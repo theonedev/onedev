@@ -1,0 +1,18 @@
+.issue-detail .transition-option .modal-header {
+	display: none;
+}
+.issue-detail .transition-option .modal-body {
+	padding: 0;
+	display: block;
+	flex: none;
+}
+.issue-detail .transition-option .modal-footer {
+	display: block;
+	padding: 0;
+	border-top: none;
+	margin-top: 1rem;
+	border-radius: none;
+}
+.issue-detail .transition-option .modal-footer>* {
+	margin-left: 0;
+}

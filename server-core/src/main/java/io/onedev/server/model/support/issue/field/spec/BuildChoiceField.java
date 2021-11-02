@@ -34,4 +34,9 @@ public class BuildChoiceField extends FieldSpec {
 			return super.getOrdinal(fieldValue);
 	}
 
+	@Override
+	protected void runScripts() {
+		
+	}
+
 }

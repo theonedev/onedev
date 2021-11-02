@@ -1,8 +1,19 @@
 package io.onedev.server.web.component.issue.fieldvalues;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -19,6 +30,7 @@ import org.unbescape.html.HtmlEscape;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -30,8 +42,11 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
@@ -39,15 +54,21 @@ import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Input;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.InplacePropertyEditLink;
+import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
 public abstract class FieldValuesPanel extends Panel implements EditContext {
@@ -63,12 +84,122 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
+	private InplacePropertyEditLink newInplaceEditLink(String componentId) {
+		return new InplacePropertyEditLink(componentId) {
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
+				AttachAjaxIndicatorListener ajaxIndicatorListener = getInplaceEditAjaxIndicator();
+				if (ajaxIndicatorListener != null)
+					attributes.getAjaxCallListeners().add(ajaxIndicatorListener);
+			}
+
+			@Override
+			protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName) {
+				BeanDescriptor beanDescriptor = new BeanDescriptor(bean.getClass());
+				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
+				Collection<String> dependentFields = fieldSpec.getTransitiveDependents();
+				boolean hasVisibleEditableDependents = dependentFields.stream()
+						.anyMatch(it->SecurityUtils.canEditIssueField(getIssue().getProject(), it) 
+								&& FieldUtils.isFieldVisible(beanDescriptor, bean, it));
+				
+				Map<String, Object> fieldValues = new HashMap<>();
+				Object propertyValue = new PropertyDescriptor(bean.getClass(), propertyName).getPropertyValue(bean);
+				fieldValues.put(getField().getName(), propertyValue);
+				
+				if (hasVisibleEditableDependents) {
+					Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(
+							getIssue().getProject(), bean.getClass(), dependentFields);
+					class DependentFieldsEditor extends BeanEditModalPanel implements ProjectAware, InputContext {
+
+						public DependentFieldsEditor(IPartialPageRequestHandler handler, Serializable bean,
+								Collection<String> propertyNames, boolean exclude, String title) {
+							super(handler, bean, propertyNames, exclude, title);
+						}
+
+						@Override
+						public Project getProject() {
+							return getIssue().getProject();
+						}
+
+						@Override
+						public List<String> getInputNames() {
+							throw new UnsupportedOperationException();
+						}
+
+						@Override
+						public InputSpec getInputSpec(String inputName) {
+							return getIssueSetting().getFieldSpec(inputName);
+						}
+
+						@Override
+						protected void onSave(AjaxRequestTarget target, Serializable bean) {
+							fieldValues.putAll(FieldUtils.getFieldValues(
+									FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
+									bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
+							OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
+							close();
+						}
+						
+					}
+					
+					new DependentFieldsEditor(handler, bean, propertyNames, false, "Dependent Fields");
+				} else {
+					OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
+				}
+			}
+			
+			@Override
+			protected String getPropertyName() {
+				BeanDescriptor descriptor = new BeanDescriptor(FieldUtils.getFieldBeanClass());
+				return FieldUtils.getPropertyName(descriptor, getField().getName());
+			}
+			
+			@Override
+			protected Serializable getBean() {
+				Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
+				return getIssue().getFieldBean(fieldBeanClass, true); 
+			}
+
+		};
+	}
+	
+	private boolean canEditField() {
+		if (getField() != null && getIssueSetting().getFieldSpec(getField().getName()) != null) {
+			User user = SecurityUtils.getUser();
+			String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
+			if (SecurityUtils.canManageIssues(getIssue().getProject())) {
+				return true;
+			} else {
+				return SecurityUtils.canEditIssueField(getIssue().getProject(), getField().getName()) 
+						&& user != null 
+						&& user.equals(getIssue().getSubmitter()) 
+						&& getIssue().getState().equals(initialState);
+			}
+		} else {
+			return false;
+		}
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		WebMarkupContainer link;
+		if (canEditField()) {
+			link = newInplaceEditLink("edit");
+			link.add(AttributeAppender.append("style", "cursor:pointer;"));
+			link.add(AttributeAppender.append("class", "editable"));
+		} else {
+			link = new WebMarkupContainer("edit");
+		}
+		add(link);
+		
 		if (getField() != null && !getField().getValues().isEmpty()) {
 			Fragment fragment = new Fragment("content", "nonEmptyValuesFrag", this);
+			
 			fragment.add(new ListView<String>("values", getField().getValues()) {
 
 				@Override
@@ -130,7 +261,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 								CommitDetailPage.State commitState = new CommitDetailPage.State();
 								commitState.revision = value;
 								PageParameters params = CommitDetailPage.paramsOf(project, commitState);
-								Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
+								Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
 								fragment.add(hashLink);
 								hashLink.add(new Label("hash", GitUtils.abbreviateSHA(value)));
 								fragment.add(new CopyToClipboardLink("copyHash", Model.of(value)));
@@ -175,7 +306,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				}
 				
 			});
-			add(fragment);
+			link.add(fragment);
 		} else if (getField() != null) {
 			FieldSpec fieldSpec = null;
 			if (getField() != null)
@@ -186,13 +317,13 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			else
 				displayValue = "Undefined";
 			displayValue = HtmlEscape.escapeHtml5(displayValue);
-			Label label = new Label("content", "<i>" + displayValue + "</i>");
+			Label label = new Label("content", "<i class='mb-2 mr-2'>" + displayValue + "</i>");
 			label.setEscapeModelStrings(false);
 			label.add(AttributeAppender.append("title", getField().getName()));
-			add(label);
+			link.add(label);
 			add(AttributeAppender.append("class", "undefined"));
 		} else {
-			add(new WebMarkupContainer("content"));
+			link.add(new WebMarkupContainer("content"));
 			setVisible(false);
 		}
 	}
@@ -207,7 +338,18 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			return null;
 		}
 	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new FieldValuesCssResourceReference()));
+	}
 
+	@Nullable
+	protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
+		return null;
+	}
+	
 	protected abstract Issue getIssue();
 	
 	@Nullable

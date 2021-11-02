@@ -78,6 +78,10 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		return false;
 	}
 	
+	private boolean hasTransitiveDependency(String dependentPropertyName, String dependencyPropertyName) {
+		return hasTransitiveDependency(dependentPropertyName, dependencyPropertyName, new HashSet<>());
+	}
+	
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
@@ -91,9 +95,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					@SuppressWarnings("unchecked")
 					PropertyContext<Serializable> propertyContext = 
 							(PropertyContext<Serializable>) propertyContainer.getDefaultModelObject(); 
-					Set<String> checkedPropertyNames = new HashSet<>();
-					if (hasTransitiveDependency(propertyContext.getPropertyName(), 
-							propertyUpdating.getPropertyName(), checkedPropertyNames)) {
+					if (hasTransitiveDependency(propertyContext.getPropertyName(), propertyUpdating.getPropertyName())) {
 						/*
 						 * Create new property container instead of simply refreshing it as some dependent 
 						 * properties may only take effect when re-create the property container. For instance
@@ -178,7 +180,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				 */
 				String propertyName = descriptor.getPropertyName(name);
 				property.getDescriptor().getDependencyPropertyNames().add(propertyName);
-				
+				 
 				Optional<Object> result= BeanEditor.this.visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, Optional<Object>>() {
 
 					@Override
@@ -190,7 +192,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					}
 					
 				});
-				if (result == null)
+ 				if (result == null)
 					return getPropertyContext(propertyName).getDescriptor().getPropertyValue(getModelObject());
 				else
 					return result.orElse(null);

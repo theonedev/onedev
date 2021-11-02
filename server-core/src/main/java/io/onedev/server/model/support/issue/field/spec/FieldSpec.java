@@ -2,21 +2,29 @@ package io.onedev.server.model.support.issue.field.spec;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.apache.wicket.MarkupContainer;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
 import io.onedev.server.model.support.inputspec.showcondition.ValueIsNotAnyOf;
 import io.onedev.server.model.support.inputspec.showcondition.ValueIsOneOf;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentityAware;
+import io.onedev.server.util.script.identity.SiteAdministrator;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.FieldName;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -31,6 +39,10 @@ public abstract class FieldSpec extends InputSpec {
 	private static final long serialVersionUID = 1L;
 	
 	private String nameOfEmptyValue;
+	
+	private transient Collection<String> dependencies;
+	
+	private transient Collection<String> dependents;
 	
 	@Editable(order=10)
 	@FieldName
@@ -221,6 +233,100 @@ public abstract class FieldSpec extends InputSpec {
 	
 	public Usage onDeleteGroup(String groupName) {
 		return new Usage();
+	}
+	
+	public Collection<String> getDependencies() {
+		if (dependencies == null) {
+			dependencies = new HashSet<>();
+			if (getShowCondition() != null)
+				dependencies.add(getShowCondition().getInputName());
+			
+			class PropertyComponent extends MarkupContainer implements InputContext, EditContext, ScriptIdentityAware {
+
+				private static final long serialVersionUID = 1L;
+
+				public PropertyComponent() {
+					super("component");
+				}
+
+				@Override
+				public List<String> getInputNames() {
+					return getIssueSetting().getFieldNames();
+				}
+
+				@Override
+				public InputSpec getInputSpec(String inputName) {
+					return getIssueSetting().getFieldSpec(inputName);
+				}
+
+				@Override
+				public Object getInputValue(String name) {
+					dependencies.add(name);
+					return null;
+				}
+
+				@Override
+				public ScriptIdentity getScriptIdentity() {
+					return new SiteAdministrator();
+				}
+
+			}	
+			
+			ComponentContext.push(new ComponentContext(new PropertyComponent()));
+			try {
+				runScripts();
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				ComponentContext.pop();
+			}
+		}
+		return dependencies;
+	}
+	
+	protected abstract void runScripts();
+	
+	public Collection<String> getTransitiveDependencies() {
+		return getTransitiveDependencies(new HashSet<>());
+	}
+
+	private Collection<String> getTransitiveDependencies(Set<String> checkedFields) {
+		Collection<String> transitiveDependencies = new HashSet<>(getDependencies());
+		for (String dependency: getDependencies()) {
+			if (checkedFields.add(dependency)) { 
+				FieldSpec dependencyField = getIssueSetting().getFieldSpec(dependency);
+				if (dependencyField != null)
+					transitiveDependencies.addAll(dependencyField.getTransitiveDependencies(checkedFields));
+			}
+		}
+		return transitiveDependencies;
+	}
+	
+	public Collection<String> getDependents() {
+		if (dependents == null) {
+			dependents = new HashSet<>();
+			for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
+				if (field.getDependencies().contains(getName()))
+					dependents.add(field.getName());
+			}
+		}
+		return dependents;
+	}
+	
+	public Collection<String> getTransitiveDependents() {
+		return getTransitiveDependents(new HashSet<>());
+	}
+
+	private Collection<String> getTransitiveDependents(Set<String> checkedFields) {
+		Collection<String> transitiveDependents = new HashSet<>(getDependents());
+		for (String dependent: getDependents()) {
+			if (checkedFields.add(dependent)) { 
+				FieldSpec dependentField = getIssueSetting().getFieldSpec(dependent);
+				if (dependentField != null)
+					transitiveDependents.addAll(dependentField.getTransitiveDependents(checkedFields));
+			}
+		}
+		return transitiveDependents;
 	}
 	
 }

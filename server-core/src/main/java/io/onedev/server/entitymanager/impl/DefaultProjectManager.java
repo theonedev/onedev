@@ -365,7 +365,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     			child = find(project, name);
     			if (child == null) {
 	    			if (project == null && !SecurityUtils.canCreateRootProjects())
-	    				throw new UnauthorizedException("Not authorized to create project under root");
+	    				throw new UnauthorizedException("Not authorized to create root project");
 	    			if (project != null && !SecurityUtils.canCreateChildren(project))
 	    				throw new UnauthorizedException("Not authorized to create project under '" + project.getPath() + "'");
 	    			child = new Project();

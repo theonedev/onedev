@@ -4,10 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -20,6 +22,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -63,6 +66,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -79,13 +83,17 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -1165,10 +1173,35 @@ public abstract class IssueListPanel extends Panel {
 					if (field.equals(Issue.NAME_STATE)) {
 						Fragment stateFragment = new Fragment(fieldsView.newChildId(), 
 								"stateFrag", IssueListPanel.this);
-						stateFragment.add(new IssueStateBadge("state", rowModel));
-						fieldsView.add(stateFragment);
+						WebMarkupContainer transitLink = new WebMarkupContainer("transit");
+						List<TransitionSpec> transitionSpecs = OneDev.getInstance(SettingManager.class)
+								.getIssueSetting().getTransitionSpecs();
+						if (transitionSpecs.stream().anyMatch(it->it.canTransitManually(issue, null))) {
+							transitLink = new TransitionMenuLink("transit") {
+
+								@Override
+								protected Issue getIssue() {
+									return rowModel.getObject();
+								}
+								
+							};
+							transitLink.add(AttributeAppender.append("class", "transit"));
+						} else {
+							transitLink = new WebMarkupContainer("transit");
+						}
+						
+						transitLink.add(new IssueStateBadge("state", rowModel));
+						stateFragment.add(transitLink);
+						
+						fieldsView.add(stateFragment.setOutputMarkupId(true));
 					} else {
 						fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME) {
+
+							@SuppressWarnings("deprecation")
+							@Override
+							protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
+								return new AttachAjaxIndicatorListener(fieldsView.get(fieldsView.size()-1), AttachMode.APPEND, false);
+							}
 
 							@Override
 							protected Issue getIssue() {
@@ -1184,7 +1217,7 @@ public abstract class IssueListPanel extends Panel {
 									return null;
 							}
 							
-						});
+						}.setOutputMarkupId(true));
 					}
 				}	
 				fragment.add(fieldsView);
@@ -1228,6 +1261,30 @@ public abstract class IssueListPanel extends Panel {
 		});
 		issuesTable.addBottomToolbar(new NoRecordsToolbar(issuesTable));
 		issuesTable.add(new NoRecordsBehavior());
+
+		add(new WebSocketObserver() {
+			
+			@Override
+			public Collection<String> getObservables() {
+				Set<String> observables = new HashSet<>();
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+				if (getProject() != null) {
+					observables.add(Issue.getListWebSocketObservable(getProject().getId()));
+					for (Project project: getProject().getDescendants())
+						observables.add(Issue.getListWebSocketObservable(project.getId()));
+				} else {
+					for (Project project: projectManager.getPermittedProjects(new AccessProject()))
+						observables.add(Issue.getListWebSocketObservable(project.getId()));
+				}
+				return observables;
+			}
+
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.add(IssueListPanel.this);
+			}
+			
+		});
 		
 		setOutputMarkupId(true);
 	}

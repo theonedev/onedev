@@ -24,7 +24,7 @@ public abstract class IssueChangeData implements Serializable {
 	
 	public abstract Map<String, Group> getNewGroups();
 	
-	public abstract boolean affectsBoards();
+	public abstract boolean affectsListing();
 
 	@Nullable
 	public ActivityDetail getActivityDetail() {

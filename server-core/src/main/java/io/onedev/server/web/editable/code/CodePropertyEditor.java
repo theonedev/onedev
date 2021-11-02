@@ -146,4 +146,9 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

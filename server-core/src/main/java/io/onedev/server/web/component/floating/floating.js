@@ -53,7 +53,10 @@ onedev.server.floating = {
 			} else {
 				if (alignment) {
 					$floating.align(alignment);
-					$floating.trigger("resized");
+					setTimeout(function() {
+						$floating.align(alignment);
+						$floating.trigger("resized");
+					}, 0);
 				}
 				if (!openTriggered) {
 					$floating.trigger("open");

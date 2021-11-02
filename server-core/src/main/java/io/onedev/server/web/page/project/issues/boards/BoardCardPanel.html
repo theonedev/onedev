@@ -1,13 +1,11 @@
 <wicket:panel>
 	<div class="head d-flex flex-wrap align-items-center mb-2">
-		<wicket:enclosure child="state">
-			<div class="state mb-2 mr-2">
-				<span wicket:id="state"></span>
-			</div>
-		</wicket:enclosure>
+		<div wicket:id="transit" class="state">
+			<span wicket:id="state" class="mb-2 mr-2"></span>
+		</div>
 		<div wicket:id="fields" class="field"></div>
-		<div class="avatars ml-auto">
-			<a wicket:id="avatars" class="avatar ml-2 mb-2"></a>
+		<div class="avatars ml-auto d-flex flex-wrap mr-n2">
+			<div wicket:id="avatars" class="avatar"></div>
 		</div>
 	</div>
 	<div class="body font-weight-bold d-flex flex-wrap">

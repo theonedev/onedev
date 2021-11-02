@@ -50,4 +50,9 @@ public class ColorPropertyEditor extends PropertyEditor<String> {
 		response.render(CssHeaderItem.forReference(new ColorSupportResourceReference()));
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

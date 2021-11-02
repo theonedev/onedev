@@ -54,6 +54,16 @@
     box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
 	position: relative;
 }
+.issue-boards>.body .board-card .state {
+	border-bottom: 2px dotted transparent;
+}
+.issue-boards>.body .board-card .state.transit {
+	cursor: pointer;
+}
+.issue-boards>.body .board-card .state.transit:hover {
+	border-color: var(--gray);
+}
+
 .issue-boards>.body .board-card.issue-dragging {
 	visibility: hidden;
 }

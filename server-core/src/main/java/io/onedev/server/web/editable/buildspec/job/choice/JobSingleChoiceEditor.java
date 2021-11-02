@@ -58,4 +58,9 @@ public class JobSingleChoiceEditor extends PropertyEditor<String> {
 		return input.getConvertedInput();
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
+	}
+
 }

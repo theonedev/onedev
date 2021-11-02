@@ -23,7 +23,7 @@ public abstract class IssueEvent extends ProjectEvent {
 		return issue;
 	}
 	
-	public abstract boolean affectsBoards();
+	public abstract boolean affectsListing();
 	
 	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();

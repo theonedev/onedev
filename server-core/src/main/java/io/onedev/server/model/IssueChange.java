@@ -73,7 +73,7 @@ public class IssueChange extends AbstractEntity {
 	}
 	
 	public boolean affectsBoards() {
-		return data.affectsBoards();
+		return data.affectsListing();
 	}
 
 }

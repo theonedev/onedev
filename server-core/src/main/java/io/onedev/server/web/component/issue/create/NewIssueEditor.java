@@ -37,11 +37,11 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.IssueTemplate;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -79,11 +79,12 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		super.onInitialize();
 
 		Issue issue = newIssue();
-		Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
+		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 
 		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(); 
-		issue.setFieldValues(IssueUtils.getFieldValues(new ComponentContext(this), fieldBean, fieldNames));
+		issue.setFieldValues(FieldUtils.getFieldValues(new ComponentContext(this), fieldBean, 
+				FieldUtils.getEditableFields(getProject(), fieldNames)));
 		
 		titleInput = new TextField<String>("title", Model.of("")); 
 		titleInput.setRequired(true).setLabel(Model.of("Title"));
@@ -124,8 +125,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		
 		add(milestoneChoice);
 		
-		Collection<String> properties = IssueUtils.getPropertyNames(getProject(), 
-				fieldBeanClass, getIssueSetting().getPromptFieldsUponIssueOpen());
+		Collection<String> properties = FieldUtils.getEditablePropertyNames(getProject(), 
+				fieldBeanClass, fieldNames);
 		add(fieldEditor = new BeanContext(fieldBean.getClass(), properties, false)
 				.renderForEdit("fields", Model.of(fieldBean)));
 		
@@ -283,8 +284,9 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		issue.setMilestone(milestoneChoice.getConvertedInput());
 		
 		fieldEditor.convertInput();
-		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(); 
-		issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.newComponentContext(), 
+		Collection<String> fieldNames = FieldUtils.getEditableFields(getProject(), 
+				getIssueSetting().getPromptFieldsUponIssueOpen()); 
+		issue.setFieldValues(FieldUtils.getFieldValues(fieldEditor.newComponentContext(), 
 				fieldEditor.getConvertedInput(), fieldNames));
 		return issue;
 	}

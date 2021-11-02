@@ -90,4 +90,9 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 			return null;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
+	}
+
 }

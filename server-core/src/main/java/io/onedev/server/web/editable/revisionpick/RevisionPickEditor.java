@@ -53,4 +53,9 @@ public class RevisionPickEditor extends PropertyEditor<String> {
 		return revision;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
+	}
+
 }

@@ -94,4 +94,9 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 		return groupNames;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

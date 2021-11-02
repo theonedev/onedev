@@ -156,4 +156,9 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 			return null;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

@@ -31,5 +31,9 @@ public class CommitField extends FieldSpec {
 	public List<String> convertToStrings(Object value) {
 		return CommitInput.convertToStrings(value);
 	}
+
+	@Override
+	protected void runScripts() {
+	}
 	
 }

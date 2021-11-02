@@ -98,4 +98,9 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 			return null;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
+	}
+
 }

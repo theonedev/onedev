@@ -948,7 +948,15 @@ the specific language governing permissions and limitations under the Apache Lic
             // so here we trigger the blur event manually if so desired
             if (this.opts.blurOnChange)
                 this.opts.element.blur();
+
+			this.align(this.container);
         },
+
+		align: function(container) {
+			var $floating = $(container).closest(".floating");
+			if ($floating.length != 0 && $floating.data("afterElementReplace")) 
+				$floating.data("afterElementReplace")();
+		},
 
         // abstract
         enable: function() {
@@ -1036,6 +1044,8 @@ the specific language governing permissions and limitations under the Apache Lic
             }, evaluate(this.opts.dropdownCss));
 
             this.dropdown.css(css);
+
+			this.align(this.container);
         },
 
         // abstract
@@ -1178,6 +1188,8 @@ the specific language governing permissions and limitations under the Apache Lic
             this.clearSearch();
             this.search.removeClass("select2-active");
             this.opts.element.trigger($.Event("close"));
+
+			this.align(this.container);
         },
 
         // abstract
@@ -1794,7 +1806,6 @@ the specific language governing permissions and limitations under the Apache Lic
 
             this.initContainerWidth();
             this.setPlaceholder();
-
         },
 
         // single

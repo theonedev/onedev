@@ -26,3 +26,12 @@
 .issue-side>.fields>.body>table>tbody>tr:last-child>td {
 	padding-bottom: 0;
 }
+.issue-side>.fields .field-values {
+	flex-grow: 1;
+}
+.issue-side>.fields .field-values.editable:not(.with-working-indicator) .icon {
+	display: inline;
+}
+.issue-side>.fields .field-values.editable {
+	border-color: transparent;
+}

@@ -287,10 +287,15 @@ onedev.server = {
 						if ($this.closest(".no-autofocus").length == 0) {
 							if ($this.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
 								$this[0].CodeMirror.focus();					
-							} else if ($this.closest(".select2-container").length == 0 
-									&& $this.attr("readonly") != "readonly"
-                                    && $this.attr("disabled") != "disabled") {
-								$this.focus();
+							} else if ($this.attr("readonly") != "readonly" && $this.attr("disabled") != "disabled") {
+								if ($this.closest(".select2-container").length != 0) {
+									if ($this.closest(".inplace-property-edit").length != 0) {
+										$this.focus();
+										$this.closest(".select2-container").next("input").select2("open");
+									} 
+								} else {
+									$this.focus();
+								}
 							}
 							return false;
                         }

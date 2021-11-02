@@ -349,5 +349,10 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		}
 		return newList;
 	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
 	
 }

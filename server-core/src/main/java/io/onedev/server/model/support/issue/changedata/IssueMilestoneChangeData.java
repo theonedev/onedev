@@ -54,7 +54,7 @@ public class IssueMilestoneChangeData extends IssueChangeData {
 	}
 
 	@Override
-	public boolean affectsBoards() {
+	public boolean affectsListing() {
 		return true;
 	}
 

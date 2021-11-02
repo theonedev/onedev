@@ -93,4 +93,9 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 		return projectPaths;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

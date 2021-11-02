@@ -87,10 +87,11 @@ public class BeanDescriptor implements Serializable {
 	}
 	
 	@Nullable
-	public PropertyDescriptor getProperty(String propertyName) {
+	public PropertyDescriptor getProperty(String propertyNameOrDisplayName) {
 		for (List<PropertyDescriptor> groupProperties: getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
-				if (property.getPropertyName().equals(propertyName))
+				String displayName = property.getDisplayName();
+				if (property.getPropertyName().equals(propertyNameOrDisplayName) || displayName.equals(propertyNameOrDisplayName))
 					return property;
 			}
 		}

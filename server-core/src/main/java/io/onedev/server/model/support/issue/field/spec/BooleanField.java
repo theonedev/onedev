@@ -61,4 +61,9 @@ public class BooleanField extends FieldSpec {
 		return BooleanInput.convertToStrings(value);
 	}
 
+	@Override
+	protected void runScripts() {
+		getDefaultValueProvider().getDefaultValue();
+	}
+
 }

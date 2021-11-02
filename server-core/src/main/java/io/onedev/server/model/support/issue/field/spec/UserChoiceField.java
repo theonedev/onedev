@@ -114,4 +114,13 @@ public class UserChoiceField extends FieldSpec {
 		return UserChoiceInput.convertToStrings(this, value);
 	}
 
+	@Override
+	protected void runScripts() {
+		if (isAllowMultiple() && getDefaultMultiValueProvider() != null)
+			getDefaultMultiValueProvider().getDefaultValue();
+		if (!isAllowMultiple() && getDefaultValueProvider() != null)
+			getDefaultValueProvider().getDefaultValue();
+		getChoiceProvider().getChoices(true);
+	}
+
 }

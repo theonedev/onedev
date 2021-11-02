@@ -400,10 +400,6 @@ public class BoardSpec implements Serializable {
 		return query;
 	}
 	
-	public static String getWebSocketObservable(Long projectId) {
-		return BoardSpec.class.getName() + ":" + projectId;
-	}
-
 	public void onRenameUser(GlobalIssueSetting issueSetting, String oldName, String newName) {
 		FieldSpec fieldSpec = issueSetting.getFieldSpec(getIdentifyField());
 		if (fieldSpec instanceof UserChoiceField) {

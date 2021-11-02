@@ -41,4 +41,9 @@ public class BooleanPropertyEditor extends PropertyEditor<Boolean> {
 		return input.getConvertedInput();
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
+	}
+
 }

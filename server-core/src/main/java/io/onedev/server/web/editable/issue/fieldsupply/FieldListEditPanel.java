@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.SecretField;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
@@ -36,7 +37,6 @@ import io.onedev.server.model.support.issue.field.supply.Ignore;
 import io.onedev.server.model.support.issue.field.supply.ScriptingValue;
 import io.onedev.server.model.support.issue.field.supply.SpecifiedValue;
 import io.onedev.server.model.support.issue.field.supply.ValueProvider;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.JobSecretEditBean;
@@ -89,7 +89,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private Serializable getDefaultFieldBean() {
 		if (defaultFieldBean == null) {
-			Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
+			Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 			try {
 				defaultFieldBean = (Serializable) fieldBeanClass.newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {
@@ -298,6 +298,11 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 			String script = String.format("onedev.server.form.markDirty($('#%s').closest('form'));", getMarkupId());
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		}
+	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
 	}
 	
 }

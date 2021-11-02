@@ -146,5 +146,10 @@ class ImportListEditPanel extends PropertyEditor<List<Serializable>> {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new ImportCssResourceReference()));
 	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
 	
 }

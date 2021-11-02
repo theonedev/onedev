@@ -509,6 +509,13 @@ public class Project extends AbstractEntity {
 	public Collection<Project> getChildren() {
 		return children;
 	}
+	
+	public Collection<Project> getDescendants() {
+		Collection<Project> descendants = new ArrayList<>(getChildren());
+		for (Project child: getChildren())
+			descendants.addAll(child.getDescendants());
+		return descendants;
+	}
 
 	public void setChildren(Collection<Project> children) {
 		this.children = children;

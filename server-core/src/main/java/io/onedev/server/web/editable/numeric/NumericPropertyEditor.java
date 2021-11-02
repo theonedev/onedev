@@ -58,4 +58,9 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 		return input.getConvertedInput();
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

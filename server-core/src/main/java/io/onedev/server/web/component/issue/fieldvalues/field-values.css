@@ -1,0 +1,13 @@
+.field-values {
+	border-bottom: 2px dotted transparent;
+}
+.field-values.editable {
+	cursor: pointer;
+}
+.field-values.editable:hover {
+	border-color: var(--gray);
+}
+.field-values .icon {
+	cursor: pointer;
+	display: none;
+}

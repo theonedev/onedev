@@ -88,5 +88,12 @@ public class GroupChoiceField extends FieldSpec {
 		}
 		return new Usage();
 	}
+
+	@Override
+	protected void runScripts() {
+		if (getDefaultValueProvider() != null)
+			getDefaultValueProvider().getDefaultValue();
+		getChoiceProvider().getChoices(true);
+	}
 	
 }

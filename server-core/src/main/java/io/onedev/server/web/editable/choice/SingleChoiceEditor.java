@@ -106,4 +106,9 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		return input.getConvertedInput();
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
+	}
+
 }

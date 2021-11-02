@@ -86,4 +86,9 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 		return projectAndBranches;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

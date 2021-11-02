@@ -142,7 +142,7 @@ public class IssueFieldChangeData extends IssueChangeData {
 	}
 	
 	@Override
-	public boolean affectsBoards() {
+	public boolean affectsListing() {
 		return true;
 	}
 

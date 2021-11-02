@@ -112,4 +112,6 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 		return descriptor;
 	}
 
+	public abstract boolean needExplicitSubmit();
+	
 }

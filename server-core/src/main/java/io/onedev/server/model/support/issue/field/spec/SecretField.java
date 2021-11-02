@@ -38,4 +38,8 @@ public class SecretField extends FieldSpec {
 		return SecretInput.convertToStrings(value);
 	}
 
+	@Override
+	protected void runScripts() {
+	}
+
 }

@@ -15,7 +15,7 @@ import io.onedev.server.web.component.pullrequest.choice.PullRequestChoiceProvid
 import io.onedev.server.web.component.pullrequest.choice.PullRequestSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
 public class PullRequestSingleChoiceEditor extends PropertyEditor<Long> {
@@ -28,7 +28,11 @@ public class PullRequestSingleChoiceEditor extends PropertyEditor<Long> {
 	}
 
 	private Project getProject() {
-		return ((ProjectPage)getPage()).getProject();		
+		ProjectAware projectAware = findParent(ProjectAware.class);
+		if (projectAware != null)
+			return projectAware.getProject();		
+		else
+			return null;
 	}
 
 	@Override
@@ -81,6 +85,11 @@ public class PullRequestSingleChoiceEditor extends PropertyEditor<Long> {
 			return request.getNumber();
 		else
 			return null;
+	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
 	}
 
 }

@@ -15,7 +15,7 @@ import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
 import io.onedev.server.web.component.build.choice.BuildSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
 public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
@@ -28,8 +28,9 @@ public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
 	}
 
 	private Project getProject() {
-		if (getPage() instanceof ProjectPage)
-			return ((ProjectPage)getPage()).getProject();		
+		ProjectAware projectAware = findParent(ProjectAware.class);
+		if (projectAware != null)
+			return projectAware.getProject();		
 		else
 			return null;
 	}
@@ -84,6 +85,11 @@ public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
 			return build.getNumber();
 		else
 			return null;
+	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
 	}
 
 }

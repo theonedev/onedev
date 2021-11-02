@@ -1,6 +1,15 @@
 <wicket:panel>
 	<div class="issue-side">
-		<div wicket:id="fields" class="fields"></div>
+		<div class="fields">
+			<div class="body">
+				<table>
+					<tr wicket:id="fields">
+						<td class="name"><span wicket:id="name"></span></td>
+						<td class="values d-flex flex-nowrap"><div wicket:id="values"></div></td>
+					</tr>
+				</table>
+			</div>
+		</div>
 		<div class="milestone">
 			<div class="head">Milestone</div>
 			<div wicket:id="milestone" class="body"></div>
@@ -31,30 +40,6 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="nonEmptyValuesFrag">
 		<div wicket:id="values" class="value"><span wicket:id="value"></span></div>	
-	</wicket:fragment>
-	<wicket:fragment wicket:id="fieldsViewFrag">
-		<div class="body">
-			<table>
-				<tr wicket:id="fields">
-					<td class="name"><span wicket:id="name"></span></td>
-					<td class="values"><div wicket:id="values"></div></td>
-				</tr>
-			</table>
-		</div>
-		<wicket:enclosure>
-		<div class="d-flex align-items-center mt-3">
-			<a wicket:id="edit" class="btn btn-light btn-xs btn-icon btn-hover-primary edit" title="Edit fields"><wicket:svg href="edit" class="icon mr-2"></wicket:svg></a>
-		</div>
-		</wicket:enclosure>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="fieldsEditFrag">
-		<form wicket:id="form" class="fields-edit leave-confirm">
-			<div wicket:id="editor"></div>
-			<div class="mt-4">
-				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary mr-1" value="Save">
-				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
-			</div>
-		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneViewFrag">
 		<div class="d-flex align-items-center">

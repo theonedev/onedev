@@ -2,7 +2,9 @@ package io.onedev.server.web.page.project.issues.boards;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -14,14 +16,11 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -139,7 +138,11 @@ abstract class CardListPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(BoardSpec.getWebSocketObservable(getProject().getId()));
+				Set<String> observables = new HashSet<>();
+				observables.add(Issue.getListWebSocketObservable(getProject().getId()));
+				for (Project project: getProject().getDescendants())
+					observables.add(Issue.getListWebSocketObservable(project.getId()));
+				return observables;
 			}
 			
 		});

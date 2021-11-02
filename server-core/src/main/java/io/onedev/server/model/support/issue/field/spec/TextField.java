@@ -71,5 +71,11 @@ public class TextField extends FieldSpec {
 	public List<String> convertToStrings(Object value) {
 		return TextInput.convertToStrings(value);
 	}
+
+	@Override
+	protected void runScripts() {
+		if (getDefaultValueProvider() != null)
+			getDefaultValueProvider().getDefaultValue();
+	}
 	
 }

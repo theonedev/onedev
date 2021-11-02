@@ -27,7 +27,7 @@ public class IssueOpened extends IssueEvent {
 	}
 
 	@Override
-	public boolean affectsBoards() {
+	public boolean affectsListing() {
 		return true;
 	}
 

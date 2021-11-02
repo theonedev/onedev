@@ -66,4 +66,9 @@ public class EmailListPropertyEditor extends PropertyEditor<List<String>> {
         return values;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

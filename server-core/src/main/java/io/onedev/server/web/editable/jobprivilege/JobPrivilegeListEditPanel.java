@@ -237,5 +237,10 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			value.add(each);
 		return value;
 	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
 	
 }

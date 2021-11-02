@@ -74,4 +74,9 @@ public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 		}
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

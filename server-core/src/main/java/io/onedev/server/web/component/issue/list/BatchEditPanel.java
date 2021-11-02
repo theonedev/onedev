@@ -39,10 +39,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -178,7 +178,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		});
 		
 		builtInFieldsBean = new BuiltInFieldsBean();
-		Class<? extends Serializable> fieldBeanClass = IssueUtils.defineFieldBeanClass();
+		Class<? extends Serializable> fieldBeanClass = FieldUtils.getFieldBeanClass();
 		Issue issue = new Issue();
 		issue.setProject(getProject());
 		if (getIssueQuery() != null && getIssueQuery().getCriteria() != null) {
@@ -191,7 +191,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
-			IssueUtils.clearFields(customFieldsBean);
+			FieldUtils.clearFields(customFieldsBean);
 		}
 		
 		Set<String> excludedProperties = new HashSet<>();
@@ -256,7 +256,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						else
 							milestone = null;
 						
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
+						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
 								customFieldsBean, selectedFields);
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
 								getIssueIterator(), state, milestone, fieldValues, comment);

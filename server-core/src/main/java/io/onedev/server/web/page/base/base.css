@@ -160,8 +160,10 @@ a.tree-junction {
 	border-radius:0 0 0.42rem 0.42rem;
 }
 
-.working-indicator {
-	color: var(--success);
+.with-working-indicator+.working-indicator {
+	margin-left: 0.4rem;
+}
+.working-indicator+.with-working-indicator {
 	margin-left: 0.4rem;
 }
 

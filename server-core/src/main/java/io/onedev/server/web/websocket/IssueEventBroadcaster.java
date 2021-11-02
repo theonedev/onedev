@@ -7,7 +7,6 @@ import io.onedev.commons.loader.Listen;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
 
 @Singleton
 public class IssueEventBroadcaster {
@@ -22,10 +21,10 @@ public class IssueEventBroadcaster {
 	@Listen
 	public void on(IssueEvent event) {
 		webSocketManager.notifyObservableChange(Issue.getWebSocketObservable(event.getIssue().getId()));
-		if (event.affectsBoards()) {
+		if (event.affectsListing()) {
 			Project project = event.getIssue().getProject();
 			do {
-				webSocketManager.notifyObservableChange(BoardSpec.getWebSocketObservable(project.getId()));
+				webSocketManager.notifyObservableChange(Issue.getListWebSocketObservable(project.getId()));
 				project = project.getParent();
 			} while (project != null);
 		}

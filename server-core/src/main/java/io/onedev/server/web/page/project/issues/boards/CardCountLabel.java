@@ -1,15 +1,15 @@
 package io.onedev.server.web.page.project.issues.boards;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import com.google.common.collect.Sets;
-
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.web.behavior.WebSocketObserver;
 
 @SuppressWarnings("serial")
@@ -41,7 +41,11 @@ abstract class CardCountLabel extends Label {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(BoardSpec.getWebSocketObservable(getProject().getId()));
+				Set<String> observables = new HashSet<>();
+				observables.add(Issue.getListWebSocketObservable(getProject().getId()));
+				for (Project project: getProject().getDescendants())
+					observables.add(Issue.getListWebSocketObservable(project.getId()));
+				return observables;
 			}
 			
 		});

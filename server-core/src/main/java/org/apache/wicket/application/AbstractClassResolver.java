@@ -30,7 +30,7 @@ import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.util.collections.UrlExternalFormComparator;
 
 import io.onedev.server.buildspec.param.ParamUtils;
-import io.onedev.server.util.IssueUtils;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 
 /**
  * An abstract implementation of a {@link IClassResolver} which uses a {@link ClassLoader} for
@@ -59,12 +59,10 @@ public abstract class AbstractClassResolver implements IClassResolver
 	@Override
 	public final Class<?> resolveClass(final String className) throws ClassNotFoundException
 	{
-		Class<?> clazz = IssueUtils.loadFieldBeanClass(className); 
+		if (className.equals(FieldUtils.FIELD_BEAN_CLASS_NAME)) 
+			return FieldUtils.getFieldBeanClass();
 		
-		if (clazz != null)
-			return clazz;
-		
-		clazz = ParamUtils.loadBeanClass(className);
+		Class<?> clazz = ParamUtils.loadBeanClass(className);
 		
 		if (clazz != null)
 			return clazz;

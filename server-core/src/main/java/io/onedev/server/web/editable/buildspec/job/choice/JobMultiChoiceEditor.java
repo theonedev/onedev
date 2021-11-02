@@ -70,4 +70,9 @@ public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {
 			return null;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

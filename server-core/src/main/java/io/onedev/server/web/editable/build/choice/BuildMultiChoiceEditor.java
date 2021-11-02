@@ -20,7 +20,7 @@ import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
 import io.onedev.server.web.component.build.choice.BuildMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
 public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
@@ -33,8 +33,9 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	}
 
 	private Project getProject() {
-		if (getPage() instanceof ProjectPage)
-			return ((ProjectPage)getPage()).getProject();		
+		ProjectAware projectAware = findParent(ProjectAware.class);
+		if (projectAware != null)
+			return projectAware.getProject();		
 		else
 			return null;
 	}
@@ -93,6 +94,11 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 			return builds.stream().map(it->it.getNumber()).collect(Collectors.toList());
 		else
 			return new ArrayList<>();
+	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
 	}
 
 }

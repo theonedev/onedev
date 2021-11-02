@@ -287,5 +287,10 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 		else
 			return null;
 	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
 	
 }

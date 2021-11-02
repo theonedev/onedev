@@ -489,6 +489,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		return Issue.class.getName() + ":" + issueId;
 	}
 	
+	public static String getListWebSocketObservable(Long projectId) {
+		return Issue.class.getName() + ":list:" + projectId;
+	}
+
 	@Nullable
 	public String getMilestoneName() {
 		return getMilestone()!=null? getMilestone().getName():null;

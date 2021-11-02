@@ -50,7 +50,7 @@ public class IssueReferencedFromIssueData extends IssueChangeData implements Ref
 	}
 
 	@Override
-	public boolean affectsBoards() {
+	public boolean affectsListing() {
 		return false;
 	}
 

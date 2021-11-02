@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
 import io.onedev.server.web.component.modal.ModalPanel;
 
@@ -22,13 +23,13 @@ public abstract class BeanEditModalPanel extends ModalPanel {
 	
 	private final String title;
 	
-	public BeanEditModalPanel(AjaxRequestTarget target, Serializable bean) {
-		this(target, bean, new HashSet<>(), true, null);
+	public BeanEditModalPanel(IPartialPageRequestHandler handler, Serializable bean) {
+		this(handler, bean, new HashSet<>(), true, null);
 	}
 			
-	public BeanEditModalPanel(AjaxRequestTarget target, Serializable bean, 
+	public BeanEditModalPanel(IPartialPageRequestHandler handler, Serializable bean, 
 			Collection<String> propertyNames, boolean exclude, @Nullable String title) {
-		super(target);
+		super(handler);
 		this.bean = bean;
 		this.propertyNames = propertyNames;
 		this.exclude = exclude;

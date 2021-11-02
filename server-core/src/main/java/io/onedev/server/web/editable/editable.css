@@ -117,3 +117,12 @@
 .property-editor.property-polymorphic.property-defined + div + .form-text {
 	display: none;
 } 
+
+.inplace-property-edit .switch {
+	justify-content: center;
+	padding-top: 8px;
+}
+
+.inplace-property-edit {
+	width: 300px !important;
+}

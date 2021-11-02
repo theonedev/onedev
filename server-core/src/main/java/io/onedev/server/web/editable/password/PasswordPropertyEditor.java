@@ -51,4 +51,9 @@ public class PasswordPropertyEditor extends PropertyEditor<String> {
 		return input.getConvertedInput();
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

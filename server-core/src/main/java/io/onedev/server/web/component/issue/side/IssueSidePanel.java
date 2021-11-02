@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.issue.side;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +12,6 @@ import java.util.stream.Collectors;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -41,7 +39,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
@@ -51,13 +48,11 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.IssueUtils;
-import io.onedev.server.web.ajaxlistener.AppendAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
@@ -69,8 +64,6 @@ import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 
@@ -160,24 +153,18 @@ public abstract class IssueSidePanel extends Panel {
 			}
 			
 		};		
-		Fragment fragment = new Fragment("fields", "fieldsViewFrag", this) {
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!fieldsModel.getObject().isEmpty());
-			}
-			
-		};
-		fragment.setOutputMarkupId(true);
-		
-		fragment.add(new ListView<Input>("fields", fieldsModel) {
+		return new ListView<Input>("fields", fieldsModel) {
 
 			@Override
 			protected void populateItem(ListItem<Input> item) {
 				Input field = item.getModelObject();
 				item.add(new Label("name", field.getName()));
 				item.add(new FieldValuesPanel("values", Mode.NAME) {
+
+					@Override
+					protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
+						return new AttachAjaxIndicatorListener(false);
+					}
 
 					@Override
 					protected Issue getIssue() {
@@ -192,93 +179,13 @@ public abstract class IssueSidePanel extends Panel {
 				}.setRenderBodyOnly(true));
 			}
 			
-		});
-		
-		fragment.add(new AjaxLink<Void>("edit") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new AppendAjaxIndicatorListener(false));
-			}
-
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				User user = SecurityUtils.getUser();
-				String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
-				if (SecurityUtils.canManageIssues(getProject())) {
-					setVisible(true);
-				} else {
-					GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-					boolean hasEditableFields = false;
-					for (String fieldName: setting.getFieldNames()) {
-						if (SecurityUtils.canEditIssueField(getProject(), fieldName)) {
-							hasEditableFields = true;
-							break;
-						}
-					}
-					setVisible(hasEditableFields 
-							&& user != null 
-							&& user.equals(getIssue().getSubmitter()) 
-							&& getIssue().getState().equals(initialState));
-				}
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("fields", "fieldsEditFrag", IssueSidePanel.this);
-				Form<?> form = new Form<Void>("form");
-
-				Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
-				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true); 
-
-				Collection<String> propertyNames = IssueUtils.getPropertyNames(getIssue().getProject(), 
-						fieldBeanClass, getIssue().getFieldNames());
-				BeanEditor beanEditor = BeanContext.edit("editor", fieldBean, propertyNames, false); 
-				form.add(beanEditor);
-				
-				form.add(new AjaxButton("save") {
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(beanEditor.newComponentContext(), fieldBean, getIssue().getFieldNames());
-						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
-						Component fieldsContainer = newFieldsContainer();
-						IssueSidePanel.this.replace(fieldsContainer);
-						target.add(fieldsContainer);
-					}
-
-					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
-						target.add(fragment);
-					}
-					
-				});
-				
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						Component fieldsContainer = newFieldsContainer();
-						IssueSidePanel.this.replace(fieldsContainer);
-						target.add(fieldsContainer);
-					}
-					
-				});
-				fragment.add(form);
-				fragment.setOutputMarkupId(true);
-				
-				IssueSidePanel.this.replace(fragment);
-				target.add(fragment);
+				setVisible(!fieldsModel.getObject().isEmpty());
 			}
 			
-		});		
-		
-		return fragment;
+		};
 	}
 	
 	private Component newMilestoneContainer() {

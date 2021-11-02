@@ -116,4 +116,9 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			return new ArrayList<>();
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

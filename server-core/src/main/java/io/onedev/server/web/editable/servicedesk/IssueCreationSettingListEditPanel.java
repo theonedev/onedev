@@ -227,4 +227,9 @@ class IssueCreationSettingListEditPanel extends PropertyEditor<List<Serializable
 		return value;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

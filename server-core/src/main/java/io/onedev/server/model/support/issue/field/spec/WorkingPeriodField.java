@@ -58,4 +58,10 @@ public class WorkingPeriodField extends FieldSpec {
 			return super.getOrdinal(fieldValue);
 	}
 
+	@Override
+	protected void runScripts() {
+		if (getDefaultValueProvider() != null)
+			getDefaultValueProvider().getDefaultValue();
+	}
+
 }

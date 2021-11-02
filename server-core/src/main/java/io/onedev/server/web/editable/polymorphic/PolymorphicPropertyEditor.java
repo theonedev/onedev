@@ -271,4 +271,9 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			return null;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
+	}
+
 }

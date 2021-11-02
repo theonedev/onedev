@@ -86,4 +86,9 @@ public class AgentQueryEditPanel extends PropertyEditor<String> {
 		return input.getConvertedInput();
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

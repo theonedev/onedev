@@ -50,7 +50,7 @@ public class IssueReferencedFromPullRequestData extends IssueChangeData implemen
 	}
 
 	@Override
-	public boolean affectsBoards() {
+	public boolean affectsListing() {
 		return false;
 	}
 

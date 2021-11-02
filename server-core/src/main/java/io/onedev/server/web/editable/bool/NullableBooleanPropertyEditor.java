@@ -62,4 +62,9 @@ public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 			return null;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return false;
+	}
+
 }

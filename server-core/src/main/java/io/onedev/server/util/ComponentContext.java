@@ -51,7 +51,6 @@ public class ComponentContext implements Serializable {
 		return component;
 	}
 	
-	@Nullable
 	public ComponentContext getChildContext(String childName) {
 		return null;
 	}

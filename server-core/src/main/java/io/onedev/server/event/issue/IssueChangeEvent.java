@@ -30,7 +30,7 @@ public class IssueChangeEvent extends IssueEvent {
 	}
 
 	@Override
-	public boolean affectsBoards() {
+	public boolean affectsListing() {
 		return change.affectsBoards();
 	}
 

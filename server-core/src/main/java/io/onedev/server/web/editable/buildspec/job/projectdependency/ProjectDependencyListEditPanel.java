@@ -282,4 +282,9 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 		response.render(CssHeaderItem.forReference(new ProjectDependencyCssResourceReference()));
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

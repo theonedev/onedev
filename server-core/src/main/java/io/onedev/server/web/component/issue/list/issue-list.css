@@ -17,3 +17,13 @@
 .issue-list>div>.body tr.issue.new td.new-indicator {
 	background: var(--primary);
 }
+
+.issue-list .state {
+	border-bottom: 2px dotted transparent;
+}
+.issue-list .state.transit {
+	cursor: pointer;
+}
+.issue-list .state.transit:hover {
+	border-color: var(--gray);
+}

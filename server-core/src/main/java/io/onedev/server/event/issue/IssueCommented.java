@@ -26,7 +26,7 @@ public class IssueCommented extends IssueEvent {
 	}
 
 	@Override
-	public boolean affectsBoards() {
+	public boolean affectsListing() {
 		return false;
 	}
 

@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.issues.boards;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +19,8 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -34,7 +35,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
+		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 		Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 
 		Form<?> form = new Form<Void>("form");
@@ -45,8 +46,9 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 		
 		PressButtonTrigger trigger = (PressButtonTrigger) getTransition().getTrigger();
 		
-		BeanEditor editor = BeanContext.edit("editor", fieldBean, 
-				IssueUtils.getPropertyNames(getIssue().getProject(), fieldBeanClass, trigger.getPromptFields()), false); 
+		Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(
+				getIssue().getProject(), fieldBeanClass, trigger.getPromptFields());
+		BeanEditor editor = BeanContext.edit("editor", fieldBean, propertyNames, false); 
 		form.add(editor);
 		
 		form.add(new AjaxButton("ok") {
@@ -55,8 +57,10 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				Map<String, Object> fieldValues = IssueUtils.getFieldValues(
-						editor.newComponentContext(), fieldBean, trigger.getPromptFields());
+				Collection<String> editableFields = FieldUtils.getEditableFields(
+						getIssue().getProject(), trigger.getPromptFields());
+				Map<String, Object> fieldValues = FieldUtils.getFieldValues(
+						editor.newComponentContext(), fieldBean, editableFields);
 				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), 
 						getTransition().getToState(), fieldValues, getTransition().getRemoveFields(), null);
 				onSaved(target);

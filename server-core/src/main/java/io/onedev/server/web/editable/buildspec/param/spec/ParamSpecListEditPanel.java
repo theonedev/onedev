@@ -230,5 +230,10 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 		response.render(CssHeaderItem.forReference(new InputSpecCssResourceReference()));
 		response.render(CssHeaderItem.forReference(new ParamSpecCssResourceReference()));
 	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
 	
 }

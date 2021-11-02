@@ -281,4 +281,9 @@ class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 		return value;
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

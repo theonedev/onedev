@@ -9,6 +9,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -21,22 +22,24 @@ import org.hibernate.Hibernate;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -63,22 +66,36 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		super.onInitialize();
 
 		List<String> displayFields = ((IssueBoardsPage)getPage()).getBoard().getDisplayFields();
-		add(new IssueStateBadge("state", new AbstractReadOnlyModel<Issue>() {
+		
+		WebMarkupContainer transitLink;
+		List<TransitionSpec> transitionSpecs = OneDev.getInstance(SettingManager.class)
+				.getIssueSetting().getTransitionSpecs();
+		
+		if (transitionSpecs.stream().anyMatch(it->it.canTransitManually(getIssue(), null))) {
+			transitLink = new TransitionMenuLink("transit") {
+
+				@Override
+				protected Issue getIssue() {
+					return BoardCardPanel.this.getIssue();
+				}
+				
+			};
+			transitLink.add(AttributeAppender.append("class", "transit"));
+		} else {
+			transitLink = new WebMarkupContainer("transit");
+		}
+		transitLink.setVisible(displayFields.contains(Issue.NAME_STATE));		
+		
+		transitLink.add(new IssueStateBadge("state", new AbstractReadOnlyModel<Issue>() {
 
 			@Override
 			public Issue getObject() {
 				return getIssue();
 			}
 			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(displayFields.contains(Issue.NAME_STATE));
-			}
-			
-		});
+		}));
+		
+		add(transitLink);
 		
 		RepeatingView fieldsView = new RepeatingView("fields");
 		for (String fieldName: displayFields) {
@@ -94,10 +111,19 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 						@Override
 						protected Input getField() {
-							return field;
+							if (getIssue().isFieldVisible(fieldName))
+								return field;
+							else
+								return null;
+						}
+
+						@SuppressWarnings("deprecation")
+						@Override
+						protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
+							return new AttachAjaxIndicatorListener(fieldsView.get(fieldsView.size()-1), AttachMode.APPEND, false);
 						}
 						
-					});
+					}.setOutputMarkupId(true));
 				}
 			}
 		}
@@ -108,15 +134,28 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		for (String fieldName: displayFields) {
 			Input field = getIssue().getFieldInputs().get(fieldName);
 			if (field != null && field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
-				for (String userName: field.getValues()) {
-					User user = OneDev.getInstance(UserManager.class).findByName(userName);
-					if (user != null) {
-						String tooltip = field.getName() + ": " + user.getDisplayName();
-						UserAvatar avatar = new UserAvatar(avatarsView.newChildId(), user);
-						avatar.add(AttributeAppender.append("title", tooltip));
-						avatarsView.add(avatar);
+				avatarsView.add(new FieldValuesPanel(avatarsView.newChildId(), Mode.AVATAR) {
+
+					@SuppressWarnings("deprecation")
+					@Override
+					protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
+						return new AttachAjaxIndicatorListener(avatarsView.get(0), AttachMode.PREPEND, false);
 					}
-				}
+
+					@Override
+					protected Issue getIssue() {
+						return BoardCardPanel.this.getIssue();
+					}
+
+					@Override
+					protected Input getField() {
+						if (getIssue().isFieldVisible(fieldName))
+							return field;
+						else
+							return null;
+					}
+					
+				}.setOutputMarkupId(true));
 			}
 		}
 		

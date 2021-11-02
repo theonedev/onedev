@@ -448,5 +448,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		}
 	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
 	
 }

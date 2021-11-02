@@ -8,12 +8,14 @@ import javax.annotation.Nullable;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.EditableUtils;
 
 @SuppressWarnings("serial")
@@ -43,7 +45,10 @@ abstract class BeanEditContentPanel extends Panel {
 		else
 			form.add(new Label("title", EditableUtils.getDisplayName(getBean().getClass())));
 		
-		form.add(BeanContext.edit("editor", getBean(), getPropertyNames(), isExclude()));
+		form.add(new FencedFeedbackPanel("feedback", form));
+		
+		BeanEditor editor = BeanContext.edit("editor", getBean(), getPropertyNames(), isExclude());
+		form.add(editor);
 		
 		form.add(new AjaxButton("ok") {
 

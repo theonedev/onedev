@@ -80,4 +80,9 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		}
 	}
 
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
+
 }

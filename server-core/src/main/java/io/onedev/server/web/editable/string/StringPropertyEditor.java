@@ -86,5 +86,10 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		this.inputAssist = inputAssist;
 		return this;
 	}
+
+	@Override
+	public boolean needExplicitSubmit() {
+		return true;
+	}
 	
 }
