@@ -107,6 +107,10 @@ public class DefaultPersistManager implements PersistManager {
 		return properties.getDialect();
 	}
 	
+	protected boolean isHSQLDialect(String dialect) {
+		return dialect.trim().equals("org.hibernate.dialect.HSQLDialect");
+	}
+	
 	protected void execute(List<String> sqls, boolean failOnError) {
 		try (	Connection conn = getConnection();
 				Statement stmt = conn.createStatement();) {
@@ -155,8 +159,7 @@ public class DefaultPersistManager implements PersistManager {
 	
 	@Override
 	public void start() {
-		String dialect = getDialect().toLowerCase();
-		if (dialect.contains("hsql")) 
+		if (isHSQLDialect(getDialect())) 
 			execute(Lists.newArrayList("SET DATABASE TRANSACTION CONTROL MVCC"), true);
 		
 		String dbDataVersion = checkDataVersion(true);
@@ -607,7 +610,7 @@ public class DefaultPersistManager implements PersistManager {
 			return true;
 		} else {
 			String dialect = getDialect().toLowerCase();
-			return !dialect.contains("mysql") && !dialect.contains("hsql");
+			return !dialect.contains("mysql") && !isHSQLDialect(dialect);
 		}
 	}
 

@@ -34,7 +34,7 @@ public class CheckDataVersion extends DefaultPersistManager {
 
 	@Override
 	public void start() {
-		if (Bootstrap.isServerRunning(Bootstrap.installDir) && getDialect().toLowerCase().contains("hsql")) {
+		if (Bootstrap.isServerRunning(Bootstrap.installDir) && isHSQLDialect(getDialect())) {
 			logger.error("Please stop server before checking data version");
 			System.exit(1);
 		}

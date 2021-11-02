@@ -1,5 +1,7 @@
 package io.onedev.server.maintenance;
 
+import static org.hibernate.cfg.AvailableSettings.DIALECT;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -123,6 +125,15 @@ public class Upgrade extends DefaultPersistManager {
 	
 	private String prefixUpgradeTargetLog(String line) {
 		return ">>> " + line;
+	}
+	
+	private String getDialect(File installDir) {
+		String dialect = System.getenv(DIALECT.replace('.', '_'));
+		if (dialect == null) {
+			File file = new File(installDir, "conf/hibernate.properties"); 
+			dialect = FileUtils.loadProperties(file).getProperty(DIALECT);
+		}
+		return dialect;
 	}
 	
 	@Override
@@ -271,7 +282,7 @@ public class Upgrade extends DefaultPersistManager {
 						}).getReturnCode();
 						
 						if (ret == 0) {
-							if (getDialect().toLowerCase().contains("hsql")) { 
+							if (isHSQLDialect(getDialect(upgradeDir))) { 
 								FileUtils.deleteDir(new File(upgradeDir, "sampledb"), 3);
 							} else {
 								logger.info("Cleaning database with old program...");

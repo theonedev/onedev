@@ -66,7 +66,7 @@ public class ApplyDatabaseConstraints extends DefaultPersistManager {
 		dropConstraints(metadata);
 		applyConstraints(metadata);
 
-		if (getDialect().toLowerCase().contains("hsql")) {
+		if (isHSQLDialect(getDialect())) {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {

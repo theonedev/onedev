@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e 
+
 _sigterm() {
   kill -TERM "$child"
   wait "$child"

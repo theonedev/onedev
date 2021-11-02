@@ -75,7 +75,7 @@ public class RestoreDatabase extends DefaultPersistManager {
 
 		sessionFactory.close();
 		
-		if (getDialect().toLowerCase().contains("hsql")) {
+		if (isHSQLDialect(getDialect())) {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
