@@ -209,6 +209,8 @@
 .markdown-rendered table th, .markdown-rendered table td {
 	padding: 0.4rem 0.8rem; 
 	border: 1px solid var(--secondary);
+	word-break: break-word!important;
+    overflow-wrap: break-word!important;
 }
 .markdown-rendered table tr:nth-child(even) td {
 	background: var(--light);
