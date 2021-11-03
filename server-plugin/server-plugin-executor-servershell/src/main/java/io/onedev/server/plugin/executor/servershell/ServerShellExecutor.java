@@ -133,8 +133,6 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					
 					File userDir = new File(buildDir, "user");
 					FileUtils.createDir(userDir);
-					Map<String, String> environments = new HashMap<>();
-					environments.put("HOME", userDir.getAbsolutePath());
 					
 					jobContext.reportJobWorkspace(workspaceDir.getAbsolutePath());
 					
@@ -175,7 +173,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
 									if (!PathUtils.isCurrent(entry.getValue())) {
 										File sourceDir = entry.getKey().getDirectory(cacheHomeDir);
-										File destDir = resolveCachePath(workspaceDir, userDir, entry.getValue());
+										File destDir = resolveCachePath(workspaceDir, entry.getValue());
 										if (destDir.exists())
 											FileUtils.deleteDir(destDir);
 										else
@@ -189,6 +187,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								}
 								
 								Commandline shell = getShell();
+								Map<String, String> environments = new HashMap<>();
+								environments.put("GIT_HOME", userDir.getAbsolutePath());
 								shell.workingDir(workspaceDir).environments(environments);
 								shell.addArgs(jobScriptFile.getAbsolutePath());
 								
@@ -203,6 +203,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									jobLogger.log("Checking out code...");
 									Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
 									git.workingDir(workspaceDir);
+									Map<String, String> environments = new HashMap<>();
+									environments.put("HOME", userDir.getAbsolutePath());
 									git.environments(environments);
 
 									CloneInfo cloneInfo = checkoutExecutable.getCloneInfo();

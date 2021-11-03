@@ -179,12 +179,8 @@ public class Upgrade extends DefaultPersistManager {
 			if (oldAppVersion == null || !oldAppVersion.equals(AppLoader.getProduct().getVersion())) {
 				logger.info("Upgrading {}...", upgradeDir.getAbsolutePath());
 				
-				if (Bootstrap.isServerRunning(upgradeDir)) {
-					logger.error("Please stop server running at \"{}\" before upgrading", upgradeDir.getAbsolutePath());
-					System.exit(1);
-				}
-				if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
-					logger.error("Please stop server running at \"{}\" before upgrading", Bootstrap.installDir.getAbsolutePath());
+				if (isServerRunning(upgradeDir) || isServerRunning(Bootstrap.installDir)) {
+					logger.error("Please stop server before upgrading");
 					System.exit(1);
 				}
 
@@ -202,6 +198,10 @@ public class Upgrade extends DefaultPersistManager {
 						}
 					}
 				}
+				
+				File statusDir = new File(upgradeDir, "status");
+				if (statusDir.exists())
+					FileUtils.cleanDir(statusDir);
 				
 				AtomicInteger oldDataVersion = new AtomicInteger(0);
 				
@@ -264,7 +264,7 @@ public class Upgrade extends DefaultPersistManager {
 						logger.info("Backing up database as {}...", dbBackupFile.getAbsolutePath());
 						
 						FileUtils.createDir(dbBackupFile.getParentFile());
-						
+
 						ret = buildCommandline(upgradeDir, "backup-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
 
 							@Override
@@ -286,6 +286,7 @@ public class Upgrade extends DefaultPersistManager {
 								FileUtils.deleteDir(new File(upgradeDir, "sampledb"), 3);
 							} else {
 								logger.info("Cleaning database with old program...");
+								
 								ret = buildCommandline(upgradeDir, "clean-db").execute(new LineConsumer() {
 									
 									@Override
@@ -395,13 +396,14 @@ public class Upgrade extends DefaultPersistManager {
 		} else {
 			logger.info("Populating {}...", upgradeDir.getAbsolutePath());
 			
-			if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
-				logger.error("Please stop server running at \"{}\" before populating", Bootstrap.installDir.getAbsolutePath());
+			if (isServerRunning(Bootstrap.installDir)) {
+				logger.error("Please stop server before populating");
 				System.exit(1);
 			}
 
 			try {
 				FileUtils.copyDirectory(Bootstrap.installDir, upgradeDir);
+				FileUtils.cleanDir(new File(upgradeDir, "logs"));
 				restoreExecutables(upgradeDir);
 				logger.info("Successfully populated {}", upgradeDir.getAbsolutePath());
 				System.exit(0);
@@ -418,36 +420,38 @@ public class Upgrade extends DefaultPersistManager {
 		
 		File siteServerScriptFile = new File(upgradeDir, "bin/server.sh");
 		for (File file: Bootstrap.getBinDir().listFiles()) {
-			try {
-				String serverScript = null;
-				if (file.getName().equals("server.sh")) {
-					String siteRunAsUserLine = null;
-					for (String line: (List<String>)FileUtils.readLines(siteServerScriptFile, Charset.defaultCharset())) {
-						if (line.contains("RUN_AS_USER")) {
-							siteRunAsUserLine = line;
-							break;
-						}
-					}
-					if (siteRunAsUserLine != null) {
-						String newRunAsUserLine = null;
-						for (String line: (List<String>)FileUtils.readLines(file, Charset.defaultCharset())) {
+			if (!file.getName().endsWith(".pid") && !file.getName().endsWith(".status")) {
+				try {
+					String serverScript = null;
+					if (file.getName().equals("server.sh")) {
+						String siteRunAsUserLine = null;
+						for (String line: (List<String>)FileUtils.readLines(siteServerScriptFile, Charset.defaultCharset())) {
 							if (line.contains("RUN_AS_USER")) {
-								newRunAsUserLine = line;
+								siteRunAsUserLine = line;
 								break;
 							}
 						}
-						if (newRunAsUserLine != null) {
-							serverScript = FileUtils.readFileToString(file, Charset.defaultCharset());
-							serverScript = StringUtils.replace(serverScript, newRunAsUserLine, siteRunAsUserLine);
+						if (siteRunAsUserLine != null) {
+							String newRunAsUserLine = null;
+							for (String line: (List<String>)FileUtils.readLines(file, Charset.defaultCharset())) {
+								if (line.contains("RUN_AS_USER")) {
+									newRunAsUserLine = line;
+									break;
+								}
+							}
+							if (newRunAsUserLine != null) {
+								serverScript = FileUtils.readFileToString(file, Charset.defaultCharset());
+								serverScript = StringUtils.replace(serverScript, newRunAsUserLine, siteRunAsUserLine);
+							}
 						}
 					}
+					if (serverScript != null)
+						FileUtils.writeStringToFile(siteServerScriptFile, serverScript, Charset.defaultCharset());
+					else 
+						FileUtils.copyFile(file, new File(upgradeDir, "bin/" + file.getName()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
-				if (serverScript != null)
-					FileUtils.writeStringToFile(siteServerScriptFile, serverScript, Charset.defaultCharset());
-				else 
-					FileUtils.copyFile(file, new File(upgradeDir, "bin/" + file.getName()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
 			}
 		}
 
@@ -468,16 +472,21 @@ public class Upgrade extends DefaultPersistManager {
 		if (new File(upgradeDir, "bin/reset_admin_password.sh").exists())
 			FileUtils.deleteFile(new File(upgradeDir, "bin/reset_admin_password.sh"));
 		
+		FileUtils.deleteDir(new File(upgradeDir, "status"));
+		
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
+		cleanAndCopy(new File(Bootstrap.installDir, "agent"), new File(upgradeDir, "agent"));
 		if (new File(upgradeDir, "boot/system.classpath").exists())
 			FileUtils.deleteFile(new File(upgradeDir, "boot/system.classpath"));
 		
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
 		for (File file: new File(Bootstrap.getSiteDir(), "avatars").listFiles()) {
-			try {
-				FileUtils.copyFileToDirectory(file, new File(upgradeDir, "site/avatars"));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			if (file.isFile()) {
+				try {
+					FileUtils.copyFileToDirectory(file, new File(upgradeDir, "site/avatars"));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 		File uploadedDir = new File(upgradeDir, "site/avatars/uploaded");
@@ -507,6 +516,8 @@ public class Upgrade extends DefaultPersistManager {
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "io.onedev.commons.launcher.bootstrap.Bootstrap", 
 					"io.onedev.commons.bootstrap.Bootstrap");
+			wrapperConf = StringUtils.replace(wrapperConf, "wrapper.pidfile=../status/onedev.pid", "");
+			
 			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, StandardCharsets.UTF_8);
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");

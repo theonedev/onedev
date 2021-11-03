@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.ServerSocket;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -109,6 +110,19 @@ public class DefaultPersistManager implements PersistManager {
 	
 	protected boolean isHSQLDialect(String dialect) {
 		return dialect.trim().equals("org.hibernate.dialect.HSQLDialect");
+	}
+	
+	protected boolean isServerRunning(File installDir) {
+		Properties props = FileUtils.loadProperties(new File(installDir, "conf/server.properties"));
+		int sshPort = Integer.parseInt(props.get("ssh_port").toString());
+		try (ServerSocket serverSocket = new ServerSocket(sshPort)) {
+			return false;
+		} catch (IOException e) {
+			if (e.getMessage() != null && e.getMessage().contains("Address already in use"))
+				return true;
+			else
+				throw new RuntimeException(e);
+		}		
 	}
 	
 	protected void execute(List<String> sqls, boolean failOnError) {

@@ -12,6 +12,7 @@ import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.shell.UnknownCommand;
 
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -59,11 +60,13 @@ public class SshServerLauncher {
             return new UnknownCommand(command);
         });
 
-        try {
-			server.start();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+        if (Bootstrap.command == null) {
+            try {
+    			server.start();
+    		} catch (IOException e) {
+    			throw new RuntimeException(e);
+    		}
+        }        
     }
 
     @Listen

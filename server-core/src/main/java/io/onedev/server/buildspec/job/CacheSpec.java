@@ -1,19 +1,15 @@
 package io.onedev.server.buildspec.job;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 public class CacheSpec implements Serializable {
@@ -39,7 +35,7 @@ public class CacheSpec implements Serializable {
 	@Editable(order=200, description="Specify path to cache. Non-absolute path is considered to be relative to job workspace. "
 			+ "Specify \".\" (without quote) to cache workspace itself. "
 			+ "<span class='text-warning'>Absolute path is not allowed if the job is executed by a shell executor</span>")
-	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestPaths")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getPath() {
 		return path;
@@ -47,13 +43,6 @@ public class CacheSpec implements Serializable {
 
 	public void setPath(String path) {
 		this.path = path;
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestPaths(String matchWith) {
-		Map<String, String> candidates = new LinkedHashMap<>();
-		candidates.put(KubernetesHelper.HOME_PREFIX, "Path under user home");
-		return SuggestionUtils.suggest(candidates, matchWith); 
 	}
 	
 	@SuppressWarnings("unused")

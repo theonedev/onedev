@@ -277,8 +277,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
 											if (!PathUtils.isCurrent(entry.getValue())) {
 												String each = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
-												for (String containerCachePath: KubernetesHelper.resolveCachePath(containerWorkspace, entry.getValue()))
-													docker.addArgs("-v", getOuterPath(each) + ":" + containerCachePath);
+												String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
+												docker.addArgs("-v", getOuterPath(each) + ":" + containerCachePath);
 											}
 										}
 										
