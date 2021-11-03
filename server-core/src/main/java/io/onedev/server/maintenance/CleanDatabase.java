@@ -35,7 +35,7 @@ public class CleanDatabase extends DefaultPersistManager {
 
 	@Override
 	public void start() {
-		if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
+		if (isServerRunning(Bootstrap.installDir)) {
 			logger.error("Please stop server before cleaning database");
 			System.exit(1);
 		}

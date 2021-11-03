@@ -39,7 +39,7 @@ public class ApplyDatabaseConstraints extends DefaultPersistManager {
 
 	@Override
 	public void start() {
-		if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
+		if (isServerRunning(Bootstrap.installDir)) {
 			logger.error("Please stop server before applying db constraints");
 			System.exit(1);
 		}

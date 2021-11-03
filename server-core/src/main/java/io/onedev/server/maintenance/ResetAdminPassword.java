@@ -47,7 +47,7 @@ public class ResetAdminPassword extends DefaultPersistManager {
 			logger.error("Missing password parameter. Usage: {} <new password>", Bootstrap.command.getScript());
 			System.exit(1);
 		}
-		if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
+		if (isServerRunning(Bootstrap.installDir)) {
 			logger.error("Please stop server before resetting admin password");
 			System.exit(1);
 		}

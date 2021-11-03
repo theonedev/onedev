@@ -66,7 +66,7 @@ WRAPPER_CONF="../conf/wrapper.conf"
 PRIORITY=
 
 # Location of the pid file.
-PIDDIR="../status"
+PIDDIR="."
 
 # PIDFILE_CHECK_PID tells the script to double check whether the pid in the pid
 #  file actually exists and belongs to this application.  When not set, only

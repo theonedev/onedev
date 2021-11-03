@@ -53,7 +53,7 @@ public class RestoreDatabase extends DefaultPersistManager {
 		
 		logger.info("Restoring database from {}...", backupFile.getAbsolutePath());
 		
-		if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
+		if (isServerRunning(Bootstrap.installDir)) {
 			logger.error("Please stop server before restoring");
 			System.exit(1);
 		}

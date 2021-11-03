@@ -105,7 +105,6 @@ public class AgentResource extends AbstractResource {
 					}
 					FileUtils.touchFile(new File(agentDir, "agent/conf/attributes.properties"));
 					FileUtils.touchFile(new File(agentDir, "agent/logs/console.log"));
-					FileUtils.touchFile(new File(agentDir, "agent/status/do_not_remove.txt"));
 					
 					Collection<String> agentLibs = OneDev.getInstance(AgentManager.class).getAgentLibs();
 					
