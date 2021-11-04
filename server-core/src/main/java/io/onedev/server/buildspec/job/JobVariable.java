@@ -7,6 +7,14 @@ import io.onedev.server.model.Build;
 
 public enum JobVariable {
 
+	PROJECT_NAME {
+
+		@Override
+		public String getValue(Build build) {
+			return build.getProject().getName();
+		}
+
+	}, 
 	PROJECT_PATH {
 
 		@Override
