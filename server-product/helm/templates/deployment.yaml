@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-onedev
+  labels:
+    tier: server
+    {{- include "onedev.labels" . | nindent 4 }}
+spec:
+  replicas: 1 # only allow one replicas as OneDev doesn't support clustering
+  selector:
+    matchLabels:
+      tier: server
+      app: onedev
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        tier: server
+        app: onedev
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: onedev
+      containers:
+        - name: onedev
+          resources:
+            requests:
+              memory: {{ .Values.resources.onedev.memory }}
+          volumeMounts:
+          - mountPath: "/opt/onedev"
+            name: onedev
+          image: "1dev/server:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          ports:
+            - containerPort: 6610
+            - containerPort: 6611
+          env:
+          - name: hibernate_dialect
+            value: org.hibernate.dialect.MySQL5InnoDBDialect
+          - name: hibernate_connection_driver_class
+            value: com.mysql.cj.jdbc.Driver
+          - name: hibernate_connection_url
+            value: jdbc:mysql://{{ .Release.Name }}-mysql:3306/onedev?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+          - name: hibernate_connection_username
+            value: root
+          - name: hibernate_connection_password
+            valueFrom:
+              secretKeyRef:
+                name: {{.Release.Name}}-mysql
+                key: password
+          - name: hibernate_hikari_maximumPoolSize
+            value: "25"
+      initContainers:
+        - name: init
+          image: busybox
+          command: ["sh", "-c", "until nslookup {{ .Release.Name }}-mysql.{{.Release.Namespace}}.svc.cluster.local; do echo waiting for mysql; sleep 2; done;"]
+      volumes:
+        - name: onedev
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-onedev
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mysql
+  labels:
+    tier: database
+spec:
+  selector:
+    matchLabels:
+      tier: database
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: mysql
+      labels:
+        tier: database
+        app: onedev
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          resources:
+            requests:
+              memory: {{ .Values.resources.mysql.memory }}
+          args:
+            - "--ignore-db-dir=lost+found"
+          env:
+            - name: MYSQL_DATABASE
+              value: onedev
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Release.Name}}-mysql
+                  key: password
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql
+              mountPath: /var/lib/mysql
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - "-c"
+                - |
+                  mysql -uroot -p$MYSQL_ROOT_PASSWORD -e 'SELECT 1'
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            timeoutSeconds: 1
+      volumes:
+        - name: mysql
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-mysql
