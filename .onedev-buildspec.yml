@@ -95,6 +95,9 @@ jobs:
     - cd $projectDir/server-product/k8s
     - ./build.sh
     - ''
+    - cd $projectDir/server-product/helm
+    - ./build.sh
+    - ''
     - cd $projectDir
     - ''
     - cp server-product/target/k8s-resources.zip .
