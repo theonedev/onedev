@@ -2,5 +2,5 @@ apiVersion: v2
 name: onedev
 description: All-In-One DevOps Platform
 type: application
-version: 0.0.11
+version: ${buildVersion}
 appVersion: ${buildVersion}
