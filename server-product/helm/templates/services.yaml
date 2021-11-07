@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-onedev
+  labels:
+    tier: server
+    app: ondev
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 6610
+      protocol: TCP
+    - name: ssh
+      port: 22
+      targetPort: 6611
+      protocol: TCP
+  selector:
+    tier: server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-mysql
+  labels:
+    tier: database
+    app: onedev
+spec:
+  ports:
+    - port: 3306
+  selector:
+    tier: database

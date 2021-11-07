@@ -1,0 +1,37 @@
+{{- $onedevPvc := lookup "v1" "PersistentVolumeClaim" .Release.Namespace "onedev" -}}
+{{- if not $onedevPvc }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ .Release.Name }}-onedev
+  labels:
+    tier: server
+spec:
+  storageClassName: {{ .Values.volumes.onedev.storageClassName }}
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.volumes.onedev.size }}
+  {{- end }}
+---
+{{- $mysqlPvc := lookup "v1" "PersistentVolumeClaim" .Release.Namespace "mysql" -}}
+{{ if not $mysqlPvc }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ .Release.Name }}-mysql
+  labels:
+    tier: database
+spec:
+  storageClassName: {{ .Values.volumes.onedev.storageClassName }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.volumes.onedev.size }}
+{{- end }}

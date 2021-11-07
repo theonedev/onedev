@@ -1,0 +1,15 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: onedev
+subjects:
+  - kind: ServiceAccount
+    name: onedev
+    namespace: onedev
+  - kind: ServiceAccount
+    name: deploy
+    namespace: deploy
+roleRef:
+  kind: ClusterRole
+  name: onedev
+  apiGroup: rbac.authorization.k8s.io
