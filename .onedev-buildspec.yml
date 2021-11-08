@@ -95,9 +95,13 @@ jobs:
     - cd $projectDir/server-product/k8s
     - ./build.sh
     - ''
+    - cd $projectDir/server-product/helm
+    - ./build.sh
+    - ''
     - cd $projectDir
     - ''
     - cp server-product/target/k8s-resources.zip .
+    - cp server-product/target/helm-resources.zip .
     - cp server-product/target/onedev-${buildVersion}.zip .
     - ''
     - echo "Creating release tag..."

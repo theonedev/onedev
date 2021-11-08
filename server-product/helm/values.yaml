@@ -1,0 +1,30 @@
+image:
+  repository:
+  pullPolicy: IfNotPresent
+  tag: ${buildVersion}
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+volumes:
+  onedev:
+    storageClassName: openebs-hostpath
+    size: 100Gi
+  mysql:
+    storageClassName: openebs-hostpath
+    size: 20Gi
+
+resources:
+  onedev:
+    memory: 2Gi
+  mysql:
+    memory: 500Mi
