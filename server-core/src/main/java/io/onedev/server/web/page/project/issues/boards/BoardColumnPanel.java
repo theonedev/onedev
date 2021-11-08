@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -40,10 +43,13 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
@@ -59,11 +65,14 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
 abstract class BoardColumnPanel extends Panel implements EditContext {
@@ -102,7 +111,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		protected Integer load() {
 			if (getQuery() != null) {
 				try {
-					return OneDev.getInstance(IssueManager.class).count(getProject(), true, getQuery().getCriteria());
+					return getIssueManager().count(getProject(), true, getQuery().getCriteria());
 				} catch(ExplicitException e) {
 					return 0;
 				}
@@ -334,7 +343,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				Long issueId = params.getParameterValue("issue").toLong();
-				Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
+				Issue issue = getIssueManager().load(issueId);
 				String fieldName = getBoard().getIdentifyField();
 				if (issue.getMilestone() == null && getMilestone() != null) { 
 					// move a backlog issue to board 
@@ -384,7 +393,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 									
 									@Override
 									protected Issue getIssue() {
-										return OneDev.getInstance(IssueManager.class).load(issueId);
+										return getIssueManager().load(issueId);
 									}
 
 									@Override
@@ -409,16 +418,75 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					if (!SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName()))
 						throw new UnauthorizedException("Permission denied");
 					
+					Serializable fieldBean = issue.getFieldBean(FieldUtils.getFieldBeanClass(), true);
+					BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
+					beanDescriptor.getProperty(fieldName).setPropertyValue(fieldBean, getColumn());
+					
+					Collection<String> dependentFields = fieldSpec.getTransitiveDependents();
+					boolean hasVisibleEditableDependents = dependentFields.stream()
+							.anyMatch(it->SecurityUtils.canEditIssueField(issue.getProject(), it) 
+									&& FieldUtils.isFieldVisible(beanDescriptor, fieldBean, it));
+					
 					Map<String, Object> fieldValues = new HashMap<>();
 					fieldValues.put(fieldName, getColumn());
-					OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
-					markAccepted(target, issue, true);
+					
+					if (hasVisibleEditableDependents) {
+						Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(
+								issue.getProject(), fieldBean.getClass(), dependentFields);
+						class DependentFieldsEditor extends BeanEditModalPanel implements ProjectAware, InputContext {
+
+							public DependentFieldsEditor(IPartialPageRequestHandler handler, Serializable bean,
+									Collection<String> propertyNames, boolean exclude, String title) {
+								super(handler, bean, propertyNames, exclude, title);
+							}
+
+							@Override
+							public Project getProject() {
+								return BoardColumnPanel.this.getProject();
+							}
+
+							@Override
+							public List<String> getInputNames() {
+								throw new UnsupportedOperationException();
+							}
+
+							@Override
+							public InputSpec getInputSpec(String inputName) {
+								return getIssueSetting().getFieldSpec(inputName);
+							}
+
+							@Override
+							protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
+								fieldValues.putAll(FieldUtils.getFieldValues(
+										FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
+										bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
+								close();
+								Issue issue = getIssueManager().load(issueId);
+								OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
+								markAccepted(target, issue, true);
+							}
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								markAccepted(target, getIssueManager().load(issueId), false);
+							}
+							
+						}
+						new DependentFieldsEditor(target, fieldBean, propertyNames, false, "Dependent Fields");
+					} else {
+						OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
+						markAccepted(target, issue, true);
+					}
 				}
 			}
 			
 		});
 		
 		setOutputMarkupId(true);
+	}
+	
+	private IssueManager getIssueManager() {
+		return OneDev.getInstance(IssueManager.class);
 	}
 	
 	@Override

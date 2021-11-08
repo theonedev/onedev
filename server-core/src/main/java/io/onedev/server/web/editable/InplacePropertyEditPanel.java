@@ -101,7 +101,7 @@ public abstract class InplacePropertyEditPanel<T> extends Panel implements EditC
 		
 	}
 	
-	protected abstract void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName);
+	protected abstract void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String z);
 	
 	protected abstract void onCancelled(IPartialPageRequestHandler handler);
 	

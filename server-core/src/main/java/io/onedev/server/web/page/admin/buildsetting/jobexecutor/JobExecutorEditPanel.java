@@ -3,6 +3,7 @@ package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -174,7 +175,7 @@ abstract class JobExecutorEditPanel extends Panel {
 						new BeanEditModalPanel(target, testData, Sets.newHashSet(), true, title) {
 
 							@Override
-							protected void onSave(AjaxRequestTarget target, Serializable bean) {
+							protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
 								close();
 								target.add(editor);
 								target.focusComponent(null);

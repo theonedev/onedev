@@ -116,7 +116,7 @@ public class PressButtonTrigger extends TransitionTrigger {
 	public boolean isAuthorized(Project project) {
 		if (SecurityUtils.getUser() != null) {
 			if (!getAuthorizedRoles().isEmpty()) {
-				if (SecurityUtils.canManageIssues(Project.get())) {
+				if (SecurityUtils.canManageIssues(project)) {
 					return true;
 				} else {
 					for (String roleName: getAuthorizedRoles()) {

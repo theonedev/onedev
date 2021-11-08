@@ -258,7 +258,7 @@ public abstract class BuildDetailPage extends ProjectPage
 					new BeanEditModalPanel(target, paramBean, secretParamNames, false, "Rebuild #" + build.getNumber()) {
 						
 						@Override
-						protected void onSave(AjaxRequestTarget target, Serializable bean) {
+						protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
 							resubmit(paramBean);
 						}
 						

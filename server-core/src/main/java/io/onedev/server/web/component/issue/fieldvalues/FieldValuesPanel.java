@@ -135,7 +135,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						}
 
 						@Override
-						protected void onSave(AjaxRequestTarget target, Serializable bean) {
+						protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
 							fieldValues.putAll(FieldUtils.getFieldValues(
 									FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
 									bean, FieldUtils.getEditableFields(getProject(), dependentFields)));
