@@ -1360,18 +1360,8 @@ public class Project extends AbstractEntity {
 
 	public List<Milestone> getSortedHierarchyMilestones() {
 		if (sortedMilestones == null) {
-			sortedMilestones = new ArrayList<>();
-			List<Milestone> open = getHierarchyMilestones().stream()
-					.filter(it->!it.isClosed())
-					.sorted(new Milestone.DatesComparator())
-					.collect(Collectors.toList());
-			sortedMilestones.addAll(open);
-			List<Milestone> closed = getHierarchyMilestones().stream()
-					.filter(it->it.isClosed())
-					.sorted(new Milestone.DatesComparator())
-					.collect(Collectors.toList());
-			Collections.reverse(closed);
-			sortedMilestones.addAll(closed);
+			sortedMilestones = new ArrayList<>(getHierarchyMilestones());
+			Collections.sort(sortedMilestones, new Milestone.DatesAndStatusComparator());
 		}
 		return sortedMilestones;
 	}

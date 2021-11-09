@@ -22,6 +22,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
@@ -153,7 +154,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
 									withCurrentPullRequestCriteria, withCurrentCommitCriteria);
 						}
-						if (fieldName.equals(Issue.NAME_MILESTONE)) {
+						if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 							return new MilestoneIsEmptyCriteria();
 						} else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -226,7 +227,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 						case IssueQueryLexer.Is:
 							if (fieldName.equals(Issue.NAME_PROJECT)) {
 								return new ProjectCriteria(value);
-							} else if (fieldName.equals(Issue.NAME_MILESTONE)) {
+							} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 								return new MilestoneCriteria(value);
 							} else if (fieldName.equals(Issue.NAME_STATE)) {
 								return new StateCriteria(value);
@@ -358,7 +359,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
 			if (Issue.QUERY_FIELDS.contains(fieldName) 
-					&& !fieldName.equals(Issue.NAME_MILESTONE)) { 
+					&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)) { 
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -398,7 +399,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !fieldName.equals(Issue.NAME_VOTE_COUNT) 
 					&& !fieldName.equals(Issue.NAME_COMMENT_COUNT) 
 					&& !fieldName.equals(Issue.NAME_NUMBER)
-					&& !fieldName.equals(Issue.NAME_MILESTONE)
+					&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)
 					&& !(fieldSpec instanceof IssueChoiceField)
 					&& !(fieldSpec instanceof PullRequestChoiceField)
 					&& !(fieldSpec instanceof BuildChoiceField)

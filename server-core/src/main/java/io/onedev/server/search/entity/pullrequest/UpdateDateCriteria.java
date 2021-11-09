@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.pullrequest;
 import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -29,7 +30,7 @@ public class UpdateDateCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<Date> attribute = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
 		if (operator == PullRequestQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);

@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.agent;
 import java.util.Collection;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -18,7 +19,7 @@ public class OnlineCriteria extends EntityCriteria<Agent> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Root<Agent> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Agent> root, CriteriaBuilder builder) {
 		Path<?> attribute = root.get(Agent.PROP_ID);
 		Collection<Long> agentIds = OneDev.getInstance(AgentManager.class).getOnlineAgentIds();
 		if (!agentIds.isEmpty())

@@ -249,14 +249,14 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 
 	private Predicate[] getPredicates(Project project, 
 			@Nullable io.onedev.server.search.entity.EntityCriteria<CodeComment> criteria, 
-			@Nullable PullRequest request, Root<CodeComment> root, CriteriaBuilder builder) {
+			@Nullable PullRequest request, CriteriaQuery<?> query, Root<CodeComment> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) 
 			predicates.add(builder.equal(CodeCommentQuery.getPath(root, CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST), request));
 		else 
 			predicates.add(builder.equal(root.get(CodeComment.PROP_PROJECT), project));
 		if (criteria != null) 
-			predicates.add(criteria.getPredicate(root, builder));
+			predicates.add(criteria.getPredicate(query, root, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -266,7 +266,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		CriteriaQuery<CodeComment> query = builder.createQuery(CodeComment.class);
 		Root<CodeComment> root = query.from(CodeComment.class);
 		
-		query.where(getPredicates(project, commentQuery.getCriteria(), request, root, builder));
+		query.where(getPredicates(project, commentQuery.getCriteria(), request, query, root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: commentQuery.getSorts()) {
@@ -302,7 +302,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<CodeComment> root = criteriaQuery.from(CodeComment.class);
 
-		criteriaQuery.where(getPredicates(project, commentCriteria, request, root, builder));
+		criteriaQuery.where(getPredicates(project, commentCriteria, request, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

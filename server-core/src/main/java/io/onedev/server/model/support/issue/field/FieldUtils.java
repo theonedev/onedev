@@ -80,8 +80,9 @@ public class FieldUtils {
 	public static Collection<String> getEditablePropertyNames(Project project, Class<?> fieldBeanClass, Collection<String> fieldNames) {
 		BeanDescriptor descriptor = new BeanDescriptor(fieldBeanClass);
 		return fieldNames.stream()
+				.filter(it->SecurityUtils.canEditIssueField(project, it))
 				.map(it->getPropertyName(descriptor, it))
-				.filter(it->it!=null && SecurityUtils.canEditIssueField(project, it))
+				.filter(it->it!=null)
 				.collect(Collectors.toList());
 	}
 

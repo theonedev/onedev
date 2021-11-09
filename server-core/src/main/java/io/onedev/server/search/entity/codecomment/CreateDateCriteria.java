@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.codecomment;
 import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -27,7 +28,7 @@ public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<Date> attribute = root.get(CodeComment.PROP_CREATE_DATE);
 		if (operator == CodeCommentQueryLexer.IsUntil)
 			return builder.lessThan(attribute, value);

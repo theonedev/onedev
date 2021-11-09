@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.build;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -23,7 +24,7 @@ public class ParamIsEmptyCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
 		Join<?, ?> join1 = root.join(Build.PROP_PARAMS, JoinType.LEFT);
 		join1.on(builder.and(
 				builder.equal(join1.get(BuildParam.PROP_NAME), name)),

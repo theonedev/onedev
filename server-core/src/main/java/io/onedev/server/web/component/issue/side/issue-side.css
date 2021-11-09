@@ -35,3 +35,6 @@
 .issue-side>.fields .field-values.editable {
 	border-color: transparent;
 }
+.issue-side>.milestones li+li {
+	padding-top: 1.2rem; 
+}

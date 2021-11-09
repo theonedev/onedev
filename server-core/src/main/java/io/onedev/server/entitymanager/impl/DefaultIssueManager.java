@@ -40,6 +40,7 @@ import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
+import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -56,6 +57,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.IssueQueryPersonalization;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -125,7 +127,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			SettingManager settingManager, ListenerRegistry listenerRegistry, 
 			ProjectManager projectManager, UserManager userManager, 
 			RoleManager roleManager, AttachmentStorageManager attachmentStorageManager, 
-			IssueCommentManager issueCommentManager, EntityReferenceManager entityReferenceManager) {
+			IssueCommentManager issueCommentManager, EntityReferenceManager entityReferenceManager, 
+			IssueScheduleManager issueScheduleManager) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 		this.issueQueryPersonalizationManager = issueQueryPersonalizationManager;
@@ -196,6 +199,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		save(issue);
 
 		issueFieldManager.saveFields(issue);
+		for (IssueSchedule schedule: issue.getSchedules())
+			dao.persist(schedule);
 		
 		listenerRegistry.post(event);
 	}
@@ -265,7 +270,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		
-		criteriaQuery.where(getPredicates(issueQuery.getCriteria(), builder, root));
+		criteriaQuery.where(getPredicates(issueQuery.getCriteria(), criteriaQuery, builder, root));
 		criteriaQuery.orderBy(getOrders(issueQuery.getSorts(), builder, root));
 		
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
@@ -286,7 +291,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		
-		criteriaQuery.where(getPredicates(project, inTree, issueQuery.getCriteria(), builder, root));
+		criteriaQuery.where(getPredicates(project, inTree, issueQuery.getCriteria(), criteriaQuery, builder, root));
 		criteriaQuery.orderBy(getOrders(issueQuery.getSorts(), builder, root));
 		
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
@@ -320,7 +325,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		
-		criteriaQuery.where(getPredicates(issueCriteria, builder, root));
+		criteriaQuery.where(getPredicates(issueCriteria, criteriaQuery, builder, root));
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
@@ -332,14 +337,14 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
-		criteriaQuery.where(getPredicates(project, inTree, issueCriteria, builder, root));
+		criteriaQuery.where(getPredicates(project, inTree, issueCriteria, criteriaQuery, builder, root));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	
 	private Predicate[] getPredicates(Project project, boolean inTree, @Nullable io.onedev.server.search.entity.EntityCriteria<Issue> issueCriteria, 
-			CriteriaBuilder builder, Root<Issue> root) {
+			CriteriaQuery<?> query, CriteriaBuilder builder, Root<Issue> root) {
 		List<Predicate> predicates = new ArrayList<>();
 		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);		
 		if (inTree)
@@ -347,13 +352,13 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		else
 			predicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
 		if (issueCriteria != null)
-			predicates.add(issueCriteria.getPredicate(root, builder));
+			predicates.add(issueCriteria.getPredicate(query, root, builder));
 
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
 	
 	private Predicate[] getPredicates(@Nullable io.onedev.server.search.entity.EntityCriteria<Issue> issueCriteria, 
-			CriteriaBuilder builder, Root<Issue> root) {
+			CriteriaQuery<?> query, CriteriaBuilder builder, Root<Issue> root) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
@@ -363,7 +368,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				predicates.add(builder.disjunction());
 		}
 		if (issueCriteria != null)
-			predicates.add(issueCriteria.getPredicate(root, builder));
+			predicates.add(issueCriteria.getPredicate(query, root, builder));
 
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
@@ -781,18 +786,19 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public Collection<MilestoneAndState> queryMilestoneAndStates(Project project, Collection<Milestone> milestones) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<MilestoneAndState> criteriaQuery = builder.createQuery(MilestoneAndState.class);
-		Root<Issue> root = criteriaQuery.from(Issue.class);
+		Root<IssueSchedule> root = criteriaQuery.from(IssueSchedule.class);
+		Join<Issue, Issue> issueJoin = root.join(IssueSchedule.PROP_ISSUE, JoinType.INNER);
 		criteriaQuery.multiselect(
-				root.get(Issue.PROP_MILESTONE).get(Milestone.PROP_ID), 
-				root.get(Issue.PROP_STATE));
+				root.get(IssueSchedule.PROP_MILESTONE).get(Milestone.PROP_ID), 
+				issueJoin.get(Issue.PROP_STATE));
 		
 		List<Predicate> milestonePredicates = new ArrayList<>();
 		for (Milestone milestone: milestones) 
-			milestonePredicates.add(builder.equal(root.get(Issue.PROP_MILESTONE), milestone));
+			milestonePredicates.add(builder.equal(root.get(IssueSchedule.PROP_MILESTONE), milestone));
 		
-		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);
+		Join<Project, Project> projectJoin = issueJoin.join(Issue.PROP_PROJECT, JoinType.INNER);
 		criteriaQuery.where(builder.and(
-				projectManager.getTreePredicate(builder, join, project),
+				projectManager.getTreePredicate(builder, projectJoin, project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
@@ -803,10 +809,12 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public Collection<Milestone> queryUsedMilestones(Project project) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Milestone> criteriaQuery = builder.createQuery(Milestone.class);
-		Root<Issue> root = criteriaQuery.from(Issue.class);
-		criteriaQuery.select(root.get(Issue.PROP_MILESTONE));
+		Root<IssueSchedule> root = criteriaQuery.from(IssueSchedule.class);
+		criteriaQuery.select(root.get(IssueSchedule.PROP_MILESTONE));
 		
-		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);
+		Join<Project, Project> join = root
+				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
+				.join(Issue.PROP_PROJECT, JoinType.INNER);
 		criteriaQuery.where(projectManager.getTreePredicate(builder, join, project));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
@@ -840,10 +848,13 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			issue.setNumber(nextNumber);
 			numberMapping.put(oldNumber, nextNumber);
 			
-			if (issue.getMilestone() != null 
-					&& !issue.getMilestone().getProject().isSelfOrAncestorOf(targetProject)) {
-				issue.setMilestone(null);
+			for (IssueSchedule schedule: issue.getSchedules()) {
+				if (schedule.getMilestone() != null 
+						&& !schedule.getMilestone().getProject().isSelfOrAncestorOf(targetProject)) {
+					dao.remove(schedule);
+				}
 			}
+			
 		}
 		
 		for (Issue issue: issueList) {
@@ -891,22 +902,24 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	@Transactional
 	@Override
-	public void clearMilestones(Project project, Collection<Milestone> milestones) {
+	public void clearSchedules(Project project, Collection<Milestone> milestones) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
-		Root<Issue> root = criteriaQuery.from(Issue.class);
+		CriteriaQuery<IssueSchedule> criteriaQuery = builder.createQuery(IssueSchedule.class);
+		Root<IssueSchedule> root = criteriaQuery.from(IssueSchedule.class);
 
 		List<Predicate> milestonePredicates = new ArrayList<>();
 		for (Milestone milestone: milestones) 
-			milestonePredicates.add(builder.equal(root.get(Issue.PROP_MILESTONE), milestone));
+			milestonePredicates.add(builder.equal(root.get(IssueSchedule.PROP_MILESTONE), milestone));
 		
-		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);
+		Join<Project, Project> join = root
+				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
+				.join(Issue.PROP_PROJECT, JoinType.INNER);
 		criteriaQuery.where(builder.and(
 				projectManager.getTreePredicate(builder, join, project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
-		for (Issue issue: getSession().createQuery(criteriaQuery).getResultList()) 
-			issue.setMilestone(null);
+		for (IssueSchedule schedule: getSession().createQuery(criteriaQuery).getResultList()) 
+			dao.remove(schedule);
 	}
 
 	@Sessional

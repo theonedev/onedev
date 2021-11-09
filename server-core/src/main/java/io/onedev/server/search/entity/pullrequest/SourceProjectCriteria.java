@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -23,7 +24,7 @@ public class SourceProjectCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
 		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(builder, 
 				root.join(PullRequest.PROP_SOURCE_PROJECT, JoinType.INNER), projectPath);
 	}

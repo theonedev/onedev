@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
@@ -25,7 +26,7 @@ public class ToBeReviewedByCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
 		Join<?, ?> join = root.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
 		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.PROP_USER);
 		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);

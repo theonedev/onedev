@@ -2,10 +2,11 @@ package io.onedev.server.model.support.issue.changedata;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.User;
@@ -16,26 +17,26 @@ public class IssueMilestoneChangeData extends IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String oldMilestone;
+	private final List<String> oldMilestones;
 	
-	private final String newMilestone;
+	private final List<String> newMilestones;
 	
-	public IssueMilestoneChangeData(@Nullable Milestone oldMilestone, @Nullable Milestone newMilestone) {
-		this.oldMilestone = oldMilestone!=null?oldMilestone.getName():null;
-		this.newMilestone = newMilestone!=null?newMilestone.getName():null;
+	public IssueMilestoneChangeData(List<Milestone> oldMilestones, List<Milestone> newMilestones) {
+		this.oldMilestones = oldMilestones.stream().map(it->it.getName()).collect(Collectors.toList());
+		this.newMilestones = newMilestones.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	
-	public String getOldMilestone() {
-		return oldMilestone;
+	public List<String> getOldMilestones() {
+		return oldMilestones;
 	}
 
-	public String getNewMilestone() {
-		return newMilestone;
+	public List<String> getNewMilestones() {
+		return newMilestones;
 	}
 
 	@Override
 	public String getActivity() {
-		return "changed milestone";
+		return "changed milestones";
 	}
 
 	@Override
@@ -61,9 +62,9 @@ public class IssueMilestoneChangeData extends IssueChangeData {
 	@Override
 	public ActivityDetail getActivityDetail() {
 		Map<String, String> oldFieldValues = new HashMap<>();
-		oldFieldValues.put("Milestone", oldMilestone);
+		oldFieldValues.put("Milestones", StringUtils.join(oldMilestones));
 		Map<String, String> newFieldValues = new HashMap<>();
-		oldFieldValues.put("Milestone", newMilestone);
+		newFieldValues.put("Milestones", StringUtils.join(newMilestones));
 		return ActivityDetail.compare(oldFieldValues, newFieldValues, true);
 	}
 	

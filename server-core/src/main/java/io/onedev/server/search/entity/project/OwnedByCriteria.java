@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.project;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -25,7 +26,7 @@ public class OwnedByCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
 		Join<?, ?> userAuthorizationJoin = root.join(Project.PROP_USER_AUTHORIZATIONS, JoinType.LEFT);
 
 		userAuthorizationJoin.on(builder.and(

@@ -1,10 +1,13 @@
 package io.onedev.server.model.support.issue.changedata;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
@@ -17,21 +20,21 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	
 	private final String newState;
 	
-	private final String oldMilestone;
+	private final List<String> oldMilestones;
 	
-	private final String newMilestone;
+	private final List<String> newMilestones;
 	
 	private String comment;
 	
 	public IssueBatchUpdateData(String oldState, String newState, 
-			@Nullable Milestone oldMilestone, @Nullable Milestone newMilestone, 
+			List<Milestone> oldMilestones, List<Milestone> newMilestones, 
 			Map<String, Input> oldFields, Map<String, Input> newFields, 
 			@Nullable String comment) {
 		super(oldFields, newFields);
 		this.oldState = oldState;
 		this.newState = newState;
-		this.oldMilestone = oldMilestone!=null?oldMilestone.getName():null;
-		this.newMilestone = newMilestone!=null?newMilestone.getName():null;
+		this.oldMilestones = oldMilestones.stream().map(it->it.getName()).collect(Collectors.toList());
+		this.newMilestones = newMilestones.stream().map(it->it.getName()).collect(Collectors.toList());
 		this.comment = comment;
 	}
 
@@ -39,8 +42,8 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	public Map<String, String> getOldFieldValues() {
 		Map<String, String> oldFieldValues = new LinkedHashMap<>();
 		oldFieldValues.put("State", oldState);
-		if (oldMilestone != null)
-			oldFieldValues.put("Milestone", oldMilestone);
+		if (!oldMilestones.isEmpty())
+			oldFieldValues.put("Milestones", StringUtils.join(oldMilestones));
 		oldFieldValues.putAll(super.getOldFieldValues());
 		return oldFieldValues;
 	}
@@ -49,8 +52,8 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	public Map<String, String> getNewFieldValues() {
 		Map<String, String> newFieldValues = new LinkedHashMap<>();
 		newFieldValues.put("State", newState);
-		if (newMilestone != null)
-			newFieldValues.put("Milestone", newMilestone);
+		if (!newMilestones.isEmpty())
+			newFieldValues.put("Milestones", StringUtils.join(newMilestones));
 		newFieldValues.putAll(super.getNewFieldValues());
 		return newFieldValues;
 	}
@@ -63,12 +66,12 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 		return oldState;
 	}
 
-	public String getOldMilestone() {
-		return oldMilestone;
+	public List<String> getOldMilestones() {
+		return oldMilestones;
 	}
 
-	public String getNewMilestone() {
-		return newMilestone;
+	public List<String> getNewMilestones() {
+		return newMilestones;
 	}
 
 	@Override

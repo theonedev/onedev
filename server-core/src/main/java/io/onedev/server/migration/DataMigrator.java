@@ -3224,5 +3224,54 @@ public class DataMigrator {
 	
 	private void migrate69(File dataDir, Stack<Integer> versions) {
 	}
+
+	// Migrate to 6.0
+	private void migrate70(File dataDir, Stack<Integer> versions) {
+		Long scheduleId = 1L;
+		VersionedXmlDoc issueSchedulesDoc = new VersionedXmlDoc();
+		Element listElement = issueSchedulesDoc.addElement("list");
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String issueId = element.elementTextTrim("id");
+					String issueSubmitDate = element.elementTextTrim("submitDate");
+					Element milestoneElement = element.element("milestone");
+					if (milestoneElement != null) {
+						Element scheduleElement = listElement.addElement("io.onedev.server.model.IssueSchedule");
+						scheduleElement.addAttribute("revision", "0.0");
+						scheduleElement.addElement("id").setText(String.valueOf(scheduleId++));
+						scheduleElement.addElement("issue").setText(issueId);
+						scheduleElement.addElement("milestone").setText(milestoneElement.getTextTrim());
+						scheduleElement.addElement("date").addAttribute("class", "sql-timestamp").setText(issueSubmitDate);
+						milestoneElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					String dataClass = dataElement.attributeValue("class");
+					if (dataClass.contains("IssueMilestoneChangeData") || dataClass.contains("IssueBatchUpdateData")) {
+						Element oldMilestonesElement = dataElement.addElement("oldMilestones");
+						Element oldMilestoneElement = dataElement.element("oldMilestone");
+						if (oldMilestoneElement != null) {
+							oldMilestonesElement.addElement("string").setText(oldMilestoneElement.getText());
+							oldMilestoneElement.detach();
+						}
+						Element newMilestonesElement = dataElement.addElement("newMilestones");
+						Element newMilestoneElement = dataElement.element("newMilestone");
+						if (newMilestoneElement != null) { 
+							newMilestonesElement.addElement("string").setText(newMilestoneElement.getText());
+							newMilestoneElement.detach();
+						}
+					}
+				}				
+				dom.writeToFile(file, false);
+			}
+		}
+		issueSchedulesDoc.writeToFile(new File(dataDir, "IssueSchedules.xml"), false);
+	}
 	
 }

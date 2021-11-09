@@ -78,7 +78,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	Collection<Milestone> queryUsedMilestones(Project project);
 
-	void clearMilestones(Project project, Collection<Milestone> milestones);
+	void clearSchedules(Project project, Collection<Milestone> milestones);
 	
 	List<Issue> queryAfter(@Nullable Long afterIssueId, int count);
 	

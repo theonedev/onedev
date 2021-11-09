@@ -5,7 +5,6 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 
 public class PullRequestReferencedFromPullRequestData 
@@ -13,7 +12,6 @@ public class PullRequestReferencedFromPullRequestData
 
 	private static final long serialVersionUID = 1L;
 
-	@EntityId(PullRequest.class)
 	private final Long requestId;
 	
 	public PullRequestReferencedFromPullRequestData(PullRequest request) {

@@ -27,10 +27,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.MilestoneIsEmptyCriteria;
+import io.onedev.server.search.entity.issue.MilestoneCriteria;
+import io.onedev.server.search.entity.issue.NotIssueCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -49,7 +51,7 @@ abstract class BacklogColumnPanel extends Panel {
 				List<IssueCriteria> criterias = new ArrayList<>();
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
-				criterias.add(new MilestoneIsEmptyCriteria());
+				criterias.add(new NotIssueCriteria(new MilestoneCriteria(getMilestone().getName())));
 				return new IssueQuery(IssueCriteria.and(criterias), backlogQuery.getSorts());
 			} else {
 				return null;
@@ -151,7 +153,7 @@ abstract class BacklogColumnPanel extends Panel {
 				Issue issue = OneDev.getInstance(IssueManager.class).load(params.getParameterValue("issue").toLong());
 				if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 					throw new UnauthorizedException("Permission denied");
-				OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, null);
+				OneDev.getInstance(IssueChangeManager.class).removeFromMilestone(issue, getMilestone());
 				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, true);", issue.getId()));
 			}
 			
@@ -172,7 +174,7 @@ abstract class BacklogColumnPanel extends Panel {
 					Issue issue = issueDragging.getIssue();
 					if (SecurityUtils.canScheduleIssues(issue.getProject())) {
 						issue = SerializationUtils.clone(issue);
-						issue.setMilestone(null);
+						issue.removeFromMilestone(getMilestone());
 					}
 					if (getQuery().matches(issue)) {
 						String script = String.format("$('#%s').addClass('issue-droppable');", getMarkupId());
@@ -227,5 +229,7 @@ abstract class BacklogColumnPanel extends Panel {
 	
 	@Nullable
 	protected abstract IssueQuery getBacklogQuery();
+	
+	protected abstract Milestone getMilestone();
 	
 }

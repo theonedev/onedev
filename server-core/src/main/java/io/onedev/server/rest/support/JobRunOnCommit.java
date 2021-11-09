@@ -5,10 +5,8 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.validation.annotation.CommitHash;
 
 @EntityCreate(Build.class)
@@ -17,7 +15,7 @@ public class JobRunOnCommit extends JobRun {
 	private static final long serialVersionUID = 1L;
 
 	@Api(order=100)
-	@EntityId(Project.class) Long projectId; 
+	private Long projectId; 
 	
 	@Api(order=200)
 	private String commitHash;

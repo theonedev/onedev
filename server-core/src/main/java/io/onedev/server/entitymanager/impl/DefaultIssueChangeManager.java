@@ -16,7 +16,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -30,8 +29,6 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-
 import io.onedev.commons.loader.Listen;
 import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.LockUtils;
@@ -40,6 +37,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -54,6 +52,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -61,6 +60,8 @@ import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueMilestoneAddData;
+import io.onedev.server.model.support.issue.changedata.IssueMilestoneRemoveData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
 import io.onedev.server.model.support.issue.transitiontrigger.BranchUpdateTrigger;
@@ -115,6 +116,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	private final BuildManager buildManager;
 	
+	private final IssueScheduleManager issueScheduleManager;
+	
 	private final ExecutorService executorService;
 	
 	private final ListenerRegistry listenerRegistry;
@@ -128,7 +131,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			IssueManager issueManager,  IssueFieldManager issueFieldManager,
 			ProjectManager projectManager, BuildManager buildManager, 
 			ExecutorService executorService, PullRequestManager pullRequestManager, 
-			ListenerRegistry listenerRegistry, TaskScheduler taskScheduler) {
+			ListenerRegistry listenerRegistry, TaskScheduler taskScheduler, 
+			IssueScheduleManager issueScheduleManager) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
@@ -139,6 +143,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
 		this.taskScheduler = taskScheduler;
+		this.issueScheduleManager = issueScheduleManager;
 	}
 
 	@Transactional
@@ -166,16 +171,28 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Transactional
 	@Override
-	public void changeMilestone(Issue issue, @Nullable Milestone milestone) {
-		Milestone prevMilestone = issue.getMilestone();
-		if (!Objects.equal(prevMilestone, milestone)) {
-			issue.setMilestone(milestone);
-			
+	public void addToMilestone(Issue issue, Milestone milestone) {
+		issueScheduleManager.save(issue.addToMilestone(milestone));
+		
+		IssueChange change = new IssueChange();
+		change.setDate(new Date());
+		change.setIssue(issue);
+		change.setData(new IssueMilestoneAddData(milestone.getName()));
+		change.setUser(SecurityUtils.getUser());
+		save(change);
+	}
+	
+	@Transactional
+	@Override
+	public void removeFromMilestone(Issue issue, Milestone milestone) {
+		IssueSchedule schedule = issue.removeFromMilestone(milestone);
+		if (schedule != null) {
+			issueScheduleManager.delete(schedule);
 			IssueChange change = new IssueChange();
-			change.setIssue(issue);
 			change.setDate(new Date());
+			change.setIssue(issue);
+			change.setData(new IssueMilestoneRemoveData(milestone.getName()));
 			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueMilestoneChangeData(prevMilestone, milestone));
 			save(change);
 		}
 	}
@@ -222,29 +239,38 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
-			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, 
+			@Nullable Collection<Milestone> milestones, Map<String, Object> fieldValues, 
 			@Nullable String comment) {
 		while (issues.hasNext()) {
 			Issue issue = issues.next();
 			String prevState = issue.getState();
-			Milestone prevMilestone = issue.getMilestone();
+			Collection<Milestone> prevMilestones = issue.getMilestones();
 			Map<String, Input> prevFields = issue.getFieldInputs();
 			if (state != null)
 				issue.setState(state);
-			if (milestone != null)
-				issue.setMilestone(milestone.orNull());
+			
+			if (milestones != null) 
+				issueScheduleManager.syncMilestones(issue, milestones);
 			
 			issue.setFieldValues(fieldValues);
 			issueFieldManager.saveFields(issue);
 
-			IssueChange change = new IssueChange();
-			change.setIssue(issue);
-			change.setDate(new Date());
-			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueBatchUpdateData(prevState, issue.getState(), prevMilestone, 
-					issue.getMilestone(), prevFields, issue.getFieldInputs(), comment));
-			
-			save(change);
+			if (!prevState.equals(issue.getState()) 
+					|| !prevFields.equals(issue.getFieldInputs()) 
+					|| !new HashSet<>(prevMilestones).equals(new HashSet<>(issue.getMilestones()))) {
+				IssueChange change = new IssueChange();
+				change.setIssue(issue);
+				change.setDate(new Date());
+				change.setUser(SecurityUtils.getUser());
+				
+				List<Milestone> prevMilestoneList = new ArrayList<>(prevMilestones);
+				prevMilestoneList.sort(new Milestone.DatesAndStatusComparator());
+				List<Milestone> currentMilestoneList = new ArrayList<>(issue.getMilestones());
+				currentMilestoneList.sort(new Milestone.DatesAndStatusComparator());
+				change.setData(new IssueBatchUpdateData(prevState, issue.getState(), prevMilestoneList, 
+						currentMilestoneList, prevFields, issue.getFieldInputs(), comment));
+				save(change);
+			}
 		}
 	}
 	
@@ -580,6 +606,27 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Listen
 	public void on(SystemStopping event) {
 		taskScheduler.unschedule(taskId);
+	}
+
+	@Transactional
+	@Override
+	public void changeMilestones(Issue issue, Collection<Milestone> milestones) {
+		Collection<Milestone> prevMilestones = new HashSet<>(issue.getMilestones());
+		if (!prevMilestones.equals(new HashSet<>(milestones))) {
+			issueScheduleManager.syncMilestones(issue, milestones);
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setDate(new Date());
+			change.setUser(SecurityUtils.getUser());
+			
+			List<Milestone> prevMilestoneList = new ArrayList<>(prevMilestones);
+			prevMilestoneList.sort(new Milestone.DatesAndStatusComparator());
+			List<Milestone> currentMilestoneList = new ArrayList<>(milestones);
+			currentMilestoneList.sort(new Milestone.DatesAndStatusComparator());
+			change.setData(new IssueMilestoneChangeData(prevMilestoneList, currentMilestoneList));
+			save(change);
+		}
+		
 	}
 	
 }

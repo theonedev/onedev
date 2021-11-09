@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.issue;
 import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -27,7 +28,7 @@ public class SubmitDateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
 		Path<Date> attribute = root.get(Issue.PROP_SUBMIT_DATE);
 		if (operator == IssueQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);

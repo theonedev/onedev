@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.codecomment;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -15,7 +16,7 @@ public class CreatedByMeCriteria extends EntityCriteria<CodeComment> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<CodeComment> root, CriteriaBuilder builder) {
 		if (User.get() != null) {
 			Path<?> attribute = root.get(CodeComment.PROP_USER);
 			return builder.equal(attribute, User.get());

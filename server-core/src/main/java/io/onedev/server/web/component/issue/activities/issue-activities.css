@@ -37,6 +37,12 @@
 .issue-activities>table>tbody>tr>td.content>.body>.detail+.comment {
     margin-top: 1rem;
 }
+.issue-activities>table>tbody>tr>td.content.no-body {
+	vertical-align: middle;
+}
+.issue-activities>table>tbody>tr>td.content.no-body>.body {
+	display: none;
+}
 
 .issue-activities table.field-compare {
 	border: 1px dashed var(--secondary) !important;

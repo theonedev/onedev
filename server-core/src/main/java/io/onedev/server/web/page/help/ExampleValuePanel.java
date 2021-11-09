@@ -51,7 +51,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -253,29 +252,7 @@ public class ExampleValuePanel extends Panel {
 			fragment.add(typeHintFrag);
 			hasHint = true;
 		} else if (getField() != null) {
-			if (getField().getAnnotation(ManyToOne.class) != null 
-					|| getField().getAnnotation(JoinColumn.class) != null 
-					|| getField().getAnnotation(EntityId.class) != null) {
-				Class<?> entityClass;
-				if (getValue() instanceof AbstractEntity)
-					entityClass = getValue().getClass();
-				else
-					entityClass = getField().getAnnotation(EntityId.class).value();
-				Class<?> resourceClass = resourceMap.get(entityClass);
-				if (resourceClass != null) {
-					Fragment typeHintFrag = new Fragment("typeHint", "entityIdHintFrag", this);
-					Link<Void> link = new ViewStateAwarePageLink<Void>("entity", ResourceDetailPage.class, 
-							ResourceDetailPage.paramsOf(resourceClass));
-					link.add(new Label("label", WordUtils.uncamel(entityClass.getSimpleName()).toLowerCase()));
-					typeHintFrag.add(link);
-					fragment.add(typeHintFrag);
-					hasHint = true;
-				} else {
-					fragment.add(new WebMarkupContainer("typeHint").setVisible(false));
-				}
-			} else {
-				fragment.add(new WebMarkupContainer("typeHint").setVisible(false));
-			}
+			fragment.add(new WebMarkupContainer("typeHint").setVisible(false));
 		} else if (getValue() instanceof Long 
 				&& getValueOrigin() == ValueInfo.Origin.RESPONSE_BODY 
 				&& requestBodyClass != null) {

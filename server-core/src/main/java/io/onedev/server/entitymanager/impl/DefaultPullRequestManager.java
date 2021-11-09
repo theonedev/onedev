@@ -892,7 +892,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	private Predicate[] getPredicates(@Nullable Project targetProject, 
 			@Nullable io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
-			Root<PullRequest> root, CriteriaBuilder builder) {
+			CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {
 			predicates.add(builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
@@ -905,7 +905,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		}
 		
 		if (criteria != null) 
-			predicates.add(criteria.getPredicate(root, builder));
+			predicates.add(criteria.getPredicate(query, root, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -916,7 +916,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		query.distinct(true);
 		Root<PullRequest> root = query.from(PullRequest.class);
 		
-		query.where(getPredicates(targetProject, requestQuery.getCriteria(), root, builder));
+		query.where(getPredicates(targetProject, requestQuery.getCriteria(), query, root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: requestQuery.getSorts()) {
@@ -965,7 +965,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		criteriaQuery.where(getPredicates(targetProject, requestCriteria, root, builder));
+		criteriaQuery.where(getPredicates(targetProject, requestCriteria, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

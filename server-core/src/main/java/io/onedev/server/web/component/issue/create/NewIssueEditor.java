@@ -31,6 +31,7 @@ import com.google.common.base.Objects;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -45,7 +46,7 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
+import io.onedev.server.web.component.milestone.choice.MilestoneMultiChoice;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
@@ -62,7 +63,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	
 	private CommentInput descriptionInput;
 	
-	private MilestoneSingleChoice milestoneChoice;
+	private MilestoneMultiChoice milestoneChoice;
 	
 	private BeanEditor fieldEditor;
 	
@@ -111,7 +112,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		lastDescriptionTemplate = getDescriptionTemplate(issue);
 		add(descriptionInput = newDescriptionInput(lastDescriptionTemplate));
 		
-		milestoneChoice = new MilestoneSingleChoice("milestone", Model.of(issue.getMilestone()), 
+		Collection<Milestone> milestones = issue.getMilestones();
+		milestoneChoice = new MilestoneMultiChoice("milestones", Model.of(milestones), 
 				new LoadableDetachableModel<Collection<Milestone>>() {
 
 			@Override
@@ -281,7 +283,12 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Issue issue = newIssue();
 		issue.setTitle(titleInput.getConvertedInput());
 		issue.setDescription(descriptionInput.getConvertedInput());
-		issue.setMilestone(milestoneChoice.getConvertedInput());
+		for (Milestone milestone: milestoneChoice.getConvertedInput()) {
+			IssueSchedule schedule = new IssueSchedule();
+			schedule.setMilestone(milestone);
+			schedule.setIssue(issue);
+			issue.getSchedules().add(schedule);
+		}
 		
 		fieldEditor.convertInput();
 		Collection<String> fieldNames = FieldUtils.getEditableFields(getProject(), 

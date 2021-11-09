@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.build;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -26,7 +27,7 @@ public class RanOnCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
 		Join<?, ?> join = root.join(Build.PROP_AGENT, JoinType.INNER);
 		join.on(builder.equal(join.get(Agent.PROP_NAME), value));
 		return join.isNotNull();

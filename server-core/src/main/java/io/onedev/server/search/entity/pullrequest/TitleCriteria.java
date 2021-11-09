@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -20,7 +21,7 @@ public class TitleCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
 		Expression<String> attribute = root.get(PullRequest.PROP_TITLE);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}

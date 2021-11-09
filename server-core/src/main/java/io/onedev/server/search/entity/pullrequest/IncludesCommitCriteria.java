@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -35,7 +36,7 @@ public class IncludesCommitCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
 		Collection<Long> pullRequestIds = getPullRequestIds();
 		if (!pullRequestIds.isEmpty()) {
 			return builder.and(

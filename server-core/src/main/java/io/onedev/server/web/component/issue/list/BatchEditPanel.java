@@ -2,11 +2,13 @@ package io.onedev.server.web.component.issue.list;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -27,7 +29,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
@@ -50,6 +51,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import static io.onedev.server.web.component.issue.list.BuiltInFieldsBean.*;
 
 @SuppressWarnings("serial")
 abstract class BatchEditPanel extends Panel implements InputContext {
@@ -108,15 +110,15 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(Issue.NAME_STATE);
+				return selectedFields.contains(NAME_STATE);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(Issue.NAME_STATE);
+					selectedFields.add(NAME_STATE);
 				else
-					selectedFields.remove(Issue.NAME_STATE);
+					selectedFields.remove(NAME_STATE);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
@@ -129,15 +131,15 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(Issue.NAME_MILESTONE);
+				return selectedFields.contains(NAME_MILESTONES);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(Issue.NAME_MILESTONE);
+					selectedFields.add(NAME_MILESTONES);
 				else
-					selectedFields.remove(Issue.NAME_MILESTONE);
+					selectedFields.remove(NAME_MILESTONES);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
@@ -183,7 +185,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		issue.setProject(getProject());
 		if (getIssueQuery() != null && getIssueQuery().getCriteria() != null) {
 			getIssueQuery().getCriteria().fill(issue);
-			builtInFieldsBean.setMilestone(issue.getMilestoneName());
+			builtInFieldsBean.setMilestones(issue.getMilestones().stream()
+					.map(it->it.getName()).collect(Collectors.toList()));
 			customFieldsBean = issue.getFieldBean(fieldBeanClass, false);
 		} else {
 			try {
@@ -195,10 +198,10 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		}
 		
 		Set<String> excludedProperties = new HashSet<>();
-		if (!selectedFields.contains(Issue.NAME_STATE))
-			excludedProperties.add(Issue.PROP_STATE);
-		if (!selectedFields.contains(Issue.NAME_MILESTONE))
-			excludedProperties.add(Issue.PROP_MILESTONE);
+		if (!selectedFields.contains(NAME_STATE))
+			excludedProperties.add(PROP_STATE);
+		if (!selectedFields.contains(NAME_MILESTONES))
+			excludedProperties.add(PROP_MILESTONES);
 		
 		builtInFieldsEditor = BeanContext.edit("builtInFieldsEditor", builtInFieldsBean, excludedProperties, true); 
 		form.add(builtInFieldsEditor);
@@ -245,21 +248,27 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						String state;
-						if (selectedFields.contains(Issue.NAME_STATE))
+						if (selectedFields.contains(NAME_STATE))
 							state = builtInFieldsBean.getState();
 						else
 							state = null;
 						
-						Optional<Milestone> milestone;
-						if (selectedFields.contains(Issue.NAME_MILESTONE))
-							milestone = Optional.fromNullable(getProject().getHierarchyMilestone(builtInFieldsBean.getMilestone()));
-						else
-							milestone = null;
+						Collection<Milestone> milestones;
+						if (selectedFields.contains(NAME_MILESTONES)) {
+							milestones = new ArrayList<>();
+							for (String each: builtInFieldsBean.getMilestones()) {
+								Milestone milestone = getProject().getHierarchyMilestone(each);
+								if (milestone != null)
+									milestones.add(milestone);
+							}
+						} else {
+							milestones = null;
+						}
 						
 						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
 								customFieldsBean, selectedFields);
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
-								getIssueIterator(), state, milestone, fieldValues, comment);
+								getIssueIterator(), state, milestones, fieldValues, comment);
 						onUpdated(target);
 					}
 					

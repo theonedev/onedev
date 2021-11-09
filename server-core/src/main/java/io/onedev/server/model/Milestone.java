@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
@@ -66,8 +67,8 @@ public class Milestone extends AbstractEntity {
 	
 	private boolean closed;
 
-	@OneToMany(mappedBy="milestone")
-	private Collection<Issue> issues = new ArrayList<>();
+	@OneToMany(mappedBy="milestone", cascade=CascadeType.REMOVE)
+	private Collection<IssueSchedule> schedules = new ArrayList<>();
 	
 	public Project getProject() {
 		return project;
@@ -129,27 +130,45 @@ public class Milestone extends AbstractEntity {
 		return closed?"Closed":"Open";
 	}
 
-	public Collection<Issue> getIssues() {
-		return issues;
+	public Collection<IssueSchedule> getSchedules() {
+		return schedules;
 	}
 
-	public void setIssues(Collection<Issue> issues) {
-		this.issues = issues;
+	public void setSchedules(Collection<IssueSchedule> schedules) {
+		this.schedules = schedules;
 	}
-	
+
 	public Map<String, Integer> getStateStats(Project tree) {
 		Map<String, Integer> stateStats = new HashMap<>();
-		for (Issue issue: getIssues()) {
-			if (tree.isSelfOrAncestorOf(issue.getProject())) {
-				Integer count = stateStats.get(issue.getState());
+		for (IssueSchedule schedule: getSchedules()) {
+			if (tree.isSelfOrAncestorOf(schedule.getIssue().getProject())) {
+				Integer count = stateStats.get(schedule.getIssue().getState());
 				if (count != null)
 					count++;
 				else
 					count = 1;
-				stateStats.put(issue.getState(), count);
+				stateStats.put(schedule.getIssue().getState(), count);
 			}
 		}
 		return stateStats;
+	}
+	
+	public static class DatesAndStatusComparator extends DatesComparator {
+
+		@Override
+		public int compare(Milestone o1, Milestone o2) {
+			if (o1.isClosed()) {
+				if (o2.isClosed())
+					return super.compare(o1, o2) * -1;
+				else
+					return 1;
+			} else if (o2.isClosed()) {
+				return -1;
+			} else {
+				return super.compare(o1, o2);
+			}
+		}
+		
 	}
 	
 	public static class DatesComparator implements Comparator<Milestone> {

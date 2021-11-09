@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.codecomment;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -22,7 +23,7 @@ public class ReplyCountCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<Integer> attribute = root.get(CodeComment.PROP_REPLY_COUNT);
 		if (operator == CodeCommentQueryLexer.Is)
 			return builder.equal(attribute, value);

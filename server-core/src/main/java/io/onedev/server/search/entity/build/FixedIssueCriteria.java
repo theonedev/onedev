@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -44,7 +45,7 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
 		Path<Long> attribute = root.get(Build.PROP_ID);
 		Project project = issue.getProject();
 		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, issue.getNumber());

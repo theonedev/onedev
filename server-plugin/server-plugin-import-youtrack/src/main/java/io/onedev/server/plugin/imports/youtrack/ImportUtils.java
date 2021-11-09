@@ -38,6 +38,7 @@ import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
@@ -784,16 +785,19 @@ public class ImportUtils {
 
 			if (!dryRun) {
 				ReferenceMigrator migrator = new ReferenceMigrator(Issue.class, issueNumberMappings);
+				Dao dao = OneDev.getInstance(Dao.class);
 				for (Issue issue: issues) {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), youTrackProjectShortName + "-"));
 					
 					OneDev.getInstance(IssueManager.class).save(issue);
+					for (IssueSchedule schedule: issue.getSchedules())
+						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
-						OneDev.getInstance(Dao.class).persist(field);
+						dao.persist(field);
 					for (IssueComment comment: issue.getComments()) {
 						comment.setContent(migrator.migratePrefixed(comment.getContent(), youTrackProjectShortName + "-"));
-						OneDev.getInstance(Dao.class).persist(comment);
+						dao.persist(comment);
 					}
 				}
 			}

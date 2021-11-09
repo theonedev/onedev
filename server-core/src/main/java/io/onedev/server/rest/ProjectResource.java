@@ -174,7 +174,7 @@ public class ProjectResource {
     		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
     	
     	EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
-    	criteria.add(Restrictions.eq(Milestone.PROP_PROJECT, project));
+    	criteria.add(Restrictions.in(Milestone.PROP_PROJECT, project.getSelfAndAncestors()));
     	if (name != null)
     		criteria.add(Restrictions.ilike(Milestone.PROP_NAME, name.replace('%', '*')));
     	if (startBefore != null)

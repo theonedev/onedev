@@ -11,14 +11,12 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 
 public class IssueReferencedFromCodeCommentData extends IssueChangeData implements ReferencedFromAware<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
 
-	@EntityId(CodeComment.class)
 	private final Long commentId;
 	
 	public IssueReferencedFromCodeCommentData(CodeComment comment) {

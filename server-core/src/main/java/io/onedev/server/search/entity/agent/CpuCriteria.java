@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.agent;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -23,7 +24,7 @@ public class CpuCriteria extends EntityCriteria<Agent> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Agent> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Agent> root, CriteriaBuilder builder) {
 		Path<Integer> attribute = root.get(Agent.PROP_CPU);
 		if (operator == AgentQueryLexer.IsGreaterThan)
 			return builder.greaterThan(attribute, value);

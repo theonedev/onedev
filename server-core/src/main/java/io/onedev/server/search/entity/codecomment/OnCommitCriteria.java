@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.codecomment;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -26,7 +27,7 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<?> projectAttribute = CodeCommentQuery.getPath(root, CodeComment.PROP_PROJECT);
 		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeComment.PROP_MARK + "." + Mark.PROP_COMMIT_HASH);
 		return builder.and(

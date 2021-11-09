@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -76,7 +77,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
 		Set<Long> fixedIssueNumbers = new HashSet<>();
 		
 		Repository repository = project.getRepository();

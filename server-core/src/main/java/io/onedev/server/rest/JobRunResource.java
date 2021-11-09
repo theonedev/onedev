@@ -36,7 +36,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.rest.support.JobRun;
 import io.onedev.server.rest.support.JobRunOnCommit;
 import io.onedev.server.rest.support.JobRunOnPullRequest;
@@ -175,7 +174,6 @@ public class JobRunResource {
 		private static final long serialVersionUID = 1L;
 
 		@Api(order=100)
-		@EntityId(Build.class)
 		private Long buildId;
 		
 		@Api(order=200, description="A map of param name to value list. Normally the value list contains only one "

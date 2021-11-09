@@ -1,20 +1,8 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.search.entity.EntityQuery.getValue;
-import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
-import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
-import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentPullRequest;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInPullRequest;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentCommit;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
 import static io.onedev.server.model.Issue.NAME_COMMENT;
 import static io.onedev.server.model.Issue.NAME_COMMENT_COUNT;
 import static io.onedev.server.model.Issue.NAME_DESCRIPTION;
-import static io.onedev.server.model.Issue.NAME_MILESTONE;
 import static io.onedev.server.model.Issue.NAME_NUMBER;
 import static io.onedev.server.model.Issue.NAME_PROJECT;
 import static io.onedev.server.model.Issue.NAME_STATE;
@@ -22,7 +10,18 @@ import static io.onedev.server.model.Issue.NAME_SUBMIT_DATE;
 import static io.onedev.server.model.Issue.NAME_TITLE;
 import static io.onedev.server.model.Issue.NAME_UPDATE_DATE;
 import static io.onedev.server.model.Issue.NAME_VOTE_COUNT;
+import static io.onedev.server.search.entity.EntityQuery.getValue;
+import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
+import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
+import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentCommit;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentPullRequest;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInPullRequest;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.OrderBy;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +47,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
@@ -57,8 +58,8 @@ import io.onedev.server.model.support.issue.field.spec.CommitField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
-import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
+import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
 import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
 import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
@@ -66,7 +67,6 @@ import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.model.Issue;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -211,7 +211,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										}			
 									} else if (fieldName.equals(NAME_NUMBER)) {
 										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldName.equals(NAME_MILESTONE)) {
+									} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 										if (project != null && !matchWith.contains("*"))
 											return SuggestionUtils.suggestMilestones(project, matchWith);
 										else
@@ -280,7 +280,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					} else if (fieldName.equals(Issue.NAME_TITLE) 
 							|| fieldName.equals(Issue.NAME_DESCRIPTION)
 							|| fieldName.equals(Issue.NAME_COMMENT)
-							|| fieldName.equals(Issue.NAME_MILESTONE)) {
+							|| fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

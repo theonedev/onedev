@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.build;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -26,7 +27,7 @@ public class PullRequestCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
 		Path<PullRequest> attribute = root.get(Build.PROP_PULL_REQUEST);
 		return builder.equal(attribute, request);
 	}

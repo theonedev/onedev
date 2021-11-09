@@ -5,7 +5,6 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 
 public class PullRequestReferencedFromCodeCommentData 
@@ -13,7 +12,6 @@ public class PullRequestReferencedFromCodeCommentData
 
 	private static final long serialVersionUID = 1L;
 
-	@EntityId(CodeComment.class)
 	private final Long commentId;
 	
 	public PullRequestReferencedFromCodeCommentData(CodeComment comment) {

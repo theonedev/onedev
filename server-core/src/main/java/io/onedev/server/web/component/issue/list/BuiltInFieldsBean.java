@@ -18,9 +18,17 @@ public class BuiltInFieldsBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String NAME_STATE = "State";
+	
+	public static final String NAME_MILESTONES = "Milestones";
+	
+	public static final String PROP_STATE = "state";
+	
+	public static final String PROP_MILESTONES = "milestones";
+	
 	private String state;
 	
-	private String milestone;
+	private List<String> milestones;
 
 	@Editable(order=100)
 	@ChoiceProvider("getStateChoices")
@@ -35,12 +43,12 @@ public class BuiltInFieldsBean implements Serializable {
 
 	@Editable(order=200)
 	@MilestoneChoice
-	public String getMilestone() {
-		return milestone;
+	public List<String> getMilestones() {
+		return milestones;
 	}
 
-	public void setMilestone(String milestone) {
-		this.milestone = milestone;
+	public void setMilestones(List<String> milestones) {
+		this.milestones = milestones;
 	}
 	
 	@SuppressWarnings("unused")

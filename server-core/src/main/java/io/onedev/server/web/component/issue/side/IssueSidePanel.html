@@ -10,9 +10,23 @@
 				</table>
 			</div>
 		</div>
-		<div class="milestone">
-			<div class="head">Milestone</div>
-			<div wicket:id="milestone" class="body"></div>
+		<div wicket:id="milestones" class="milestones">
+			<div class="head">Milestones</div>
+			<ul class="body list-unstyled mb-0">
+				<li wicket:id="milestones">
+					<div class="d-flex align-items-center">
+						<a wicket:id="link" class="mr-3"><span wicket:id="label"></span></a>
+						<span wicket:id="status" class="status mr-3"></span> 
+						<a wicket:id="delete" class="btn btn-icon btn-xs btn-light btn-hover-danger ml-auto flex-shrink-0" title="Change milestone"><wicket:svg href="trash" class="icon icon-sm"></wicket:svg></a>
+					</div>
+					<div wicket:id="progress" class="mt-3"></div>
+				</li>
+				<wicket:enclosure>
+				<li class="add">
+					<input wicket:id="add" type="hidden" class="form-control">
+				</li>
+				</wicket:enclosure>
+			</ul>
 		</div>
 		<div wicket:id="votes" class="votes">
 			<div class="head">
@@ -40,22 +54,5 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="nonEmptyValuesFrag">
 		<div wicket:id="values" class="value"><span wicket:id="value"></span></div>	
-	</wicket:fragment>
-	<wicket:fragment wicket:id="milestoneViewFrag">
-		<div class="d-flex align-items-center">
-			<a wicket:id="link" class="mr-3"><span wicket:id="label"></span></a>
-			<span wicket:id="status" class="status mr-3"></span> 
-			<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary edit action" title="Change milestone"><wicket:svg href="edit" class="icon mr-2"></wicket:svg></a>
-		</div>
-		<div wicket:id="progress" class="mt-3"></div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="milestoneEditFrag">
-		<form wicket:id="form">
-			<input wicket:id="milestone" type="hidden" class="form-control">
-			<div class="mt-4">
-				<a wicket:id="save" class="dirty-aware btn btn-primary btn-sm mr-1">Save</a>
-				<a wicket:id="cancel" class="btn btn-secondary btn-sm">Cancel</a>
-			</div>
-		</form>
 	</wicket:fragment>
 </wicket:panel>

@@ -213,7 +213,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     				milestones.add(milestone);
     			}
     		}
-    		issueManager.clearMilestones(project, milestones);
+    		issueManager.clearSchedules(project, milestones);
     		settingManager.onRenameProject(oldPath, project.getPath());
     		scheduleTree(project);
     	}
@@ -687,7 +687,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		Root<Project> root = query.from(Project.class);
 		query.select(root);
 		
-		query.where(getPredicates(projectQuery.getCriteria(), root, builder));
+		query.where(getPredicates(projectQuery.getCriteria(), query, root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: projectQuery.getSorts()) {
@@ -705,7 +705,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	private Predicate[] getPredicates(@Nullable io.onedev.server.search.entity.EntityCriteria<Project> criteria, 
-			Root<Project> root, CriteriaBuilder builder) {
+			CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
 			Collection<Long> projectIds = getPermittedProjects(new AccessProject())
@@ -716,7 +716,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				predicates.add(builder.disjunction());
 		}
 		if (criteria != null) 
-			predicates.add(criteria.getPredicate(root, builder));
+			predicates.add(criteria.getPredicate(query, root, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -737,7 +737,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Project> root = criteriaQuery.from(Project.class);
 
-		criteriaQuery.where(getPredicates(projectCriteria, root, builder));
+		criteriaQuery.where(getPredicates(projectCriteria, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

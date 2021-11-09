@@ -1,11 +1,14 @@
 package io.onedev.server.web.editable.milestonechoice;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
+import org.eclipse.jgit.util.StringUtils;
 
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -22,7 +25,34 @@ public class MilestoneChoiceEditSupport implements EditSupport {
         Method propertyGetter = descriptor.getPropertyGetter();
         MilestoneChoice milestoneChoice = propertyGetter.getAnnotation(MilestoneChoice.class);
         if (milestoneChoice != null) {
-        	if (propertyGetter.getReturnType() == String.class) {
+        	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
+        			&& ReflectionUtils.getCollectionElementClass(propertyGetter.getGenericReturnType()) == String.class) {
+        		return new PropertyContext<List<String>>(descriptor) {
+
+					@Override
+					public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
+						return new PropertyViewer(componentId, descriptor) {
+
+							@Override
+							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+						        List<String> milestoneNames = model.getObject();
+						        if (milestoneNames != null && !milestoneNames.isEmpty()) {
+						            return new Label(id, StringUtils.join(milestoneNames, ", " ));
+						        } else {
+									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+						        }
+							}
+							
+						};
+					}
+
+					@Override
+					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
+						return new MilestoneMultiChoiceEditor(componentId, descriptor, model);
+					}
+        			
+        		};
+        	} else if (propertyGetter.getReturnType() == String.class) {
         		return new PropertyContext<String>(descriptor) {
 
 					@Override
@@ -48,7 +78,7 @@ public class MilestoneChoiceEditSupport implements EditSupport {
         			
         		};
         	} else {
-        		throw new RuntimeException("Annotation 'MilestoneChoice' should be applied to property with type 'String'");
+        		throw new RuntimeException("Annotation 'MilestoneChoice' should be applied to property with type 'String' or 'List<String>'");
         	}
         } else {
             return null;

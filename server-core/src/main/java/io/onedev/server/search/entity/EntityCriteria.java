@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -21,7 +22,7 @@ public abstract class EntityCriteria<T extends AbstractEntity> extends Criteria<
 	
 	public static final int IN_CLAUSE_LIMIT = 1000;
 	
-	public abstract Predicate getPredicate(Root<T> root, CriteriaBuilder builder);
+	public abstract Predicate getPredicate(CriteriaQuery<?> query, Root<T> root, CriteriaBuilder builder);
 
 	public static Predicate inManyValues(CriteriaBuilder builder, Path<Long> attribute, Collection<Long> inValues, 
 			Collection<Long> allValues) {

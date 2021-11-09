@@ -37,6 +37,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Milestone;
@@ -46,7 +47,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -122,6 +122,16 @@ public class IssueResource {
     	return issue.getComments();
     }
 	
+	@Api(order=450)
+	@Path("/{issueId}/milestones")
+    @GET
+    public Collection<Milestone> getMilestones(@PathParam("issueId") Long issueId) {
+		Issue issue = issueManager.load(issueId);
+    	if (!SecurityUtils.canAccess(issue.getProject())) 
+			throw new UnauthorizedException();
+    	return issue.getMilestones();
+    }
+	
 	@Api(order=500)
 	@Path("/{issueId}/votes")
     @GET
@@ -191,16 +201,8 @@ public class IssueResource {
     	if (!SecurityUtils.canAccess(project))
 			throw new UnauthorizedException();
 
-    	Milestone milestone;
-    	if (data.getMilestoneId() != null) {
-        	if (!SecurityUtils.canScheduleIssues(project))
-    			throw new UnauthorizedException();
-        	milestone = milestoneManager.load(data.getMilestoneId());
-    	    if (!milestone.getProject().equals(project))
-    	    	throw new InvalidParamException("Milestone is not defined in current project");
-    	} else {
-    		milestone = null;
-    	}
+    	if (!data.getMilestoneIds().isEmpty() && !SecurityUtils.canScheduleIssues(project))
+			throw new UnauthorizedException();
     	
     	Issue issue = new Issue();
     	issue.setTitle(data.getTitle());
@@ -209,7 +211,16 @@ public class IssueResource {
     	issue.setSubmitDate(new Date());
     	issue.setSubmitter(user);
 		issue.setState(settingManager.getIssueSetting().getInitialStateSpec().getName());
-		issue.setMilestone(milestone);
+		
+    	for (Long milestoneId: data.getMilestoneIds()) {
+    		Milestone milestone = milestoneManager.load(milestoneId);
+    	    if (!milestone.getProject().isSelfOrAncestorOf(project))
+    	    	throw new InvalidParamException("Milestone is not defined in project hierarchy of the issue");
+    	    IssueSchedule schedule = new IssueSchedule();
+    	    schedule.setIssue(issue);
+    	    schedule.setMilestone(milestone);
+    	    issue.getSchedules().add(schedule);
+    	}
     	
     	for (Map.Entry<String, String> entry: data.fields.entrySet()) {
     		FieldSpec fieldSpec = settingManager.getIssueSetting().getFieldSpec(entry.getKey());
@@ -249,22 +260,23 @@ public class IssueResource {
 		return Response.ok().build();
     }
 	
-	@Api(order=1300)
-	@Path("/{issueId}/milestone")
+	@Api(order=1300, description="Schedule issue into specified milestones with list of milestone id")
+	@Path("/{issueId}/milestones")
     @POST
-    public Response setMilestone(@PathParam("issueId") Long issueId, Long milestoneId) {
+    public Response setMilestones(@PathParam("issueId") Long issueId, List<Long> milestoneIds) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canScheduleIssues(issue.getProject()))
 			throw new UnauthorizedException();
-    	Milestone milestone;
-    	if (milestoneId != null) {
-    		milestone = milestoneManager.load(milestoneId);
-	    	if (!milestone.getProject().equals(issue.getProject()))
-	    		throw new InvalidParamException("Milestone is not defined in current project");
-    	} else {
-    		milestone = null;
+    	Collection<Milestone> milestones = new HashSet<>();
+    	for (Long milestoneId: milestoneIds) {
+    		Milestone milestone = milestoneManager.load(milestoneId);
+	    	if (!milestone.getProject().isSelfOrAncestorOf(issue.getProject()))
+	    		throw new InvalidParamException("Milestone is not defined in project hierarchy of the issue");
+	    	milestones.add(milestone);
     	}
-		issueChangeManager.changeMilestone(issue, milestone);
+    	
+    	issueChangeManager.changeMilestones(issue, milestones);
+    	
 		return Response.ok().build();
     }
 	
@@ -347,15 +359,13 @@ public class IssueResource {
 
 		private static final long serialVersionUID = 1L;
 
-		@EntityId(Project.class)
 		private Long projectId;
 		
 		private String title;
 		
 		private String description;
 		
-		@EntityId(Project.class)
-		private Long milestoneId;
+		private List<Long> milestoneIds = new ArrayList<>();
 		
 		private Map<String, String> fields = new HashMap<>();
 
@@ -385,12 +395,12 @@ public class IssueResource {
 			this.description = description;
 		}
 
-		public Long getMilestoneId() {
-			return milestoneId;
+		public List<Long> getMilestoneIds() {
+			return milestoneIds;
 		}
 
-		public void setMilestoneId(Long milestoneId) {
-			this.milestoneId = milestoneId;
+		public void setMilestoneIds(List<Long> milestoneIds) {
+			this.milestoneIds = milestoneIds;
 		}
 
 		@NotNull

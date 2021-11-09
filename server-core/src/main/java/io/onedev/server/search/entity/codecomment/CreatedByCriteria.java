@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.codecomment;
 import java.util.Objects;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -22,7 +23,7 @@ public class CreatedByCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<User> attribute = root.get(CodeComment.PROP_USER);
 		return builder.equal(attribute, user);
 	}

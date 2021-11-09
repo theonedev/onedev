@@ -24,6 +24,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -294,9 +295,10 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 						.getParameterValue("issue").toLong();
 				Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
 				Hibernate.initialize(issue.getProject());
-				Hibernate.initialize(issue.getMilestone());
 				Hibernate.initialize(issue.getFields());
 				Hibernate.initialize(issue.getSubmitter());
+				for (Milestone milestone: issue.getMilestones())
+					Hibernate.initialize(milestone);
 				send(getPage(), Broadcast.BREADTH, new IssueDragging(target, issue));
 			}
 			

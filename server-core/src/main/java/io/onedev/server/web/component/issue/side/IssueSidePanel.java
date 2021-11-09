@@ -12,25 +12,22 @@ import java.util.stream.Collectors;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
@@ -52,7 +49,11 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.match.MatchScoreProvider;
+import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
@@ -60,7 +61,11 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
-import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
+import io.onedev.server.web.component.milestone.choice.AbstractMilestoneChoiceProvider;
+import io.onedev.server.web.component.milestone.choice.MilestoneChoiceResourceReference;
+import io.onedev.server.web.component.select2.Response;
+import io.onedev.server.web.component.select2.ResponseFiller;
+import io.onedev.server.web.component.select2.SelectToAddChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
@@ -79,7 +84,7 @@ public abstract class IssueSidePanel extends Panel {
 	@Override
 	protected void onBeforeRender() {
 		addOrReplace(newFieldsContainer());
-		addOrReplace(newMilestoneContainer());
+		addOrReplace(newMilestonesContainer());
 		addOrReplace(newVotesContainer());
 		
 		addOrReplace(new EntityWatchesPanel("watches") {
@@ -188,113 +193,142 @@ public abstract class IssueSidePanel extends Panel {
 		};
 	}
 	
-	private Component newMilestoneContainer() {
-		Fragment fragment = new Fragment("milestone", "milestoneViewFrag", this);
-		if (getIssue().getMilestone() != null) {
-			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneIssuesPage.class, 
-					MilestoneIssuesPage.paramsOf(getProject(), getIssue().getMilestone(), null));
-			link.add(new Label("label", getIssue().getMilestone().getName()));
-			fragment.add(new StateStatsBar("progress", new AbstractReadOnlyModel<Map<String, Integer>>() {
-
-				@Override
-				public Map<String, Integer> getObject() {
-					return getIssue().getMilestone().getStateStats(getProject());
-				}
-				
-			}) {
-
-				@Override
-				protected Link<Void> newStateLink(String componentId, String state) {
-					String query = new IssueQuery(new StateCriteria(state)).toString();
-					PageParameters params = MilestoneIssuesPage.paramsOf(getProject(), getIssue().getMilestone(), query);
-					return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
-				}
-				
-			});
-			fragment.add(link);
-			fragment.add(new MilestoneStatusLabel("status", new AbstractReadOnlyModel<Milestone>() {
-
-				@Override
-				public Milestone getObject() {
-					return getIssue().getMilestone();
-				}
-				
-			}));
-		} else {
-			WebMarkupContainer link = new WebMarkupContainer("link") {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.setName("span");
-				}
-				
-			};
-			link.add(new Label("label", "<i>No milestone</i>").setEscapeModelStrings(false));
-			fragment.add(new WebMarkupContainer("status").setVisible(false));
-			fragment.add(new WebMarkupContainer("progress").setVisible(false));
-			fragment.add(link);
-		}
-
-		fragment.add(new AjaxLink<Void>("edit") {
+	private Component newMilestonesContainer() {
+		WebMarkupContainer container = new WebMarkupContainer("milestones") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment =  new Fragment("milestone", "milestoneEditFrag", IssueSidePanel.this);
-				Form<?> form = new Form<Void>("form");
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getIssue().getSchedules().isEmpty() || SecurityUtils.canScheduleIssues(getProject()));
+			}
+			
+		};
+		
+		container.add(new ListView<Milestone>("milestones", new AbstractReadOnlyModel<List<Milestone>>() {
+
+			@Override
+			public List<Milestone> getObject() {
+				return getIssue().getMilestones().stream()
+						.sorted(new Milestone.DatesAndStatusComparator())
+						.collect(Collectors.toList()); 
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<Milestone> item) {
+				Milestone milestone = item.getModelObject();
+
+				Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneIssuesPage.class, 
+						MilestoneIssuesPage.paramsOf(getIssue().getProject(), milestone, null));
+				link.add(new Label("label", milestone.getName()));
+				item.add(link);
 				
-				MilestoneSingleChoice choice = new MilestoneSingleChoice("milestone", 
-						Model.of(getIssue().getMilestone()), 
-						new LoadableDetachableModel<Collection<Milestone>>() {
+				item.add(new StateStatsBar("progress", new AbstractReadOnlyModel<Map<String, Integer>>() {
 
 					@Override
-					protected Collection<Milestone> load() {
-						return getProject().getSortedHierarchyMilestones();
+					public Map<String, Integer> getObject() {
+						return item.getModelObject().getStateStats(getIssue().getProject());
+					}
+					
+				}) {
+
+					@Override
+					protected Link<Void> newStateLink(String componentId, String state) {
+						String query = new IssueQuery(new StateCriteria(state)).toString();
+						PageParameters params = MilestoneIssuesPage.paramsOf(getIssue().getProject(), 
+								item.getModelObject(), query);
+						return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
 					}
 					
 				});
-				choice.setRequired(false);
-				
-				form.add(choice);
-
-				form.add(new AjaxButton("save") {
+				item.add(new MilestoneStatusLabel("status", new AbstractReadOnlyModel<Milestone>() {
 
 					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-						Milestone milestone = choice.getModelObject();
-						getIssueChangeManager().changeMilestone(getIssue(), milestone);
-						Component container = newMilestoneContainer();
-						IssueSidePanel.this.replace(container);
-						target.add(container);
+					public Milestone getObject() {
+						return item.getModelObject();
 					}
+					
+				}));
+				
+				item.add(new AjaxLink<Void>("delete") {
 
-				});
-				form.add(new AjaxLink<Void>("cancel") {
-
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						if (!getIssue().isNew()) {
+							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
+									+ "remove the issue from milestone '" + item.getModelObject().getName() + "'?"));
+						}
+					}
+					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						Component container = newMilestoneContainer();
-						IssueSidePanel.this.replace(container);
-						target.add(container);
+						getIssueChangeManager().removeFromMilestone(getIssue(), item.getModelObject());
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
 					}
 					
 				});
-				fragment.add(form);
-				fragment.setOutputMarkupId(true);
-				IssueSidePanel.this.replace(fragment);
-				target.add(fragment);
 			}
+			
+		});
+		
+		container.add(new SelectToAddChoice<Milestone>("add", new AbstractMilestoneChoiceProvider() {
+			
+			@Override
+			public void query(String term, int page, Response<Milestone> response) {
+				List<Milestone> milestones = getProject().getSortedHierarchyMilestones();
+				milestones.removeAll(getIssue().getMilestones());
+				
+				milestones = MatchScoreUtils.filterAndSort(
+						milestones, new MatchScoreProvider<Milestone>() {
 
+					@Override
+					public double getMatchScore(Milestone object) {
+						return MatchScoreUtils.getMatchScore(object.getName(), term);
+					}
+					
+				});
+				new ResponseFiller<Milestone>(response).fill(milestones, page, WebConstants.PAGE_SIZE);
+			}
+			
+		}) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				getSettings().setPlaceholder("Add to milestone...");
+				getSettings().setFormatResult("onedev.server.milestoneChoiceFormatter.formatResult");
+				getSettings().setFormatSelection("onedev.server.milestoneChoiceFormatter.formatSelection");
+				getSettings().setEscapeMarkup("onedev.server.milestoneChoiceFormatter.escapeMarkup");
+			}
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
 			}
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(JavaScriptHeaderItem.forReference(new MilestoneChoiceResourceReference()));
+			}
 			
-		});
-		fragment.setOutputMarkupId(true);
-		return fragment;
+			@Override
+			protected void onSelect(AjaxRequestTarget target, Milestone milestone) {
+				getIssueChangeManager().addToMilestone(getIssue(), milestone);
+			}
+
+		});		
+		
+		return container;
 	}
 	
 	private List<IssueVote> getSortedVotes() {

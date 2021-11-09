@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -37,7 +38,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public final Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
+	public final Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
 		Join<?, ?> join = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
 		Predicate valuePredicate = getValuePredicate(join, builder);
 		if (valuePredicate != null) {

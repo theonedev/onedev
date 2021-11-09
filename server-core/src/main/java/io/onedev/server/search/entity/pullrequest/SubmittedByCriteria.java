@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.pullrequest;
 import java.util.Objects;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -22,7 +23,7 @@ public class SubmittedByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<User> attribute = root.get(PullRequest.PROP_SUBMITTER);
 		return builder.equal(attribute, user);
 	}

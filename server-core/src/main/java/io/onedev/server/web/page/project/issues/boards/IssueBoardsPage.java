@@ -761,6 +761,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						return backlogQueryModel.getObject();
 					}
 
+					@Override
+					protected Milestone getMilestone() {
+						return IssueBoardsPage.this.getMilestone();
+					}
+
 				});
 			}
 			

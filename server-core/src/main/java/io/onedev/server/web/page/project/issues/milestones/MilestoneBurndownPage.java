@@ -25,6 +25,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.infomanager.IssueInfoManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -177,10 +178,12 @@ public class MilestoneBurndownPage extends MilestoneDetailPage {
 					int dueDayValue = new Day(getMilestone().getDueDate()).getValue();
 					
 					Map<Integer, Map<String, Integer>> dailyStateWeights = new LinkedHashMap<>();
-					for (Issue issue: getMilestone().getIssues()) {
+					for (IssueSchedule schedule: getMilestone().getSchedules()) {
+						Issue issue = schedule.getIssue();
 						int issueWeight = getFieldValue(issue);
+						int scheduleDayValue = new Day(schedule.getDate()).getValue();
 						Map<Integer, String> dailyStates = OneDev.getInstance(IssueInfoManager.class)
-								.getDailyStates(issue.getId(), startDayValue, dueDayValue);
+								.getDailyStates(issue.getId(), Math.max(startDayValue, scheduleDayValue), dueDayValue);
 						for (Map.Entry<Integer, String> entry: dailyStates.entrySet()) {
 							Map<String, Integer> stateWeights = dailyStateWeights.get(entry.getKey());
 							if (stateWeights == null) {

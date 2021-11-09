@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.build;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -25,7 +26,7 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
 		Path<?> projectAttribute = BuildQuery.getPath(root, Build.PROP_PROJECT);
 		Path<?> commitAttribute = BuildQuery.getPath(root, Build.PROP_COMMIT);
 		return builder.and(

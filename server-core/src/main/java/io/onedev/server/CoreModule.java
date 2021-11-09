@@ -116,6 +116,7 @@ import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
+import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.MembershipManager;
@@ -155,6 +156,7 @@ import io.onedev.server.entitymanager.impl.DefaultIssueCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueFieldManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueQueryPersonalizationManager;
+import io.onedev.server.entitymanager.impl.DefaultIssueScheduleManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueVoteManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueWatchManager;
 import io.onedev.server.entitymanager.impl.DefaultMembershipManager;
@@ -423,6 +425,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildMetricManager.class).to(DefaultBuildMetricManager.class);
 		bind(EntityReferenceManager.class).to(DefaultEntityReferenceManager.class);
 		bind(GitLfsLockManager.class).to(DefaultGitLfsLockManager.class);
+		bind(IssueScheduleManager.class).to(DefaultIssueScheduleManager.class);
 		
 		bind(WebHookManager.class);
 		

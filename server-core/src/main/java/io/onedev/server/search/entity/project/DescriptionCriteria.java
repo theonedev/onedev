@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.project;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -21,7 +22,7 @@ public class DescriptionCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
 		Expression<String> attribute = root.get(Project.PROP_DESCRIPTION);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}

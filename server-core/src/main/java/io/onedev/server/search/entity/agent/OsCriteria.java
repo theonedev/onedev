@@ -1,6 +1,7 @@
 package io.onedev.server.search.entity.agent;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -19,7 +20,7 @@ public class OsCriteria extends EntityCriteria<Agent> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Agent> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, Root<Agent> root, CriteriaBuilder builder) {
 		return builder.equal(root.get(Agent.PROP_OS), value); 
 	}
 

@@ -32,7 +32,6 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestChange;
@@ -45,7 +44,6 @@ import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
@@ -402,10 +400,8 @@ public class PullRequestResource {
 
 		private static final long serialVersionUID = 1L;
 
-		@EntityId(Project.class)
 		private Long targetProjectId;
 		
-		@EntityId(Project.class)
 		private Long sourceProjectId;
 		
 		private String targetBranch;

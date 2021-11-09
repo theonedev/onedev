@@ -8,6 +8,7 @@ import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Issue.PROP_TITLE;
 import static io.onedev.server.model.Issue.PROP_UUID;
 import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
+import static io.onedev.server.model.IssueSchedule.NAME_MILESTONE;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -80,8 +81,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_NO_SPACE_TITLE),  
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
-				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_milestone_id"), 
-				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_numberScope_id")}, 
+				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList=LastUpdate.COLUMN_DATE), 
+				@Index(columnList="o_numberScope_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -140,12 +141,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
-	public static final String NAME_MILESTONE = "Milestone";
-	
-	public static final String PROP_MILESTONE = "milestone";
-	
 	public static final String PROP_FIELDS = "fields";
 		
+	public static final String PROP_SCHEDULES = "schedules";
+	
 	public static final String PROP_UUID = "uuid";
 	
 	public static final String PROP_ID = "id";
@@ -187,8 +186,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	@JoinColumn(nullable=false)
 	private Project project;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-	private Milestone milestone;
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueSchedule> schedules = new ArrayList<>();
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -343,13 +342,12 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		this.submitDate = submitDate;
 	}
 
-	@Nullable
-	public Milestone getMilestone() {
-		return milestone;
+	public Collection<IssueSchedule> getSchedules() {
+		return schedules;
 	}
 
-	public void setMilestone(@Nullable Milestone milestone) {
-		this.milestone = milestone;
+	public void setSchedules(Collection<IssueSchedule> schedules) {
+		this.schedules = schedules;
 	}
 
 	public Collection<IssueComment> getComments() {
@@ -491,11 +489,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static String getListWebSocketObservable(Long projectId) {
 		return Issue.class.getName() + ":list:" + projectId;
-	}
-
-	@Nullable
-	public String getMilestoneName() {
-		return getMilestone()!=null? getMilestone().getName():null;
 	}
 
 	@Nullable
@@ -712,6 +705,30 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public String getNumberAndTitle() {
 		return "#" + getNumber() + " - " + getTitle();
+	}
+	
+	public Collection<Milestone> getMilestones() {
+		return getSchedules().stream().map(it->it.getMilestone()).collect(Collectors.toList());
+	}
+	
+	public IssueSchedule addToMilestone(Milestone milestone) {
+		IssueSchedule schedule = new IssueSchedule();
+		schedule.setIssue(this);
+		schedule.setMilestone(milestone);
+		getSchedules().add(schedule);
+		return schedule;
+	}
+	
+	@Nullable
+	public IssueSchedule removeFromMilestone(Milestone milestone) {
+		for (Iterator<IssueSchedule> it = getSchedules().iterator(); it.hasNext();) {
+			IssueSchedule schedule = it.next();
+			if (schedule.getMilestone().equals(milestone)) {
+				it.remove();
+				return schedule;
+			}
+		}
+		return null;
 	}
 	
 }

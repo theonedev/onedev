@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
@@ -39,6 +38,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -159,7 +159,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 						if (event.getPayload() instanceof IssueDragging && getQuery() != null) {
 							IssueDragging issueDragging = (IssueDragging) event.getPayload();
 							Issue issue = issueDragging.getIssue();
-							if (Objects.equals(issue.getMilestone(), getMilestone())) { 
+							if (getMilestone() == null || issue.getMilestones().contains(getMilestone())) { 
 								// move issue between board columns
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(Issue.NAME_STATE)) {
@@ -180,7 +180,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							} else if (SecurityUtils.canScheduleIssues(issue.getProject())) { 
 								// move issue between backlog column and board column
 								issue = SerializationUtils.clone(issue);
-								issue.setMilestone(getMilestone());
+								IssueSchedule schedule = new IssueSchedule();
+								schedule.setIssue(issue);
+								schedule.setMilestone(getMilestone());
+								issue.getSchedules().add(schedule);
 							}
 							if (getQuery().matches(issue)) {
 								String script = String.format("$('#%s').addClass('issue-droppable');", getMarkupId());
@@ -345,12 +348,12 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				Long issueId = params.getParameterValue("issue").toLong();
 				Issue issue = getIssueManager().load(issueId);
 				String fieldName = getBoard().getIdentifyField();
-				if (issue.getMilestone() == null && getMilestone() != null) { 
+				if (getMilestone() != null && !issue.getMilestones().contains(getMilestone())) { 
 					// move a backlog issue to board 
 					if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 						throw new UnauthorizedException("Permission denied");
-					
-					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone());
+
+					OneDev.getInstance(IssueChangeManager.class).addToMilestone(issue, getMilestone());
 					markAccepted(target, issue, true);
 				} else if (fieldName.equals(Issue.NAME_STATE)) {
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);

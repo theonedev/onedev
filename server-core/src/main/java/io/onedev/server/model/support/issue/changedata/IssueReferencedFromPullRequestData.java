@@ -11,14 +11,12 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 
 public class IssueReferencedFromPullRequestData extends IssueChangeData implements ReferencedFromAware<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
-	@EntityId(PullRequest.class)
 	private final Long requestId;
 	
 	public IssueReferencedFromPullRequestData(PullRequest request) {

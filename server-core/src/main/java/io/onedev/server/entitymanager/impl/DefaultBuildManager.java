@@ -517,10 +517,10 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private Predicate[] getPredicates(@Nullable Project project, 
 			@Nullable io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
-			Root<Build> root, CriteriaBuilder builder) {
+			CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = getPredicates(project, root, builder);
 		if (criteria != null) 
-			predicates.add(criteria.getPredicate(root, builder));
+			predicates.add(criteria.getPredicate(query, root, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -531,7 +531,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		Root<Build> root = query.from(Build.class);
 		query.select(root);
 		
-		query.where(getPredicates(project, buildQuery.getCriteria(), root, builder));
+		query.where(getPredicates(project, buildQuery.getCriteria(), query, root, builder));
 
 		applyOrders(root, query, builder, buildQuery);
 		
@@ -573,7 +573,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		Root<Build> root = criteriaQuery.from(Build.class);
 		criteriaQuery.select(root.get(Build.PROP_ID));
 
-		criteriaQuery.where(getPredicates(project, buildQuery.getCriteria(), root, builder));
+		criteriaQuery.where(getPredicates(project, buildQuery.getCriteria(), criteriaQuery, root, builder));
 
 		applyOrders(root, criteriaQuery, builder, buildQuery);
 
@@ -591,7 +591,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
 
-		criteriaQuery.where(getPredicates(project, buildCriteria, root, builder));
+		criteriaQuery.where(getPredicates(project, buildCriteria, criteriaQuery, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
