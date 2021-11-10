@@ -168,13 +168,13 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 		}
 		
-		String summary = request.getStatusName() + " - "; 
+		String summary; 
 		if (user != null)
-			summary = summary + user.getDisplayName() + " " + event.getActivity();
+			summary = user.getDisplayName() + " " + event.getActivity();
 		else if (committer != null)
-			summary = summary + committer.getDisplayName() + " " + event.getActivity();
+			summary = committer.getDisplayName() + " " + event.getActivity();
 		else
-			summary = summary + event.getActivity();
+			summary = event.getActivity();
 		
 		if (event instanceof PullRequestOpened) {
 			for (PullRequestReview review: request.getReviews()) {
@@ -263,7 +263,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 
 			if (!bccUsers.isEmpty()) {
-				String subject = String.format("[Pull Request %s] (Updated) %s", request.getFQN(), request.getTitle());
+				String subject = String.format("[Pull Request %s] (%s) %s", 
+						request.getFQN(), (event instanceof PullRequestOpened)?"Opened":"Updated", request.getTitle());
 				String threadingReferences = "<" + request.getUUID() + "@onedev>";
 				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(request));
 				String htmlBody = getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, unsubscribable);

@@ -22,6 +22,7 @@ import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
+import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
@@ -75,11 +76,11 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		else
 			url = urlManager.urlFor(issue);
 
-		String summary = issue.getState() + " - "; 
+		String summary; 
 		if (user != null)
-			summary = summary + user.getDisplayName() + " " + event.getActivity();
+			summary = user.getDisplayName() + " " + event.getActivity();
 		else
-			summary = summary + event.getActivity();
+			summary = event.getActivity();
 
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
 
@@ -223,7 +224,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 	
 			if (!bccUsers.isEmpty()) {
-				String subject = String.format("[Issue %s] (Updated) %s", issue.getFQN(), issue.getTitle()); 
+				String subject = String.format("[Issue %s] (%s) %s", 
+						issue.getFQN(), (event instanceof IssueOpened)?"Opened":"Updated", issue.getTitle()); 
 	
 				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
 				String htmlBody = getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
