@@ -33,6 +33,14 @@ public class IssueFieldChangeData extends IssueChangeData {
 		this.newFields = copyNonEmptyFields(newFields);
 	}
 	
+	public Map<String, Input> getOldFields() {
+		return oldFields;
+	}
+
+	public Map<String, Input> getNewFields() {
+		return newFields;
+	}
+
 	public Map<String, String> getOldFieldValues() {
 		Map<String, String> oldFieldValues = new LinkedHashMap<>();
 		for (Map.Entry<String, Input> entry: oldFields.entrySet())

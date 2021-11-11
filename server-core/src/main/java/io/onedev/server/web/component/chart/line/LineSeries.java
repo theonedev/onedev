@@ -2,7 +2,6 @@ package io.onedev.server.web.component.chart.line;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -12,60 +11,53 @@ public class LineSeries implements Serializable {
 
 	private final String seriesName;
 	
-	private final List<String> lineNames;
+	private final List<String> xAxisValues;
 	
-	private final Map<String, List<Integer>> lineValues;
+	private final List<Line> lines;
 	
-	private final String valueFormatter;
+	private final String yAxisValueFormatter;
 	
-	private final Integer minValue;
+	private final Integer minYAxisValue;
 	
-	private final Integer maxValue;
+	private final Integer maxYAxisValue;
 	
-	private final List<String> lineColors;
-	
-	public LineSeries(@Nullable String seriesName, List<String> lineNames, 
-			Map<String, List<Integer>> lineValues, @Nullable String valueFormatter, 
-			@Nullable Integer minValue, @Nullable Integer maxValue, 
-			List<String> lineColors) {
+	public LineSeries(@Nullable String seriesName, List<String> xAxisValues, List<Line> lines, 
+			@Nullable String yAxisValueFormatter, @Nullable Integer minYAxisValue, 
+			@Nullable Integer maxYAxisValue) {
 		this.seriesName = seriesName;
-		this.lineNames = lineNames;
-		this.lineValues = lineValues;
-		this.valueFormatter = valueFormatter;
-		this.minValue = minValue;
-		this.maxValue = maxValue;
-		this.lineColors = lineColors;
+		this.xAxisValues = xAxisValues;
+		this.lines = lines;
+		this.yAxisValueFormatter = yAxisValueFormatter;
+		this.minYAxisValue = minYAxisValue;
+		this.maxYAxisValue = maxYAxisValue;
 	}
 
+	@Nullable
 	public String getSeriesName() {
 		return seriesName;
 	}
 
-	public List<String> getLineNames() {
-		return lineNames;
+	public List<String> getxAxisValues() {
+		return xAxisValues;
 	}
 
-	public Map<String, List<Integer>> getLineValues() {
-		return lineValues;
-	}
-
-	@Nullable
-	public String getValueFormatter() {
-		return valueFormatter;
+	public List<Line> getLines() {
+		return lines;
 	}
 
 	@Nullable
-	public Integer getMinValue() {
-		return minValue;
+	public String getYAxisValueFormatter() {
+		return yAxisValueFormatter;
 	}
 
 	@Nullable
-	public Integer getMaxValue() {
-		return maxValue;
+	public Integer getMinYAxisValue() {
+		return minYAxisValue;
 	}
 
-	public List<String> getLineColors() {
-		return lineColors;
+	@Nullable
+	public Integer getMaxYAxisValue() {
+		return maxYAxisValue;
 	}
 
 }

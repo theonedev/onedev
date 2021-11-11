@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -60,6 +59,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.ajaxlistener.AppendAjaxIndicatorListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
@@ -71,7 +71,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 
 @SuppressWarnings("serial")
@@ -284,8 +284,8 @@ public abstract class IssueSidePanel extends Panel {
 	private Component newMilestoneContainer() {
 		Fragment fragment = new Fragment("milestone", "milestoneViewFrag", this);
 		if (getIssue().getMilestone() != null) {
-			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, 
-					MilestoneDetailPage.paramsOf(getProject(), getIssue().getMilestone(), null));
+			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneIssuesPage.class, 
+					MilestoneIssuesPage.paramsOf(getProject(), getIssue().getMilestone(), null));
 			link.add(new Label("label", getIssue().getMilestone().getName()));
 			fragment.add(new StateStatsBar("progress", new AbstractReadOnlyModel<Map<String, Integer>>() {
 
@@ -299,8 +299,8 @@ public abstract class IssueSidePanel extends Panel {
 				@Override
 				protected Link<Void> newStateLink(String componentId, String state) {
 					String query = new IssueQuery(new StateCriteria(state)).toString();
-					PageParameters params = MilestoneDetailPage.paramsOf(getProject(), getIssue().getMilestone(), query);
-					return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
+					PageParameters params = MilestoneIssuesPage.paramsOf(getProject(), getIssue().getMilestone(), query);
+					return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
 				}
 				
 			});

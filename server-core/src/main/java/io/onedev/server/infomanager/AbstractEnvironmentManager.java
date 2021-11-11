@@ -8,16 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.event.system.SystemStopping;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
@@ -36,10 +32,8 @@ public abstract class AbstractEnvironmentManager {
 	
 	private static final int MEMORY_USAGE_PERCENT = 25;
 	
-	private final Map<String, Environment> envs = new ConcurrentHashMap<>();
-	
-	protected void checkVersion(String envKey) {
-		File versionFile = new File(getEnvDir(envKey), VERSION_FILE);
+	protected void checkVersion(File envDir) {
+		File versionFile = new File(envDir, VERSION_FILE);
 		int versionFromFile;
 		if (versionFile.exists()) {
 			try {
@@ -56,34 +50,24 @@ public abstract class AbstractEnvironmentManager {
 		} 
 	}
 	
-	protected void writeVersion(String envKey) {
-		File versionFile = new File(getEnvDir(envKey), VERSION_FILE);
+	protected void writeVersion(File envDir) {
+		File versionFile = new File(envDir, VERSION_FILE);
 		FileUtils.writeFile(versionFile, String.valueOf(getEnvVersion()));
 	}
 
-	protected abstract File getEnvDir(String envKey);
-	
 	protected abstract int getEnvVersion();
 	
 	protected long getLogFileSize() {
 		return DEFAULT_LOG_FILE_SIZE;
 	}
 	
-	protected Environment getEnv(String envKey) {
-		Environment env = envs.get(envKey);
-		if (env == null) synchronized (envs) {
-			env = envs.get(envKey);
-			if (env == null) {
-				checkVersion(envKey);
-				EnvironmentConfig config = new EnvironmentConfig();
-				config.setEnvCloseForcedly(true);
-				config.setMemoryUsagePercentage(MEMORY_USAGE_PERCENT);
-				config.setLogFileSize(getLogFileSize());
-				env = Environments.newInstance(getEnvDir(envKey), config);
-				envs.put(envKey, env);
-			}
-		}
-		return env;
+	protected Environment newEnv(File envDir) {
+		checkVersion(envDir);
+		EnvironmentConfig config = new EnvironmentConfig();
+		config.setEnvCloseForcedly(true);
+		config.setMemoryUsagePercentage(MEMORY_USAGE_PERCENT);
+		config.setLogFileSize(getLogFileSize());
+		return Environments.newInstance(envDir, config);
 	}
 	
 	protected Store getStore(Environment env, String storeName) {
@@ -93,23 +77,6 @@ public abstract class AbstractEnvironmentManager {
 		        return env.openStore(storeName, StoreConfig.WITHOUT_DUPLICATES, txn);
 		    }
 		});		
-	}
-
-	protected void removeEnv(String envKey) {
-		synchronized (envs) {
-			Environment env = envs.remove(envKey);
-			if (env != null)
-				env.close();
-		}
-	}
-
-	@Listen
-	public void on(SystemStopping event) {
-		synchronized (envs) {
-			for (Environment env: envs.values())
-				env.close();
-			envs.clear();
-		}
 	}
 
 	@Nullable 

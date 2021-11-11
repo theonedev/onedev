@@ -160,6 +160,8 @@ public class ProjectResource {
 	@Path("/{projectId}/milestones")
     @GET
     public List<Milestone> queryMilestones(@PathParam("projectId") Long projectId, @QueryParam("name") String name, 
+    		@QueryParam("startBefore") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String startBefore, 
+    		@QueryParam("startAfter") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String startAfter, 
     		@QueryParam("dueBefore") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueBefore, 
     		@QueryParam("dueAfter") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueAfter, 
     		@QueryParam("closed") Boolean closed, @QueryParam("offset") @Api(example="0") int offset, 
@@ -175,6 +177,10 @@ public class ProjectResource {
     	criteria.add(Restrictions.eq(Milestone.PROP_PROJECT, project));
     	if (name != null)
     		criteria.add(Restrictions.ilike(Milestone.PROP_NAME, name.replace('%', '*')));
+    	if (startBefore != null)
+    		criteria.add(Restrictions.le(Milestone.PROP_START_DATE, DateUtils.parseISO8601Date(startBefore)));
+    	if (startAfter != null)
+    		criteria.add(Restrictions.ge(Milestone.PROP_START_DATE, DateUtils.parseISO8601Date(startAfter)));
     	if (dueBefore != null)
     		criteria.add(Restrictions.le(Milestone.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueBefore)));
     	if (dueAfter != null)

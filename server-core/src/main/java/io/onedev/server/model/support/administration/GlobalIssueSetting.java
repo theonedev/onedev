@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -16,7 +17,10 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
@@ -64,6 +68,15 @@ public class GlobalIssueSetting implements Serializable {
 	
 	private List<IssueTemplate> issueTemplates = new ArrayList<>();
 	
+	@SuppressWarnings("unused")
+	private static List<String> getWorkingPeriodFieldChoices() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs()
+				.stream()
+				.filter(it->it.getType().equals(InputSpec.WORKING_PERIOD))
+				.map(it->it.getName())
+				.collect(Collectors.toList());
+	}
+
 	private boolean reconciled = true;
 	
 	public GlobalIssueSetting() {

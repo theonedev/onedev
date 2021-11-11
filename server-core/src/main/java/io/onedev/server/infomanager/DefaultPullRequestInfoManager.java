@@ -41,7 +41,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager 
+public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManager 
 		implements PullRequestInfoManager {
 
 	private static final int INFO_VERSION = 7;
@@ -209,7 +209,7 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	@Listen
 	public void on(SystemStarted event) {
 		for (Project project: projectManager.query()) {
-			checkVersion(project.getId().toString());
+			checkVersion(getEnvDir(project.getId().toString()));
 			batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
 		}
 	}

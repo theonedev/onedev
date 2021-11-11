@@ -35,7 +35,7 @@ public class LineChartPanel extends GenericPanel<LineSeries> {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			String script = String.format("onedev.server.lineChart.onDomReady('%s', %s, %s);", 
 					getMarkupId(true), mapper.writeValueAsString(getSeries()), 
-					getSeries().getValueFormatter());
+					getSeries().getYAxisValueFormatter());
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);

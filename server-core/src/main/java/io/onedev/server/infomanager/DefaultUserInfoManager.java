@@ -35,7 +35,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
  *
  */
 @Singleton
-public class DefaultUserInfoManager extends AbstractEnvironmentManager implements UserInfoManager {
+public class DefaultUserInfoManager extends AbstractMultiEnvironmentManager implements UserInfoManager {
 
 	private static final int INFO_VERSION = 6;
 	

@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -27,5 +28,7 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
 			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, 
 			@Nullable String comment);
+	
+	List<IssueChange> queryAfter(Long afterChangeId, int count);
 	
 }

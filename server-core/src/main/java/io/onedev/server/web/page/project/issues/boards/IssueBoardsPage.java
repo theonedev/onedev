@@ -66,7 +66,7 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.board.BoardEditPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.milestone.MilestoneDueLabel;
+import io.onedev.server.web.component.milestone.MilestoneDateLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -498,7 +498,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								});
 								
 								item.add(new MilestoneStatusLabel("status", item.getModel()));
-								item.add(new MilestoneDueLabel("dueDate", item.getModel()));
+								item.add(new MilestoneDateLabel("dueDate", item.getModel()));
 
 								if (SecurityUtils.canManageIssues(getProject()) 
 										&& item.getModelObject().getProject().equals(getProject())) {

@@ -22,6 +22,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -72,9 +74,11 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardD
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
@@ -551,6 +555,16 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				}
 			}
 		}
+	}
+	
+	@Sessional
+	@Override
+	public List<IssueChange> queryAfter(Long afterChangeId, int count) {
+		EntityCriteria<IssueChange> criteria = newCriteria();
+		criteria.addOrder(Order.asc("id"));
+		if (afterChangeId != null) 
+			criteria.add(Restrictions.gt("id", afterChangeId));
+		return query(criteria, 0, count);
 	}
 
 	@Override
