@@ -1,30 +1,37 @@
-image:
-  repository:
-  pullPolicy: IfNotPresent
-  tag: ${buildVersion}
+# Set this as true to stop OneDev server to perform various maintenance tasks such as backup, restore. 
+# Check https://code.onedev.io/projects/162/blob/main/pages/backup-restore.md for details
+maintenance: false
 
-ingress:
-  enabled: false
-  annotations: {}
-  hosts:
-    - host: chart-example.local
-      paths: []
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-
-volumes:
+nodeSelector:
   onedev:
-    storageClassName: openebs-hostpath
-    size: 100Gi
+    kubernetes.io/os: linux
   mysql:
-    storageClassName: openebs-hostpath
-    size: 20Gi
+    kubernetes.io/os: linux
+
+# Ingress support, check below for more info. 
+# Check https://code.onedev.io/projects/162/blob/main/pages/deploy-into-k8s-with-helm.md#ingress-setup for details
+ingress:
+  host: "" # Optionally specify dns name to access OneDev via ingress controller
+  tls: false # Whether or not to enable TLS for above host
+  class: nginx # Will be used as ingressClassName of ingress spec to match controller
+
+letsencrypt: 
+  email: "" # Specify an email here to enable LetsEncrypt. Check https://code.onedev.io/projects/162/blob/main/pages/deploy-into-k8s-with-helm.md#letsencrypt-setup for details
 
 resources:
   onedev:
-    memory: 2Gi
+    memory: 1024Mi
   mysql:
-    memory: 500Mi
+    memory: 256Mi
+
+volumes:
+  onedev:
+    storageClassName: "" # Optionally specify storage class of persistent volume to store OneDev data including git repositories and indexes. Leave empty to use default storage class
+    size: 100Gi
+  mysql:
+    storageClassName: "" # Optionally specify storage class of persistent volume to store mysql data. Leave empty to use default storage class
+    size: 20Gi
+
+secrets:
+  mysql:
+    password: changeit # change mysql root password if desired

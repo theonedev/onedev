@@ -1,34 +1,29 @@
-{{- if .Values.ingress.enabled -}}
-{{- $fullName := include "onedev.fullname" . -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
-apiVersion: extensions/v1beta1
-{{- end }}
+{{- if .Values.ingress.host -}}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ include "onedev.fullname" . }}
+  {{- if .Values.letsencrypt.email }}
+  annotations:
+    cert-manager.io/issuer: "{{ include "onedev.fullname" . }}"
+  {{- end }}
 spec:
+  ingressClassName: {{ .Values.ingress.class }}
   {{- if .Values.ingress.tls }}
   tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: {{ include "onedev.fullname" . }}-tls
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ .Values.ingress.host }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            backend:
-              serviceName: {{ template "onedev.fullname" $ }}-onedev
-              servicePort: 80
-          {{- end }}
-    {{- end }}
-  {{- end }}
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "onedev.fullname" . }}-http
+              port: 
+                number: 80
+{{- end }}

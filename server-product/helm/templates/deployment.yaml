@@ -1,38 +1,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-onedev
+  name: {{ include "onedev.fullname" . }}
   labels:
-    tier: server
     {{- include "onedev.labels" . | nindent 4 }}
+    tier: onedev
 spec:
   replicas: 1 # only allow one replicas as OneDev doesn't support clustering
   selector:
     matchLabels:
-      tier: server
-      app: onedev
+      {{- include "onedev.selectorLabels" . | nindent 6 }}
+      tier: onedev
   strategy:
     type: Recreate
   template:
     metadata:
+      name: {{ include "onedev.fullname" . }}
       labels:
-        tier: server
-        app: onedev
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- include "onedev.selectorLabels" . | nindent 8 }}
+        tier: onedev
     spec:
-      serviceAccountName: onedev
+      serviceAccountName: {{ include "onedev.fullname" . }}
+      {{- if .Values.nodeSelector.onedev }}
+      nodeSelector: {{ toYaml .Values.nodeSelector.onedev | nindent 8 }}
+      {{- end }}
       containers:
         - name: onedev
+          {{- if .Values.maintenance }}
+          command: ["/root/bin/idle.sh"]
+          {{- end }}
           resources:
             requests:
               memory: {{ .Values.resources.onedev.memory }}
           volumeMounts:
           - mountPath: "/opt/onedev"
             name: onedev
-          image: "1dev/server:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "1dev/server:{{ .Chart.AppVersion }}"
           ports:
             - containerPort: 6610
             - containerPort: 6611
@@ -42,51 +45,53 @@ spec:
           - name: hibernate_connection_driver_class
             value: com.mysql.cj.jdbc.Driver
           - name: hibernate_connection_url
-            value: jdbc:mysql://{{ .Release.Name }}-mysql:3306/onedev?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+            value: jdbc:mysql://{{ include "onedev.fullname" . }}-mysql:3306/onedev?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
           - name: hibernate_connection_username
             value: root
           - name: hibernate_connection_password
             valueFrom:
               secretKeyRef:
-                name: {{.Release.Name}}-mysql
+                name: {{ include "onedev.fullname" . }}-mysql
                 key: password
           - name: hibernate_hikari_maximumPoolSize
             value: "25"
       initContainers:
         - name: init
           image: busybox
-          command: ["sh", "-c", "until nslookup {{ .Release.Name }}-mysql.{{.Release.Namespace}}.svc.cluster.local; do echo waiting for mysql; sleep 2; done;"]
+          command: ["sh", "-c", "until nslookup {{ include "onedev.fullname" . }}-mysql.{{.Release.Namespace}}.svc.cluster.local; do echo waiting for mysql; sleep 2; done;"]
       volumes:
         - name: onedev
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-onedev
+            claimName: {{ include "onedev.fullname" . }}
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-mysql
+  name: {{ include "onedev.fullname" . }}-mysql
   labels:
-    tier: database
+    {{- include "onedev.labels" . | nindent 4 }}
+    tier: mysql
 spec:
   selector:
     matchLabels:
-      tier: database
+      {{- include "onedev.selectorLabels" . | nindent 6 }}
+      tier: mysql 
   strategy:
     type: Recreate
   template:
     metadata:
-      name: mysql
+      name: {{ include "onedev.fullname" . }}-mysql
       labels:
-        tier: database
-        app: onedev
+        {{- include "onedev.selectorLabels" . | nindent 8 }}
+        tier: mysql
     spec:
+      {{- if .Values.nodeSelector.onedev }}
+      nodeSelector: {{ toYaml .Values.nodeSelector.mysql | nindent 8 }}
+      {{- end }}
       containers:
         - name: mysql
           image: mysql:5.7
-          resources:
-            requests:
-              memory: {{ .Values.resources.mysql.memory }}
           args:
             - "--ignore-db-dir=lost+found"
           env:
@@ -95,10 +100,13 @@ spec:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{.Release.Name}}-mysql
+                  name: {{include "onedev.fullname" . }}-mysql
                   key: password
           ports:
             - containerPort: 3306
+          resources:
+            requests:
+              memory: {{ .Values.resources.mysql.memory }}
           volumeMounts:
             - name: mysql
               mountPath: /var/lib/mysql
@@ -115,4 +123,4 @@ spec:
       volumes:
         - name: mysql
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-mysql
+            claimName: {{ include "onedev.fullname" . }}-mysql
