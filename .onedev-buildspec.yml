@@ -237,7 +237,7 @@ jobs:
     - ./build.sh
     - ''
     - cd $projectDir/server-product/target/helm-chart
-    - cloudsmith -k @cloudsmith-token@ push helm theonedev/onedev onedev-${buildVersion}.tgz
+    - cloudsmith -k @secret:cloudsmith-token@ push helm theonedev/onedev onedev-${buildVersion}.tgz
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   retryCondition: never
