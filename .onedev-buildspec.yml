@@ -98,10 +98,11 @@ jobs:
     - cd $projectDir/server-product/helm
     - ./build.sh
     - ''
-    - cd $projectDir
+    - cd $projectDir/server-product/target/helm-chart
+    - cloudsmith push helm theonedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
     - ''
+    - cd $projectDir
     - cp server-product/target/k8s-resources.zip .
-    - cp server-product/target/helm-resources.zip .
     - cp server-product/target/onedev-${buildVersion}.zip .
     - ''
     - echo "Creating release tag..."
@@ -197,55 +198,4 @@ jobs:
   retryDelay: 30
   cpuRequirement: 250
   memoryRequirement: 128
-  timeout: 3600
-- name: Test
-  steps:
-  - !CheckoutStep
-    name: checkout
-    cloneCredential: !HttpCredential
-      accessTokenSecret: onedev-token
-    withLfs: false
-    withSubmodules: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: 'detect build version '
-    image: 1dev/build-environment:1.3
-    commands:
-    - set -e
-    - echo "Detecting project version (may require some time while downloading maven
-      dependencies)..."
-    - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version
-      -q -DforceStdout) > buildVersion
-    useTTY: false
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SetBuildVersionStep
-    name: set build version
-    buildVersion: '@file:buildVersion@'
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: build & deploy
-    image: 1dev/build-environment:1.3
-    commands:
-    - set -e
-    - set -o pipefail
-    - ''
-    - buildVersion=@build_version@
-    - ''
-    - projectDir=`pwd`
-    - mvn -Dmaven.test.skip=true package
-    - cd $projectDir/server-product/helm
-    - ./build.sh
-    - ''
-    - cd $projectDir/server-product/target/helm-chart
-    - cloudsmith push helm theonedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
-    useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  retryCondition: never
-  maxRetries: 3
-  retryDelay: 30
-  cpuRequirement: 250
-  memoryRequirement: 128
-  caches:
-  - key: maven-cache
-    path: /root/.m2/repository
   timeout: 3600
