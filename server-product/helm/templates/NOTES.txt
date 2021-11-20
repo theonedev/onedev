@@ -1,0 +1,13 @@
+{{- if .Values.maintenance -}}
+Now in maintenance mode
+{{- else if .Values.ingress.host }}
+{{- if .Values.ingress.tls }}
+OneDev can be accessed at url "https://{{ .Values.ingress.host }}" when ready
+{{- else }}
+OneDev can be accessed at url "http://{{ .Values.ingress.host }}" when ready
+{{- end }}
+{{- else }}
+OneDev can be accessed at url "http://<OneDev external ip>" when ready. 
+OneDev external ip can be dispalyed via below command: 
+kubectl get service {{ include "onedev.fullname" . }} -n {{ .Release.Namespace }}
+{{- end }}

@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
@@ -33,6 +34,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
@@ -200,6 +202,10 @@ public class SettingResource {
     public Response setSystemSetting(@NotNull SystemSetting systemSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
+    	String ingressUrl = OneDev.getInstance().getIngressUrl();
+    	if (ingressUrl != null && !ingressUrl.equals(systemSetting.getServerUrl()))
+    		throw new InvalidParamException("Server URL can only be \"" + ingressUrl + "\"");
+    	
     	settingManager.saveSystemSetting(systemSetting);
     	return Response.ok().build();
     }

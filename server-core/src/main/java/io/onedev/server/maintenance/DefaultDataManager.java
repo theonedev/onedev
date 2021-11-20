@@ -15,8 +15,6 @@ import javax.inject.Singleton;
 import javax.validation.Validator;
 
 import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.Url.StringMode;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
@@ -31,7 +29,6 @@ import io.onedev.commons.loader.Listen;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -99,7 +96,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.passwordService = passwordService;
 		this.roleManager = roleManager;
 	}
-	
+
 	@SuppressWarnings({"serial"})
 	@Transactional
 	@Override
@@ -147,20 +144,35 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 		Setting setting = settingManager.getSetting(Key.SYSTEM);
 		SystemSetting systemSetting = null;
-		Url webServerUrl = OneDev.getInstance().guessServerUrl(false);
+
+		String ingressUrl = OneDev.getInstance().getIngressUrl();
 		
 		if (setting == null || setting.getValue() == null) {
 		    systemSetting = new SystemSetting();
-			systemSetting.setServerUrl(StringUtils.stripEnd(webServerUrl.toString(StringMode.FULL), "/"));
-		} else if (!validator.validate(setting.getValue()).isEmpty()) {
+			if (ingressUrl != null) {
+				systemSetting.setServerUrl(ingressUrl);
+				settingManager.saveSystemSetting(systemSetting);
+				systemSetting = null;
+			} else {
+				systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl(false));
+			}
+		} else {
 			systemSetting = (SystemSetting) setting.getValue();
+			if (ingressUrl != null)
+				systemSetting.setServerUrl(ingressUrl);
+			if (validator.validate(systemSetting).isEmpty())			
+				systemSetting = null;
 		}
+		
 		if (systemSetting != null) {
 			Collection<String> excludedProps = Sets.newHashSet("gravatarEnabled");
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add("gitConfig");
 				excludedProps.add("curlConfig");
 			}
+			if (ingressUrl != null)
+				excludedProps.add("serverUrl");
+
 			manualConfigs.add(new ManualConfig("Specify System Setting", null, 
 					systemSetting, excludedProps) {
 	
@@ -180,8 +192,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.getSetting(Key.SSH);
 		if (setting == null || setting.getValue() == null) {
 			SshSetting sshSetting = new SshSetting();
-			Url sshServerUrl = OneDev.getInstance().guessServerUrl(true);
-            sshSetting.setServerUrl(StringUtils.stripEnd(sshServerUrl.toString(StringMode.FULL), "/"));
+            sshSetting.setServerUrl(OneDev.getInstance().guessServerUrl(true));
             sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
             
             settingManager.saveSshSetting(sshSetting);

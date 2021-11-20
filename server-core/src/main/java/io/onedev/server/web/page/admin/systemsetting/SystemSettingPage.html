@@ -1,6 +1,15 @@
 <wicket:extend>
 	<div class="card">
 		<div class="card-body">
+			<wicket:enclosure child="ingressUrl">
+			<div class="form-group">
+				<label class="name control-label">
+					<span>Server URL</span> <span class="text-danger">*</span>
+				</label>
+				<input wicket:id="ingressUrl" type="text" class="form-control" disabled="disabled">
+				<div class="text-muted form-text">This is derived from ingress setting, and can not be changed</div>
+			</div>
+			</wicket:enclosure>
 			<form wicket:id="form" class="leave-confirm">
 				<div wicket:id="editor" class="mb-4"></div>
 				<input type="submit" class="btn btn-primary dirty-aware" value="Save Setting">

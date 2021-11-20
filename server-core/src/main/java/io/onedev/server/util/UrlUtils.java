@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.Url.StringMode;
 import org.apache.wicket.util.encoding.UrlDecoder;
 import org.apache.wicket.util.encoding.UrlEncoder;
 
@@ -64,6 +66,10 @@ public class UrlUtils {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public static String toString(Url url) {
+		return StringUtils.stripEnd(url.toString(StringMode.FULL), "/");
 	}
 	
 }

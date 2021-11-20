@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
-import org.apache.wicket.request.Url.StringMode;
 import org.eclipse.jgit.util.FS.FileStoreAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +44,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ServerConfig;
+import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.Version;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
@@ -110,8 +110,10 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		
 		List<ManualConfig> manualConfigs = dataManager.init();
 		if (!manualConfigs.isEmpty()) {
-			String serverUrl = StringUtils.stripEnd(guessServerUrl(false).toString(StringMode.FULL), "/");
-			logger.warn("Please set up the server at " + serverUrl);
+			if (getIngressUrl() != null)
+				logger.warn("Please set up the server at " + getIngressUrl());
+			else
+				logger.warn("Please set up the server at " + guessServerUrl(false));
 			initStage = new InitStage("Server Setup", manualConfigs);
 			
 			initStage.waitForFinish();
@@ -139,20 +141,35 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		initStage = null;
 	}
 
-	public Url guessServerUrl(boolean ssh) {
+	@Nullable
+	public String getIngressUrl() {
+		String ingressHost = System.getenv("ingress_host");
+		if (ingressHost != null) {
+			boolean ingressTLS = Boolean.parseBoolean(System.getenv("ingress_tls"));
+			if (ingressTLS)
+				return UrlUtils.toString(buildServerUrl(ingressHost, "https", 443));
+			else
+				return UrlUtils.toString(buildServerUrl(ingressHost, "http", 80));
+		} else {
+			return null;
+		}
+	}
+	
+	public String guessServerUrl(boolean ssh) {
 	    Url serverUrl = null;
 	    
-		String serviceHost = System.getenv("ONEDEV_SERVICE_HOST");
-		if (serviceHost != null) { // we are running inside Kubernetes  
+		String k8sService = System.getenv("k8s_service");
+		if (k8sService != null) { // we are running inside Kubernetes  
 			Commandline kubectl = new Commandline("kubectl");
-			kubectl.addArgs("get", "service", "onedev", "-o", 
+			kubectl.addArgs("get", "service", k8sService, "-o", 
 					"jsonpath={.status.loadBalancer.ingress[0].ip}");
 			AtomicReference<String> externalIpRef = new AtomicReference<>(null);
 			kubectl.execute(new LineConsumer() {
 
 				@Override
 				public void consume(String line) {
-					externalIpRef.set(line);
+					if (StringUtils.isNotBlank(line))
+						externalIpRef.set(line);
 				}
 				
 			}, new LineConsumer() {
@@ -167,66 +184,10 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			String externalIp = externalIpRef.get();
 			
 			if (externalIp != null) {
-				kubectl.clearArgs();
-				kubectl.addArgs("get", "service", "onedev", "-o", 
-						"jsonpath={range .spec.ports[*]}{.name} {.port}{'\\n'}{end}");
-				AtomicReference<Integer> httpPortRef = new AtomicReference<>(null);
-				AtomicReference<Integer> httpsPortRef = new AtomicReference<>(null);
-				AtomicReference<Integer> sshPortRef = new AtomicReference<>(null);
-				kubectl.execute(new LineConsumer() {
-
-					@Override
-					public void consume(String line) {
-						String protocol = StringUtils.substringBefore(line, " ");
-						int port = Integer.parseInt(StringUtils.substringAfter(line, " "));
-						if (protocol.equals("http"))
-							httpPortRef.set(port);
-						else if (protocol.equals("https"))
-							httpsPortRef.set(port);
-						else if (protocol.equals("ssh"))
-							sshPortRef.set(port);
-					}
-					
-				}, new LineConsumer() {
-
-					@Override
-					public void consume(String line) {
-						logger.warn(line);
-					}
-					
-				}).checkReturnCode();
-				
-				Integer sshPort = sshPortRef.get();
-				Integer httpPort = httpPortRef.get();
-				Integer httpsPort = httpsPortRef.get();
-
-				if (ssh) {
-					if (sshPort != null) 
-						serverUrl = buildServerUrl(externalIp, "ssh", sshPort);
-				} else if (httpsPort != null) {
-					serverUrl = buildServerUrl(externalIp, "https", httpsPort);
-				} else {
-					serverUrl = buildServerUrl(externalIp, "http", httpPort);
-				}
-				
-				if (serverUrl == null) {
-					String httpPortEnv = System.getenv("ONEDEV_SERVICE_PORT_HTTP");
-					String httpsPortEnv = System.getenv("ONEDEV_SERVICE_PORT_HTTPS");
-					String sshPortEnv = System.getenv("ONEDEV_SERVICE_PORT_SSH");
-					
-					httpPort = httpPortEnv!=null?Integer.valueOf(httpPortEnv):null;
-					httpsPort = httpsPortEnv!=null?Integer.valueOf(httpsPortEnv):null;
-					sshPort = sshPortEnv!=null?Integer.valueOf(sshPortEnv):null;
-					
-					if (ssh) {
-						if (sshPort != null) 
-							serverUrl = buildServerUrl(externalIp, "ssh", sshPort);
-					} else if (httpsPort != null) {
-						serverUrl = buildServerUrl(externalIp, "https", httpsPort);
-					} else {
-						serverUrl = buildServerUrl(externalIp, "http", httpPort);
-					}
-				}
+				if (ssh)
+					serverUrl = buildServerUrl(externalIp, "ssh", 22);
+				else 
+					serverUrl = buildServerUrl(externalIp, "http", 80);
 			} 			
 		} 
 		
@@ -263,7 +224,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
                 serverUrl = buildServerUrl(host, "http", serverConfig.getHttpPort());
 		}
 		
-		return serverUrl;
+		return UrlUtils.toString(serverUrl);
 	}
 	
 	private Url buildServerUrl(String host, String protocol, int port) {

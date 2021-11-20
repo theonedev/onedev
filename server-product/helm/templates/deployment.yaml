@@ -40,6 +40,14 @@ spec:
             - containerPort: 6610
             - containerPort: 6611
           env:
+          - name: k8s_service
+            value: {{ include "onedev.fullname" . }}
+          {{- if .Values.ingress.host }}
+          - name: ingress_host
+            value: {{ .Values.ingress.host }}
+          {{- end }}
+          - name: ingress_tls
+            value: {{ .Values.ingress.tls }}
           - name: hibernate_dialect
             value: org.hibernate.dialect.MySQL5InnoDBDialect
           - name: hibernate_connection_driver_class
