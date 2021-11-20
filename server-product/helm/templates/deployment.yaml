@@ -47,7 +47,7 @@ spec:
             value: {{ .Values.ingress.host }}
           {{- end }}
           - name: ingress_tls
-            value: {{ .Values.ingress.tls }}
+            value: "{{ .Values.ingress.tls }}"
           - name: hibernate_dialect
             value: org.hibernate.dialect.MySQL5InnoDBDialect
           - name: hibernate_connection_driver_class
