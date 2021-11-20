@@ -1,3 +1,7 @@
+# 5.4.0 
+
+1. In case install OneDev into a Kubernetes cluster, Kustomization based deployment is replaced by helm based deployment for flexibility reason
+
 # 5.2.1
 
 1. User by default is not able to create/fork projects now. To allow it, specify default login group with appropriate project create permissions in security setting.
