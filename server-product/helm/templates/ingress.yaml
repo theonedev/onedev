@@ -23,7 +23,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ include "onedev.fullname" . }}-http
+              name: {{ include "onedev.fullname" . }}
               port: 
                 number: 80
 {{- end }}

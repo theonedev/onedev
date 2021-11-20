@@ -1,5 +1,0 @@
-namespace: onedev
-bases:
-- ../production
-patchesStrategicMerge:
-- deployments.yaml
