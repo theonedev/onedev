@@ -3225,7 +3225,7 @@ public class DataMigrator {
 	private void migrate69(File dataDir, Stack<Integer> versions) {
 	}
 
-	// Migrate to 6.0
+	// Migrate to 5.4.0
 	private void migrate70(File dataDir, Stack<Integer> versions) {
 		Long scheduleId = 1L;
 		VersionedXmlDoc issueSchedulesDoc = new VersionedXmlDoc();
@@ -3269,7 +3269,20 @@ public class DataMigrator {
 					}
 				}				
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						for (Element executorElement: valueElement.elements()) {
+							if (executorElement.getName().contains("KubernetesExecutor"))
+								executorElement.element("createCacheLabels").detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
+
 		}
 		issueSchedulesDoc.writeToFile(new File(dataDir, "IssueSchedules.xml"), false);
 	}
