@@ -1337,36 +1337,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					.filter(it->!allAllocated.contains(it.getName()))
 					.forEach(deletionMarker);
 			
-			updateCacheCounts(jobContext, cacheInstances.keySet(), allAllocated);
-			
 			return allocations;
-		}
-	}
-	
-	private void updateCacheCounts(JobContext jobContext, Collection<CacheInstance> cacheInstances, 
-			Collection<String> allAllocated) {
-		for (CacheInstance cacheInstance: cacheInstances) {
-			if (!allAllocated.contains(cacheInstance.getName())) {
-				String cacheKey = cacheInstance.getCacheKey();
-				Integer cacheCount = jobContext.getCacheCounts().get(cacheKey);
-				if (cacheCount == null)
-					cacheCount = 0;
-				cacheCount++;
-				jobContext.getCacheCounts().put(cacheKey, cacheCount);
-			}
-		}
-	}
-
-	@Override
-	public void reportJobCaches(String jobToken, Collection<CacheInstance> cacheInstances) {
-		synchronized (jobContexts) {
-			JobContext jobContext = getJobContext(jobToken, true);
-			Collection<String> allAllocated = new HashSet<>();
-			for (JobContext each: jobContexts.values()) {
-				if (each != jobContext)
-					allAllocated.addAll(each.getAllocatedCaches());
-			}
-			updateCacheCounts(jobContext, cacheInstances, allAllocated);
 		}
 	}
 

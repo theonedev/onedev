@@ -1,7 +1,6 @@
 package io.onedev.server.buildspec.job;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +29,6 @@ public interface JobManager {
 	
 	Map<CacheInstance, String> allocateJobCaches(String jobToken, Date currentTime, 
 			Map<CacheInstance, Date> cacheInstances);
-	
-	void reportJobCaches(String jobToken, Collection<CacheInstance> cacheInstances);
 	
 	@Nullable
 	Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 

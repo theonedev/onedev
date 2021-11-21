@@ -13,7 +13,7 @@ rules:
     verbs: ["get", "list", "create", "delete"] #require this permission to bind cluster roles to service account of running builds
   - apiGroups: [""]
     resources: ["nodes"]
-    verbs: ["get", "list", "patch"] #require this permission to label nodes with build cache properties to increase cache hit rate
+    verbs: ["get", "list"] #require this permission to search nodes matching executor criterias
   - apiGroups: [""]
     resources: ["services", "pods", "pods/log", "pods/exec", "secrets", "configmaps", "events"]
     verbs: ["get", "list", "watch", "create", "patch", "delete"] #require this permission to run builds as pods

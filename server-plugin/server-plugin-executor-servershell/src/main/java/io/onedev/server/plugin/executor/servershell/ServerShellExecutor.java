@@ -276,9 +276,6 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 		
 					if (!successful)
 						throw new FailedException();
-
-					jobLogger.log("Reporting job caches...");
-					jobManager.reportJobCaches(jobToken, getCacheInstances(cacheHomeDir).keySet());
 				} finally {
 					FileUtils.deleteDir(buildDir);
 				}

@@ -386,9 +386,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 							if (!successful)
 								throw new FailedException();
-							
-							jobLogger.log("Reporting job caches...");
-							jobManager.reportJobCaches(jobToken, getCacheInstances(hostCacheHome).keySet());
 						} finally {
 							if (hostAuthInfoHome.get() != null)
 								FileUtils.deleteDir(hostAuthInfoHome.get());

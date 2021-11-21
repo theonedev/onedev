@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.executor.remoteshell;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -78,7 +79,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				
 			}
 			
-		}, new HashMap<>(), parsedQeury, jobContext.getResourceRequirements(), jobLogger);
+		}, new HashMap<>(), parsedQeury, jobContext.getResourceRequirements(), jobContext.getCacheSpecs(), jobLogger);
 		
 	}
 
@@ -106,7 +107,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 					
 				}
 				
-			}, new HashMap<>(), parsedQeury, new HashMap<>(), jobLogger);
+			}, new HashMap<>(), parsedQeury, new HashMap<>(), new ArrayList<>(), jobLogger);
 		} finally {
 			logManager.deregisterLogger(jobToken);
 		}

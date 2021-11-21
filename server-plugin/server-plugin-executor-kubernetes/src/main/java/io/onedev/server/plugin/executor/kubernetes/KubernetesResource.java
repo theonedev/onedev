@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.SerializationUtils;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -38,7 +36,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheAllocationRequest;
-import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.JobData;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.buildspec.job.Job;
@@ -82,16 +79,6 @@ public class KubernetesResource {
 		return SerializationUtils.serialize((Serializable) jobManager.allocateJobCaches(
 				getJobToken(), cacheAllocationRequest.getCurrentTime(), cacheAllocationRequest.getInstances()));
     }
-	
-	@Path("/report-job-caches")
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	@POST
-	public void reportJobCaches(String cacheInstancesString) {
-		Collection<CacheInstance> cacheInstances = new ArrayList<>();
-		for (String field: Splitter.on(';').omitEmptyStrings().split(cacheInstancesString))
-			cacheInstances.add(CacheInstance.fromString(field));
-		jobManager.reportJobCaches(getJobToken(), cacheInstances);
-	}
 	
 	@Path("/run-server-step")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)

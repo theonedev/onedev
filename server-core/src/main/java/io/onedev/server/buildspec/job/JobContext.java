@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
@@ -47,8 +46,6 @@ public abstract class JobContext {
 	private final TaskLogger logger;	
 	
 	private final Collection<String> allocatedCaches = new HashSet<>();
-	
-	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
 	protected final Collection<Thread> serverStepThreads = new ArrayList<>();
 	
@@ -127,10 +124,6 @@ public abstract class JobContext {
 		return services;
 	}
 
-	public Map<String, Integer> getCacheCounts() {
-		return cacheCounts;
-	}
-	
 	public abstract void notifyJobRunning(@Nullable Long agentId);
 	
 	public abstract void reportJobWorkspace(String jobWorkspace);
