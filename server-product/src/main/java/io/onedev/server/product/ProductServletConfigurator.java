@@ -20,6 +20,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.ServerSocketServlet;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitLfsFilter;
+import io.onedev.server.git.GoGetFilter;
 import io.onedev.server.git.hookcallback.GitPostReceiveCallback;
 import io.onedev.server.git.hookcallback.GitPreReceiveCallback;
 import io.onedev.server.security.DefaultWebEnvironment;
@@ -38,6 +39,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	private final ShiroFilter shiroFilter;
 	
     private final GitFilter gitFilter;
+    
+    private final GoGetFilter goGetFilter;
     
     private final GitLfsFilter gitLfsFilter;
     
@@ -58,7 +61,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 			GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet, 
 			GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet, 
 			WebSocketManager webSocketManager, ServletContainer jerseyServlet, 
-			ServerSocketServlet serverServlet) {
+			ServerSocketServlet serverServlet, GoGetFilter goGetFilter) {
 		this.serverConfig = serverConfig;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
@@ -69,6 +72,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		this.webSocketManager = webSocketManager;
 		this.jerseyServlet = jerseyServlet;
 		this.serverServlet = serverServlet;
+		this.goGetFilter = goGetFilter;
 	}
 	
 	@Override
@@ -83,6 +87,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
         context.addFilter(new FilterHolder(gitFilter), "/*", EnumSet.allOf(DispatcherType.class));
         context.addFilter(new FilterHolder(gitLfsFilter), "/*", EnumSet.allOf(DispatcherType.class));
+        context.addFilter(new FilterHolder(goGetFilter), "/*", EnumSet.allOf(DispatcherType.class));
 		
 		context.addServlet(new ServletHolder(preReceiveServlet), GitPreReceiveCallback.PATH + "/*");
         

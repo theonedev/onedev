@@ -119,6 +119,7 @@ public abstract class BasePage extends WebPage {
 			}
 			
 		});
+		
 		add(new WebMarkupContainer("pageRefresh") {
 
 			@Override
@@ -305,5 +306,5 @@ public abstract class BasePage extends WebPage {
 		handler.appendJavaScript(String.format("alert('%s');", 
 				JavaScriptEscape.escapeJavaScript(message)));
 	}
-	
+
 }
