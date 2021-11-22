@@ -84,7 +84,7 @@ public class IssueCreationSetting implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static Collection<String> getFieldNames() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getPromptFieldsUponIssueOpen();
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
 	}
 	
 	public boolean isProjectAuthorized(Project project) {

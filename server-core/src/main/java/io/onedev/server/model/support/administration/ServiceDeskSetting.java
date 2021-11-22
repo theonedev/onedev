@@ -17,7 +17,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.util.match.Matcher;
@@ -90,11 +89,6 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 		this.issueCreationSettings = issueCreationSettings;
 	}
 	
-	@SuppressWarnings("unused")
-	private static Collection<String> getIssueFieldNames() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getPromptFieldsUponIssueOpen();
-	}
-
 	@Nullable
 	public SenderAuthorization getSenderAuthorization(String senderAddress) {
 		Matcher matcher = new StringMatcher();

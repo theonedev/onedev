@@ -80,7 +80,7 @@ public class CreateIssueAction extends PostBuildAction {
 	}
 	
 	private static Collection<String> getFieldNames() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getPromptFieldsUponIssueOpen();
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
 	}
 	
 	@Override

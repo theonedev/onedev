@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import org.apache.wicket.MarkupContainer;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -32,6 +33,8 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 public abstract class FieldSpec extends InputSpec {
@@ -39,6 +42,8 @@ public abstract class FieldSpec extends InputSpec {
 	private static final long serialVersionUID = 1L;
 	
 	private String nameOfEmptyValue;
+	
+	private String primaryProjects = "**";
 	
 	private transient Collection<String> dependencies;
 	
@@ -120,6 +125,24 @@ public abstract class FieldSpec extends InputSpec {
 		return (boolean) EditContext.get().getInputValue("allowEmpty");
 	}
 
+	@Editable(order=10000, description="Primary projects are those prompting for this field upon creating new issues. "
+			+ "Multiple primary projects should be separated by space. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty if no primary projects")
+	@Patterns(suggester="suggestProjects", path=true)
+	@NameOfEmptyValue("No primary projects")
+	public String getPrimaryProjects() {
+		return primaryProjects;
+	}
+
+	public void setPrimaryProjects(String primaryProjects) {
+		this.primaryProjects = primaryProjects;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestProjects(String matchWith) {
+		return SuggestionUtils.suggestProjects(matchWith);
+	}
+	
 	@Override
 	public void appendCommonAnnotations(StringBuffer buffer, int index) {
 		super.appendCommonAnnotations(buffer, index);

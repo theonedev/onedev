@@ -83,7 +83,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 
-		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(); 
+		Collection<String> fieldNames = getIssueSetting().getPrimaryFields(getProject());
 		issue.setFieldValues(FieldUtils.getFieldValues(new ComponentContext(this), fieldBean, 
 				FieldUtils.getEditableFields(getProject(), fieldNames)));
 		
@@ -291,8 +291,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		}
 		
 		fieldEditor.convertInput();
-		Collection<String> fieldNames = FieldUtils.getEditableFields(getProject(), 
-				getIssueSetting().getPromptFieldsUponIssueOpen()); 
+		Collection<String> fieldNames = getIssueSetting().getPrimaryFields(getProject());
 		issue.setFieldValues(FieldUtils.getFieldValues(fieldEditor.newComponentContext(), 
 				fieldEditor.getConvertedInput(), fieldNames));
 		return issue;

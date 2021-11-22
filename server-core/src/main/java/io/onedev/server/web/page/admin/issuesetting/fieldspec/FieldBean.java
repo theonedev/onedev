@@ -14,8 +14,6 @@ public class FieldBean implements Serializable {
 
 	private FieldSpec field;
 
-	private boolean promptUponIssueOpen = true;
-
 	@Editable(name="Type", order=100)
 	@NotNull(message="may not be empty")
 	public FieldSpec getField() {
@@ -24,15 +22,6 @@ public class FieldBean implements Serializable {
 
 	public void setField(FieldSpec field) {
 		this.field = field;
-	}
-
-	@Editable(order=200, description="If checked, this field will be prompted for user input by default when issue is opened")
-	public boolean isPromptUponIssueOpen() {
-		return promptUponIssueOpen;
-	}
-
-	public void setPromptUponIssueOpen(boolean promptUponIssueOpen) {
-		this.promptUponIssueOpen = promptUponIssueOpen;
 	}
 
 }

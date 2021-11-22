@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -17,6 +18,7 @@ import com.google.common.collect.Lists;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
@@ -35,6 +37,9 @@ import io.onedev.server.model.support.issue.transitiontrigger.BranchUpdateTrigge
 import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -53,8 +58,6 @@ public class GlobalIssueSetting implements Serializable {
 	private List<TransitionSpec> transitionSpecs = new ArrayList<>();
 	
 	private List<FieldSpec> fieldSpecs = new ArrayList<>();
-	
-	private Collection<String> promptFieldsUponIssueOpen = new HashSet<>();
 	
 	private List<BoardSpec> boardSpecs = new ArrayList<>();
 	
@@ -231,11 +234,6 @@ public class GlobalIssueSetting implements Serializable {
 		
 		transitionSpecs.add(transition);
 		
-		promptFieldsUponIssueOpen.add("Type");
-		promptFieldsUponIssueOpen.add("Priority");
-		promptFieldsUponIssueOpen.add("Assignees");
-		promptFieldsUponIssueOpen.add("Failed Build");
-		
 		BoardSpec board = new BoardSpec();
 		board.setName(Issue.NAME_STATE);
 		board.setIdentifyField(Issue.NAME_STATE);
@@ -301,14 +299,6 @@ public class GlobalIssueSetting implements Serializable {
 		this.fieldSpecs = fieldSpecs;
 	}
 
-	public Collection<String> getPromptFieldsUponIssueOpen() {
-		return promptFieldsUponIssueOpen;
-	}
-
-	public void setPromptFieldsUponIssueOpen(Collection<String> promptFieldsUponIssueOpen) {
-		this.promptFieldsUponIssueOpen = promptFieldsUponIssueOpen;
-	}
-
 	public boolean isReconciled() {
 		return reconciled;
 	}
@@ -369,10 +359,6 @@ public class GlobalIssueSetting implements Serializable {
 		Collection<String> undefinedFields = new HashSet<>();
 		for (String fieldName: listFields) {
 			if (!fieldName.equals(Issue.NAME_STATE) && getFieldSpec(fieldName) == null)
-				undefinedFields.add(fieldName);
-		}
-		for (String fieldName: promptFieldsUponIssueOpen) {
-			if (getFieldSpec(fieldName) == null)
 				undefinedFields.add(fieldName);
 		}
 		
@@ -442,14 +428,10 @@ public class GlobalIssueSetting implements Serializable {
 
 	public Collection<String> fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
 		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
-			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) { 
+			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD)  
 				ReconcileUtils.renameItem(listFields, entry.getKey(), entry.getValue().getNewField());
-				if (promptFieldsUponIssueOpen.remove(entry.getKey()))
-					promptFieldsUponIssueOpen.add(entry.getValue().getNewField());
-			} else { 
+			else 
 				listFields.remove(entry.getKey());
-				promptFieldsUponIssueOpen.remove(entry.getKey());
-			}
 		}
 		
 		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
@@ -618,6 +600,14 @@ public class GlobalIssueSetting implements Serializable {
 				return namedQuery;
 		}
 		return null;
+	}
+	
+	public Collection<String> getPrimaryFields(Project project) {
+		Matcher matcher = new PathMatcher();
+		return getFieldSpecs().stream()
+				.filter(it->PatternSet.parse(it.getPrimaryProjects()).matches(matcher, project.getName()))
+				.map(it->it.getName())
+				.collect(Collectors.toList());
 	}
 	
 }

@@ -3230,6 +3230,9 @@ public class DataMigrator {
 		Long scheduleId = 1L;
 		VersionedXmlDoc issueSchedulesDoc = new VersionedXmlDoc();
 		Element listElement = issueSchedulesDoc.addElement("list");
+		
+		Set<String> promptFieldsUponIssueOpen = new HashSet<>();
+		
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Issues.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -3272,19 +3275,44 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element fieldNameElement: valueElement.element("promptFieldsUponIssueOpen").elements())
+								promptFieldsUponIssueOpen.add(fieldNameElement.getText().trim());
+						}
+					}
+				}
+			}
+		}
+		
+		issueSchedulesDoc.writeToFile(new File(dataDir, "IssueSchedules.xml"), false);
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
 						for (Element executorElement: valueElement.elements()) {
 							if (executorElement.getName().contains("KubernetesExecutor"))
 								executorElement.element("createCacheLabels").detach();
 						}
+					} else if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
+								if (promptFieldsUponIssueOpen.contains(fieldSpecElement.elementText("name").trim()))
+									fieldSpecElement.addElement("primaryProjects").setText("**");
+							}
+							valueElement.element("promptFieldsUponIssueOpen").detach();
+						}
 					}
 				}
 				dom.writeToFile(file, false);
 			}
-
 		}
-		issueSchedulesDoc.writeToFile(new File(dataDir, "IssueSchedules.xml"), false);
+		
 	}
 	
 }
