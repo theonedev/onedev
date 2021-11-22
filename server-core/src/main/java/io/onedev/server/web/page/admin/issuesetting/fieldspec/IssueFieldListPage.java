@@ -60,6 +60,11 @@ public class IssueFieldListPage extends IssueSettingPage {
 		add(new ModalLink("addNew") {
 
 			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
+
+			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new FieldEditPanel(id, -1) {
 
@@ -134,6 +139,11 @@ public class IssueFieldListPage extends IssueSettingPage {
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", IssueFieldListPage.this);
 				fragment.add(new ModalLink("edit") {
 	
+					@Override
+					protected String getModalCssClass() {
+						return "modal-lg";
+					}
+					
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
 						return new FieldEditPanel(id, fieldIndex) {

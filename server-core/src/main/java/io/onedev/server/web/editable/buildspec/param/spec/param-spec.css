@@ -16,6 +16,7 @@
 	border-radius: 0.42rem 0.42rem 0 0;
 }
 .floating.param-spec .property-choices thead, .param-spec-edit .property-choices thead,
+.floating.param-spec .property-applicableProjects, .param-spec-edit .property-applicableProjects,
 .floating.param-spec .property-color, .param-spec-edit .property-color {
 	display: none;
 }

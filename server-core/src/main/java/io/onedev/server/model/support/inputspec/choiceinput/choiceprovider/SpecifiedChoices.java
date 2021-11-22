@@ -13,8 +13,12 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.Size;
 
 import io.onedev.server.buildspec.param.spec.ChoiceParam;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -42,8 +46,14 @@ public class SpecifiedChoices extends ChoiceProvider implements Validatable {
 	@Override
 	public Map<String, String> getChoices(boolean allPossible) {
 		Map<String, String> choices = new LinkedHashMap<>();
-		for (Choice choice: getChoices()) 
-			choices.put(choice.getValue(), choice.getColor());
+		Project project = Project.get();
+		Matcher matcher = new PathMatcher();
+		for (Choice choice: getChoices()) {
+			if (project == null || choice.getApplicableProjects() == null 
+					|| PatternSet.parse(choice.getApplicableProjects()).matches(matcher, project.getPath())) {
+				choices.put(choice.getValue(), choice.getColor());
+			}
+		}
 		return choices;
 	}
 	

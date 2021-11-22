@@ -1,11 +1,16 @@
 package io.onedev.server.model.support.inputspec.choiceinput.choiceprovider;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.web.editable.annotation.Color;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(name="Value")
 public class Choice implements Serializable {
@@ -15,6 +20,8 @@ public class Choice implements Serializable {
 	private String value;
 	
 	private String color = "#0d87e9";
+	
+	private String applicableProjects;
 
 	@Editable(order=100)
 	@NotEmpty
@@ -35,6 +42,23 @@ public class Choice implements Serializable {
 
 	public void setColor(String color) {
 		this.color = color;
+	}
+
+	@Editable(order=300, description="Specify applicable projects for this choice separated by space. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty for all projects")
+	@Patterns(suggester="suggestProjects", path=true)
+	@NameOfEmptyValue("All projects")
+	public String getApplicableProjects() {
+		return applicableProjects;
+	}
+
+	public void setApplicableProjects(String applicableProjects) {
+		this.applicableProjects = applicableProjects;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestProjects(String matchWith) {
+		return SuggestionUtils.suggestProjects(matchWith);
 	}
 	
 }

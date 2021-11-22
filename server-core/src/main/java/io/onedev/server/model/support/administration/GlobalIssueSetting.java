@@ -605,7 +605,7 @@ public class GlobalIssueSetting implements Serializable {
 	public Collection<String> getPrimaryFields(Project project) {
 		Matcher matcher = new PathMatcher();
 		return getFieldSpecs().stream()
-				.filter(it->PatternSet.parse(it.getPrimaryProjects()).matches(matcher, project.getName()))
+				.filter(it->PatternSet.parse(it.getPrimaryProjects()).matches(matcher, project.getPath()))
 				.map(it->it.getName())
 				.collect(Collectors.toList());
 	}
