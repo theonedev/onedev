@@ -24,8 +24,8 @@ public class OrCriteria<T> extends Criteria<T> {
 	}
 
 	@Override
-	public void onRenameProject(String oldName, String newName) {
-		criterias.stream().forEach(it->it.onRenameProject(oldName, newName));
+	public void onMoveProject(String oldName, String newName) {
+		criterias.stream().forEach(it->it.onMoveProject(oldName, newName));
 	}
 
 	@Override

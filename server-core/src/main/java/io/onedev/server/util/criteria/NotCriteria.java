@@ -21,8 +21,8 @@ public class NotCriteria<T> extends Criteria<T> {
 	}
 
 	@Override
-	public void onRenameProject(String oldName, String newName) {
-		criteria.onRenameProject(oldName, newName);
+	public void onMoveProject(String oldName, String newName) {
+		criteria.onMoveProject(oldName, newName);
 	}
 
 	@Override

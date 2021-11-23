@@ -3303,7 +3303,9 @@ public class DataMigrator {
 						if (valueElement != null) {
 							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
 								if (promptFieldsUponIssueOpen.contains(fieldSpecElement.elementText("name").trim()))
-									fieldSpecElement.addElement("primaryProjects").setText("**");
+									fieldSpecElement.addElement("promptUponIssueOpen").setText("true");
+								else
+									fieldSpecElement.addElement("promptUponIssueOpen").setText("false");
 							}
 							valueElement.element("promptFieldsUponIssueOpen").detach();
 						}

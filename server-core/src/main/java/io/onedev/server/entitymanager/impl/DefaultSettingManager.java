@@ -656,13 +656,14 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	}
 
 	@Override
-	public void onRenameProject(String oldPath, String newPath) {
+	public void onMoveProject(String oldPath, String newPath) {
     	for (JobExecutor jobExecutor: getJobExecutors())
-    		jobExecutor.onRenameProject(oldPath, newPath);
+    		jobExecutor.onMoveProject(oldPath, newPath);
     	for (GroovyScript groovyScript: getGroovyScripts())
-    		groovyScript.onRenameProject(oldPath, newPath);
+    		groovyScript.onMoveProject(oldPath, newPath);
     	if (getServiceDeskSetting() != null)
-    		getServiceDeskSetting().onRenameProject(oldPath, newPath);
+    		getServiceDeskSetting().onMoveProject(oldPath, newPath);
+    	getIssueSetting().onMoveProject(oldPath, newPath);
 	}
 
 	@Override
@@ -681,6 +682,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     	}
     	if (getServiceDeskSetting() != null)
     		usage.add(getServiceDeskSetting().onDeleteProject(projectPath));
+    	usage.add(getIssueSetting().onDeleteProject(projectPath));
 		
 		return usage.prefix("administration");
 	}

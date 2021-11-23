@@ -185,7 +185,7 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	Usage onDeleteRole(String roleName);
 
-	void onRenameProject(String oldPath, String newPath);
+	void onMoveProject(String oldPath, String newPath);
 	
 	Usage onDeleteProject(String projectPath);
 

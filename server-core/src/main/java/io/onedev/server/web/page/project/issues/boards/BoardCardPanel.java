@@ -295,6 +295,11 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 						.getParameterValue("issue").toLong();
 				Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
 				Hibernate.initialize(issue.getProject());
+				Project parent = issue.getProject().getParent();
+				while (parent != null) {
+					Hibernate.initialize(parent);
+					parent = parent.getParent();
+				}
 				Hibernate.initialize(issue.getFields());
 				Hibernate.initialize(issue.getSubmitter());
 				for (Milestone milestone: issue.getMilestones())

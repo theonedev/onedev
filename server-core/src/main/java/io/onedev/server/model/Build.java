@@ -83,7 +83,6 @@ import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.ProjectScopedNumber;
@@ -645,7 +644,7 @@ public class Build extends AbstractEntity implements Referenceable {
 
 					RevCommit commit;
 					while ((commit = revWalk.next()) != null) 
-						fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(getProject(), commit.getFullMessage()));
+						fixedIssueNumbers.addAll(Issue.parseFixedIssueNumbers(getProject(), commit.getFullMessage()));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

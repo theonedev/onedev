@@ -29,8 +29,8 @@ public class NotEntityCriteria<T extends AbstractEntity> extends EntityCriteria<
 	}
 
 	@Override
-	public void onRenameProject(String oldName, String newName) {
-		new NotCriteria<T>(criteria).onRenameProject(oldName, newName);
+	public void onMoveProject(String oldName, String newName) {
+		new NotCriteria<T>(criteria).onMoveProject(oldName, newName);
 	}
 
 	@Override

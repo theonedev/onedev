@@ -13,6 +13,7 @@ import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Speci
 import io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
@@ -112,4 +113,15 @@ public class ChoiceField extends FieldSpec {
 		getChoiceProvider().getChoices(true);
 	}
 
+	@Override
+	public void onMoveProject(String oldPath, String newPath) {
+		super.onMoveProject(oldPath, newPath);
+		choiceProvider.onMoveProject(oldPath, newPath);
+	}
+
+	@Override
+	protected void onDeleteProject(Usage usage, String projectPath) {
+		usage.add(choiceProvider.onDeleteProject(projectPath));
+	}
+	
 }

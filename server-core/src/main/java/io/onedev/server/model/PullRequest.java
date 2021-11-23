@@ -71,7 +71,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.util.PullRequestAware;
@@ -901,7 +900,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			fixedIssueNumbers = new HashSet<>();
 			for (PullRequestUpdate update: getUpdates()) {
 				for (RevCommit commit: update.getCommits())
-					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(update.getRequest().getProject(), commit.getFullMessage()));
+					fixedIssueNumbers.addAll(Issue.parseFixedIssueNumbers(update.getRequest().getProject(), commit.getFullMessage()));
 			}
 		}
 		return fixedIssueNumbers;

@@ -25,7 +25,7 @@ public class ProjectCriteria extends Criteria<ProjectAndBranch> {
 	}
 
 	@Override
-	public void onRenameProject(String oldPath, String newPath) {
+	public void onMoveProject(String oldPath, String newPath) {
 		projectPath = PathUtils.substituteSelfOrAncestor(projectPath, oldPath, newPath);
 	}
 

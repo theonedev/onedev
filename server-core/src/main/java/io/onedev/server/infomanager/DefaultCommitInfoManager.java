@@ -60,6 +60,7 @@ import io.onedev.server.git.command.ListNumStatsCommand;
 import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.command.RevListCommand.Order;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
@@ -67,7 +68,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.ElementPumper;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.concurrent.BatchWorkManager;
@@ -444,7 +444,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 										if (currentCommit.getBody() != null)
 											commitMessage += "\n\n" + currentCommit.getBody();
 										
-										for (Long issueNumber: IssueUtils.parseFixedIssueNumbers(project, commitMessage)) {
+										for (Long issueNumber: Issue.parseFixedIssueNumbers(project, commitMessage)) {
 											ByteIterable issueKey = new LongByteIterable(issueNumber);
 											Collection<ObjectId> fixingCommits = readCommits(fixCommitsStore, txn, issueKey);
 											

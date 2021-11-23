@@ -96,7 +96,7 @@ jobs:
     - ./build.sh
     - ''
     - cd $projectDir/server-product/target/helm-chart
-    - cloudsmith push helm theonedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
+    - cloudsmith push helm onedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
     - ''
     - echo "Creating release tag..."
     - git config --global user.name "Robin Shen"

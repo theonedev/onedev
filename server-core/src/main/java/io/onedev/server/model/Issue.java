@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -43,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
+import org.unbescape.java.JavaEscape;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
@@ -69,6 +72,7 @@ import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.facade.IssueFacade;
+import io.onedev.server.util.validation.ProjectPathValidator;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -169,6 +173,22 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			NAME_PROJECT, PROP_PROJECT,
 			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);	
 	
+	private static final List<String> ISSUE_FIX_WORDS = Lists.newArrayList(
+			"fix", "fixed", "fixes", "fixing", 
+			"resolve", "resolved", "resolves", "resolving", 
+			"close", "closed", "closes", "closing");
+	
+    private static final Pattern ISSUE_FIX_PATTERN;
+    
+    static {
+    	StringBuilder builder = new StringBuilder("(^|[\\W|/]+)(");
+    	builder.append(StringUtils.join(ISSUE_FIX_WORDS, "|"));
+    	builder.append(")\\s+issue\\s+(");
+    	builder.append(JavaEscape.unescapeJava(ProjectPathValidator.PATTERN.pattern()));
+    	builder.append(")?#(\\d+)(?=$|[\\W|/]+)");
+    	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
+    }
+    
 	@Column(nullable=false)
 	private String state;
 	
@@ -729,6 +749,34 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			}
 		}
 		return null;
+	}
+	
+	public static Collection<Long> parseFixedIssueNumbers(Project project, String commitMessage) {
+		Collection<Long> issueNumbers = new HashSet<>();
+
+		// Skip unmatched commit message quickly 
+		boolean fixWordsFound = false;
+		String lowerCaseCommitMessage = commitMessage.toLowerCase();
+		for (String word: ISSUE_FIX_WORDS) {
+			if (lowerCaseCommitMessage.indexOf(word) != -1) {
+				fixWordsFound = true;
+				break;
+			}
+		}
+		
+		if (fixWordsFound 
+				&& lowerCaseCommitMessage.contains("#") 
+				&& lowerCaseCommitMessage.contains("issue")) {
+			Matcher matcher = ISSUE_FIX_PATTERN.matcher(lowerCaseCommitMessage);
+			
+			while (matcher.find()) {
+				String projectPath = matcher.group(3);
+				if (projectPath == null || projectPath.equals(project.getPath()))
+					issueNumbers.add(Long.parseLong(matcher.group(matcher.groupCount())));
+			}
+		}
+		
+		return issueNumbers;
 	}
 	
 }

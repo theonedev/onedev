@@ -214,7 +214,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     			}
     		}
     		issueManager.clearSchedules(project, milestones);
-    		settingManager.onRenameProject(oldPath, project.getPath());
+    		settingManager.onMoveProject(oldPath, project.getPath());
     		scheduleTree(project);
     	}
     }

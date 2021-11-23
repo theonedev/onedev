@@ -35,8 +35,8 @@ public class OrEntityCriteria<T extends AbstractEntity> extends EntityCriteria<T
 	}
 
 	@Override
-	public void onRenameProject(String oldName, String newName) {
-		new OrCriteria<T>(criterias).onRenameProject(oldName, newName);
+	public void onMoveProject(String oldName, String newName) {
+		new OrCriteria<T>(criterias).onMoveProject(oldName, newName);
 	}
 
 	@Override

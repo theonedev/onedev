@@ -85,7 +85,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				
 			}
 			
-		}, new HashMap<>(), parsedQeury, jobContext.getResourceRequirements(), jobContext.getCacheSpecs(), jobLogger);
+		}, new HashMap<>(), parsedQeury, jobContext.getResourceRequirements(), jobLogger);
 		
 	}
 
@@ -122,7 +122,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					
 				}
 				
-			}, new HashMap<>(), parsedQeury, new HashMap<>(), new ArrayList<>(), jobLogger);
+			}, new HashMap<>(), parsedQeury, new HashMap<>(), jobLogger);
 		} finally {
 			logManager.deregisterLogger(jobToken);
 		}

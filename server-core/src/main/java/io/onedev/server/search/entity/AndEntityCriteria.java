@@ -27,8 +27,8 @@ public class AndEntityCriteria<T extends AbstractEntity> extends EntityCriteria<
 	}
 
 	@Override
-	public void onRenameProject(String oldName, String newName) {
-		new AndCriteria<T>(criterias).onRenameProject(oldName, newName);
+	public void onMoveProject(String oldName, String newName) {
+		new AndCriteria<T>(criterias).onMoveProject(oldName, newName);
 	}
 
 	@Override

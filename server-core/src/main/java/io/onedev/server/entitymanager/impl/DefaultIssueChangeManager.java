@@ -59,8 +59,8 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneAddData;
+import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneRemoveData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
@@ -87,7 +87,6 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.search.entity.issue.UpdateDateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -490,7 +489,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 													}
 													RevCommit commit;
 													while ((commit = revWalk.next()) != null) {
-														fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(project, commit.getFullMessage()));
+														fixedIssueNumbers.addAll(Issue.parseFixedIssueNumbers(project, commit.getFullMessage()));
 														if (fixedIssueNumbers.size() > MAX_FIXED_ISSUES)
 															break;
 													}

@@ -142,8 +142,8 @@ public class JobRequirement extends Criteria<ProjectAndBranch> {
 	}
 
 	@Override
-	public void onRenameProject(String oldPath, String newPath) {
-		criteria.onRenameProject(oldPath, newPath);
+	public void onMoveProject(String oldPath, String newPath) {
+		criteria.onMoveProject(oldPath, newPath);
 	}
 
 	@Override

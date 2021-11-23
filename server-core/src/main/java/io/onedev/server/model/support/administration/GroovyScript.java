@@ -2,15 +2,13 @@ package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.PathUtils;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -126,30 +124,13 @@ public class GroovyScript implements Serializable {
 	
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (getAllowedProjects() != null) {
-			PatternSet patternSet = PatternSet.parse(getAllowedProjects());
-			if (patternSet.getIncludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it)) 
-					|| patternSet.getExcludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it))) {
-				usage.add("allowed projects");
-			}
-		} 
+		if (Project.containsPath(getAllowedProjects(), projectPath))
+			usage.add("allowed projects");
 		return usage;
 	}
 	
-	public void onRenameProject(String oldPath, String newPath) {
-		PatternSet patternSet = PatternSet.parse(getAllowedProjects());
-		
-		Set<String> substitutedIncludes = patternSet.getIncludes().stream()
-				.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
-				.collect(Collectors.toSet());
-		Set<String> substitutedExcludes = patternSet.getExcludes().stream()
-				.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
-				.collect(Collectors.toSet());
-				
-		setAllowedProjects(new PatternSet(substitutedIncludes, substitutedExcludes).toString());
-		
-		if (getAllowedProjects().length() == 0)
-			setAllowedProjects(null);
+	public void onMoveProject(String oldPath, String newPath) {
+		setAllowedProjects(Project.substitutePath(getAllowedProjects(), oldPath, newPath));
 	}
 
 }

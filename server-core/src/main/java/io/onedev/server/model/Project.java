@@ -81,6 +81,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
@@ -1811,6 +1812,27 @@ public class Project extends AbstractEntity {
 			parent = parent.getParent();
 		}
 		return selfAndAncestors;
+	}
+	
+	@Nullable
+	public static String substitutePath(@Nullable String patterns, String oldPath, String newPath) {
+		PatternSet patternSet = PatternSet.parse(patterns);
+		Set<String> substitutedIncludes = patternSet.getIncludes().stream()
+				.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
+				.collect(Collectors.toSet());
+		Set<String> substitutedExcludes = patternSet.getExcludes().stream()
+				.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
+				.collect(Collectors.toSet());
+		patterns = new PatternSet(substitutedIncludes, substitutedExcludes).toString();
+		if (patterns.length() == 0)
+			patterns = null;
+		return patterns;
+	}
+	
+	public static boolean containsPath(@Nullable String patterns, String path) {
+		PatternSet patternSet = PatternSet.parse(patterns);
+		return patternSet.getIncludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(path, it)) 
+				|| patternSet.getExcludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(path, it));
 	}
 	
 }

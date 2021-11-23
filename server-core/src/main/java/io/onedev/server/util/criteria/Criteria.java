@@ -20,7 +20,7 @@ public abstract class Criteria<T> implements Serializable {
 	public void onRenameUser(String oldName, String newName) {
 	}
 
-	public void onRenameProject(String oldPath, String newPath) {
+	public void onMoveProject(String oldPath, String newPath) {
 	}
 
 	public void onRenameGroup(String oldName, String newName) {

@@ -156,34 +156,18 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 		return usage;
 	}
 	
-	public void onRenameProject(String oldPath, String newPath) {
+	public void onMoveProject(String oldPath, String newPath) {
 		for (SenderAuthorization authorization: getSenderAuthorizations()) {
-			PatternSet patternSet = PatternSet.parse(authorization.getAuthorizedProjects());
-			Set<String> substitutedIncludes = patternSet.getIncludes().stream()
-					.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
-					.collect(Collectors.toSet());
-			Set<String> substitutedExcludes = patternSet.getExcludes().stream()
-					.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
-					.collect(Collectors.toSet());
-			authorization.setAuthorizedProjects(new PatternSet(substitutedIncludes, substitutedExcludes).toString());
-			if (authorization.getAuthorizedProjects().length() == 0)
-				authorization.setAuthorizedProjects(null);
+			authorization.setAuthorizedProjects(Project.substitutePath(
+					authorization.getAuthorizedProjects(), oldPath, newPath));
 		}
 		for (ProjectDesignation designation: getProjectDesignations()) {
 			designation.setProject(PathUtils.substituteSelfOrAncestor(
 					designation.getProject(), oldPath, newPath));
 		}
 		for (IssueCreationSetting setting: getIssueCreationSettings()) {
-			PatternSet patternSet = PatternSet.parse(setting.getApplicableProjects());
-			Set<String> substitutedIncludes = patternSet.getIncludes().stream()
-					.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
-					.collect(Collectors.toSet());
-			Set<String> substitutedExcludes = patternSet.getExcludes().stream()
-					.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
-					.collect(Collectors.toSet());
-			setting.setApplicableProjects(new PatternSet(substitutedIncludes, substitutedExcludes).toString());
-			if (setting.getApplicableProjects().length() == 0)
-				setting.setApplicableProjects(null);
+			setting.setApplicableProjects(Project.substitutePath(
+					setting.getApplicableProjects(), oldPath, newPath));
 		}
 	}
 	
@@ -192,11 +176,8 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 		
 		int index = 1;
 		for (SenderAuthorization authorization: getSenderAuthorizations()) {
-			PatternSet patternSet = PatternSet.parse(authorization.getAuthorizedProjects());
-			if (patternSet.getIncludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it)) 
-					|| patternSet.getExcludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it))) {
+			if (Project.containsPath(authorization.getAuthorizedProjects(), projectPath))
 				usage.add("sender authorization #" + index + ": authorized projects");
-			}
 			index++;
 		}
 		
@@ -209,11 +190,8 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 		
 		index = 1;
 		for (IssueCreationSetting setting: getIssueCreationSettings()) {
-			PatternSet patternSet = PatternSet.parse(setting.getApplicableProjects());
-			if (patternSet.getIncludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it)) 
-					|| patternSet.getExcludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it))) {
+			if (Project.containsPath(setting.getApplicableProjects(), projectPath))
 				usage.add("issue creation setting #" + index + ": applicable projects");
-			}
 			index++;
 		}
 		return usage.prefix("service desk setting");

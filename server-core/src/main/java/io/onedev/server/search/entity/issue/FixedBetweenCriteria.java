@@ -27,7 +27,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 
 public class FixedBetweenCriteria extends IssueCriteria {
@@ -90,7 +89,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 
 				RevCommit commit;
 				while ((commit = revWalk.next()) != null) 
-					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(project, commit.getFullMessage()));
+					fixedIssueNumbers.addAll(Issue.parseFixedIssueNumbers(project, commit.getFullMessage()));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -124,7 +123,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 
 					RevCommit commit;
 					while ((commit = revWalk.next()) != null) { 
-						if (IssueUtils.parseFixedIssueNumbers(issue.getProject(), commit.getFullMessage()).contains(issue.getNumber()))
+						if (Issue.parseFixedIssueNumbers(issue.getProject(), commit.getFullMessage()).contains(issue.getNumber()))
 							return true;
 					}
 					return false;

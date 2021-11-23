@@ -14,6 +14,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
@@ -43,7 +44,9 @@ public abstract class FieldSpec extends InputSpec {
 	
 	private String nameOfEmptyValue;
 	
-	private String primaryProjects = "**";
+	private boolean promptUponIssueOpen = true;
+	
+	private String applicableProjects;
 	
 	private transient Collection<String> dependencies;
 	
@@ -125,17 +128,32 @@ public abstract class FieldSpec extends InputSpec {
 		return (boolean) EditContext.get().getInputValue("allowEmpty");
 	}
 
-	@Editable(order=10000, description="Primary projects are those prompting for this field upon creating new issues. "
-			+ "Multiple primary projects should be separated by space. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
-			+ "Prefix with '-' to exclude. Leave empty if no primary projects")
-	@Patterns(suggester="suggestProjects", path=true)
-	@NameOfEmptyValue("No primary projects")
-	public String getPrimaryProjects() {
-		return primaryProjects;
+	@Editable(order=10000, description="Whether or not to prompt this field upon issue open")
+	public boolean isPromptUponIssueOpen() {
+		return promptUponIssueOpen;
 	}
 
-	public void setPrimaryProjects(String primaryProjects) {
-		this.primaryProjects = primaryProjects;
+	public void setPromptUponIssueOpen(boolean promptUponIssueOpen) {
+		this.promptUponIssueOpen = promptUponIssueOpen;
+	}
+	
+	@SuppressWarnings("unused")
+	private static boolean isPromptUponIssueOpenEnabled() {
+		return Boolean.TRUE.equals(EditContext.get().getInputValue("promptUponIssueOpen"));
+	}
+
+	@Editable(order=10100, description="Specify applicable projects for above option. Multiple projects should be separated by space. "
+			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty for all projects")
+	@io.onedev.server.web.editable.annotation.ShowCondition("isPromptUponIssueOpenEnabled")
+	@Patterns(suggester="suggestProjects", path=true)
+	@NameOfEmptyValue("All projects")
+	public String getApplicableProjects() {
+		return applicableProjects;
+	}
+
+	public void setApplicableProjects(String applicableProjects) {
+		this.applicableProjects = applicableProjects;
 	}
 
 	@SuppressWarnings("unused")
@@ -243,7 +261,6 @@ public abstract class FieldSpec extends InputSpec {
 	}
 		
 	public void onRenameUser(String oldName, String newName) {
-		
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
@@ -350,6 +367,22 @@ public abstract class FieldSpec extends InputSpec {
 			}
 		}
 		return transitiveDependents;
+	}
+
+	public void onMoveProject(String oldPath, String newPath) {
+		setApplicableProjects(Project.substitutePath(getApplicableProjects(), oldPath, newPath));
+	}
+
+	public Usage onDeleteProject(String projectPath) {
+		Usage usage = new Usage();
+		if (Project.containsPath(getApplicableProjects(), projectPath))
+			usage.add("Applicable Projects");
+		onDeleteProject(usage, projectPath);
+		
+		return usage.prefix("Field Spec '" + getName() + "'");
+	}
+	
+	protected void onDeleteProject(Usage usage, String projectPath) {
 	}
 	
 }

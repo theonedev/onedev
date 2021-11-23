@@ -20,7 +20,6 @@ import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.agent.AgentConnected;
@@ -164,8 +163,7 @@ public class DefaultResourceManager implements ResourceManager {
 
 	@Override
 	public void run(AgentAwareRunnable runnable, Map<String, Integer> serverResourceRequirements, 
-			AgentQuery agentQuery, Map<String, Integer> agentResourceRequirements, 
-			Collection<CacheSpec> cacheSpecs, TaskLogger logger) {
+			AgentQuery agentQuery, Map<String, Integer> agentResourceRequirements, TaskLogger logger) {
 		Set<Long> agentIds = agentManager.query(agentQuery, 0, Integer.MAX_VALUE)
 				.stream().map(it->it.getId()).collect(Collectors.toSet());
 		Long agentId = 0L;

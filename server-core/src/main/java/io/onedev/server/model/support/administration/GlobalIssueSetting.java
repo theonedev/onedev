@@ -507,6 +507,11 @@ public class GlobalIssueSetting implements Serializable {
 		return derivedDeletions;
 	}
 	
+	public void onMoveProject(String oldPath, String newPath) {
+		for (FieldSpec field: getFieldSpecs()) 
+			field.onMoveProject(oldPath, newPath);
+	}
+	
 	public void onRenameUser(String oldName, String newName) {
 		for (FieldSpec field: getFieldSpecs())
 			field.onRenameUser(oldName, newName);
@@ -529,6 +534,15 @@ public class GlobalIssueSetting implements Serializable {
 	public void onRenameGroup(String oldName, String newName) {
 		for (FieldSpec field: getFieldSpecs())
 			field.onRenameGroup(oldName, newName);
+	}
+
+	public Usage onDeleteProject(String projectPath) {
+		Usage usage = new Usage();
+		
+		for (FieldSpec field: getFieldSpecs()) 
+			usage.add(field.onDeleteProject(projectPath));
+		
+		return usage.prefix("issue setting");
 	}
 	
 	public Usage onDeleteGroup(String groupName) {
@@ -602,10 +616,10 @@ public class GlobalIssueSetting implements Serializable {
 		return null;
 	}
 	
-	public Collection<String> getPrimaryFields(Project project) {
+	public Collection<String> getPromptFieldsUponIssueOpen(Project project) {
 		Matcher matcher = new PathMatcher();
 		return getFieldSpecs().stream()
-				.filter(it->PatternSet.parse(it.getPrimaryProjects()).matches(matcher, project.getPath()))
+				.filter(it->it.isPromptUponIssueOpen() && (it.getApplicableProjects() == null || PatternSet.parse(it.getApplicableProjects()).matches(matcher, project.getPath())))
 				.map(it->it.getName())
 				.collect(Collectors.toList());
 	}

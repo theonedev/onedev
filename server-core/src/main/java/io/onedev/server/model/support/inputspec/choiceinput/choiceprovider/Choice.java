@@ -44,7 +44,7 @@ public class Choice implements Serializable {
 		this.color = color;
 	}
 
-	@Editable(order=300, description="Specify applicable projects for this choice separated by space. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+	@Editable(order=300, description="Specify applicable projects separated by space. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty for all projects")
 	@Patterns(suggester="suggestProjects", path=true)
 	@NameOfEmptyValue("All projects")

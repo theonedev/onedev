@@ -1,10 +1,8 @@
 package io.onedev.server.job.resource;
 
-import java.util.Collection;
 import java.util.Map;
 
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.search.entity.agent.AgentQuery;
 
 public interface ResourceManager {
@@ -13,7 +11,7 @@ public interface ResourceManager {
 	
 	void run(AgentAwareRunnable runnable, Map<String, Integer> serverResourceRequirements, 
 			AgentQuery agentQuery, Map<String, Integer> agentResourceRequirements, 
-			Collection<CacheSpec> cacheSpecs, TaskLogger logger);
+			TaskLogger logger);
 	
 	void waitingForAgentResourceToBeReleased(Long agentId);
 	

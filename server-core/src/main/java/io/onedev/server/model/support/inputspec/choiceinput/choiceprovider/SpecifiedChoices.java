@@ -19,6 +19,7 @@ import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -89,6 +90,24 @@ public class SpecifiedChoices extends ChoiceProvider implements Validatable {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public void onMoveProject(String oldPath, String newPath) {
+		for (Choice choice: choices) 
+			choice.setApplicableProjects(Project.substitutePath(choice.getApplicableProjects(), oldPath, newPath));
+	}
+	
+	@Override
+	public Usage onDeleteProject(String projectPath) {
+		Usage usage = new Usage();
+		int index = 1;
+		for (Choice choice: choices) {
+			if (Project.containsPath(choice.getApplicableProjects(), projectPath))
+				usage.add("Applicable Projects").prefix("Available Choice #" + index);
+			index++;
+		}
+		return usage;
 	}
 	
 }

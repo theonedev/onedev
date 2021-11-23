@@ -96,7 +96,7 @@ public class TransitionSpec implements Serializable {
 			fields.add(field.getName());
 		return fields;
 	}
-	
+
 	public Usage onDeleteBranch(String branchName) {
 		return getTrigger().onDeleteBranch(branchName).prefix("trigger");
 	}
@@ -121,7 +121,7 @@ public class TransitionSpec implements Serializable {
 	public String toString() {
 		return StringUtils.join(getFromStates()) + "->" + getToState();		
 	}
-
+	
 	public boolean canTransitManually(Issue issue, @Nullable String toState) {
 		if (getFromStates().contains(issue.getState()) 
 				&& (toState == null || toState.equals(getToState())) 
