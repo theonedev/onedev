@@ -1,5 +1,10 @@
 <wicket:extend>
 	<div class="state-transitions">
+		<div class="text-muted mb-4">
+			<wicket:svg href="bulb" class="icon"/> Define how issue states should be transited from one to another, either manually 
+			or automatically when some events happen. And the rule can be configured to apply to certain projects and issues 
+			via the applicable issues setting
+		</div>
 		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add issue state transition"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 		<table wicket:id="stateTransitions" class="table table-hover"></table>
 	</div>

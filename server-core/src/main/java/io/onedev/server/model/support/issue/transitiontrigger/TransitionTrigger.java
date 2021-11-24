@@ -21,7 +21,7 @@ public abstract class TransitionTrigger implements Serializable {
 	
 	private String issueQuery;
 	
-	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
+	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues. ")
 	@IssueQuery(withOrder = false, withCurrentUserCriteria = false, withCurrentBuildCriteria = false, 
 			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
 	@NameOfEmptyValue("All")
