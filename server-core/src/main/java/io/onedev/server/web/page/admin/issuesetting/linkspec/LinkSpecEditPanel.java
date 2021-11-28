@@ -1,0 +1,128 @@
+package io.onedev.server.web.page.admin.issuesetting.linkspec;
+
+import java.io.Serializable;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.model.LinkSpec;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+
+@SuppressWarnings("serial")
+abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
+
+	private BeanEditor editor;
+	
+	public LinkSpecEditPanel(String id, IModel<LinkSpec> model) {
+		super(id, model);
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		Form<?> form = new Form<Void>("form") {
+
+			@Override
+			protected void onError() {
+				super.onError();
+				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+			}
+			
+		};
+		
+		form.add(new AjaxLink<Void>("close") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(LinkSpecEditPanel.this));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCancel(target);
+			}
+			
+		});
+		
+		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Serializable getObject() {
+				return getSpec();
+			}
+
+			@Override
+			public void setObject(Serializable object) {
+				editor.getDescriptor().copyProperties(object, getSpec());
+			}
+			
+		});
+		
+		form.add(editor);
+		
+		form.add(new AjaxButton("save") {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				
+				LinkSpecManager manager = OneDev.getInstance(LinkSpecManager.class);
+				LinkSpec specWithSameName = manager.find(getSpec().getName());
+				if (getSpec().isNew() && specWithSameName != null 
+						|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
+					editor.error(new Path(new PathNode.Named("name")), "Name already used by another link");
+					target.add(form);
+				} else {
+					manager.save(getSpec());
+					onSave(target);
+				}
+			}
+			
+		});
+		
+		form.add(new AjaxLink<Void>("cancel") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(LinkSpecEditPanel.this));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onCancel(target);
+			}
+			
+		});
+		form.setOutputMarkupId(true);
+		
+		add(form);
+	}
+	
+	private LinkSpec getSpec() {
+		return getModelObject();
+	}
+
+	protected abstract void onSave(AjaxRequestTarget target);
+	
+	protected abstract void onCancel(AjaxRequestTarget target);
+
+}

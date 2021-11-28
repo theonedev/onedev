@@ -241,13 +241,10 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 			@Override
 			public IModel<?> getBody() {
-				String prefix;
 				if (getProject().equals(getIssue().getProject()))
-					prefix = "";
+					return Model.of("#" + getIssue().getNumber());
 				else
-					prefix = getIssue().getProject().getPath().substring(getProject().getPath().length()+1);
-				
-				return Model.of(prefix + "#" + getIssue().getNumber());
+					return Model.of(getIssue().getProject() + "#" + getIssue().getNumber());
 			}
 
 			@Override

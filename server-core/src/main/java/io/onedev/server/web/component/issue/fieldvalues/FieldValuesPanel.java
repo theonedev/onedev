@@ -212,66 +212,67 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						else 
 							item.add(new Label("value", value));
 					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
-						Issue issue = OneDev.getInstance(IssueManager.class)
-								.find(getIssue().getProject(), Long.valueOf(value));
+						Issue issue = OneDev.getInstance(IssueManager.class).get(Long.valueOf(value));
 						if (issue != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
 									IssueActivitiesPage.paramsOf(issue));
-							link.add(new Label("label", "#" + issue.getNumber()));
+							if (issue.getNumberScope().equals(getIssue().getProject().getForkRoot()))
+								link.add(new Label("label", "#" + issue.getNumber()));
+							else
+								link.add(new Label("label", issue.getFQN().toString()));
 							linkFrag.add(link);
 							item.add(linkFrag);
 						} else {
-							item.add(new Label("value", "#" + value));
+							item.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 						}
 					} else if (getField().getType().equals(FieldSpec.BUILD)) {
-						Build build = OneDev.getInstance(BuildManager.class)
-								.find(getIssue().getProject(), Long.valueOf(value));
+						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
 						if (build != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", 
 									BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 							String buildInfo = "#" + build.getNumber();
+							if (build.getNumberScope().equals(getIssue().getProject().getForkRoot()))
+								buildInfo = "#" + build.getNumber();
+							else
+								buildInfo = build.getFQN().toString();
+							
 							if (build.getVersion() != null)
 								buildInfo += " (" + build.getVersion() + ")";
 							link.add(new Label("label", buildInfo));
 							linkFrag.add(link);
 							item.add(linkFrag);
 						} else {
-							item.add(new Label("value", "#" + value));
+							item.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 						}
 					} else if (getField().getType().equals(FieldSpec.PULL_REQUEST)) {
-						PullRequest request = OneDev.getInstance(PullRequestManager.class)
-								.find(getIssue().getProject(), Long.valueOf(value));
-						if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
+						PullRequest request = OneDev.getInstance(PullRequestManager.class).get(Long.valueOf(value));
+						if (request != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
 									PullRequestActivitiesPage.paramsOf(request));
-							link.add(new Label("label", "#" + request.getNumber()));
+							if (request.getNumberScope().equals(getIssue().getProject().getForkRoot()))
+								link.add(new Label("label", "#" + request.getNumber()));
+							else
+								link.add(new Label("label", request.getFQN().toString()));
 							linkFrag.add(link);
 							item.add(linkFrag);
 						} else {
-							item.add(new Label("value", "#" + value));
+							item.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 						}
 					} else if (getField().getType().equals(FieldSpec.COMMIT)) {
 						if (ObjectId.isId(value)) {
-							if (SecurityUtils.canReadCode(getIssue().getProject())) {
-								Fragment fragment = new Fragment("value", "commitFrag", FieldValuesPanel.this);
-								Project project = getIssue().getProject();
-								CommitDetailPage.State commitState = new CommitDetailPage.State();
-								commitState.revision = value;
-								PageParameters params = CommitDetailPage.paramsOf(project, commitState);
-								Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
-								fragment.add(hashLink);
-								hashLink.add(new Label("hash", GitUtils.abbreviateSHA(value)));
-								fragment.add(new CopyToClipboardLink("copyHash", Model.of(value)));
-								item.add(fragment);
-							} else {
-								Fragment fragment = new Fragment("value", "notAccessibleCommitFrag", FieldValuesPanel.this);
-								fragment.add(new Label("hash", GitUtils.abbreviateSHA(value)));
-								fragment.add(new CopyToClipboardLink("copyHash", Model.of(value)));
-								item.add(fragment);
-							}
+							Fragment fragment = new Fragment("value", "commitFrag", FieldValuesPanel.this);
+							Project project = getIssue().getProject();
+							CommitDetailPage.State commitState = new CommitDetailPage.State();
+							commitState.revision = value;
+							PageParameters params = CommitDetailPage.paramsOf(project, commitState);
+							Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+							fragment.add(hashLink);
+							hashLink.add(new Label("hash", GitUtils.abbreviateSHA(value)));
+							fragment.add(new CopyToClipboardLink("copyHash", Model.of(value)));
+							item.add(fragment);
 						} else {
 							item.add(new Label("value", value));
 						}

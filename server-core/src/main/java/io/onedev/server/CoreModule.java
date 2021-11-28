@@ -114,11 +114,13 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
+import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -154,11 +156,13 @@ import io.onedev.server.entitymanager.impl.DefaultGroupManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueFieldManager;
+import io.onedev.server.entitymanager.impl.DefaultIssueLinkManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueScheduleManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueVoteManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueWatchManager;
+import io.onedev.server.entitymanager.impl.DefaultLinkSpecManager;
 import io.onedev.server.entitymanager.impl.DefaultMembershipManager;
 import io.onedev.server.entitymanager.impl.DefaultMilestoneManager;
 import io.onedev.server.entitymanager.impl.DefaultProjectManager;
@@ -427,6 +431,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(EntityReferenceManager.class).to(DefaultEntityReferenceManager.class);
 		bind(GitLfsLockManager.class).to(DefaultGitLfsLockManager.class);
 		bind(IssueScheduleManager.class).to(DefaultIssueScheduleManager.class);
+		bind(LinkSpecManager.class).to(DefaultLinkSpecManager.class);
+		bind(IssueLinkManager.class).to(DefaultIssueLinkManager.class);
 		
 		bind(WebHookManager.class);
 		

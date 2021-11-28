@@ -31,6 +31,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
@@ -1016,6 +1017,15 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
 
+		if (term.contains("#")) {
+			String projectPath = StringUtils.substringBefore(term, "#");
+			Project specifiedProject = projectManager.find(projectPath);
+			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
+				project = specifiedProject;
+				term = StringUtils.substringAfter(term, "#");
+			}
+		}
+		
 		Set<Project> projects = Sets.newHashSet(project);
 		projects.addAll(project.getForkParents().stream().filter(it->SecurityUtils.canReadCode(it)).collect(Collectors.toSet()));
 		criteria.add(Restrictions.in(PullRequest.PROP_TARGET_PROJECT, projects));

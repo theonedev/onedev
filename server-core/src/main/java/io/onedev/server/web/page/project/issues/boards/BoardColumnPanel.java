@@ -353,7 +353,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 						throw new UnauthorizedException("Permission denied");
 
-					OneDev.getInstance(IssueChangeManager.class).addToMilestone(issue, getMilestone());
+					OneDev.getInstance(IssueChangeManager.class).addSchedule(issue, getMilestone());
 					markAccepted(target, issue, true);
 				} else if (fieldName.equals(Issue.NAME_STATE)) {
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);

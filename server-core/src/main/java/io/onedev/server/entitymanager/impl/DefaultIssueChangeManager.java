@@ -2,7 +2,6 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,6 +35,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
+import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -53,12 +53,16 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueLinkAddData;
+import io.onedev.server.model.support.issue.changedata.IssueLinkChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueLinkRemoveData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneAddData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneRemoveData;
@@ -117,6 +121,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	private final IssueScheduleManager issueScheduleManager;
 	
+	private final IssueLinkManager issueLinkManager;
+	
 	private final ExecutorService executorService;
 	
 	private final ListenerRegistry listenerRegistry;
@@ -131,7 +137,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			ProjectManager projectManager, BuildManager buildManager, 
 			ExecutorService executorService, PullRequestManager pullRequestManager, 
 			ListenerRegistry listenerRegistry, TaskScheduler taskScheduler, 
-			IssueScheduleManager issueScheduleManager) {
+			IssueScheduleManager issueScheduleManager, IssueLinkManager issueLinkManager) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
@@ -143,6 +149,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		this.listenerRegistry = listenerRegistry;
 		this.taskScheduler = taskScheduler;
 		this.issueScheduleManager = issueScheduleManager;
+		this.issueLinkManager = issueLinkManager;
 	}
 
 	@Transactional
@@ -161,7 +168,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
-			change.setDate(new Date());
 			change.setUser(SecurityUtils.getUser());
 			change.setData(new IssueTitleChangeData(prevTitle, issue.getTitle()));
 			save(change);
@@ -170,11 +176,10 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Transactional
 	@Override
-	public void addToMilestone(Issue issue, Milestone milestone) {
-		issueScheduleManager.save(issue.addToMilestone(milestone));
+	public void addSchedule(Issue issue, Milestone milestone) {
+		issueScheduleManager.save(issue.addSchedule(milestone));
 		
 		IssueChange change = new IssueChange();
-		change.setDate(new Date());
 		change.setIssue(issue);
 		change.setData(new IssueMilestoneAddData(milestone.getName()));
 		change.setUser(SecurityUtils.getUser());
@@ -183,12 +188,11 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	@Transactional
 	@Override
-	public void removeFromMilestone(Issue issue, Milestone milestone) {
-		IssueSchedule schedule = issue.removeFromMilestone(milestone);
+	public void removeSchedule(Issue issue, Milestone milestone) {
+		IssueSchedule schedule = issue.removeSchedule(milestone);
 		if (schedule != null) {
 			issueScheduleManager.delete(schedule);
 			IssueChange change = new IssueChange();
-			change.setDate(new Date());
 			change.setIssue(issue);
 			change.setData(new IssueMilestoneRemoveData(milestone.getName()));
 			change.setUser(SecurityUtils.getUser());
@@ -206,7 +210,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
-			change.setDate(new Date());
 			change.setUser(SecurityUtils.getUser());
 			change.setData(new IssueFieldChangeData(prevFields, issue.getFieldInputs()));
 			save(change);
@@ -228,7 +231,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
-		change.setDate(new Date());
 		change.setUser(SecurityUtils.getUser());
 		change.setData(new IssueStateChangeData(prevState, issue.getState(), 
 				prevFields, issue.getFieldInputs(), comment));
@@ -259,7 +261,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 					|| !new HashSet<>(prevMilestones).equals(new HashSet<>(issue.getMilestones()))) {
 				IssueChange change = new IssueChange();
 				change.setIssue(issue);
-				change.setDate(new Date());
 				change.setUser(SecurityUtils.getUser());
 				
 				List<Milestone> prevMilestoneList = new ArrayList<>(prevMilestones);
@@ -615,7 +616,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			issueScheduleManager.syncMilestones(issue, milestones);
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
-			change.setDate(new Date());
 			change.setUser(SecurityUtils.getUser());
 			
 			List<Milestone> prevMilestoneList = new ArrayList<>(prevMilestones);
@@ -626,6 +626,116 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			save(change);
 		}
 		
+	}
+
+	@Transactional
+	@Override
+	public void changeLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite) {
+		Issue prevLinkedIssue = issue.findLinkedIssue(spec, opposite);
+		
+		List<Issue> linkedIssues = new ArrayList<>();
+		if (linkedIssue != null)
+			linkedIssues.add(linkedIssue);
+		issueLinkManager.syncLinks(spec, issue, linkedIssues, opposite);
+		
+		IssueChange change = new IssueChange();
+		change.setIssue(issue);
+		change.setUser(SecurityUtils.getUser());
+		
+		String linkName = opposite?spec.getOpposite().getName():spec.getName();
+		
+		IssueLinkChangeData data = new IssueLinkChangeData(linkName, 
+				getIssueSummary(issue, prevLinkedIssue), 
+				getIssueSummary(issue, linkedIssue));
+		change.setData(data);
+		save(change);
+		
+		logLinkedSideChange(spec, issue, prevLinkedIssue, linkedIssue, opposite);
+	}
+	
+	private void logLinkedSideChange(LinkSpec spec, Issue issue, @Nullable Issue prevLinkedIssue, 
+			@Nullable Issue linkedIssue, boolean opposite) {
+		String linkName;
+		boolean multiple;
+		if (spec.getOpposite() != null) {
+			linkName = opposite?spec.getName():spec.getOpposite().getName();
+			multiple = opposite?spec.isMultiple():spec.getOpposite().isMultiple(); 
+		} else {
+			linkName = spec.getName();
+			multiple = spec.isMultiple();
+		}
+		if (prevLinkedIssue != null) {
+			IssueChange change = new IssueChange();
+			change.setIssue(prevLinkedIssue);
+			change.setUser(SecurityUtils.getUser());
+			String prevIssueSummary = getIssueSummary(prevLinkedIssue, issue);
+			if (multiple)
+				change.setData(new IssueLinkRemoveData(linkName, prevIssueSummary));
+			else
+				change.setData(new IssueLinkChangeData(linkName, prevIssueSummary, null));
+			save(change);
+		} 
+		if (linkedIssue != null) {
+			IssueChange change = new IssueChange();
+			change.setIssue(linkedIssue);
+			change.setUser(SecurityUtils.getUser());
+			String issueSummary = getIssueSummary(linkedIssue, issue);
+			if (multiple)
+				change.setData(new IssueLinkAddData(linkName, issueSummary));
+			else
+				change.setData(new IssueLinkChangeData(linkName, null, issueSummary));
+			save(change);
+		}
+	}
+	
+	@Nullable
+	private String getIssueSummary(Issue issue, @Nullable Issue linkedIssue) {
+		if (linkedIssue != null) {
+			if (linkedIssue.getNumberScope().equals(issue.getNumberScope()))
+				return linkedIssue.getNumberAndTitle();
+			else
+				return linkedIssue.getProject() + linkedIssue.getNumberAndTitle();
+		} else {
+			return null;
+		}
+	}
+
+	@Transactional
+	@Override
+	public void addLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite) {
+		Collection<Issue> linkedIssues = issue.findLinkedIssues(spec, opposite);
+		linkedIssues.add(linkedIssue);
+		issueLinkManager.syncLinks(spec, issue, linkedIssues, opposite);
+		
+		IssueChange change = new IssueChange();
+		change.setIssue(issue);
+		change.setUser(SecurityUtils.getUser());
+	
+		String linkName = opposite?spec.getOpposite().getName():spec.getName();
+		IssueLinkAddData data = new IssueLinkAddData(linkName, getIssueSummary(issue, linkedIssue));
+		change.setData(data);
+		save(change);
+		
+		logLinkedSideChange(spec, issue, null, linkedIssue, opposite);
+	}
+
+	@Transactional
+	@Override
+	public void removeLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite) {
+		Collection<Issue> linkedIssues = issue.findLinkedIssues(spec, opposite);
+		linkedIssues.remove(linkedIssue);
+		issueLinkManager.syncLinks(spec, issue, linkedIssues, opposite);
+		
+		IssueChange change = new IssueChange();
+		change.setIssue(issue);
+		change.setUser(SecurityUtils.getUser());
+		
+		String linkName = opposite?spec.getOpposite().getName():spec.getName();
+		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, getIssueSummary(issue, linkedIssue));
+		change.setData(data);
+		save(change);
+		
+		logLinkedSideChange(spec, issue, linkedIssue, null, opposite);
 	}
 	
 }

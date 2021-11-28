@@ -1700,9 +1700,6 @@ input[type="radio"], input[type="checkbox"] {
 .nav.nav-tabs.nav-tabs-line .nav-item {
     margin: 0 0 -1px 0;
 }
-.nav.nav-tabs.nav-tabs-line .nav-item:first-child .nav-link {
-    margin-left: 0;
-}
 .nav.nav-tabs.nav-tabs-line .nav-link:hover:not(.disabled), 
 .nav.nav-tabs.nav-tabs-line .active .nav-link, 
 .nav.nav-tabs.nav-tabs-line .nav-link.active, 
@@ -1715,7 +1712,7 @@ input[type="radio"], input[type="checkbox"] {
     border: 0;
     border-bottom: 1px solid transparent;
     padding: 0.85rem 0;
-    margin: 0 1rem;
+    margin-right: 2rem;
 }
 .nav.nav-tabs.nav-tabs-line.nav-tabs-line-2x {
     border-bottom-width: 2px;

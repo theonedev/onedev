@@ -1,13 +1,19 @@
 package io.onedev.server.web.editable.build.choice;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
+import org.unbescape.html.HtmlEscape;
 
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
@@ -37,7 +43,15 @@ public class BuildChoiceEditSupport implements EditSupport {
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 						        List<Long> buildIds = model.getObject();
 						        if (buildIds != null && !buildIds.isEmpty()) {
-						        	return new Label(id, buildIds.stream().map(it->"#"+it).collect(Collectors.joining(", ")));
+						        	List<String> buildNumbers = new ArrayList<>();
+						        	for (Long buildId: buildIds) {
+						        		Build build = getBuildManager().get(buildId);
+						        		if (build != null) 
+						        			buildNumbers.add(HtmlEscape.escapeHtml5(getBuildNumber(build)));
+						        		else
+						        			buildNumbers.add("<i>Not Found</i>");
+						        	}
+						        	return new Label(id, StringUtils.join(buildNumbers, ", ")).setEscapeModelStrings(false);
 						        } else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }
@@ -61,10 +75,16 @@ public class BuildChoiceEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) 
-						            return new Label(id, "#" + model.getObject());
-						        else 
+								Long buildId = model.getObject();
+								if (buildId != null) {
+									Build build = getBuildManager().get(buildId);
+									if (build != null) 
+										return new Label(id, getBuildNumber(build));
+									else 
+										return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
+								} else { 
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								}
 							}
 							
 						};
@@ -82,6 +102,17 @@ public class BuildChoiceEditSupport implements EditSupport {
         } else {
             return null;
         }
+	}
+	
+	private String getBuildNumber(Build build) {
+		if (Project.get() != null && Project.get().getForkRoot().equals(build.getNumberScope()))
+			return "#" + build.getNumber();
+		else
+			return build.getFQN().toString();
+	}
+	
+	private BuildManager getBuildManager() {
+		return OneDev.getInstance(BuildManager.class);
 	}
 
 	@Override

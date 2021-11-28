@@ -27,6 +27,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -369,6 +370,15 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
+
+		if (term.contains("#")) {
+			String projectPath = StringUtils.substringBefore(term, "#");
+			Project specifiedProject = projectManager.find(projectPath);
+			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
+				project = specifiedProject;
+				term = StringUtils.substringAfter(term, "#");
+			}
+		}
 		
 		Set<Project> projects = Sets.newHashSet(project);
 		projects.addAll(project.getForkParents());

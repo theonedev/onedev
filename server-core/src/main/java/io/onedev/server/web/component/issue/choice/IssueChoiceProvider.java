@@ -43,6 +43,8 @@ public class IssueChoiceProvider extends ChoiceProvider<Issue> {
 			.key("id").value(choice.getId())
 			.key("number").value(choice.getNumber())
 			.key("title").value(Emojis.getInstance().apply(HtmlEscape.escapeHtml5(choice.getTitle())));
+		if (!choice.getNumberScope().equals(projectModel.getObject().getForkRoot()))
+			writer.key("project").value(HtmlEscape.escapeHtml5(choice.getProject().getPath()));
 	}
 
 	@Override
@@ -56,7 +58,7 @@ public class IssueChoiceProvider extends ChoiceProvider<Issue> {
 		}
 		return issues;
 	}
-
+	
 	@Override
 	public void query(String term, int page, Response<Issue> response) {
 		int count = (page+1) * WebConstants.PAGE_SIZE + 1;

@@ -6,6 +6,10 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -31,10 +35,20 @@ public class IssueChoiceEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) 
-						            return new Label(id, "#" + model.getObject());
-						        else 
+								Long issueId = model.getObject();
+								if (issueId != null) {
+									Issue issue = OneDev.getInstance(IssueManager.class).get(issueId);
+									if (issue != null) {
+										if (Project.get() != null && Project.get().getForkRoot().equals(issue.getNumberScope()))
+											return new Label(id, "#" + issue.getNumber());
+										else
+											return new Label(id, issue.getFQN().toString());
+									} else {
+										return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
+									}
+								} else { 
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								}
 							}
 							
 						};
@@ -42,7 +56,7 @@ public class IssueChoiceEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
-						return new IssueSingleChoiceEditor(componentId, descriptor, model);
+						return new IssueChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};

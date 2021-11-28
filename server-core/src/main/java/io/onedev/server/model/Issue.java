@@ -250,6 +250,20 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWatch> watches = new ArrayList<>();
 	
+	@OneToMany(mappedBy=IssueLink.PROP_TARGET, cascade=CascadeType.REMOVE)
+	private Collection<IssueLink> sourceLinks = new ArrayList<>();
+	
+	@OneToMany(mappedBy=IssueLink.PROP_SOURCE, cascade=CascadeType.REMOVE)
+	private Collection<IssueLink> targetLinks = new ArrayList<>();
+	
+	private transient List<IssueLink> sortedSourceLinks;
+	
+	private transient List<IssueLink> sortedTargetLinks;
+	
+	private transient Collection<IssueLink> links;
+	
+	private transient List<IssueLink> sortedLinks;
+	
 	private transient List<RevCommit> commits;
 	
 	private transient List<PullRequest> pullRequests;
@@ -441,6 +455,55 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public void setFields(Collection<IssueField> fields) {
 		this.fields = fields;
+	}
+	
+	public Collection<IssueLink> getSourceLinks() {
+		return sourceLinks;
+	}
+	
+	public void setSourceLinks(Collection<IssueLink> sourceLinks) {
+		this.sourceLinks = sourceLinks;
+	}
+
+	public Collection<IssueLink> getTargetLinks() {
+		return targetLinks;
+	}
+
+	public void setTargetLinks(Collection<IssueLink> targetLinks) {
+		this.targetLinks = targetLinks;
+	}
+	
+	public List<IssueLink> getSortedSourceLinks() {
+		if (sortedSourceLinks == null) {
+			sortedSourceLinks = new ArrayList<>(sourceLinks);
+			Collections.sort(sortedSourceLinks);
+		}
+		return sortedSourceLinks;
+	}
+
+	public List<IssueLink> getSortedTargetLinks() {
+		if (sortedTargetLinks == null) {
+			sortedTargetLinks = new ArrayList<>(targetLinks);
+			Collections.sort(sortedTargetLinks);
+		}
+		return sortedTargetLinks;
+	}
+	
+	public List<IssueLink> getSortedLinks() {
+		if (sortedLinks == null) {
+			sortedLinks = new ArrayList<>(getLinks());
+			Collections.sort(sortedLinks);
+		}
+		return sortedLinks;
+	}
+	
+	public Collection<IssueLink> getLinks() {
+		if (links == null) {
+			links = new ArrayList<>();
+			links.addAll(sourceLinks);
+			links.addAll(targetLinks);
+		}
+		return links;
 	}
 	
 	public boolean isVisitedAfter(Date date) {
@@ -731,7 +794,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		return getSchedules().stream().map(it->it.getMilestone()).collect(Collectors.toList());
 	}
 	
-	public IssueSchedule addToMilestone(Milestone milestone) {
+	public IssueSchedule addSchedule(Milestone milestone) {
 		IssueSchedule schedule = new IssueSchedule();
 		schedule.setIssue(this);
 		schedule.setMilestone(milestone);
@@ -740,7 +803,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 	
 	@Nullable
-	public IssueSchedule removeFromMilestone(Milestone milestone) {
+	public IssueSchedule removeSchedule(Milestone milestone) {
 		for (Iterator<IssueSchedule> it = getSchedules().iterator(); it.hasNext();) {
 			IssueSchedule schedule = it.next();
 			if (schedule.getMilestone().equals(milestone)) {
@@ -777,6 +840,52 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		}
 		
 		return issueNumbers;
+	}
+	
+	@Nullable
+	public Issue findLinkedIssue(LinkSpec spec, boolean opposite) {
+		if (spec.getOpposite() != null) {
+			if (opposite) {
+				for (IssueLink link: getSortedSourceLinks()) {
+					if (link.getSpec().equals(spec)) 
+						return link.getSource();
+				}
+				return null;
+			} else {
+				for (IssueLink link: getSortedTargetLinks()) {
+					if (link.getSpec().equals(spec)) 
+						return link.getTarget();
+				}
+				return null;
+			}
+		} else {
+			for (IssueLink link: getSortedLinks()) {
+				if (link.getSpec().equals(spec)) 
+					return link.getLinked(this);
+			}
+			return null;
+		}
+	}
+	
+	public Collection<Issue> findLinkedIssues(LinkSpec spec, boolean opposite) {
+		if (spec.getOpposite() != null) {
+			if (opposite) {
+				return getSortedSourceLinks().stream()
+						.filter(it->it.getSpec().equals(spec))
+						.map(it->it.getSource())
+						.collect(Collectors.toList());
+			} else {
+				return getSortedTargetLinks().stream()
+						.filter(it->it.getSpec().equals(spec))
+						.map(it->it.getTarget())
+						.collect(Collectors.toList());
+			}
+		} else {
+			return getSortedLinks().stream()
+					.filter(it->it.getSpec().equals(spec))
+					.map(it->it.getLinked(this))
+					.collect(Collectors.toList());
+		}
 	}
 	
 }

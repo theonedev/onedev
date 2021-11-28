@@ -47,8 +47,8 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 		List<Build> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			for (Long buildNumber: getModelObject()) {
-				Build build = buildManager.find(getProject(), buildNumber);
+			for (Long buildId: getModelObject()) {
+				Build build = buildManager.get(buildId);
 				if (build != null)
 					selections.add(build);
 			}
@@ -91,7 +91,7 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	protected List<Long> convertInputToValue() throws ConversionException {
 		Collection<Build> builds = input.getConvertedInput();
 		if (builds != null)
-			return builds.stream().map(it->it.getNumber()).collect(Collectors.toList());
+			return builds.stream().map(it->it.getId()).collect(Collectors.toList());
 		else
 			return new ArrayList<>();
 	}

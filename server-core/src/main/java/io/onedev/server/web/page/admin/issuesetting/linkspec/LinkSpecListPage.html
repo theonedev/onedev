@@ -1,0 +1,14 @@
+<wicket:extend>
+	<div class="issue-links">
+		<div class="text-muted mb-4">
+			<wicket:svg href="bulb" class="icon"/> Links can be used to associate different issues. For instance, an issue can be linked to 
+			child issues or blocking issues
+		</div>
+		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add issue link"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+		<table wicket:id="links" class="table table-hover"></table>
+	</div>
+	<wicket:fragment wicket:id="linkActionsFrag">
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="More"><wicket:svg href="ellipsis" class="icon align-middle"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this link"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
+	</wicket:fragment>
+</wicket:extend>

@@ -41,7 +41,7 @@ public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
 
 		Build build;
 		if (getModelObject() != null)
-			build = OneDev.getInstance(BuildManager.class).find(getProject(), getModelObject());
+			build = OneDev.getInstance(BuildManager.class).get(getModelObject());
 		else
 			build = null;
 		
@@ -82,7 +82,7 @@ public class BuildSingleChoiceEditor extends PropertyEditor<Long> {
 	protected Long convertInputToValue() throws ConversionException {
 		Build build = input.getConvertedInput();
 		if (build != null)
-			return build.getNumber();
+			return build.getId();
 		else
 			return null;
 	}

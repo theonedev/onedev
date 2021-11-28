@@ -1122,7 +1122,7 @@ public abstract class IssueListPanel extends Panel {
 				else if (getProject().equals(issue.getProject()))
 					label = "#" + issue.getNumber();
 				else 
-					label = issue.getProject().getPath().substring(getProject().getPath().length()+1) + "#" + issue.getNumber();
+					label = issue.getProject() + "#" + issue.getNumber();
 				
 				ActionablePageLink<Void> numberLink;
 				fragment.add(numberLink = new ActionablePageLink<Void>("number", 

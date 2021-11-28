@@ -44,6 +44,8 @@ public class BuildChoiceProvider extends ChoiceProvider<Build> {
 			.key("jobName").value(HtmlEscape.escapeHtml5(choice.getJobName()));
 		if (choice.getVersion() != null)
 			writer.key("version").value(HtmlEscape.escapeHtml5(choice.getVersion()));
+		if (!choice.getNumberScope().equals(projectModel.getObject().getForkRoot()))
+			writer.key("project").value(HtmlEscape.escapeHtml5(choice.getProject().getPath()));
 	}
 
 	@Override

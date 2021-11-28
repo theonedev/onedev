@@ -9,20 +9,27 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueChangeManager extends EntityManager<IssueChange> {
 
+	void changeLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite);
+	
+	void addLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite);
+	
+	void removeLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite);
+	
 	void changeTitle(Issue issue, String title);
 	
 	void changeFields(Issue issue, Map<String, Object> fieldValues);
 
 	void changeMilestones(Issue issue, Collection<Milestone> milestones);
 	
-	void addToMilestone(Issue issue, Milestone milestone);
+	void addSchedule(Issue issue, Milestone milestone);
 	
-	void removeFromMilestone(Issue issue, Milestone milestone);
+	void removeSchedule(Issue issue, Milestone milestone);
 	
 	void changeState(Issue issue, String state, Map<String, Object> fieldValues, 
 			Collection<String> removeFields, @Nullable String comment);

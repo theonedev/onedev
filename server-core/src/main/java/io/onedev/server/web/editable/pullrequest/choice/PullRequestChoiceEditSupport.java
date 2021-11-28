@@ -6,6 +6,10 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -31,11 +35,20 @@ public class PullRequestChoiceEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) {
-						            return new Label(id, "#" + model.getObject());
-						        } else {
+								Long pullRequestId = model.getObject();
+								if (pullRequestId != null) {
+									PullRequest request = OneDev.getInstance(PullRequestManager.class).get(pullRequestId);
+									if (request != null) {
+										if (Project.get() != null && Project.get().getForkRoot().equals(request.getNumberScope()))
+											return new Label(id, "#" + request.getNumber());
+										else
+											return new Label(id, request.getFQN().toString());
+									} else {
+										return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
+									}
+								} else { 
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
-						        }
+								}
 							}
 							
 						};
@@ -43,7 +56,7 @@ public class PullRequestChoiceEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
-						return new PullRequestSingleChoiceEditor(componentId, descriptor, model);
+						return new PullRequestChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};

@@ -1,12 +1,16 @@
 onedev.server.pullRequestChoiceFormatter = {
+	formatPullRequest: function(request) {
+		if (request.project)
+			return request.project + "#" + request.number + " " + request.title;
+		else
+			return "#" + request.number + " " + request.title;
+	},
 	formatSelection: function(request) {
-		return "#" + request.number + " " + request.title;
+		return onedev.server.pullRequestChoiceFormatter.formatPullRequest(request);
 	},
-	
 	formatResult: function(request) {
-		return "<div class='pull-request'>#" + request.number + " " + request.title + "</div>";
+		return onedev.server.pullRequestChoiceFormatter.formatPullRequest(request);
 	},
-	
 	escapeMarkup: function(m) {
 		return m;
 	},

@@ -57,6 +57,7 @@ import io.onedev.server.web.page.admin.group.create.NewGroupPage;
 import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardListPage;
 import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
+import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
@@ -149,6 +150,8 @@ public abstract class LayoutPage extends BasePage {
 							StateTransitionListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Boards", 
 							DefaultBoardListPage.class, new PageParameters()));
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Links", 
+							LinkSpecListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates", 
 							IssueTemplateListPage.class, new PageParameters()));
 

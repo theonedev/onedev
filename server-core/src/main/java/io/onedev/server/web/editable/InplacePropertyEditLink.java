@@ -17,6 +17,10 @@ public abstract class InplacePropertyEditLink extends DropdownLink {
 		super(id, new AlignPlacement(0, 0, 0, 0));
 	}
 
+	public InplacePropertyEditLink(String id, AlignPlacement placement) {
+		super(id, placement);
+	}
+	
 	@Override
 	protected void onInitialize(FloatingPanel dropdown) {
 		super.onInitialize(dropdown);
@@ -25,7 +29,7 @@ public abstract class InplacePropertyEditLink extends DropdownLink {
 
 	@Override
 	protected Component newContent(String id, FloatingPanel dropdown) {
-		return new InplacePropertyEditPanel<Serializable>(id, getBean(), getPropertyName()) {
+		return new InplacePropertyEditPanel(id, getBean(), getPropertyName()) {
 
 			@Override
 			protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName) {

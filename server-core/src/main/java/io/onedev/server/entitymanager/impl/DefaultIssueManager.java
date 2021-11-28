@@ -22,6 +22,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.util.lang.Objects;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -699,7 +700,15 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Override
 	public List<Issue> query(Project project, String term, int count) {
 		EntityCriteria<Issue> criteria = newCriteria();
-		
+
+		if (term.contains("#")) {
+			String projectPath = StringUtils.substringBefore(term, "#");
+			Project specifiedProject = projectManager.find(projectPath);
+			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
+				project = specifiedProject;
+				term = StringUtils.substringAfter(term, "#");
+			}
+		}
 		Set<Project> projects = Sets.newHashSet(project);
 		projects.addAll(project.getForkParents().stream().filter(it->SecurityUtils.canAccess(it)).collect(Collectors.toSet()));
 		criteria.add(Restrictions.in(Issue.PROP_PROJECT, projects));

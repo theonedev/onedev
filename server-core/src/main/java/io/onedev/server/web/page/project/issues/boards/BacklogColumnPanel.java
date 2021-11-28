@@ -153,7 +153,7 @@ abstract class BacklogColumnPanel extends Panel {
 				Issue issue = OneDev.getInstance(IssueManager.class).load(params.getParameterValue("issue").toLong());
 				if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 					throw new UnauthorizedException("Permission denied");
-				OneDev.getInstance(IssueChangeManager.class).removeFromMilestone(issue, getMilestone());
+				OneDev.getInstance(IssueChangeManager.class).removeSchedule(issue, getMilestone());
 				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, true);", issue.getId()));
 			}
 			
@@ -174,7 +174,7 @@ abstract class BacklogColumnPanel extends Panel {
 					Issue issue = issueDragging.getIssue();
 					if (SecurityUtils.canScheduleIssues(issue.getProject())) {
 						issue = SerializationUtils.clone(issue);
-						issue.removeFromMilestone(getMilestone());
+						issue.removeSchedule(getMilestone());
 					}
 					if (getQuery().matches(issue)) {
 						String script = String.format("$('#%s').addClass('issue-droppable');", getMarkupId());

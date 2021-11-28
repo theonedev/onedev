@@ -15,7 +15,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import io.onedev.server.util.EditContext;
 
 @SuppressWarnings("serial")
-public abstract class InplacePropertyEditPanel<T> extends Panel implements EditContext {
+public abstract class InplacePropertyEditPanel extends Panel implements EditContext {
 
 	private final Serializable bean;
 	
@@ -101,7 +101,7 @@ public abstract class InplacePropertyEditPanel<T> extends Panel implements EditC
 		
 	}
 	
-	protected abstract void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String z);
+	protected abstract void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName);
 	
 	protected abstract void onCancelled(IPartialPageRequestHandler handler);
 	

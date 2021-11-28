@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.pullrequest.choice;
+package io.onedev.server.web.editable.issue.choice;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -8,21 +8,21 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.web.component.pullrequest.choice.PullRequestChoiceProvider;
-import io.onedev.server.web.component.pullrequest.choice.PullRequestSingleChoice;
+import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
+import io.onedev.server.web.component.issue.choice.IssueChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
-public class PullRequestSingleChoiceEditor extends PropertyEditor<Long> {
+public class IssueChoiceEditor extends PropertyEditor<Long> {
 
-	private PullRequestSingleChoice input;
+	private IssueChoice input;
 	
-	public PullRequestSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
+	public IssueChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
 			IModel<Long> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
@@ -39,13 +39,13 @@ public class PullRequestSingleChoiceEditor extends PropertyEditor<Long> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		PullRequest request;
+		Issue issue;
 		if (getModelObject() != null)
-			request = OneDev.getInstance(PullRequestManager.class).find(getProject(), getModelObject());
+			issue = OneDev.getInstance(IssueManager.class).get(getModelObject());
 		else
-			request = null;
+			issue = null;
 		
-		PullRequestChoiceProvider choiceProvider = new PullRequestChoiceProvider(new AbstractReadOnlyModel<Project>() {
+		IssueChoiceProvider choiceProvider = new IssueChoiceProvider(new AbstractReadOnlyModel<Project>() {
 
 			@Override
 			public Project getObject() {
@@ -53,7 +53,7 @@ public class PullRequestSingleChoiceEditor extends PropertyEditor<Long> {
 			}
     		
     	});
-    	input = new PullRequestSingleChoice("input", Model.of(request), choiceProvider) {
+    	input = new IssueChoice("input", Model.of(issue), choiceProvider) {
 
     		@Override
 			protected void onInitialize() {
@@ -80,9 +80,9 @@ public class PullRequestSingleChoiceEditor extends PropertyEditor<Long> {
 
 	@Override
 	protected Long convertInputToValue() throws ConversionException {
-		PullRequest request = input.getConvertedInput();
-		if (request != null)
-			return request.getNumber();
+		Issue issue = input.getConvertedInput();
+		if (issue != null)
+			return issue.getId();
 		else
 			return null;
 	}

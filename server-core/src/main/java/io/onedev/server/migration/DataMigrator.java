@@ -3317,4 +3317,71 @@ public class DataMigrator {
 		
 	}
 	
+	// Migrate to 5.5.0
+	private void migrate71(File dataDir, Stack<Integer> versions) {
+		Map<String, String> issueScopes = new HashMap<>();
+		Map<Pair<String, String>, String> issueIds = new HashMap<>();
+		Map<Pair<String, String>, String> buildIds = new HashMap<>();
+		Map<Pair<String, String>, String> pullRequestIds = new HashMap<>();
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					String issueId = element.elementTextTrim("id");
+					String numberScope = element.elementTextTrim("numberScope");
+					issueScopes.put(issueId, numberScope);
+					issueIds.put(new Pair<>(numberScope, element.elementTextTrim("number")), issueId);
+				}
+			} else if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					String buildId = element.elementTextTrim("id");
+					String numberScope = element.elementTextTrim("numberScope");
+					String number = element.elementTextTrim("number");
+					buildIds.put(new Pair<>(numberScope, number), buildId);
+				}
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					String pullRequestId = element.elementTextTrim("id");
+					String numberScope = element.elementTextTrim("numberScope");
+					String number = element.elementTextTrim("number");
+					pullRequestIds.put(new Pair<>(numberScope, number), pullRequestId);
+				}
+			}
+		}		
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueFields.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					String issueId = element.elementTextTrim("issue");
+					String type = element.elementText("type").trim();
+					String value = element.elementTextTrim("value");
+					if (type.equals("Issue")) {
+						String fieldIssueId = issueIds.get(new Pair<>(issueScopes.get(issueId), value));
+						if (fieldIssueId != null)
+							element.element("value").setText(fieldIssueId);
+						else
+							element.detach();
+					} else if (type.equals("Build")) {
+						String fieldBuildId = buildIds.get(new Pair<>(issueScopes.get(issueId), value));
+						if (fieldBuildId != null)
+							element.element("value").setText(fieldBuildId);
+						else
+							element.detach();
+					} else if (type.equals("Pull Request")) {
+						String fieldPullRequestId = pullRequestIds.get(new Pair<>(issueScopes.get(issueId), value));
+						if (fieldPullRequestId != null)
+							element.element("value").setText(fieldPullRequestId);
+						else
+							element.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}		
+	}
+	
 }
