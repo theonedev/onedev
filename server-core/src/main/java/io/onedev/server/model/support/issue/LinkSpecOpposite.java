@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.IssueQuery;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class LinkSpecOpposite implements Serializable {
@@ -14,6 +16,8 @@ public class LinkSpecOpposite implements Serializable {
 	private String name;
 	
 	private boolean multiple;
+	
+	private String issueQuery;
 	
 	@Editable(order=100, name="Name On the Other Side", description="Name of the link on the other side. "
 			+ "For instance if name is <tt>child issues</tt>, name on the other side can be <tt>parent issue</tt>")
@@ -35,6 +39,19 @@ public class LinkSpecOpposite implements Serializable {
 
 	public void setMultiple(boolean multiple) {
 		this.multiple = multiple;
+	}
+
+	@Editable(order=300, name="Linkable Issues On the Other Side", description="Optionally specify criteria of "
+			+ "issues which can be linked on the other side")
+	@IssueQuery(withCurrentBuildCriteria=false, withCurrentCommitCriteria=false, withCurrentPullRequestCriteria=false, 
+				withCurrentUserCriteria=false, withOrder=false)
+	@NameOfEmptyValue("All issues")
+	public String getIssueQuery() {
+		return issueQuery;
+	}
+
+	public void setIssueQuery(String issueQuery) {
+		this.issueQuery = issueQuery;
 	}
 
 }

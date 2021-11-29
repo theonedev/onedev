@@ -53,6 +53,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -218,9 +219,21 @@ public abstract class IssueSidePanel extends Panel {
 				Collections.sort(specs);
 				
 				for (LinkSpec spec: specs) {
-					links.add(new LinkSide(spec, false));
-					if (spec.getOpposite() != null)
-						links.add(new LinkSide(spec, true));
+					if (spec.getOpposite() != null) {
+						IssueQuery query = IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), 
+								false, false, false, false, false);
+						if (query.matches(getIssue()))
+							links.add(new LinkSide(spec, false));
+						query = IssueQuery.parse(getProject(), spec.getIssueQuery(), false, false, false, 
+								false, false);
+						if (query.matches(getIssue()))
+							links.add(new LinkSide(spec, true));
+					} else {
+						IssueQuery query = IssueQuery.parse(getProject(), spec.getIssueQuery(), 
+								false, false, false, false, false);
+						if (query.matches(getIssue()))
+							links.add(new LinkSide(spec, false));
+					}
 				}
 				return links;
 			}
@@ -245,7 +258,8 @@ public abstract class IssueSidePanel extends Panel {
 				LinkSpec spec = side.spec;
 				boolean opposite = side.opposite;
 				
-				fragment.add(new Label("name", opposite?spec.getOpposite().getName():spec.getName()));
+				String name = opposite?spec.getOpposite().getName():spec.getName();
+				fragment.add(new Label("name", name));
 				
 				RepeatingView linkedIssuesView = new RepeatingView("linkedIssues");
 				for (Issue linkedIssue: getIssue().findLinkedIssues(spec, opposite)) {
@@ -263,15 +277,26 @@ public abstract class IssueSidePanel extends Panel {
 				}
 				fragment.add(linkedIssuesView);
 
-				IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
+				fragment.add(new IssueAddChoice("add", new IssueChoiceProvider() {
 
 					@Override
-					public Project getObject() {
+					protected Project getProject() {
 						return getIssue().getProject();
 					}
 					
-				};
-				fragment.add(new IssueAddChoice("add", new IssueChoiceProvider(projectModel)) {
+					@Override
+					protected EntityQuery<Issue> getScope() {
+						LinkSpec spec = model.getObject().spec;
+						if (opposite) {
+							return IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), 
+									false, false, false, false, false);
+						} else {
+							return IssueQuery.parse(getProject(), spec.getIssueQuery(), 
+									false, false, false, false, false);
+						}
+					}
+					
+				}) {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Issue selection) {
@@ -282,6 +307,11 @@ public abstract class IssueSidePanel extends Panel {
 							getSession().warn("Issue already added");
 						else 
 							getIssueChangeManager().addLink(spec, getIssue(), selection, opposite);
+					}
+
+					@Override
+					protected String getPlaceholder() {
+						return "Add " + name.toLowerCase();
 					}
 					
 				}.setVisible(SecurityUtils.getUser() != null));
@@ -316,6 +346,18 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					protected String getPropertyName() {
 						return "issueId";
+					}
+
+					@Override
+					protected IssueQuery getIssueQuery() {
+						LinkSide side = model.getObject();
+						if (side.opposite) {
+							return IssueQuery.parse(getProject(), side.spec.getOpposite().getIssueQuery(), 
+									false, false, false, false, false);
+						} else {
+							return IssueQuery.parse(getProject(), side.spec.getIssueQuery(), 
+									false, false, false, false, false);
+						}
 					}
 
 					@Override

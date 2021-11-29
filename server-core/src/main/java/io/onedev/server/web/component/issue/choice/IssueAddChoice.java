@@ -17,7 +17,7 @@ public abstract class IssueAddChoice extends SelectToAddChoice<Issue> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		getSettings().setPlaceholder("Add Issue...");
+		getSettings().setPlaceholder(getPlaceholder());
 		getSettings().setFormatResult("onedev.server.issueChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.issueChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.issueChoiceFormatter.escapeMarkup");
@@ -30,4 +30,8 @@ public abstract class IssueAddChoice extends SelectToAddChoice<Issue> {
 		response.render(JavaScriptHeaderItem.forReference(new IssueChoiceResourceReference()));
 	}
 
+	protected String getPlaceholder() {
+		return "Add Issue...";
+	}
+	
 }

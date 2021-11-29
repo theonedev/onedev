@@ -2,7 +2,6 @@ package io.onedev.server.web.editable.issue.choice;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -11,10 +10,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.web.component.issue.choice.IssueChoice;
+import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.util.IssueQueryAware;
 import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
@@ -45,14 +46,23 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 		else
 			issue = null;
 		
-		IssueChoiceProvider choiceProvider = new IssueChoiceProvider(new AbstractReadOnlyModel<Project>() {
+		IssueChoiceProvider choiceProvider = new IssueChoiceProvider() {
 
 			@Override
-			public Project getObject() {
-				return getProject();
+			protected Project getProject() {
+				return IssueChoiceEditor.this.getProject();
 			}
-    		
-    	});
+
+			@Override
+			protected EntityQuery<Issue> getScope() {
+				IssueQueryAware issueScopeAware = findParent(IssueQueryAware.class);
+				if (issueScopeAware != null) 
+					return issueScopeAware.getIssueQuery();
+				else
+					return null;
+			}
+			
+		};
     	input = new IssueChoice("input", Model.of(issue), choiceProvider) {
 
     		@Override

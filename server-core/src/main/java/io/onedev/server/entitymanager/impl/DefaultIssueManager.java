@@ -1,16 +1,15 @@
 package io.onedev.server.entitymanager.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -24,7 +23,6 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.util.lang.Objects;
-import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -32,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.Listen;
@@ -265,7 +262,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public List<Issue> query(EntityQuery<Issue> issueQuery,  int firstResult, int maxResults, 
+	public List<Issue> query(EntityQuery<Issue> issueQuery, int firstResult, int maxResults, 
 			boolean loadFields) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
@@ -698,9 +695,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public List<Issue> query(Project project, String term, int count) {
-		EntityCriteria<Issue> criteria = newCriteria();
-
+	public List<Issue> query(EntityQuery<Issue> scope, Project project, String term, int count) {
 		if (term.contains("#")) {
 			String projectPath = StringUtils.substringBefore(term, "#");
 			Project specifiedProject = projectManager.find(projectPath);
@@ -709,26 +704,46 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				term = StringUtils.substringAfter(term, "#");
 			}
 		}
-		Set<Project> projects = Sets.newHashSet(project);
-		projects.addAll(project.getForkParents().stream().filter(it->SecurityUtils.canAccess(it)).collect(Collectors.toSet()));
-		criteria.add(Restrictions.in(Issue.PROP_PROJECT, projects));
+				
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		
+		if (scope != null)
+			predicates.addAll(Arrays.asList(getPredicates(scope.getCriteria(), criteriaQuery, builder, root)));		
+		
+		List<Predicate> projectPredicates = new ArrayList<>();
+		projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
+		for (Project forkParent: project.getForkParents()) {
+			if (SecurityUtils.canAccess(forkParent)) 
+				projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), forkParent));
+		}
+		predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		
 		if (term.startsWith("#"))
 			term = term.substring(1);
 		if (term.length() != 0) {
 			try {
 				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq(Issue.PROP_NUMBER, buildNumber));
+				predicates.add(builder.equal(root.get(Issue.PROP_NUMBER), buildNumber));
 			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.or(
-						Restrictions.ilike(Issue.PROP_TITLE, term, MatchMode.ANYWHERE),
-						Restrictions.ilike(Issue.PROP_NO_SPACE_TITLE, term, MatchMode.ANYWHERE)));
+				predicates.add(builder.or(
+						builder.like(builder.lower(root.get(Issue.PROP_TITLE)), "%" + term.toLowerCase() + "%"),
+						builder.like(builder.lower(root.get(Issue.PROP_NO_SPACE_TITLE)), "%" + term.toLowerCase() + "%")));
 			}
 		}
 
-		criteria.addOrder(Order.desc(Issue.PROP_PROJECT));
-		criteria.addOrder(Order.desc(Issue.PROP_NUMBER));
-		return query(criteria, 0, count);
+		criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		criteriaQuery.orderBy(
+				builder.desc(root.get(Issue.PROP_PROJECT)), 
+				builder.desc(root.get(Issue.PROP_NUMBER)));
+		
+		Query<Issue> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(0);
+		query.setMaxResults(count);
+		return query.getResultList();
 	}
 	
 	@Transactional

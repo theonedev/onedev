@@ -13,6 +13,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.IssueQuery;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Entity
 @Editable
@@ -24,6 +26,8 @@ public class LinkSpec extends AbstractEntity {
 	private String name;
 	
 	private boolean multiple;
+	
+	private String issueQuery;
 	
 	@Lob
 	@Column(length=65535)
@@ -49,6 +53,19 @@ public class LinkSpec extends AbstractEntity {
 
 	public void setMultiple(boolean multiple) {
 		this.multiple = multiple;
+	}
+
+
+	@Editable(order=160, name="Linkable Issues", description="Optionally specify criteria of issues which can be linked")
+	@IssueQuery(withCurrentBuildCriteria=false, withCurrentCommitCriteria=false, withCurrentPullRequestCriteria=false, 
+				withCurrentUserCriteria=false, withOrder=false)
+	@NameOfEmptyValue("All issues")
+	public String getIssueQuery() {
+		return issueQuery;
+	}
+
+	public void setIssueQuery(String issueQuery) {
+		this.issueQuery = issueQuery;
 	}
 
 	@Editable(order=175, name="Asymmetric", description="Whether or not the link is asymmetric. A asymmetric link has different "

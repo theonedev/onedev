@@ -47,7 +47,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	int count(Project project, boolean inTree, @Nullable IssueCriteria issueCriteria);
 	
-	List<Issue> query(Project project, String term, int count);
+	List<Issue> query(@Nullable EntityQuery<Issue> scope, Project project, String term, int count);
 
 	Collection<String> getUndefinedStates();
 	

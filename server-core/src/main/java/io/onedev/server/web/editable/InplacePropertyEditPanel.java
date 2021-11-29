@@ -13,9 +13,10 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.util.EditContext;
+import io.onedev.server.web.util.IssueQueryAware;
 
 @SuppressWarnings("serial")
-public abstract class InplacePropertyEditPanel extends Panel implements EditContext {
+public abstract class InplacePropertyEditPanel extends Panel implements EditContext, IssueQueryAware {
 
 	private final Serializable bean;
 	

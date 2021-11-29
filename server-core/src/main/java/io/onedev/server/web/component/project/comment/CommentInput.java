@@ -83,7 +83,7 @@ public abstract class CommentInput extends MarkdownEditor {
 				if (project == null) 
 					project = getProject();
 				if (SecurityUtils.canAccess(project)) 
-					return OneDev.getInstance(IssueManager.class).query(project, query, count);
+					return OneDev.getInstance(IssueManager.class).query(null, project, query, count);
 				else
 					return new ArrayList<>();
 			}

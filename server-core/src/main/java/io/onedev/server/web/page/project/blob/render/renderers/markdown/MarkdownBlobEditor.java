@@ -113,7 +113,7 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 						if (project == null) 
 							project = context.getProject();
 						if (SecurityUtils.canAccess(project))
-							return OneDev.getInstance(IssueManager.class).query(project, query, count);
+							return OneDev.getInstance(IssueManager.class).query(null, project, query, count);
 						else
 							return new ArrayList<>();
 					}

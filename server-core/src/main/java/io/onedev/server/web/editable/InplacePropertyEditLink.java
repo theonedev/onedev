@@ -2,10 +2,13 @@ package io.onedev.server.web.editable;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -42,6 +45,11 @@ public abstract class InplacePropertyEditLink extends DropdownLink {
 				dropdown.close();
 			}
 
+			@Override
+			public IssueQuery getIssueQuery() {
+				return InplacePropertyEditLink.this.getIssueQuery();
+			}
+
 		};
 	}
 	
@@ -50,5 +58,10 @@ public abstract class InplacePropertyEditLink extends DropdownLink {
 	protected abstract String getPropertyName();
 
 	protected abstract void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName);
+
+	@Nullable
+	protected IssueQuery getIssueQuery() {
+		return null;
+	}
 	
 }
