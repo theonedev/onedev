@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -41,7 +41,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
+	protected Predicate getValuePredicate(Root<Issue> issue, Root<IssueField> field, CriteriaBuilder builder) {
 		if (allowMultiple)
 			return builder.equal(field.get(IssueField.PROP_VALUE), value);
 		else if (operator == IssueQueryLexer.Is) 

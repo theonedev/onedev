@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -344,11 +345,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	private Predicate[] getPredicates(Project project, boolean inTree, @Nullable io.onedev.server.search.entity.EntityCriteria<Issue> issueCriteria, 
 			CriteriaQuery<?> query, CriteriaBuilder builder, Root<Issue> root) {
 		List<Predicate> predicates = new ArrayList<>();
-		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);		
+		Path<Project> projectPath = root.get(Issue.PROP_PROJECT);
 		if (inTree)
-			predicates.add(projectManager.getTreePredicate(builder, join, project));
+			predicates.add(projectManager.getTreePredicate(builder, projectPath, project));
 		else
-			predicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
+			predicates.add(builder.equal(projectPath, project));
 		if (issueCriteria != null)
 			predicates.add(issueCriteria.getPredicate(query, root, builder));
 
@@ -820,9 +821,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Milestone milestone: milestones) 
 			milestonePredicates.add(builder.equal(root.get(IssueSchedule.PROP_MILESTONE), milestone));
 		
-		Join<Project, Project> projectJoin = issueJoin.join(Issue.PROP_PROJECT, JoinType.INNER);
 		criteriaQuery.where(builder.and(
-				projectManager.getTreePredicate(builder, projectJoin, project),
+				projectManager.getTreePredicate(builder, issueJoin.get(Issue.PROP_PROJECT), project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
@@ -836,10 +836,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		Root<IssueSchedule> root = criteriaQuery.from(IssueSchedule.class);
 		criteriaQuery.select(root.get(IssueSchedule.PROP_MILESTONE));
 		
-		Join<Project, Project> join = root
+		Path<Project> projectPath = root
 				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
-				.join(Issue.PROP_PROJECT, JoinType.INNER);
-		criteriaQuery.where(projectManager.getTreePredicate(builder, join, project));
+				.get(Issue.PROP_PROJECT);
+		criteriaQuery.where(projectManager.getTreePredicate(builder, projectPath, project));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
 	}
@@ -935,11 +935,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Milestone milestone: milestones) 
 			milestonePredicates.add(builder.equal(root.get(IssueSchedule.PROP_MILESTONE), milestone));
 		
-		Join<Project, Project> join = root
+		Path<Project> projectPath = root
 				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
-				.join(Issue.PROP_PROJECT, JoinType.INNER);
+				.get(Issue.PROP_PROJECT);
 		criteriaQuery.where(builder.and(
-				projectManager.getTreePredicate(builder, join, project),
+				projectManager.getTreePredicate(builder, projectPath, project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		for (IssueSchedule schedule: getSession().createQuery(criteriaQuery).getResultList()) 

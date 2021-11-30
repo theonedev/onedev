@@ -3,12 +3,11 @@ package io.onedev.server.search.entity.issue;
 import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-
 import io.onedev.server.search.entity.EntityQuery;
 
 public class DateFieldCriteria extends FieldCriteria {
@@ -29,7 +28,7 @@ public class DateFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
+	protected Predicate getValuePredicate(Root<Issue> issue, Root<IssueField> field, CriteriaBuilder builder) {
 		if (operator == IssueQueryLexer.IsUntil)
 			return builder.lessThan(field.get(IssueField.PROP_ORDINAL), date.getTime());
 		else

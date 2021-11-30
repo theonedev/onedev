@@ -810,20 +810,20 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	@Override
-	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> bean, String pathPattern) {
+	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> project, String pathPattern) {
 		cacheLock.readLock().lock();
 		try {
-			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, bean.get(Project.PROP_ID), 
+			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, project.get(Project.PROP_ID), 
 					getMatchingIds(pathPattern), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
 	}
 	
-	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> bean, Project treeRoot) {
+	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> project, Project treeRoot) {
 		cacheLock.readLock().lock();
 		try {
-			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, bean.get(Project.PROP_ID), 
+			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, project.get(Project.PROP_ID), 
 					getTreeIds(treeRoot.getId()), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();

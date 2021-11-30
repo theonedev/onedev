@@ -25,6 +25,8 @@ public class BuildParam extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_BUILD = "build";
+	
 	public static final String PROP_NAME = "name";
 	
 	public static final String PROP_VALUE = "value";

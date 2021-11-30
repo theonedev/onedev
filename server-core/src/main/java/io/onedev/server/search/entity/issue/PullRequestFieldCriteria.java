@@ -4,8 +4,8 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
@@ -28,10 +28,8 @@ public class PullRequestFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		return builder.and(
-				builder.equal(field.getParent().get(Issue.PROP_PROJECT), request.getTargetProject()),
-				builder.equal(field.get(IssueField.PROP_ORDINAL), request.getNumber()));
+	protected Predicate getValuePredicate(Root<Issue> issue, Root<IssueField> field, CriteriaBuilder builder) {
+		return builder.equal(field.get(IssueField.PROP_ORDINAL), request.getId());
 	}
 
 	@Override

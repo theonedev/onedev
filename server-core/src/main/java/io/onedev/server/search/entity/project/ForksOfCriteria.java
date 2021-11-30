@@ -4,6 +4,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -24,8 +25,14 @@ public class ForksOfCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
-		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(
-				builder, root.join(Project.PROP_FORKED_FROM), forkedFromPath);
+		Subquery<Project> forkedFromQuery = query.subquery(Project.class);
+		Root<Project> forkedFrom = forkedFromQuery.from(Project.class);
+		forkedFromQuery.select(forkedFrom);
+
+		ProjectManager manager = OneDev.getInstance(ProjectManager.class);
+		return builder.exists(forkedFromQuery.where(
+				builder.equal(root.get(Project.PROP_FORKED_FROM), forkedFrom), 
+				manager.getPathMatchPredicate(builder, forkedFrom, forkedFromPath)));
 	}
 
 	@Override

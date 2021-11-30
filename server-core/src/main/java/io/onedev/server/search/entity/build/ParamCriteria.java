@@ -4,10 +4,9 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
@@ -28,11 +27,14 @@ public class ParamCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.LEFT);
-		join.on(builder.and(
-				builder.equal(join.get(BuildParam.PROP_NAME), name)),
-				builder.equal(join.get(BuildParam.PROP_VALUE), value));
-		return join.isNotNull();
+		Subquery<BuildParam> paramQuery = query.subquery(BuildParam.class);
+		Root<BuildParam> param = paramQuery.from(BuildParam.class);
+		paramQuery.select(param);
+
+		return builder.exists(paramQuery.where(
+				builder.equal(param.get(BuildParam.PROP_BUILD), root), 
+				builder.equal(param.get(BuildParam.PROP_NAME), name), 
+				builder.equal(param.get(BuildParam.PROP_VALUE), value)));
 	}
 
 	@Override

@@ -28,25 +28,25 @@ public class LinkIsEmptyCriteria extends IssueCriteria {
 	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
-		Subquery<IssueLink> subQuery = query.subquery(IssueLink.class);
-		Root<IssueLink> linkRoot = subQuery.from(IssueLink.class);
-		subQuery.select(linkRoot);
+		Subquery<IssueLink> linkQuery = query.subquery(IssueLink.class);
+		Root<IssueLink> link = linkQuery.from(IssueLink.class);
+		linkQuery.select(link);
 		
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SPEC), linkSpec));
+		predicates.add(builder.equal(link.get(IssueLink.PROP_SPEC), linkSpec));
 		
 		if (opposite) {
-			predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_TARGET), root));
+			predicates.add(builder.equal(link.get(IssueLink.PROP_TARGET), root));
 		} else if (linkSpec.getOpposite() != null) {
-			predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), root));
+			predicates.add(builder.equal(link.get(IssueLink.PROP_SOURCE), root));
 		} else {
 			predicates.add(builder.or(
-					builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), root), 
-					builder.equal(linkRoot.get(IssueLink.PROP_TARGET), root))
+					builder.equal(link.get(IssueLink.PROP_SOURCE), root), 
+					builder.equal(link.get(IssueLink.PROP_TARGET), root))
 			);
 		}
 
-		return builder.not(builder.exists(subQuery.where(builder.and(predicates.toArray(new Predicate[0])))));
+		return builder.not(builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0])))));
 	}
 
 	@Override

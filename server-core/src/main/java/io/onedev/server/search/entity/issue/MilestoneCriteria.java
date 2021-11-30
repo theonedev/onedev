@@ -25,14 +25,14 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
-		Subquery<IssueSchedule> subQuery = query.subquery(IssueSchedule.class);
-		Root<IssueSchedule> scheduleRoot = subQuery.from(IssueSchedule.class);
-		subQuery.select(scheduleRoot);
-		Join<?, ?> milestoneJoin = scheduleRoot.join(IssueSchedule.PROP_MILESTONE, JoinType.INNER);
-		subQuery.where(builder.and(
-				builder.equal(scheduleRoot.get(IssueSchedule.PROP_ISSUE), root), 
+		Subquery<IssueSchedule> scheduleQuery = query.subquery(IssueSchedule.class);
+		Root<IssueSchedule> schedule = scheduleQuery.from(IssueSchedule.class);
+		scheduleQuery.select(schedule);
+		Join<?, ?> milestoneJoin = schedule.join(IssueSchedule.PROP_MILESTONE, JoinType.INNER);
+		scheduleQuery.where(builder.and(
+				builder.equal(schedule.get(IssueSchedule.PROP_ISSUE), root), 
 				builder.like(milestoneJoin.get(Milestone.PROP_NAME), milestoneName.replace("*", "%"))));
-		return builder.exists(subQuery);
+		return builder.exists(scheduleQuery);
 	}
 
 	@Override

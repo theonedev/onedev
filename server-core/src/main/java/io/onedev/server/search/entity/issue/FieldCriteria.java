@@ -8,10 +8,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import com.google.common.base.Preconditions;
 
@@ -39,20 +38,20 @@ public abstract class FieldCriteria extends IssueCriteria {
 
 	@Override
 	public final Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
-		Predicate valuePredicate = getValuePredicate(join, builder);
+		Subquery<IssueField> fieldQuery = query.subquery(IssueField.class);
+		Root<IssueField> field = fieldQuery.from(IssueField.class);
+		fieldQuery.select(field);
+
+		Predicate issuePredicate = builder.equal(field.get(IssueField.PROP_ISSUE), root);
+		Predicate namePredicate = builder.equal(field.get(IssueField.PROP_NAME), getFieldName());
+		Predicate valuePredicate = getValuePredicate(root, field, builder);
 		if (valuePredicate != null) {
-			join.on(builder.and(
-					builder.equal(join.get(IssueField.PROP_NAME), getFieldName()), 
-					getValuePredicate(join, builder)));
-			return join.isNotNull();
+			return builder.exists(fieldQuery.where(issuePredicate, namePredicate, valuePredicate));
 		} else {
-			join.on(builder.and(
-					builder.equal(join.get(IssueField.PROP_NAME), getFieldName()), 
-					builder.or(builder.isNull(join.get(IssueField.PROP_VALUE)))));
-			Join<?, ?> join2 = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
-			join2.on(builder.equal(join2.get(IssueField.PROP_NAME), getFieldName()));
-			return builder.or(join.isNotNull(), join2.isNull());
+			return builder.not(builder.exists(fieldQuery.where(
+					issuePredicate, 
+					namePredicate, 
+					builder.isNotNull(field.get(IssueField.PROP_VALUE)))));
 		}
 	}
 
@@ -60,7 +59,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 	 * @return predicate of field value. <tt>null</tt> to indicate that this field is empty   
 	 */
 	@Nullable
-	protected abstract Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder);
+	protected abstract Predicate getValuePredicate(Root<Issue> issue, Root<IssueField> field, CriteriaBuilder builder);
 	
 	@Override
 	public Collection<String> getUndefinedFields() {

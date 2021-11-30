@@ -33,6 +33,8 @@ public class AgentAttribute extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_AGENT = "agent";
+	
 	public static final String PROP_NAME = "name";
 	
 	public static final String PROP_VALUE = "value";

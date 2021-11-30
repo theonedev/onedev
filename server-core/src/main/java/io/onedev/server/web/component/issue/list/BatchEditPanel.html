@@ -8,19 +8,19 @@
 			<div class="modal-body">
 				<div class="mb-3 font-size-lg">Fields to Change</div>
 				<div wicket:id="feedback"></div>
-				<div class="d-flex flex-wrap mb-4">
-					<label class="checkbox flex-shrink-0 mr-3">
+				<div class="d-flex flex-wrap">
+					<label class="checkbox flex-shrink-0 mr-3 mb-4">
 	      				<input wicket:id="stateCheck" type="checkbox"> State
 	  				</label>					
-					<label class="checkbox flex-shrink-0 mr-3">
+					<label class="checkbox flex-shrink-0 mr-3 mb-4">
 	      				<input wicket:id="milestoneCheck" type="checkbox"> Milestone
 	  				</label>					
-					<label wicket:id="customFields" class="checkbox flex-shrink-0 mr-3">
+					<label wicket:id="customFields" class="checkbox flex-shrink-0 mr-3 mb-4">
 		      			<input wicket:id="customFieldCheck" type="checkbox"> <wicket:container wicket:id="name"></wicket:container>
 					</label>
 				</div>
-				<div wicket:id="builtInFieldsEditor" class="mb-4"></div>
-				<div wicket:id="customFieldsEditor" class="mb-4"></div>
+				<div wicket:id="builtInFieldsEditor"></div>
+				<div wicket:id="customFieldsEditor"></div>
 				<div wicket:id="comment" placeholder="Leave a comment"></div>
 			</div>				
 			<div class="modal-footer">
