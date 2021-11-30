@@ -642,9 +642,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setIssue(issue);
 		change.setUser(SecurityUtils.getUser());
 		
-		String linkName = opposite?spec.getOpposite().getName():spec.getName();
-		
-		IssueLinkChangeData data = new IssueLinkChangeData(linkName, 
+		IssueLinkChangeData data = new IssueLinkChangeData(spec.getName(opposite), 
 				getIssueSummary(issue, prevLinkedIssue), 
 				getIssueSummary(issue, linkedIssue));
 		change.setData(data);
@@ -711,7 +709,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setIssue(issue);
 		change.setUser(SecurityUtils.getUser());
 	
-		String linkName = opposite?spec.getOpposite().getName():spec.getName();
+		String linkName = spec.getName(opposite);
 		IssueLinkAddData data = new IssueLinkAddData(linkName, getIssueSummary(issue, linkedIssue));
 		change.setData(data);
 		save(change);
@@ -730,7 +728,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setIssue(issue);
 		change.setUser(SecurityUtils.getUser());
 		
-		String linkName = opposite?spec.getOpposite().getName():spec.getName();
+		String linkName = spec.getName(opposite);
 		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, getIssueSummary(issue, linkedIssue));
 		change.setData(data);
 		save(change);

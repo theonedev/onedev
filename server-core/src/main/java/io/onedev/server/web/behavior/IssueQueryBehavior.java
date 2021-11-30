@@ -37,6 +37,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
@@ -46,9 +47,11 @@ import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
@@ -109,6 +112,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		return projectModel.getObject();
 	}
 
+	private LinkSpecManager getLinkSpecManager() {
+		return OneDev.getInstance(LinkSpecManager.class);
+	}
+	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
@@ -125,6 +132,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							List<String> candidates = new ArrayList<>(Issue.QUERY_FIELDS);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
 								candidates.add(field.getName());
+							List<LinkSpec> links = new ArrayList<>(getLinkSpecManager().query());
+							Collections.sort(links);
+							for (LinkSpec link: links) {
+								candidates.add(link.getName());
+								if (link.getOpposite() != null)
+									candidates.add(link.getOpposite().getName());
+							}
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
@@ -169,58 +183,63 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								try {
 									checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
 											withCurrentPullRequestCriteria, withCurrentCommitCriteria);
-									FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
-									if (fieldSpec instanceof DateField || fieldName.equals(NAME_SUBMIT_DATE) 
-											|| fieldName.equals(NAME_UPDATE_DATE)) {
-										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
-										return !suggestions.isEmpty()? suggestions: null;
-									} else if (fieldSpec instanceof UserChoiceField) {
-										return SuggestionUtils.suggestUsers(matchWith);
-									} else if (fieldSpec instanceof IssueChoiceField) {
+									LinkSpec linkSpec = getLinkSpecManager().find(fieldName);
+									if (linkSpec != null) {
 										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldSpec instanceof BuildChoiceField) {
-										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldSpec instanceof CommitField) {
-										return SuggestionUtils.suggestCommits(project, matchWith);
-									} else if (fieldSpec instanceof PullRequestChoiceField) {
-										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldSpec instanceof BooleanField) {
-										return SuggestionUtils.suggest(Lists.newArrayList("true", "false"), matchWith);
-									} else if (fieldSpec instanceof GroupChoiceField) {
-										List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
-										return SuggestionUtils.suggest(candidates, matchWith);
-									} else if (fieldName.equals(NAME_PROJECT)) {
-										if (!matchWith.contains("*"))
-											return SuggestionUtils.suggestProjects(matchWith);
-										else
-											return null;
-									} else if (fieldName.equals(NAME_STATE)) {
-										List<String> candidates = issueSetting.getStateSpecs()
-												.stream()
-												.map(it->it.getName())
-												.collect(Collectors.toList());
-										return SuggestionUtils.suggest(candidates, matchWith);
-									} else if (fieldSpec instanceof ChoiceField) {
-										ComponentContext.push(new ComponentContext(getComponent()));
-										try {
-											List<String> candidates = new ArrayList<>(((ChoiceField)fieldSpec)
-													.getChoiceProvider().getChoices(true).keySet());
+									} else {
+										FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
+										if (fieldSpec instanceof DateField || fieldName.equals(NAME_SUBMIT_DATE) 
+												|| fieldName.equals(NAME_UPDATE_DATE)) {
+											List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
+											return !suggestions.isEmpty()? suggestions: null;
+										} else if (fieldSpec instanceof UserChoiceField) {
+											return SuggestionUtils.suggestUsers(matchWith);
+										} else if (fieldSpec instanceof IssueChoiceField) {
+											return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+										} else if (fieldSpec instanceof BuildChoiceField) {
+											return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+										} else if (fieldSpec instanceof CommitField) {
+											return SuggestionUtils.suggestCommits(project, matchWith);
+										} else if (fieldSpec instanceof PullRequestChoiceField) {
+											return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+										} else if (fieldSpec instanceof BooleanField) {
+											return SuggestionUtils.suggest(Lists.newArrayList("true", "false"), matchWith);
+										} else if (fieldSpec instanceof GroupChoiceField) {
+											List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
 											return SuggestionUtils.suggest(candidates, matchWith);
-										} finally {
-											ComponentContext.pop();
-										}			
-									} else if (fieldName.equals(NAME_NUMBER)) {
-										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
-										if (project != null && !matchWith.contains("*"))
-											return SuggestionUtils.suggestMilestones(project, matchWith);
-										else
+										} else if (fieldName.equals(NAME_PROJECT)) {
+											if (!matchWith.contains("*"))
+												return SuggestionUtils.suggestProjects(matchWith);
+											else
+												return null;
+										} else if (fieldName.equals(NAME_STATE)) {
+											List<String> candidates = issueSetting.getStateSpecs()
+													.stream()
+													.map(it->it.getName())
+													.collect(Collectors.toList());
+											return SuggestionUtils.suggest(candidates, matchWith);
+										} else if (fieldSpec instanceof ChoiceField) {
+											ComponentContext.push(new ComponentContext(getComponent()));
+											try {
+												List<String> candidates = new ArrayList<>(((ChoiceField)fieldSpec)
+														.getChoiceProvider().getChoices(true).keySet());
+												return SuggestionUtils.suggest(candidates, matchWith);
+											} finally {
+												ComponentContext.pop();
+											}			
+										} else if (fieldName.equals(NAME_NUMBER)) {
+											return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+										} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
+											if (project != null && !matchWith.contains("*"))
+												return SuggestionUtils.suggestMilestones(project, matchWith);
+											else
+												return null;
+										} else if (fieldName.equals(NAME_TITLE) || fieldName.equals(NAME_DESCRIPTION) 
+												|| fieldName.equals(NAME_COMMENT) || fieldName.equals(NAME_VOTE_COUNT) 
+												|| fieldName.equals(NAME_COMMENT_COUNT) || fieldSpec instanceof IntegerField 
+												|| fieldSpec instanceof TextField) {
 											return null;
-									} else if (fieldName.equals(NAME_TITLE) || fieldName.equals(NAME_DESCRIPTION) 
-											|| fieldName.equals(NAME_COMMENT) || fieldName.equals(NAME_VOTE_COUNT) 
-											|| fieldName.equals(NAME_COMMENT_COUNT) || fieldSpec instanceof IntegerField 
-											|| fieldSpec instanceof TextField) {
-										return null;
+										}
 									}
 								} catch (ExplicitException ex) {
 								}

@@ -17,6 +17,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -24,6 +25,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -91,6 +93,13 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (dateValue == null)
 			throw new ExplicitException("Unrecognized date: " + value);
 		return dateValue;
+	}
+	
+	public static LinkSpec getLinkSpec(String value) {
+		LinkSpec linkSpec = OneDev.getInstance(LinkSpecManager.class).find(value);
+		if (linkSpec == null)
+			throw new ExplicitException("Unable to find link spec: " + value);
+		return linkSpec;
 	}
 	
 	public static ProjectScopedCommit getCommitId(@Nullable Project project, String value) {

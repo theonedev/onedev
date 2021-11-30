@@ -147,6 +147,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static final String PROP_FIELDS = "fields";
 		
+	public static final String PROP_SOURCE_LINKS = "sourceLinks";
+	
+	public static final String PROP_TARGET_LINKS = "targetLinks";
+	
 	public static final String PROP_SCHEDULES = "schedules";
 	
 	public static final String PROP_UUID = "uuid";

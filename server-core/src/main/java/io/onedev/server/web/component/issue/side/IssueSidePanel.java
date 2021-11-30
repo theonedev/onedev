@@ -258,7 +258,7 @@ public abstract class IssueSidePanel extends Panel {
 				LinkSpec spec = side.spec;
 				boolean opposite = side.opposite;
 				
-				String name = opposite?spec.getOpposite().getName():spec.getName();
+				String name = spec.getName(opposite);
 				fragment.add(new Label("name", name));
 				
 				RepeatingView linkedIssuesView = new RepeatingView("linkedIssues");
@@ -323,10 +323,7 @@ public abstract class IssueSidePanel extends Panel {
 				Fragment fragment = new Fragment("content", "singleLinkFrag", IssueSidePanel.this);
 				
 				LinkSide side = model.getObject();
-				if (side.opposite)
-					fragment.add(new Label("name", side.spec.getOpposite().getName()));
-				else
-					fragment.add(new Label("name", side.spec.getName()));
+				fragment.add(new Label("name", side.spec.getName(side.opposite)));
 				
 				SingleLinkBean bean = new SingleLinkBean();
 				

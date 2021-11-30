@@ -83,16 +83,34 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				
-				LinkSpecManager manager = OneDev.getInstance(LinkSpecManager.class);
-				LinkSpec specWithSameName = manager.find(getSpec().getName());
-				if (getSpec().isNew() && specWithSameName != null 
-						|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
-					editor.error(new Path(new PathNode.Named("name")), "Name already used by another link");
+
+				if (getSpec().getOpposite() != null && getSpec().getName().equals(getSpec().getOpposite().getName())) {
+					String errorMessage = "Name and name on the other side should be different";
+					editor.error(new Path(new PathNode.Named("name")), errorMessage);
+					editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 					target.add(form);
 				} else {
-					manager.save(getSpec());
-					onSave(target);
+					LinkSpecManager manager = OneDev.getInstance(LinkSpecManager.class);
+					LinkSpec specWithSameName = manager.find(getSpec().getName());
+					if (getSpec().isNew() && specWithSameName != null 
+							|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
+						editor.error(new Path(new PathNode.Named("name")), "Name already used by another link");
+						target.add(form);
+					} else if (getSpec().getOpposite() != null) {
+						specWithSameName = manager.find(getSpec().getOpposite().getName());
+						if (getSpec().isNew() && specWithSameName != null 
+								|| !getSpec().isNew() && specWithSameName != null && !specWithSameName.equals(getSpec())) {
+							String errorMessage = "Name already used by another link";
+							editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
+							target.add(form);
+						} else {
+							manager.save(getSpec());
+							onSave(target);
+						}
+					} else {
+						manager.save(getSpec());
+						onSave(target);
+					}
 				}
 			}
 			

@@ -20,9 +20,11 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
@@ -157,11 +159,16 @@ public class IssueQuery extends EntityQuery<Issue> {
 						if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 							return new MilestoneIsEmptyCriteria();
 						} else {
-							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
-							if (fieldSpec != null)
-								return new FieldOperatorCriteria(fieldName, operator, fieldSpec.isAllowMultiple());
-							else
-								return new FieldOperatorCriteria(fieldName, operator, false);
+							LinkSpec linkSpec = getLinkSpecManager().find(fieldName);
+							if (linkSpec != null) {
+								return new LinkIsEmptyCriteria(linkSpec, !fieldName.equals(linkSpec.getName()));
+							} else {
+								FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
+								if (fieldSpec != null) 
+									return new FieldOperatorCriteria(fieldName, operator, fieldSpec.isAllowMultiple());
+								else 
+									return new FieldOperatorCriteria(fieldName, operator, false);
+							}
 						}
 					}
 					
@@ -238,27 +245,32 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 								return new NumberCriteria(project, value, operator);
 							} else {
-								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
-								if (field instanceof IssueChoiceField) {
-									return new IssueFieldCriteria(fieldName, project, value);
-								} else if (field instanceof BuildChoiceField) {
-									return new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple());
-								} else if (field instanceof PullRequestChoiceField) {
-									return new PullRequestFieldCriteria(fieldName, project, value);
-								} else if (field instanceof CommitField) {
-									return new CommitFieldCriteria(fieldName, project, value);
-								} else if (field instanceof BooleanField) {
-									return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
-								} else if (field instanceof IntegerField) {
-									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
-								} else if (field instanceof ChoiceField) { 
-									long ordinal = getValueOrdinal((ChoiceField) field, value);
-									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, field.isAllowMultiple());
-								} else if (field instanceof UserChoiceField 
-										|| field instanceof GroupChoiceField) {
-									return new ChoiceFieldCriteria(fieldName, value, -1, operator, field.isAllowMultiple());
+								LinkSpec link = getLinkSpecManager().find(fieldName);
+								if (link != null) {
+									return new LinkCriteria(link, !fieldName.equals(link.getName()), project, value);
 								} else {
-									return new StringFieldCriteria(fieldName, value, operator);
+									FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
+									if (field instanceof IssueChoiceField) {
+										return new IssueFieldCriteria(fieldName, project, value);
+									} else if (field instanceof BuildChoiceField) {
+										return new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple());
+									} else if (field instanceof PullRequestChoiceField) {
+										return new PullRequestFieldCriteria(fieldName, project, value);
+									} else if (field instanceof CommitField) {
+										return new CommitFieldCriteria(fieldName, project, value);
+									} else if (field instanceof BooleanField) {
+										return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
+									} else if (field instanceof IntegerField) {
+										return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
+									} else if (field instanceof ChoiceField) { 
+										long ordinal = getValueOrdinal((ChoiceField) field, value);
+										return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, field.isAllowMultiple());
+									} else if (field instanceof UserChoiceField 
+											|| field instanceof GroupChoiceField) {
+										return new ChoiceFieldCriteria(fieldName, value, -1, operator, field.isAllowMultiple());
+									} else {
+										return new StringFieldCriteria(fieldName, value, operator);
+									}
 								}
 							}
 						case IssueQueryLexer.IsLessThan:
@@ -346,6 +358,10 @@ public class IssueQuery extends EntityQuery<Issue> {
 			return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
+	private static LinkSpecManager getLinkSpecManager() {
+		return OneDev.getInstance(LinkSpecManager.class);
+	}
+	
 	private static ExplicitException newOperatorException(String fieldName, int operator) {
 		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
@@ -354,7 +370,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
 			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria) {
 		FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
-		if (fieldSpec == null && !Issue.QUERY_FIELDS.contains(fieldName))
+		LinkSpec linkSpec = getLinkSpecManager().find(fieldName);
+		if (fieldSpec == null && linkSpec == null && !Issue.QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
@@ -400,6 +417,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !fieldName.equals(Issue.NAME_COMMENT_COUNT) 
 					&& !fieldName.equals(Issue.NAME_NUMBER)
 					&& !fieldName.equals(IssueSchedule.NAME_MILESTONE)
+					&& linkSpec == null
 					&& !(fieldSpec instanceof IssueChoiceField)
 					&& !(fieldSpec instanceof PullRequestChoiceField)
 					&& !(fieldSpec instanceof BuildChoiceField)

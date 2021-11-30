@@ -12,6 +12,7 @@ import javax.persistence.OneToMany;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
+import io.onedev.server.util.validation.annotation.LinkName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -37,6 +38,7 @@ public class LinkSpec extends AbstractEntity {
 	private Collection<IssueLink> links = new ArrayList<>();
 	
 	@Editable(order=100, description="Name of the link")
+	@LinkName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -76,6 +78,10 @@ public class LinkSpec extends AbstractEntity {
 
 	public void setOpposite(LinkSpecOpposite opposite) {
 		this.opposite = opposite;
+	}
+	
+	public String getName(boolean opposite) {
+		return opposite?getOpposite().getName():getName();
 	}
 	
 }
