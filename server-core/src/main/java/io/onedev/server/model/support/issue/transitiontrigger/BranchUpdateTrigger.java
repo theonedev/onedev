@@ -47,8 +47,7 @@ public class BranchUpdateTrigger extends TransitionTrigger {
 	}
 
 	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
-	@IssueQuery(withOrder = false, withCurrentUserCriteria = false, withCurrentBuildCriteria = false, 
-			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = true)
+	@IssueQuery(withOrder = false, withCurrentCommitCriteria = true)
 	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {

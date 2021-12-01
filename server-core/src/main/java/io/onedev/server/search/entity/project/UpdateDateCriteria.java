@@ -4,9 +4,9 @@ import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -30,8 +30,8 @@ public class UpdateDateCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
-		Path<Date> attribute = ProjectQuery.getPath(root, Project.PROP_UPDATE_DATE);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
+		Path<Date> attribute = ProjectQuery.getPath(from, Project.PROP_UPDATE_DATE);
 		if (operator == ProjectQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else

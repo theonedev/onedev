@@ -6,9 +6,9 @@ import java.util.HashSet;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -45,8 +45,8 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
-		Path<Long> attribute = root.get(Build.PROP_ID);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+		Path<Long> attribute = from.get(Build.PROP_ID);
 		Project project = issue.getProject();
 		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, issue.getNumber());
 		Collection<String> descendants = new HashSet<>();
@@ -55,7 +55,7 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 		Collection<Long> inBuildIds = buildManager.filterIds(project.getId(), descendants);
 		return builder.and(
-				builder.equal(root.get(Build.PROP_PROJECT), issue.getProject()),
+				builder.equal(from.get(Build.PROP_PROJECT), issue.getProject()),
 				inManyValues(builder, attribute, inBuildIds, buildManager.getIdsByProject(project.getId())));
 	}
 

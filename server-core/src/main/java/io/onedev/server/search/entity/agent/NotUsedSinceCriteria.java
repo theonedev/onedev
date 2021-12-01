@@ -4,8 +4,8 @@ import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -25,8 +25,8 @@ public class NotUsedSinceCriteria extends EntityCriteria<Agent> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Agent> root, CriteriaBuilder builder) {
-		return builder.lessThan(root.get(Agent.PROP_LAST_USED_DATE), date);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
+		return builder.lessThan(from.get(Agent.PROP_LAST_USED_DATE), date);
 	}
 
 	@Override

@@ -19,7 +19,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
-import io.onedev.server.event.issue.IssueChangeEvent;
+import io.onedev.server.event.issue.IssueChanged;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
@@ -71,8 +71,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		String url;
 		if (event instanceof IssueCommented)
 			url = urlManager.urlFor(((IssueCommented)event).getComment());
-		else if (event instanceof IssueChangeEvent)
-			url = urlManager.urlFor(((IssueChangeEvent)event).getChange());
+		else if (event instanceof IssueChanged)
+			url = urlManager.urlFor(((IssueChanged)event).getChange());
 		else
 			url = urlManager.urlFor(issue);
 
@@ -96,7 +96,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(issue.getProject(), queryString, true, true, false, false, false);
+				return IssueQuery.parse(issue.getProject(), queryString, true, true, false, false, false, false);
 			}
 
 			@Override
@@ -122,7 +122,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(null, queryString, true, true, false, false, false);
+				return IssueQuery.parse(null, queryString, true, true, false, false, false, false);
 			}
 
 			@Override
@@ -209,8 +209,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 		}
 
-		if (!(event instanceof IssueChangeEvent) 
-				|| !(((IssueChangeEvent) event).getChange().getData() instanceof ReferencedFromAware)) {
+		if (!(event instanceof IssueChanged) 
+				|| !(((IssueChanged) event).getChange().getData() instanceof ReferencedFromAware)) {
 			Collection<User> bccUsers = new HashSet<>();
 			
 			for (IssueWatch watch: issue.getWatches()) {

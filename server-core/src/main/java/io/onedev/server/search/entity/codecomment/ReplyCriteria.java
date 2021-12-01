@@ -2,11 +2,11 @@ package io.onedev.server.search.entity.codecomment;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -24,8 +24,8 @@ public class ReplyCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<CodeComment> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(CodeComment.PROP_REPLIES, JoinType.LEFT);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
+		Join<?, ?> join = from.join(CodeComment.PROP_REPLIES, JoinType.LEFT);
 		Path<String> attribute = join.get(CodeCommentReply.PROP_CONTENT);
 		join.on(builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%"));
 		return join.isNotNull();

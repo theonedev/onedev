@@ -174,7 +174,7 @@ public abstract class IssueListPanel extends Panel {
 	@Nullable
 	private IssueQuery parse(@Nullable String queryString, IssueQuery baseQuery) {
 		try {
-			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, true, true, false, false, false));
+			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, true, true, false, false, false, false));
 		} catch (ExplicitException e) {
 			error(e.getMessage());
 			return null;
@@ -373,7 +373,7 @@ public abstract class IssueListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, true, true, false, false, false) {
+		}, true, true, false, false, false, false) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

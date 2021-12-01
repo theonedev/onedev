@@ -134,8 +134,7 @@ public class PressButtonTrigger extends TransitionTrigger {
 	}
 
 	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
-	@IssueQuery(withOrder = false, withCurrentUserCriteria = true, withCurrentBuildCriteria = false, 
-			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)	
+	@IssueQuery(withOrder = false, withCurrentUserCriteria = true)	
 	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {

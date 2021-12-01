@@ -125,7 +125,7 @@ public class ProjectBuildSetting implements Serializable {
 
 		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters) {
 			try {
-				undefinedStates.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false).getUndefinedStates());
+				undefinedStates.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false).getUndefinedStates());
 			} catch (Exception e) {
 			}
 		}
@@ -137,7 +137,7 @@ public class ProjectBuildSetting implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters) {
 			try {
-				undefinedFields.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false).getUndefinedFields());
+				undefinedFields.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false).getUndefinedFields());
 			} catch (Exception e) {
 			}
 		}
@@ -148,7 +148,7 @@ public class ProjectBuildSetting implements Serializable {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters) {
 			try {
-				undefinedFieldValues.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false).getUndefinedFieldValues());
+				undefinedFieldValues.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false).getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
 		}
@@ -159,7 +159,7 @@ public class ProjectBuildSetting implements Serializable {
 		for (Iterator<DefaultFixedIssueFilter> it = defaultFixedIssueFilters.iterator(); it.hasNext();) {
 			DefaultFixedIssueFilter filter = it.next();
 			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false);
+				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false);
 				if (parsedQuery.fixUndefinedStates(resolutions))
 					filter.setIssueQuery(parsedQuery.toString());
 				else
@@ -173,7 +173,7 @@ public class ProjectBuildSetting implements Serializable {
 		for (Iterator<DefaultFixedIssueFilter> it = defaultFixedIssueFilters.iterator(); it.hasNext();) {
 			DefaultFixedIssueFilter filter = it.next();
 			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false);
+				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false);
 				if (parsedQuery.fixUndefinedFields(resolutions))
 					filter.setIssueQuery(parsedQuery.toString());
 				else
@@ -187,7 +187,7 @@ public class ProjectBuildSetting implements Serializable {
 		for (Iterator<DefaultFixedIssueFilter> it = defaultFixedIssueFilters.iterator(); it.hasNext();) {
 			DefaultFixedIssueFilter filter = it.next();
 			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false);
+				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false);
 				if (parsedQuery.fixUndefinedFieldValues(resolutions))
 					filter.setIssueQuery(parsedQuery.toString());
 				else

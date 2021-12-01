@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -249,7 +250,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 
 	private Predicate[] getPredicates(Project project, 
 			@Nullable io.onedev.server.search.entity.EntityCriteria<CodeComment> criteria, 
-			@Nullable PullRequest request, CriteriaQuery<?> query, Root<CodeComment> root, CriteriaBuilder builder) {
+			@Nullable PullRequest request, CriteriaQuery<?> query, From<CodeComment, CodeComment> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) 
 			predicates.add(builder.equal(CodeCommentQuery.getPath(root, CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST), request));

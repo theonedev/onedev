@@ -3317,7 +3317,7 @@ public class DataMigrator {
 		
 	}
 	
-	// Migrate to 5.5.0
+	// Migrate to 6.0.0
 	private void migrate71(File dataDir, Stack<Integer> versions) {
 		Map<String, String> issueScopes = new HashMap<>();
 		Map<Pair<String, String>, String> issueIds = new HashMap<>();

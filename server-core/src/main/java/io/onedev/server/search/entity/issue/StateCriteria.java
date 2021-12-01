@@ -7,9 +7,9 @@ import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -27,8 +27,8 @@ public class StateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
-		Path<?> attribute = root.get(Issue.PROP_STATE);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+		Path<?> attribute = from.get(Issue.PROP_STATE);
 		return builder.equal(attribute, value);
 	}
 

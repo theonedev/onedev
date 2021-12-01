@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.project;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -24,15 +25,15 @@ public class ChildrenOfCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Subquery<Project> parentQuery = query.subquery(Project.class);
-		Root<Project> parent = parentQuery.from(Project.class);
-		parentQuery.select(parent);
+		Root<Project> parentRoot = parentQuery.from(Project.class);
+		parentQuery.select(parentRoot);
 
 		ProjectManager manager = OneDev.getInstance(ProjectManager.class);
 		return builder.exists(parentQuery.where(
-				builder.equal(root.get(Project.PROP_PARENT), parent), 
-				manager.getPathMatchPredicate(builder, parent, parentPath)));
+				builder.equal(from.get(Project.PROP_PARENT), parentRoot), 
+				manager.getPathMatchPredicate(builder, parentRoot, parentPath)));
 	}
 
 	@Override

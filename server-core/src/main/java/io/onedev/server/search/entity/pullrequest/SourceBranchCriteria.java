@@ -2,9 +2,9 @@ package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -21,8 +21,8 @@ public class SourceBranchCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<String> attribute = root.get(PullRequest.PROP_SOURCE_BRANCH);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+		Path<String> attribute = from.get(PullRequest.PROP_SOURCE_BRANCH);
 		String normalized = branch.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}

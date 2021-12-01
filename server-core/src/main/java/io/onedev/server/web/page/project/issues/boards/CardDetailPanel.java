@@ -222,7 +222,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 					@Override
 					protected EntityQuery<Issue> parse(String queryString, Project project) {
-						return IssueQuery.parse(project, queryString, true, true, false, false, false);
+						return IssueQuery.parse(project, queryString, true, true, false, false, false, false);
 					}
 
 					@Override

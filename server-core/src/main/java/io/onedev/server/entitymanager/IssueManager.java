@@ -82,4 +82,5 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	List<Issue> queryAfter(@Nullable Long afterIssueId, int count);
 	
+	void test();
 }

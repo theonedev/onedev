@@ -347,7 +347,7 @@ public class GlobalIssueSetting implements Serializable {
 			undefinedStates.addAll(template.getUndefinedStates());
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
 				undefinedStates.addAll(query.getUndefinedStates());
 			} catch (Exception e) {
 			}
@@ -372,7 +372,7 @@ public class GlobalIssueSetting implements Serializable {
 			undefinedFields.addAll(template.getUndefinedFields());
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
 				undefinedFields.addAll(query.getUndefinedFields());
 			} catch (Exception e) {
 			}
@@ -392,7 +392,7 @@ public class GlobalIssueSetting implements Serializable {
 			undefinedFieldValues.addAll(template.getUndefinedFieldValues());
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
 				undefinedFieldValues.addAll(query.getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
@@ -416,7 +416,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
 				if (query.fixUndefinedStates(resolutions))
 					namedQuery.setQuery(query.toString());
 				else
@@ -449,7 +449,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
 				if (query.fixUndefinedFields(resolutions))
 					namedQuery.setQuery(query.toString());
 				else
@@ -486,7 +486,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
 				if (query.fixUndefinedFieldValues(resolutions))
 					namedQuery.setQuery(query.toString());
 				else

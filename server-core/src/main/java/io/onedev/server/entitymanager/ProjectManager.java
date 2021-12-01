@@ -59,13 +59,13 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Collection<Project> getPermittedProjects(Permission permission);
 	
-	List<Project> query(EntityQuery<Project> projecQuery, int firstResult, int maxResults);
+	List<Project> query(EntityQuery<Project> query, int firstResult, int maxResults);
 	
-	int count(EntityCriteria<Project> projectCriteria);
+	int count(EntityCriteria<Project> criteria);
 
-	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> project, String pathPattern);
+	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> jpaPath, String pathPattern);
 	
-	Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> project, Project treeRoot);
+	Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> jpaPath, Project project);
 	
 	void move(Collection<Project> projects, @Nullable Project parent);
 

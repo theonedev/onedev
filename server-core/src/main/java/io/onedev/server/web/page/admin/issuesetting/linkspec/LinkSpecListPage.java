@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting.linkspec;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -13,6 +14,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -23,14 +25,16 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 
 @SuppressWarnings("serial")
@@ -69,6 +73,29 @@ public class LinkSpecListPage extends IssueSettingPage {
 		});
 		
 		List<IColumn<LinkSpec, Void>> columns = new ArrayList<>();
+		
+		columns.add(new AbstractColumn<LinkSpec, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<LinkSpec>> cellItem, String componentId, IModel<LinkSpec> rowModel) {
+				cellItem.add(new SpriteImage(componentId, "grip") {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("svg");
+						tag.put("class", "icon drag-indicator");
+					}
+					
+				});
+			}
+			
+			@Override
+			public String getCssClass() {
+				return "minimum actions";
+			}
+			
+		});		
 		
 		columns.add(new AbstractColumn<LinkSpec, Void>(Model.of("Name")) {
 
@@ -142,9 +169,7 @@ public class LinkSpecListPage extends IssueSettingPage {
 
 			@Override
 			protected List<LinkSpec> getData() {
-				List<LinkSpec> links = getLinkSpecManager().query();
-				Collections.sort(links);
-				return links;
+				return getLinkSpecManager().queryAndSort();
 			}
 
 			@Override
@@ -167,6 +192,28 @@ public class LinkSpecListPage extends IssueSettingPage {
 		linksTable.addBottomToolbar(new NoRecordsToolbar(linksTable));
 		linksTable.add(new NoRecordsBehavior());
 		linksTable.setOutputMarkupId(true);
+		
+		linksTable.add(new SortBehavior() {
+
+			@Override
+			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				List<LinkSpec> links = getLinkSpecManager().queryAndSort();
+				int fromIndex = from.getItemIndex();
+				int toIndex = to.getItemIndex();
+				if (fromIndex < toIndex) {
+					for (int i=0; i<toIndex-fromIndex; i++) 
+						Collections.swap(links, fromIndex+i, fromIndex+i+1);
+				} else {
+					for (int i=0; i<fromIndex-toIndex; i++) 
+						Collections.swap(links, fromIndex-i, fromIndex-i-1);
+				}
+				
+				getLinkSpecManager().updateOrders(links);
+				
+				target.add(linksTable);
+			}
+			
+		}.sortable("tbody"));
 	}
 
 	private LinkSpecManager getLinkSpecManager() {

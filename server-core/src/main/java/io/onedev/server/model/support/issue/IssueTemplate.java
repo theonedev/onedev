@@ -28,9 +28,7 @@ public class IssueTemplate implements Serializable {
 	
 	@Editable(order=100, name="Applicable Issues", description="Optionally specify issues applicable for this template. "
 			+ "Leave empty for all")
-	@IssueQuery(withCurrentBuildCriteria = false, withCurrentCommitCriteria = false, 
-			withCurrentPullRequestCriteria = false, withCurrentUserCriteria = false, 
-			withOrder = false)
+	@IssueQuery(withOrder = false)
 	@NameOfEmptyValue("All")
 	public String getIssueQuery() {
 		return issueQuery;
@@ -56,7 +54,7 @@ public class IssueTemplate implements Serializable {
 		if (issueQuery != null) {
 			try {
 				undefinedStates.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(
-						null, issueQuery, false, true, true, true, true).getUndefinedStates());
+						null, issueQuery, false, true, true, true, true, true).getUndefinedStates());
 			} catch (Exception e) {
 			}
 		}
@@ -68,7 +66,7 @@ public class IssueTemplate implements Serializable {
 		if (issueQuery != null) {
 			try {
 				undefinedFields.addAll(io.onedev.server.search.entity.issue.IssueQuery
-						.parse(null, issueQuery, false, true, true, true, true).getUndefinedFields());
+						.parse(null, issueQuery, false, true, true, true, true, true).getUndefinedFields());
 			} catch (Exception e) {
 			}
 		}
@@ -80,7 +78,7 @@ public class IssueTemplate implements Serializable {
 		if (issueQuery != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
 				undefinedFieldValues.addAll(parsedQuery.getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
@@ -92,7 +90,7 @@ public class IssueTemplate implements Serializable {
 		if (issueQuery != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
 				if (parsedQuery.fixUndefinedStates(resolutions))
 					issueQuery = parsedQuery.toString();
 				else 
@@ -107,7 +105,7 @@ public class IssueTemplate implements Serializable {
 		if (issueQuery != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
 				if (parsedQuery.fixUndefinedFields(resolutions))
 					issueQuery = parsedQuery.toString();
 				else
@@ -122,7 +120,7 @@ public class IssueTemplate implements Serializable {
 		if (issueQuery != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
 				if (parsedQuery.fixUndefinedFieldValues(resolutions))
 					issueQuery = parsedQuery.toString();
 				else

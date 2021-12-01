@@ -7,21 +7,22 @@ query
     ;
 
 criteria
-    : operator=(SubmittedByMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest) #OperatorCriteria
-    | operator=(SubmittedBy|FixedInCommit|FixedInBuild|FixedInPullRequest) WS+ criteriaValue=Quoted #OperatorValueCriteria
+    : operator=(SubmittedByMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
+    | operator=(SubmittedBy|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
-    | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
+    | Not WS* LParens WS* criteria WS* RParens #NotCriteria
+    | scope=(Any|All) WS+ linkSpec=Quoted WS+ Matching WS* LParens WS* criteria WS* RParens #LinkMatchCriteria
     | LParens WS* criteria WS* RParens #ParensCriteria
     ;
 
 revisionCriteria
-	: revisionType=(Build|Branch|Tag|Commit) WS+ revisionValue=Quoted 
+	: revisionType=(Build|Branch|Tag|Commit) WS+ revisionValue=Quoted
 	;
-	
+
 order
 	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
 	;
@@ -33,18 +34,18 @@ OrderBy
 SubmittedBy
 	: 'submitted' WS+ 'by'
 	;
-	
+
 FixedInCommit
 	: 'fixed' WS+ 'in' WS+ 'commit'
-	;							
+	;
 
 FixedInCurrentCommit
 	: 'fixed' WS+ 'in' WS+ 'current' WS+ 'commit'
 	;
-	
+
 FixedInBuild
 	: 'fixed' WS+ 'in' WS+ 'build'
-	;							
+	;
 
 FixedInCurrentBuild
 	: 'fixed' WS+ 'in' WS+ 'current' WS+ 'build'
@@ -52,28 +53,32 @@ FixedInCurrentBuild
 
 FixedInPullRequest
 	: 'fixed' WS+ 'in' WS+ 'pull' WS+ 'request'
-	;							
+	;
 
 FixedInCurrentPullRequest
 	: 'fixed' WS+ 'in' WS+ 'current' WS+ 'pull' WS+ 'request'
 	;
 
 IsCurrent
-	: 'is' WS+ 'current' 
+	: 'is' WS+ 'current'
 	;
-	
+
 IsPrevious
 	: 'is' WS+ 'previous'
 	;
-			
+
 FixedBetween
-	: 'fixed' WS+ 'between' 
+	: 'fixed' WS+ 'between'
 	;
 
 SubmittedByMe
 	: 'submitted' WS+ 'by' WS+ 'me'
 	;
-		
+	
+CurrentIssue
+	: 'current' WS+ 'issue'
+	;
+
 Is
 	: 'is'
 	;
@@ -81,7 +86,7 @@ Is
 IsMe
 	: 'is' WS+  'me'
 	;
-	
+
 Contains
 	: 'contains'
 	;
@@ -109,55 +114,71 @@ IsEmpty
 Build
 	: 'build'
 	;
-	
+
 Branch
 	: 'branch'
 	;
-	
+
 Tag
 	: 'tag'
 	;
-	
+
 Commit
 	: 'commit'
 	;
-		
+
 And
 	: 'and'
 	;
-	
+
 Or
 	: 'or'
 	;
-	
+
 Not
 	: 'not'
 	;
+
+Any
+	: 'any'
+	;
+
+All
+	: 'all'
+	;
 	
+HasAny
+	: 'has' WS+ 'any'
+	;
+
+Matching
+    : 'matching'
+    ;
+
 Asc
 	: 'asc'
 	;
-	
+
 Desc
 	: 'desc'
-	;			
-	
+	;
+
 LParens
 	: '('
 	;
-	
+
 RParens
 	: ')'
-	;				
+	;
 
 Quoted
     : '"' ('\\'.|~[\\"])+? '"'
     ;
-	
+
 WS
     : ' '
     ;
 
 Identifier
 	: [a-zA-Z0-9:_/\\+\-;]+
-	;    
+	;

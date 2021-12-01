@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -24,13 +25,13 @@ public class MilestoneCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Subquery<IssueSchedule> scheduleQuery = query.subquery(IssueSchedule.class);
 		Root<IssueSchedule> schedule = scheduleQuery.from(IssueSchedule.class);
 		scheduleQuery.select(schedule);
 		Join<?, ?> milestoneJoin = schedule.join(IssueSchedule.PROP_MILESTONE, JoinType.INNER);
 		scheduleQuery.where(builder.and(
-				builder.equal(schedule.get(IssueSchedule.PROP_ISSUE), root), 
+				builder.equal(schedule.get(IssueSchedule.PROP_ISSUE), from), 
 				builder.like(milestoneJoin.get(Milestone.PROP_NAME), milestoneName.replace("*", "%"))));
 		return builder.exists(scheduleQuery);
 	}

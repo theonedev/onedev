@@ -2,9 +2,9 @@ package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -21,8 +21,8 @@ public class StatusCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<?> attribute = PullRequestQuery.getPath(root, PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+		Path<?> attribute = PullRequestQuery.getPath(from, PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS);
 		if (value.equalsIgnoreCase(PullRequest.STATE_OPEN)) 
 			return builder.isNull(attribute);
 		else

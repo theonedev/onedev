@@ -35,6 +35,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -44,6 +45,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -240,6 +242,17 @@ public class SuggestionUtils {
 				break;
 		}
 		return suggestions;
+	}
+	
+	public static List<InputSuggestion> suggestLinkSpecs(String matchWith) {
+		List<String> linkNames = new ArrayList<>();
+		List<LinkSpec> linkSpecs = OneDev.getInstance(LinkSpecManager.class).queryAndSort();
+		for (LinkSpec link: linkSpecs) {
+			linkNames.add(link.getName());
+			if (link.getOpposite() != null)
+				linkNames.add(link.getOpposite().getName());
+		}
+		return suggest(linkNames, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestIssues(@Nullable Project project, String matchWith, int count) {

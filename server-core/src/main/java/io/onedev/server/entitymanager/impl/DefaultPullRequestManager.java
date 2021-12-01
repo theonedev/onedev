@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -893,7 +894,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	private Predicate[] getPredicates(@Nullable Project targetProject, 
 			@Nullable io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
-			CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
+			CriteriaQuery<?> query, From<PullRequest, PullRequest> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {
 			predicates.add(builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), targetProject));

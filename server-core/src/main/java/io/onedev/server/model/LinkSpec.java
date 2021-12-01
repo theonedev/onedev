@@ -12,7 +12,6 @@ import javax.persistence.OneToMany;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
-import io.onedev.server.util.validation.annotation.LinkName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -34,11 +33,12 @@ public class LinkSpec extends AbstractEntity {
 	@Column(length=65535)
 	private LinkSpecOpposite opposite;
 	
+	private int order;
+	
 	@OneToMany(mappedBy=IssueLink.PROP_SPEC, cascade=CascadeType.REMOVE)
 	private Collection<IssueLink> links = new ArrayList<>();
 	
 	@Editable(order=100, description="Name of the link")
-	@LinkName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -59,8 +59,7 @@ public class LinkSpec extends AbstractEntity {
 
 
 	@Editable(order=160, name="Linkable Issues", description="Optionally specify criteria of issues which can be linked")
-	@IssueQuery(withCurrentBuildCriteria=false, withCurrentCommitCriteria=false, withCurrentPullRequestCriteria=false, 
-				withCurrentUserCriteria=false, withOrder=false)
+	@IssueQuery
 	@NameOfEmptyValue("All issues")
 	public String getIssueQuery() {
 		return issueQuery;
@@ -82,6 +81,14 @@ public class LinkSpec extends AbstractEntity {
 	
 	public String getName(boolean opposite) {
 		return opposite?getOpposite().getName():getName();
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 	
 }

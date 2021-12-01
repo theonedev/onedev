@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.validation.annotation.LinkName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -22,7 +21,6 @@ public class LinkSpecOpposite implements Serializable {
 	
 	@Editable(order=100, name="Name On the Other Side", description="Name of the link on the other side. "
 			+ "For instance if name is <tt>child issues</tt>, name on the other side can be <tt>parent issue</tt>")
-	@LinkName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -45,8 +43,7 @@ public class LinkSpecOpposite implements Serializable {
 
 	@Editable(order=300, name="Linkable Issues On the Other Side", description="Optionally specify criteria of "
 			+ "issues which can be linked on the other side")
-	@IssueQuery(withCurrentBuildCriteria=false, withCurrentCommitCriteria=false, withCurrentPullRequestCriteria=false, 
-				withCurrentUserCriteria=false, withOrder=false)
+	@IssueQuery(withOrder = false)
 	@NameOfEmptyValue("All issues")
 	public String getIssueQuery() {
 		return issueQuery;

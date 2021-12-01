@@ -21,6 +21,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.util.lang.Objects;
@@ -35,11 +36,13 @@ import com.google.common.base.Preconditions;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.Listen;
 import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.IssueScheduleManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -48,15 +51,17 @@ import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.issue.IssueChangeEvent;
+import io.onedev.server.event.issue.IssueChanged;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -307,8 +312,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Listen
 	public void on(IssueEvent event) {
 		boolean minorChange = false;
-		if (event instanceof IssueChangeEvent) {
-			IssueChangeData changeData = ((IssueChangeEvent)event).getChange().getData();
+		if (event instanceof IssueChanged) {
+			IssueChangeData changeData = ((IssueChanged)event).getChange().getData();
 			if (changeData instanceof ReferencedFromAware) 
 				minorChange = true;
 		}
@@ -403,7 +408,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			List<NamedIssueQuery> namedQueries) {
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedStates());
+				undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedStates());
 			} catch (Exception e) {
 			}
 		}
@@ -442,7 +447,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFields());
+				undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedFields());
 			} catch (Exception e) {
 			}
 		}
@@ -486,7 +491,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFieldValues());
+				undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
 		}
@@ -547,7 +552,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
 				if (parsedQuery.fixUndefinedStates(resolutions))
 					namedQuery.setQuery(parsedQuery.toString());
 				else
@@ -597,7 +602,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
 				if (parsedQuery.fixUndefinedFields(resolutions))
 					namedQuery.setQuery(parsedQuery.toString());
 				else
@@ -649,7 +654,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
 				if (query.fixUndefinedFieldValues(resolutions))
 					namedQuery.setQuery(query.toString());
 				else
@@ -954,6 +959,40 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		if (afterIssueId != null) 
 			criteria.add(Restrictions.gt("id", afterIssueId));
 		return query(criteria, 0, count);
+	}
+
+	@Sessional
+	@Override
+	public void test() {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Issue> issueQuery = builder.createQuery(Issue.class);
+		Root<Issue> issueRoot = issueQuery.from(Issue.class);
+		
+		Subquery<IssueLink> linkQuery = issueQuery.subquery(IssueLink.class);
+		Root<IssueLink> linkRoot = linkQuery.from(IssueLink.class);
+		Join<Issue, Issue> linkedIssueJoin = linkRoot.join(IssueLink.PROP_TARGET, JoinType.INNER);
+		linkQuery.select(linkRoot);
+		
+		Subquery<IssueField> fieldQuery = issueQuery.subquery(IssueField.class);
+		Root<IssueField> fieldRoot = fieldQuery.from(IssueField.class);
+		fieldQuery.select(fieldRoot);
+		
+		Predicate issuePredicate = builder.equal(fieldRoot.get(IssueField.PROP_ISSUE), linkedIssueJoin);
+		Predicate namePredicate = builder.equal(fieldRoot.get(IssueField.PROP_NAME), "Assignees");
+		Predicate valuePredicate = builder.equal(fieldRoot.get(IssueField.PROP_VALUE), "robin");
+		
+		LinkSpec linkSpec = OneDev.getInstance(LinkSpecManager.class).find("Parent");
+		issueQuery.where(builder.exists(linkQuery.where(
+				builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), issueRoot),
+				builder.equal(linkRoot.get(IssueLink.PROP_SPEC), linkSpec), 
+				builder.exists(fieldQuery.where(issuePredicate, namePredicate, valuePredicate)))
+				));
+		
+		Query<Issue> query = getSession().createQuery(issueQuery);
+		System.out.println("*** Results ***");
+		for (Issue issue: query.getResultList()) {
+			System.out.println(issue.getTitle());
+		}
 	}
 	
 }

@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -41,15 +41,15 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Root<Issue> issue, Root<IssueField> field, CriteriaBuilder builder) {
+	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
 		if (allowMultiple)
-			return builder.equal(field.get(IssueField.PROP_VALUE), value);
+			return builder.equal(fieldFrom.get(IssueField.PROP_VALUE), value);
 		else if (operator == IssueQueryLexer.Is) 
-			return builder.equal(field.get(IssueField.PROP_VALUE), value);
+			return builder.equal(fieldFrom.get(IssueField.PROP_VALUE), value);
 		else if (operator == IssueQueryLexer.IsGreaterThan) 
-			return builder.greaterThan(field.get(IssueField.PROP_ORDINAL), ordinal);
+			return builder.greaterThan(fieldFrom.get(IssueField.PROP_ORDINAL), ordinal);
 		else
-			return builder.lessThan(field.get(IssueField.PROP_ORDINAL), ordinal);
+			return builder.lessThan(fieldFrom.get(IssueField.PROP_ORDINAL), ordinal);
 	}
 
 	@SuppressWarnings("unchecked")

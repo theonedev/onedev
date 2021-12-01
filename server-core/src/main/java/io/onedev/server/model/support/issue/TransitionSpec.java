@@ -129,7 +129,7 @@ public class TransitionSpec implements Serializable {
 			PressButtonTrigger pressButton = (PressButtonTrigger) getTrigger();
 			if (pressButton.isAuthorized(issue.getProject())) {
 				IssueQuery parsedQuery = IssueQuery.parse(issue.getProject(), 
-						getTrigger().getIssueQuery(), true, true, true, true, true);
+						getTrigger().getIssueQuery(), true, true, true, true, true, true);
 				return parsedQuery.matches(issue);
 			}
 		}

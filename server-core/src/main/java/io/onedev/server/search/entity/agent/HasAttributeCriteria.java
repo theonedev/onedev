@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.agent;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -22,13 +23,13 @@ public class HasAttributeCriteria extends EntityCriteria<Agent> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Agent> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
 		Subquery<AgentAttribute> attributeQuery = query.subquery(AgentAttribute.class);
 		Root<AgentAttribute> attribute = attributeQuery.from(AgentAttribute.class);
 		attributeQuery.select(attribute);
 
 		return builder.exists(attributeQuery.where(
-				builder.equal(attribute.get(AgentAttribute.PROP_AGENT), root), 
+				builder.equal(attribute.get(AgentAttribute.PROP_AGENT), from), 
 				builder.equal(attribute.get(BuildParam.PROP_NAME), attributeName)));
 	}
 

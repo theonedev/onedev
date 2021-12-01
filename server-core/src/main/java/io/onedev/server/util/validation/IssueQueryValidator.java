@@ -19,6 +19,8 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 	
 	private boolean withCurrentCommitCriteria;
 	
+	private boolean withCurrentIssueCriteria;
+	
 	@Override
 	public void initialize(IssueQuery constaintAnnotation) {
 		message = constaintAnnotation.message();
@@ -26,6 +28,7 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 		withCurrentBuildCriteria = constaintAnnotation.withCurrentBuildCriteria();
 		withCurrentPullRequestCriteria = constaintAnnotation.withCurrentPullRequestCriteria();
 		withCurrentCommitCriteria = constaintAnnotation.withCurrentCommitCriteria();
+		withCurrentIssueCriteria = constaintAnnotation.withCurrentIssueCriteria();
 	}
 
 	@Override
@@ -37,7 +40,8 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery.parse(project, value, 
 						true, withCurrentUserCriteria, withCurrentBuildCriteria, 
-						withCurrentPullRequestCriteria, withCurrentCommitCriteria);
+						withCurrentPullRequestCriteria, withCurrentCommitCriteria, 
+						withCurrentIssueCriteria);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

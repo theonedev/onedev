@@ -2,9 +2,9 @@ package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -23,8 +23,8 @@ public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<Long> attribute = root.get(PullRequest.PROP_COMMENT_COUNT);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+		Path<Long> attribute = from.get(PullRequest.PROP_COMMENT_COUNT);
 		if (operator == PullRequestQueryLexer.Is)
 			return builder.equal(attribute, value);
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)

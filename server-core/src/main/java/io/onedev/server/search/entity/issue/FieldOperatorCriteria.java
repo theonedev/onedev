@@ -8,9 +8,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Build;
@@ -40,9 +40,9 @@ public class FieldOperatorCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Root<Issue> issue, Root<IssueField> field, CriteriaBuilder builder) {
-		Path<?> valueAttribute = field.get(IssueField.PROP_VALUE);
-		Path<?> projectAttribute = issue.get(Issue.PROP_PROJECT);		
+	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
+		Path<?> valueAttribute = fieldFrom.get(IssueField.PROP_VALUE);
+		Path<?> projectAttribute = issueFrom.get(Issue.PROP_PROJECT);		
 		if (operator == IssueQueryLexer.IsEmpty) {
 			return null;
 		} else if (operator == IssueQueryLexer.IsMe) {

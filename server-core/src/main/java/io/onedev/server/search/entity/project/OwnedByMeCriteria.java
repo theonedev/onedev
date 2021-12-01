@@ -2,8 +2,8 @@ package io.onedev.server.search.entity.project;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
@@ -15,9 +15,9 @@ public class OwnedByMeCriteria extends EntityCriteria<Project> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		if (User.get() != null)
-			return new OwnedByCriteria(User.get()).getPredicate(query, root, builder);
+			return new OwnedByCriteria(User.get()).getPredicate(query, from, builder);
 		else
 			throw new ExplicitException("Please login to perform this query");
 	}

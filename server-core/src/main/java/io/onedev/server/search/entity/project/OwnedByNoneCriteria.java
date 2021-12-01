@@ -2,10 +2,10 @@ package io.onedev.server.search.entity.project;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
@@ -18,9 +18,9 @@ public class OwnedByNoneCriteria extends EntityCriteria<Project> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
-		Join<?, ?> userAuthorizationJoin = root.join(Project.PROP_USER_AUTHORIZATIONS, JoinType.LEFT);
-		Join<?, ?> groupAuthorizationJoin = root.join(Project.PROP_GROUP_AUTHORIZATIONS, JoinType.LEFT);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
+		Join<?, ?> userAuthorizationJoin = from.join(Project.PROP_USER_AUTHORIZATIONS, JoinType.LEFT);
+		Join<?, ?> groupAuthorizationJoin = from.join(Project.PROP_GROUP_AUTHORIZATIONS, JoinType.LEFT);
 
 		userAuthorizationJoin.on(builder.equal(
 				userAuthorizationJoin.get(UserAuthorization.PROP_ROLE), Role.OWNER_ID));

@@ -3,9 +3,9 @@ package io.onedev.server.search.entity.pullrequest;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -30,8 +30,8 @@ public class NumberCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<Long> attribute = root.get(PullRequest.PROP_NUMBER);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+		Path<Long> attribute = from.get(PullRequest.PROP_NUMBER);
 		Predicate numberPredicate;
 		
 		if (operator == PullRequestQueryLexer.Is)
@@ -42,7 +42,7 @@ public class NumberCriteria extends EntityCriteria<PullRequest> {
 			numberPredicate = builder.lessThan(attribute, number.getNumber());
 		
 		return builder.and(
-				builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), number.getProject()),
+				builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), number.getProject()),
 				numberPredicate);
 	}
 

@@ -5,13 +5,12 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-
 import io.onedev.server.search.entity.EntityQuery;
 
 public class FixedInBuildCriteria extends IssueCriteria {
@@ -29,16 +28,16 @@ public class FixedInBuildCriteria extends IssueCriteria {
 
 	public FixedInBuildCriteria(Build build) {
 		this.build = build;
-		value = String.valueOf(build.getNumber());
+		value = build.getFQN().toString();
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Collection<Long> fixedIssueNumbers = build.getFixedIssueNumbers();
 		if (!fixedIssueNumbers.isEmpty()) {
 			return builder.and(
-					builder.equal(root.get(Issue.PROP_PROJECT), build.getProject()),
-					root.get(Issue.PROP_NUMBER).in(fixedIssueNumbers));
+					builder.equal(from.get(Issue.PROP_PROJECT), build.getProject()),
+					from.get(Issue.PROP_NUMBER).in(fixedIssueNumbers));
 		} else {
 			return builder.disjunction();
 		}

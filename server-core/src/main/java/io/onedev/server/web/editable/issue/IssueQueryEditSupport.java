@@ -66,7 +66,8 @@ public class IssueQueryEditSupport implements EditSupport {
 	        	    	}, issueQuery.withOrder(), issueQuery.withCurrentUserCriteria(), 
 		        				issueQuery.withCurrentBuildCriteria(), 
 		        				issueQuery.withCurrentPullRequestCriteria(), 
-		        				issueQuery.withCurrentCommitCriteria()));
+		        				issueQuery.withCurrentCommitCriteria(), 
+		        				issueQuery.withCurrentIssueCriteria()));
 	        		};
     		};
         } else {

@@ -2,8 +2,8 @@ package io.onedev.server.search.entity;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -19,7 +19,7 @@ public class NotEntityCriteria<T extends AbstractEntity> extends EntityCriteria<
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<T> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<T, T> root, CriteriaBuilder builder) {
 		return criteria.getPredicate(query, root, builder).not();
 	}
 

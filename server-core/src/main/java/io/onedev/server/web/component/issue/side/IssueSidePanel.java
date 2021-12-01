@@ -215,22 +215,21 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected List<LinkSide> load() {
 				List<LinkSide> links = new ArrayList<>();
-				List<LinkSpec> specs = new ArrayList<>(OneDev.getInstance(LinkSpecManager.class).query());
-				Collections.sort(specs);
+				List<LinkSpec> specs = new ArrayList<>(OneDev.getInstance(LinkSpecManager.class).queryAndSort());
 				
 				for (LinkSpec spec: specs) {
 					if (spec.getOpposite() != null) {
 						IssueQuery query = IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), 
-								false, false, false, false, false);
+								false, false, false, false, false, false);
 						if (query.matches(getIssue()))
 							links.add(new LinkSide(spec, false));
 						query = IssueQuery.parse(getProject(), spec.getIssueQuery(), false, false, false, 
-								false, false);
+								false, false, false);
 						if (query.matches(getIssue()))
 							links.add(new LinkSide(spec, true));
 					} else {
 						IssueQuery query = IssueQuery.parse(getProject(), spec.getIssueQuery(), 
-								false, false, false, false, false);
+								false, false, false, false, false, false);
 						if (query.matches(getIssue()))
 							links.add(new LinkSide(spec, false));
 					}
@@ -289,10 +288,10 @@ public abstract class IssueSidePanel extends Panel {
 						LinkSpec spec = model.getObject().spec;
 						if (opposite) {
 							return IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), 
-									false, false, false, false, false);
+									false, false, false, false, false, false);
 						} else {
 							return IssueQuery.parse(getProject(), spec.getIssueQuery(), 
-									false, false, false, false, false);
+									false, false, false, false, false, false);
 						}
 					}
 					
@@ -350,10 +349,10 @@ public abstract class IssueSidePanel extends Panel {
 						LinkSide side = model.getObject();
 						if (side.opposite) {
 							return IssueQuery.parse(getProject(), side.spec.getOpposite().getIssueQuery(), 
-									false, false, false, false, false);
+									false, false, false, false, false, false);
 						} else {
 							return IssueQuery.parse(getProject(), side.spec.getIssueQuery(), 
-									false, false, false, false, false);
+									false, false, false, false, false, false);
 						}
 					}
 

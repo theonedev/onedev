@@ -104,10 +104,14 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 							editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 							target.add(form);
 						} else {
+							if (getSpec().isNew()) 
+								getSpec().setOrder(manager.query().stream().mapToInt(it->it.getOrder()).max().orElse(0)+1);
 							manager.save(getSpec());
 							onSave(target);
 						}
 					} else {
+						if (getSpec().isNew()) 
+							getSpec().setOrder(manager.query().stream().mapToInt(it->it.getOrder()).max().orElse(0)+1);
 						manager.save(getSpec());
 						onSave(target);
 					}

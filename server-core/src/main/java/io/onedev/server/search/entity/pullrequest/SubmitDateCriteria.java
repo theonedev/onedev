@@ -4,9 +4,9 @@ import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -29,8 +29,8 @@ public class SubmitDateCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<Date> attribute = root.get(PullRequest.PROP_SUBMIT_DATE);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
+		Path<Date> attribute = from.get(PullRequest.PROP_SUBMIT_DATE);
 		if (operator == PullRequestQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else

@@ -38,9 +38,7 @@ public class DefaultFixedIssueFilter implements Serializable {
 	}
 
 	@Editable(order=200, description="Specify a default query to filter/order fixed issues of specified jobs")
-	@IssueQuery(withCurrentBuildCriteria = false, withCurrentCommitCriteria = false, 
-			withCurrentPullRequestCriteria = false, withCurrentUserCriteria = true, 
-			withOrder = true)
+	@IssueQuery(withCurrentUserCriteria = true)
 	@NotEmpty
 	public String getIssueQuery() {
 		return issueQuery;

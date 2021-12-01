@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.search.entity.NotEntityCriteria;
@@ -26,8 +26,8 @@ public class NotIssueCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
-		return new NotEntityCriteria<Issue>(criteria).getPredicate(query, root, builder);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+		return new NotEntityCriteria<Issue>(criteria).getPredicate(query, from, builder);
 	}
 
 	@Override

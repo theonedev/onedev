@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -343,7 +344,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return getSession().createQuery(query).list();
 	}
 	
-	private List<Predicate> getPredicates(Root<Build> root, CriteriaBuilder builder, 
+	private List<Predicate> getPredicates(From<Build, Build> root, CriteriaBuilder builder, 
 			Map<String, List<String>> params) {
 		List<Predicate> predicates = new ArrayList<>();
 		
@@ -470,7 +471,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			buildDependenceManager.save(dependence);
 	}
 
-	private Collection<Predicate> getPredicates(@Nullable Project project, Root<Build> root, CriteriaBuilder builder) {
+	private Collection<Predicate> getPredicates(@Nullable Project project, From<Build, Build> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = new ArrayList<>();
 
 		jobNamesLock.readLock().lock();
@@ -527,7 +528,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private Predicate[] getPredicates(@Nullable Project project, 
 			@Nullable io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
-			CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
+			CriteriaQuery<?> query, From<Build, Build> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = getPredicates(project, root, builder);
 		if (criteria != null) 
 			predicates.add(criteria.getPredicate(query, root, builder));
@@ -559,7 +560,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return query.getResultList();
 	}
 
-	private void applyOrders(Root<Build> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder, 
+	private void applyOrders(From<Build, Build> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder, 
 			EntityQuery<Build> buildQuery) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: buildQuery.getSorts()) {

@@ -43,7 +43,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildFinished;
-import io.onedev.server.event.issue.IssueChangeEvent;
+import io.onedev.server.event.issue.IssueChanged;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.system.SystemStarted;
@@ -75,6 +75,7 @@ import io.onedev.server.model.support.issue.transitiontrigger.MergePullRequestTr
 import io.onedev.server.model.support.issue.transitiontrigger.NoActivityTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequestTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.PullRequestTrigger;
+import io.onedev.server.model.support.issue.transitiontrigger.StateTransitionTrigger;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
@@ -156,7 +157,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Override
 	public void save(IssueChange change) {
 		dao.persist(change);
-		listenerRegistry.post(new IssueChangeEvent(change));
+		listenerRegistry.post(new IssueChanged(change));
 	}
 	
 	@Transactional
@@ -280,6 +281,75 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	@Transactional
 	@Listen
+	public void on(IssueChanged event) {
+		if (event.getChange().getData() instanceof IssueStateChangeData) {
+			Long issueId = event.getIssue().getId();
+			Long projectId = event.getIssue().getProject().getId();
+			
+			transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					executorService.execute(new Runnable() {
+
+						@Override
+						public void run() {
+				        	LockUtils.call(getLockKey(projectId), new Callable<Void>() {
+
+								@Override
+								public Void call() throws Exception {
+									transactionManager.run(new Runnable() {
+
+										@Override
+										public void run() {
+											try {
+												SecurityUtils.bindAsSystem();
+												Issue issue = issueManager.load(issueId);
+												for (TransitionSpec transition: getTransitionSpecs()) {
+													if (transition.getTrigger() instanceof StateTransitionTrigger) {
+														Project project = issue .getProject();
+														StateTransitionTrigger trigger = (StateTransitionTrigger) transition.getTrigger();
+														if (trigger.getStates().contains(issue.getState())) {
+															IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, false, false, false, true);
+															List<IssueCriteria> criterias = new ArrayList<>();
+															
+															List<IssueCriteria> fromStateCriterias = new ArrayList<>();
+															for (String fromState: transition.getFromStates()) 
+																fromStateCriterias.add(new StateCriteria(fromState));
+															
+															criterias.add(IssueCriteria.or(fromStateCriterias));
+															if (query.getCriteria() != null)
+																criterias.add(query.getCriteria());
+															query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
+															Issue.push(issue);
+															try {
+																for (Issue each: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
+																	changeState(each, transition.getToState(), new HashMap<>(), 
+																			transition.getRemoveFields(), null);
+																}
+															} finally {
+																Issue.pop();
+															}
+														}
+													}      												
+												}
+											} catch (Exception e) {
+												logger.error("Error changing issue state", e);
+											}
+										}
+									});
+									return null;
+								}
+				        	});
+						}
+					});
+				}
+			});				
+		}
+	}
+	
+	@Transactional
+	@Listen
 	public void on(BuildFinished event) {
 		Long buildId = event.getBuild().getId();
 		Long projectId = event.getBuild().getProject().getId();
@@ -311,7 +381,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 													if ((trigger.getJobNames() == null || PatternSet.parse(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
 															&& build.getStatus() == Build.Status.SUCCESSFUL
 															&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-														IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true, false, false);
+														IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true, false, false, false);
 														List<IssueCriteria> criterias = new ArrayList<>();
 														
 														List<IssueCriteria> fromStateCriterias = new ArrayList<>();
@@ -376,7 +446,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 												if (transition.getTrigger().getClass() == triggerClass) {
 													PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
 													if (trigger.getBranches() == null || PatternSet.parse(trigger.getBranches()).matches(matcher, request.getTargetBranch())) {
-														IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, false, true, false);
+														IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, false, true, false, false);
 														List<IssueCriteria> criterias = new ArrayList<>();
 														
 														List<IssueCriteria> fromStateCriterias = new ArrayList<>();
@@ -502,7 +572,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														Matcher matcher = new PathMatcher();
 														if (branches == null || PatternSet.parse(branches).matches(matcher, branchName)) {
 															IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), 
-																	true, false, false, false, true);
+																	true, false, false, false, true, false);
 															List<IssueCriteria> criterias = new ArrayList<>();
 															
 															List<IssueCriteria> fromStateCriterias = new ArrayList<>();
@@ -558,7 +628,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			if (transition.getTrigger() instanceof NoActivityTrigger) {
 				NoActivityTrigger trigger = (NoActivityTrigger) transition.getTrigger();
 				IssueQuery query = IssueQuery.parse(null, trigger.getIssueQuery(), 
-						false, false, false, false, false);
+						false, false, false, false, false, false);
 				List<IssueCriteria> criterias = new ArrayList<>();
 				
 				List<IssueCriteria> fromStateCriterias = new ArrayList<>();

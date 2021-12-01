@@ -8,11 +8,11 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
 
-public class IssueChangeEvent extends IssueEvent {
+public class IssueChanged extends IssueEvent {
 
 	private final IssueChange change;
 	
-	public IssueChangeEvent(IssueChange change) {
+	public IssueChanged(IssueChange change) {
 		super(change.getUser(), change.getDate(), change.getIssue());
 		this.change = change;
 	}

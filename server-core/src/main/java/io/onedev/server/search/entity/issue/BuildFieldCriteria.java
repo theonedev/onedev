@@ -6,8 +6,8 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -33,8 +33,8 @@ public class BuildFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Root<Issue> issue, Root<IssueField> field, CriteriaBuilder builder) {
-		return builder.equal(field.get(IssueField.PROP_ORDINAL), build.getId());
+	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
+		return builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), build.getId());
 	}
 
 	@Override

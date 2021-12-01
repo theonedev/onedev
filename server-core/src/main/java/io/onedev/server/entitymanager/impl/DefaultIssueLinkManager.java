@@ -27,13 +27,13 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 		if (spec.getOpposite() != null) {
 			Collection<IssueLink> links = opposite?issue.getSourceLinks():issue.getTargetLinks();
 			for (IssueLink link: links) {
-				if (!linkedIssues.contains(link.getLinked(issue)))
+				if (link.getSpec().equals(spec) && !linkedIssues.contains(link.getLinked(issue)))
 					delete(link);
 			}
 			for (Issue linkedIssue: linkedIssues) {
 				boolean found = false;
 				for (IssueLink link: links) {
-					if (link.getLinked(issue).equals(linkedIssue)) {
+					if (link.getSpec().equals(spec) && link.getLinked(issue).equals(linkedIssue)) {
 						found = true;
 						break;
 					}
@@ -53,13 +53,13 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 			}
 		} else {			
 			for (IssueLink link: issue.getLinks()) {
-				if (!linkedIssues.contains(link.getLinked(issue)))
+				if (link.getSpec().equals(spec) && !linkedIssues.contains(link.getLinked(issue)))
 					delete(link);
 			}
 			for (Issue linkedIssue: linkedIssues) {
 				boolean found = false;
 				for (IssueLink link: issue.getLinks()) {
-					if (link.getLinked(issue).equals(linkedIssue)) {
+					if (link.getSpec().equals(spec) && link.getLinked(issue).equals(linkedIssue)) {
 						found = true;
 						break;
 					}

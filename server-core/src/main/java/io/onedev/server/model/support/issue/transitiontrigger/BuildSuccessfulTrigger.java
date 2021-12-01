@@ -73,8 +73,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	}
 	
 	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
-	@IssueQuery(withOrder = false, withCurrentUserCriteria = false, withCurrentBuildCriteria = true, 
-			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
+	@IssueQuery(withOrder = false, withCurrentBuildCriteria = true)
 	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {

@@ -40,8 +40,7 @@ public abstract class PullRequestTrigger extends TransitionTrigger {
 	}
 
 	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
-	@IssueQuery(withOrder = false, withCurrentUserCriteria = false, withCurrentBuildCriteria = false, 
-			withCurrentPullRequestCriteria = true, withCurrentCommitCriteria = false)
+	@IssueQuery(withOrder = false, withCurrentPullRequestCriteria = true)
 	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {

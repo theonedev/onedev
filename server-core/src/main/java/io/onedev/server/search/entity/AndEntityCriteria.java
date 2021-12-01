@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.util.criteria.AndCriteria;
@@ -52,7 +52,7 @@ public class AndEntityCriteria<T extends AbstractEntity> extends EntityCriteria<
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<T> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<T, T> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		for (EntityCriteria<T> criteria: criterias)
 			predicates.add(criteria.getPredicate(query, root, builder));

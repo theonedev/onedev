@@ -22,8 +22,7 @@ public abstract class TransitionTrigger implements Serializable {
 	private String issueQuery;
 	
 	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues. ")
-	@IssueQuery(withOrder = false, withCurrentUserCriteria = false, withCurrentBuildCriteria = false, 
-			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
+	@IssueQuery(withOrder = false)
 	@NameOfEmptyValue("All")
 	public String getIssueQuery() {
 		return issueQuery;
@@ -47,7 +46,7 @@ public abstract class TransitionTrigger implements Serializable {
 	public Collection<String> getUndefinedStates() {
 		try {
 			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true, true, true).getUndefinedStates();
+					.parse(null, issueQuery, false, true, true, true, true, true).getUndefinedStates();
 		} catch (Exception e) {
 			return new HashSet<>();
 		}
@@ -56,7 +55,7 @@ public abstract class TransitionTrigger implements Serializable {
 	public Collection<String> getUndefinedFields() {
 		try {
 			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true, true, true).getUndefinedFields();
+					.parse(null, issueQuery, false, true, true, true, true, true).getUndefinedFields();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new HashSet<>();
@@ -66,7 +65,7 @@ public abstract class TransitionTrigger implements Serializable {
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		try {
 			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true, true, true).getUndefinedFieldValues();
+					.parse(null, issueQuery, false, true, true, true, true, true).getUndefinedFieldValues();
 		} catch (Exception e) {
 			return new HashSet<>();
 		}
@@ -75,7 +74,7 @@ public abstract class TransitionTrigger implements Serializable {
 	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
 		try {
 			io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
+					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
 			if (parsedQuery.fixUndefinedStates(resolutions))
 				issueQuery = parsedQuery.toString();
 			else
@@ -88,7 +87,7 @@ public abstract class TransitionTrigger implements Serializable {
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
 		try {
 			io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
+					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
 			if (parsedQuery.fixUndefinedFields(resolutions))
 				issueQuery = parsedQuery.toString();
 			else
@@ -101,7 +100,7 @@ public abstract class TransitionTrigger implements Serializable {
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
 		try {
 			io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
+					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
 			if (parsedQuery.fixUndefinedFieldValues(resolutions))
 				issueQuery = parsedQuery.toString();
 			else 

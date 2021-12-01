@@ -4,9 +4,9 @@ import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.LastUpdate;
@@ -36,8 +36,8 @@ public class UpdateDateCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
-		Path<Date> attribute = IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
+		Path<Date> attribute = IssueQuery.getPath(from, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
 		if (operator == IssueQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else

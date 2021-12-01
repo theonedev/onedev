@@ -184,7 +184,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 					@Override
 					protected EntityQuery<Issue> parse(String queryString, Project project) {
-						return IssueQuery.parse(project, queryString, true, true, false, false, false);
+						return IssueQuery.parse(project, queryString, true, true, false, false, false, false);
 					}
 
 					@Override

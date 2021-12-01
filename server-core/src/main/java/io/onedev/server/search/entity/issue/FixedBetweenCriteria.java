@@ -10,9 +10,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -76,7 +76,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Set<Long> fixedIssueNumbers = new HashSet<>();
 		
 		Repository repository = project.getRepository();
@@ -96,17 +96,17 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		}
 
 		Predicate issuePredicate;
-		Path<Long> attribute = root.get(Issue.PROP_NUMBER);		
+		Path<Long> attribute = from.get(Issue.PROP_NUMBER);		
 		if (fixedIssueNumbers.size() > IN_CLAUSE_LIMIT) {
 			Collection<Long> allIssueNumbers = OneDev.getInstance(IssueManager.class).getIssueNumbers(project.getId());
 			issuePredicate = inManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
 		} else if (!fixedIssueNumbers.isEmpty()) {
-			issuePredicate = root.get(Issue.PROP_NUMBER).in(fixedIssueNumbers);
+			issuePredicate = from.get(Issue.PROP_NUMBER).in(fixedIssueNumbers);
 		} else {
 			issuePredicate = builder.disjunction();
 		}
 		return builder.and(
-				builder.equal(root.get(Issue.PROP_PROJECT), project), 
+				builder.equal(from.get(Issue.PROP_PROJECT), project), 
 				issuePredicate);
 	}
 

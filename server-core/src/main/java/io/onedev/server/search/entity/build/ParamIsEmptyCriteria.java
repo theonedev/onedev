@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -23,15 +24,15 @@ public class ParamIsEmptyCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
 		Subquery<BuildParam> paramQuery = query.subquery(BuildParam.class);
-		Root<BuildParam> param = paramQuery.from(BuildParam.class);
-		paramQuery.select(param);
+		Root<BuildParam> paramRoot = paramQuery.from(BuildParam.class);
+		paramQuery.select(paramRoot);
 
 		return builder.not(builder.exists(paramQuery.where(
-				builder.equal(param.get(BuildParam.PROP_BUILD), root), 
-				builder.equal(param.get(BuildParam.PROP_NAME), name), 
-				builder.isNotNull(param.get(BuildParam.PROP_VALUE)))));
+				builder.equal(paramRoot.get(BuildParam.PROP_BUILD), from), 
+				builder.equal(paramRoot.get(BuildParam.PROP_NAME), name), 
+				builder.isNotNull(paramRoot.get(BuildParam.PROP_VALUE)))));
 	}
 
 	@Override

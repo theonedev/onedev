@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -705,29 +706,29 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	private Predicate[] getPredicates(@Nullable io.onedev.server.search.entity.EntityCriteria<Project> criteria, 
-			CriteriaQuery<?> query, Root<Project> root, CriteriaBuilder builder) {
+			CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
 			Collection<Long> projectIds = getPermittedProjects(new AccessProject())
 					.stream().map(it->it.getId()).collect(Collectors.toSet());
 			if (!projectIds.isEmpty())
-				predicates.add(root.get(Project.PROP_ID).in(projectIds));
+				predicates.add(from.get(Project.PROP_ID).in(projectIds));
 			else
 				predicates.add(builder.disjunction());
 		}
 		if (criteria != null) 
-			predicates.add(criteria.getPredicate(query, root, builder));
+			predicates.add(criteria.getPredicate(query, from, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
 	@Sessional
 	@Override
-	public List<Project> query(EntityQuery<Project> projectQuery, int firstResult, int maxResults) {
-		CriteriaQuery<Project> criteriaQuery = buildCriteriaQuery(getSession(), projectQuery);
-		Query<Project> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
-		return query.getResultList();
+	public List<Project> query(EntityQuery<Project> query, int firstResult, int maxResults) {
+		CriteriaQuery<Project> criteriaQuery = buildCriteriaQuery(getSession(), query);
+		Query<Project> projectQuery = getSession().createQuery(criteriaQuery);
+		projectQuery.setFirstResult(firstResult);
+		projectQuery.setMaxResults(maxResults);
+		return projectQuery.getResultList();
 	}
 
 	@Sessional
@@ -800,31 +801,31 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return ids;
 	}
 
-	private Collection<Long> getTreeIds(Long treeRootId) {
-		Collection<Long> treeIds = Sets.newHashSet(treeRootId);
+	private Collection<Long> getTreeIds(Long projectId) {
+		Collection<Long> treeIds = Sets.newHashSet(projectId);
 		for (ProjectFacade facade: cache.values()) {
-			if (treeRootId.equals(facade.getParentId()))
+			if (projectId.equals(facade.getParentId()))
 				treeIds.addAll(getTreeIds(facade.getId()));
 		}
 		return treeIds;
 	}
 	
 	@Override
-	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> project, String pathPattern) {
+	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> jpaPath, String pathPattern) {
 		cacheLock.readLock().lock();
 		try {
-			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, project.get(Project.PROP_ID), 
+			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, jpaPath.get(Project.PROP_ID), 
 					getMatchingIds(pathPattern), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
 	}
 	
-	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> project, Project treeRoot) {
+	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> jpaPath, Project project) {
 		cacheLock.readLock().lock();
 		try {
-			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, project.get(Project.PROP_ID), 
-					getTreeIds(treeRoot.getId()), cache.keySet());		
+			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, jpaPath.get(Project.PROP_ID), 
+					getTreeIds(project.getId()), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}

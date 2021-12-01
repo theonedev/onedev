@@ -71,8 +71,7 @@ public class BoardSpec implements Serializable {
 	}
 
 	@Editable(order=200, description="Optionally specify a base query to filter/order issues of the board")
-	@IssueQuery(withCurrentUserCriteria = true, withCurrentBuildCriteria = false, 
-			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
+	@IssueQuery(withCurrentUserCriteria = true)
 	@Nullable
 	public String getBaseQuery() {
 		return baseQuery;
@@ -84,8 +83,7 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=250, description="Optionally specify a base query to filter/order issues in backlog. "
 			+ "Backlog issues are those not associating with any milestones")
-	@IssueQuery(withCurrentUserCriteria = true, withCurrentBuildCriteria = false, 
-			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
+	@IssueQuery(withCurrentUserCriteria = true)
 	@Nullable
 	public String getBacklogBaseQuery() {
 		return backlogBaseQuery;
@@ -236,7 +234,7 @@ public class BoardSpec implements Serializable {
 		if (query != null) {
 			try {
 				undefinedStates.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(
-						project, query, false, true, true, true, true).getUndefinedStates());
+						project, query, false, true, true, true, true, true).getUndefinedStates());
 			} catch (Exception e) {
 			}
 		}
@@ -267,7 +265,7 @@ public class BoardSpec implements Serializable {
 		if (query != null) {
 			try {
 				undefinedFields.addAll(io.onedev.server.search.entity.issue.IssueQuery
-						.parse(project, query, false, true, true, true, true).getUndefinedFields());
+						.parse(project, query, false, true, true, true, true, true).getUndefinedFields());
 			} catch (Exception e) {
 			}
 		}
@@ -295,7 +293,7 @@ public class BoardSpec implements Serializable {
 		if (query != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true, true);
 				undefinedFieldValues.addAll(parsedQuery.getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
@@ -324,7 +322,7 @@ public class BoardSpec implements Serializable {
 		if (query != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true, true);
 				if (parsedQuery.fixUndefinedStates(resolutions))
 					query = parsedQuery.toString();
 				else
@@ -359,7 +357,7 @@ public class BoardSpec implements Serializable {
 		if (query != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true, true);
 				if (parsedQuery.fixUndefinedFields(resolutions))
 					query = parsedQuery.toString();
 				else
@@ -389,7 +387,7 @@ public class BoardSpec implements Serializable {
 		if (query != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true, true);
 				if (parsedQuery.fixUndefinedFieldValues(resolutions))
 					query = parsedQuery.toString();
 				else

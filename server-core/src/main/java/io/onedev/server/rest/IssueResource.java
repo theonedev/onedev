@@ -184,7 +184,7 @@ public class IssueResource {
 
     	IssueQuery parsedQuery;
 		try {
-			parsedQuery = IssueQuery.parse(null, query, true, true, false, false, false);
+			parsedQuery = IssueQuery.parse(null, query, true, true, false, false, false, false);
 		} catch (Exception e) {
 			throw new InvalidParamException("Error parsing query", e);
 		}

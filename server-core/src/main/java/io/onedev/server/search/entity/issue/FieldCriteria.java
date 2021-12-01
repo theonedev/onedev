@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -37,21 +38,21 @@ public abstract class FieldCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public final Predicate getPredicate(CriteriaQuery<?> query, Root<Issue> root, CriteriaBuilder builder) {
+	public final Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Subquery<IssueField> fieldQuery = query.subquery(IssueField.class);
-		Root<IssueField> field = fieldQuery.from(IssueField.class);
-		fieldQuery.select(field);
+		Root<IssueField> fieldRoot = fieldQuery.from(IssueField.class);
+		fieldQuery.select(fieldRoot);
 
-		Predicate issuePredicate = builder.equal(field.get(IssueField.PROP_ISSUE), root);
-		Predicate namePredicate = builder.equal(field.get(IssueField.PROP_NAME), getFieldName());
-		Predicate valuePredicate = getValuePredicate(root, field, builder);
+		Predicate issuePredicate = builder.equal(fieldRoot.get(IssueField.PROP_ISSUE), from);
+		Predicate namePredicate = builder.equal(fieldRoot.get(IssueField.PROP_NAME), getFieldName());
+		Predicate valuePredicate = getValuePredicate(from, fieldRoot, builder);
 		if (valuePredicate != null) {
 			return builder.exists(fieldQuery.where(issuePredicate, namePredicate, valuePredicate));
 		} else {
 			return builder.not(builder.exists(fieldQuery.where(
 					issuePredicate, 
 					namePredicate, 
-					builder.isNotNull(field.get(IssueField.PROP_VALUE)))));
+					builder.isNotNull(fieldRoot.get(IssueField.PROP_VALUE)))));
 		}
 	}
 
@@ -59,7 +60,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 	 * @return predicate of field value. <tt>null</tt> to indicate that this field is empty   
 	 */
 	@Nullable
-	protected abstract Predicate getValuePredicate(Root<Issue> issue, Root<IssueField> field, CriteriaBuilder builder);
+	protected abstract Predicate getValuePredicate(From<Issue, Issue> issue, From<IssueField, IssueField> field, CriteriaBuilder builder);
 	
 	@Override
 	public Collection<String> getUndefinedFields() {

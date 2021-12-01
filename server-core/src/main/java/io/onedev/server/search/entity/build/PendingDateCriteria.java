@@ -4,12 +4,11 @@ import java.util.Date;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 
@@ -30,8 +29,8 @@ public class PendingDateCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<Build> root, CriteriaBuilder builder) {
-		Path<Date> attribute = root.get(Build.PROP_PENDING_DATE);
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+		Path<Date> attribute = from.get(Build.PROP_PENDING_DATE);
 		if (operator == BuildQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else

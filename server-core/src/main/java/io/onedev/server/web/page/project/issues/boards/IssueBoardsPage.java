@@ -141,7 +141,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		
 		IssueQuery query;
 		try {
-			query = IssueQuery.parse(getProject(), queryString, true, true, false, false, false);
+			query = IssueQuery.parse(getProject(), queryString, true, true, false, false, false, false);
 		} catch (ExplicitException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
 			return null;
@@ -157,7 +157,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 		IssueQuery baseQuery;
 		try {
-			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false);
+			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false, false);
 		} catch (ExplicitException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
 			return null;
@@ -646,7 +646,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				
 			});
 			
-			queryInput.add(new IssueQueryBehavior(projectModel, true, true, false, false, false));
+			queryInput.add(new IssueQueryBehavior(projectModel, true, true, false, false, false, false));
 			
 			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 				

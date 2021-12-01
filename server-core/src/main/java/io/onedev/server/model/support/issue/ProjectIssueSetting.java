@@ -111,7 +111,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedStates());
+					undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedStates());
 				} catch (Exception e) {
 				}
 			}
@@ -136,7 +136,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFields());
+					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedFields());
 				} catch (Exception e) {
 				}
 			}
@@ -153,7 +153,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFieldValues());
+					undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedFieldValues());
 				} catch (Exception e) {
 				}
 			}
@@ -170,7 +170,7 @@ public class ProjectIssueSetting implements Serializable {
 			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
 					if (parsedQuery.fixUndefinedStates(resolutions))
 						namedQuery.setQuery(parsedQuery.toString());
 					else
@@ -199,7 +199,7 @@ public class ProjectIssueSetting implements Serializable {
 			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
 					if (parsedQuery.fixUndefinedFields(resolutions))
 						namedQuery.setQuery(parsedQuery.toString());
 					else
@@ -222,7 +222,7 @@ public class ProjectIssueSetting implements Serializable {
 			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
 					if (parsedQuery.fixUndefinedFieldValues(resolutions))
 						namedQuery.setQuery(parsedQuery.toString());
 					else

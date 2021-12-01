@@ -14,11 +14,13 @@ import static io.onedev.server.search.entity.EntityQuery.getValue;
 import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
 import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.CurrentIssue;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentCommit;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentPullRequest;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInPullRequest;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.HasAny;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.OrderBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
@@ -37,7 +39,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
@@ -89,9 +90,12 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	private final boolean withCurrentCommitCriteria;
 	
+	private final boolean withCurrentIssueCriteria;
+	
 	public IssueQueryBehavior(IModel<Project> projectModel, boolean withOrder,
 			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
-			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria) {
+			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria, 
+			boolean withCurrentIssueCriteria) {
 		super(IssueQueryParser.class, "query", false);
 		this.projectModel = projectModel;
 		this.withOrder = withOrder;
@@ -99,6 +103,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		this.withCurrentBuildCriteria = withCurrentBuildCriteria;
 		this.withCurrentPullRequestCriteria = withCurrentPullRequestCriteria;
 		this.withCurrentCommitCriteria = withCurrentCommitCriteria;
+		this.withCurrentIssueCriteria = withCurrentIssueCriteria;
 	}
 
 	@Override
@@ -132,13 +137,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							List<String> candidates = new ArrayList<>(Issue.QUERY_FIELDS);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
 								candidates.add(field.getName());
-							List<LinkSpec> links = new ArrayList<>(getLinkSpecManager().query());
-							Collections.sort(links);
-							for (LinkSpec link: links) {
-								candidates.add(link.getName());
-								if (link.getOpposite() != null)
-									candidates.add(link.getOpposite().getName());
-							}
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
@@ -175,6 +173,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								else if (operator == FixedInPullRequest) 
 									return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+								else if (operator == HasAny) 
+									return SuggestionUtils.suggestLinkSpecs(matchWith);
 								else
 									return SuggestionUtils.suggestCommits(project, matchWith);
 							} else {
@@ -182,7 +182,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								
 								try {
 									checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
-											withCurrentPullRequestCriteria, withCurrentCommitCriteria);
+											withCurrentPullRequestCriteria, withCurrentCommitCriteria, withCurrentIssueCriteria);
 									LinkSpec linkSpec = getLinkSpecManager().find(fieldName);
 									if (linkSpec != null) {
 										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
@@ -244,6 +244,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								} catch (ExplicitException ex) {
 								}
 							}
+						} else if ("linkSpec".equals(spec.getLabel())) {
+							return SuggestionUtils.suggestLinkSpecs(matchWith);
 						}
 						return new ArrayList<>();
 					}
@@ -265,7 +267,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				|| !withCurrentUserCriteria && suggestedLiteral.equals(getRuleName(SubmittedByMe))
 				|| !withCurrentBuildCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
 				|| !withCurrentPullRequestCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
-				|| !withCurrentCommitCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))) {
+				|| !withCurrentCommitCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))
+				|| !withCurrentIssueCriteria && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
 			return null;
 		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
@@ -276,7 +279,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				try {
 					checkField(fieldName, getOperator(suggestedLiteral), 
 							withCurrentUserCriteria, withCurrentBuildCriteria, 
-							withCurrentPullRequestCriteria, withCurrentCommitCriteria);
+							withCurrentPullRequestCriteria, withCurrentCommitCriteria, 
+							withCurrentIssueCriteria);
 				} catch (ExplicitException e) {
 					return null;
 				}

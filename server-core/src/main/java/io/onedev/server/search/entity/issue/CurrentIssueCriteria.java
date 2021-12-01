@@ -7,31 +7,30 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.PullRequest;
 
-public class FixedInCurrentPullRequestCriteria extends IssueCriteria {
+public class CurrentIssueCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		if (PullRequest.get() != null)
-			return new FixedInPullRequestCriteria(PullRequest.get()).getPredicate(query, from, builder);
+		if (Issue.get() != null)
+			return builder.equal(from, Issue.get());
 		else
-			throw new ExplicitException("No pull request in query context");
+			throw new ExplicitException("No issue in query context");
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (PullRequest.get() != null)
-			return new FixedInPullRequestCriteria(PullRequest.get()).matches(issue);
+		if (Issue.get() != null)
+			return Issue.get().equals(issue);
 		else
-			throw new ExplicitException("No pull request in query context");
+			throw new ExplicitException("No issue in query context");
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return IssueQuery.getRuleName(IssueQueryLexer.FixedInCurrentPullRequest);
+		return IssueQuery.getRuleName(IssueQueryLexer.IsCurrent);
 	}
 
 }

@@ -5,8 +5,8 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -36,12 +36,12 @@ public class IncludesCommitCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, Root<PullRequest> root, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Collection<Long> pullRequestIds = getPullRequestIds();
 		if (!pullRequestIds.isEmpty()) {
 			return builder.and(
-					builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), project),
-					root.get(PullRequest.PROP_ID).in(pullRequestIds));
+					builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), project),
+					from.get(PullRequest.PROP_ID).in(pullRequestIds));
 		} else {
 			return builder.disjunction();
 		}

@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,6 +70,7 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.facade.IssueFacade;
@@ -76,6 +78,8 @@ import io.onedev.server.util.validation.ProjectPathValidator;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.util.IssueAware;
+import io.onedev.server.web.util.WicketUtils;
 
 @Entity
 @Table(
@@ -193,6 +197,15 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
     	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
     }
     
+	private static ThreadLocal<Stack<Issue>> stack =  new ThreadLocal<Stack<Issue>>() {
+
+		@Override
+		protected Stack<Issue> initialValue() {
+			return new Stack<Issue>();
+		}
+	
+	};
+	
 	@Column(nullable=false)
 	private String state;
 	
@@ -890,6 +903,29 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 					.map(it->it.getLinked(this))
 					.collect(Collectors.toList());
 		}
+	}
+	
+	@Nullable
+	public static Issue get() {
+		if (!stack.get().isEmpty()) { 
+			return stack.get().peek();
+		} else {
+			ComponentContext componentContext = ComponentContext.get();
+			if (componentContext != null) {
+				IssueAware issueAware = WicketUtils.findInnermost(componentContext.getComponent(), IssueAware.class);
+				if (issueAware != null) 
+					return issueAware.getIssue();
+			}
+			return null;
+		}
+	}
+	
+	public static void push(@Nullable Issue issue) {
+		stack.get().push(issue);
+	}
+
+	public static void pop() {
+		stack.get().pop();
 	}
 	
 }

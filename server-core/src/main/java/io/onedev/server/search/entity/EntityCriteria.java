@@ -7,9 +7,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.AbstractEntity;
@@ -22,9 +22,9 @@ public abstract class EntityCriteria<T extends AbstractEntity> extends Criteria<
 	
 	public static final int IN_CLAUSE_LIMIT = 1000;
 	
-	public abstract Predicate getPredicate(CriteriaQuery<?> query, Root<T> root, CriteriaBuilder builder);
+	public abstract Predicate getPredicate(CriteriaQuery<?> query, From<T, T> from, CriteriaBuilder builder);
 
-	public static Predicate inManyValues(CriteriaBuilder builder, Path<Long> attribute, Collection<Long> inValues, 
+	public static Predicate inManyValues(CriteriaBuilder builder, Path<Long> path, Collection<Long> inValues, 
 			Collection<Long> allValues) {
 		List<Long> listOfInValues = new ArrayList<>(inValues);
 		Collections.sort(listOfInValues);
@@ -38,8 +38,8 @@ public abstract class EntityCriteria<T extends AbstractEntity> extends Criteria<
 				discreteValues.addAll(range);
 			} else {
 				predicates.add(builder.and(
-						builder.greaterThanOrEqualTo(attribute, range.get(0)), 
-						builder.lessThanOrEqualTo(attribute, range.get(range.size()-1))));
+						builder.greaterThanOrEqualTo(path, range.get(0)), 
+						builder.lessThanOrEqualTo(path, range.get(range.size()-1))));
 			}
 		}
 
@@ -47,12 +47,12 @@ public abstract class EntityCriteria<T extends AbstractEntity> extends Criteria<
 		for (Long value: discreteValues) {
 			inClause.add(value);
 			if (inClause.size() == IN_CLAUSE_LIMIT) {
-				predicates.add(attribute.in(inClause));
+				predicates.add(path.in(inClause));
 				inClause = new ArrayList<>();
 			}
 		}
 		if (!inClause.isEmpty()) 
-			predicates.add(attribute.in(inClause));
+			predicates.add(path.in(inClause));
 		
 		return builder.or(predicates.toArray(new Predicate[0]));
 	}
