@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.admin.role;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
@@ -8,7 +11,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
@@ -45,7 +50,10 @@ public class NewRolePage extends AdministrationPage {
 							"This name has already been used by another role");
 				} 
 				if (editor.isValid()) {
-					roleManager.save(role, null);
+					Collection<LinkSpec> authorizedLinks = new ArrayList<>();
+					for (String linkName: role.getEditableIssueLinks()) 
+						authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
+					roleManager.save(role, authorizedLinks, null);
 					Session.get().success("Role created");
 					setResponsePage(RoleListPage.class);
 				}

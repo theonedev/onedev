@@ -2,7 +2,9 @@ package io.onedev.server.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -11,6 +13,7 @@ import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.apache.shiro.authz.Permission;
@@ -21,6 +24,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.role.AllIssueFields;
 import io.onedev.server.model.support.role.CodePrivilege;
@@ -33,6 +37,7 @@ import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.EditIssueField;
+import io.onedev.server.security.permission.EditIssueLink;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ManageBuilds;
 import io.onedev.server.security.permission.ManageCodeComments;
@@ -45,7 +50,9 @@ import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
 /**
@@ -83,6 +90,9 @@ public class Role extends AbstractEntity implements Permission {
 	@Column(length=65535, nullable=false)
 	private IssueFieldSet editableIssueFields = new AllIssueFields();
 	
+	@Transient
+	private List<String> editableIssueLinks = new ArrayList<>();
+	
 	private boolean manageBuilds;
 	
 	@Lob
@@ -97,6 +107,9 @@ public class Role extends AbstractEntity implements Permission {
 	
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
 	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
+	
+	@OneToMany(mappedBy=LinkAuthorization.PROP_ROLE, cascade=CascadeType.REMOVE)
+	private Collection<LinkAuthorization> linkAuthorizations = new ArrayList<>();
 	
 	@Editable(order=100)
 	@NotEmpty
@@ -214,6 +227,29 @@ public class Role extends AbstractEntity implements Permission {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
 	}
 	
+	@Editable(order=625, description="Optionally specify issue links allowed to edit")
+	@ChoiceProvider("getIssueLinkChoices")
+	@NameOfEmptyValue("None")
+	public List<String> getEditableIssueLinks() {
+		return editableIssueLinks;
+	}
+
+	public void setEditableIssueLinks(List<String> editableIssueLinks) {
+		this.editableIssueLinks = editableIssueLinks;
+	}
+	
+	@SuppressWarnings("unused")
+	private static Map<String, String> getIssueLinkChoices() {
+		Map<String, String> choices = new LinkedHashMap<>();
+		for (LinkSpec link: OneDev.getInstance(LinkSpecManager.class).queryAndSort()) {
+			if (link.getOpposite() != null)
+				choices.put(link.getName(), link.getName() + " - " + link.getOpposite().getName());
+			else
+				choices.put(link.getName(), link.getName());
+		}
+		return choices;
+	}
+
 	@Editable(order=650)
 	@ShowCondition("isManageProjectDisabled")
 	public boolean isManageBuilds() {
@@ -263,6 +299,14 @@ public class Role extends AbstractEntity implements Permission {
 		this.groupAuthorizations = groupAuthorizations;
 	}
 
+	public Collection<LinkAuthorization> getLinkAuthorizations() {
+		return linkAuthorizations;
+	}
+
+	public void setLinkAuthorizations(Collection<LinkAuthorization> linkAuthorizations) {
+		this.linkAuthorizations = linkAuthorizations;
+	}
+
 	@Override
 	public boolean implies(Permission p) {
 		for (Permission each: getPermissions()) {
@@ -293,6 +337,8 @@ public class Role extends AbstractEntity implements Permission {
 			if (scheduleIssues)
 				permissions.add(new ScheduleIssues());
 			permissions.add(new EditIssueField(editableIssueFields.getIncludeFields()));
+			for (LinkAuthorization linkAuthorization: getLinkAuthorizations()) 
+				permissions.add(new EditIssueLink(linkAuthorization.getLink()));
 			if (manageBuilds)
 				permissions.add(new ManageBuilds());
 			for (JobPrivilege jobPrivilege: jobPrivileges) {

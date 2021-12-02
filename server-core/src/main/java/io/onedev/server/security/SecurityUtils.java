@@ -36,6 +36,7 @@ import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
@@ -50,6 +51,7 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.EditIssueField;
+import io.onedev.server.security.permission.EditIssueLink;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ManageBuilds;
 import io.onedev.server.security.permission.ManageCodeComments;
@@ -149,6 +151,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static boolean canEditIssueField(Project project, String fieldName) {
 		return getSubject().isPermitted(new ProjectPermission(project, new EditIssueField(Sets.newHashSet(fieldName))));
+	}
+	
+	public static boolean canEditIssueLink(Project project, LinkSpec link) {
+		return getSubject().isPermitted(new ProjectPermission(project, new EditIssueLink(link)));
 	}
 	
 	public static boolean canScheduleIssues(Project project) {

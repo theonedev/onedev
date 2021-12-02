@@ -1,5 +1,6 @@
 package io.onedev.server.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -74,7 +75,7 @@ public class RoleResource {
     public Long createOrUpdate(@NotNull Role role) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-	    roleManager.save(role, (String) role.getCustomData());
+	    roleManager.save(role, new ArrayList<>(), (String) role.getCustomData());
     	return role.getId();
     }
 	

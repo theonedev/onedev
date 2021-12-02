@@ -218,20 +218,23 @@ public abstract class IssueSidePanel extends Panel {
 				List<LinkSpec> specs = new ArrayList<>(OneDev.getInstance(LinkSpecManager.class).queryAndSort());
 				
 				for (LinkSpec spec: specs) {
-					if (spec.getOpposite() != null) {
-						IssueQuery query = IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), 
-								false, false, false, false, false, false);
-						if (query.matches(getIssue()))
-							links.add(new LinkSide(spec, false));
-						query = IssueQuery.parse(getProject(), spec.getIssueQuery(), false, false, false, 
-								false, false, false);
-						if (query.matches(getIssue()))
-							links.add(new LinkSide(spec, true));
-					} else {
-						IssueQuery query = IssueQuery.parse(getProject(), spec.getIssueQuery(), 
-								false, false, false, false, false, false);
-						if (query.matches(getIssue()))
-							links.add(new LinkSide(spec, false));
+					if (SecurityUtils.canEditIssueLink(getProject(), spec) 
+							|| getIssue().getLinks().stream().anyMatch(it->it.getSpec().equals(spec))) {
+						if (spec.getOpposite() != null) {
+							IssueQuery query = IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), 
+									false, false, false, false, false, false);
+							if (query.matches(getIssue()))
+								links.add(new LinkSide(spec, false));
+							query = IssueQuery.parse(getProject(), spec.getIssueQuery(), false, false, false, 
+									false, false, false);
+							if (query.matches(getIssue()))
+								links.add(new LinkSide(spec, true));
+						} else {
+							IssueQuery query = IssueQuery.parse(getProject(), spec.getIssueQuery(), 
+									false, false, false, false, false, false);
+							if (query.matches(getIssue()))
+								links.add(new LinkSide(spec, false));
+						}
 					}
 				}
 				return links;
@@ -257,20 +260,28 @@ public abstract class IssueSidePanel extends Panel {
 				LinkSpec spec = side.spec;
 				boolean opposite = side.opposite;
 				
+				boolean canEditIssueLink = SecurityUtils.canEditIssueLink(getProject(), spec);
+				
 				String name = spec.getName(opposite);
 				fragment.add(new Label("name", name));
 				
 				RepeatingView linkedIssuesView = new RepeatingView("linkedIssues");
 				for (Issue linkedIssue: getIssue().findLinkedIssues(spec, opposite)) {
-					LinkDeleteListener deleteListener = new LinkDeleteListener() {
-
-						@Override
-						void onDelete(AjaxRequestTarget target, Issue linkedIssue) {
-							getIssueChangeManager().removeLink(model.getObject().spec, getIssue(), 
-									linkedIssue, opposite);
-						}
-						
-					};
+					LinkDeleteListener deleteListener;
+					if (canEditIssueLink 
+							&& (linkedIssue.getProject().equals(getProject()) || SecurityUtils.canEditIssueLink(linkedIssue.getProject(), spec))) { 
+						deleteListener = new LinkDeleteListener() {
+	
+							@Override
+							void onDelete(AjaxRequestTarget target, Issue linkedIssue) {
+								getIssueChangeManager().removeLink(model.getObject().spec, getIssue(), 
+										linkedIssue, opposite);
+							}
+							
+						};
+					} else {
+						deleteListener = null;
+					}
 					linkedIssuesView.add(newLinkedIssueContainer(linkedIssuesView.newChildId(), 
 							linkedIssue, deleteListener));
 				}
@@ -300,12 +311,16 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Issue selection) {
 						LinkSpec spec = model.getObject().spec;
-						if (getIssue().equals(selection))
+						if (getIssue().equals(selection)) {
 							getSession().warn("Can not link to self");
-						else if (getIssue().findLinkedIssues(spec, opposite).contains(selection)) 
+						} else if (getIssue().findLinkedIssues(spec, opposite).contains(selection)) { 
 							getSession().warn("Issue already added");
-						else 
+						} else if (!selection.getProject().equals(getProject()) 
+								&& !SecurityUtils.canEditIssueLink(selection.getProject(), spec)) {
+							getSession().warn("Not authorized to link issue in project '" + selection.getProject() + "'");
+						} else {
 							getIssueChangeManager().addLink(spec, getIssue(), selection, opposite);
+						}
 					}
 
 					@Override
@@ -313,24 +328,28 @@ public abstract class IssueSidePanel extends Panel {
 						return "Add " + name.toLowerCase();
 					}
 					
-				}.setVisible(SecurityUtils.getUser() != null));
+				}.setVisible(canEditIssueLink));
 				
 				return fragment;
 			}
 			
 			private Fragment newSingleLink(IModel<LinkSide> model) {
 				Fragment fragment = new Fragment("content", "singleLinkFrag", IssueSidePanel.this);
-				
 				LinkSide side = model.getObject();
 				fragment.add(new Label("name", side.spec.getName(side.opposite)));
 				
 				SingleLinkBean bean = new SingleLinkBean();
 				
-				Issue linkedIssue = getIssue().findLinkedIssue(side.spec, side.opposite);
-				if (linkedIssue != null)
-					bean.setIssueId(linkedIssue.getId());
+				Issue prevLinkedIssue = getIssue().findLinkedIssue(side.spec, side.opposite);
+				if (prevLinkedIssue != null)
+					bean.setIssueId(prevLinkedIssue.getId());
 				
-				Long linkedIssueId = bean.getIssueId();
+				Long prevLinkedIssueId = bean.getIssueId();
+				
+				boolean authorized = SecurityUtils.canEditIssueLink(getProject(), side.spec) 
+						&& (prevLinkedIssue == null 
+								|| prevLinkedIssue.getProject().equals(getProject()) 
+								|| SecurityUtils.canEditIssueLink(prevLinkedIssue.getProject(), side.spec));
 				
 				fragment.add(new InplacePropertyEditLink("edit", new AlignPlacement(100, 0, 100, 0)) {
 
@@ -359,23 +378,28 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean,
 							String propertyName) {
+						LinkSide side = model.getObject();
 						SingleLinkBean singleLinkBean = (SingleLinkBean) bean;
 						Issue linkedIssue = null;
 						if (singleLinkBean.getIssueId() != null) 
 							linkedIssue = getIssueManager().load(singleLinkBean.getIssueId());
 						if (getIssue().equals(linkedIssue)) {
 							getSession().warn("Can not link to self");
-							singleLinkBean.setIssueId(linkedIssueId);
+							singleLinkBean.setIssueId(prevLinkedIssueId);
+						} else if (linkedIssue != null && !linkedIssue.getProject().equals(getProject()) 
+								&& !SecurityUtils.canEditIssueLink(linkedIssue.getProject(), side.spec)) {
+							getSession().warn("Not authorized to link issue in project '" + linkedIssue.getProject() + "'");
+							singleLinkBean.setIssueId(prevLinkedIssueId);
 						} else {
-							getIssueChangeManager().changeLink(model.getObject().spec, getIssue(), 
-									linkedIssue, model.getObject().opposite);
+							getIssueChangeManager().changeLink(side.spec, getIssue(), 
+									linkedIssue, side.opposite);
 						}
 					}
 
-				}.setVisible(SecurityUtils.getUser() != null));
+				}.setVisible(authorized));
 				
-				if (linkedIssue != null) 
-					fragment.add(newLinkedIssueContainer("body", linkedIssue, null));
+				if (prevLinkedIssue != null) 
+					fragment.add(newLinkedIssueContainer("body", prevLinkedIssue, null));
 				else 
 					fragment.add(new Label("body", "<i>Not specified</i>").setEscapeModelStrings(false));
 				
@@ -412,7 +436,7 @@ public abstract class IssueSidePanel extends Panel {
 				deleteListener.onDelete(target, linkedIssue);
 			}
 			
-		}.setVisible(deleteListener != null && SecurityUtils.getUser() != null));
+		}.setVisible(deleteListener != null));
 		
 		fragment.add(new IssueStateBadge("state", new LoadableDetachableModel<Issue>() {
 

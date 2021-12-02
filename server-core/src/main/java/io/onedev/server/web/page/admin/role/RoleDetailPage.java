@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.admin.role;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -18,7 +20,10 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.model.LinkAuthorization;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Role;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
@@ -51,10 +56,17 @@ public class RoleDetailPage extends AdministrationPage {
 
 			@Override
 			protected Role load() {
-				return OneDev.getInstance(RoleManager.class).load(Long.valueOf(roleIdString));
+				Role role = getManager().load(Long.valueOf(roleIdString));
+				for (LinkAuthorization linkAuthorization: role.getLinkAuthorizations())
+					role.getEditableIssueLinks().add(linkAuthorization.getLink().getName());
+				return role;
 			}
 			
 		};
+	}
+	
+	private RoleManager getManager() {
+		return OneDev.getInstance(RoleManager.class);
 	}
 
 	@Override
@@ -98,7 +110,10 @@ public class RoleDetailPage extends AdministrationPage {
 								"This name has already been used by another role.");
 					} 
 					if (editor.isValid()) {
-						roleManager.save(role, oldName);
+						Collection<LinkSpec> authorizedLinks = new ArrayList<>();
+						for (String linkName: role.getEditableIssueLinks()) 
+							authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
+						roleManager.save(role, authorizedLinks, oldName);
 						setResponsePage(RoleDetailPage.class, RoleDetailPage.paramsOf(role));
 						Session.get().success("Role updated");
 					}

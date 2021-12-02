@@ -120,6 +120,7 @@ import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.entitymanager.LinkAuthorizationManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.MilestoneManager;
@@ -162,6 +163,7 @@ import io.onedev.server.entitymanager.impl.DefaultIssueQueryPersonalizationManag
 import io.onedev.server.entitymanager.impl.DefaultIssueScheduleManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueVoteManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueWatchManager;
+import io.onedev.server.entitymanager.impl.DefaultLinkAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultLinkSpecManager;
 import io.onedev.server.entitymanager.impl.DefaultMembershipManager;
 import io.onedev.server.entitymanager.impl.DefaultMilestoneManager;
@@ -433,6 +435,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueScheduleManager.class).to(DefaultIssueScheduleManager.class);
 		bind(LinkSpecManager.class).to(DefaultLinkSpecManager.class);
 		bind(IssueLinkManager.class).to(DefaultIssueLinkManager.class);
+		bind(LinkAuthorizationManager.class).to(DefaultLinkAuthorizationManager.class);
 		
 		bind(WebHookManager.class);
 		

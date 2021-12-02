@@ -38,6 +38,9 @@ public class LinkSpec extends AbstractEntity {
 	@OneToMany(mappedBy=IssueLink.PROP_SPEC, cascade=CascadeType.REMOVE)
 	private Collection<IssueLink> links = new ArrayList<>();
 	
+	@OneToMany(mappedBy=LinkAuthorization.PROP_LINK, cascade=CascadeType.REMOVE)
+	private Collection<LinkAuthorization> authorizations = new ArrayList<>();
+	
 	@Editable(order=100, description="Name of the link")
 	@NotEmpty
 	public String getName() {

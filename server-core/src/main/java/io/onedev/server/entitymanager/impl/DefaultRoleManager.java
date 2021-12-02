@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -12,8 +13,10 @@ import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
+import io.onedev.server.entitymanager.LinkAuthorizationManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.role.AllIssueFields;
@@ -40,11 +43,15 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	
 	private final IdManager idManager;
 	
+	private final LinkAuthorizationManager linkAuthorizationManager;
+	
 	@Inject
-	public DefaultRoleManager(Dao dao, SettingManager settingManager, IdManager idManager) {
+	public DefaultRoleManager(Dao dao, SettingManager settingManager, IdManager idManager, 
+			LinkAuthorizationManager linkAuthorizationManager) {
 		super(dao);
 		this.settingManager = settingManager;
 		this.idManager = idManager;
+		this.linkAuthorizationManager = linkAuthorizationManager;
 	}
 
 	@Transactional
@@ -56,10 +63,12 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	
 	@Transactional
 	@Override
-	public void save(Role role, String oldName) {
+	public void save(Role role, Collection<LinkSpec> authorizedLinks, String oldName) {
 		if (oldName != null && !oldName.equals(role.getName())) 
 			settingManager.onRenameRole(oldName, role.getName());
 		dao.persist(role);
+		
+		linkAuthorizationManager.syncAuthorizations(role, authorizedLinks);
 	}
 
 	@Transactional
@@ -111,7 +120,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setJobNames("*");
 		childCreator.getJobPrivileges().add(jobPrivilege);
 		
-		save(childCreator, null);
+		save(childCreator, new ArrayList<>(), null);
 		
 		Role codeWriter = new Role();
 		codeWriter.setName("Code Writer");
@@ -124,7 +133,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setRunJob(true);
 		codeWriter.getJobPrivileges().add(jobPrivilege);
 		
-		save(codeWriter, null);
+		save(codeWriter, new ArrayList<>(), null);
 
 		Role codeReader = new Role();
 		codeReader.setName("Code Reader");
@@ -137,7 +146,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setJobNames("*");
 		codeReader.getJobPrivileges().add(jobPrivilege);
 		
-		save(codeReader, null);
+		save(codeReader, new ArrayList<>(), null);
 		
 		Role issueReporter = new Role();
 		issueReporter.setName("Issue Reporter");
@@ -150,7 +159,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setJobNames("*");
 		issueReporter.getJobPrivileges().add(jobPrivilege);
 
-		save(issueReporter, null);					
+		save(issueReporter, new ArrayList<>(), null);					
 	}
 
     @Sessional
