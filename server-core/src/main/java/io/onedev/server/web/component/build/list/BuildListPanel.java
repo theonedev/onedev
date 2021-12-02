@@ -94,7 +94,6 @@ import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -260,8 +259,6 @@ public abstract class BuildListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		BasePage page = (BasePage) getPage();
-		
 		add(new MenuLink("operations") {
 
 			@Override
@@ -293,7 +290,7 @@ public abstract class BuildListPanel extends Panel {
 								}
 								
 								if (errorMessage != null) {
-									page.alert(target, errorMessage);
+									getSession().error(errorMessage);
 								} else {
 									new ConfirmModalPanel(target) {
 										
@@ -428,7 +425,7 @@ public abstract class BuildListPanel extends Panel {
 								}
 								
 								if (errorMessage != null) {
-									page.alert(target, errorMessage);
+									getSession().error(errorMessage);
 								} else {
 									new ConfirmModalPanel(target) {
 										

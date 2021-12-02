@@ -110,7 +110,8 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 							parentError = "Can not use current or descendant project as parent";
 						else if (!SecurityUtils.canCreateChildren(parent)) 
 							parentError = "Not authorized to move project under this parent";
-						project.setParent(parent);
+						else
+							project.setParent(parent);
 					} else if (!SecurityUtils.canCreateRootProjects()) {
 						parentError = "Not authorized to set as root project";
 					} else {

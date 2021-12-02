@@ -32,8 +32,11 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
 		super.onInitialize();
 
 		Map<String, String> projectPaths = new LinkedHashMap<>();
-		for (Project project: OneDev.getInstance(ProjectManager.class).getPermittedProjects(new CreateChildren())) 
-			projectPaths.put(project.getPath(), project.getPath());
+		Project currentProject = Project.get();
+		for (Project project: OneDev.getInstance(ProjectManager.class).getPermittedProjects(new CreateChildren())) {
+			if (currentProject == null || !currentProject.isSelfOrAncestorOf(project))
+				projectPaths.put(project.getPath(), project.getPath());
+		}
 		String selection = getModelObject();
 		
     	input = new StringSingleChoice("input", Model.of(selection), Model.ofMap(projectPaths), true) {

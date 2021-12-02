@@ -89,7 +89,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
@@ -244,8 +243,6 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		BasePage page = (BasePage) getPage();
-		
 		add(new MenuLink("operations") {
 
 			@Override
@@ -277,7 +274,7 @@ public abstract class PullRequestListPanel extends Panel {
 								}
 								
 								if (errorMessage != null) {
-									page.alert(target, errorMessage);
+									getSession().error(errorMessage);
 								} else {
 									new ConfirmModalPanel(target) {
 										
@@ -400,7 +397,7 @@ public abstract class PullRequestListPanel extends Panel {
 								}
 								
 								if (errorMessage != null) {
-									page.alert(target, errorMessage);
+									getSession().error(errorMessage);
 								} else {
 									new ConfirmModalPanel(target) {
 										

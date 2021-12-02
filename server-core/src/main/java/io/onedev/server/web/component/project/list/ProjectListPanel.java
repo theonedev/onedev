@@ -73,7 +73,6 @@ import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
@@ -254,8 +253,6 @@ public class ProjectListPanel extends Panel {
 		else
 			canCreateProjects = SecurityUtils.canCreateProjects();
 		
-		BasePage page = (BasePage) getPage();
-		
 		add(new MenuLink("operations") {
 
 			@Override
@@ -308,7 +305,7 @@ public class ProjectListPanel extends Panel {
 										}
 										
 										if (errorMessage != null) {
-											page.alert(target, errorMessage);
+											getSession().error(errorMessage);
 										} else {
 											new ConfirmModalPanel(target) {
 												
@@ -397,7 +394,7 @@ public class ProjectListPanel extends Panel {
 									}
 									
 									if (errorMessage != null) {
-										page.alert(target, errorMessage);
+										getSession().error(errorMessage);
 									} else {
 										new ConfirmModalPanel(target) {
 											
@@ -471,7 +468,7 @@ public class ProjectListPanel extends Panel {
 									}
 								}
 								if (errorMessage != null) {
-									page.alert(target, errorMessage);
+									getSession().error(errorMessage);
 								} else {
 									new ConfirmModalPanel(target) {
 										
@@ -568,7 +565,7 @@ public class ProjectListPanel extends Panel {
 										}
 										
 										if (errorMessage != null) {
-											page.alert(target, errorMessage);
+											getSession().error(errorMessage);
 										} else {
 											new ConfirmModalPanel(target) {
 												
@@ -657,7 +654,7 @@ public class ProjectListPanel extends Panel {
 									}
 									
 									if (errorMessage != null) {
-										page.alert(target, errorMessage);
+										getSession().error(errorMessage);
 									} else {
 										new ConfirmModalPanel(target) {
 											
@@ -734,7 +731,7 @@ public class ProjectListPanel extends Panel {
 								}
 								
 								if (errorMessage != null) {
-									page.alert(target, errorMessage);
+									getSession().error(errorMessage);
 								} else {
 									new ConfirmModalPanel(target) {
 										

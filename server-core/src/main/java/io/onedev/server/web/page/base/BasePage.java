@@ -302,9 +302,4 @@ public abstract class BasePage extends WebPage {
 		handler.appendJavaScript("$(window).resize();");
 	}
 	
-	public void alert(IPartialPageRequestHandler handler, String message) {
-		handler.appendJavaScript(String.format("alert('%s');", 
-				JavaScriptEscape.escapeJavaScript(message)));
-	}
-
 }
