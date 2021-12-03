@@ -341,6 +341,8 @@ public class DefaultMailManager implements MailManager {
 					EmailAddress receiverAddress = EmailAddress.parse(receiver.getAddress());
 					if (receiverAddress.toString().equals(systemAddress.toString())) {
 						if (serviceDeskSetting != null) {
+							if (designatedProject == null)
+								throw new ExplicitException("No project designated for sender: " + from.getAddress());
 							Project project = projectManager.find(designatedProject);
 							if (project == null) {
 								String errorMessage = String.format(
@@ -497,6 +499,8 @@ public class DefaultMailManager implements MailManager {
 		Pattern pattern = Pattern.compile("(^|\\W)" + quotedSender.replace(".", "\\.") + "($|\\W)");
 		
 		Document document = HtmlUtils.parse(content);
+		document.select(".gmail_quote").remove();
+		
 		Element quotedSenderElement = null;
 		for (Element element: document.getElementsContainingOwnText(quotedSender)) {
 			if (pattern.matcher(element.text()).find()) {

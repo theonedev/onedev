@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
@@ -24,22 +23,15 @@ import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-@ClassValidating
-public class ServiceDeskSetting implements Serializable, Validatable {
+public class ServiceDeskSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final String PROP_PROJECT_DESIGNATIONS = "projectDesignations";
-
-	private static final String PROP_ISSUE_CREATION_SETTINGS = "issueCreationSettings";
 	
 	private List<SenderAuthorization> senderAuthorizations = new ArrayList<>(); 
 	
@@ -103,6 +95,7 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 		return null;
 	}
 	
+	@Nullable
 	public String getDesignatedProject(String senderAddress) {
 		Matcher matcher = new StringMatcher();
 		for (ProjectDesignation designation: projectDesignations) {
@@ -113,7 +106,7 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 			if (patternSet.matches(matcher, senderAddress))
 				return designation.getProject();
 		}
-		throw new ExplicitException("No project designated for sender: " + senderAddress);
+		return null;
 	}
 	
 	public List<FieldSupply> getIssueCreationSetting(String senderAddress, Project project) {
@@ -221,46 +214,4 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 			setting.fixUndefinedFieldValues(resolutions);
 	}
 
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		boolean isValid = true;
-		
-		boolean foundDefault = false;
-		for (ProjectDesignation designation: getProjectDesignations()) {
-			if (designation.getSenderEmails() == null) {
-				foundDefault = true;
-				break;
-			}
-		}
-		if (!foundDefault) {
-			String errorMessage = "An entry with any sender should be defined to be used as "
-					+ "default project designation"; 
-			context.buildConstraintViolationWithTemplate(errorMessage)
-					.addPropertyNode(PROP_PROJECT_DESIGNATIONS)
-					.addConstraintViolation();
-			isValid = false;
-		}
-		
-		foundDefault = false;
-		for (IssueCreationSetting setting: getIssueCreationSettings()) {
-			if (setting.getSenderEmails() == null && setting.getApplicableProjects() == null) {
-				foundDefault = true;
-				break;
-			}
-		}
-		if (!foundDefault) {
-			String errorMessage = "An entry with any sender and any project should be defined "
-					+ "to be use as default issue creation setting"; 
-			context.buildConstraintViolationWithTemplate(errorMessage)
-					.addPropertyNode(PROP_ISSUE_CREATION_SETTINGS)
-					.addConstraintViolation();
-			isValid = false;
-		}
-		
-		if (!isValid)
-			context.disableDefaultConstraintViolation();
-		
-		return isValid;
-	}
-	
 }
