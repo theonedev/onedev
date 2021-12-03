@@ -30,10 +30,12 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
@@ -51,6 +53,7 @@ import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
+import io.onedev.server.model.support.issue.LinkSpecOpposite;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -80,13 +83,16 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final RoleManager roleManager;
 	
+	private final LinkSpecManager linkSpecManager;
+	
 	private String backupTaskId;
 
 	@Inject
 	public DefaultDataManager(UserManager userManager, 
 			SettingManager settingManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
-			PasswordService passwordService, RoleManager roleManager) {
+			PasswordService passwordService, RoleManager roleManager, 
+			LinkSpecManager linkSpecManager) {
 		this.userManager = userManager;
 		this.settingManager = settingManager;
 		this.validator = validator;
@@ -95,6 +101,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.mailManager = mailManager;
 		this.passwordService = passwordService;
 		this.roleManager = roleManager;
+		this.linkSpecManager = linkSpecManager;
 	}
 
 	@SuppressWarnings({"serial"})
@@ -204,6 +211,23 @@ public class DefaultDataManager implements DataManager, Serializable {
 		} 
 		setting = settingManager.getSetting(Key.ISSUE);
 		if (setting == null) {
+			LinkSpec link = new LinkSpec();
+			link.setName("Child Issue");
+			link.setMultiple(true);
+			link.setOpposite(new LinkSpecOpposite());
+			link.getOpposite().setName("Parent Issue");
+			link.setOrder(1);
+			linkSpecManager.save(link);
+			
+			link = new LinkSpec();
+			link.setName("Blocked By");
+			link.setMultiple(true);
+			link.setOpposite(new LinkSpecOpposite());
+			link.getOpposite().setName("Blocking");
+			link.getOpposite().setMultiple(true);
+			link.setOrder(2);
+			linkSpecManager.save(link);
+			
 			settingManager.saveIssueSetting(new GlobalIssueSetting());
 		} 
 		setting = settingManager.getSetting(Key.PERFORMANCE);

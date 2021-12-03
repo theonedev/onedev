@@ -29,7 +29,7 @@ public class IssueLinkChangeData extends IssueChangeData {
 	
 	@Override
 	public String getActivity() {
-		return "changed '" + linkName + "'";
+		return "changed \"" + linkName + "\"";
 	}
 
 	@Override

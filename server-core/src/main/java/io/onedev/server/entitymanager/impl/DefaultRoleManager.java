@@ -112,9 +112,14 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		childCreator.setName("Child Creator");
 		childCreator.setCreateChildren(true);
 		childCreator.setCodePrivilege(CodePrivilege.READ);
-		ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-		allfieldsExcept.getExcludeFields().add("Assignees");
-		childCreator.setEditableIssueFields(allfieldsExcept);
+
+		boolean hasAssigneesField = settingManager.getIssueSetting().getFieldSpec("Assignees") != null;
+		
+		if (hasAssigneesField) {
+			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
+			allfieldsExcept.getExcludeFields().add("Assignees");
+			childCreator.setEditableIssueFields(allfieldsExcept);
+		}
 		
 		JobPrivilege jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
@@ -138,9 +143,12 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role codeReader = new Role();
 		codeReader.setName("Code Reader");
 		codeReader.setCodePrivilege(CodePrivilege.READ);
-		allfieldsExcept = new ExcludeIssueFields();
-		allfieldsExcept.getExcludeFields().add("Assignees");
-		codeReader.setEditableIssueFields(allfieldsExcept);
+		
+		if (hasAssigneesField) {
+			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
+			allfieldsExcept.getExcludeFields().add("Assignees");
+			codeReader.setEditableIssueFields(allfieldsExcept);
+		}
 		
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
@@ -151,9 +159,12 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role issueReporter = new Role();
 		issueReporter.setName("Issue Reporter");
 		issueReporter.setCodePrivilege(CodePrivilege.NONE);
-		allfieldsExcept = new ExcludeIssueFields();
-		allfieldsExcept.getExcludeFields().add("Assignees");
-		issueReporter.setEditableIssueFields(allfieldsExcept);
+		
+		if (hasAssigneesField) {
+			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
+			allfieldsExcept.getExcludeFields().add("Assignees");
+			issueReporter.setEditableIssueFields(allfieldsExcept);
+		}
 		
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");

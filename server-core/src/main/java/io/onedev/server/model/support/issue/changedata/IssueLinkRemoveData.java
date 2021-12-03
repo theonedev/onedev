@@ -23,7 +23,7 @@ public class IssueLinkRemoveData extends IssueChangeData {
 	
 	@Override
 	public String getActivity() {
-		return "removed '" + linkName + "': " + issueSummary;
+		return "removed \"" + linkName + "\" (" + issueSummary + ")";
 	}
 
 	@Override

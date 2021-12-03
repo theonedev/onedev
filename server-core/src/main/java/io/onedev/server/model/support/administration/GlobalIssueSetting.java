@@ -36,6 +36,7 @@ import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
 import io.onedev.server.model.support.issue.transitiontrigger.BranchUpdateTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.transitiontrigger.StateTransitionTrigger;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -190,6 +191,7 @@ public class GlobalIssueSetting implements Serializable {
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
 		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader"));
+		pressButton.setIssueQuery("not(any \"Blocked By\" matching(\"State\" is \"Open\")) and not(any \"Child Issue\" matching(\"State\" is \"Open\"))");
 		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);
@@ -214,6 +216,16 @@ public class GlobalIssueSetting implements Serializable {
 		transitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
+		transition.setFromStates(Lists.newArrayList("Open"));
+		transition.setToState("Closed");
+		StateTransitionTrigger stateTransition = new StateTransitionTrigger();
+		stateTransition.setStates(Lists.newArrayList("Closed"));
+		stateTransition.setIssueQuery("any \"Child Issue\" matching(current issue) and all \"Child Issue\" matching(\"State\" is \"Closed\")");
+		transition.setTrigger(stateTransition);
+		
+		transitionSpecs.add(transition);
+		
+		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open", "Closed"));
 		transition.setToState("Released");
 		buildSuccessful = new BuildSuccessfulTrigger();
@@ -231,6 +243,16 @@ public class GlobalIssueSetting implements Serializable {
 		pressButton.setButtonLabel("Reopen");
 		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader"));
 		transition.setTrigger(pressButton);
+		
+		transitionSpecs.add(transition);
+
+		transition = new TransitionSpec();
+		transition.setFromStates(Lists.newArrayList("Closed", "Released"));
+		transition.setToState("Open");
+		stateTransition = new StateTransitionTrigger();
+		stateTransition.setStates(Lists.newArrayList("Open"));
+		stateTransition.setIssueQuery("any \"Child Issue\" matching(current issue) or any \"Blocked By\" matching(current issue)");
+		transition.setTrigger(stateTransition);
 		
 		transitionSpecs.add(transition);
 		

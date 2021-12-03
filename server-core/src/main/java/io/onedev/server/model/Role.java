@@ -228,6 +228,7 @@ public class Role extends AbstractEntity implements Permission {
 	}
 	
 	@Editable(order=625, description="Optionally specify issue links allowed to edit")
+	@ShowCondition("isManageIssuesDisabled")
 	@ChoiceProvider("getIssueLinkChoices")
 	@NameOfEmptyValue("None")
 	public List<String> getEditableIssueLinks() {
