@@ -1,17 +1,10 @@
 package io.onedev.server.model.support.issue.transitiontrigger;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
 
+import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
@@ -22,7 +15,7 @@ public abstract class TransitionTrigger implements Serializable {
 	private String issueQuery;
 	
 	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues. ")
-	@IssueQuery(withOrder = false)
+	@io.onedev.server.web.editable.annotation.IssueQuery(withOrder = false)
 	@NameOfEmptyValue("All")
 	public String getIssueQuery() {
 		return issueQuery;
@@ -43,72 +36,32 @@ public abstract class TransitionTrigger implements Serializable {
 		return new Usage();
 	}
 	
-	public Collection<String> getUndefinedStates() {
-		try {
-			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true, true, true, true).getUndefinedStates();
-		} catch (Exception e) {
-			return new HashSet<>();
-		}
-	}
+	public IssueQueryUpdater getQueryUpdater() {
+		return new IssueQueryUpdater() {
 
-	public Collection<String> getUndefinedFields() {
-		try {
-			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true, true, true, true).getUndefinedFields();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new HashSet<>();
-		}
-	}
+			@Override
+			protected Usage getUsage() {
+				return new Usage().add("applicable issues");
+			}
 
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
-		try {
-			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true, true, true, true).getUndefinedFieldValues();
-		} catch (Exception e) {
-			return new HashSet<>();
-		}
-	}	
-	
-	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
-		try {
-			io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
-			if (parsedQuery.fixUndefinedStates(resolutions))
-				issueQuery = parsedQuery.toString();
-			else
-				return false;
-		} catch (Exception e) {
-		}
-		return true;
-	}
-	
-	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		try {
-			io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
-			if (parsedQuery.fixUndefinedFields(resolutions))
-				issueQuery = parsedQuery.toString();
-			else
-				return false;
-		} catch (Exception e) {
-		}
-		return true;
-	}
-	
-	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
-		try {
-			io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true, true);
-			if (parsedQuery.fixUndefinedFieldValues(resolutions))
-				issueQuery = parsedQuery.toString();
-			else 
-				return false;
-		} catch (Exception e) {
-		}
-		return true;
+			@Override
+			protected boolean isAllowEmpty() {
+				return true;
+			}
+
+			@Override
+			protected String getIssueQuery() {
+				return issueQuery;
+			}
+
+			@Override
+			protected void setIssueQuery(String issueQuery) {
+				TransitionTrigger.this.issueQuery = issueQuery;
+			}
+			
+		};
 	}
 	
 	public abstract String getDescription();
+	
 }

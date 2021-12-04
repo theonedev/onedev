@@ -13,8 +13,8 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 
 public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
@@ -27,8 +27,7 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	List<CodeComment> query(Project project, @Nullable PullRequest request, 
 			EntityQuery<CodeComment> commentQuery, int firstResult, int maxResults);
 	
-	int count(Project project, @Nullable PullRequest request, 
-			EntityCriteria<CodeComment> commentCriteria);
+	int count(Project project, @Nullable PullRequest request, Criteria<CodeComment> commentCriteria);
 
 	void delete(Collection<CodeComment> comments);
 	

@@ -21,9 +21,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.CommitField;
 import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.Criteria;
 
 public class FieldOperatorCriteria extends FieldCriteria {
 
@@ -85,7 +85,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 			if (getFieldSpec() instanceof BuildChoiceField) {
 				Build build = Build.get();
 				if (build != null) { 
-					Collection<Long> streamPreviousNumbers = Build.get().getStreamPreviousNumbers(EntityCriteria.IN_CLAUSE_LIMIT);
+					Collection<Long> streamPreviousNumbers = Build.get().getStreamPreviousNumbers(Criteria.IN_CLAUSE_LIMIT);
 					if (!streamPreviousNumbers.isEmpty()) {
 						return builder.and(
 								builder.equal(projectAttribute, build.getProject()),
@@ -141,7 +141,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 				Build build = Build.get();
 				if (build != null) {
 					return build.getProject().equals(issue.getProject()) 
-							&& build.getStreamPreviousNumbers(EntityCriteria.IN_CLAUSE_LIMIT)
+							&& build.getStreamPreviousNumbers(Criteria.IN_CLAUSE_LIMIT)
 								.stream()
 								.anyMatch(it->it.equals(fieldValue));
 				} else {

@@ -22,6 +22,7 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -106,7 +107,23 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public Usage onDeleteRole(String roleName) {
-		return trigger.onDeleteRole(roleName).prefix("trigger");
+		return getTrigger().onDeleteRole(roleName).prefix("trigger");
+	}
+	
+	public void onRenameLink(String oldName, String newName) {
+		getTrigger().getQueryUpdater().onRenameLink(oldName, newName);
+	}
+	
+	public Usage onDeleteLink(String linkName) {
+		return getTrigger().getQueryUpdater().onDeleteLink(linkName).prefix("trigger");
+	}
+	
+	public void onMoveProject(String oldPath, String newPath) {
+		getTrigger().getQueryUpdater().onMoveProject(oldPath, newPath);
+	}
+	
+	public Usage onDeleteProject(String projectPath) {
+		return getTrigger().getQueryUpdater().onDeleteProject(projectPath).prefix("trigger");
 	}
 	
 	@SuppressWarnings("unused")
@@ -129,7 +146,7 @@ public class TransitionSpec implements Serializable {
 			PressButtonTrigger pressButton = (PressButtonTrigger) getTrigger();
 			if (pressButton.isAuthorized(issue.getProject())) {
 				IssueQuery parsedQuery = IssueQuery.parse(issue.getProject(), 
-						getTrigger().getIssueQuery(), true, true, true, true, true, true);
+						getTrigger().getIssueQuery(), new IssueQueryParseOption().enableAll(true), true);
 				return parsedQuery.matches(issue);
 			}
 		}
@@ -148,13 +165,13 @@ public class TransitionSpec implements Serializable {
 			if (getIssueSetting().getStateSpec(fromState) == null)
 				undefinedStates.add(fromState);
 		}
-		undefinedStates.addAll(trigger.getUndefinedStates());
+		undefinedStates.addAll(trigger.getQueryUpdater().getUndefinedStates());
 		return undefinedStates;
 	}
 
 	public Collection<String> getUndefinedFields() {
 		Collection<String> undefinedFields = new HashSet<>();
-		undefinedFields.addAll(getTrigger().getUndefinedFields());
+		undefinedFields.addAll(getTrigger().getQueryUpdater().getUndefinedFields());
 		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		for (String field: getRemoveFields()) {
 			if (setting.getFieldSpec(field) == null)
@@ -164,7 +181,7 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
-		return trigger.getUndefinedFieldValues();
+		return trigger.getQueryUpdater().getUndefinedFieldValues();
 	}
 
 	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
@@ -179,7 +196,7 @@ public class TransitionSpec implements Serializable {
 					return false;
 			}
 		}
-		return trigger.fixUndefinedStates(resolutions);
+		return trigger.getQueryUpdater().fixUndefinedStates(resolutions);
 	}
 	
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
@@ -189,11 +206,11 @@ public class TransitionSpec implements Serializable {
 			else 
 				getRemoveFields().remove(entry.getKey());
 		}
-		return trigger.fixUndefinedFields(resolutions);
+		return trigger.getQueryUpdater().fixUndefinedFields(resolutions);
 	}
 	
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
-		return trigger.fixUndefinedFieldValues(resolutions);
+		return trigger.getQueryUpdater().fixUndefinedFieldValues(resolutions);
 	}
 	
 }

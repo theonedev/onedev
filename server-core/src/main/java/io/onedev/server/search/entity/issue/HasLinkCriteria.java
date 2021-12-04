@@ -13,18 +13,24 @@ import javax.persistence.criteria.Subquery;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
+import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.criteria.Criteria;
 
-public class HasLinkCriteria extends IssueCriteria {
+public class HasLinkCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final LinkSpec linkSpec;
+	private String linkName;
 	
-	private final boolean opposite;
+	private transient LinkSide linkSide;
 	
-	public HasLinkCriteria(LinkSpec linkSpec, boolean opposite) {
-		this.linkSpec = linkSpec;
-		this.opposite = opposite;
+	public HasLinkCriteria(String linkName) {
+		this.linkName = linkName;
+	}
+	
+	public HasLinkCriteria(LinkSide linkSide) {
+		linkName = linkSide.getName();
+		this.linkSide = linkSide;
 	}
 	
 	@Override
@@ -34,11 +40,11 @@ public class HasLinkCriteria extends IssueCriteria {
 		linkQuery.select(linkRoot);
 		
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SPEC), linkSpec));
+		predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SPEC), getLinkSide().getSpec()));
 		
-		if (opposite) {
+		if (getLinkSide().isOpposite()) {
 			predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from));
-		} else if (linkSpec.getOpposite() != null) {
+		} else if (getLinkSide().getSpec().getOpposite() != null) {
 			predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), from));
 		} else {
 			predicates.add(builder.or(
@@ -50,19 +56,39 @@ public class HasLinkCriteria extends IssueCriteria {
 		return builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
 
+	private LinkSide getLinkSide() {
+		if (linkSide == null) 
+			linkSide = new LinkSide(linkName);
+		return linkSide;
+	}
+	
 	@Override
 	public boolean matches(Issue issue) {
-		if (opposite) 
-			return issue.getSourceLinks().stream().anyMatch(it->it.getSpec().equals(linkSpec));
-		else if (linkSpec.getOpposite() != null) 
-			return issue.getTargetLinks().stream().anyMatch(it->it.getSpec().equals(linkSpec));
+		LinkSpec spec = getLinkSide().getSpec();
+		if (getLinkSide().isOpposite()) 
+			return issue.getSourceLinks().stream().anyMatch(it->it.getSpec().equals(spec));
+		else if (spec.getOpposite() != null) 
+			return issue.getTargetLinks().stream().anyMatch(it->it.getSpec().equals(spec));
 		else 
-			return issue.getLinks().stream().anyMatch(it->it.getSpec().equals(linkSpec));
+			return issue.getLinks().stream().anyMatch(it->it.getSpec().equals(spec));
+	}
+	
+	@Override
+	public void onRenameLink(String oldName, String newName) {
+		if (linkName.equals(oldName)) {
+			linkName = newName;
+			linkSide = null;
+		}
+	}
+
+	@Override
+	public boolean isUsingLink(String linkName) {
+		return this.linkName.equals(linkName);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return IssueQuery.getRuleName(IssueQueryLexer.HasAny) + " " + quote(linkSpec.getName(opposite));
+		return IssueQuery.getRuleName(IssueQueryLexer.HasAny) + " " + quote(linkName);
 	}
 
 }

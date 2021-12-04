@@ -75,6 +75,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.NumberCriteria;
 import io.onedev.server.search.entity.issue.TitleCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -173,8 +174,9 @@ public abstract class IssueListPanel extends Panel {
 	
 	@Nullable
 	private IssueQuery parse(@Nullable String queryString, IssueQuery baseQuery) {
+		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
 		try {
-			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, true, true, false, false, false, false));
+			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, option, true));
 		} catch (ExplicitException e) {
 			error(e.getMessage());
 			return null;
@@ -366,6 +368,9 @@ public abstract class IssueListPanel extends Panel {
 		});
 		
 		queryInput = new TextField<String>("input", queryStringModel);
+		
+		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+		
 		queryInput.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -373,7 +378,7 @@ public abstract class IssueListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, true, true, false, false, false, false) {
+		}, option) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

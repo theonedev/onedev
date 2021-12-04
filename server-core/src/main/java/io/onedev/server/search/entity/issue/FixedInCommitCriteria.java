@@ -10,31 +10,41 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.Criteria;
 
-public class FixedInCommitCriteria extends IssueCriteria {
+public class FixedInCommitCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final ProjectScopedCommit commit;
+	private final Project project;
 	
 	private final String value;
 	
+	private transient ProjectScopedCommit commit;
+	
 	public FixedInCommitCriteria(@Nullable Project project, String value) {
-		commit = EntityQuery.getCommitId(project, value);
+		this.project = project;
 		this.value = value;
 	}
 
 	public FixedInCommitCriteria(ProjectScopedCommit commit) {
 		this.commit = commit;
-		value = commit.getCommitId().name();
+		project = commit.getProject();
+		value = project.getPath() + ":" + commit.toString();
+	}
+	
+	private ProjectScopedCommit getCommit() {
+		if (commit == null)
+			commit = EntityQuery.getCommitId(project, value);
+		return commit;
 	}
 	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		if (!commit.getFixedIssueNumbers().isEmpty()) {
+		if (!getCommit().getFixedIssueNumbers().isEmpty()) {
 			return builder.and(
-					builder.equal(from.get(Issue.PROP_PROJECT), commit.getProject()),
-					from.get(Issue.PROP_NUMBER).in(commit.getFixedIssueNumbers()));
+					builder.equal(from.get(Issue.PROP_PROJECT), getCommit().getProject()),
+					from.get(Issue.PROP_NUMBER).in(getCommit().getFixedIssueNumbers()));
 		} else {
 			return builder.disjunction();
 		}
@@ -42,8 +52,8 @@ public class FixedInCommitCriteria extends IssueCriteria {
 
 	@Override
 	public boolean matches(Issue issue) {
-		return issue.getProject().equals(commit.getProject()) 
-				&& commit.getFixedIssueNumbers().contains(issue.getNumber());
+		return issue.getProject().equals(getCommit().getProject()) 
+				&& getCommit().getFixedIssueNumbers().contains(issue.getNumber());
 	}
 
 	@Override

@@ -16,13 +16,9 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.AndEntityCriteria;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.NotEntityCriteria;
-import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.project.ProjectQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.FieldOperatorValueCriteriaContext;
@@ -33,21 +29,25 @@ import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaConte
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.QueryContext;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 public class ProjectQuery extends EntityQuery<Project> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final EntityCriteria<Project> criteria;
+	private final Criteria<Project> criteria;
 	
 	private final List<EntitySort> sorts;
 	
-	public ProjectQuery(@Nullable EntityCriteria<Project> criteria, List<EntitySort> sorts) {
+	public ProjectQuery(@Nullable Criteria<Project> criteria, List<EntitySort> sorts) {
 		this.criteria = criteria;
 		this.sorts = sorts;
 	}
 
-	public ProjectQuery(@Nullable EntityCriteria<Project> criteria) {
+	public ProjectQuery(@Nullable Criteria<Project> criteria) {
 		this(criteria, new ArrayList<>());
 	}
 	
@@ -56,7 +56,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 	}
 	
 	@Nullable
-	public EntityCriteria<Project> getCriteria() {
+	public Criteria<Project> getCriteria() {
 		return criteria;
 	}
 
@@ -84,12 +84,12 @@ public class ProjectQuery extends EntityQuery<Project> {
 			parser.setErrorHandler(new BailErrorStrategy());
 			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
-			EntityCriteria<Project> projectCriteria;
+			Criteria<Project> projectCriteria;
 			if (criteriaContext != null) {
-				projectCriteria = new ProjectQueryBaseVisitor<EntityCriteria<Project>>() {
+				projectCriteria = new ProjectQueryBaseVisitor<Criteria<Project>>() {
 
 					@Override
-					public EntityCriteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
+					public Criteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						if (ctx.operator.getType() == ProjectQueryLexer.Roots)
 							return new RootsCriteria();
 						else if (ctx.operator.getType() == ProjectQueryLexer.ForkRoots)
@@ -100,7 +100,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 							return new OwnedByNoneCriteria();
 					}
 					
-					public EntityCriteria<Project> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
+					public Criteria<Project> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.operator.getType() == ProjectQueryLexer.ChildrenOf)
 							return new ChildrenOfCriteria(value);
@@ -111,12 +111,12 @@ public class ProjectQuery extends EntityQuery<Project> {
 					}
 					
 					@Override
-					public EntityCriteria<Project> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (EntityCriteria<Project>) visit(ctx.criteria()).withParens(true);
+					public Criteria<Project> visitParensCriteria(ParensCriteriaContext ctx) {
+						return (Criteria<Project>) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
-					public EntityCriteria<Project> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
+					public Criteria<Project> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
@@ -139,24 +139,24 @@ public class ProjectQuery extends EntityQuery<Project> {
 					}
 					
 					@Override
-					public EntityCriteria<Project> visitOrCriteria(OrCriteriaContext ctx) {
-						List<EntityCriteria<Project>> childCriterias = new ArrayList<>();
+					public Criteria<Project> visitOrCriteria(OrCriteriaContext ctx) {
+						List<Criteria<Project>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrEntityCriteria<Project>(childCriterias);
+						return new OrCriteria<Project>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<Project> visitAndCriteria(AndCriteriaContext ctx) {
-						List<EntityCriteria<Project>> childCriterias = new ArrayList<>();
+					public Criteria<Project> visitAndCriteria(AndCriteriaContext ctx) {
+						List<Criteria<Project>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndEntityCriteria<Project>(childCriterias);
+						return new AndCriteria<Project>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<Project> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotEntityCriteria<Project>(visit(ctx.criteria()));
+					public Criteria<Project> visitNotCriteria(NotCriteriaContext ctx) {
+						return new NotCriteria<Project>(visit(ctx.criteria()));
 					}
 					
 				}.visit(criteriaContext);
@@ -210,7 +210,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 	}
 	
 	public static ProjectQuery merge(ProjectQuery query1, ProjectQuery query2) {
-		List<EntityCriteria<Project>> criterias = new ArrayList<>();
+		List<Criteria<Project>> criterias = new ArrayList<>();
 		if (query1.getCriteria() != null)
 			criterias.add(query1.getCriteria());
 		if (query2.getCriteria() != null)
@@ -218,7 +218,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 		List<EntitySort> sorts = new ArrayList<>();
 		sorts.addAll(query1.getSorts());
 		sorts.addAll(query2.getSorts());
-		return new ProjectQuery(EntityCriteria.andCriterias(criterias), sorts);
+		return new ProjectQuery(Criteria.andCriterias(criterias), sorts);
 	}
 	
 	@Override

@@ -21,9 +21,10 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 
-public abstract class FieldCriteria extends IssueCriteria {
+public abstract class FieldCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 

@@ -10,8 +10,8 @@ import org.eclipse.jetty.websocket.api.Session;
 import io.onedev.agent.AgentData;
 import io.onedev.server.model.Agent;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 
 public interface AgentManager extends EntityManager<Agent> {
 	
@@ -31,7 +31,7 @@ public interface AgentManager extends EntityManager<Agent> {
 	
 	List<Agent> query(EntityQuery<Agent> agentQuery, int firstResult, int maxResults);
 	
-	int count(@Nullable EntityCriteria<Agent> agentCriteria);
+	int count(@Nullable Criteria<Agent> agentCriteria);
 	
 	void restart(Agent agent);
 	

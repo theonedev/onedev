@@ -54,6 +54,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.agent.AgentQuery;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.AttributeNameValidator;
 
 @Singleton
@@ -276,7 +277,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 
 	@Sessional
 	@Override
-	public int count(io.onedev.server.search.entity.EntityCriteria<Agent> agentCriteria) {
+	public int count(Criteria<Agent> agentCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Agent> root = criteriaQuery.from(Agent.class);

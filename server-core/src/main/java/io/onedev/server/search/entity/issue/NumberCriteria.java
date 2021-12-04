@@ -11,49 +11,58 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.criteria.Criteria;
 
-public class NumberCriteria extends IssueCriteria {
+public class NumberCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
+	private final Project project;
+	
 	private final int operator;
 	
 	private final String value;
 	
-	private final ProjectScopedNumber number;
+	private transient ProjectScopedNumber number;
 	
 	public NumberCriteria(@Nullable Project project, String value, int operator) {
+		this.project = project;
 		this.operator = operator;
 		this.value = value;
-		number = EntityQuery.getProjectScopedNumber(project, value);
 	}
 
+	private ProjectScopedNumber getNumber() {
+		if (number == null) 
+			number = EntityQuery.getProjectScopedNumber(project, value);
+		return number;
+	}
+	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Path<Long> attribute = from.get(Issue.PROP_NUMBER);
 		Predicate numberPredicate;
 		
 		if (operator == IssueQueryLexer.Is)
-			numberPredicate = builder.equal(attribute, number.getNumber());
+			numberPredicate = builder.equal(attribute, getNumber().getNumber());
 		else if (operator == IssueQueryLexer.IsGreaterThan)
-			numberPredicate = builder.greaterThan(attribute, number.getNumber());
+			numberPredicate = builder.greaterThan(attribute, getNumber().getNumber());
 		else
-			numberPredicate = builder.lessThan(attribute, number.getNumber());
+			numberPredicate = builder.lessThan(attribute, getNumber().getNumber());
 		
 		return builder.and(
-				builder.equal(from.get(Issue.PROP_PROJECT), number.getProject()),
+				builder.equal(from.get(Issue.PROP_PROJECT), getNumber().getProject()),
 				numberPredicate);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (issue.getProject().equals(number.getProject())) {
+		if (issue.getProject().equals(getNumber().getProject())) {
 			if (operator == IssueQueryLexer.Is)
-				return issue.getNumber() == number.getNumber();
+				return issue.getNumber() == getNumber().getNumber();
 			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return issue.getNumber() > number.getNumber();
+				return issue.getNumber() > getNumber().getNumber();
 			else
-				return issue.getNumber() < number.getNumber();
+				return issue.getNumber() < getNumber().getNumber();
 		} else {
 			return false;
 		}

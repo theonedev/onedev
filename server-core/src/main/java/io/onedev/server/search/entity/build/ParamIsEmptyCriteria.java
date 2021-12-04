@@ -11,9 +11,9 @@ import javax.persistence.criteria.Subquery;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class ParamIsEmptyCriteria extends EntityCriteria<Build> {
+public class ParamIsEmptyCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 

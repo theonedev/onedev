@@ -9,10 +9,10 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class ProjectCriteria extends EntityCriteria<Build> {
+public class ProjectCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 	

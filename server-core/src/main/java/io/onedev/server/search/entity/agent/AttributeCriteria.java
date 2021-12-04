@@ -9,9 +9,9 @@ import javax.persistence.criteria.Subquery;
 
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class AttributeCriteria extends EntityCriteria<Agent> {
+public class AttributeCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
 

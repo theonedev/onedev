@@ -85,14 +85,15 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.search.entity.issue.UpdateDateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
@@ -305,22 +306,24 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 											try {
 												SecurityUtils.bindAsSystem();
 												Issue issue = issueManager.load(issueId);
+												
+												IssueQueryParseOption option = new IssueQueryParseOption().withCurrentIssueCriteria(true);
 												for (TransitionSpec transition: getTransitionSpecs()) {
 													if (transition.getTrigger() instanceof StateTransitionTrigger) {
 														Project project = issue .getProject();
 														StateTransitionTrigger trigger = (StateTransitionTrigger) transition.getTrigger();
 														if (trigger.getStates().contains(issue.getState())) {
-															IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, false, false, false, true);
-															List<IssueCriteria> criterias = new ArrayList<>();
+															IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
+															List<Criteria<Issue>> criterias = new ArrayList<>();
 															
-															List<IssueCriteria> fromStateCriterias = new ArrayList<>();
+															List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 															for (String fromState: transition.getFromStates()) 
 																fromStateCriterias.add(new StateCriteria(fromState));
 															
-															criterias.add(IssueCriteria.or(fromStateCriterias));
+															criterias.add(Criteria.orCriterias(fromStateCriterias));
 															if (query.getCriteria() != null)
 																criterias.add(query.getCriteria());
-															query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
+															query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 															Issue.push(issue);
 															try {
 																for (Issue each: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
@@ -372,6 +375,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 										try {
 											SecurityUtils.bindAsSystem();
 											Build build = buildManager.load(buildId);
+
+											IssueQueryParseOption option = new IssueQueryParseOption().withCurrentBuildCriteria(true);
 											for (TransitionSpec transition: getTransitionSpecs()) {
 												if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 													Project project = build.getProject();
@@ -381,17 +386,17 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 													if ((trigger.getJobNames() == null || PatternSet.parse(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
 															&& build.getStatus() == Build.Status.SUCCESSFUL
 															&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-														IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true, false, false, false);
-														List<IssueCriteria> criterias = new ArrayList<>();
+														IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
+														List<Criteria<Issue>> criterias = new ArrayList<>();
 														
-														List<IssueCriteria> fromStateCriterias = new ArrayList<>();
+														List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 														for (String fromState: transition.getFromStates()) 
 															fromStateCriterias.add(new StateCriteria(fromState));
 														
-														criterias.add(IssueCriteria.or(fromStateCriterias));
+														criterias.add(Criteria.orCriterias(fromStateCriterias));
 														if (query.getCriteria() != null)
 															criterias.add(query.getCriteria());
-														query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
+														query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 														Build.push(build);
 														try {
 															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
@@ -442,21 +447,23 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 											Matcher matcher = new PathMatcher();
 											PullRequest request = pullRequestManager.load(requestId);
 											Project project = request.getTargetProject();
+
+											IssueQueryParseOption option = new IssueQueryParseOption().withCurrentPullRequestCriteria(true);
 											for (TransitionSpec transition: getTransitionSpecs()) {
 												if (transition.getTrigger().getClass() == triggerClass) {
 													PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
 													if (trigger.getBranches() == null || PatternSet.parse(trigger.getBranches()).matches(matcher, request.getTargetBranch())) {
-														IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, false, true, false, false);
-														List<IssueCriteria> criterias = new ArrayList<>();
+														IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
+														List<Criteria<Issue>> criterias = new ArrayList<>();
 														
-														List<IssueCriteria> fromStateCriterias = new ArrayList<>();
+														List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 														for (String fromState: transition.getFromStates()) 
 															fromStateCriterias.add(new StateCriteria(fromState));
 														
-														criterias.add(IssueCriteria.or(fromStateCriterias));
+														criterias.add(Criteria.orCriterias(fromStateCriterias));
 														if (query.getCriteria() != null)
 															criterias.add(query.getCriteria());
-														query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
+														query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 														PullRequest.push(request);
 														try {
 															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
@@ -565,24 +572,25 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 															break;
 													}
 												} 
+												
+												IssueQueryParseOption option = new IssueQueryParseOption().withCurrentCommitCriteria(true);
 												for (TransitionSpec transition: getTransitionSpecs()) {
 													if (transition.getTrigger() instanceof BranchUpdateTrigger) {
 														BranchUpdateTrigger trigger = (BranchUpdateTrigger) transition.getTrigger();
 														String branches = trigger.getBranches();
 														Matcher matcher = new PathMatcher();
 														if (branches == null || PatternSet.parse(branches).matches(matcher, branchName)) {
-															IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), 
-																	true, false, false, false, true, false);
-															List<IssueCriteria> criterias = new ArrayList<>();
+															IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
+															List<Criteria<Issue>> criterias = new ArrayList<>();
 															
-															List<IssueCriteria> fromStateCriterias = new ArrayList<>();
+															List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 															for (String fromState: transition.getFromStates()) 
 																fromStateCriterias.add(new StateCriteria(fromState));
 															
-															criterias.add(IssueCriteria.or(fromStateCriterias));
+															criterias.add(Criteria.orCriterias(fromStateCriterias));
 															if (query.getCriteria() != null)
 																criterias.add(query.getCriteria());
-															query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
+															query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 															ProjectScopedCommit.push(new ProjectScopedCommit(project, newCommitId) {
 
 																private static final long serialVersionUID = 1L;
@@ -624,18 +632,18 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void execute() {
+		IssueQueryParseOption option = new IssueQueryParseOption();
 		for (TransitionSpec transition: getTransitionSpecs()) {
 			if (transition.getTrigger() instanceof NoActivityTrigger) {
 				NoActivityTrigger trigger = (NoActivityTrigger) transition.getTrigger();
-				IssueQuery query = IssueQuery.parse(null, trigger.getIssueQuery(), 
-						false, false, false, false, false, false);
-				List<IssueCriteria> criterias = new ArrayList<>();
+				IssueQuery query = IssueQuery.parse(null, trigger.getIssueQuery(), option, false);
+				List<Criteria<Issue>> criterias = new ArrayList<>();
 				
-				List<IssueCriteria> fromStateCriterias = new ArrayList<>();
+				List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 				for (String fromState: transition.getFromStates()) 
 					fromStateCriterias.add(new StateCriteria(fromState));
 				
-				criterias.add(IssueCriteria.or(fromStateCriterias));
+				criterias.add(Criteria.orCriterias(fromStateCriterias));
 				if (query.getCriteria() != null)
 					criterias.add(query.getCriteria());
 				
@@ -643,7 +651,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 						new DateTime().minusDays(trigger.getDays()).toDate(), 
 						IssueQueryLexer.IsUntil));
 				
-				query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
+				query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 				
 				for (Issue issue: issueManager.query(query, 0, Integer.MAX_VALUE, true)) {
 					changeState(issue, transition.getToState(), new HashMap<>(), 

@@ -56,7 +56,6 @@ import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
 import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
-import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
@@ -64,6 +63,7 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -83,7 +83,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		protected IssueQuery load() {
 			IssueQuery boardQuery = getBoardQuery();
 			if (boardQuery != null) {
-				List<IssueCriteria> criterias = new ArrayList<>();
+				List<Criteria<Issue>> criterias = new ArrayList<>();
 				if (boardQuery.getCriteria() != null)
 					criterias.add(boardQuery.getCriteria());
 				if (getMilestone() != null)
@@ -97,7 +97,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				} else {
 					criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty, false));
 				}
-				return new IssueQuery(IssueCriteria.and(criterias), boardQuery.getSorts());
+				return new IssueQuery(Criteria.andCriterias(criterias), boardQuery.getSorts());
 			} else {
 				return null;
 			}
@@ -303,7 +303,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					}
 
 					@Override
-					protected IssueCriteria getTemplate() {
+					protected Criteria<Issue> getTemplate() {
 						return getQuery().getCriteria();
 					}
 

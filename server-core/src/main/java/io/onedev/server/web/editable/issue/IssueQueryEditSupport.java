@@ -10,6 +10,7 @@ import org.apache.wicket.model.IModel;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
@@ -55,6 +56,13 @@ public class IssueQueryEditSupport implements EditSupport {
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
         			IssueQuery issueQuery = Preconditions.checkNotNull(
         					getDescriptor().getPropertyGetter().getAnnotation(IssueQuery.class));
+        			IssueQueryParseOption option = new IssueQueryParseOption()
+        					.withCurrentBuildCriteria(issueQuery.withCurrentBuildCriteria())
+        					.withCurrentCommitCriteria(issueQuery.withCurrentCommitCriteria())
+        					.withCurrentIssueCriteria(issueQuery.withCurrentIssueCriteria())
+        					.withCurrentPullRequestCriteria(issueQuery.withCurrentPullRequestCriteria())
+        					.withCurrentUserCriteria(issueQuery.withCurrentUserCriteria())
+        					.withOrder(issueQuery.withOrder());
 		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
 		        		new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
@@ -63,11 +71,7 @@ public class IssueQueryEditSupport implements EditSupport {
 	        					return Project.get();
 	        				}
 	        	    		
-	        	    	}, issueQuery.withOrder(), issueQuery.withCurrentUserCriteria(), 
-		        				issueQuery.withCurrentBuildCriteria(), 
-		        				issueQuery.withCurrentPullRequestCriteria(), 
-		        				issueQuery.withCurrentCommitCriteria(), 
-		        				issueQuery.withCurrentIssueCriteria()));
+	        	    	}, option));
 	        		};
     		};
         } else {

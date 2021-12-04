@@ -28,8 +28,9 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.Criteria;
 
-public class FixedBetweenCriteria extends IssueCriteria {
+public class FixedBetweenCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -39,31 +40,34 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	
 	private final String firstValue;
 	
-	private final ObjectId firstCommitId;
-	
 	private final int secondType;
 	
 	private final String secondValue;
 	
-	private final ObjectId secondCommitId;
+	private transient ProjectAndCommitIds projectAndCommitIds;
 	
 	public FixedBetweenCriteria(@Nullable Project project, int firstType, String firstValue, 
 			int secondType, String secondValue) {
+		this.project = project;
 		this.firstType = firstType;
 		this.firstValue = firstValue;
 		this.secondType = secondType;
 		this.secondValue = secondValue;
-
-		ProjectScopedCommit first = getCommitId(project, firstType, firstValue);
-		ProjectScopedCommit second = getCommitId(project, secondType, secondValue);
-		firstCommitId = first.getCommitId();
-		secondCommitId = second.getCommitId();
-		if (first.getProject().equals(second.getProject())) { 
-			this.project = first.getProject();
-		} else {
-			throw new ExplicitException("'" + getRuleName(IssueQueryLexer.FixedBetween) 
-				+ "' should be used for same projects");
+	}
+	
+	private ProjectAndCommitIds getProjectAndCommitIds() {
+		if (projectAndCommitIds == null) {
+			ProjectScopedCommit first = getCommitId(project, firstType, firstValue);
+			ProjectScopedCommit second = getCommitId(project, secondType, secondValue);
+			if (first.getProject().equals(second.getProject())) { 
+				projectAndCommitIds = new ProjectAndCommitIds(
+						first.getProject(), first.getCommitId(), second.getCommitId());
+			} else {
+				throw new ExplicitException("'" + getRuleName(IssueQueryLexer.FixedBetween) 
+					+ "' should be used for same projects");
+			}
 		}
+		return projectAndCommitIds;
 	}
 	
 	private static ProjectScopedCommit getCommitId(@Nullable Project project, int type, String value) {
@@ -79,7 +83,10 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
 		Set<Long> fixedIssueNumbers = new HashSet<>();
 		
-		Repository repository = project.getRepository();
+		Project project = getProjectAndCommitIds().project;
+		ObjectId firstCommitId = getProjectAndCommitIds().firstCommitId;
+		ObjectId secondCommitId = getProjectAndCommitIds().secondCommitId;
+		Repository repository = getProjectAndCommitIds().project.getRepository();
 		ObjectId mergeBaseId = GitUtils.getMergeBase(repository, firstCommitId, secondCommitId);
 		if (mergeBaseId != null) {
 			try (RevWalk revWalk = new RevWalk(repository)) {
@@ -112,6 +119,9 @@ public class FixedBetweenCriteria extends IssueCriteria {
 
 	@Override
 	public boolean matches(Issue issue) {
+		Project project = getProjectAndCommitIds().project;
+		ObjectId firstCommitId = getProjectAndCommitIds().firstCommitId;
+		ObjectId secondCommitId = getProjectAndCommitIds().secondCommitId;
 		if (project.equals(issue.getProject())) {
 			Repository repository = issue.getProject().getRepository();
 			ObjectId mergeBaseId = GitUtils.getMergeBase(repository, firstCommitId, secondCommitId);
@@ -143,4 +153,19 @@ public class FixedBetweenCriteria extends IssueCriteria {
 				+ getRuleName(secondType) + " " + quote(secondValue);
 	}
 
+	private static class ProjectAndCommitIds {
+		
+		final Project project;
+		
+		final ObjectId firstCommitId;
+		
+		final ObjectId secondCommitId;
+		
+		ProjectAndCommitIds(Project project, ObjectId firstCommitId, ObjectId secondCommitId) {
+			this.project = project;
+			this.firstCommitId = firstCommitId;
+			this.secondCommitId = secondCommitId;
+		}
+		
+	}
 }

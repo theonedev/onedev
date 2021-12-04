@@ -7,10 +7,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class JobCriteria extends EntityCriteria<Build> {
+public class JobCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 

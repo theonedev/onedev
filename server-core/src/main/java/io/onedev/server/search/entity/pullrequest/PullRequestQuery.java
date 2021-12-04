@@ -18,13 +18,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.search.entity.AndEntityCriteria;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.NotEntityCriteria;
-import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.FieldOperatorValueCriteriaContext;
@@ -35,21 +31,25 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrCrite
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrderContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.QueryContext;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 public class PullRequestQuery extends EntityQuery<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final EntityCriteria<PullRequest> criteria;
+	private final Criteria<PullRequest> criteria;
 	
 	private final List<EntitySort> sorts;
 	
-	public PullRequestQuery(@Nullable EntityCriteria<PullRequest> criteria, List<EntitySort> sorts) {
+	public PullRequestQuery(@Nullable Criteria<PullRequest> criteria, List<EntitySort> sorts) {
 		this.criteria = criteria;
 		this.sorts = sorts;
 	}
 
-	public PullRequestQuery(@Nullable EntityCriteria<PullRequest> criteria) {
+	public PullRequestQuery(@Nullable Criteria<PullRequest> criteria) {
 		this(criteria, new ArrayList<>());
 	}
 	
@@ -77,12 +77,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 			parser.setErrorHandler(new BailErrorStrategy());
 			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
-			EntityCriteria<PullRequest> requestCriteria;
+			Criteria<PullRequest> requestCriteria;
 			if (criteriaContext != null) {
-				requestCriteria = new PullRequestQueryBaseVisitor<EntityCriteria<PullRequest>>() {
+				requestCriteria = new PullRequestQueryBaseVisitor<Criteria<PullRequest>>() {
 
 					@Override
-					public EntityCriteria<PullRequest> visitOperatorCriteria(OperatorCriteriaContext ctx) {
+					public Criteria<PullRequest> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
 						case PullRequestQueryLexer.Open:
 							return new OpenCriteria();
@@ -118,7 +118,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 					}
 					
 					@Override
-					public EntityCriteria<PullRequest> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
+					public Criteria<PullRequest> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						switch (ctx.operator.getType()) {
 						case PullRequestQueryLexer.ToBeReviewedBy:
@@ -143,12 +143,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 					}
 					
 					@Override
-					public EntityCriteria<PullRequest> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (EntityCriteria<PullRequest>) visit(ctx.criteria()).withParens(true);
+					public Criteria<PullRequest> visitParensCriteria(ParensCriteriaContext ctx) {
+						return (Criteria<PullRequest>) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
-					public EntityCriteria<PullRequest> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
+					public Criteria<PullRequest> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
@@ -213,24 +213,24 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 					}
 					
 					@Override
-					public EntityCriteria<PullRequest> visitOrCriteria(OrCriteriaContext ctx) {
-						List<EntityCriteria<PullRequest>> childCriterias = new ArrayList<>();
+					public Criteria<PullRequest> visitOrCriteria(OrCriteriaContext ctx) {
+						List<Criteria<PullRequest>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrEntityCriteria<PullRequest>(childCriterias);
+						return new OrCriteria<PullRequest>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<PullRequest> visitAndCriteria(AndCriteriaContext ctx) {
-						List<EntityCriteria<PullRequest>> childCriterias = new ArrayList<>();
+					public Criteria<PullRequest> visitAndCriteria(AndCriteriaContext ctx) {
+						List<Criteria<PullRequest>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndEntityCriteria<PullRequest>(childCriterias);
+						return new AndCriteria<PullRequest>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<PullRequest> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotEntityCriteria<PullRequest>(visit(ctx.criteria()));
+					public Criteria<PullRequest> visitNotCriteria(NotCriteriaContext ctx) {
+						return new NotCriteria<PullRequest>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -312,7 +312,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 	}
 	
 	@Override
-	public EntityCriteria<PullRequest> getCriteria() {
+	public Criteria<PullRequest> getCriteria() {
 		return criteria;
 	}
 
@@ -322,7 +322,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 	}
 	
 	public static PullRequestQuery merge(PullRequestQuery query1, PullRequestQuery query2) {
-		List<EntityCriteria<PullRequest>> criterias = new ArrayList<>();
+		List<Criteria<PullRequest>> criterias = new ArrayList<>();
 		if (query1.getCriteria() != null)
 			criterias.add(query1.getCriteria());
 		if (query2.getCriteria() != null)
@@ -330,7 +330,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		List<EntitySort> sorts = new ArrayList<>();
 		sorts.addAll(query1.getSorts());
 		sorts.addAll(query2.getSorts());
-		return new PullRequestQuery(EntityCriteria.andCriterias(criterias), sorts);
+		return new PullRequestQuery(Criteria.andCriterias(criterias), sorts);
 	}
 	
 }

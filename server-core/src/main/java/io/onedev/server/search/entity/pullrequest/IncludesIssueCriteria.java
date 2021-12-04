@@ -17,10 +17,10 @@ import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 
-public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
+public class IncludesIssueCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 

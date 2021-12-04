@@ -74,9 +74,8 @@ public class PressButtonTrigger extends TransitionTrigger {
 		return fields;
 	}
 
-	@Override
 	public Collection<String> getUndefinedFields() {
-		Collection<String> undefinedFields = super.getUndefinedFields();
+		Collection<String> undefinedFields = new ArrayList<>();
 		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		for (String field: getPromptFields()) {
 			if (setting.getFieldSpec(field) == null)
@@ -85,10 +84,7 @@ public class PressButtonTrigger extends TransitionTrigger {
 		return undefinedFields;
 	}
 
-	@Override
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		if (!super.fixUndefinedFields(resolutions))
-			return false;
 		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) 
 				ReconcileUtils.renameItem(getPromptFields(), entry.getKey(), entry.getValue().getNewField());

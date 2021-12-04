@@ -12,9 +12,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class RanOnCriteria extends EntityCriteria<Build> {
+public class RanOnCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 

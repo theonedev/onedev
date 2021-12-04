@@ -3,6 +3,11 @@ package io.onedev.server.buildspec.job.retrycondition;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -42,6 +47,11 @@ public class RetryCondition extends Criteria<Build> {
 
 	public static String getValue(String token) {
 		return StringUtils.unescape(FenceAware.unfence(token));
+	}
+	
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+		throw new UnsupportedOperationException();
 	}
 	
 	public boolean matches(Build build) {

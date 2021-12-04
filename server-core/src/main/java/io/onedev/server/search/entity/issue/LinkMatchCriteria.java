@@ -1,7 +1,13 @@
 package io.onedev.server.search.entity.issue;
 
+import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.All;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.Any;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -15,22 +21,27 @@ import javax.persistence.criteria.Subquery;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
+import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
-public class LinkMatchCriteria extends IssueCriteria {
+public class LinkMatchCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final LinkSpec linkSpec;
-	
-	private final boolean opposite;
+	private String linkName;
 
-	private final IssueCriteria criteria;
+	private final Criteria<Issue> criteria;
 	
 	private final boolean allMatch;
 	
-	public LinkMatchCriteria(LinkSpec linkSpec, boolean opposite, IssueCriteria criteria, boolean allMatch) {
-		this.linkSpec = linkSpec;
-		this.opposite = opposite;
+	private transient LinkSide linkSide;
+	
+	public LinkMatchCriteria(String linkName, Criteria<Issue> criteria, boolean allMatch) {
+		this.linkName = linkName;
 		this.criteria = criteria;
 		this.allMatch = allMatch;
 	}
@@ -41,15 +52,18 @@ public class LinkMatchCriteria extends IssueCriteria {
 		Root<IssueLink> linkRoot = linkQuery.from(IssueLink.class);
 		linkQuery.select(linkRoot);
 		
+		LinkSpec spec = getLinkSide().getSpec();
+		boolean opposite = getLinkSide().isOpposite();
+		
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SPEC), linkSpec));
+		predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SPEC), spec));
 		
 		if (allMatch) {
 			if (opposite) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from));
 				Join<Issue, Issue> linkSourceJoin = linkRoot.join(IssueLink.PROP_SOURCE, JoinType.INNER);
 				predicates.add(builder.not(criteria.getPredicate(query, linkSourceJoin, builder)));
-			} else if (linkSpec.getOpposite() != null) {
+			} else if (spec.getOpposite() != null) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), from));
 				Join<Issue, Issue> linkTargetJoin = linkRoot.join(IssueLink.PROP_TARGET, JoinType.INNER);
 				predicates.add(builder.not(criteria.getPredicate(query, linkTargetJoin, builder)));
@@ -68,13 +82,13 @@ public class LinkMatchCriteria extends IssueCriteria {
 
 			return builder.and(
 					builder.not(builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0]))))),
-					new HasLinkCriteria(linkSpec, opposite).getPredicate(query, from, builder));
+					new HasLinkCriteria(getLinkSide()).getPredicate(query, from, builder));
 		} else {
 			if (opposite) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_TARGET), from));
 				Join<Issue, Issue> linkSourceJoin = linkRoot.join(IssueLink.PROP_SOURCE, JoinType.INNER);
 				predicates.add(criteria.getPredicate(query, linkSourceJoin, builder));
-			} else if (linkSpec.getOpposite() != null) {
+			} else if (spec.getOpposite() != null) {
 				predicates.add(builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), from));
 				Join<Issue, Issue> linkTargetJoin = linkRoot.join(IssueLink.PROP_TARGET, JoinType.INNER);
 				predicates.add(criteria.getPredicate(query, linkTargetJoin, builder));
@@ -94,24 +108,32 @@ public class LinkMatchCriteria extends IssueCriteria {
 			return builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 		}
 	}
+	
+	private LinkSide getLinkSide() {
+		if (linkSide == null)
+			linkSide = new LinkSide(linkName);
+		return linkSide;
+	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (allMatch) {
+		LinkSpec spec = getLinkSide().getSpec();
+		boolean opposite = getLinkSide().isOpposite();
+	if (allMatch) {
 			if (opposite) {
 				boolean hasLink = false;
 				for (IssueLink link: issue.getSourceLinks()) {
-					if (link.getSpec().equals(linkSpec)) {
+					if (link.getSpec().equals(spec)) {
 						hasLink = true;
 						if (!criteria.matches(link.getSource())) 
 							return false;
 					}
 				}
 				return hasLink;
-			} else if (linkSpec.getOpposite() != null) {
+			} else if (spec.getOpposite() != null) {
 				boolean hasLink = false;
 				for (IssueLink link: issue.getTargetLinks()) {
-					if (link.getSpec().equals(linkSpec)) {
+					if (link.getSpec().equals(spec)) {
 						hasLink = true;
 						if (!criteria.matches(link.getTarget()))
 							return false;
@@ -121,7 +143,7 @@ public class LinkMatchCriteria extends IssueCriteria {
 			} else {
 				boolean hasLink = false;
 				for (IssueLink link: issue.getLinks()) {
-					if (link.getSpec().equals(linkSpec)) {
+					if (link.getSpec().equals(spec)) {
 						hasLink = true;
 						if (!criteria.matches(link.getLinked(issue)))
 							return false;
@@ -132,31 +154,78 @@ public class LinkMatchCriteria extends IssueCriteria {
 		} else {
 			if (opposite) {
 				for (IssueLink link: issue.getSourceLinks()) {
-					if (link.getSpec().equals(linkSpec) && criteria.matches(link.getSource()))
+					if (link.getSpec().equals(spec) && criteria.matches(link.getSource()))
 						return true;
 				}
 				return false;
-			} else if (linkSpec.getOpposite() != null) {
+			} else if (spec.getOpposite() != null) {
 				for (IssueLink link: issue.getTargetLinks()) {
-					if (link.getSpec().equals(linkSpec) && criteria.matches(link.getTarget()))
+					if (link.getSpec().equals(spec) && criteria.matches(link.getTarget()))
 						return true;
 				}
 				return false;
 			} else {
 				for (IssueLink link: issue.getLinks()) {
-					if (link.getSpec().equals(linkSpec) && criteria.matches(link.getLinked(issue)))
+					if (link.getSpec().equals(spec) && criteria.matches(link.getLinked(issue)))
 						return true;
 				}
 				return false;
 			}
 		}
 	}
+	
+	@Override
+	public void onRenameLink(String oldName, String newName) {
+		if (linkName.equals(oldName)) {
+			linkName = newName;
+			linkSide = null;
+		}
+		criteria.onRenameLink(oldName, newName);
+	}
+
+	@Override
+	public boolean isUsingLink(String linkName) {
+		if (this.linkName.equals(linkName))
+			return true;
+		else
+			return criteria.isUsingLink(linkName);
+	}
+	
+	@Override
+	public Collection<String> getUndefinedStates() {
+		return criteria.getUndefinedStates();
+	}
+
+	@Override
+	public Collection<String> getUndefinedFields() {
+		return criteria.getUndefinedFields();
+	}
+
+	@Override
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		return criteria.getUndefinedFieldValues();
+	}
+
+	@Override
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		return criteria.fixUndefinedStates(resolutions);
+	}
+
+	@Override
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		return criteria.fixUndefinedFields(resolutions);
+	}
+
+	@Override
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		return criteria.fixUndefinedFieldValues(resolutions);
+	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return allMatch?IssueQuery.getRuleName(IssueQueryLexer.All):IssueQuery.getRuleName(IssueQueryLexer.Any) 
-				+ quote(linkSpec.getName(opposite)) + " "
-				+ IssueQuery.getRuleName(IssueQueryLexer.Matching) 
+		return (allMatch?getRuleName(All):getRuleName(Any)) 
+				+ " " + quote(linkName) + " "
+				+ getRuleName(IssueQueryLexer.Matching) 
 				+ "(" + criteria.toString() + ")";
 	}
 

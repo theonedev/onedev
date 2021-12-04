@@ -3,6 +3,11 @@ package io.onedev.server.job.requirement;
 import static io.onedev.server.job.requirement.JobRequirement.getRuleName;
 import static io.onedev.server.job.requirement.JobRequirementLexer.OnBranch;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
@@ -27,4 +32,10 @@ public class BranchCriteria extends Criteria<ProjectAndBranch> {
 		return getRuleName(OnBranch) + " " + quote(branch);
 	}
 
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<ProjectAndBranch, ProjectAndBranch> from,
+			CriteriaBuilder builder) {
+		throw new UnsupportedOperationException();
+	}
+	
 }

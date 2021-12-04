@@ -104,7 +104,7 @@ public class SpecifiedChoices extends ChoiceProvider implements Validatable {
 		int index = 1;
 		for (Choice choice: choices) {
 			if (Project.containsPath(choice.getApplicableProjects(), projectPath))
-				usage.add("Applicable Projects").prefix("Available Choice #" + index);
+				usage.add("applicable projects").prefix("available choice #" + index);
 			index++;
 		}
 		return usage;

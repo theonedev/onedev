@@ -10,8 +10,9 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
+import io.onedev.server.util.criteria.Criteria;
 
-public class CommentCriteria extends IssueCriteria {
+public class CommentCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 

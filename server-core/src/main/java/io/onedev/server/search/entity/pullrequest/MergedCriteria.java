@@ -7,13 +7,13 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class MergedCriteria extends EntityCriteria<PullRequest> {
+public class MergedCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
-	private EntityCriteria<PullRequest> getCriteria() {
+	private Criteria<PullRequest> getCriteria() {
 		return new StatusCriteria(CloseInfo.Status.MERGED.toString());
 	}
 	

@@ -27,13 +27,9 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.AndEntityCriteria;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.NotEntityCriteria;
-import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.FieldOperatorValueCriteriaContext;
@@ -45,21 +41,25 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderCo
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final EntityCriteria<CodeComment> criteria;
+	private final Criteria<CodeComment> criteria;
 	
 	private final List<EntitySort> sorts;
 	
-	public CodeCommentQuery(@Nullable EntityCriteria<CodeComment> criteria, List<EntitySort> sorts) {
+	public CodeCommentQuery(@Nullable Criteria<CodeComment> criteria, List<EntitySort> sorts) {
 		this.criteria = criteria;
 		this.sorts = sorts;
 	}
 
-	public CodeCommentQuery(@Nullable EntityCriteria<CodeComment> criteria) {
+	public CodeCommentQuery(@Nullable Criteria<CodeComment> criteria) {
 		this(criteria, new ArrayList<>());
 	}
 	
@@ -87,17 +87,17 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 			parser.setErrorHandler(new BailErrorStrategy());
 			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
-			EntityCriteria<CodeComment> commentCriteria;
+			Criteria<CodeComment> commentCriteria;
 			if (criteriaContext != null) {
-				commentCriteria = new CodeCommentQueryBaseVisitor<EntityCriteria<CodeComment>>() {
+				commentCriteria = new CodeCommentQueryBaseVisitor<Criteria<CodeComment>>() {
 
 					@Override
-					public EntityCriteria<CodeComment> visitOperatorCriteria(OperatorCriteriaContext ctx) {
+					public Criteria<CodeComment> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						return new CreatedByMeCriteria();
 					}
 					
 					@Override
-					public EntityCriteria<CodeComment> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
+					public Criteria<CodeComment> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						int operator = ctx.operator.getType();
 						String value = getValue(ctx.Quoted().getText());
 						if (operator == CodeCommentQueryLexer.CreatedBy) {
@@ -109,12 +109,12 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					}
 					
 					@Override
-					public EntityCriteria<CodeComment> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (EntityCriteria<CodeComment>) visit(ctx.criteria()).withParens(true);
+					public Criteria<CodeComment> visitParensCriteria(ParensCriteriaContext ctx) {
+						return (Criteria<CodeComment>) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
-					public EntityCriteria<CodeComment> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
+					public Criteria<CodeComment> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
@@ -159,24 +159,24 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					}
 					
 					@Override
-					public EntityCriteria<CodeComment> visitOrCriteria(OrCriteriaContext ctx) {
-						List<EntityCriteria<CodeComment>> childCriterias = new ArrayList<>();
+					public Criteria<CodeComment> visitOrCriteria(OrCriteriaContext ctx) {
+						List<Criteria<CodeComment>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrEntityCriteria<CodeComment>(childCriterias);
+						return new OrCriteria<CodeComment>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<CodeComment> visitAndCriteria(AndCriteriaContext ctx) {
-						List<EntityCriteria<CodeComment>> childCriterias = new ArrayList<>();
+					public Criteria<CodeComment> visitAndCriteria(AndCriteriaContext ctx) {
+						List<Criteria<CodeComment>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndEntityCriteria<CodeComment>(childCriterias);
+						return new AndCriteria<CodeComment>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<CodeComment> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotEntityCriteria<CodeComment>(visit(ctx.criteria()));
+					public Criteria<CodeComment> visitNotCriteria(NotCriteriaContext ctx) {
+						return new NotCriteria<CodeComment>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -243,7 +243,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 	}
 	
 	@Override
-	public EntityCriteria<CodeComment> getCriteria() {
+	public Criteria<CodeComment> getCriteria() {
 		return criteria;
 	}
 

@@ -21,14 +21,15 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
+import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -37,7 +38,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.IssueQuery;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class BoardSpec implements Serializable {
@@ -71,7 +72,8 @@ public class BoardSpec implements Serializable {
 	}
 
 	@Editable(order=200, description="Optionally specify a base query to filter/order issues of the board")
-	@IssueQuery(withCurrentUserCriteria = true)
+	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true)
+	@NameOfEmptyValue("Not specified")
 	@Nullable
 	public String getBaseQuery() {
 		return baseQuery;
@@ -83,7 +85,8 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=250, description="Optionally specify a base query to filter/order issues in backlog. "
 			+ "Backlog issues are those not associating with any milestones")
-	@IssueQuery(withCurrentUserCriteria = true)
+	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true)
+	@NameOfEmptyValue("Not specified")
 	@Nullable
 	public String getBacklogBaseQuery() {
 		return backlogBaseQuery;
@@ -215,11 +218,10 @@ public class BoardSpec implements Serializable {
 		return -1;
 	}
 	
-	public Set<String> getUndefinedStates(@Nullable Project project) {
+	public Set<String> getUndefinedStates() {
 		Set<String> undefinedStates = new HashSet<>();
-		undefinedStates.addAll(getUndefinedStates(project, getBaseQuery()));
-		undefinedStates.addAll(getUndefinedStates(project, getBacklogBaseQuery()));
-		
+		undefinedStates.addAll(getBaseQueryUpdater().getUndefinedStates());
+		undefinedStates.addAll(getBacklogBaseQueryUpdater().getUndefinedStates());
 		if (getIdentifyField().equals(Issue.NAME_STATE)) {
 			for (String column: getColumns()) {
 				if (getIssueSetting().getStateSpec(column) == null)
@@ -229,22 +231,10 @@ public class BoardSpec implements Serializable {
 		return undefinedStates;
 	}
 	
-	private Set<String> getUndefinedStates(@Nullable Project project, @Nullable String query) {
-		Set<String> undefinedStates = new HashSet<>();
-		if (query != null) {
-			try {
-				undefinedStates.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(
-						project, query, false, true, true, true, true, true).getUndefinedStates());
-			} catch (Exception e) {
-			}
-		}
-		return undefinedStates;
-	}
-	
-	public Set<String> getUndefinedFields(@Nullable Project project) {
+	public Set<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
-		undefinedFields.addAll(getUndefinedFields(project, getBaseQuery()));
-		undefinedFields.addAll(getUndefinedFields(project, getBacklogBaseQuery()));
+		undefinedFields.addAll(getBaseQueryUpdater().getUndefinedFields());
+		undefinedFields.addAll(getBacklogBaseQueryUpdater().getUndefinedFields());
 		if (!Issue.NAME_STATE.equals(getIdentifyField())) { 
 			FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getIdentifyField());
 			if (fieldSpec == null)
@@ -260,20 +250,10 @@ public class BoardSpec implements Serializable {
 		return undefinedFields;
 	}
 
-	private Set<String> getUndefinedFields(@Nullable Project project, @Nullable String query) {
-		Set<String> undefinedFields = new HashSet<>();
-		if (query != null) {
-			try {
-				undefinedFields.addAll(io.onedev.server.search.entity.issue.IssueQuery
-						.parse(project, query, false, true, true, true, true, true).getUndefinedFields());
-			} catch (Exception e) {
-			}
-		}
-		return undefinedFields;
-	}
-	
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(@Nullable Project project) {
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>(); 
+		undefinedFieldValues.addAll(getBaseQueryUpdater().getUndefinedFieldValues());
+		undefinedFieldValues.addAll(getBacklogBaseQueryUpdater().getUndefinedFieldValues());
 		if (!identifyField.equals(Issue.NAME_STATE)) {
 			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getIssueSetting().getFieldSpec(identifyField));
 			if (specifiedChoices != null) {
@@ -283,27 +263,12 @@ public class BoardSpec implements Serializable {
 				}
 			}
 		}
-		undefinedFieldValues.addAll(getUndefinedFieldValues(project, getBaseQuery()));
-		undefinedFieldValues.addAll(getUndefinedFieldValues(project, getBacklogBaseQuery()));
 		return undefinedFieldValues;
 	}
 	
-	private Collection<UndefinedFieldValue> getUndefinedFieldValues(@Nullable Project project, @Nullable String query) {
-		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>(); 
-		if (query != null) {
-			try {
-				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true, true);
-				undefinedFieldValues.addAll(parsedQuery.getUndefinedFieldValues());
-			} catch (Exception e) {
-			}
-		}
-		return undefinedFieldValues;
-	}
-	
-	public boolean fixUndefinedStates(@Nullable Project project, Map<String, UndefinedStateResolution> resolutions) {
-		setBaseQuery(fixUndefinedStates(project, resolutions, getBaseQuery()));
-		setBacklogBaseQuery(fixUndefinedStates(project, resolutions, getBacklogBaseQuery()));
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		getBaseQueryUpdater().fixUndefinedStates(resolutions);
+		getBacklogBaseQueryUpdater().fixUndefinedStates(resolutions);
 		if (getIdentifyField().equals(Issue.NAME_STATE)) {
 			for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
 				if (entry.getValue().getFixType() == UndefinedStateResolution.FixType.CHANGE_TO_ANOTHER_STATE) 
@@ -317,26 +282,9 @@ public class BoardSpec implements Serializable {
 		return true;
 	}
 
-	private String fixUndefinedStates(@Nullable Project project, Map<String, UndefinedStateResolution> resolutions, 
-			@Nullable String query) {
-		if (query != null) {
-			try {
-				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true, true);
-				if (parsedQuery.fixUndefinedStates(resolutions))
-					query = parsedQuery.toString();
-				else
-					query = null;
-			} catch (Exception e) {
-			}
-		}
-		return query;
-	}
-	
-	public boolean fixUndefinedFields(@Nullable Project project, Map<String, UndefinedFieldResolution> resolutions) {
-		setBaseQuery(fixUndefinedFields(project, resolutions, getBaseQuery()));
-		setBacklogBaseQuery(fixUndefinedFields(project, resolutions, getBacklogBaseQuery()));
-		
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		getBaseQueryUpdater().fixUndefinedFields(resolutions);
+		getBacklogBaseQueryUpdater().fixUndefinedFields(resolutions);
 		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 			UndefinedFieldResolution resolution = entry.getValue();
 			if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
@@ -352,25 +300,9 @@ public class BoardSpec implements Serializable {
 		return true;
 	}
 	
-	private String fixUndefinedFields(@Nullable Project project, Map<String, UndefinedFieldResolution> resolutions, 
-			@Nullable String query) {
-		if (query != null) {
-			try {
-				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true, true);
-				if (parsedQuery.fixUndefinedFields(resolutions))
-					query = parsedQuery.toString();
-				else
-					query = null;
-			} catch (Exception e) {
-			}
-		}
-		return query;
-	}
-	
-	public boolean fixUndefinedFieldValues(@Nullable Project project, Map<String, UndefinedFieldValuesResolution> resolutions) {
-		setBaseQuery(fixUndefinedFieldValues(project, resolutions, getBaseQuery()));
-		setBacklogBaseQuery(fixUndefinedFieldValues(project, resolutions, getBacklogBaseQuery()));
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		getBaseQueryUpdater().fixUndefinedFieldValues(resolutions);
+		getBacklogBaseQueryUpdater().fixUndefinedFieldValues(resolutions);
 		for (Map.Entry<String, UndefinedFieldValuesResolution> resolutionEntry: resolutions.entrySet()) {
 			if (resolutionEntry.getKey().equals(getIdentifyField())) {
 				getColumns().removeAll(resolutionEntry.getValue().getDeletions());
@@ -379,23 +311,6 @@ public class BoardSpec implements Serializable {
 			}
 		}
 		return getColumns().size() >= 2;
-	}
-	
-	@Nullable
-	private String fixUndefinedFieldValues(@Nullable Project project, Map<String, UndefinedFieldValuesResolution> resolutions, 
-			@Nullable String query) {
-		if (query != null) {
-			try {
-				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true, true);
-				if (parsedQuery.fixUndefinedFieldValues(resolutions))
-					query = parsedQuery.toString();
-				else
-					query = null;
-			} catch (Exception e) {
-			}
-		}
-		return query;
 	}
 	
 	public void onRenameUser(GlobalIssueSetting issueSetting, String oldName, String newName) {
@@ -422,4 +337,56 @@ public class BoardSpec implements Serializable {
 			return false;
 	}
 
+	public IssueQueryUpdater getBaseQueryUpdater() {
+		return new IssueQueryUpdater() {
+
+			@Override
+			protected Usage getUsage() {
+				return new Usage().add("base query");
+			}
+
+			@Override
+			protected boolean isAllowEmpty() {
+				return true;
+			}
+
+			@Override
+			protected String getIssueQuery() {
+				return baseQuery;
+			}
+
+			@Override
+			protected void setIssueQuery(String issueQuery) {
+				baseQuery = issueQuery;
+			}
+			
+		};
+	}
+	
+	public IssueQueryUpdater getBacklogBaseQueryUpdater() {
+		return new IssueQueryUpdater() {
+
+			@Override
+			protected Usage getUsage() {
+				return new Usage().add("backlog base query");
+			}
+
+			@Override
+			protected boolean isAllowEmpty() {
+				return true;
+			}
+
+			@Override
+			protected String getIssueQuery() {
+				return backlogBaseQuery;
+			}
+
+			@Override
+			protected void setIssueQuery(String issueQuery) {
+				backlogBaseQuery = issueQuery;
+			}
+			
+		};
+	}
+	
 }

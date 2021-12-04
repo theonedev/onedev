@@ -13,8 +13,8 @@ import org.eclipse.jgit.lib.Repository;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 
 public interface ProjectManager extends EntityManager<Project> {
 	
@@ -61,7 +61,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	List<Project> query(EntityQuery<Project> query, int firstResult, int maxResults);
 	
-	int count(EntityCriteria<Project> criteria);
+	int count(Criteria<Project> criteria);
 
 	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> jpaPath, String pathPattern);
 	

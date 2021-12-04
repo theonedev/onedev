@@ -4,6 +4,11 @@ import static io.onedev.server.job.requirement.JobRequirement.getRuleName;
 import static io.onedev.server.job.requirement.JobRequirementLexer.Is;
 import static io.onedev.server.model.Build.NAME_PROJECT;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.criteria.Criteria;
@@ -37,6 +42,12 @@ public class ProjectCriteria extends Criteria<ProjectAndBranch> {
 	@Override
 	public String toStringWithoutParens() {
 		return quote(NAME_PROJECT) + " " + getRuleName(Is) + " " + quote(projectPath);
+	}
+
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<ProjectAndBranch, ProjectAndBranch> from,
+			CriteriaBuilder builder) {
+		throw new UnsupportedOperationException();
 	}
 	
 }

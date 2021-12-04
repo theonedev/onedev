@@ -7,8 +7,9 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Issue;
+import io.onedev.server.util.criteria.Criteria;
 
-public class CurrentIssueCriteria extends IssueCriteria {
+public class CurrentIssueCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -30,7 +31,7 @@ public class CurrentIssueCriteria extends IssueCriteria {
 
 	@Override
 	public String toStringWithoutParens() {
-		return IssueQuery.getRuleName(IssueQueryLexer.IsCurrent);
+		return IssueQuery.getRuleName(IssueQueryLexer.CurrentIssue);
 	}
 
 }

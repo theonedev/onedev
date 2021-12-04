@@ -3,6 +3,11 @@ package io.onedev.server.buildspec.job.action.condition;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -191,6 +196,11 @@ public class ActionCondition extends Criteria<Build> {
 	@Override
 	public String toStringWithoutParens() {
 		return criteria.toStringWithoutParens();
+	}
+
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+		throw new UnsupportedOperationException();
 	}
 	
 }

@@ -9,9 +9,9 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class SubmittedByMeCriteria extends EntityCriteria<PullRequest> {
+public class SubmittedByMeCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 

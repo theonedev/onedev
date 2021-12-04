@@ -12,8 +12,9 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.criteria.Criteria;
 
-public class UpdateDateCriteria extends IssueCriteria {
+public class UpdateDateCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 

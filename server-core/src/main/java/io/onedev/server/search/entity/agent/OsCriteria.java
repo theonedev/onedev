@@ -7,9 +7,9 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.agent.AgentOs;
 import io.onedev.server.model.Agent;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class OsCriteria extends EntityCriteria<Agent> {
+public class OsCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
 

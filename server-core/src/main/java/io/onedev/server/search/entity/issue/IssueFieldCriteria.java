@@ -16,31 +16,39 @@ public class IssueFieldCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Issue issue;
+	private final Project project;
 	
 	private final String value;
 	
+	private transient Issue issue;
+	
 	public IssueFieldCriteria(String name, @Nullable Project project, String value) {
 		super(name);
-		issue = EntityQuery.getIssue(project, value);
+		this.project = project;
 		this.value = value;
+	}
+	
+	private Issue getIssue() {
+		if (issue == null)
+			issue = EntityQuery.getIssue(project, value);
+		return issue;
 	}
 
 	@Override
 	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, 
 			CriteriaBuilder builder) {
-		return builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), IssueFieldCriteria.this.issue.getId());
+		return builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), getIssue().getId());
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		return issue.getProject().equals(this.issue.getProject()) && Objects.equals(fieldValue, this.issue.getNumber());
+		return issue.getProject().equals(getIssue().getProject()) && Objects.equals(fieldValue, getIssue().getId());
 	}
 
 	@Override
 	public void fill(Issue issue) {
-		issue.setFieldValue(getFieldName(), this.issue.getNumber());
+		issue.setFieldValue(getFieldName(), getIssue().getId());
 	}
 	
 	@Override

@@ -10,11 +10,10 @@ import javax.persistence.criteria.Subquery;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class ForksOfCriteria extends EntityCriteria<Project> {
+public class ForksOfCriteria extends Criteria<Project> {
 
 	private static final long serialVersionUID = 1L;
 

@@ -1,15 +1,70 @@
 package io.onedev.server.util.criteria;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.RangeBuilder;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 public abstract class Criteria<T> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final int IN_CLAUSE_LIMIT = 1000;
+	
 	private boolean withParens;
 	
+	public static Predicate inManyValues(CriteriaBuilder builder, Path<Long> path, Collection<Long> inValues, 
+			Collection<Long> allValues) {
+		List<Long> listOfInValues = new ArrayList<>(inValues);
+		Collections.sort(listOfInValues);
+		List<Long> listOfAllValues = new ArrayList<>(allValues);
+		Collections.sort(listOfAllValues);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		List<Long> discreteValues = new ArrayList<>();
+		for (List<Long> range: new RangeBuilder(listOfInValues, listOfAllValues).getRanges()) {
+			if (range.size() <= 2) {
+				discreteValues.addAll(range);
+			} else {
+				predicates.add(builder.and(
+						builder.greaterThanOrEqualTo(path, range.get(0)), 
+						builder.lessThanOrEqualTo(path, range.get(range.size()-1))));
+			}
+		}
+
+		Collection<Long> inClause = new ArrayList<>();
+		for (Long value: discreteValues) {
+			inClause.add(value);
+			if (inClause.size() == IN_CLAUSE_LIMIT) {
+				predicates.add(path.in(inClause));
+				inClause = new ArrayList<>();
+			}
+		}
+		if (!inClause.isEmpty()) 
+			predicates.add(path.in(inClause));
+		
+		return builder.or(predicates.toArray(new Predicate[0]));
+	}
+	
+	public abstract Predicate getPredicate(CriteriaQuery<?> query, From<T, T> from, CriteriaBuilder builder);
+
 	public abstract boolean matches(T t);
 	
 	public Criteria<T> withParens(boolean withParens) {
@@ -25,6 +80,9 @@ public abstract class Criteria<T> implements Serializable {
 
 	public void onRenameGroup(String oldName, String newName) {
 	}
+
+	public void onRenameLink(String oldName, String newName) {
+	}
 	
 	public boolean isUsingUser(String userName) {
 		return false;
@@ -37,7 +95,35 @@ public abstract class Criteria<T> implements Serializable {
 	public boolean isUsingGroup(String groupName) {
 		return false;
 	}
+	
+	public boolean isUsingLink(String linkName) {
+		return false;
+	}
+	
+	public Collection<String> getUndefinedStates() {
+		return new HashSet<>();
+	}
 
+	public Collection<String> getUndefinedFields() {
+		return new HashSet<>();
+	}
+	
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		return new HashSet<>();
+	}
+
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		return true;
+	}
+	
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		return true;
+	}
+	
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		return true;
+	}
+	
 	public static String quote(String value) {
 		return "\"" + StringUtils.escape(value, "\"") + "\"";
 	}
@@ -50,6 +136,29 @@ public abstract class Criteria<T> implements Serializable {
 			return toStringWithoutParens();
 	}
 	
+	public void fill(T object) {
+	}
+	
 	public abstract String toStringWithoutParens();
+	
+	@Nullable
+	public static <T> Criteria<T> andCriterias(List<Criteria<T>> criterias) {
+		if (criterias.size() > 1)
+			return new AndCriteria<T>(criterias);
+		else if (criterias.size() == 1)
+			return criterias.iterator().next();
+		else
+			return null;
+	}
+
+	@Nullable
+	public static <T> Criteria<T> orCriterias(List<Criteria<T>> criterias) {
+		if (criterias.size() > 1)
+			return new OrCriteria<T>(criterias);
+		else if (criterias.size() == 1)
+			return criterias.iterator().next();
+		else
+			return null;
+	}
 	
 }

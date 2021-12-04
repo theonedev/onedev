@@ -3,6 +3,11 @@ package io.onedev.server.job.requirement;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -136,6 +141,12 @@ public class JobRequirement extends Criteria<ProjectAndBranch> {
 		return criteria.matches(projectAndBranch);
 	}
 
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<ProjectAndBranch, ProjectAndBranch> from,
+			CriteriaBuilder builder) {
+		throw new UnsupportedOperationException();
+	}
+	
 	@Override
 	public void onRenameUser(String oldName, String newName) {
 		criteria.onRenameUser(oldName, newName);

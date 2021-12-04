@@ -12,8 +12,9 @@ import javax.persistence.OneToMany;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
+import io.onedev.server.search.entity.issue.IssueQueryUpdater;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Entity
@@ -62,7 +63,7 @@ public class LinkSpec extends AbstractEntity {
 
 
 	@Editable(order=160, name="Linkable Issues", description="Optionally specify criteria of issues which can be linked")
-	@IssueQuery
+	@io.onedev.server.web.editable.annotation.IssueQuery
 	@NameOfEmptyValue("All issues")
 	public String getIssueQuery() {
 		return issueQuery;
@@ -94,4 +95,57 @@ public class LinkSpec extends AbstractEntity {
 		this.order = order;
 	}
 	
+	public Collection<IssueQueryUpdater> getQueryUpdaters() {
+		Collection<IssueQueryUpdater> updaters = new ArrayList<>();
+		updaters.add(new IssueQueryUpdater() {
+			
+			@Override
+			protected void setIssueQuery(String issueQuery) {
+				LinkSpec.this.issueQuery = issueQuery;
+			}
+			
+			@Override
+			protected boolean isAllowEmpty() {
+				return true;
+			}
+			
+			@Override
+			protected String getIssueQuery() {
+				return issueQuery;
+			}
+
+			@Override
+			protected Usage getUsage() {
+				return new Usage().add("linkable issues").prefix("link '" + getName() + "'");
+			}
+			
+		});
+		if (opposite != null) {
+			updaters.add(new IssueQueryUpdater() {
+				
+				@Override
+				protected void setIssueQuery(String issueQuery) {
+					opposite.setIssueQuery(issueQuery);
+				}
+				
+				@Override
+				protected boolean isAllowEmpty() {
+					return true;
+				}
+				
+				@Override
+				protected String getIssueQuery() {
+					return opposite.getIssueQuery();
+				}
+
+				@Override
+				protected Usage getUsage() {
+					return new Usage().add("linkable issues").prefix("opposite").prefix("link '" + getName() + "'");
+				}
+				
+			});
+		}
+		return updaters;
+	}
+
 }

@@ -7,8 +7,9 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.util.criteria.Criteria;
 
-public class MilestoneIsEmptyCriteria extends IssueCriteria {
+public class MilestoneIsEmptyCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 	

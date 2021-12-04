@@ -7,9 +7,10 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class TitleCriteria extends IssueCriteria {
+public class TitleCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 

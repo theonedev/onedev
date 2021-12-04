@@ -87,6 +87,7 @@ import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
@@ -526,8 +527,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return predicates;
 	}
 	
-	private Predicate[] getPredicates(@Nullable Project project, 
-			@Nullable io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
+	private Predicate[] getPredicates(@Nullable Project project, @Nullable Criteria<Build> criteria, 
 			CriteriaQuery<?> query, From<Build, Build> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = getPredicates(project, root, builder);
 		if (criteria != null) 
@@ -597,7 +597,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	@Sessional
 	@Override
-	public int count(@Nullable Project project, io.onedev.server.search.entity.EntityCriteria<Build> buildCriteria) {
+	public int count(@Nullable Project project, Criteria<Build> buildCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Build> root = criteriaQuery.from(Build.class);

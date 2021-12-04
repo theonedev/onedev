@@ -20,8 +20,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
-import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.util.script.identity.SiteAdministrator;
@@ -36,7 +37,7 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 
 	private static final String PARAM_TEMPLATE = "query";
 	
-	private IModel<IssueCriteria> templateModel;
+	private IModel<Criteria<Issue>> templateModel;
 	
 	public NewIssuePage(PageParameters params) {
 		super(params);
@@ -46,12 +47,13 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 		
 		String queryString = params.get(PARAM_TEMPLATE).toString();
-		templateModel = new LoadableDetachableModel<IssueCriteria>() {
+		templateModel = new LoadableDetachableModel<Criteria<Issue>>() {
 
 			@Override
-			protected IssueCriteria load() {
+			protected Criteria<Issue> load() {
 				try {
-					return IssueQuery.parse(getProject(), queryString, true, true, false, false, false, false).getCriteria();
+					IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+					return IssueQuery.parse(getProject(), queryString, option, true).getCriteria();
 				} catch (Exception e) {
 					return null;
 				}
@@ -86,7 +88,7 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 			}
 
 			@Override
-			protected IssueCriteria getTemplate() {
+			protected Criteria<Issue> getTemplate() {
 				return templateModel.getObject();
 			}
 			

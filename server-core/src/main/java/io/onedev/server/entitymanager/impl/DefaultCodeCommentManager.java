@@ -63,6 +63,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 
@@ -248,9 +249,8 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 
 	}
 
-	private Predicate[] getPredicates(Project project, 
-			@Nullable io.onedev.server.search.entity.EntityCriteria<CodeComment> criteria, 
-			@Nullable PullRequest request, CriteriaQuery<?> query, From<CodeComment, CodeComment> root, CriteriaBuilder builder) {
+	private Predicate[] getPredicates(Project project, @Nullable Criteria<CodeComment> criteria, @Nullable PullRequest request, 
+			CriteriaQuery<?> query, From<CodeComment, CodeComment> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) 
 			predicates.add(builder.equal(CodeCommentQuery.getPath(root, CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST), request));
@@ -297,8 +297,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	
 	@Sessional
 	@Override
-	public int count(Project project, PullRequest request,  
-			io.onedev.server.search.entity.EntityCriteria<CodeComment> commentCriteria) {
+	public int count(Project project, PullRequest request,  Criteria<CodeComment> commentCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<CodeComment> root = criteriaQuery.from(CodeComment.class);

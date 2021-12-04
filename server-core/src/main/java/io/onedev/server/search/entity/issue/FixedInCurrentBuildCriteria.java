@@ -8,8 +8,9 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.util.criteria.Criteria;
 
-public class FixedInCurrentBuildCriteria extends IssueCriteria {
+public class FixedInCurrentBuildCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 	

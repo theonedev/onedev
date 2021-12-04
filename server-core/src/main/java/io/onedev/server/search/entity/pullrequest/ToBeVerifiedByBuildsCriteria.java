@@ -11,9 +11,9 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class ToBeVerifiedByBuildsCriteria extends EntityCriteria<PullRequest> {
+public class ToBeVerifiedByBuildsCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 

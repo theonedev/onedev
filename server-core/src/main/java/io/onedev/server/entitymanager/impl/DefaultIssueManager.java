@@ -80,14 +80,16 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.MilestoneAndState;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -121,6 +123,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final RoleManager roleManager;
 	
+	private final LinkSpecManager linkSpecManager;
+	
 	private final Map<Long, IssueFacade> cache = new HashMap<>();
 	
 	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
@@ -132,7 +136,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			ProjectManager projectManager, UserManager userManager, 
 			RoleManager roleManager, AttachmentStorageManager attachmentStorageManager, 
 			IssueCommentManager issueCommentManager, EntityReferenceManager entityReferenceManager, 
-			IssueScheduleManager issueScheduleManager) {
+			IssueScheduleManager issueScheduleManager, LinkSpecManager linkSpecManager) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 		this.issueQueryPersonalizationManager = issueQueryPersonalizationManager;
@@ -142,6 +146,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.transactionManager = transactionManager;
 		this.userManager = userManager;
 		this.roleManager = roleManager;
+		this.linkSpecManager = linkSpecManager;
 		this.attachmentStorageManager = attachmentStorageManager;
 		this.issueCommentManager = issueCommentManager;
 		this.entityReferenceManager = entityReferenceManager;
@@ -324,7 +329,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	@Sessional
 	@Override
-	public int count(IssueCriteria issueCriteria) {
+	public int count(Criteria<Issue> issueCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
@@ -336,7 +341,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public int count(Project project, boolean inTree, IssueCriteria issueCriteria) {
+	public int count(Project project, boolean inTree, Criteria<Issue> issueCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
@@ -347,7 +352,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	
-	private Predicate[] getPredicates(Project project, boolean inTree, @Nullable io.onedev.server.search.entity.EntityCriteria<Issue> issueCriteria, 
+	private Predicate[] getPredicates(Project project, boolean inTree, @Nullable Criteria<Issue> issueCriteria, 
 			CriteriaQuery<?> query, CriteriaBuilder builder, Root<Issue> root) {
 		List<Predicate> predicates = new ArrayList<>();
 		Path<Project> projectPath = root.get(Issue.PROP_PROJECT);
@@ -361,7 +366,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
 	
-	private Predicate[] getPredicates(@Nullable io.onedev.server.search.entity.EntityCriteria<Issue> issueCriteria, 
+	private Predicate[] getPredicates(@Nullable Criteria<Issue> issueCriteria, 
 			CriteriaQuery<?> query, CriteriaBuilder builder, Root<Issue> root) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
@@ -391,24 +396,29 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 
 		for (Project project: projectManager.query()) {
-			undefinedStates.addAll(project.getIssueSetting().getUndefinedStates(project));
-			undefinedStates.addAll(project.getBuildSetting().getUndefinedStates(project));
+			undefinedStates.addAll(project.getIssueSetting().getUndefinedStates());
+			undefinedStates.addAll(project.getBuildSetting().getUndefinedStates());
+		}
+		
+		for (LinkSpec link: linkSpecManager.query()) { 
+			for (IssueQueryUpdater updater: link.getQueryUpdaters())
+				undefinedStates.addAll(updater.getUndefinedStates());
 		}
 		
 		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
-			populateUndefinedStates(undefinedStates, setting.getProject(), setting.getQueries());
+			populateUndefinedStates(undefinedStates, setting.getQueries());
 		
 		for (User user: userManager.query()) 
-			populateUndefinedStates(undefinedStates, null, user.getIssueQueryPersonalization().getQueries());
-
+			populateUndefinedStates(undefinedStates, user.getIssueQueryPersonalization().getQueries());
+		
 		return undefinedStates;
 	}
 	
-	private void populateUndefinedStates(Collection<String> undefinedStates, @Nullable Project project, 
-			List<NamedIssueQuery> namedQueries) {
+	private void populateUndefinedStates(Collection<String> undefinedStates, List<NamedIssueQuery> namedQueries) {
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedStates());
+				undefinedStates.addAll(IssueQuery.parse(null, namedQuery.getQuery(), option, false).getUndefinedStates());
 			} catch (Exception e) {
 			}
 		}
@@ -430,24 +440,29 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 
 		for (Project project: projectManager.query()) { 
-			undefinedFields.addAll(project.getIssueSetting().getUndefinedFields(project));
-			undefinedFields.addAll(project.getBuildSetting().getUndefinedFields(project));
+			undefinedFields.addAll(project.getIssueSetting().getUndefinedFields());
+			undefinedFields.addAll(project.getBuildSetting().getUndefinedFields());
+		}
+		
+		for (LinkSpec link: linkSpecManager.query()) {
+			for (IssueQueryUpdater updater: link.getQueryUpdaters())
+				undefinedFields.addAll(updater.getUndefinedFields());
 		}
 		
 		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
-			populateUndefinedFields(undefinedFields, setting.getProject(), setting.getQueries());
+			populateUndefinedFields(undefinedFields, setting.getQueries());
 		
 		for (User user: userManager.query()) 
-			populateUndefinedFields(undefinedFields, null, user.getIssueQueryPersonalization().getQueries());
+			populateUndefinedFields(undefinedFields, user.getIssueQueryPersonalization().getQueries());
 		
 		return undefinedFields;
 	}
 	
-	private void populateUndefinedFields(Collection<String> undefinedFields, 
-			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
+	private void populateUndefinedFields(Collection<String> undefinedFields, List<NamedIssueQuery> namedQueries) {
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedFields());
+				undefinedFields.addAll(IssueQuery.parse(null, namedQuery.getQuery(), option, false).getUndefinedFields());
 			} catch (Exception e) {
 			}
 		}
@@ -474,24 +489,30 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 
 		for (Project project: projectManager.query()) {
-			undefinedFieldValues.addAll(project.getIssueSetting().getUndefinedFieldValues(project));
-			undefinedFieldValues.addAll(project.getBuildSetting().getUndefinedFieldValues(project));
+			undefinedFieldValues.addAll(project.getIssueSetting().getUndefinedFieldValues());
+			undefinedFieldValues.addAll(project.getBuildSetting().getUndefinedFieldValues());
+		}
+		
+		for (LinkSpec link: linkSpecManager.query()) {
+			for (IssueQueryUpdater updater: link.getQueryUpdaters())
+				undefinedFieldValues.addAll(updater.getUndefinedFieldValues());
 		}
 		
 		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
-			populateUndefinedFieldValues(undefinedFieldValues, setting.getProject(), setting.getQueries());
+			populateUndefinedFieldValues(undefinedFieldValues, setting.getQueries());
 		
 		for (User user: userManager.query()) 
-			populateUndefinedFieldValues(undefinedFieldValues, null, user.getIssueQueryPersonalization().getQueries());
+			populateUndefinedFieldValues(undefinedFieldValues, user.getIssueQueryPersonalization().getQueries());
 		
 		return undefinedFieldValues;
 	}
 	
 	private void populateUndefinedFieldValues(Collection<UndefinedFieldValue> undefinedFieldValues, 
-			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
+			List<NamedIssueQuery> namedQueries) {
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true).getUndefinedFieldValues());
+				undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), option, false).getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
 		}
@@ -536,23 +557,29 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 		
 		for (Project project: projectManager.query()) { 
-			project.getIssueSetting().fixUndefinedStates(project, resolutions);
-			project.getBuildSetting().fixUndefinedStates(project, resolutions);
+			project.getIssueSetting().fixUndefinedStates(resolutions);
+			project.getBuildSetting().fixUndefinedStates(resolutions);
+		}
+		
+		for (LinkSpec link: linkSpecManager.query()) {
+			for (IssueQueryUpdater updater: link.getQueryUpdaters())
+				updater.fixUndefinedStates(resolutions);
 		}
 		
 		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
-			fixUndefinedStates(setting.getProject(), resolutions, setting.getQueries());
+			fixUndefinedStates(resolutions, setting.getQueries());
 
 		for (User user: userManager.query())
-			fixUndefinedStates(null, resolutions, user.getIssueQueryPersonalization().getQueries());
+			fixUndefinedStates(resolutions, user.getIssueQueryPersonalization().getQueries());
 	}
 	
-	private void fixUndefinedStates(@Nullable Project project, Map<String, UndefinedStateResolution> resolutions, 
+	private void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions, 
 			List<NamedIssueQuery> namedQueries) {
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery parsedQuery = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				if (parsedQuery.fixUndefinedStates(resolutions))
 					namedQuery.setQuery(parsedQuery.toString());
 				else
@@ -581,8 +608,13 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 		
 		for (Project project: projectManager.query()) { 
-			project.getIssueSetting().fixUndefinedFields(project, resolutions);
-			project.getBuildSetting().fixUndefinedFields(project, resolutions);
+			project.getIssueSetting().fixUndefinedFields(resolutions);
+			project.getBuildSetting().fixUndefinedFields(resolutions);
+		}
+		
+		for (LinkSpec link: linkSpecManager.query()) {
+			for (IssueQueryUpdater updater: link.getQueryUpdaters())
+				updater.fixUndefinedFields(resolutions);
 		}
 		
 		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query())
@@ -599,10 +631,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private void fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions, 
 			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), option, false);
 				if (parsedQuery.fixUndefinedFields(resolutions))
 					namedQuery.setQuery(parsedQuery.toString());
 				else
@@ -633,8 +666,13 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 		
 		for (Project project: projectManager.query()) {
-			project.getIssueSetting().fixUndefinedFieldValues(project, resolutions);
-			project.getBuildSetting().fixUndefinedFieldValues(project, resolutions);
+			project.getIssueSetting().fixUndefinedFieldValues(resolutions);
+			project.getBuildSetting().fixUndefinedFieldValues(resolutions);
+		}
+		
+		for (LinkSpec link: linkSpecManager.query()) { 
+			for (IssueQueryUpdater updater: link.getQueryUpdaters())
+				updater.fixUndefinedFieldValues(resolutions);
 		}
 		
 		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
@@ -651,10 +689,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private void fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions, 
 			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), option, false);
 				if (query.fixUndefinedFieldValues(resolutions))
 					namedQuery.setQuery(query.toString());
 				else

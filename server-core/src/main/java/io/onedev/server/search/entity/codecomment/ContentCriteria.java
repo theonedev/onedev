@@ -7,10 +7,10 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class ContentCriteria extends EntityCriteria<CodeComment> {
+public class ContentCriteria extends Criteria<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
 

@@ -17,28 +17,36 @@ public class CommitFieldCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final ProjectScopedCommit commit;
+	private final Project project;
 	
 	private final String value;
 	
+	private transient ProjectScopedCommit commit;
+	
 	public CommitFieldCriteria(String name, @Nullable Project project, String value) {
 		super(name);
-		commit = EntityQuery.getCommitId(project, value);
+		this.project = project;
 		this.value = value;
 	}
 
+	private ProjectScopedCommit getCommit() {
+		if (commit == null)
+			commit = EntityQuery.getCommitId(project, value);
+		return commit;
+	}
+	
 	@Override
 	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
 		return builder.and(
-				builder.equal(issueFrom.get(Issue.PROP_PROJECT), commit.getProject()),
-				builder.equal(fieldFrom.get(IssueField.PROP_VALUE), commit.getCommitId().name()));
+				builder.equal(issueFrom.get(Issue.PROP_PROJECT), getCommit().getProject()),
+				builder.equal(fieldFrom.get(IssueField.PROP_VALUE), getCommit().getCommitId().name()));
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		return issue.getProject().equals(commit.getProject()) 
-				&& Objects.equals(fieldValue, commit.getCommitId().name());
+		return issue.getProject().equals(getCommit().getProject()) 
+				&& Objects.equals(fieldValue, getCommit().getCommitId().name());
 	}
 
 	@Override

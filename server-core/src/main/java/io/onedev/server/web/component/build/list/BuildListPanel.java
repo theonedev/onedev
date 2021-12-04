@@ -59,10 +59,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryLexer;
 import io.onedev.server.search.entity.build.JobCriteria;
@@ -71,6 +69,8 @@ import io.onedev.server.search.entity.build.VersionCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
@@ -157,10 +157,10 @@ public abstract class BuildListPanel extends Panel {
 				return BuildQuery.merge(baseQuery, 
 						new BuildQuery(new NumberCriteria(getProject(), queryString, BuildQueryLexer.Is)));
 			} catch (Exception e2) {
-				List<EntityCriteria<Build>> criterias = new ArrayList<>();
+				List<Criteria<Build>> criterias = new ArrayList<>();
 				criterias.add(new VersionCriteria("*" + queryString + "*"));
 				criterias.add(new JobCriteria("*" + queryString + "*"));
-				return BuildQuery.merge(baseQuery, new BuildQuery(new OrEntityCriteria<Build>(criterias)));
+				return BuildQuery.merge(baseQuery, new BuildQuery(new OrCriteria<Build>(criterias)));
 			}
 		}
 	}

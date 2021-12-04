@@ -1,17 +1,17 @@
 package io.onedev.server.search.entity.build;
 
+import static io.onedev.server.model.Build.NAME_BRANCH;
 import static io.onedev.server.model.Build.NAME_COMMIT;
 import static io.onedev.server.model.Build.NAME_FINISH_DATE;
 import static io.onedev.server.model.Build.NAME_JOB;
 import static io.onedev.server.model.Build.NAME_NUMBER;
 import static io.onedev.server.model.Build.NAME_PENDING_DATE;
 import static io.onedev.server.model.Build.NAME_PROJECT;
+import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
 import static io.onedev.server.model.Build.NAME_RUNNING_DATE;
 import static io.onedev.server.model.Build.NAME_SUBMIT_DATE;
-import static io.onedev.server.model.Build.NAME_VERSION;
-import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
-import static io.onedev.server.model.Build.NAME_BRANCH;
 import static io.onedev.server.model.Build.NAME_TAG;
+import static io.onedev.server.model.Build.NAME_VERSION;
 import static io.onedev.server.model.Build.ORDER_FIELDS;
 import static io.onedev.server.model.Build.QUERY_FIELDS;
 
@@ -35,13 +35,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.AndEntityCriteria;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.NotEntityCriteria;
-import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.build.BuildQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.FieldOperatorCriteriaContext;
@@ -54,21 +50,25 @@ import io.onedev.server.search.entity.build.BuildQueryParser.OrderContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.QueryContext;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 public class BuildQuery extends EntityQuery<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final EntityCriteria<Build> criteria;
+	private final Criteria<Build> criteria;
 	
 	private final List<EntitySort> sorts;
 	
-	public BuildQuery(@Nullable EntityCriteria<Build> criteria, List<EntitySort> sorts) {
+	public BuildQuery(@Nullable Criteria<Build> criteria, List<EntitySort> sorts) {
 		this.criteria = criteria;
 		this.sorts = sorts;
 	}
 
-	public BuildQuery(@Nullable EntityCriteria<Build> criteria) {
+	public BuildQuery(@Nullable Criteria<Build> criteria) {
 		this(criteria, new ArrayList<>());
 	}
 	
@@ -97,12 +97,12 @@ public class BuildQuery extends EntityQuery<Build> {
 			parser.setErrorHandler(new BailErrorStrategy());
 			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
-			EntityCriteria<Build> buildCriteria;
+			Criteria<Build> buildCriteria;
 			if (criteriaContext != null) {
-				buildCriteria = new BuildQueryBaseVisitor<EntityCriteria<Build>>() {
+				buildCriteria = new BuildQueryBaseVisitor<Criteria<Build>>() {
 
 					@Override
-					public EntityCriteria<Build> visitOperatorCriteria(OperatorCriteriaContext ctx) {
+					public Criteria<Build> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
 						case BuildQueryLexer.Successful:
 							return new SuccessfulCriteria();
@@ -138,7 +138,7 @@ public class BuildQuery extends EntityQuery<Build> {
 					}
 					
 					@Override
-					public EntityCriteria<Build> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
+					public Criteria<Build> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.SubmittedBy() != null) 
 							return new SubmittedByCriteria(getUser(value));
@@ -157,12 +157,12 @@ public class BuildQuery extends EntityQuery<Build> {
 					}
 					
 					@Override
-					public EntityCriteria<Build> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (EntityCriteria<Build>) visit(ctx.criteria()).withParens(true);
+					public Criteria<Build> visitParensCriteria(ParensCriteriaContext ctx) {
+						return (Criteria<Build>) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
-					public EntityCriteria<Build> visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
+					public Criteria<Build> visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted().getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
@@ -179,7 +179,7 @@ public class BuildQuery extends EntityQuery<Build> {
 					}
 					
 					@Override
-					public EntityCriteria<Build> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
+					public Criteria<Build> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
@@ -229,24 +229,24 @@ public class BuildQuery extends EntityQuery<Build> {
 					}
 					
 					@Override
-					public EntityCriteria<Build> visitOrCriteria(OrCriteriaContext ctx) {
-						List<EntityCriteria<Build>> childCriterias = new ArrayList<>();
+					public Criteria<Build> visitOrCriteria(OrCriteriaContext ctx) {
+						List<Criteria<Build>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrEntityCriteria<Build>(childCriterias);
+						return new OrCriteria<Build>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<Build> visitAndCriteria(AndCriteriaContext ctx) {
-						List<EntityCriteria<Build>> childCriterias = new ArrayList<>();
+					public Criteria<Build> visitAndCriteria(AndCriteriaContext ctx) {
+						List<Criteria<Build>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndEntityCriteria<Build>(childCriterias);
+						return new AndCriteria<Build>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<Build> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotEntityCriteria<Build>(visit(ctx.criteria()));
+					public Criteria<Build> visitNotCriteria(NotCriteriaContext ctx) {
+						return new NotCriteria<Build>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -325,7 +325,7 @@ public class BuildQuery extends EntityQuery<Build> {
 	}
 	
 	@Override
-	public EntityCriteria<Build> getCriteria() {
+	public Criteria<Build> getCriteria() {
 		return criteria;
 	}
 
@@ -335,7 +335,7 @@ public class BuildQuery extends EntityQuery<Build> {
 	}
 	
 	public static BuildQuery merge(BuildQuery query1, BuildQuery query2) {
-		List<EntityCriteria<Build>> criterias = new ArrayList<>();
+		List<Criteria<Build>> criterias = new ArrayList<>();
 		if (query1.getCriteria() != null)
 			criterias.add(query1.getCriteria());
 		if (query2.getCriteria() != null)
@@ -343,7 +343,7 @@ public class BuildQuery extends EntityQuery<Build> {
 		List<EntitySort> sorts = new ArrayList<>();
 		sorts.addAll(query1.getSorts());
 		sorts.addAll(query2.getSorts());
-		return new BuildQuery(EntityCriteria.andCriterias(criterias), sorts);
+		return new BuildQuery(Criteria.andCriterias(criterias), sorts);
 	}
 	
 }

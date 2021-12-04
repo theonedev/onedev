@@ -47,15 +47,15 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.LastUpdate;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.ContentCriteria;
 import io.onedev.server.search.entity.codecomment.PathCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.UrlUtils;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
@@ -94,10 +94,10 @@ public abstract class CodeCommentListPanel extends Panel {
 				return null;
 			} catch (Exception e) {
 				warn("Not a valid formal query, performing fuzzy query");
-				List<EntityCriteria<CodeComment>> criterias = new ArrayList<>();
+				List<Criteria<CodeComment>> criterias = new ArrayList<>();
 				criterias.add(new ContentCriteria(queryString));
 				criterias.add(new PathCriteria("*" + queryString + "*"));
-				return new CodeCommentQuery(new OrEntityCriteria<CodeComment>(criterias));
+				return new CodeCommentQuery(new OrCriteria<CodeComment>(criterias));
 			}
 		}
 		

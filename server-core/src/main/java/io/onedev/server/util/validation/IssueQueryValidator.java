@@ -5,6 +5,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.web.editable.annotation.IssueQuery;
 
 public class IssueQueryValidator implements ConstraintValidator<IssueQuery, String> {
@@ -38,10 +39,13 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 		} else {
 			Project project = Project.get();
 			try {
-				io.onedev.server.search.entity.issue.IssueQuery.parse(project, value, 
-						true, withCurrentUserCriteria, withCurrentBuildCriteria, 
-						withCurrentPullRequestCriteria, withCurrentCommitCriteria, 
-						withCurrentIssueCriteria);
+				IssueQueryParseOption option = new IssueQueryParseOption()
+						.withCurrentUserCriteria(withCurrentUserCriteria)
+						.withCurrentBuildCriteria(withCurrentBuildCriteria)
+						.withCurrentCommitCriteria(withCurrentCommitCriteria)
+						.withCurrentPullRequestCriteria(withCurrentPullRequestCriteria)
+						.withCurrentIssueCriteria(withCurrentIssueCriteria);
+				io.onedev.server.search.entity.issue.IssueQuery.parse(project, value, option, true);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

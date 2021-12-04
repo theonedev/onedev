@@ -11,9 +11,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
+public class OnCommitCriteria extends Criteria<CodeComment>  {
 
 	private static final long serialVersionUID = 1L;
 

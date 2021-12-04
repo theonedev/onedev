@@ -36,6 +36,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 
 @Singleton
 public class IssueNotificationManager extends AbstractNotificationManager {
@@ -96,7 +97,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(issue.getProject(), queryString, true, true, false, false, false, false);
+				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+				return IssueQuery.parse(issue.getProject(), queryString, option, true);
 			}
 
 			@Override
@@ -122,7 +124,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(null, queryString, true, true, false, false, false, false);
+				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentBuildCriteria(true);
+				return IssueQuery.parse(null, queryString, option, true);
 			}
 
 			@Override

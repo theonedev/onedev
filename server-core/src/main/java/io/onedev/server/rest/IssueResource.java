@@ -50,6 +50,7 @@ import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 
 @Api(order=2000, description="In most cases, issue resource is operated with issue id, which is different from issue number. "
@@ -184,7 +185,8 @@ public class IssueResource {
 
     	IssueQuery parsedQuery;
 		try {
-			parsedQuery = IssueQuery.parse(null, query, true, true, false, false, false, false);
+			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+			parsedQuery = IssueQuery.parse(null, query, option, true);
 		} catch (Exception e) {
 			throw new InvalidParamException("Error parsing query", e);
 		}

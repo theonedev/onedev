@@ -6,9 +6,9 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class VersionIsEmptyCriteria extends EntityCriteria<Build> {
+public class VersionIsEmptyCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 

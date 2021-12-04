@@ -30,6 +30,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.FixedIssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -222,7 +223,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 					@Override
 					protected EntityQuery<Issue> parse(String queryString, Project project) {
-						return IssueQuery.parse(project, queryString, true, true, false, false, false, false);
+						IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+						return IssueQuery.parse(project, queryString, option, true);
 					}
 
 					@Override

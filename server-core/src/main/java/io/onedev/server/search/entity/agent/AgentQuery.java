@@ -30,13 +30,9 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.model.Agent;
-import io.onedev.server.search.entity.AndEntityCriteria;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.NotEntityCriteria;
-import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.agent.AgentQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.agent.AgentQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.agent.AgentQueryParser.FieldOperatorValueCriteriaContext;
@@ -47,21 +43,25 @@ import io.onedev.server.search.entity.agent.AgentQueryParser.OrCriteriaContext;
 import io.onedev.server.search.entity.agent.AgentQueryParser.OrderContext;
 import io.onedev.server.search.entity.agent.AgentQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.agent.AgentQueryParser.QueryContext;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
+import io.onedev.server.util.criteria.OrCriteria;
 
 public class AgentQuery extends EntityQuery<Agent> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final EntityCriteria<Agent> criteria;
+	private final Criteria<Agent> criteria;
 	
 	private final List<EntitySort> sorts;
 	
-	public AgentQuery(@Nullable EntityCriteria<Agent> criteria, List<EntitySort> sorts) {
+	public AgentQuery(@Nullable Criteria<Agent> criteria, List<EntitySort> sorts) {
 		this.criteria = criteria;
 		this.sorts = sorts;
 	}
 
-	public AgentQuery(@Nullable EntityCriteria<Agent> criteria) {
+	public AgentQuery(@Nullable Criteria<Agent> criteria) {
 		this(criteria, new ArrayList<>());
 	}
 	
@@ -89,12 +89,12 @@ public class AgentQuery extends EntityQuery<Agent> {
 			parser.setErrorHandler(new BailErrorStrategy());
 			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
-			EntityCriteria<Agent> agentCriteria;
+			Criteria<Agent> agentCriteria;
 			if (criteriaContext != null) {
-				agentCriteria = new AgentQueryBaseVisitor<EntityCriteria<Agent>>() {
+				agentCriteria = new AgentQueryBaseVisitor<Criteria<Agent>>() {
 
 					@Override
-					public EntityCriteria<Agent> visitOperatorCriteria(OperatorCriteriaContext ctx) {
+					public Criteria<Agent> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						if (forExecutor)
 							throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 						
@@ -113,7 +113,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 					}
 					
 					@Override
-					public EntityCriteria<Agent> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
+					public Criteria<Agent> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						if (forExecutor && ctx.HasAttribute() == null)
 							throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 						
@@ -131,12 +131,12 @@ public class AgentQuery extends EntityQuery<Agent> {
 					}
 					
 					@Override
-					public EntityCriteria<Agent> visitParensCriteria(ParensCriteriaContext ctx) {
-						return (EntityCriteria<Agent>) visit(ctx.criteria()).withParens(true);
+					public Criteria<Agent> visitParensCriteria(ParensCriteriaContext ctx) {
+						return (Criteria<Agent>) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
-					public EntityCriteria<Agent> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
+					public Criteria<Agent> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
@@ -174,24 +174,24 @@ public class AgentQuery extends EntityQuery<Agent> {
 					}
 					
 					@Override
-					public EntityCriteria<Agent> visitOrCriteria(OrCriteriaContext ctx) {
-						List<EntityCriteria<Agent>> childCriterias = new ArrayList<>();
+					public Criteria<Agent> visitOrCriteria(OrCriteriaContext ctx) {
+						List<Criteria<Agent>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrEntityCriteria<Agent>(childCriterias);
+						return new OrCriteria<Agent>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<Agent> visitAndCriteria(AndCriteriaContext ctx) {
-						List<EntityCriteria<Agent>> childCriterias = new ArrayList<>();
+					public Criteria<Agent> visitAndCriteria(AndCriteriaContext ctx) {
+						List<Criteria<Agent>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndEntityCriteria<Agent>(childCriterias);
+						return new AndCriteria<Agent>(childCriterias);
 					}
 
 					@Override
-					public EntityCriteria<Agent> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotEntityCriteria<Agent>(visit(ctx.criteria()));
+					public Criteria<Agent> visitNotCriteria(NotCriteriaContext ctx) {
+						return new NotCriteria<Agent>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -248,7 +248,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 	}
 	
 	@Override
-	public EntityCriteria<Agent> getCriteria() {
+	public Criteria<Agent> getCriteria() {
 		return criteria;
 	}
 
@@ -258,7 +258,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 	}
 	
 	public static AgentQuery merge(AgentQuery query1, AgentQuery query2) {
-		List<EntityCriteria<Agent>> criterias = new ArrayList<>();
+		List<Criteria<Agent>> criterias = new ArrayList<>();
 		if (query1.getCriteria() != null)
 			criterias.add(query1.getCriteria());
 		if (query2.getCriteria() != null)
@@ -266,7 +266,7 @@ public class AgentQuery extends EntityQuery<Agent> {
 		List<EntitySort> sorts = new ArrayList<>();
 		sorts.addAll(query1.getSorts());
 		sorts.addAll(query2.getSorts());
-		return new AgentQuery(EntityCriteria.andCriterias(criterias), sorts);
+		return new AgentQuery(Criteria.andCriterias(criterias), sorts);
 	}
 	
 }

@@ -14,9 +14,10 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
-public class StateCriteria extends IssueCriteria {
+public class StateCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 

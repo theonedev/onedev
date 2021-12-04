@@ -19,28 +19,36 @@ public class BuildFieldCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Build build;
+	private final Project project;
 	
 	private final String value;
 	
 	private final boolean allowMultiple;
 	
+	private transient Build build;
+	
 	public BuildFieldCriteria(String name, @Nullable Project project, String value, boolean allowMultiple) {
 		super(name);
-		build = EntityQuery.getBuild(project, value);
+		this.project = project;
 		this.value = value;
 		this.allowMultiple = allowMultiple;
+	}
+	
+	private Build getBuild() {
+		if (build == null)
+			build = EntityQuery.getBuild(project, value);
+		return build;
 	}
 
 	@Override
 	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, CriteriaBuilder builder) {
-		return builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), build.getId());
+		return builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), getBuild().getId());
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		return issue.getProject().equals(build.getProject()) && Objects.equals(fieldValue, build.getNumber());
+		return issue.getProject().equals(getBuild().getProject()) && Objects.equals(fieldValue, getBuild().getId());
 	}
 
 	@SuppressWarnings({"unchecked" })
@@ -50,10 +58,10 @@ public class BuildFieldCriteria extends FieldCriteria {
 			List<Long> valueFromIssue = (List<Long>) issue.getFieldValue(getFieldName());
 			if (valueFromIssue == null)
 				valueFromIssue = new ArrayList<>();
-			valueFromIssue.add(build.getNumber());
+			valueFromIssue.add(getBuild().getId());
 			issue.setFieldValue(getFieldName(), valueFromIssue);
 		} else {
-			issue.setFieldValue(getFieldName(), build.getNumber());
+			issue.setFieldValue(getFieldName(), getBuild().getId());
 		}
 	}
 	

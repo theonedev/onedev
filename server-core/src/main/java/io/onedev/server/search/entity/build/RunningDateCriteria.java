@@ -9,10 +9,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 
-public class RunningDateCriteria extends EntityCriteria<Build> {
+public class RunningDateCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 

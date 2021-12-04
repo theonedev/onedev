@@ -39,10 +39,11 @@ import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -208,15 +209,15 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	}
 	
 	@Nullable
-	protected IssueCriteria getTemplate() {
+	protected Criteria<Issue> getTemplate() {
 		return null;
 	}
 	
 	@Nullable
 	private String getDescriptionTemplate(Issue issue) {
+		IssueQueryParseOption option = new IssueQueryParseOption();
 		for (IssueTemplate template: getIssueSetting().getIssueTemplates()) {
-			IssueQuery criteria = IssueQuery.parse(getProject(), template.getIssueQuery(), 
-					true, false, false, false, false, false);
+			IssueQuery criteria = IssueQuery.parse(getProject(), template.getIssueQuery(), option, true);
 			if (criteria.matches(issue)) 
 				return template.getIssueDescription();
 		}

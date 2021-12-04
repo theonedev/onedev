@@ -38,6 +38,7 @@ import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTri
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.StateTransitionTrigger;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -364,12 +365,15 @@ public class GlobalIssueSetting implements Serializable {
 		for (TransitionSpec transition: getTransitionSpecs())
 			undefinedStates.addAll(transition.getUndefinedStates());
 		for (BoardSpec board: getBoardSpecs())
-			undefinedStates.addAll(board.getUndefinedStates(null));
+			undefinedStates.addAll(board.getUndefinedStates());
 		for (IssueTemplate template: getIssueTemplates())
-			undefinedStates.addAll(template.getUndefinedStates());
+			undefinedStates.addAll(template.getQueryUpdater().getUndefinedStates());
+		
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
+			
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				undefinedStates.addAll(query.getUndefinedStates());
 			} catch (Exception e) {
 			}
@@ -389,12 +393,15 @@ public class GlobalIssueSetting implements Serializable {
 		for (FieldSpec field: getFieldSpecs())
 			undefinedFields.addAll(field.getUndefinedFields());
 		for (BoardSpec board: getBoardSpecs())
-			undefinedFields.addAll(board.getUndefinedFields(null));
+			undefinedFields.addAll(board.getUndefinedFields());
 		for (IssueTemplate template: getIssueTemplates())
-			undefinedFields.addAll(template.getUndefinedFields());
+			undefinedFields.addAll(template.getQueryUpdater().getUndefinedFields());
+		
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
+		
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				undefinedFields.addAll(query.getUndefinedFields());
 			} catch (Exception e) {
 			}
@@ -409,12 +416,14 @@ public class GlobalIssueSetting implements Serializable {
 		for (FieldSpec field: getFieldSpecs())
 			undefinedFieldValues.addAll(field.getUndefinedFieldValues());
 		for (BoardSpec board: getBoardSpecs())
-			undefinedFieldValues.addAll(board.getUndefinedFieldValues(null));
+			undefinedFieldValues.addAll(board.getUndefinedFieldValues());
 		for (IssueTemplate template: getIssueTemplates())
-			undefinedFieldValues.addAll(template.getUndefinedFieldValues());
+			undefinedFieldValues.addAll(template.getQueryUpdater().getUndefinedFieldValues());
+
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				undefinedFieldValues.addAll(query.getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
@@ -428,17 +437,19 @@ public class GlobalIssueSetting implements Serializable {
 				it.remove();
 		}
 		for (Iterator<BoardSpec> it = getBoardSpecs().iterator(); it.hasNext();) {
-			if (!it.next().fixUndefinedStates(null, resolutions))
-				it.remove();
-		}
-		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
 			if (!it.next().fixUndefinedStates(resolutions))
 				it.remove();
 		}
+		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
+			if (!it.next().getQueryUpdater().fixUndefinedStates(resolutions))
+				it.remove();
+		}
+		
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				if (query.fixUndefinedStates(resolutions))
 					namedQuery.setQuery(query.toString());
 				else
@@ -461,17 +472,19 @@ public class GlobalIssueSetting implements Serializable {
 				it.remove();
 		}
 		for (Iterator<BoardSpec> it = getBoardSpecs().iterator(); it.hasNext();) {
-			if (!it.next().fixUndefinedFields(null, resolutions))
-				it.remove();
-		}
-		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
 			if (!it.next().fixUndefinedFields(resolutions))
 				it.remove();
 		}
+		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
+			if (!it.next().getQueryUpdater().fixUndefinedFields(resolutions))
+				it.remove();
+		}
+		
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				if (query.fixUndefinedFields(resolutions))
 					namedQuery.setQuery(query.toString());
 				else
@@ -498,17 +511,19 @@ public class GlobalIssueSetting implements Serializable {
 				it.remove();
 		}
 		for (Iterator<BoardSpec> it = getBoardSpecs().iterator(); it.hasNext();) {
-			if (!it.next().fixUndefinedFieldValues(null, resolutions))
-				it.remove();
-		}
-		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
 			if (!it.next().fixUndefinedFieldValues(resolutions))
 				it.remove();
 		}
+		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
+			if (!it.next().getQueryUpdater().fixUndefinedFieldValues(resolutions))
+				it.remove();
+		}
+		
+		IssueQueryParseOption option = new IssueQueryParseOption().enableAll(true);
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), option, false);
 				if (query.fixUndefinedFieldValues(resolutions))
 					namedQuery.setQuery(query.toString());
 				else
@@ -527,11 +542,6 @@ public class GlobalIssueSetting implements Serializable {
 		}
 
 		return derivedDeletions;
-	}
-	
-	public void onMoveProject(String oldPath, String newPath) {
-		for (FieldSpec field: getFieldSpecs()) 
-			field.onMoveProject(oldPath, newPath);
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
@@ -558,15 +568,6 @@ public class GlobalIssueSetting implements Serializable {
 			field.onRenameGroup(oldName, newName);
 	}
 
-	public Usage onDeleteProject(String projectPath) {
-		Usage usage = new Usage();
-		
-		for (FieldSpec field: getFieldSpecs()) 
-			usage.add(field.onDeleteProject(projectPath));
-		
-		return usage.prefix("issue setting");
-	}
-	
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
 		
@@ -574,6 +575,45 @@ public class GlobalIssueSetting implements Serializable {
 			usage.add(field.onDeleteGroup(groupName));
 		
 		return usage.prefix("issue setting");
+	}
+	
+	public void onMoveProject(String oldPath, String newPath) {
+		for (FieldSpec field: getFieldSpecs()) 
+			field.onMoveProject(oldPath, newPath);
+		
+		for (TransitionSpec transition: getTransitionSpecs())
+			transition.onMoveProject(oldPath, newPath);
+		for (BoardSpec board: getBoardSpecs()) {
+			board.getBaseQueryUpdater().onMoveProject(oldPath, newPath);
+			board.getBacklogBaseQueryUpdater().onMoveProject(oldPath, newPath);
+		}
+		
+		for (IssueTemplate template: getIssueTemplates())
+			template.getQueryUpdater().onMoveProject(oldPath, newPath);
+	}
+	
+	public Usage onDeleteProject(String projectPath) {
+		Usage usage = new Usage();
+		
+		for (FieldSpec field: getFieldSpecs()) 
+			usage.add(field.onDeleteProject(projectPath));
+		
+		int index = 1;
+		for (TransitionSpec transition: getTransitionSpecs()) 
+			usage.add(transition.onDeleteProject(projectPath).prefix("state transition #" + index++));
+		
+		index = 1;
+		for (BoardSpec board: getBoardSpecs()) { 
+			usage.add(board.getBaseQueryUpdater().onDeleteProject(projectPath).prefix("default board #" + index++));
+			usage.add(board.getBacklogBaseQueryUpdater().onDeleteProject(projectPath).prefix("default board #" + index++));
+		}
+		
+		index = 1;
+		for (IssueTemplate template: getIssueTemplates()) 
+			usage.add(template.getQueryUpdater().onDeleteProject(projectPath).prefix("description template #" + index++));
+		
+		return usage.prefix("issue setting");
+		
 	}
 	
 	public void onRenameRole(String oldName, String newName) {
@@ -584,8 +624,41 @@ public class GlobalIssueSetting implements Serializable {
 	public Usage onDeleteRole(String roleName) {
 		Usage usage = new Usage();
 		
+		int index = 0;
 		for (TransitionSpec transition: getTransitionSpecs())
-			usage.add(transition.onDeleteRole(roleName));
+			usage.add(transition.onDeleteRole(roleName).prefix("state transition #" + index++));
+		
+		return usage.prefix("issue setting");
+	}
+	
+	public void onRenameLink(String oldName, String newName) {
+		for (TransitionSpec transition: getTransitionSpecs())
+			transition.onRenameLink(oldName, newName);
+		for (BoardSpec board: getBoardSpecs()) {
+			board.getBaseQueryUpdater().onRenameLink(oldName, newName);
+			board.getBacklogBaseQueryUpdater().onRenameLink(oldName, newName);
+		}
+		
+		for (IssueTemplate template: getIssueTemplates())
+			template.getQueryUpdater().onRenameLink(oldName, newName);
+	}
+
+	public Usage onDeleteLink(String linkName) {
+		Usage usage = new Usage();
+		
+		int index = 1;
+		for (TransitionSpec transition: getTransitionSpecs()) 
+			usage.add(transition.onDeleteLink(linkName).prefix("state transition #" + index++));
+		
+		index = 1;
+		for (BoardSpec board: getBoardSpecs()) { 
+			usage.add(board.getBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index++));
+			usage.add(board.getBacklogBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index++));
+		}
+		
+		index = 1;
+		for (IssueTemplate template: getIssueTemplates()) 
+			usage.add(template.getQueryUpdater().onDeleteLink(linkName).prefix("description template #" + index++));
 		
 		return usage.prefix("issue setting");
 	}

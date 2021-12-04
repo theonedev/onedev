@@ -59,6 +59,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -75,6 +76,7 @@ import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -92,10 +94,12 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.patternset.PatternSet;
@@ -123,6 +127,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     private final TransactionManager transactionManager;
     
     private final IssueManager issueManager;
+    
+    private final LinkSpecManager linkSpecManager;
     
     private final JobManager jobManager;
     
@@ -152,7 +158,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		SettingManager settingManager, TransactionManager transactionManager, 
     		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
     		TaskScheduler taskScheduler, UserAuthorizationManager userAuthorizationManager, 
-    		RoleManager roleManager, JobManager jobManager, IssueManager issueManager) {
+    		RoleManager roleManager, JobManager jobManager, IssueManager issueManager, 
+    		LinkSpecManager linkSpecManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -167,6 +174,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         this.roleManager = roleManager;
         this.jobManager = jobManager;
         this.issueManager = issueManager;
+        this.linkSpecManager = linkSpecManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -216,6 +224,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		}
     		issueManager.clearSchedules(project, milestones);
     		settingManager.onMoveProject(oldPath, project.getPath());
+    		
+    		for (LinkSpec link: linkSpecManager.query()) {
+    			for (IssueQueryUpdater updater: link.getQueryUpdaters())
+    				updater.onMoveProject(oldPath, project.getPath());
+    		}
+    			
     		scheduleTree(project);
     	}
     }
@@ -293,6 +307,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	
     	Usage usage = new Usage();
     	usage.add(settingManager.onDeleteProject(project.getPath()));
+    	
+		for (LinkSpec link: linkSpecManager.query()) {
+			for (IssueQueryUpdater updater: link.getQueryUpdaters())
+				usage.add(updater.onDeleteProject(project.getPath()).prefix("issue setting").prefix("administration"));
+		}
     	
     	usage.checkInUse("Project '" + project.getPath() + "'");
 
@@ -705,8 +724,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return query;
 	}
 	
-	private Predicate[] getPredicates(@Nullable io.onedev.server.search.entity.EntityCriteria<Project> criteria, 
-			CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
+	private Predicate[] getPredicates(@Nullable Criteria<Project> criteria, CriteriaQuery<?> query, 
+			From<Project, Project> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
 			Collection<Long> projectIds = getPermittedProjects(new AccessProject())
@@ -733,7 +752,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Sessional
 	@Override
-	public int count(io.onedev.server.search.entity.EntityCriteria<Project> projectCriteria) {
+	public int count(Criteria<Project> projectCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Project> root = criteriaQuery.from(Project.class);
@@ -814,7 +833,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> jpaPath, String pathPattern) {
 		cacheLock.readLock().lock();
 		try {
-			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, jpaPath.get(Project.PROP_ID), 
+			return Criteria.inManyValues(builder, jpaPath.get(Project.PROP_ID), 
 					getMatchingIds(pathPattern), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
@@ -824,7 +843,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> jpaPath, Project project) {
 		cacheLock.readLock().lock();
 		try {
-			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, jpaPath.get(Project.PROP_ID), 
+			return Criteria.inManyValues(builder, jpaPath.get(Project.PROP_ID), 
 					getTreeIds(project.getId()), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();

@@ -11,9 +11,9 @@ import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class OwnedByNoneCriteria extends EntityCriteria<Project> {
+public class OwnedByNoneCriteria extends Criteria<Project> {
 
 	private static final long serialVersionUID = 1L;
 

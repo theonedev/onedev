@@ -14,6 +14,7 @@ import io.onedev.server.util.validation.ProjectQueryValidator;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=ProjectQueryValidator.class) 
 public @interface ProjectQuery {
+	
     String message() default "";
 
     Class<?>[] groups() default {};

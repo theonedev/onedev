@@ -8,10 +8,10 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class PathCriteria extends EntityCriteria<CodeComment>  {
+public class PathCriteria extends Criteria<CodeComment>  {
 
 	private static final long serialVersionUID = 1L;
 

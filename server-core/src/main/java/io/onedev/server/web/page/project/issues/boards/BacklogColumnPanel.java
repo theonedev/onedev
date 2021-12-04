@@ -29,11 +29,11 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
-import io.onedev.server.search.entity.issue.NotIssueCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -48,11 +48,11 @@ abstract class BacklogColumnPanel extends Panel {
 		protected IssueQuery load() {
 			IssueQuery backlogQuery = getBacklogQuery();
 			if (backlogQuery != null) {
-				List<IssueCriteria> criterias = new ArrayList<>();
+				List<Criteria<Issue>> criterias = new ArrayList<>();
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
-				criterias.add(new NotIssueCriteria(new MilestoneCriteria(getMilestone().getName())));
-				return new IssueQuery(IssueCriteria.and(criterias), backlogQuery.getSorts());
+				criterias.add(new NotCriteria<Issue>(new MilestoneCriteria(getMilestone().getName())));
+				return new IssueQuery(Criteria.andCriterias(criterias), backlogQuery.getSorts());
 			} else {
 				return null;
 			}
@@ -109,7 +109,7 @@ abstract class BacklogColumnPanel extends Panel {
 					}
 
 					@Override
-					protected IssueCriteria getTemplate() {
+					protected Criteria<Issue> getTemplate() {
 						return getQuery().getCriteria();
 					}
 

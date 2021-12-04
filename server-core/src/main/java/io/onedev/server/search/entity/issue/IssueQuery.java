@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.issue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +24,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.BooleanField;
@@ -55,7 +55,12 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.OrderContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
+import io.onedev.server.util.criteria.AndCriteria;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.NotCriteria;
+import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
@@ -66,16 +71,16 @@ public class IssueQuery extends EntityQuery<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final IssueCriteria criteria;
+	private final Criteria<Issue> criteria;
 	
 	private final List<EntitySort> sorts;
 	
-	public IssueQuery(@Nullable IssueCriteria criteria, List<EntitySort> sorts) {
+	public IssueQuery(@Nullable Criteria<Issue> criteria, List<EntitySort> sorts) {
 		this.criteria = criteria;
 		this.sorts = sorts;
 	}
 
-	public IssueQuery(@Nullable IssueCriteria criteria) {
+	public IssueQuery(@Nullable Criteria<Issue> criteria) {
 		this(criteria, new ArrayList<>());
 	}
 	
@@ -84,7 +89,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 	
 	@Nullable
-	public IssueCriteria getCriteria() {
+	public Criteria<Issue> getCriteria() {
 		return criteria;
 	}
 
@@ -93,9 +98,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 
 	public static IssueQuery parse(@Nullable Project project, @Nullable String queryString, 
-			boolean validate, boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
-			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria, 
-			boolean withCurrentIssueCriteria) {
+			IssueQueryParseOption option, boolean validate) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			IssueQueryLexer lexer = new IssueQueryLexer(is);
@@ -116,9 +119,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 			
 			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
-			IssueCriteria issueCriteria;
+			Criteria<Issue> issueCriteria;
 			if (criteriaContext != null) {
-				issueCriteria = new IssueQueryBaseVisitor<IssueCriteria>() {
+				issueCriteria = new IssueQueryBaseVisitor<Criteria<Issue>>() {
 
 					private long getValueOrdinal(ChoiceField field, String value) {
 						List<String> choices = new ArrayList<>(field.getChoiceProvider().getChoices(true).keySet());
@@ -126,26 +129,26 @@ public class IssueQuery extends EntityQuery<Issue> {
 					}
 					
 					@Override
-					public IssueCriteria visitOperatorCriteria(OperatorCriteriaContext ctx) {
+					public Criteria<Issue> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
 						case IssueQueryLexer.SubmittedByMe:
-							if (!withCurrentUserCriteria)
+							if (!option.withCurrentUserCriteria())
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new SubmittedByMeCriteria();
 						case IssueQueryLexer.FixedInCurrentBuild:
-							if (!withCurrentBuildCriteria)
+							if (!option.withCurrentBuildCriteria())
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FixedInCurrentBuildCriteria();
 						case IssueQueryLexer.FixedInCurrentPullRequest:
-							if (!withCurrentPullRequestCriteria)
+							if (!option.withCurrentPullRequestCriteria())
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FixedInCurrentPullRequestCriteria();
 						case IssueQueryLexer.FixedInCurrentCommit:
-							if (!withCurrentCommitCriteria)
+							if (!option.withCurrentCommitCriteria())
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FixedInCurrentCommitCriteria();
 						case IssueQueryLexer.CurrentIssue:
-							if (!withCurrentIssueCriteria)
+							if (!option.withCurrentIssueCriteria())
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new CurrentIssueCriteria();
 						default:
@@ -154,13 +157,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 					}
 					
 					@Override
-					public IssueCriteria visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
+					public Criteria<Issue> visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted().getText());
 						int operator = ctx.operator.getType();
-						if (validate) {
-							checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
-									withCurrentPullRequestCriteria, withCurrentCommitCriteria, withCurrentIssueCriteria);
-						}
+						if (validate) 
+							checkField(fieldName, operator, option);
 						if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 							return new MilestoneIsEmptyCriteria();
 						} else {
@@ -173,35 +174,31 @@ public class IssueQuery extends EntityQuery<Issue> {
 					}
 					
 					@Override
-					public IssueCriteria visitLinkMatchCriteria(LinkMatchCriteriaContext ctx) {
+					public Criteria<Issue> visitLinkMatchCriteria(LinkMatchCriteriaContext ctx) {
 						String linkName = getValue(ctx.Quoted().getText());
-						LinkSpec linkSpec = getLinkSpec(linkName);
-						boolean opposite = !linkName.equals(linkSpec.getName());
 						boolean allMatch = ctx.All() != null;
-						IssueCriteria criteria = visit(ctx.criteria());
-						return new LinkMatchCriteria(linkSpec, opposite, criteria, allMatch);
+						Criteria<Issue> criteria = visit(ctx.criteria());
+						return new LinkMatchCriteria(linkName, criteria, allMatch);
 					}
 					
-					public IssueCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
+					public Criteria<Issue> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						if (ctx.SubmittedBy() != null) {
+						if (ctx.SubmittedBy() != null) 
 							return new SubmittedByCriteria(getUser(value));
-						} else if (ctx.FixedInBuild() != null) { 
+						else if (ctx.FixedInBuild() != null)  
 							return new FixedInBuildCriteria(project, value);
-						} else if (ctx.FixedInPullRequest() != null) { 
+						else if (ctx.FixedInPullRequest() != null)  
 							return new FixedInPullRequestCriteria(project, value);
-						} else if (ctx.FixedInCommit() != null) { 
+						else if (ctx.FixedInCommit() != null) 
 							return new FixedInCommitCriteria(project, value);
-						} else if (ctx.HasAny() != null) {
-							LinkSpec linkSpec = getLinkSpec(value);
-							return new HasLinkCriteria(linkSpec, !value.equals(linkSpec.getName()));
-						} else {
+						else if (ctx.HasAny() != null) 
+							return new HasLinkCriteria(value);
+						else 
 							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
-						}
 					}
 					
 					@Override
-					public IssueCriteria visitFixedBetweenCriteria(FixedBetweenCriteriaContext ctx) {
+					public Criteria<Issue> visitFixedBetweenCriteria(FixedBetweenCriteriaContext ctx) {
 						RevisionCriteriaContext firstRevision = ctx.revisionCriteria(0);
 						int firstType = firstRevision.revisionType.getType();
 						String firstValue = getValue(firstRevision.Quoted().getText());
@@ -214,19 +211,17 @@ public class IssueQuery extends EntityQuery<Issue> {
 					}
 					
 					@Override
-					public IssueCriteria visitParensCriteria(ParensCriteriaContext ctx) {
-						return (IssueCriteria) visit(ctx.criteria()).withParens(true);
+					public Criteria<Issue> visitParensCriteria(ParensCriteriaContext ctx) {
+						return (Criteria<Issue>) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
-					public IssueCriteria visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
+					public Criteria<Issue> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
-						if (validate) {
-							checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
-									withCurrentPullRequestCriteria, withCurrentCommitCriteria, withCurrentIssueCriteria);
-						}
+						if (validate) 
+							checkField(fieldName, operator, option);
 						
 						switch (operator) {
 						case IssueQueryLexer.IsUntil:
@@ -309,24 +304,24 @@ public class IssueQuery extends EntityQuery<Issue> {
 					}
 					
 					@Override
-					public IssueCriteria visitOrCriteria(OrCriteriaContext ctx) {
-						List<IssueCriteria> childCriterias = new ArrayList<>();
+					public Criteria<Issue> visitOrCriteria(OrCriteriaContext ctx) {
+						List<Criteria<Issue>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrIssueCriteria(childCriterias);
+						return new OrCriteria<Issue>(childCriterias);
 					}
 
 					@Override
-					public IssueCriteria visitAndCriteria(AndCriteriaContext ctx) {
-						List<IssueCriteria> childCriterias = new ArrayList<>();
+					public Criteria<Issue> visitAndCriteria(AndCriteriaContext ctx) {
+						List<Criteria<Issue>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndIssueCriteria(childCriterias);
+						return new AndCriteria<Issue>(childCriterias);
 					}
 
 					@Override
-					public IssueCriteria visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotIssueCriteria(visit(ctx.criteria()));
+					public Criteria<Issue> visitNotCriteria(NotCriteriaContext ctx) {
+						return new NotCriteria<Issue>(visit(ctx.criteria()));
 					}
 					
 				}.visit(criteriaContext);
@@ -357,7 +352,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			return new IssueQuery(issueCriteria, issueSorts);
 		} else {
 			return new IssueQuery();
-		}
+		} 
 	}
 	
 	private static GlobalIssueSetting getGlobalIssueSetting() {
@@ -371,10 +366,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
 	
-	public static void checkField(String fieldName, int operator, 
-			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
-			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria, 
-			boolean withCurrentIssueCriteria) {
+	public static void checkField(String fieldName, int operator, IssueQueryParseOption option) {
 		FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec == null && !Issue.QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
@@ -386,17 +378,17 @@ public class IssueQuery extends EntityQuery<Issue> {
 			}
 			break;
 		case IssueQueryLexer.IsMe:
-			if (!(fieldSpec instanceof UserChoiceField && withCurrentUserCriteria))
+			if (!(fieldSpec instanceof UserChoiceField && option.withCurrentUserCriteria()))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsCurrent:
-			if (!(fieldSpec instanceof BuildChoiceField && withCurrentBuildCriteria 
-					|| fieldSpec instanceof PullRequestChoiceField && withCurrentPullRequestCriteria)
-					|| fieldSpec instanceof CommitField && withCurrentCommitCriteria)
+			if (!(fieldSpec instanceof BuildChoiceField && option.withCurrentBuildCriteria() 
+					|| fieldSpec instanceof PullRequestChoiceField && option.withCurrentPullRequestCriteria())
+					|| fieldSpec instanceof CommitField && option.withCurrentCommitCriteria())
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsPrevious:
-			if (!(fieldSpec instanceof BuildChoiceField && withCurrentBuildCriteria)) 
+			if (!(fieldSpec instanceof BuildChoiceField && option.withCurrentBuildCriteria())) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsUntil:
@@ -460,6 +452,19 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return AntlrUtils.getLexerRule(IssueQueryLexer.ruleNames, operatorName);
 	}
 	
+	public IssueQuery onRenameLink(String oldName, String newName) {
+		if (getCriteria() != null)
+			getCriteria().onRenameLink(oldName, newName);
+		return this;
+	}
+	
+	public boolean isUsingLink(String linkName) {
+		if (getCriteria() != null)
+			return getCriteria().isUsingLink(linkName);
+		else
+			return false;
+	}
+	
 	public Collection<String> getUndefinedStates() {
 		if (criteria != null) 
 			return criteria.getUndefinedStates();
@@ -496,10 +501,19 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 	
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		if (criteria != null) 
-			return criteria.fixUndefinedFields(resolutions);
-		else 
-			return true;
+		if (criteria != null && !criteria.fixUndefinedFields(resolutions))
+			return false;
+		for (Iterator<EntitySort> it = sorts.iterator(); it.hasNext();) {
+			EntitySort sort = it.next();
+			UndefinedFieldResolution resolution = resolutions.get(sort.getField());
+			if (resolution != null) {
+				if (resolution.getFixType() == FixType.CHANGE_TO_ANOTHER_FIELD)
+					sort.setField(resolution.getNewField());
+				else
+					it.remove();
+			}
+		}
+		return true;
 	}
 	
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
@@ -510,7 +524,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 	
 	public static IssueQuery merge(IssueQuery query1, IssueQuery query2) {
-		List<IssueCriteria> criterias = new ArrayList<>();
+		List<Criteria<Issue>> criterias = new ArrayList<>();
 		if (query1.getCriteria() != null)
 			criterias.add(query1.getCriteria());
 		if (query2.getCriteria() != null)
@@ -518,7 +532,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		List<EntitySort> sorts = new ArrayList<>();
 		sorts.addAll(query1.getSorts());
 		sorts.addAll(query2.getSorts());
-		return new IssueQuery(IssueCriteria.and(criterias), sorts);
+		return new IssueQuery(Criteria.andCriterias(criterias), sorts);
 	}
-
+	
 }

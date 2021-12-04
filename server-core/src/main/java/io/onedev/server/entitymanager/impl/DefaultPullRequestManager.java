@@ -130,6 +130,7 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 
 @Singleton
@@ -892,8 +893,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		}
 	}
 	
-	private Predicate[] getPredicates(@Nullable Project targetProject, 
-			@Nullable io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
+	private Predicate[] getPredicates(@Nullable Project targetProject, @Nullable Criteria<PullRequest> criteria, 
 			CriteriaQuery<?> query, From<PullRequest, PullRequest> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {
@@ -961,8 +961,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	@Sessional
 	@Override
-	public int count(@Nullable Project targetProject,  
-			io.onedev.server.search.entity.EntityCriteria<PullRequest> requestCriteria) {
+	public int count(@Nullable Project targetProject,  Criteria<PullRequest> requestCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);

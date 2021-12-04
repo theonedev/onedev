@@ -9,8 +9,9 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
+import io.onedev.server.util.criteria.Criteria;
 
-public class SubmittedByMeCriteria extends IssueCriteria {
+public class SubmittedByMeCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 

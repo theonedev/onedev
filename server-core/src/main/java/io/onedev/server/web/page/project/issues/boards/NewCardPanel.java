@@ -13,7 +13,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.issue.create.NewIssueEditor;
 
@@ -39,7 +39,7 @@ abstract class NewCardPanel extends Panel {
 			}
 
 			@Override
-			protected IssueCriteria getTemplate() {
+			protected Criteria<Issue> getTemplate() {
 				return NewCardPanel.this.getTemplate();
 			}
 			
@@ -90,7 +90,7 @@ abstract class NewCardPanel extends Panel {
 	}
 
 	@Nullable
-	protected abstract IssueCriteria getTemplate();
+	protected abstract Criteria<Issue> getTemplate();
 	
 	protected abstract void onClose(AjaxRequestTarget target);
 

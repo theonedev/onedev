@@ -25,6 +25,10 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 
 	private BeanEditor editor;
 	
+	private String oldName;
+	
+	private String oldOppositeName;
+	
 	public LinkSpecEditPanel(String id, IModel<LinkSpec> model) {
 		super(id, model);
 	}
@@ -71,6 +75,9 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 
 			@Override
 			public void setObject(Serializable object) {
+				oldName = getSpec().getName();
+				if (getSpec().getOpposite() != null)
+					oldOppositeName = getSpec().getOpposite().getName();
 				editor.getDescriptor().copyProperties(object, getSpec());
 			}
 			
@@ -106,13 +113,13 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 						} else {
 							if (getSpec().isNew()) 
 								getSpec().setOrder(manager.query().stream().mapToInt(it->it.getOrder()).max().orElse(0)+1);
-							manager.save(getSpec());
+							manager.save(getSpec(), oldName, oldOppositeName);
 							onSave(target);
 						}
 					} else {
 						if (getSpec().isNew()) 
 							getSpec().setOrder(manager.query().stream().mapToInt(it->it.getOrder()).max().orElse(0)+1);
-						manager.save(getSpec());
+						manager.save(getSpec(), oldName, oldOppositeName);
 						onSave(target);
 					}
 				}

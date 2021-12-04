@@ -44,12 +44,12 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.Agent;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.search.entity.agent.NameCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AgentQueryBehavior;
 import io.onedev.server.web.component.AgentStatusBadge;
@@ -85,9 +85,9 @@ class AgentListPanel extends Panel {
 				return null;
 			} catch (Exception e) {
 				warn("Not a valid formal query, performing fuzzy query");
-				List<EntityCriteria<Agent>> criterias = new ArrayList<>();
+				List<Criteria<Agent>> criterias = new ArrayList<>();
 				criterias.add(new NameCriteria("*" + queryString + "*"));
-				return new AgentQuery(new OrEntityCriteria<Agent>(criterias));
+				return new AgentQuery(new OrCriteria<Agent>(criterias));
 			}
 		}
 		

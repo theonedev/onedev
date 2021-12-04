@@ -13,12 +13,12 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
 import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
 import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
-import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryUpdater;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
@@ -120,80 +120,79 @@ public class ProjectBuildSetting implements Serializable {
 		return null;
 	}
 	
-	public Collection<String> getUndefinedStates(Project project) {
-		Set<String> undefinedStates = new HashSet<>();
+	private IssueQueryUpdater getQueryUpdater(DefaultFixedIssueFilter filter, int index) {
+		return new IssueQueryUpdater() {
 
-		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters) {
-			try {
-				undefinedStates.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false).getUndefinedStates());
-			} catch (Exception e) {
+			@Override
+			protected Usage getUsage() {
+				return new Usage().add("issue query").prefix("default fixed issue filter #" + index);
 			}
-		}
+
+			@Override
+			protected boolean isAllowEmpty() {
+				return false;
+			}
+
+			@Override
+			protected String getIssueQuery() {
+				return filter.getIssueQuery();
+			}
+
+			@Override
+			protected void setIssueQuery(String issueQuery) {
+				filter.setIssueQuery(issueQuery);
+			}
+			
+		};
+	}
+	
+	public Collection<String> getUndefinedStates() {
+		Set<String> undefinedStates = new HashSet<>();
+		
+		int index =1;
+		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters)
+			undefinedStates.addAll(getQueryUpdater(filter, index++).getUndefinedStates());
 		
 		return undefinedStates;
 	}
 
-	public Collection<String> getUndefinedFields(Project project) {
+	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
-		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters) {
-			try {
-				undefinedFields.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false).getUndefinedFields());
-			} catch (Exception e) {
-			}
-		}
+		int index = 1;
+		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters)
+			undefinedFields.addAll(getQueryUpdater(filter, index++).getUndefinedFields());
 		return undefinedFields;
 	}
 
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
-		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters) {
-			try {
-				undefinedFieldValues.addAll(IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false).getUndefinedFieldValues());
-			} catch (Exception e) {
-			}
-		}
+		int index = 1;
+		for (DefaultFixedIssueFilter filter: defaultFixedIssueFilters) 
+			undefinedFieldValues.addAll(getQueryUpdater(filter, index++).getUndefinedFieldValues());
 		return undefinedFieldValues;
 	}
 	
-	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
+	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		int index = 1;
 		for (Iterator<DefaultFixedIssueFilter> it = defaultFixedIssueFilters.iterator(); it.hasNext();) {
-			DefaultFixedIssueFilter filter = it.next();
-			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false);
-				if (parsedQuery.fixUndefinedStates(resolutions))
-					filter.setIssueQuery(parsedQuery.toString());
-				else
-					it.remove();
-			} catch (Exception e) {
-			}
+			if (!getQueryUpdater(it.next(), index++).fixUndefinedStates(resolutions))
+				it.remove();
 		}
 	}
 	
-	public void fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions) {
+	public void fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		int index = 1;
 		for (Iterator<DefaultFixedIssueFilter> it = defaultFixedIssueFilters.iterator(); it.hasNext();) {
-			DefaultFixedIssueFilter filter = it.next();
-			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false);
-				if (parsedQuery.fixUndefinedFields(resolutions))
-					filter.setIssueQuery(parsedQuery.toString());
-				else
-					it.remove();
-			} catch (Exception e) {
-			}
+			if (!getQueryUpdater(it.next(), index++).fixUndefinedFields(resolutions))
+				it.remove();
 		}
 	}	
 	
-	public void fixUndefinedFieldValues(Project project, Map<String, UndefinedFieldValuesResolution> resolutions) {
+	public void fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		int index = 1;
 		for (Iterator<DefaultFixedIssueFilter> it = defaultFixedIssueFilters.iterator(); it.hasNext();) {
-			DefaultFixedIssueFilter filter = it.next();
-			try {
-				IssueQuery parsedQuery = IssueQuery.parse(project, filter.getIssueQuery(), false, false, false, false, false, false);
-				if (parsedQuery.fixUndefinedFieldValues(resolutions))
-					filter.setIssueQuery(parsedQuery.toString());
-				else
-					it.remove();
-			} catch (Exception e) {
-			}
+			if (!getQueryUpdater(it.next(), index++).fixUndefinedFieldValues(resolutions))
+				it.remove();
 		}
 	}	
 	

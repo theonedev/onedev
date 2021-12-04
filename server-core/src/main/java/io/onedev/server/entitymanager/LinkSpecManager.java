@@ -16,4 +16,5 @@ public interface LinkSpecManager extends EntityManager<LinkSpec> {
 
 	void updateOrders(List<LinkSpec> links);
 	
+	void save(LinkSpec spec, @Nullable String oldName, @Nullable String oldOppositeName);
 }

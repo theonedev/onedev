@@ -34,6 +34,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.ProjectScopedRevision;
+import io.onedev.server.util.criteria.Criteria;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
 
@@ -41,7 +42,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	
 	private static final Pattern INSIDE_QUOTE = Pattern.compile("\"([^\"\\\\]|\\\\.)*");
 
-	public abstract EntityCriteria<T> getCriteria();
+	public abstract Criteria<T> getCriteria();
 
 	public abstract List<EntitySort> getSorts();
 	
@@ -213,6 +214,19 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		} else {
 			return root.get(pathName);
 		}
+	}
+	
+	public EntityQuery<T> onMoveProject(String oldPath, String newPath) {
+		if (getCriteria() != null)
+			getCriteria().onMoveProject(oldPath, newPath);
+		return this;
+	}
+	
+	public boolean isUsingProject(String projectPath) {
+		if (getCriteria() != null)
+			return getCriteria().isUsingProject(projectPath);
+		else
+			return false;
 	}
 	
 	public static boolean isInsideQuote(String value) {

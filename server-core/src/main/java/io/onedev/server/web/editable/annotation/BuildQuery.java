@@ -14,9 +14,10 @@ import io.onedev.server.util.validation.BuildQueryValidator;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=BuildQueryValidator.class) 
 public @interface BuildQuery {
-	boolean withCurrentUserCriteria();
 	
-	boolean withUnfinishedCriteria();
+	boolean withCurrentUserCriteria() default false;
+	
+	boolean withUnfinishedCriteria() default false;
 	
 	boolean withOrder() default true;
 	

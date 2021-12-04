@@ -77,7 +77,6 @@ import io.onedev.server.model.support.build.actionauthorization.ActionAuthorizat
 import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
 import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
 import io.onedev.server.model.support.inputspec.SecretInput;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
@@ -86,6 +85,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.patternset.PatternSet;
@@ -789,7 +789,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		if (!streamPreviousNumbersCache.containsKey(limit)) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 			streamPreviousNumbersCache.put(limit, buildManager.queryStreamPreviousNumbers(
-					this, null, EntityCriteria.IN_CLAUSE_LIMIT));
+					this, null, Criteria.IN_CLAUSE_LIMIT));
 		}
 		return streamPreviousNumbersCache.get(limit);
 	}

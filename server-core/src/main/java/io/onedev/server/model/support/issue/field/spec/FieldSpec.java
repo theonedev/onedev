@@ -376,10 +376,10 @@ public abstract class FieldSpec extends InputSpec {
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
 		if (Project.containsPath(getApplicableProjects(), projectPath))
-			usage.add("Applicable Projects");
+			usage.add("applicable projects");
 		onDeleteProject(usage, projectPath);
 		
-		return usage.prefix("Field Spec '" + getName() + "'");
+		return usage.prefix("custom field '" + getName() + "'");
 	}
 	
 	protected void onDeleteProject(Usage usage, String projectPath) {

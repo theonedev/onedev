@@ -9,10 +9,10 @@ import javax.persistence.criteria.Predicate;
 import org.eclipse.jgit.lib.Constants;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class BranchCriteria extends EntityCriteria<Build> {
+public class BranchCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 

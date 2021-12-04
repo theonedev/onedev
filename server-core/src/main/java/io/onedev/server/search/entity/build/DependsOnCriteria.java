@@ -11,10 +11,10 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 
-public class DependsOnCriteria extends EntityCriteria<Build> {
+public class DependsOnCriteria extends Criteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 

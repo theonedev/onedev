@@ -37,6 +37,7 @@ import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
@@ -184,7 +185,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 					@Override
 					protected EntityQuery<Issue> parse(String queryString, Project project) {
-						return IssueQuery.parse(project, queryString, true, true, false, false, false, false);
+						IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+						return IssueQuery.parse(project, queryString, option, true);
 					}
 
 					@Override

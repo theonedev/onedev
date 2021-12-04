@@ -9,13 +9,15 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class ProjectCriteria extends IssueCriteria {
+public class ProjectCriteria extends Criteria<Issue> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final String projectPath;
+	private String projectPath;
 
 	public ProjectCriteria(String projectPath) {
 		this.projectPath = projectPath;
@@ -30,6 +32,16 @@ public class ProjectCriteria extends IssueCriteria {
 	@Override
 	public boolean matches(Issue issue) {
 		return WildcardUtils.matchPath(projectPath, issue.getProject().getPath());
+	}
+
+	@Override
+	public void onMoveProject(String oldPath, String newPath) {
+		projectPath = Project.substitutePath(projectPath, oldPath, newPath);
+	}
+
+	@Override
+	public boolean isUsingProject(String projectPath) {
+		return Project.containsPath(this.projectPath, projectPath);
 	}
 
 	@Override

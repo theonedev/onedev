@@ -14,10 +14,10 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
+import io.onedev.server.util.criteria.Criteria;
 
 public interface BuildManager extends EntityManager<Build> {
 
@@ -59,7 +59,7 @@ public interface BuildManager extends EntityManager<Build> {
 
 	List<Build> query(@Nullable Project project, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 
-	int count(@Nullable Project project, EntityCriteria<Build> buildCriteria);
+	int count(@Nullable Project project, Criteria<Build> buildCriteria);
 
 	Collection<Long> queryIds(Project project, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 

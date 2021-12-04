@@ -11,9 +11,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 
-public class HasRunningBuildsCriteria extends EntityCriteria<Agent> {
+public class HasRunningBuildsCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
 

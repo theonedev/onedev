@@ -196,5 +196,9 @@ public interface SettingManager extends EntityManager<Setting> {
 	void onRenameUser(String oldName, String newName);
 
 	Usage onDeleteUser(String userName);
+
+	void onRenameLink(String oldName, String name);
+
+	Usage onDeleteLink(String linkName);
 	
 }

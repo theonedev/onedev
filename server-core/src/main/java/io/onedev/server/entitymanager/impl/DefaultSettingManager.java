@@ -732,4 +732,16 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		return usage.prefix("administration");
 	}
 	
+	@Override
+	public void onRenameLink(String oldName, String newName) {
+		getIssueSetting().onRenameLink(oldName, newName);
+	}
+
+	@Override
+	public Usage onDeleteLink(String linkName) {
+		Usage usage = new Usage();
+		usage.add(getIssueSetting().onDeleteLink(linkName));
+		return usage.prefix("administration");
+	}
+	
 }

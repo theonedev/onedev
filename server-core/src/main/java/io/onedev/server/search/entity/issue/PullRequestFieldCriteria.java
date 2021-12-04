@@ -17,31 +17,40 @@ public class PullRequestFieldCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final PullRequest request;
+	private final Project project;
 	
 	private final String value;
 	
+	private transient PullRequest request;
+	
 	public PullRequestFieldCriteria(String name, @Nullable Project project, String value) {
 		super(name);
-		request = EntityQuery.getPullRequest(project, value);
+		this.project = project;
 		this.value = value;
+	}
+	
+	private PullRequest getRequest() {
+		if (request == null)
+			request = EntityQuery.getPullRequest(project, value);
+		return request;
 	}
 
 	@Override
 	protected Predicate getValuePredicate(From<Issue, Issue> issueFrom, From<IssueField, IssueField> fieldFrom, 
 			CriteriaBuilder builder) {
-		return builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), request.getId());
+		return builder.equal(fieldFrom.get(IssueField.PROP_ORDINAL), getRequest().getId());
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		return issue.getProject().equals(request.getTargetProject()) && Objects.equals(fieldValue, request.getNumber());
+		return issue.getProject().equals(getRequest().getTargetProject()) 
+				&& Objects.equals(fieldValue, getRequest().getId());
 	}
 
 	@Override
 	public void fill(Issue issue) {
-		issue.setFieldValue(getFieldName(), request.getNumber());
+		issue.setFieldValue(getFieldName(), getRequest().getId());
 	}
 	
 	@Override

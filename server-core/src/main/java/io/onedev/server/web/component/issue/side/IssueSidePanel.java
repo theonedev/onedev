@@ -55,9 +55,11 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.match.MatchScoreProvider;
 import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.WebConstants;
@@ -217,21 +219,19 @@ public abstract class IssueSidePanel extends Panel {
 				List<LinkSide> links = new ArrayList<>();
 				List<LinkSpec> specs = new ArrayList<>(OneDev.getInstance(LinkSpecManager.class).queryAndSort());
 				
+				IssueQueryParseOption option = new IssueQueryParseOption();
 				for (LinkSpec spec: specs) {
 					if (SecurityUtils.canEditIssueLink(getProject(), spec) 
 							|| getIssue().getLinks().stream().anyMatch(it->it.getSpec().equals(spec))) {
 						if (spec.getOpposite() != null) {
-							IssueQuery query = IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), 
-									false, false, false, false, false, false);
+							IssueQuery query = IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), option, false);
 							if (query.matches(getIssue()))
 								links.add(new LinkSide(spec, false));
-							query = IssueQuery.parse(getProject(), spec.getIssueQuery(), false, false, false, 
-									false, false, false);
+							query = IssueQuery.parse(getProject(), spec.getIssueQuery(), option, false);
 							if (query.matches(getIssue()))
 								links.add(new LinkSide(spec, true));
 						} else {
-							IssueQuery query = IssueQuery.parse(getProject(), spec.getIssueQuery(), 
-									false, false, false, false, false, false);
+							IssueQuery query = IssueQuery.parse(getProject(), spec.getIssueQuery(), option, false);
 							if (query.matches(getIssue()))
 								links.add(new LinkSide(spec, false));
 						}
@@ -246,8 +246,8 @@ public abstract class IssueSidePanel extends Panel {
 			protected void populateItem(ListItem<LinkSide> item) {
 				LinkSide side = item.getModelObject();
 				
-				if (side.opposite && side.spec.getOpposite().isMultiple() 
-						|| !side.opposite && side.spec.isMultiple()) {
+				if (side.isOpposite() && side.getSpec().getOpposite().isMultiple() 
+						|| !side.isOpposite() && side.getSpec().isMultiple()) {
 					item.add(newMultipleLinks(item.getModel()));
 				} else {
 					item.add(newSingleLink(item.getModel()));
@@ -257,8 +257,8 @@ public abstract class IssueSidePanel extends Panel {
 			private Fragment newMultipleLinks(IModel<LinkSide> model) {
 				Fragment fragment = new Fragment("content", "multipleLinksFrag", IssueSidePanel.this);
 				LinkSide side = model.getObject();
-				LinkSpec spec = side.spec;
-				boolean opposite = side.opposite;
+				LinkSpec spec = side.getSpec();
+				boolean opposite = side.isOpposite();
 				
 				boolean canEditIssueLink = SecurityUtils.canEditIssueLink(getProject(), spec);
 				
@@ -274,7 +274,7 @@ public abstract class IssueSidePanel extends Panel {
 	
 							@Override
 							void onDelete(AjaxRequestTarget target, Issue linkedIssue) {
-								getIssueChangeManager().removeLink(model.getObject().spec, getIssue(), 
+								getIssueChangeManager().removeLink(model.getObject().getSpec(), getIssue(), 
 										linkedIssue, opposite);
 							}
 							
@@ -296,13 +296,12 @@ public abstract class IssueSidePanel extends Panel {
 					
 					@Override
 					protected EntityQuery<Issue> getScope() {
-						LinkSpec spec = model.getObject().spec;
+						IssueQueryParseOption option = new IssueQueryParseOption();
+						LinkSpec spec = model.getObject().getSpec();
 						if (opposite) {
-							return IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), 
-									false, false, false, false, false, false);
+							return IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), option, false);
 						} else {
-							return IssueQuery.parse(getProject(), spec.getIssueQuery(), 
-									false, false, false, false, false, false);
+							return IssueQuery.parse(getProject(), spec.getIssueQuery(), option, false);
 						}
 					}
 					
@@ -310,7 +309,7 @@ public abstract class IssueSidePanel extends Panel {
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Issue selection) {
-						LinkSpec spec = model.getObject().spec;
+						LinkSpec spec = model.getObject().getSpec();
 						if (getIssue().equals(selection)) {
 							getSession().warn("Can not link to self");
 						} else if (getIssue().findLinkedIssues(spec, opposite).contains(selection)) { 
@@ -336,20 +335,20 @@ public abstract class IssueSidePanel extends Panel {
 			private Fragment newSingleLink(IModel<LinkSide> model) {
 				Fragment fragment = new Fragment("content", "singleLinkFrag", IssueSidePanel.this);
 				LinkSide side = model.getObject();
-				fragment.add(new Label("name", side.spec.getName(side.opposite)));
+				fragment.add(new Label("name", side.getSpec().getName(side.isOpposite())));
 				
 				SingleLinkBean bean = new SingleLinkBean();
 				
-				Issue prevLinkedIssue = getIssue().findLinkedIssue(side.spec, side.opposite);
+				Issue prevLinkedIssue = getIssue().findLinkedIssue(side.getSpec(), side.isOpposite());
 				if (prevLinkedIssue != null)
 					bean.setIssueId(prevLinkedIssue.getId());
 				
 				Long prevLinkedIssueId = bean.getIssueId();
 				
-				boolean authorized = SecurityUtils.canEditIssueLink(getProject(), side.spec) 
+				boolean authorized = SecurityUtils.canEditIssueLink(getProject(), side.getSpec()) 
 						&& (prevLinkedIssue == null 
 								|| prevLinkedIssue.getProject().equals(getProject()) 
-								|| SecurityUtils.canEditIssueLink(prevLinkedIssue.getProject(), side.spec));
+								|| SecurityUtils.canEditIssueLink(prevLinkedIssue.getProject(), side.getSpec()));
 				
 				fragment.add(new InplacePropertyEditLink("edit", new AlignPlacement(100, 0, 100, 0)) {
 
@@ -365,13 +364,12 @@ public abstract class IssueSidePanel extends Panel {
 
 					@Override
 					protected IssueQuery getIssueQuery() {
+						IssueQueryParseOption option = new IssueQueryParseOption();
 						LinkSide side = model.getObject();
-						if (side.opposite) {
-							return IssueQuery.parse(getProject(), side.spec.getOpposite().getIssueQuery(), 
-									false, false, false, false, false, false);
+						if (side.isOpposite()) {
+							return IssueQuery.parse(getProject(), side.getSpec().getOpposite().getIssueQuery(), option, false);
 						} else {
-							return IssueQuery.parse(getProject(), side.spec.getIssueQuery(), 
-									false, false, false, false, false, false);
+							return IssueQuery.parse(getProject(), side.getSpec().getIssueQuery(), option, false);
 						}
 					}
 
@@ -387,12 +385,12 @@ public abstract class IssueSidePanel extends Panel {
 							getSession().warn("Can not link to self");
 							singleLinkBean.setIssueId(prevLinkedIssueId);
 						} else if (linkedIssue != null && !linkedIssue.getProject().equals(getProject()) 
-								&& !SecurityUtils.canEditIssueLink(linkedIssue.getProject(), side.spec)) {
+								&& !SecurityUtils.canEditIssueLink(linkedIssue.getProject(), side.getSpec())) {
 							getSession().warn("Not authorized to link issue in project '" + linkedIssue.getProject() + "'");
 							singleLinkBean.setIssueId(prevLinkedIssueId);
 						} else {
-							getIssueChangeManager().changeLink(side.spec, getIssue(), 
-									linkedIssue, side.opposite);
+							getIssueChangeManager().changeLink(side.getSpec(), getIssue(), 
+									linkedIssue, side.isOpposite());
 						}
 					}
 
@@ -747,19 +745,6 @@ public abstract class IssueSidePanel extends Panel {
 	private static abstract class LinkDeleteListener implements Serializable {
 		
 		abstract void onDelete(AjaxRequestTarget target, Issue linkedIssue);
-		
-	}
-	
-	private static class LinkSide {
-		
-		final LinkSpec spec;
-		
-		final boolean opposite;
-		
-		LinkSide(LinkSpec spec, boolean opposite) {
-			this.spec = spec;
-			this.opposite = opposite;
-		}
 		
 	}
 }

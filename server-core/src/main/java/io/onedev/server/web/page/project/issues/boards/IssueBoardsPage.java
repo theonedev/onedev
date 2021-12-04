@@ -55,6 +55,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.NumberCriteria;
 import io.onedev.server.search.entity.issue.TitleCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -139,9 +140,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	private IssueQuery parse(boolean backlog, @Nullable String baseQueryString, @Nullable String queryString) {
 		contentFrag.getFeedbackMessages().clear(newFeedbackMessageFilter(backlog));
 		
+		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+		
 		IssueQuery query;
 		try {
-			query = IssueQuery.parse(getProject(), queryString, true, true, false, false, false, false);
+			query = IssueQuery.parse(getProject(), queryString, option, true);
 		} catch (ExplicitException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
 			return null;
@@ -157,7 +160,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 		IssueQuery baseQuery;
 		try {
-			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false, false);
+			baseQuery = IssueQuery.parse(getProject(), baseQueryString, option, true);
 		} catch (ExplicitException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
 			return null;
@@ -646,7 +649,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				
 			});
 			
-			queryInput.add(new IssueQueryBehavior(projectModel, true, true, false, false, false, false));
+			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+			queryInput.add(new IssueQueryBehavior(projectModel, option));
 			
 			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 				

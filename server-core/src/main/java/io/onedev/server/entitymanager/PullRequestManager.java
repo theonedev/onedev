@@ -10,10 +10,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.criteria.Criteria;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
@@ -67,7 +67,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
 			int firstResult, int maxResults, boolean loadReviews, boolean loadBuilds);
 	
-	int count(@Nullable Project targetProject, EntityCriteria<PullRequest> requestCriteria);
+	int count(@Nullable Project targetProject, Criteria<PullRequest> requestCriteria);
 	
 	List<PullRequest> query(Project targetProject, String term, int count);
 

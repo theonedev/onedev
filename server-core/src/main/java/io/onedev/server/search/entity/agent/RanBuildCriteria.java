@@ -9,10 +9,10 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 
-public class RanBuildCriteria extends EntityCriteria<Agent> {
+public class RanBuildCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
 

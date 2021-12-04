@@ -67,6 +67,7 @@ import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
 import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
 import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.ComponentContext;
@@ -80,30 +81,12 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	private final boolean withOrder;
+	private final IssueQueryParseOption option;
 	
-	private final boolean withCurrentUserCriteria;
-	
-	private final boolean withCurrentBuildCriteria;
-	
-	private final boolean withCurrentPullRequestCriteria;
-	
-	private final boolean withCurrentCommitCriteria;
-	
-	private final boolean withCurrentIssueCriteria;
-	
-	public IssueQueryBehavior(IModel<Project> projectModel, boolean withOrder,
-			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
-			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria, 
-			boolean withCurrentIssueCriteria) {
+	public IssueQueryBehavior(IModel<Project> projectModel, IssueQueryParseOption option) {
 		super(IssueQueryParser.class, "query", false);
 		this.projectModel = projectModel;
-		this.withOrder = withOrder;
-		this.withCurrentUserCriteria = withCurrentUserCriteria;
-		this.withCurrentBuildCriteria = withCurrentBuildCriteria;
-		this.withCurrentPullRequestCriteria = withCurrentPullRequestCriteria;
-		this.withCurrentCommitCriteria = withCurrentCommitCriteria;
-		this.withCurrentIssueCriteria = withCurrentIssueCriteria;
+		this.option = option;
 	}
 
 	@Override
@@ -181,8 +164,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = getValue(fieldElements.get(0).getMatchedText());
 								
 								try {
-									checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
-											withCurrentPullRequestCriteria, withCurrentCommitCriteria, withCurrentIssueCriteria);
+									checkField(fieldName, operator, option);
 									LinkSpec linkSpec = getLinkSpecManager().find(fieldName);
 									if (linkSpec != null) {
 										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
@@ -263,12 +245,12 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !withCurrentUserCriteria && suggestedLiteral.equals(getRuleName(SubmittedByMe))
-				|| !withCurrentBuildCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
-				|| !withCurrentPullRequestCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
-				|| !withCurrentCommitCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))
-				|| !withCurrentIssueCriteria && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
+		if (!option.withOrder() && suggestedLiteral.equals(getRuleName(OrderBy))
+				|| !option.withCurrentUserCriteria() && suggestedLiteral.equals(getRuleName(SubmittedByMe))
+				|| !option.withCurrentBuildCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
+				|| !option.withCurrentPullRequestCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
+				|| !option.withCurrentCommitCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))
+				|| !option.withCurrentIssueCriteria() && suggestedLiteral.equals(getRuleName(CurrentIssue))) {
 			return null;
 		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
@@ -277,10 +259,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			if (!fieldElements.isEmpty()) {
 				String fieldName = getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					checkField(fieldName, getOperator(suggestedLiteral), 
-							withCurrentUserCriteria, withCurrentBuildCriteria, 
-							withCurrentPullRequestCriteria, withCurrentCommitCriteria, 
-							withCurrentIssueCriteria);
+					checkField(fieldName, getOperator(suggestedLiteral), option);
 				} catch (ExplicitException e) {
 					return null;
 				}

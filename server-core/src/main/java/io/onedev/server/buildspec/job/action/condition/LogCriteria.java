@@ -2,6 +2,11 @@ package io.onedev.server.buildspec.job.action.condition;
 
 import java.util.regex.Pattern;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Build;
 import io.onedev.server.tasklog.JobLogManager;
@@ -15,6 +20,11 @@ public class LogCriteria extends Criteria<Build> {
 	
 	public LogCriteria(String value) {
 		this.value = value;
+	}
+	
+	@Override
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+		throw new UnsupportedOperationException();
 	}
 	
 	@Override
