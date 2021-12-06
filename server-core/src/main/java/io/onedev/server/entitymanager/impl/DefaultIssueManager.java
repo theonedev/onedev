@@ -525,9 +525,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		
 		for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
 			if (entry.getValue().getFixType() == UndefinedStateResolution.FixType.CHANGE_TO_ANOTHER_STATE) {
-				Query<?> query = getSession().createQuery("update Issue set state=:newState where state=:oldState");
+				Query<?> query = getSession().createQuery("update Issue set state=:newState, stateOrdinal=:newStateOrdinal where state=:oldState");
 				query.setParameter("oldState", entry.getKey());
 				query.setParameter("newState", entry.getValue().getNewState());
+				query.setParameter("newStateOrdinal", getIssueSetting().getStateOrdinal(entry.getValue().getNewState()));
 				query.executeUpdate();
 			} else {
 				Query<?> query = getSession().createQuery("delete from IssueField where issue in (select issue from Issue issue where issue.state=:state)");

@@ -16,6 +16,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
@@ -55,7 +56,7 @@ public class MilestoneIssuesPage extends MilestoneDetailPage {
 
 			@Override
 			protected Link<Void> newStateLink(String componentId, String state) {
-				String query = new IssueQuery(new StateCriteria(state)).toString();
+				String query = new IssueQuery(new StateCriteria(state, IssueQueryLexer.Is)).toString();
 				PageParameters params = paramsOf(getProject(), getMilestone(), query);
 				return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
 			}

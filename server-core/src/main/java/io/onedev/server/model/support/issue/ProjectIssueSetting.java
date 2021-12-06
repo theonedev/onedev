@@ -29,6 +29,8 @@ public class ProjectIssueSetting implements Serializable {
 	
 	private List<String> listFields;
 	
+	private List<String> listLinks;
+	
 	private List<BoardSpec> boardSpecs;
 
 	private List<NamedIssueQuery> namedQueries;
@@ -51,6 +53,18 @@ public class ProjectIssueSetting implements Serializable {
 	
 	public void setListFields(@Nullable List<String> listFields) {
 		this.listFields = listFields;
+	}
+
+	@Nullable
+	public List<String> getListLinks(boolean useDefaultIfNotDefined) {
+		if (useDefaultIfNotDefined && listLinks == null) 
+			return new ArrayList<>(getGlobalSetting().getListLinks());
+		else
+			return listLinks;
+	}
+
+	public void setListLinks(List<String> listLinks) {
+		this.listLinks = listLinks;
 	}
 
 	@Nullable

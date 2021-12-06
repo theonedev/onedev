@@ -65,6 +65,8 @@ public class GlobalIssueSetting implements Serializable {
 	
 	private List<String> listFields = new ArrayList<>();
 	
+	private List<String> listLinks = new ArrayList<>();
+	
 	private List<NamedIssueQuery> namedQueries = new ArrayList<>();
 	
 	private List<IssueTemplate> issueTemplates = new ArrayList<>();
@@ -269,10 +271,14 @@ public class GlobalIssueSetting implements Serializable {
 		listFields.add("Priority");
 		listFields.add("Assignees");
 		
+		listLinks.add("Child Issue");
+		listLinks.add("Blocked By");
+		
 		namedQueries.add(new NamedIssueQuery("Open", "\"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignees\" is me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Submitted by me & Open", "submitted by me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignees\" is me"));
+		namedQueries.add(new NamedIssueQuery("Blocked Issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Child Issue\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is since \"last week\""));
@@ -686,6 +692,14 @@ public class GlobalIssueSetting implements Serializable {
 		this.listFields = listFields;
 	}
 	
+	public List<String> getListLinks() {
+		return listLinks;
+	}
+
+	public void setListLinks(List<String> listLinks) {
+		this.listLinks = listLinks;
+	}
+
 	public List<NamedIssueQuery> getNamedQueries() {
 		return namedQueries;
 	}
@@ -717,6 +731,10 @@ public class GlobalIssueSetting implements Serializable {
 				.filter(it->it.isPromptUponIssueOpen() && (it.getApplicableProjects() == null || PatternSet.parse(it.getApplicableProjects()).matches(matcher, project.getPath())))
 				.map(it->it.getName())
 				.collect(Collectors.toList());
+	}
+	
+	public int getStateOrdinal(String state) {
+		return getStateSpecs().indexOf(getStateSpec(state));
 	}
 	
 }

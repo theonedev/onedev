@@ -22,8 +22,8 @@
 				<a wicket:id="operations" class="text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<wicket:svg href="ellipsis-circle" class="icon rotate-180"></wicket:svg> Operations
 				</a>
-				<a wicket:id="listFields" class="list-fields text-gray mr-4 mb-2 d-inline-block text-nowrap">
-					<wicket:svg href="select" class="icon"></wicket:svg> Display Fields
+				<a wicket:id="fieldsAndLinks" class="fields-and-links text-gray mr-4 mb-2 d-inline-block text-nowrap">
+					<wicket:svg href="select" class="icon"></wicket:svg> Fields & Links
 				</a>
 				<a wicket:id="import" class="import-issues text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<wicket:svg href="import" class="icon"></wicket:svg> Import
@@ -68,15 +68,15 @@
 	<wicket:fragment wicket:id="stateFrag">
 		<div wicket:id="transit" class="state"><span wicket:id="state"></span></div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="listFieldsFrag">
-		<div class="issue-list-fields">
+	<wicket:fragment wicket:id="fieldsAndLinksFrag">
+		<div class="issue-fields-and-links">
 			<form wicket:id="form">
 				<div class="modal-header">
-					<h5 id="modal-title" class="modal-title">Fields to Display</h5>
+					<h5 id="modal-title" class="modal-title">Fields & Links</h5>
 					<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 				</div>
 				<div class="modal-body">
-					<input wicket:id="fields" type="hidden" class="form-control">
+					<div wicket:id="editor"></div>
 				</div>
 				<div class="modal-footer">
 					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">

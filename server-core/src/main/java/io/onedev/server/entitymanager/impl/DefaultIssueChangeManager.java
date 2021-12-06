@@ -318,7 +318,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 															
 															List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 															for (String fromState: transition.getFromStates()) 
-																fromStateCriterias.add(new StateCriteria(fromState));
+																fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
 															
 															criterias.add(Criteria.orCriterias(fromStateCriterias));
 															if (query.getCriteria() != null)
@@ -391,7 +391,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														
 														List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 														for (String fromState: transition.getFromStates()) 
-															fromStateCriterias.add(new StateCriteria(fromState));
+															fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
 														
 														criterias.add(Criteria.orCriterias(fromStateCriterias));
 														if (query.getCriteria() != null)
@@ -458,7 +458,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														
 														List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 														for (String fromState: transition.getFromStates()) 
-															fromStateCriterias.add(new StateCriteria(fromState));
+															fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
 														
 														criterias.add(Criteria.orCriterias(fromStateCriterias));
 														if (query.getCriteria() != null)
@@ -585,7 +585,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 															
 															List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 															for (String fromState: transition.getFromStates()) 
-																fromStateCriterias.add(new StateCriteria(fromState));
+																fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
 															
 															criterias.add(Criteria.orCriterias(fromStateCriterias));
 															if (query.getCriteria() != null)
@@ -641,7 +641,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				
 				List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
 				for (String fromState: transition.getFromStates()) 
-					fromStateCriterias.add(new StateCriteria(fromState));
+					fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
 				
 				criterias.add(Criteria.orCriterias(fromStateCriterias));
 				if (query.getCriteria() != null)

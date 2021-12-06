@@ -19,8 +19,10 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
@@ -58,6 +60,8 @@ public class BoardSpec implements Serializable {
 	private List<String> columns = new ArrayList<>();
 	
 	private List<String> displayFields = Lists.newArrayList(Issue.NAME_STATE);
+	
+	private List<String> displayLinks = new ArrayList<>();
 	
 	private List<String> editColumns;
 	
@@ -144,14 +148,26 @@ public class BoardSpec implements Serializable {
 		return displayColumns;
 	}
 
-	@Editable(order=500, description="Specify fields to display in board card except issue number and title")
-	@ChoiceProvider("getDisplayFieldsChoices")
+	@Editable(order=500, description="Specify fields to display in board card")
+	@ChoiceProvider("getDisplayFieldChoices")
+	@NameOfEmptyValue("Not displaying any fields")
 	public List<String> getDisplayFields() {
 		return displayFields;
 	}
 
 	public void setDisplayFields(List<String> displayFields) {
 		this.displayFields = displayFields;
+	}
+	
+	@Editable(order=600, description="Specify links to display in board card")
+	@ChoiceProvider("getDisplayLinkChoices")
+	@NameOfEmptyValue("Not displaying any links")
+	public List<String> getDisplayLinks() {
+		return displayLinks;
+	}
+
+	public void setDisplayLinks(List<String> displayLinks) {
+		this.displayLinks = displayLinks;
 	}
 	
 	public void populateEditColumns() {
@@ -178,11 +194,22 @@ public class BoardSpec implements Serializable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<String> getDisplayFieldsChoices() {
+	private static List<String> getDisplayFieldChoices() {
 		List<String> choices = new ArrayList<>();
 		choices.add(Issue.NAME_STATE);
 		for (FieldSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
 			choices.add(fieldSpec.getName());
+		}
+		return choices;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<String> getDisplayLinkChoices() {
+		List<String> choices = new ArrayList<>();
+		for (LinkSpec linkSpec: OneDev.getInstance(LinkSpecManager.class).queryAndSort()) {
+			choices.add(linkSpec.getName());
+			if (linkSpec.getOpposite() != null)
+				choices.add(linkSpec.getOpposite().getName());
 		}
 		return choices;
 	}

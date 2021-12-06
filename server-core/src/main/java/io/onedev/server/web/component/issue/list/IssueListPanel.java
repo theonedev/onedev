@@ -6,9 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -108,9 +106,9 @@ import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
@@ -456,43 +454,19 @@ public abstract class IssueListPanel extends Panel {
 			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, params));
 		}
 		
-		add(new ModalLink("listFields") {
+		add(new ModalLink("fieldsAndLinks") {
 
-			private List<String> listFields;
-			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "listFieldsFrag", IssueListPanel.this);
+				Fragment fragment = new Fragment(id, "fieldsAndLinksFrag", IssueListPanel.this);
 				Form<?> form = new Form<Void>("form");
-				listFields = getListFields();
-				form.add(new StringMultiChoice("fields", new IModel<Collection<String>>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@Override
-					public Collection<String> getObject() {
-						return listFields;
-					}
-
-					@Override
-					public void setObject(Collection<String> object) {
-						listFields = new ArrayList<>(object);
-					}
-					
-				}, new LoadableDetachableModel<Map<String, String>>() {
-
-					@Override
-					protected Map<String, String> load() {
-						Map<String, String> choices = new LinkedHashMap<>();
-						choices.put(Issue.NAME_STATE, Issue.NAME_STATE);
-						for (String fieldName: getGlobalIssueSetting().getFieldNames())
-							choices.put(fieldName, fieldName);
-						return choices;
-					}
-					
-				}, false));
+				
+				FieldsAndLinksBean bean = new FieldsAndLinksBean();
+				
+				bean.setFields(getListFields());
+				bean.setLinks(getListLinks());
+				
+				form.add(BeanContext.edit("editor", bean));
 				
 				form.add(new AjaxLink<Void>("close") {
 
@@ -510,10 +484,12 @@ public abstract class IssueListPanel extends Panel {
 						super.onSubmit(target, form);
 						modal.close();
 						if (getProject() != null) {
-							getProject().getIssueSetting().setListFields(listFields);
+							getProject().getIssueSetting().setListFields(bean.getFields());
+							getProject().getIssueSetting().setListLinks(bean.getLinks());
 							OneDev.getInstance(ProjectManager.class).save(getProject());
 						} else {
-							getGlobalIssueSetting().setListFields(listFields);
+							getGlobalIssueSetting().setListFields(bean.getFields());
+							getGlobalIssueSetting().setListLinks(bean.getLinks());
 							OneDev.getInstance(SettingManager.class).saveIssueSetting(getGlobalIssueSetting());
 						}
 						target.add(body);
@@ -527,11 +503,20 @@ public abstract class IssueListPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						modal.close();
 						getProject().getIssueSetting().setListFields(null);
+						getProject().getIssueSetting().setListLinks(null);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
 						target.add(body);
 					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getProject() != null 
+								&& getProject().getIssueSetting().getListFields(false) != null
+								&& getProject().getIssueSetting().getListLinks(false) != null);
+					}
 					
-				}.setVisible(getProject() != null && getProject().getIssueSetting().getListFields(false) != null));
+				});
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
@@ -1299,6 +1284,13 @@ public abstract class IssueListPanel extends Panel {
 			return getProject().getIssueSetting().getListFields(true);
 		else
 			return getGlobalIssueSetting().getListFields();
+	}
+	
+	private List<String> getListLinks() {
+		if (getProject() != null)
+			return getProject().getIssueSetting().getListLinks(true);
+		else
+			return getGlobalIssueSetting().getListLinks();
 	}
 	
 	@Override

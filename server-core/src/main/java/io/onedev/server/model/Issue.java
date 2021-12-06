@@ -117,6 +117,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static final String PROP_STATE = "state";
 	
+	public static final String PROP_STATE_ORDINAL = "stateOrdinal";
+	
 	public static final String NAME_TITLE = "Title";
 	
 	public static final String PROP_TITLE = "title";
@@ -174,9 +176,11 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			NAME_COMMENT_COUNT, NAME_MILESTONE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			NAME_STATE, PROP_STATE_ORDINAL,
 			NAME_VOTE_COUNT, PROP_VOTE_COUNT,
 			NAME_COMMENT_COUNT, PROP_COMMENT_COUNT,
 			NAME_NUMBER, PROP_NUMBER,
+			NAME_STATE, PROP_STATE_ORDINAL,
 			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
 			NAME_PROJECT, PROP_PROJECT,
 			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);	
@@ -208,6 +212,9 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	@Column(nullable=false)
 	private String state;
+	
+	@Column(nullable=false)
+	private int stateOrdinal;
 	
 	@Column(nullable=false, length=MAX_TITLE_LEN)
 	private String title;
@@ -290,11 +297,20 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private transient Collection<User> participants;
 	
 	public String getState() {
-		return state;
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs().get(stateOrdinal).getName();
 	}
 
 	public void setState(String state) {
 		this.state = state;
+		stateOrdinal = getIssueSetting().getStateOrdinal(state);
+	}
+
+	public int getStateOrdinal() {
+		return stateOrdinal;
+	}
+
+	public void setStateOrdinal(int stateOrdinal) {
+		this.stateOrdinal = stateOrdinal;
 	}
 
 	public String getTitle() {

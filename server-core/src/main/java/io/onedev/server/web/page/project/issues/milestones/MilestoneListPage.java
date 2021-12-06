@@ -38,6 +38,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.MilestoneAndState;
@@ -271,7 +272,7 @@ public class MilestoneListPage extends ProjectPage {
 
 							@Override
 							protected Link<Void> newStateLink(String componentId, String state) {
-								String query = new IssueQuery(new StateCriteria(state)).toString();
+								String query = new IssueQuery(new StateCriteria(state, IssueQueryLexer.Is)).toString();
 								PageParameters params = MilestoneIssuesPage.paramsOf(getProject(), rowModel.getObject(), query);
 								return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
 							}

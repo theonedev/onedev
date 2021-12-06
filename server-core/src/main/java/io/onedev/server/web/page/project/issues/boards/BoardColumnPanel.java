@@ -90,7 +90,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					criterias.add(new MilestoneCriteria(getMilestone().getName()));
 				String identifyField = getBoard().getIdentifyField();
 				if (identifyField.equals(Issue.NAME_STATE)) {
-					criterias.add(new StateCriteria(getColumn()));
+					criterias.add(new StateCriteria(getColumn(), IssueQueryLexer.Is));
 				} else if (getColumn() != null) {
 					criterias.add(new ChoiceFieldCriteria(identifyField, 
 							getColumn(), -1, IssueQueryLexer.Is, false));

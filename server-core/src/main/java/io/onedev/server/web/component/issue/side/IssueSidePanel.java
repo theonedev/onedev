@@ -55,6 +55,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -495,7 +496,7 @@ public abstract class IssueSidePanel extends Panel {
 
 					@Override
 					protected Link<Void> newStateLink(String componentId, String state) {
-						String query = new IssueQuery(new StateCriteria(state)).toString();
+						String query = new IssueQuery(new StateCriteria(state, IssueQueryLexer.Is)).toString();
 						PageParameters params = MilestoneIssuesPage.paramsOf(getIssue().getProject(), 
 								item.getModelObject(), query);
 						return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);

@@ -246,7 +246,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 								return new MilestoneCriteria(value);
 							} else if (fieldName.equals(Issue.NAME_STATE)) {
-								return new StateCriteria(value);
+								return new StateCriteria(value, operator);
 							} else if (fieldName.equals(Issue.NAME_VOTE_COUNT)) {
 								return new VoteCountCriteria(getIntValue(value), operator);
 							} else if (fieldName.equals(Issue.NAME_COMMENT_COUNT)) {
@@ -298,6 +298,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
 								}
 							}
+						case IssueQueryLexer.IsBefore:
+						case IssueQueryLexer.IsAfter:
+							return new StateCriteria(value, operator);
 						default:
 							throw new ExplicitException("Unexpected operator " + getRuleName(operator));
 						}
@@ -426,6 +429,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !(fieldSpec instanceof TextField)) {
 				throw newOperatorException(fieldName, operator);
 			}
+			break;
+		case IssueQueryLexer.IsBefore:
+		case IssueQueryLexer.IsAfter:
+			if (!fieldName.equals(Issue.NAME_STATE))
+				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsLessThan:
 		case IssueQueryLexer.IsGreaterThan:

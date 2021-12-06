@@ -3384,4 +3384,51 @@ public class DataMigrator {
 		}		
 	}
 	
+	private void migrate72(File dataDir, Stack<Integer> versions) {
+		Map<String, Integer> stateOrdinals = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							int index = 0;
+							for (Element stateSpecElement: valueElement.element("stateSpecs").elements()) 
+								stateOrdinals.put(stateSpecElement.elementText("name").trim(), index++);
+							for (Element boardSpecElement: valueElement.element("boardSpecs").elements())
+								boardSpecElement.addElement("displayLinks");
+							valueElement.addElement("listLinks");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					int ordinal = stateOrdinals.get(element.elementText("state").trim());
+					element.addElement("stateOrdinal").setText(String.valueOf(ordinal));
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element issueSettingElement = element.element("issueSetting");
+					if (issueSettingElement.element("listFields") != null)
+						issueSettingElement.addElement("listLinks");
+					Element boardSpecsElement = issueSettingElement.element("boardSpecs");
+					if (boardSpecsElement != null) {
+						for (Element boardSpecElement: boardSpecsElement.elements()) 
+							boardSpecElement.addElement("displayLinks");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }
