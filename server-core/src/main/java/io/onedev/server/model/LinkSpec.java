@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +13,8 @@ import javax.persistence.OneToMany;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -93,6 +96,11 @@ public class LinkSpec extends AbstractEntity {
 
 	public void setOrder(int order) {
 		this.order = order;
+	}
+
+	public IssueQuery getParsedIssueQuery(@Nullable Project project) {
+		IssueQueryParseOption option = new IssueQueryParseOption();
+		return IssueQuery.parse(project, issueQuery, option, false);
 	}
 	
 	public Collection<IssueQueryUpdater> getQueryUpdaters() {

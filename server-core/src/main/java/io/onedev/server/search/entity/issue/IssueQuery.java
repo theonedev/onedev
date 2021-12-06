@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -67,7 +68,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.util.WicketUtils;
 
-public class IssueQuery extends EntityQuery<Issue> {
+public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -541,6 +542,18 @@ public class IssueQuery extends EntityQuery<Issue> {
 		sorts.addAll(query1.getSorts());
 		sorts.addAll(query2.getSorts());
 		return new IssueQuery(Criteria.andCriterias(criterias), sorts);
+	}
+
+	@Override
+	public int compare(Issue o1, Issue o2) {
+		for (EntitySort sort: getSorts()) {
+			int result = Issue.ORDER_FIELDS.get(sort.getField()).getComparator().compare(o1, o2);
+			if (sort.getDirection() == Direction.DESCENDING)
+				result *= -1;
+			if (result != 0)
+				return result;
+		}
+		return 0;
 	}
 	
 }

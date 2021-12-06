@@ -11,4 +11,6 @@ public interface IssueLinkManager extends EntityManager<IssueLink> {
 
 	void syncLinks(LinkSpec spec, Issue issue, Collection<Issue> linkedIssues, boolean opposite);
 	
+	void populateLinks(Collection<Issue> issues);
+	
 }

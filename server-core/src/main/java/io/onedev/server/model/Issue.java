@@ -67,9 +67,9 @@ import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
-import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
@@ -175,15 +175,66 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, NAME_VOTE_COUNT, 
 			NAME_COMMENT_COUNT, NAME_MILESTONE);
 
-	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			NAME_STATE, PROP_STATE_ORDINAL,
-			NAME_VOTE_COUNT, PROP_VOTE_COUNT,
-			NAME_COMMENT_COUNT, PROP_COMMENT_COUNT,
-			NAME_NUMBER, PROP_NUMBER,
-			NAME_STATE, PROP_STATE_ORDINAL,
-			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
-			NAME_PROJECT, PROP_PROJECT,
-			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);	
+	public static final Map<String, SortField<Issue>> ORDER_FIELDS = new LinkedHashMap<>();
+	
+	static {
+			ORDER_FIELDS.put(NAME_VOTE_COUNT, new SortField<Issue>(PROP_VOTE_COUNT, new Comparator<Issue>() {
+
+				@Override
+				public int compare(Issue o1, Issue o2) {
+					return o1.getVoteCount() - o1.getVoteCount();
+				}
+				
+			}));
+			ORDER_FIELDS.put(NAME_COMMENT_COUNT, new SortField<Issue>(PROP_COMMENT_COUNT, new Comparator<Issue>() {
+
+				@Override
+				public int compare(Issue o1, Issue o2) {
+					return o1.getCommentCount() - o2.getCommentCount();
+				}
+				
+			}));
+			ORDER_FIELDS.put(NAME_NUMBER, new SortField<Issue>(PROP_NUMBER, new Comparator<Issue>() {
+
+				@Override
+				public int compare(Issue o1, Issue o2) {
+					return (int)(o1.getNumber() - o2.getNumber());
+				}
+				
+			}));
+			ORDER_FIELDS.put(NAME_STATE, new SortField<Issue>(PROP_STATE_ORDINAL, new Comparator<Issue>() {
+
+				@Override
+				public int compare(Issue o1, Issue o2) {
+					return o1.getStateOrdinal() - o2.getStateOrdinal();
+				}
+				
+			}));
+			ORDER_FIELDS.put(NAME_SUBMIT_DATE, new SortField<Issue>(PROP_SUBMIT_DATE, new Comparator<Issue>() {
+
+				@Override
+				public int compare(Issue o1, Issue o2) {
+					return o1.getSubmitDate().compareTo(o2.getSubmitDate());
+				}
+				
+			}));
+			ORDER_FIELDS.put(NAME_PROJECT, new SortField<Issue>(PROP_PROJECT, new Comparator<Issue>() {
+
+				@Override
+				public int compare(Issue o1, Issue o2) {
+					return o1.getProject().getId().compareTo(o2.getProject().getId());
+				}
+				
+			}));
+			ORDER_FIELDS.put(NAME_UPDATE_DATE, new SortField<Issue>(PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE, new Comparator<Issue>() {
+
+				@Override
+				public int compare(Issue o1, Issue o2) {
+					return o1.getLastUpdate().getDate().compareTo(o2.getLastUpdate().getDate());
+				}
+				
+			}));	
+	}
 	
 	private static final List<String> ISSUE_FIX_WORDS = Lists.newArrayList(
 			"fix", "fixed", "fixes", "fixing", 
@@ -279,14 +330,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	@OneToMany(mappedBy=IssueLink.PROP_SOURCE, cascade=CascadeType.REMOVE)
 	private Collection<IssueLink> targetLinks = new ArrayList<>();
-	
-	private transient List<IssueLink> sortedSourceLinks;
-	
-	private transient List<IssueLink> sortedTargetLinks;
-	
-	private transient Collection<IssueLink> links;
-	
-	private transient List<IssueLink> sortedLinks;
 	
 	private transient List<RevCommit> commits;
 	
@@ -506,36 +549,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		this.targetLinks = targetLinks;
 	}
 	
-	public List<IssueLink> getSortedSourceLinks() {
-		if (sortedSourceLinks == null) {
-			sortedSourceLinks = new ArrayList<>(sourceLinks);
-			Collections.sort(sortedSourceLinks);
-		}
-		return sortedSourceLinks;
-	}
-
-	public List<IssueLink> getSortedTargetLinks() {
-		if (sortedTargetLinks == null) {
-			sortedTargetLinks = new ArrayList<>(targetLinks);
-			Collections.sort(sortedTargetLinks);
-		}
-		return sortedTargetLinks;
-	}
-	
-	public List<IssueLink> getSortedLinks() {
-		if (sortedLinks == null) {
-			sortedLinks = new ArrayList<>(getLinks());
-			Collections.sort(sortedLinks);
-		}
-		return sortedLinks;
-	}
-	
 	public Collection<IssueLink> getLinks() {
-		if (links == null) {
-			links = new ArrayList<>();
-			links.addAll(sourceLinks);
-			links.addAll(targetLinks);
-		}
+		List<IssueLink> links = new ArrayList<>();
+		links.addAll(sourceLinks);
+		links.addAll(targetLinks);
 		return links;
 	}
 	
@@ -879,20 +896,20 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	public Issue findLinkedIssue(LinkSpec spec, boolean opposite) {
 		if (spec.getOpposite() != null) {
 			if (opposite) {
-				for (IssueLink link: getSortedSourceLinks()) {
+				for (IssueLink link: getSourceLinks()) {
 					if (link.getSpec().equals(spec)) 
 						return link.getSource();
 				}
 				return null;
 			} else {
-				for (IssueLink link: getSortedTargetLinks()) {
+				for (IssueLink link: getTargetLinks()) {
 					if (link.getSpec().equals(spec)) 
 						return link.getTarget();
 				}
 				return null;
 			}
 		} else {
-			for (IssueLink link: getSortedLinks()) {
+			for (IssueLink link: getLinks()) {
 				if (link.getSpec().equals(spec)) 
 					return link.getLinked(this);
 			}
@@ -903,20 +920,23 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	public Collection<Issue> findLinkedIssues(LinkSpec spec, boolean opposite) {
 		if (spec.getOpposite() != null) {
 			if (opposite) {
-				return getSortedSourceLinks().stream()
+				return getSourceLinks().stream()
 						.filter(it->it.getSpec().equals(spec))
 						.map(it->it.getSource())
+						.sorted(spec.getOpposite().getParsedIssueQuery(getProject()))
 						.collect(Collectors.toList());
 			} else {
-				return getSortedTargetLinks().stream()
+				return getTargetLinks().stream()
 						.filter(it->it.getSpec().equals(spec))
 						.map(it->it.getTarget())
+						.sorted(spec.getParsedIssueQuery(getProject()))
 						.collect(Collectors.toList());
 			}
 		} else {
-			return getSortedLinks().stream()
+			return getLinks().stream()
 					.filter(it->it.getSpec().equals(spec))
 					.map(it->it.getLinked(this))
+					.sorted(spec.getParsedIssueQuery(getProject()))
 					.collect(Collectors.toList());
 		}
 	}

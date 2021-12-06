@@ -264,6 +264,7 @@ public class GlobalIssueSetting implements Serializable {
 		board.setIdentifyField(Issue.NAME_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed", "Released"));
 		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees"));
+		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Blocked By"));
 		boardSpecs.add(board);
 		
 		listFields.add(Issue.NAME_STATE);
@@ -610,8 +611,9 @@ public class GlobalIssueSetting implements Serializable {
 		
 		index = 1;
 		for (BoardSpec board: getBoardSpecs()) { 
-			usage.add(board.getBaseQueryUpdater().onDeleteProject(projectPath).prefix("default board #" + index++));
-			usage.add(board.getBacklogBaseQueryUpdater().onDeleteProject(projectPath).prefix("default board #" + index++));
+			usage.add(board.getBaseQueryUpdater().onDeleteProject(projectPath).prefix("default board #" + index));
+			usage.add(board.getBacklogBaseQueryUpdater().onDeleteProject(projectPath).prefix("default board #" + index));
+			index++;
 		}
 		
 		index = 1;
@@ -643,10 +645,13 @@ public class GlobalIssueSetting implements Serializable {
 		for (BoardSpec board: getBoardSpecs()) {
 			board.getBaseQueryUpdater().onRenameLink(oldName, newName);
 			board.getBacklogBaseQueryUpdater().onRenameLink(oldName, newName);
+			ReconcileUtils.renameItem(board.getDisplayLinks(), oldName, newName);
 		}
 		
 		for (IssueTemplate template: getIssueTemplates())
 			template.getQueryUpdater().onRenameLink(oldName, newName);
+		
+		ReconcileUtils.renameItem(listLinks, oldName, newName);
 	}
 
 	public Usage onDeleteLink(String linkName) {
@@ -658,13 +663,19 @@ public class GlobalIssueSetting implements Serializable {
 		
 		index = 1;
 		for (BoardSpec board: getBoardSpecs()) { 
-			usage.add(board.getBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index++));
-			usage.add(board.getBacklogBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index++));
+			usage.add(board.getBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index));
+			usage.add(board.getBacklogBaseQueryUpdater().onDeleteLink(linkName).prefix("default board #" + index));
+			if (board.getDisplayLinks().contains(linkName))
+				usage.add("display links").prefix("default board #" + index);
+			index++;
 		}
 		
 		index = 1;
 		for (IssueTemplate template: getIssueTemplates()) 
 			usage.add(template.getQueryUpdater().onDeleteLink(linkName).prefix("description template #" + index++));
+		
+		if (listLinks.contains(linkName))
+			usage.add(new Usage().add("fields & links").prefix("-> issues"));
 		
 		return usage.prefix("issue setting");
 	}

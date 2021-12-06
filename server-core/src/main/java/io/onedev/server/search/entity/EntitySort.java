@@ -29,7 +29,7 @@ public class EntitySort implements Serializable {
 	public void setDirection(EntitySort.Direction direction) {
 		this.direction = direction;
 	}
-
+	
 	@Override
 	public String toString() {
 		if (direction == Direction.ASCENDING)

@@ -202,7 +202,7 @@ class AgentListPanel extends Panel {
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				List<String> orderFields = new ArrayList<>(Agent.ORDER_FIELDS.keySet());
-				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+				return new OrderEditPanel<Agent>(id, orderFields, new IModel<List<EntitySort>> () {
 
 					@Override
 					public void detach() {

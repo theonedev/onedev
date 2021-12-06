@@ -2,10 +2,14 @@ package io.onedev.server.model.support.issue;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
@@ -43,7 +47,7 @@ public class LinkSpecOpposite implements Serializable {
 
 	@Editable(order=300, name="Linkable Issues On the Other Side", description="Optionally specify criteria of "
 			+ "issues which can be linked on the other side")
-	@IssueQuery(withOrder = false)
+	@io.onedev.server.web.editable.annotation.IssueQuery
 	@NameOfEmptyValue("All issues")
 	public String getIssueQuery() {
 		return issueQuery;
@@ -53,4 +57,9 @@ public class LinkSpecOpposite implements Serializable {
 		this.issueQuery = issueQuery;
 	}
 
+	public IssueQuery getParsedIssueQuery(@Nullable Project project) {
+		IssueQueryParseOption option = new IssueQueryParseOption();
+		return IssueQuery.parse(project, issueQuery, option, false);
+	}
+	
 }

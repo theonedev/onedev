@@ -212,7 +212,7 @@ public class ProjectListPanel extends Panel {
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				List<String> orderFields = new ArrayList<>(Project.ORDER_FIELDS.keySet());
-				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+				return new OrderEditPanel<Project>(id, orderFields, new IModel<List<EntitySort>> () {
 
 					@Override
 					public void detach() {

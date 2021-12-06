@@ -282,7 +282,7 @@ public abstract class IssueListPanel extends Panel {
 						orderFields.add(field.getName());
 				}
 				
-				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+				return new OrderEditPanel<Issue>(id, orderFields, new IModel<List<EntitySort>> () {
 
 					@Override
 					public void detach() {

@@ -27,8 +27,10 @@ public class Usage implements Serializable {
 	}
 	
 	public Usage prefix(String place) {
-		for (int i=0; i<places.size(); i++) 
-			places.set(i, place + ": " + places.get(i));
+		for (int i=0; i<places.size(); i++) {
+			if (!places.get(i).startsWith("->"))
+				places.set(i, place + ": " + places.get(i));
+		}
 		return this;
 	}
 	
@@ -36,8 +38,12 @@ public class Usage implements Serializable {
 	public String getInUseMessage(String thing) {
 		if (!places.isEmpty()) {
 			StringBuilder builder = new StringBuilder(thing + " is still being used in below places:\n");
-			for (String place: places) 
-				builder.append("    " + place).append("\n");
+			for (String place: places) {
+				if (!place.startsWith("->"))
+					builder.append("    -> " + place).append("\n");
+				else
+					builder.append("    " + place).append("\n");
+			}
 			String message = builder.toString();
 			return message.substring(0, message.length()-1);
 		} else {

@@ -338,7 +338,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				List<String> orderFields = new ArrayList<>(CodeComment.ORDER_FIELDS.keySet());
 				
-				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+				return new OrderEditPanel<CodeComment>(id, orderFields, new IModel<List<EntitySort>> () {
 
 					@Override
 					public void detach() {

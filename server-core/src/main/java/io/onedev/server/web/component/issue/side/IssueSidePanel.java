@@ -56,7 +56,6 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
-import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
@@ -220,19 +219,18 @@ public abstract class IssueSidePanel extends Panel {
 				List<LinkSide> links = new ArrayList<>();
 				List<LinkSpec> specs = new ArrayList<>(OneDev.getInstance(LinkSpecManager.class).queryAndSort());
 				
-				IssueQueryParseOption option = new IssueQueryParseOption();
 				for (LinkSpec spec: specs) {
 					if (SecurityUtils.canEditIssueLink(getProject(), spec) 
 							|| getIssue().getLinks().stream().anyMatch(it->it.getSpec().equals(spec))) {
 						if (spec.getOpposite() != null) {
-							IssueQuery query = IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), option, false);
+							IssueQuery query = spec.getOpposite().getParsedIssueQuery(getProject());
 							if (query.matches(getIssue()))
 								links.add(new LinkSide(spec, false));
-							query = IssueQuery.parse(getProject(), spec.getIssueQuery(), option, false);
+							query = spec.getParsedIssueQuery(getProject());
 							if (query.matches(getIssue()))
 								links.add(new LinkSide(spec, true));
 						} else {
-							IssueQuery query = IssueQuery.parse(getProject(), spec.getIssueQuery(), option, false);
+							IssueQuery query = spec.getParsedIssueQuery(getProject());
 							if (query.matches(getIssue()))
 								links.add(new LinkSide(spec, false));
 						}
@@ -297,13 +295,11 @@ public abstract class IssueSidePanel extends Panel {
 					
 					@Override
 					protected EntityQuery<Issue> getScope() {
-						IssueQueryParseOption option = new IssueQueryParseOption();
 						LinkSpec spec = model.getObject().getSpec();
-						if (opposite) {
-							return IssueQuery.parse(getProject(), spec.getOpposite().getIssueQuery(), option, false);
-						} else {
-							return IssueQuery.parse(getProject(), spec.getIssueQuery(), option, false);
-						}
+						if (opposite) 
+							return spec.getOpposite().getParsedIssueQuery(getProject());
+						else 
+							return spec.getParsedIssueQuery(getProject());
 					}
 					
 				}) {
@@ -365,13 +361,11 @@ public abstract class IssueSidePanel extends Panel {
 
 					@Override
 					protected IssueQuery getIssueQuery() {
-						IssueQueryParseOption option = new IssueQueryParseOption();
 						LinkSide side = model.getObject();
-						if (side.isOpposite()) {
-							return IssueQuery.parse(getProject(), side.getSpec().getOpposite().getIssueQuery(), option, false);
-						} else {
-							return IssueQuery.parse(getProject(), side.getSpec().getIssueQuery(), option, false);
-						}
+						if (side.isOpposite()) 
+							return side.getSpec().getOpposite().getParsedIssueQuery(getProject());
+						else 
+							return side.getSpec().getParsedIssueQuery(getProject());
 					}
 
 					@Override

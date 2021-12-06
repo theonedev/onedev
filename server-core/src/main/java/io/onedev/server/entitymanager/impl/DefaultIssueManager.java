@@ -21,7 +21,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.util.lang.Objects;
@@ -36,9 +35,9 @@ import com.google.common.base.Preconditions;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.Listen;
 import io.onedev.commons.loader.ListenerRegistry;
-import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
+import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.IssueScheduleManager;
@@ -58,7 +57,6 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
@@ -125,6 +123,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final LinkSpecManager linkSpecManager;
 	
+	private final IssueLinkManager issueLinkManager;
+	
 	private final Map<Long, IssueFacade> cache = new HashMap<>();
 	
 	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
@@ -136,7 +136,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			ProjectManager projectManager, UserManager userManager, 
 			RoleManager roleManager, AttachmentStorageManager attachmentStorageManager, 
 			IssueCommentManager issueCommentManager, EntityReferenceManager entityReferenceManager, 
-			IssueScheduleManager issueScheduleManager, LinkSpecManager linkSpecManager) {
+			IssueScheduleManager issueScheduleManager, LinkSpecManager linkSpecManager, 
+			IssueLinkManager issueLinkManager) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 		this.issueQueryPersonalizationManager = issueQueryPersonalizationManager;
@@ -147,6 +148,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.userManager = userManager;
 		this.roleManager = roleManager;
 		this.linkSpecManager = linkSpecManager;
+		this.issueLinkManager = issueLinkManager;
 		this.attachmentStorageManager = attachmentStorageManager;
 		this.issueCommentManager = issueCommentManager;
 		this.entityReferenceManager = entityReferenceManager;
@@ -248,9 +250,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (EntitySort sort: sorts) {
 			if (Issue.ORDER_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()))));
+					orders.add(builder.asc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()).getProperty())));
 				else
-					orders.add(builder.desc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()))));
+					orders.add(builder.desc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()).getProperty())));
 			} else {
 				Join<Issue, IssueField> join = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
 				join.on(builder.equal(join.get(IssueField.PROP_NAME), sort.getField()));
@@ -261,9 +263,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			}
 		}
 
-		if (orders.isEmpty()) {
+		if (orders.isEmpty())
 			orders.add(builder.desc(IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
-		}
+		
 		return orders;
 	}
 	
@@ -274,7 +276,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Sessional
 	@Override
 	public List<Issue> query(EntityQuery<Issue> issueQuery, int firstResult, int maxResults, 
-			boolean loadFields) {
+			boolean loadFieldsAndLinks) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
@@ -286,8 +288,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
 		List<Issue> issues = query.getResultList();
-		if (loadFields && !issues.isEmpty())
+		if (loadFieldsAndLinks && !issues.isEmpty()) {
 			issueFieldManager.populateFields(issues);
+			issueLinkManager.populateLinks(issues);
+		}
 		
 		return issues;
 	}
@@ -782,6 +786,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
+		
 		criteriaQuery.orderBy(
 				builder.desc(root.get(Issue.PROP_PROJECT)), 
 				builder.desc(root.get(Issue.PROP_NUMBER)));
@@ -1001,38 +1006,4 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return query(criteria, 0, count);
 	}
 
-	@Sessional
-	@Override
-	public void test() {
-		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Issue> issueQuery = builder.createQuery(Issue.class);
-		Root<Issue> issueRoot = issueQuery.from(Issue.class);
-		
-		Subquery<IssueLink> linkQuery = issueQuery.subquery(IssueLink.class);
-		Root<IssueLink> linkRoot = linkQuery.from(IssueLink.class);
-		Join<Issue, Issue> linkedIssueJoin = linkRoot.join(IssueLink.PROP_TARGET, JoinType.INNER);
-		linkQuery.select(linkRoot);
-		
-		Subquery<IssueField> fieldQuery = issueQuery.subquery(IssueField.class);
-		Root<IssueField> fieldRoot = fieldQuery.from(IssueField.class);
-		fieldQuery.select(fieldRoot);
-		
-		Predicate issuePredicate = builder.equal(fieldRoot.get(IssueField.PROP_ISSUE), linkedIssueJoin);
-		Predicate namePredicate = builder.equal(fieldRoot.get(IssueField.PROP_NAME), "Assignees");
-		Predicate valuePredicate = builder.equal(fieldRoot.get(IssueField.PROP_VALUE), "robin");
-		
-		LinkSpec linkSpec = OneDev.getInstance(LinkSpecManager.class).find("Parent");
-		issueQuery.where(builder.exists(linkQuery.where(
-				builder.equal(linkRoot.get(IssueLink.PROP_SOURCE), issueRoot),
-				builder.equal(linkRoot.get(IssueLink.PROP_SPEC), linkSpec), 
-				builder.exists(fieldQuery.where(issuePredicate, namePredicate, valuePredicate)))
-				));
-		
-		Query<Issue> query = getSession().createQuery(issueQuery);
-		System.out.println("*** Results ***");
-		for (Issue issue: query.getResultList()) {
-			System.out.println(issue.getTitle());
-		}
-	}
-	
 }

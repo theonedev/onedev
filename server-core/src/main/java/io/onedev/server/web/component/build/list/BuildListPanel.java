@@ -654,7 +654,7 @@ public abstract class BuildListPanel extends Panel {
 				if (getProject() != null)
 					orderFields.remove(Build.NAME_PROJECT);
 				
-				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+				return new OrderEditPanel<Build>(id, orderFields, new IModel<List<EntitySort>> () {
 
 					@Override
 					public void detach() {

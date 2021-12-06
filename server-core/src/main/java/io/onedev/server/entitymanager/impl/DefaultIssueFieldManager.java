@@ -81,7 +81,6 @@ public class DefaultIssueFieldManager extends BaseEntityManager<IssueField> impl
 		
 		Root<IssueField> root = query.from(IssueField.class);
 		query.select(root);
-		root.join(IssueField.PROP_ISSUE);
 		
 		query.where(root.get(IssueField.PROP_ISSUE).in(issues));
 		

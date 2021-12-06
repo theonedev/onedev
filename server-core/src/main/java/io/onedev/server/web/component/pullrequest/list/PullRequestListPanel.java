@@ -527,7 +527,7 @@ public abstract class PullRequestListPanel extends Panel {
 				if (getProject() != null)
 					orderFields.remove(PullRequest.NAME_TARGET_PROJECT);
 				
-				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+				return new OrderEditPanel<PullRequest>(id, orderFields, new IModel<List<EntitySort>> () {
 
 					@Override
 					public void detach() {

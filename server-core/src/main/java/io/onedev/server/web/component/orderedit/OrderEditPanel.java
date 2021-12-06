@@ -20,12 +20,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 
 @SuppressWarnings("serial")
-public class OrderEditPanel extends GenericPanel<List<EntitySort>> {
+public class OrderEditPanel<T extends AbstractEntity> extends GenericPanel<List<EntitySort>> {
 
 	private final List<String> available;
 	

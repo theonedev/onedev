@@ -38,7 +38,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	Long getNextNumber(Project numberScope);
 	
 	List<Issue> query(EntityQuery<Issue> issueQuery, int firstResult, int maxResults, 
-			boolean loadFields);
+			boolean loadFieldsAndLinks);
 	
 	int count(@Nullable Criteria<Issue> issueCriteria);
 	
@@ -82,5 +82,4 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	List<Issue> queryAfter(@Nullable Long afterIssueId, int count);
 	
-	void test();
 }

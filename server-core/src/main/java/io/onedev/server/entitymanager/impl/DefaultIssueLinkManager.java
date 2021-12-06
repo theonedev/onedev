@@ -1,14 +1,19 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -75,4 +80,30 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 		}
 	}
 
+	@Sessional
+	@Override
+	public void populateLinks(Collection<Issue> issues) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<IssueLink> query = builder.createQuery(IssueLink.class);
+		
+		Root<IssueLink> root = query.from(IssueLink.class);
+		query.select(root);
+		
+		query.where(builder.or(
+				root.get(IssueLink.PROP_SOURCE).in(issues)), 
+				root.get(IssueLink.PROP_TARGET).in(issues));
+		
+		for (Issue issue: issues) {
+			issue.setSourceLinks(new ArrayList<>());
+			issue.setTargetLinks(new ArrayList<>());
+		}
+		
+		for (IssueLink link: getSession().createQuery(query).getResultList()) {
+			Long sourceId = Issue.idOf(link.getSource());
+			Long targetId = Issue.idOf(link.getTarget());
+			issues.stream().filter(it->it.getId().equals(sourceId)).forEach(it->it.getTargetLinks().add(link));
+			issues.stream().filter(it->it.getId().equals(targetId)).forEach(it->it.getSourceLinks().add(link));
+		}
+	}
+	
 }
