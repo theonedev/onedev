@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
@@ -40,6 +39,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -55,16 +56,18 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueLink;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -80,6 +83,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.LinkSide;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
@@ -87,7 +91,6 @@ import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
@@ -1099,13 +1102,16 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 					IModel<Issue> rowModel) {
-				Issue issue = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
 				Item<?> row = cellItem.findParent(Item.class);
-				
 				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
 						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
-				
+				cellItem.add(newIssueDetail(componentId, rowModel, cursor));
+			}
+			
+			private Component newIssueDetail(String componentId, IModel<Issue> issueModel, @Nullable Cursor cursor) {
+				Issue issue = issueModel.getObject();
+				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
+
 				String label;
 				if (getProject() == null)
 					label = issue.getProject() + "#" + issue.getNumber();
@@ -1155,6 +1161,47 @@ public abstract class IssueListPanel extends Panel {
 				
 				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.getNumberAndTitle())));
 				
+				AtomicReference<String> expandedLinkName = new AtomicReference<>(null);
+				
+				RepeatingView linksView = new RepeatingView("links");
+				for (String linkName: getListLinks()) {
+					int count = 0;
+					for (IssueLink link: issue.getTargetLinks()) {
+						LinkSpec spec = link.getSpec();
+						if (spec.getName().equals(linkName))
+							count++;
+					}
+					for (IssueLink link: issue.getSourceLinks()) {
+						LinkSpec spec = link.getSpec();
+						if (spec.getOpposite() == null || spec.getOpposite().getName().equals(linkName))
+							count++;
+					}
+					if (count != 0) {
+						AjaxLink<Void> link = new AjaxLink<Void>(linksView.newChildId()) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								if (linkName.equals(expandedLinkName.get()))
+									expandedLinkName.set(null);
+								else
+									expandedLinkName.set(linkName);
+								target.add(fragment);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								if (linkName.equals(expandedLinkName.get()))
+									tag.put("class", tag.getAttribute("class") + " expanded");
+							}
+							
+						};
+						link.add(new Label("label", linkName));
+						linksView.add(link);
+					}
+				}
+				fragment.add(linksView);
+				
 				fragment.add(new Label("votes", issue.getVoteCount()));
 				fragment.add(new Label("comments", issue.getCommentCount()));
 				
@@ -1163,44 +1210,51 @@ public abstract class IssueListPanel extends Panel {
 					if (field.equals(Issue.NAME_STATE)) {
 						Fragment stateFragment = new Fragment(fieldsView.newChildId(), 
 								"stateFrag", IssueListPanel.this);
-						WebMarkupContainer transitLink = new WebMarkupContainer("transit");
-						List<TransitionSpec> transitionSpecs = OneDev.getInstance(SettingManager.class)
-								.getIssueSetting().getTransitionSpecs();
-						if (transitionSpecs.stream().anyMatch(it->it.canTransitManually(issue, null))) {
-							transitLink = new TransitionMenuLink("transit") {
+						AjaxLink<Void> transitLink = new TransitionMenuLink("transit") {
 
-								@Override
-								protected Issue getIssue() {
-									return rowModel.getObject();
-								}
-								
-							};
-							transitLink.add(AttributeAppender.append("class", "transit"));
-						} else {
-							transitLink = new WebMarkupContainer("transit");
-						}
+							@Override
+							protected Issue getIssue() {
+								return issueModel.getObject();
+							}
+
+							@Override
+							protected void onTransited(AjaxRequestTarget target) {
+								Component detail = newIssueDetail(componentId, issueModel, cursor);
+								fragment.replaceWith(detail);
+								target.add(detail);
+							}
+							
+						};
 						
-						transitLink.add(new IssueStateBadge("state", rowModel));
+						transitLink.add(new IssueStateBadge("state", issueModel));
 						stateFragment.add(transitLink);
 						
 						fieldsView.add(stateFragment.setOutputMarkupId(true));
 					} else {
-						fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME) {
+						fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME, true) {
+
+							@Override
+							protected void onUpdated(IPartialPageRequestHandler handler) {
+								Component detail = newIssueDetail(componentId, issueModel, cursor);
+								fragment.replaceWith(detail);
+								handler.add(detail);
+							}
 
 							@SuppressWarnings("deprecation")
 							@Override
 							protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
-								return new AttachAjaxIndicatorListener(fieldsView.get(fieldsView.size()-1), AttachMode.APPEND, false);
+								return new AttachAjaxIndicatorListener(
+										fieldsView.get(fieldsView.size()-1), AttachMode.APPEND, false);
 							}
 
 							@Override
 							protected Issue getIssue() {
-								return rowModel.getObject();
+								return issueModel.getObject();
 							}
 
 							@Override
 							protected Input getField() {
-								Issue issue = rowModel.getObject();
+								Issue issue = issueModel.getObject();
 								if (issue.isFieldVisible(field))
 									return issue.getFieldInputs().get(field);
 								else
@@ -1221,7 +1275,33 @@ public abstract class IssueListPanel extends Panel {
 				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate()))
 					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastUpdate.getDate()))));
 
-				cellItem.add(fragment);
+				fragment.add(new ListView<Issue>("linkedIssues", new LoadableDetachableModel<List<Issue>>() {
+
+					@Override
+					protected List<Issue> load() {
+						Issue issue = issueModel.getObject();
+						OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
+						LinkSide side = new LinkSide(expandedLinkName.get());
+						return issueModel.getObject().findLinkedIssues(side.getSpec(), side.isOpposite());
+					}
+					
+				}) {
+
+					@Override
+					protected void populateItem(ListItem<Issue> item) {
+						item.add(newIssueDetail("content", item.getModel(), null));
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(expandedLinkName.get() != null);
+					}
+					
+				});
+				fragment.setOutputMarkupId(true);
+				
+				return fragment;
 			}
 			
 		});
@@ -1252,30 +1332,6 @@ public abstract class IssueListPanel extends Panel {
 		issuesTable.addBottomToolbar(new NoRecordsToolbar(issuesTable));
 		issuesTable.add(new NoRecordsBehavior());
 
-		add(new WebSocketObserver() {
-			
-			@Override
-			public Collection<String> getObservables() {
-				Set<String> observables = new HashSet<>();
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				if (getProject() != null) {
-					observables.add(Issue.getListWebSocketObservable(getProject().getId()));
-					for (Project project: getProject().getDescendants())
-						observables.add(Issue.getListWebSocketObservable(project.getId()));
-				} else {
-					for (Project project: projectManager.getPermittedProjects(new AccessProject()))
-						observables.add(Issue.getListWebSocketObservable(project.getId()));
-				}
-				return observables;
-			}
-
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(IssueListPanel.this);
-			}
-			
-		});
-		
 		setOutputMarkupId(true);
 	}
 	

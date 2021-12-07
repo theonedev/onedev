@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.issue.LinkSpecOpposite;
@@ -20,12 +22,17 @@ import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
-@Entity
 @Editable
+@Entity
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class LinkSpec extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_NAME = "name";
+	
+	public static final String PROP_OPPOSITE = "opposite";
+	
 	@Column(nullable=false, unique=true)
 	private String name;
 	
@@ -43,6 +50,7 @@ public class LinkSpec extends AbstractEntity {
 	private Collection<IssueLink> links = new ArrayList<>();
 	
 	@OneToMany(mappedBy=LinkAuthorization.PROP_LINK, cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<LinkAuthorization> authorizations = new ArrayList<>();
 	
 	@Editable(order=100, description="Name of the link")

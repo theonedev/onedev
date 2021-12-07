@@ -291,9 +291,9 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}/changes", PullRequestChangesPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}/invalid", InvalidPullRequestPage.class));
 
-		add(new DynamicPathPageMapper("projects/${project}/issues/boards", IssueBoardsPage.class));
-		add(new DynamicPathPageMapper("projects/${project}/issues/boards/${board}", IssueBoardsPage.class));
-		add(new DynamicPathPageMapper("projects/${project}/issues/list", ProjectIssueListPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/boards", IssueBoardsPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/boards/${board}", IssueBoardsPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/issues", ProjectIssueListPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}", IssueActivitiesPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/commits", IssueCommitsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/pull-requests", IssuePullRequestsPage.class));

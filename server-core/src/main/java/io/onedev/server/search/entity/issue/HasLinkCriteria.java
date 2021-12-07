@@ -55,7 +55,7 @@ public class HasLinkCriteria extends Criteria<Issue> {
 
 		return builder.exists(linkQuery.where(builder.and(predicates.toArray(new Predicate[0]))));
 	}
-
+	
 	private LinkSide getLinkSide() {
 		if (linkSide == null) 
 			linkSide = new LinkSide(linkName);

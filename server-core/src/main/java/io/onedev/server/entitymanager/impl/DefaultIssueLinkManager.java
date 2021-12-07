@@ -2,6 +2,9 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -9,6 +12,10 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.Hibernate;
+import org.hibernate.query.Query;
+
+import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
@@ -21,9 +28,12 @@ import io.onedev.server.persistence.dao.Dao;
 @Singleton
 public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implements IssueLinkManager {
 
+	private final IssueFieldManager fieldManager;
+	
 	@Inject
-	public DefaultIssueLinkManager(Dao dao) {
+	public DefaultIssueLinkManager(Dao dao, IssueFieldManager fieldManager) {
 		super(dao);
+		this.fieldManager = fieldManager;
 	}
 
 	@Transactional
@@ -84,26 +94,73 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 	@Override
 	public void populateLinks(Collection<Issue> issues) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<IssueLink> query = builder.createQuery(IssueLink.class);
+		CriteriaQuery<IssueLink> linkQuery = builder.createQuery(IssueLink.class);
 		
-		Root<IssueLink> root = query.from(IssueLink.class);
-		query.select(root);
+		Root<IssueLink> linkRoot = linkQuery.from(IssueLink.class);
+		linkQuery.select(linkRoot);
 		
-		query.where(builder.or(
-				root.get(IssueLink.PROP_SOURCE).in(issues)), 
-				root.get(IssueLink.PROP_TARGET).in(issues));
+		linkQuery.where(builder.or(
+				linkRoot.get(IssueLink.PROP_SOURCE).in(issues), 
+				linkRoot.get(IssueLink.PROP_TARGET).in(issues)));
 		
 		for (Issue issue: issues) {
 			issue.setSourceLinks(new ArrayList<>());
 			issue.setTargetLinks(new ArrayList<>());
 		}
-		
-		for (IssueLink link: getSession().createQuery(query).getResultList()) {
-			Long sourceId = Issue.idOf(link.getSource());
-			Long targetId = Issue.idOf(link.getTarget());
-			issues.stream().filter(it->it.getId().equals(sourceId)).forEach(it->it.getTargetLinks().add(link));
-			issues.stream().filter(it->it.getId().equals(targetId)).forEach(it->it.getSourceLinks().add(link));
+
+		for (IssueLink link: getSession().createQuery(linkQuery).getResultList()) {
+			issues.stream().filter(it->it.equals(link.getSource())).forEach(it->it.getTargetLinks().add(link));
+			issues.stream().filter(it->it.equals(link.getTarget())).forEach(it->it.getSourceLinks().add(link));
 		}
+	}
+
+	@Sessional
+	@Override
+	public void loadDeepLinks(Issue issue) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Object[]> criteriaQuery = builder.createQuery(Object[].class);
+		Root<IssueLink> root = criteriaQuery.from(IssueLink.class);
+		criteriaQuery.multiselect(root, root.get(IssueLink.PROP_SOURCE), root.get(IssueLink.PROP_TARGET));
+		
+		criteriaQuery.where(builder.or(
+				builder.equal(root.get(IssueLink.PROP_SOURCE), issue), 
+				builder.equal(root.get(IssueLink.PROP_TARGET), issue)));
+		
+		Query<Object[]> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(0);
+		query.setMaxResults(Integer.MAX_VALUE);
+		
+		List<IssueLink> sourceLinks = new ArrayList<>();
+		List<IssueLink> targetLinks = new ArrayList<>();
+		
+		List<Object[]> results = query.getResultList();
+		if (!results.isEmpty()) {
+			Map<Long, Issue> issues = new HashMap<>();
+			for (Object[] row: results) {
+				IssueLink link = (IssueLink) row[0];
+				Issue source = (Issue) row[1];
+				Issue target = (Issue) row[2];
+				if (!source.equals(issue)) 
+					sourceLinks.add(link);
+				issues.put(source.getId(), source);
+				if (!target.equals(issue)) 
+					targetLinks.add(link);
+				issues.put(target.getId(), target);
+			}
+
+			if (Hibernate.isInitialized(issue.getFields())) {
+				issues.remove(issue.getId());
+				fieldManager.populateFields(issues.values());
+				populateLinks(issues.values());
+			} else {
+				fieldManager.populateFields(issues.values());
+				issues.remove(issue.getId());
+				populateLinks(issues.values());
+			}
+		}
+		
+		issue.setSourceLinks(sourceLinks);
+		issue.setTargetLinks(targetLinks);
 	}
 	
 }

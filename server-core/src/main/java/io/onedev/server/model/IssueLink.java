@@ -33,7 +33,7 @@ public class IssueLink extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private LinkSpec spec;
-
+	
 	public Issue getSource() {
 		return source;
 	}
@@ -61,5 +61,5 @@ public class IssueLink extends AbstractEntity {
 	public Issue getLinked(Issue issue) {
 		return issue.equals(source)?target:source;
 	}
-	
+
 }

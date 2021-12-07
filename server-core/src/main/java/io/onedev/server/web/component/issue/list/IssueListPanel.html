@@ -43,9 +43,10 @@
 			<div class="mr-4 flex-grow-1">
 				<a wicket:id="number" class="number h6 mr-2"></a> 
 				<span wicket:id="title" class="title h6 mr-1"></span> 
-				<a wicket:id="copy" title="Copy issue number and title" class="copy btn btn-icon btn-xs btn-light btn-hover-primary">
+				<a wicket:id="copy" title="Copy issue number and title" class="copy mr-3 btn btn-icon btn-xs btn-light btn-hover-primary">
 					<wicket:svg href="copy" class="icon"></wicket:svg>
 				</a>
+				<a wicket:id="links" class="link link-info d-inline-flex align-items-center mr-2"><span wicket:id="label"></span><wicket:svg href="arrow" class="icon icon-sm"/></a>
 			</div>
 			<div class="flex-shrink-0 d-none d-lg-block text-muted">
 				<span class="votes mr-2" title="Votes">
@@ -60,10 +61,15 @@
 			<div class="flex-grow-1 d-flex flex-wrap">
 				<div wicket:id="fields" class="field"></div>
 			</div>
-			<div class="last-update flex-shrink-0 d-none d-lg-block text-muted font-size-sm">
+			<div class="last-update d-none d-lg-block text-muted font-size-sm">
 				<a wicket:id="user" class="link-gray"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
 			</div>
 		</div>
+		<wicket:enclosure child="linkedIssues">
+		<div class="linked-issues pl-4">
+			<div wicket:id="linkedIssues" class="linked-issue"><div wicket:id="content"></div></div>
+		</div>
+		</wicket:enclosure>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="stateFrag">
 		<div wicket:id="transit" class="state"><span wicket:id="state"></span></div>

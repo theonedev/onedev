@@ -3,8 +3,6 @@ package io.onedev.server.web.page.project.issues.detail;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -28,6 +26,7 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.infomanager.UserInfoManager;
@@ -78,13 +77,11 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			@Override
 			protected Issue load() {
 				Long issueNumber = Long.valueOf(issueNumberString);
-				Issue issue = OneDev.getInstance(IssueManager.class).find(getProject(), issueNumber);
-				if (issue == null)
-					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
-				else if (!issue.getProject().equals(getProject()))
+				Issue issue = getIssueManager().find(getProject(), issueNumber);
+				OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
+				if (!issue.getProject().equals(getProject())) 
 					throw new RestartResponseException(getPageClass(), paramsOf(issue));
-				else
-					return issue;
+				return issue;
 			}
 
 		};
@@ -163,7 +160,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 							@Override
 							public void onClick() {
-								OneDev.getInstance(IssueManager.class).delete(getIssue());
+								getIssueManager().delete(getIssue());
 								Session.get().success("Issue #" + getIssue().getNumber() + " deleted");
 								
 								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Issue.class);
@@ -196,11 +193,10 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 					@Override
 					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, Project project) {
-						IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 						if (project != null)
-							return issueManager.query(project, true, query, offset, count, false);
+							return getIssueManager().query(project, true, query, offset, count, false);
 						else
-							return issueManager.query(query, offset, count, false);
+							return getIssueManager().query(query, offset, count, false);
 					}
 
 					@Override
@@ -315,6 +311,10 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			};
 		}
 		
+	}
+	
+	private IssueManager getIssueManager() {
+		return OneDev.getInstance(IssueManager.class);
 	}
 	
 	@Override

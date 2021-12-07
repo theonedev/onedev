@@ -18,12 +18,27 @@
 	background: var(--primary);
 }
 
+.issue-list>div>.body tr.issue .working-indicator {
+	margin-top: 4px;
+}
+
 .issue-list .state {
 	border-bottom: 2px dotted transparent;
-}
-.issue-list .state.transit {
 	cursor: pointer;
 }
-.issue-list .state.transit:hover {
+.issue-list .state:hover {
 	border-color: var(--gray);
+}
+
+.issue-list .link.expanded .icon {
+	transform: rotate(90deg);
+}
+
+.issue-list .linked-issues {
+	border-left: 2px dashed var(--secondary);
+}
+.issue-list .linked-issue {
+	margin-top: 0.7rem;
+	padding-top: 1.2rem;
+	border-top: 1px solid var(--light-gray);
 }

@@ -43,7 +43,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	int count(@Nullable Criteria<Issue> issueCriteria);
 	
 	List<Issue> query(Project project, boolean inTree, EntityQuery<Issue> issueQuery, 
-			int firstResult, int maxResults, boolean loadFields);
+			int firstResult, int maxResults, boolean loadFieldsAndLinks);
 	
 	int count(Project project, boolean inTree, @Nullable Criteria<Issue> issueCriteria);
 	
@@ -81,5 +81,5 @@ public interface IssueManager extends EntityManager<Issue> {
 	void clearSchedules(Project project, Collection<Milestone> milestones);
 	
 	List<Issue> queryAfter(@Nullable Long afterIssueId, int count);
-	
+
 }

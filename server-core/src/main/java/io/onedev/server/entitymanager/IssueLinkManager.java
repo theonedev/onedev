@@ -13,4 +13,6 @@ public interface IssueLinkManager extends EntityManager<IssueLink> {
 	
 	void populateLinks(Collection<Issue> issues);
 	
+	void loadDeepLinks(Issue issue);
+	
 }

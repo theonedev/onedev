@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -18,10 +19,9 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
@@ -57,6 +57,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -75,9 +76,12 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 
 	private final Mode userFieldDisplayMode;
 	
-	public FieldValuesPanel(String id, Mode userFieldDisplayMode) {
+	private final boolean delayPermissionCheck;
+	
+	public FieldValuesPanel(String id, Mode userFieldDisplayMode, boolean delayPermissionCheck) {
 		super(id);
 		this.userFieldDisplayMode = userFieldDisplayMode;
+		this.delayPermissionCheck = delayPermissionCheck;
 	}
 
 	private GlobalIssueSetting getIssueSetting() {
@@ -87,6 +91,14 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 	private InplacePropertyEditLink newInplaceEditLink(String componentId) {
 		return new InplacePropertyEditLink(componentId) {
 			
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				if (delayPermissionCheck && !canEditField())
+					return new Label(id, "<div class='px-3 py-2'><i>No permission to edit field</i></div>").setEscapeModelStrings(false);
+				else
+					return super.newContent(id, dropdown);
+			}
+
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
@@ -149,6 +161,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				} else {
 					OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
 				}
+				
+				FieldValuesPanel.this.onUpdated(handler);
 			}
 			
 			@Override
@@ -188,125 +202,129 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		super.onInitialize();
 		
 		WebMarkupContainer link;
-		if (canEditField()) {
+		if (delayPermissionCheck) {
 			link = newInplaceEditLink("edit");
 			link.add(AttributeAppender.append("style", "cursor:pointer;"));
 			link.add(AttributeAppender.append("class", "editable"));
 		} else {
-			link = new WebMarkupContainer("edit");
+			if (canEditField()) {
+				link = newInplaceEditLink("edit");
+				link.add(AttributeAppender.append("style", "cursor:pointer;"));
+				link.add(AttributeAppender.append("class", "editable"));
+			} else {
+				link = new WebMarkupContainer("edit");
+			}
 		}
 		add(link);
 		
 		if (getField() != null && !getField().getValues().isEmpty()) {
 			Fragment fragment = new Fragment("content", "nonEmptyValuesFrag", this);
 			
-			fragment.add(new ListView<String>("values", getField().getValues()) {
-
-				@Override
-				protected void populateItem(ListItem<String> item) {
-					String value = item.getModelObject();
-					if (getField().getType().equals(FieldSpec.USER)) {
-						User user = OneDev.getInstance(UserManager.class).findByName(value);
-						if (user != null)
-							item.add(new UserIdentPanel("value", user, userFieldDisplayMode));
-						else 
-							item.add(new Label("value", value));
-					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
-						Issue issue = OneDev.getInstance(IssueManager.class).get(Long.valueOf(value));
-						if (issue != null) {
-							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-							Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
-									IssueActivitiesPage.paramsOf(issue));
-							if (issue.getNumberScope().equals(getIssue().getProject().getForkRoot()))
-								link.add(new Label("label", "#" + issue.getNumber()));
-							else
-								link.add(new Label("label", issue.getFQN().toString()));
-							linkFrag.add(link);
-							item.add(linkFrag);
-						} else {
-							item.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
-						}
-					} else if (getField().getType().equals(FieldSpec.BUILD)) {
-						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
-						if (build != null) {
-							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-							Link<Void> link = new BookmarkablePageLink<Void>("link", 
-									BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
-							String buildInfo = "#" + build.getNumber();
-							if (build.getNumberScope().equals(getIssue().getProject().getForkRoot()))
-								buildInfo = "#" + build.getNumber();
-							else
-								buildInfo = build.getFQN().toString();
-							
-							if (build.getVersion() != null)
-								buildInfo += " (" + build.getVersion() + ")";
-							link.add(new Label("label", buildInfo));
-							linkFrag.add(link);
-							item.add(linkFrag);
-						} else {
-							item.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
-						}
-					} else if (getField().getType().equals(FieldSpec.PULL_REQUEST)) {
-						PullRequest request = OneDev.getInstance(PullRequestManager.class).get(Long.valueOf(value));
-						if (request != null) {
-							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
-									PullRequestActivitiesPage.paramsOf(request));
-							if (request.getNumberScope().equals(getIssue().getProject().getForkRoot()))
-								link.add(new Label("label", "#" + request.getNumber()));
-							else
-								link.add(new Label("label", request.getFQN().toString()));
-							linkFrag.add(link);
-							item.add(linkFrag);
-						} else {
-							item.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
-						}
-					} else if (getField().getType().equals(FieldSpec.COMMIT)) {
-						if (ObjectId.isId(value)) {
-							Fragment fragment = new Fragment("value", "commitFrag", FieldValuesPanel.this);
-							Project project = getIssue().getProject();
-							CommitDetailPage.State commitState = new CommitDetailPage.State();
-							commitState.revision = value;
-							PageParameters params = CommitDetailPage.paramsOf(project, commitState);
-							Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
-							fragment.add(hashLink);
-							hashLink.add(new Label("hash", GitUtils.abbreviateSHA(value)));
-							fragment.add(new CopyToClipboardLink("copyHash", Model.of(value)));
-							item.add(fragment);
-						} else {
-							item.add(new Label("value", value));
-						}
+			RepeatingView valuesView = new RepeatingView("values");
+			for (String value: getField().getValues()) {
+				WebMarkupContainer valueContainer = new WebMarkupContainer(valuesView.newChildId());
+				valuesView.add(valueContainer);
+				if (getField().getType().equals(FieldSpec.USER)) {
+					User user = OneDev.getInstance(UserManager.class).findByName(value);
+					if (user != null)
+						valueContainer.add(new UserIdentPanel("value", user, userFieldDisplayMode));
+					else 
+						valueContainer.add(new Label("value", value));
+				} else if (getField().getType().equals(FieldSpec.ISSUE)) {
+					Issue issue = OneDev.getInstance(IssueManager.class).get(Long.valueOf(value));
+					if (issue != null) {
+						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
+						Link<Void> issueLink = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
+								IssueActivitiesPage.paramsOf(issue));
+						if (issue.getNumberScope().equals(getIssue().getProject().getForkRoot()))
+							issueLink.add(new Label("label", "#" + issue.getNumber()));
+						else
+							issueLink.add(new Label("label", issue.getFQN().toString()));
+						linkFrag.add(issueLink);
+						valueContainer.add(linkFrag);
 					} else {
-						Label label;
-						if (getField().getType().equals(ParamSpec.SECRET))
-							label = new Label("value", SecretInput.MASK);
-						else 
-							label = new Label("value", value);
-						
-						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
-						if (fieldSpec != null && fieldSpec instanceof ChoiceField) {
-							ChoiceProvider choiceProvider = ((ChoiceField)fieldSpec).getChoiceProvider();
-							ComponentContext.push(new ComponentContext(this));
-							try {
-								String backgroundColor = choiceProvider.getChoices(false).get(value);
-								if (backgroundColor == null)
-									backgroundColor = "#E4E6EF";
-								String fontColor = ColorUtils.isLight(backgroundColor)?"#3F4254":"white"; 
-								String style = String.format(
-										"background-color: %s; color: %s;", 
-										backgroundColor, fontColor);
-								label.add(AttributeAppender.append("style", style));
-								label.add(AttributeAppender.append("class", "badge"));
-							} finally {
-								ComponentContext.pop();
-							}
-						} 
-						item.add(label);
+						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 					}
-					item.add(AttributeAppender.append("title", getField().getName()));
+				} else if (getField().getType().equals(FieldSpec.BUILD)) {
+					Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
+					if (build != null) {
+						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
+						Link<Void> buildLink = new BookmarkablePageLink<Void>("link", 
+								BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
+						String buildInfo = "#" + build.getNumber();
+						if (build.getNumberScope().equals(getIssue().getProject().getForkRoot()))
+							buildInfo = "#" + build.getNumber();
+						else
+							buildInfo = build.getFQN().toString();
+						
+						if (build.getVersion() != null)
+							buildInfo += " (" + build.getVersion() + ")";
+						buildLink.add(new Label("label", buildInfo));
+						linkFrag.add(buildLink);
+						valueContainer.add(linkFrag);
+					} else {
+						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
+					}
+				} else if (getField().getType().equals(FieldSpec.PULL_REQUEST)) {
+					PullRequest request = OneDev.getInstance(PullRequestManager.class).get(Long.valueOf(value));
+					if (request != null) {
+						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
+						Link<Void> requestLink = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
+								PullRequestActivitiesPage.paramsOf(request));
+						if (request.getNumberScope().equals(getIssue().getProject().getForkRoot()))
+							requestLink.add(new Label("label", "#" + request.getNumber()));
+						else
+							requestLink.add(new Label("label", request.getFQN().toString()));
+						linkFrag.add(requestLink);
+						valueContainer.add(linkFrag);
+					} else {
+						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
+					}
+				} else if (getField().getType().equals(FieldSpec.COMMIT)) {
+					if (ObjectId.isId(value)) {
+						Fragment commmitFragment = new Fragment("value", "commitFrag", FieldValuesPanel.this);
+						Project project = getIssue().getProject();
+						CommitDetailPage.State commitState = new CommitDetailPage.State();
+						commitState.revision = value;
+						PageParameters params = CommitDetailPage.paramsOf(project, commitState);
+						Link<Void> hashLink = new BookmarkablePageLink<Void>("hashLink", CommitDetailPage.class, params);
+						commmitFragment.add(hashLink);
+						hashLink.add(new Label("hash", GitUtils.abbreviateSHA(value)));
+						commmitFragment.add(new CopyToClipboardLink("copyHash", Model.of(value)));
+						valueContainer.add(commmitFragment);
+					} else {
+						valueContainer.add(new Label("value", value));
+					}
+				} else {
+					Label label;
+					if (getField().getType().equals(ParamSpec.SECRET))
+						label = new Label("value", SecretInput.MASK);
+					else 
+						label = new Label("value", value);
+					
+					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
+					if (fieldSpec != null && fieldSpec instanceof ChoiceField) {
+						ChoiceProvider choiceProvider = ((ChoiceField)fieldSpec).getChoiceProvider();
+						ComponentContext.push(new ComponentContext(this));
+						try {
+							String backgroundColor = choiceProvider.getChoices(false).get(value);
+							if (backgroundColor == null)
+								backgroundColor = "#E4E6EF";
+							String fontColor = ColorUtils.isLight(backgroundColor)?"#3F4254":"white"; 
+							String style = String.format(
+									"background-color: %s; color: %s;", 
+									backgroundColor, fontColor);
+							label.add(AttributeAppender.append("style", style));
+							label.add(AttributeAppender.append("class", "badge"));
+						} finally {
+							ComponentContext.pop();
+						}
+					} 
+					valueContainer.add(label);
 				}
-				
-			});
+				valueContainer.add(AttributeAppender.append("title", getField().getName()));
+			}
+			fragment.add(valuesView);
 			link.add(fragment);
 		} else if (getField() != null) {
 			FieldSpec fieldSpec = null;
@@ -356,4 +374,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 	@Nullable
 	protected abstract Input getField();
 
+	protected void onUpdated(IPartialPageRequestHandler handler) {
+	}
+	
 }

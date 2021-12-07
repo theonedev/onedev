@@ -54,13 +54,40 @@
     box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
 	position: relative;
 }
+.issue-boards>.body .board-card .primary {
+	position: relative;
+	padding-right: 20px;
+}
+.issue-boards>.body .board-card .primary .show-detail {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.issue-boards>.body .board-card .secondary .working-indicator {
+	margin-bottom: 6px;
+}
+.issue-boards>.body .board-card .secondary .avatars .working-indicator {
+	margin-top: 2px;
+	margin-bottom: 0;
+}
+.issue-boards>.body .board-card .link.expanded .icon {
+	transform: rotate(90deg);
+}
+
+.issue-boards>.body .board-card .linked-issues {
+	border-left: 2px dashed var(--secondary);
+}
+.issue-boards>.body .board-card .linked-issue {
+	margin-top: 0.7rem;
+	padding-top: 0.8rem;
+	border-top: 1px solid var(--light-gray);
+}
+
 .issue-boards>.body .board-card .state {
 	border-bottom: 2px dotted transparent;
-}
-.issue-boards>.body .board-card .state.transit {
 	cursor: pointer;
 }
-.issue-boards>.body .board-card .state.transit:hover {
+.issue-boards>.body .board-card .state:hover {
 	border-color: var(--gray);
 }
 

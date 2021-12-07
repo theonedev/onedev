@@ -100,15 +100,19 @@ public class Role extends AbstractEntity implements Permission {
 	private ArrayList<JobPrivilege> jobPrivileges = new ArrayList<>();
 	
 	@OneToMany(mappedBy="defaultRole")
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Project> defaultProjects = new ArrayList<>();
 	
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<UserAuthorization> userAuthorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy=LinkAuthorization.PROP_ROLE, cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<LinkAuthorization> linkAuthorizations = new ArrayList<>();
 	
 	@Editable(order=100)

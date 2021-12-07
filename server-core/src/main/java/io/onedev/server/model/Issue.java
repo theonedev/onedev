@@ -917,17 +917,19 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		}
 	}
 	
-	public Collection<Issue> findLinkedIssues(LinkSpec spec, boolean opposite) {
+	public List<Issue> findLinkedIssues(LinkSpec spec, boolean opposite) {
 		if (spec.getOpposite() != null) {
 			if (opposite) {
 				return getSourceLinks().stream()
 						.filter(it->it.getSpec().equals(spec))
+						.sorted()
 						.map(it->it.getSource())
 						.sorted(spec.getOpposite().getParsedIssueQuery(getProject()))
 						.collect(Collectors.toList());
 			} else {
 				return getTargetLinks().stream()
 						.filter(it->it.getSpec().equals(spec))
+						.sorted()
 						.map(it->it.getTarget())
 						.sorted(spec.getParsedIssueQuery(getProject()))
 						.collect(Collectors.toList());
@@ -935,6 +937,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		} else {
 			return getLinks().stream()
 					.filter(it->it.getSpec().equals(spec))
+					.sorted()
 					.map(it->it.getLinked(this))
 					.sorted(spec.getParsedIssueQuery(getProject()))
 					.collect(Collectors.toList());

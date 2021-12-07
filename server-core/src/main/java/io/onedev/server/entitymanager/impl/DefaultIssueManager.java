@@ -40,7 +40,6 @@ import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
-import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
@@ -99,15 +98,15 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueManager.class);
 	
-	private final IssueFieldManager issueFieldManager;
+	private final IssueFieldManager fieldManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final IssueQueryPersonalizationManager issueQueryPersonalizationManager;
+	private final IssueQueryPersonalizationManager queryPersonalizationManager;
 	
 	private final AttachmentStorageManager attachmentStorageManager;
 	
-	private final IssueCommentManager issueCommentManager;
+	private final IssueCommentManager commentManager;
 	
 	private final SettingManager settingManager;
 	
@@ -123,24 +122,23 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final LinkSpecManager linkSpecManager;
 	
-	private final IssueLinkManager issueLinkManager;
+	private final IssueLinkManager linkManager;
 	
 	private final Map<Long, IssueFacade> cache = new HashMap<>();
 	
 	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
 	
 	@Inject
-	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager, 
-			TransactionManager transactionManager, IssueQueryPersonalizationManager issueQueryPersonalizationManager, 
+	public DefaultIssueManager(Dao dao, IssueFieldManager fieldManager, 
+			TransactionManager transactionManager, IssueQueryPersonalizationManager queryPersonalizationManager, 
 			SettingManager settingManager, ListenerRegistry listenerRegistry, 
 			ProjectManager projectManager, UserManager userManager, 
 			RoleManager roleManager, AttachmentStorageManager attachmentStorageManager, 
-			IssueCommentManager issueCommentManager, EntityReferenceManager entityReferenceManager, 
-			IssueScheduleManager issueScheduleManager, LinkSpecManager linkSpecManager, 
-			IssueLinkManager issueLinkManager) {
+			IssueCommentManager commentManager, EntityReferenceManager entityReferenceManager, 
+			LinkSpecManager linkSpecManager, IssueLinkManager linkManager) {
 		super(dao);
-		this.issueFieldManager = issueFieldManager;
-		this.issueQueryPersonalizationManager = issueQueryPersonalizationManager;
+		this.fieldManager = fieldManager;
+		this.queryPersonalizationManager = queryPersonalizationManager;
 		this.listenerRegistry = listenerRegistry;
 		this.settingManager = settingManager;
 		this.projectManager = projectManager;
@@ -148,9 +146,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.userManager = userManager;
 		this.roleManager = roleManager;
 		this.linkSpecManager = linkSpecManager;
-		this.issueLinkManager = issueLinkManager;
+		this.linkManager = linkManager;
 		this.attachmentStorageManager = attachmentStorageManager;
-		this.issueCommentManager = issueCommentManager;
+		this.commentManager = commentManager;
 		this.entityReferenceManager = entityReferenceManager;
 	}
 
@@ -209,7 +207,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		
 		save(issue);
 
-		issueFieldManager.saveFields(issue);
+		fieldManager.saveFields(issue);
 		for (IssueSchedule schedule: issue.getSchedules())
 			dao.persist(schedule);
 		
@@ -289,8 +287,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		query.setMaxResults(maxResults);
 		List<Issue> issues = query.getResultList();
 		if (loadFieldsAndLinks && !issues.isEmpty()) {
-			issueFieldManager.populateFields(issues);
-			issueLinkManager.populateLinks(issues);
+			fieldManager.populateFields(issues);
+			linkManager.populateLinks(issues);
 		}
 		
 		return issues;
@@ -299,7 +297,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Sessional
 	@Override
 	public List<Issue> query(Project project, boolean inTree, EntityQuery<Issue> issueQuery, 
-			int firstResult, int maxResults, boolean loadFields) {
+			int firstResult, int maxResults, boolean loadFieldsAndLinks) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
@@ -311,8 +309,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
 		List<Issue> issues = query.getResultList();
-		if (loadFields && !issues.isEmpty())
-			issueFieldManager.populateFields(issues);
+		if (loadFieldsAndLinks && !issues.isEmpty()) {
+			fieldManager.populateFields(issues);
+			linkManager.populateLinks(issues);
+		}
 		
 		return issues;
 	}
@@ -409,7 +409,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				undefinedStates.addAll(updater.getUndefinedStates());
 		}
 		
-		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+		for (IssueQueryPersonalization setting: queryPersonalizationManager.query()) 
 			populateUndefinedStates(undefinedStates, setting.getQueries());
 		
 		for (User user: userManager.query()) 
@@ -453,7 +453,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				undefinedFields.addAll(updater.getUndefinedFields());
 		}
 		
-		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+		for (IssueQueryPersonalization setting: queryPersonalizationManager.query()) 
 			populateUndefinedFields(undefinedFields, setting.getQueries());
 		
 		for (User user: userManager.query()) 
@@ -502,7 +502,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				undefinedFieldValues.addAll(updater.getUndefinedFieldValues());
 		}
 		
-		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+		for (IssueQueryPersonalization setting: queryPersonalizationManager.query()) 
 			populateUndefinedFieldValues(undefinedFieldValues, setting.getQueries());
 		
 		for (User user: userManager.query()) 
@@ -571,7 +571,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				updater.fixUndefinedStates(resolutions);
 		}
 		
-		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+		for (IssueQueryPersonalization setting: queryPersonalizationManager.query()) 
 			fixUndefinedStates(resolutions, setting.getQueries());
 
 		for (User user: userManager.query())
@@ -622,7 +622,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				updater.fixUndefinedFields(resolutions);
 		}
 		
-		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query())
+		for (IssueQueryPersonalization setting: queryPersonalizationManager.query())
 			fixUndefinedFields(resolutions, setting.getProject(), setting.getQueries());
 		
 		for (User user: userManager.query()) 
@@ -680,7 +680,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				updater.fixUndefinedFieldValues(resolutions);
 		}
 		
-		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+		for (IssueQueryPersonalization setting: queryPersonalizationManager.query()) 
 			fixUndefinedFieldValues(resolutions, setting.getProject(), setting.getQueries());
 		
 		for (User user: userManager.query())
@@ -787,9 +787,13 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 		criteriaQuery.where(predicates.toArray(new Predicate[0]));
 		
-		criteriaQuery.orderBy(
-				builder.desc(root.get(Issue.PROP_PROJECT)), 
-				builder.desc(root.get(Issue.PROP_NUMBER)));
+		if (scope != null && !scope.getSorts().isEmpty()) {
+			criteriaQuery.orderBy(getOrders(scope.getSorts(), builder, root));
+		} else {
+			criteriaQuery.orderBy(
+					builder.desc(root.get(Issue.PROP_PROJECT)), 
+					builder.desc(root.get(Issue.PROP_NUMBER)));
+		}
 		
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(0);
@@ -821,7 +825,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
-			Long projectId = event.getEntity().getId();
+			Project project = (Project) event.getEntity();
+			Long projectId = project.getId();
 			transactionManager.runAfterCommit(new Runnable() {
 
 				@Override
@@ -940,7 +945,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			for (IssueComment comment: issue.getComments()) {
 				comment.setContent(new ReferenceMigrator(Issue.class, numberMapping)
 						.migratePrefixed(comment.getContent(), "#"));
-				issueCommentManager.save(comment);
+				commentManager.save(comment);
 			}
 			save(issue);
 		}

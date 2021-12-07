@@ -182,7 +182,7 @@ public abstract class IssueSidePanel extends Panel {
 			protected void populateItem(ListItem<Input> item) {
 				Input field = item.getModelObject();
 				item.add(new Label("name", field.getName()));
-				item.add(new FieldValuesPanel("values", Mode.NAME) {
+				item.add(new FieldValuesPanel("values", Mode.NAME, false) {
 
 					@Override
 					protected AttachAjaxIndicatorListener getInplaceEditAjaxIndicator() {
