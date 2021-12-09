@@ -52,18 +52,13 @@ public class AgentResource extends AbstractResource {
 					String agentVersion = OneDev.getInstance(AgentManager.class).getAgentVersion();
 					
 					File agentDir = new File(tempDir, "agent");
+					FileUtils.copyDirectoryToDirectory(new File(Bootstrap.installDir, "agent"), agentDir);
+					
 					String wrapperConfContent = FileUtils.readFileToString(
-							new File(Bootstrap.installDir, "agent/wrapper.conf"), StandardCharsets.UTF_8);
+							new File(agentDir, "agent/conf/wrapper.conf"), StandardCharsets.UTF_8);
 					wrapperConfContent = wrapperConfContent.replace("agentVersion", agentVersion);
 					FileUtils.writeStringToFile(new File(agentDir, "agent/conf/wrapper.conf"), 
 							wrapperConfContent, StandardCharsets.UTF_8);
-					
-					FileUtils.copyFile(new File(Bootstrap.installDir, "agent/wrapper-license.conf"), 
-							new File(agentDir, "agent/conf/wrapper-license.conf"));
-					FileUtils.copyFile(new File(Bootstrap.installDir, "agent/App.sh.in"), 
-							new File(agentDir, "agent/bin/agent.sh"));
-					FileUtils.copyFile(new File(Bootstrap.installDir, "agent/AppCommand.bat.in"), 
-							new File(agentDir, "agent/bin/agent.bat"));
 					
 					Properties props = new Properties();
 					props.setProperty("serverUrl", OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());

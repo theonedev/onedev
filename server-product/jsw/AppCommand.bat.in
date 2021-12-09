@@ -124,6 +124,7 @@ if [%_PASS_THROUGH%]==[true] (
     set _PASS_THROUGH=app_args
 )
 if [%_PASS_THROUGH%]==[app_args] (
+    @passthrough_parameters@
     set ARGS_ARE_APP_PARAMS=true
     set _PASS_THROUGH_ON=true
 )
