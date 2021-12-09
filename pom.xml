@@ -9,7 +9,7 @@
 		<version>1.0.5</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>6.0.0</version>
+	<version>6.1.0</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -52,7 +52,7 @@
 			<plugin>
 				<groupId>io.onedev</groupId>
 				<artifactId>plugin-maven</artifactId>
-				<version>2.0.7</version>
+				<version>2.0.8</version>
 				<executions>
 					<execution>
 						<?m2e execute onConfiguration,onIncremental?>
@@ -563,8 +563,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.0.18</commons.version>
-		<agent.version>1.1.6</agent.version>
+		<commons.version>2.0.19</commons.version>
+		<agent.version>1.1.7</agent.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<logback.version>1.2.0</logback.version>
 		<antlr.version>4.7.2</antlr.version>

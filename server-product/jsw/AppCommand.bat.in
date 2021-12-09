@@ -2,7 +2,7 @@
 setlocal
 
 rem
-rem Copyright (c) 1999, 2020 Tanuki Software, Ltd.
+rem Copyright (c) 1999, 2021 Tanuki Software, Ltd.
 rem http://www.tanukisoftware.com
 rem All rights reserved.
 rem
@@ -16,7 +16,7 @@ rem
 
 rem -----------------------------------------------------------------------------
 rem These settings can be modified to fit the needs of your application
-rem Optimized for use with version 3.5.44-st of the Wrapper.
+rem Optimized for use with version 3.5.47-st of the Wrapper.
 
 rem The base name for the Wrapper binary.
 set _WRAPPER_BASE=wrapper
@@ -50,6 +50,10 @@ rem        otherwise it applies to arguments starting with the second.
 rem NOTE - Passing arguments is only valid with the 'console', 'install',
 rem        'installstart' and 'update' commands.
 @set_pass_through@
+
+rem If there are any errors, the script will pause for a specific number of seconds
+rem  or until the user presses a key. (0 not to wait, negative to wait forever).
+set _WRAPPER_TIMEOUT=-1
 
 rem Do not modify anything beyond this point
 rem -----------------------------------------------------------------------------
@@ -107,8 +111,7 @@ if %_BIN_BITS%=="64" goto x86_32
 echo Unable to locate a Wrapper executable using any of the following names:
 echo %_WRAPPER_L_EXE%
 echo %_WRAPPER_EXE%
-pause
-goto :eof
+goto preexitpause
 
 :check_lic_bits
 rem The command should not be called inside a IF, else errorlevel would be 0
@@ -166,8 +169,7 @@ if [%_FIXED_COMMAND%]==[] (
     goto showusage
 ) else (
     echo Invalid value '%_COMMAND%' for _FIXED_COMMAND.
-    pause
-    goto :eof
+    goto preexitpause
 )
 
 :args_not_allowed
@@ -184,8 +186,7 @@ if not [%1]==[] (
 if not [%1]==[] (
     if [%_PASS_THROUGH%]==[false] (
         echo Additional arguments are not allowed when _PASS_THROUGH is set to false.
-        pause
-        goto :eof
+        goto preexitpause
     )
 )
 
@@ -258,8 +259,7 @@ if [%_COMMAND%]==[console] (
    call :start
 )
 if not errorlevel 1 goto :eof
-pause
-goto :eof
+goto preexitpause
 
 :start
     %_WRAPPER_EXE% -t "%_WRAPPER_CONF%"
@@ -308,4 +308,19 @@ if not [%_PASS_THROUGH%]==[false] (
     echo   Optional arguments which will be passed to the Java application.
     echo.
 )
-pause
+
+rem Exit when there is a problem
+:preexitpause
+if %errorlevel% equ 0 (
+    set EXIT_CODE=1
+) else (
+    set EXIT_CODE=%errorlevel%
+)
+if %_WRAPPER_TIMEOUT% gtr 0 (
+    timeout /t %_WRAPPER_TIMEOUT%
+) else (
+    if %_WRAPPER_TIMEOUT% lss 0 (
+        pause
+    )
+)
+EXIT /B %EXIT_CODE%
