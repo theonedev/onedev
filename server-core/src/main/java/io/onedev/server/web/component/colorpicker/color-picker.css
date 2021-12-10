@@ -1,22 +1,4 @@
-.sp-replacer {
-	border-radius: 0.42rem;
-	background: white;
-	border-color: #e4e6ef;
-    height: calc(1.5em + 1.3rem + 2px);
-    padding: 0.65rem 1rem;	
-	display: inline-flex;
-}
-.sp-replacer:hover {
-	border-color: #e4e6ef;
-}
-.sp-replacer.sp-active {
-    border-color: #69b3ff;
-    color: var(--gray-dark);
-}
-.sp-replacer .sp-dd {
-	color: var(--gray-dark);
-}
-
-.sp-input {
-	background: white;
+.pickr .pcr-button {
+	width: 2.8em;
+	height: 2.8em;
 }

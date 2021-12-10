@@ -4,9 +4,17 @@ onedev.server.colorPicker = {
 		var pickrElementId = inputId + "-pickr";
 		var $pickrEl = $("<span id='" + pickrElementId + "'></span>");
 		$input.after($pickrEl);
+		
+		var container;
+		var $modal = $input.closest(".modal");
+		if ($modal.length != 0)
+			container = $modal[0];
+		else
+			container = "body";
 
 		var pickr = Pickr.create({
 		    el: '#' + pickrElementId,
+			container: container,
 		    theme: 'classic', 
 			lockOpacity: true,
 			default: $input.val()?$input.val():null,
@@ -46,13 +54,13 @@ onedev.server.colorPicker = {
 		        }
 		    }
 		});		
+		function toHex(decimal) {
+			var hex = Math.floor(decimal).toString(16);
+			if (hex.length < 2)
+				hex = "0" + hex;
+			return hex;
+		}
 		pickr.on("save", function(color) {
-			function toHex(decimal) {
-				var hex = Math.floor(decimal).toString(16);
-				if (hex.length < 2)
-					hex = "0" + hex;
-				return hex;
-			}
 			if (color) {
 				var rgba = color.toRGBA();
 				$input.val("#" + toHex(rgba[0]) + toHex(rgba[1]) + toHex(rgba[2]));
@@ -62,6 +70,13 @@ onedev.server.colorPicker = {
 			}
 			$input.change();
 			pickr.hide();
+		}).on("show", function() {
+			$(".pcr-result").off("keydown");
+			$(".pcr-result").on("keydown", function(event) {
+				if (event.keyCode == 13) {
+					pickr.applyColor();
+				}
+			});
 		});
 	}
 }
