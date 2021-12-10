@@ -806,8 +806,16 @@ public class DefaultMailManager implements MailManager {
 							while (!Thread.interrupted()) { 
 								try {
 									inboxCopy.idle();
-								} catch (MessagingException e) {
-									throw new RuntimeException(e);
+								} catch (Exception e) {
+									InterruptedException ie = ExceptionUtils.find(e, InterruptedException.class);
+									if (ie != null)
+										break;
+									logger.error("Error running idle command", e);
+									try {
+										Thread.sleep(5000);
+									} catch (InterruptedException e2) {
+										throw new RuntimeException(e2);
+									}
 								}
 							}
 						}
