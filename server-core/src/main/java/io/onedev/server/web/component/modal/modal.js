@@ -9,7 +9,7 @@ onedev.server.modal = {
 					&& $(".select2-drop:visible").length == 0 
 					&& $(".dropdown.open").length == 0
 					&& $("body>.floating").length == 0 
-					&& $(".sp-container:visible").length == 0
+					&& $(".pcr-app.visible").length == 0
 					&& $(".atwho-view:visible").length == 0
 					&& $(".CodeMirror-hints:visible").length == 0
 					&& $(".flatpickr-calendar.open").length == 0

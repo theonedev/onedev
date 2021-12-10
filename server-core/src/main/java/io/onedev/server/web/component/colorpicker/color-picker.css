@@ -16,3 +16,7 @@
 .sp-replacer .sp-dd {
 	color: var(--gray-dark);
 }
+
+.sp-input {
+	background: white;
+}

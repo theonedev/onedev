@@ -30,7 +30,8 @@ onedev.server.floating = {
 		
 		$floating.data("keydown", function(e) {
 			if (e.keyCode == 27 && $(".select2-drop:visible").length == 0 
-					&& $(".flatpickr-calendar.open").length == 0) {
+					&& $(".flatpickr-calendar.open").length == 0
+					&& $(".pcr-app.visible").length == 0) {
 				$floating.data("closeCallback")();
 			}
 		});

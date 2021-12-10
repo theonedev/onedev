@@ -1,13 +1,13 @@
 package io.onedev.server.web.editable.color;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.colorpicker.ColorPicker;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -29,10 +29,10 @@ public class ColorPropertyEditor extends PropertyEditor<String> {
 		add(input);
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 
-		input.add(new OnTypingDoneBehavior() {
+		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override
-			protected void onTypingDone(AjaxRequestTarget target) {
+			protected void onUpdate(AjaxRequestTarget target) {
 				onPropertyUpdating(target);
 			}
 			
