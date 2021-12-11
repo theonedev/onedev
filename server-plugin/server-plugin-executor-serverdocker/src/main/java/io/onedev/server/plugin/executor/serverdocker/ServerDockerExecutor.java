@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -458,35 +459,53 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return isValid;
 	}
 	
+	private String getHostMountPath(String dockerNameOrId, String containerMountPath) {
+		AtomicReference<String> hostMountPath = new AtomicReference<>(null);
+		Commandline docker = newDocker();
+		String inspectFormat = String.format(
+				"{{range .Mounts}} {{if eq .Destination \"%s\"}} {{.Source}} {{end}} {{end}}", 
+				containerMountPath);
+		docker.addArgs("container", "inspect", "-f", inspectFormat, dockerNameOrId);						
+		
+		AtomicBoolean noSuchContainer = new AtomicBoolean(false);
+		ExecutionResult result = docker.execute(new LineConsumer() {
+	
+			@Override
+			public void consume(String line) {
+				hostMountPath.set(line.trim());
+			}
+			
+		}, new LineConsumer() {
+	
+			@Override
+			public void consume(String line) {
+				if (line.contains("Error: No such container:"))
+					noSuchContainer.set(true);
+				else
+					logger.error(line);
+			}
+			
+		});
+		
+		if (noSuchContainer.get()) {
+			return null;
+		} else {
+			result.checkReturnCode();
+			return hostMountPath.get();
+		}
+	}
+	
 	private String getOuterPath(String hostPath) {
 		String hostInstallPath = Bootstrap.installDir.getAbsolutePath();
 		Preconditions.checkState(hostPath.startsWith(hostInstallPath + "/")
 				|| hostPath.startsWith(hostInstallPath + "\\"));
 		if (outerInstallPath == null) {
 			if (Bootstrap.isInDocker()) {
-				AtomicReference<String> installDirRef = new AtomicReference<>(null);
-				Commandline docker = newDocker();
-				String inspectFormat = String.format(
-						"{{range .Mounts}} {{if eq .Destination \"%s\"}} {{.Source}} {{end}} {{end}}", 
-						hostInstallPath);
-				docker.addArgs("inspect", "-f", inspectFormat, System.getenv("HOSTNAME"));						
-				docker.execute(new LineConsumer() {
-		
-					@Override
-					public void consume(String line) {
-						installDirRef.set(line.trim());
-					}
-					
-				}, new LineConsumer() {
-		
-					@Override
-					public void consume(String line) {
-						logger.error(line);
-					}
-					
-				}).checkReturnCode();
-				
-				outerInstallPath = Preconditions.checkNotNull(installDirRef.get());
+				outerInstallPath = getHostMountPath(System.getenv("HOSTNAME"), hostInstallPath);
+				if (outerInstallPath == null)
+					outerInstallPath = getHostMountPath("onedev", hostInstallPath);
+				if (outerInstallPath == null)
+					throw new RuntimeException("Unable to get container information");
 			} else {
 				outerInstallPath = hostInstallPath;
 			}
