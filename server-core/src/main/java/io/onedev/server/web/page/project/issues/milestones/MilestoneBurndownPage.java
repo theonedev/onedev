@@ -227,8 +227,10 @@ public class MilestoneBurndownPage extends MilestoneDetailPage {
 					}
 
 					Map<String, Integer> guidelineYAxisValues = new HashMap<>();
-					guidelineYAxisValues.put(xAxisValues.get(0), initialIssueWeight);
-					guidelineYAxisValues.put(xAxisValues.get(xAxisValues.size()-1), 0);
+					if (!xAxisValues.isEmpty()) {
+						guidelineYAxisValues.put(xAxisValues.get(0), initialIssueWeight);
+						guidelineYAxisValues.put(xAxisValues.get(xAxisValues.size()-1), 0);
+					}
 					lines.add(new Line("Guide Line", guidelineYAxisValues, "black", null, "dashed"));
 					
 					String yAxisValueFormatter;
