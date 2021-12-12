@@ -173,6 +173,11 @@ public class LinkSpecListPage extends IssueSettingPage {
 				cellItem.add(fragment);
 			}
 
+			@Override
+			public String getCssClass() {
+				return "actions text-nowrap";
+			}
+			
 		});		
 		
 		IDataProvider<LinkSpec> dataProvider = new ListDataProvider<LinkSpec>() {

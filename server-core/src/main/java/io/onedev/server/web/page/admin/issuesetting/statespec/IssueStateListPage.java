@@ -202,6 +202,11 @@ public class IssueStateListPage extends IssueSettingPage {
 				cellItem.add(fragment);
 			}
 
+			@Override
+			public String getCssClass() {
+				return "actions text-nowrap";
+			}
+			
 		});		
 		
 		IDataProvider<StateSpec> dataProvider = new ListDataProvider<StateSpec>() {

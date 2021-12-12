@@ -183,8 +183,9 @@ public class IssueTemplateListPage extends IssueSettingPage {
 
 			@Override
 			public String getCssClass() {
-				return "actions";
+				return "actions text-nowrap";
 			}
+			
 		});		
 		
 		

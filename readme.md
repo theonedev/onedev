@@ -39,9 +39,15 @@ Conditional build parameters. Create matrix builds by combining different parame
 
 ![Build Workflow](doc/images/build-workflow.gif)
 
+### Code Annotation with Coverage and Problem 
+
+Analyze various CI reports to annotate code/diff with test coverage information and found problems.
+
+![code-annotation.png](doc/images/code-annotation.png)
+
 ### Custom Issue States and Fields
 
-Add custom issue states and fields. Configure field dependencies. Transit issue state automatically upon certain events, or manually by authorized users 
+Add custom issue states, fields and links. Configure field dependencies. Transit issue state automatically upon certain events, or manually by authorized users 
 
 ![Custom Issue](doc/images/custom-issue.gif)
 
