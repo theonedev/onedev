@@ -53,6 +53,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Sets;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -91,6 +93,7 @@ import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
@@ -1105,13 +1108,23 @@ public abstract class IssueListPanel extends Panel {
 				Item<?> row = cellItem.findParent(Item.class);
 				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
 						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
-				cellItem.add(newIssueDetail(componentId, rowModel, cursor));
+				cellItem.add(newIssueDetail(componentId, rowModel.getObject().getId(), cursor));
 			}
 			
-			private Component newIssueDetail(String componentId, IModel<Issue> issueModel, @Nullable Cursor cursor) {
-				Issue issue = issueModel.getObject();
+			@SuppressWarnings("unchecked")
+			private Component newIssueDetail(String componentId, Long issueId, @Nullable Cursor cursor) {
 				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
+				fragment.setDefaultModel(new LoadableDetachableModel<Issue>() {
 
+					@Override
+					protected Issue load() {
+						return getIssueManager().load(issueId);
+					}
+					
+				});
+
+				Issue issue = (Issue) fragment.getDefaultModelObject();
+				
 				String label;
 				if (getProject() == null)
 					label = issue.getProject() + "#" + issue.getNumber();
@@ -1214,19 +1227,16 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Issue getIssue() {
-								return issueModel.getObject();
+								return (Issue) fragment.getDefaultModelObject();
 							}
 
 							@Override
 							protected void onTransited(AjaxRequestTarget target) {
-								Component detail = newIssueDetail(componentId, issueModel, cursor);
-								fragment.replaceWith(detail);
-								target.add(detail);
 							}
 							
 						};
 						
-						transitLink.add(new IssueStateBadge("state", issueModel));
+						transitLink.add(new IssueStateBadge("state", (IModel<Issue>) fragment.getDefaultModel()));
 						stateFragment.add(transitLink);
 						
 						fieldsView.add(stateFragment.setOutputMarkupId(true));
@@ -1235,9 +1245,6 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected void onUpdated(IPartialPageRequestHandler handler) {
-								Component detail = newIssueDetail(componentId, issueModel, cursor);
-								fragment.replaceWith(detail);
-								handler.add(detail);
 							}
 
 							@SuppressWarnings("deprecation")
@@ -1249,12 +1256,12 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Issue getIssue() {
-								return issueModel.getObject();
+								return (Issue) fragment.getDefaultModelObject();
 							}
 
 							@Override
 							protected Input getField() {
-								Issue issue = issueModel.getObject();
+								Issue issue = (Issue) fragment.getDefaultModelObject();
 								if (issue.isFieldVisible(field))
 									return issue.getFieldInputs().get(field);
 								else
@@ -1279,17 +1286,17 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					protected List<Issue> load() {
-						Issue issue = issueModel.getObject();
+						Issue issue = (Issue) fragment.getDefaultModelObject();
 						OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
 						LinkSide side = new LinkSide(expandedLinkName.get());
-						return issueModel.getObject().findLinkedIssues(side.getSpec(), side.isOpposite());
+						return issue.findLinkedIssues(side.getSpec(), side.isOpposite());
 					}
 					
 				}) {
 
 					@Override
 					protected void populateItem(ListItem<Issue> item) {
-						item.add(newIssueDetail("content", item.getModel(), null));
+						item.add(newIssueDetail("content", item.getModelObject().getId(), null));
 					}
 
 					@Override
@@ -1299,6 +1306,23 @@ public abstract class IssueListPanel extends Panel {
 					}
 					
 				});
+				
+				fragment.add(new WebSocketObserver() {
+					
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						Component detail = newIssueDetail(componentId, issueId, cursor);
+						fragment.replaceWith(detail);
+						handler.add(detail);
+					}
+					
+					@Override
+					public Collection<String> getObservables() {
+						return Sets.newHashSet(Issue.getWebSocketObservable(issueId));
+					}
+					
+				});
+				
 				fragment.setOutputMarkupId(true);
 				
 				return fragment;
