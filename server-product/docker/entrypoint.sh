@@ -7,19 +7,18 @@ _sigterm() {
   wait "$child"
   exit 1
 }
-_sigint() {
-  wait "$child"
-  exit 1
-}
 
 trap _sigterm SIGTERM
-trap _sigint SIGINT
+trap _sigterm SIGINT
 
-/app/boot/wrapper-linux-x86-64 /app/conf/wrapper.conf -- upgrade /opt/onedev & 
+cd /app/bin
+java -cp "../boot/*" -XX:MaxRAMPercentage=60.0 io.onedev.commons.bootstrap.Bootstrap upgrade /opt/onedev &
 child=$!
 wait "$child"
 
 touch /opt/onedev/IN_DOCKER
-/opt/onedev/boot/wrapper-linux-x86-64 /opt/onedev/conf/wrapper.conf &
+
+cd /opt/onedev/bin
+java -cp "../boot/*" -XX:MaxRAMPercentage=60.0 io.onedev.commons.bootstrap.Bootstrap &
 child=$!
 wait "$child"
