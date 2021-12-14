@@ -806,23 +806,15 @@ public class DefaultMailManager implements MailManager {
 							while (!Thread.interrupted()) { 
 								try {
 									inboxCopy.idle();
-								} catch (Exception e) {
-									InterruptedException ie = ExceptionUtils.find(e, InterruptedException.class);
-									if (ie != null)
-										break;
-									logger.error("Error running idle command", e);
-									try {
-										Thread.sleep(5000);
-									} catch (InterruptedException e2) {
-										throw new RuntimeException(e2);
-									}
+								} catch (MessagingException e) {
+									throw new RuntimeException(e);
 								}
 							}
 						}
 						
 					});
 					
-					while (true) {
+					while (!future.isDone()) {
 						Thread.sleep(timeout*1000/2);
 		                inbox.doCommand(new IMAPFolder.ProtocolCommand() {
 		                	
@@ -833,6 +825,7 @@ public class DefaultMailManager implements MailManager {
 		                    
 		                });						
 					}
+					future.get();
 				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);
 				} finally {
