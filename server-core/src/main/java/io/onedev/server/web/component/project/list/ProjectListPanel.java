@@ -1020,7 +1020,7 @@ public class ProjectListPanel extends Panel {
 			if (getParentProject() != null)
 				return ProjectQuery.merge(baseQuery, new ProjectQuery(new NameCriteria("*" + queryString + "*")));
 			else
-				return ProjectQuery.merge(baseQuery, new ProjectQuery(new PathCriteria(queryString)));
+				return ProjectQuery.merge(baseQuery, new ProjectQuery(new PathCriteria("**/*" + queryString + "*/**")));
 		}
 	}
 	
