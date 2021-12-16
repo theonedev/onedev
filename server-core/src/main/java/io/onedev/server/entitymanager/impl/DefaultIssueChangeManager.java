@@ -310,7 +310,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 												IssueQueryParseOption option = new IssueQueryParseOption().withCurrentIssueCriteria(true);
 												for (TransitionSpec transition: getTransitionSpecs()) {
 													if (transition.getTrigger() instanceof StateTransitionTrigger) {
-														Project project = issue .getProject();
+														Project project = issue.getProject();
 														StateTransitionTrigger trigger = (StateTransitionTrigger) transition.getTrigger();
 														if (trigger.getStates().contains(issue.getState())) {
 															IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
@@ -328,7 +328,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 															try {
 																for (Issue each: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
 																	changeState(each, transition.getToState(), new HashMap<>(), 
-																			transition.getRemoveFields(), null);
+																			transition.getRemoveFields(), "State changed as issue #" + issue.getNumber() + " transited to '" + issue.getState() + "'");
 																}
 															} finally {
 																Issue.pop();
@@ -401,7 +401,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														try {
 															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
 																changeState(issue, transition.getToState(), new HashMap<>(), 
-																		transition.getRemoveFields(), null);
+																		transition.getRemoveFields(), "State changed as build #" + build.getNumber() + " is successful");
 															}
 														} finally {
 															Build.pop();
@@ -468,7 +468,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														try {
 															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
 																changeState(issue, transition.getToState(), new HashMap<>(), 
-																		transition.getRemoveFields(), null);
+																		transition.getRemoveFields(), "State changed as pull request #" + request.getNumber() + " is " + request.getStatusName().toLowerCase());
 															}
 														} finally {
 															PullRequest.pop();
@@ -604,7 +604,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 															try {
 																for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
 																	changeState(issue, transition.getToState(), new HashMap<>(), 
-																			transition.getRemoveFields(), null);
+																			transition.getRemoveFields(), "State changed as code fixing the issue is committed");
 																}
 															} finally {
 																ProjectScopedCommit.pop();
