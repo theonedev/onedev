@@ -1,4 +1,14 @@
 onedev.server.markdown = {
+	shortcuts: { // cmd (Mac) or ctrl (non-Mac) plus below keys
+		"b": ".do-bold",
+		"k": ".do-link",
+		"i": ".do-italic",
+		"e": ".do-code",
+		"shift-.": ".do-quote",
+		"shift-7": ".do-orderlist",
+		"shift-8": ".do-list",
+		"shift-9": ".do-tasklist" // this does not conform to github as ctrl-shift-l is occupied in MS Edge
+	},
 	getCookiePrefix: function($container) {
 		if ($container.hasClass("compact-mode"))
 			return "markdownEditor.compactMode";
@@ -31,7 +41,7 @@ onedev.server.markdown = {
 		var $preview = $body.children(".preview");
 		var $rendered = $preview.children(".markdown-rendered");
 		var $help = $head.children(".help");
-
+		
 		$head.find(".dropdown>a").dropdown();
 		
 		$editLink.click(function() {
@@ -120,6 +130,10 @@ onedev.server.markdown = {
 			}
 		}, previewTimeout);
 		
+		var $submit = $input.closest("form")
+				.find(">.btn-primary, :last-child>.btn-primary")
+				.not("[disabled=disabled]");
+		
 	    var fontSize = parseInt(getComputedStyle($input[0]).getPropertyValue('font-size'));
 	    
 		/*
@@ -157,6 +171,9 @@ onedev.server.markdown = {
 		 */
 		$input.on("keydown", function(e) {
 			if (e.keyCode == 13 && $(".atwho-view").filter(":visible").length == 0) {
+				if ((e.metaKey || e.ctrlKey) && $submit.length != 0) 
+					return;
+					
 				e.preventDefault();
 				var input = $input.val();
 				var caret = $input.caret();
@@ -176,14 +193,8 @@ onedev.server.markdown = {
 				var nonSpaceInCurrentLine = input.substring(nonSpacePosInCurrentLine, caret);
 				
 				function clearLastLine() {
-					var newInputBeforeCaret;
-					if (lastLineBreakPos != -1) {
-						newInputBeforeCaret = input.substring(0, lastLineBreakPos) + "\n\n";
-					} else {
-						newInputBeforeCaret = "\n";
-					}
-					$input.val(newInputBeforeCaret + inputAfterCaret);
-					$input.caret(newInputBeforeCaret.length);
+					$input.range(lastLineBreakPos+1, caret);
+					document.execCommand("insertText", false, "\n");
 				}
 
 				// match against task items
@@ -191,22 +202,22 @@ onedev.server.markdown = {
 				if (match != null) {
 					if (nonSpaceInCurrentLine.length > match[0].length) {
 						if (nonSpaceInCurrentLine.indexOf("*") == 0)
-							$input.caret("\n" + spaces + "* [ ] ");
+							document.execCommand("insertText", false, "\n" + spaces + "* [ ] ");
 						else
-							$input.caret("\n" + spaces + "- [ ] ");
+							document.execCommand("insertText", false, "\n" + spaces + "- [ ] ");
 					} else {
 						clearLastLine();
 					}
 				} else {
 					if (nonSpaceInCurrentLine.indexOf("* ") == 0) {
 						if (nonSpaceInCurrentLine.length > 2) {
-							$input.caret("\n" + spaces + "* ");
+							document.execCommand("insertText", false, "\n" + spaces + "* ");
 						} else {
 							clearLastLine();
 						}
 					} else if (nonSpaceInCurrentLine.indexOf("- ") == 0) {
 						if (nonSpaceInCurrentLine.length > 2) {
-							$input.caret("\n" + spaces + "- ");
+							document.execCommand("insertText", false, "\n" + spaces + "- ");
 						} else {
 							clearLastLine();
 						}
@@ -215,14 +226,14 @@ onedev.server.markdown = {
 						match = /^\d+\. /.exec(nonSpaceInCurrentLine);
 						if (match != null) {
 							if (nonSpaceInCurrentLine.length > match[0].length) {
-								$input.caret("\n" + spaces + (parseInt(match[0])+1) +". ");
+								document.execCommand("insertText", false, "\n" + spaces + (parseInt(match[0])+1) +". ");
 							} else {
 								clearLastLine();
 							}
 						} else if (nonSpacePosInCurrentLine == inputBeforeCaret.length) {
-							$input.caret("\n");
+							document.execCommand("insertText", false, "\n");
 						} else {
-							$input.caret("\n" + spaces);
+							document.execCommand("insertText", false, "\n" + spaces);
 						}
 					}
 				}
@@ -232,8 +243,6 @@ onedev.server.markdown = {
 				if (caretBottom > $input.scrollTop() + $input.height()) {
 					$input.scrollTop(caretBottom - $input.height());
 				}
-				
-				onedev.server.markdown.fireInputEvent($input);
 			}
 		});
 
@@ -323,14 +332,28 @@ onedev.server.markdown = {
 
 		$input.on("keydown", function(e) {
 			if ($(".atwho-view").filter(":visible").length == 0) {
-				if ((e.ctrlKey|e.metaKey) && e.keyCode == 76) {
+				if (onedev.server.util.isMac() && e.metaKey || !onedev.server.util.isMac() && e.ctrlKey) {
+					var key;
+					if (e.keyCode >= 48 && e.keyCode <= 57)
+						key = String.fromCharCode(e.keyCode);
+					else if (e.keyCode >= 65 && e.keyCode <= 90)
+						key = String.fromCharCode(e.keyCode+32);
+					else if (e.keyCode == 190)
+						key = ".";
+					else
+						key = "";
+					if (e.shiftKey)
+						key = "shift-" + key;
+					var selector = onedev.server.markdown.shortcuts[key];
+					if (selector) 
+						$head.find(selector).click();
+				}
+				if ((e.metaKey || e.ctrlKey) && e.keyCode == 13 && $submit.length != 0) {
 					e.preventDefault();
-					callback("selectLink");
-				} else if ((e.ctrlKey|e.metaKey) && e.keyCode == 73) {
-					e.preventDefault();
-					callback("selectImage");	
-				} 
+					$submit.click();
+				}		
 			}
+			
 		});
 		
 		$input[0].cachedEmojis = [];
@@ -475,9 +498,9 @@ onedev.server.markdown = {
 
 					xhr.replaceMessage = message;
 					if ($input.range().length == 0) {
-						$input.caret(message);
+						document.execCommand("insertText", false, message);
 					} else {
-						$input.range(message);
+						document.execCommand("insertText", false, message);
 						$input.caret($input.caret()+message.length);
 					}
 					
@@ -595,42 +618,49 @@ onedev.server.markdown = {
 		}
 		
 		$actionMenu.find(".do-bold").click(function() {
+			$input.focus();
 			var selected = $input.range();
 			if (selected.length != 0) {
-				$input.range("**" + selected.text + "**").range(selected.start+2, selected.end+2);
+				document.execCommand("insertText", false, "**" + selected.text + "**");
+				$input.range(selected.start+2, selected.end+2);
 			} else {
-				$input.range("**strong text**").range(selected.start+2, selected.end+2+"strong text".length);
+				document.execCommand("insertText", false, "**strong text**");
+				$input.range(selected.start+2, selected.end+2+"strong text".length);
 			}
-			$input.focus();
+			closeMenu();
 			onedev.server.markdown.fireInputEvent($input);
-			closeMenu();			
 		});
 		
 		$actionMenu.find(".do-italic").click(function() {
+			$input.focus();
 			var selected = $input.range();
 			if (selected.length != 0) {
-				$input.range("_" + selected.text + "_").range(selected.start+1, selected.end+1);
+				document.execCommand("insertText", false, "_" + selected.text + "_");
+				$input.range(selected.start+1, selected.end+1);
 			} else {
-				$input.range("_emphasized text_").range(selected.start+1, selected.end+1+"emphasized text".length);
+				document.execCommand("insertText", false, "_emphasized text_");
+				$input.range(selected.start+1, selected.end+1+"emphasized text".length);
 			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
 			closeMenu();			
+			onedev.server.markdown.fireInputEvent($input);
 		});
 		
 		$actionMenu.find(".do-header").click(function() {
+			$input.focus();
 			var selected = $input.range();
 			if (selected.length != 0) {
-				$input.range("### " + selected.text).range(selected.start+4, selected.end+4);
+				document.execCommand("insertText", false, "### " + selected.text);
+				$input.range(selected.start+4, selected.end+4);
 			} else {
-				$input.range("### heading text").range(selected.start+4, selected.end+4+"heading text".length);
+				document.execCommand("insertText", false, "### heading text");
+				$input.range(selected.start+4, selected.end+4+"heading text".length);
 			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
 			closeMenu();			
+			onedev.server.markdown.fireInputEvent($input);
 		});
 		
 		$actionMenu.find(".do-list, .do-orderlist, .do-tasklist").click(function() {
+			$input.focus();
 			var leading;
 			if ($(this).hasClass("do-list"))
 				leading = "-";
@@ -647,42 +677,48 @@ onedev.server.markdown = {
 						insert += "\n";
 					insert += leading + " " + splitted[i];
 				}
-				$input.range(insert).range(selected.start+leading.length+1, selected.start+leading.length+1+splitted[0].length);
+				document.execCommand("insertText", false, insert);
+				//$input.range(selected.start+leading.length+1, selected.start+leading.length+1+splitted[0].length);
 			} else {
 				var text;
 				if ($(this).hasClass("do-tasklist"))
 					text = " task text here";
 				else
 					text = " list text here";
-				$input.range(leading + text).range(selected.start+leading.length+1, selected.start+leading.length+1+text.length);
+				document.execCommand("insertText", false, leading + text);
+				$input.range(selected.start+leading.length+1, selected.start+leading.length+1+text.length);
 			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
 			closeMenu();			
+			onedev.server.markdown.fireInputEvent($input);
 		});
 
 		$actionMenu.find(".do-code").click(function() {
+			$input.focus();
 			var langHint = "programming language";
 			var selected = $input.range();
 			if (selected.length != 0) {
-				$input.range("\n```" + langHint + "\n" + selected.text + "\n```\n").range(selected.start+4, selected.start+4+langHint.length);
+				document.execCommand("insertText", false, "\n```" + langHint + "\n" + selected.text + "\n```\n");				
+				$input.range(selected.start+4, selected.start+4+langHint.length);
 			} else {
-				$input.range("\n```" + langHint + "\ncode text here\n```\n").range(selected.start+4, selected.start+4+langHint.length);
+				document.execCommand("insertText", false, "\n```" + langHint + "\n```\n");				
+				$input.range(selected.start+4, selected.start+4+langHint.length);
 			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
 			closeMenu();			
+			onedev.server.markdown.fireInputEvent($input);
 		});
 		
 		$actionMenu.find(".do-quote").click(function() {
-			var selected = $input.range();
-			if (selected.length != 0)
-				$input.range("> " + selected.text).range(selected.start+2, selected.end+2);
-			else
-				$input.range("> quote here").range(selected.start+2, selected.start+2+"quote here".length);
 			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
+			var selected = $input.range();
+			if (selected.length != 0) {
+				document.execCommand("insertText", false, "> " + selected.text);				
+				$input.range(selected.start+2, selected.end+2);
+			} else {
+				document.execCommand("insertText", false, "> quote here");				
+				$input.range(selected.start+2, selected.start+2+"quote here".length);
+			}
 			closeMenu();			
+			onedev.server.markdown.fireInputEvent($input);
 		});
 		
 		$actionMenu.find(".do-emoji").click(function() {
@@ -714,22 +750,34 @@ onedev.server.markdown = {
 			else 
 				prefix = prefix + " ";
 			
+			$input.focus();
+			
 			if (prevChar === undefined || prevChar === ' ' || prevChar === '\n') 
-				$input.caret(prefix + atChar);
+				document.execCommand("insertText", false, prefix + atChar);
 			else 
-				$input.caret(" " + prefix + atChar);
+				document.execCommand("insertText", false, " " + prefix + atChar);
+			onedev.server.markdown.fireInputEvent($input);
 			
 			$input.atwho("run");
-			onedev.server.markdown.fireInputEvent($input);
 		});
 		
 		$actionMenu.find(".do-image, .do-link").click(function() {
 	       	if ($(this).hasClass("do-image"))
-	       		callback("selectImage");
+	       		callback("selectImage", $input.range().text);
 	       	else
-	       		callback("selectLink");
+	       		callback("selectLink", $input.range().text);
 			closeMenu();			
 		});
+
+		var prefix = onedev.server.util.isMac()?"cmd-":"ctrl-";		
+		for (var key in onedev.server.markdown.shortcuts) {
+			var selector = onedev.server.markdown.shortcuts[key];
+			var $action = $actionMenu.find(selector);
+			if ($actionMenu.closest(".floating").length != 0) 
+				$action.append("<span class='float-right'>" + prefix + key + "</span>");
+			else
+				$action.attr("title", $action.attr("title") + " (" + prefix + key + ")");
+		}
 	},
 	onLoad: function(containerId) {
 		var $container = $("#" + containerId);
@@ -995,8 +1043,8 @@ onedev.server.markdown = {
 		$emojis.find(".emoji").click(function() {
 			if (!$edit.is(":visible")) 
 				return;
-			
-			$input.caret(":" + $(this).attr("title") + ": ");
+			$input.focus();
+			document.execCommand("insertText", false, ":" + $(this).attr("title") + ": ");
 			onedev.server.markdown.fireInputEvent($input);
 		});
 	},
@@ -1021,15 +1069,15 @@ onedev.server.markdown = {
     		var offset = isImage?2:1;
     		$input.range($input.caret()-message.length+offset, $input.caret()-message.length+defaultDescription.length+offset);
     	}
-    	
-		onedev.server.markdown.fireInputEvent($input);
 	}, 
 	updateUploadMessage: function($input, message, replaceMessage) {
+		$input.focus();
 		var isError = message.indexOf("!!") == 0;
 		var pos = $input.val().indexOf(replaceMessage);
 		if (pos != -1) {
 			var currentPos = $input.caret();
-			$input.range(pos, pos+ replaceMessage.length).range(message);
+			$input.range(pos, pos+ replaceMessage.length);
+			document.execCommand("insertText", false, message);
 			if (!isError) {
 				if (currentPos<pos)
 					$input.caret(currentPos);
@@ -1040,16 +1088,16 @@ onedev.server.markdown = {
 			}
 		} else {
 			if ($input.range().length != 0) {
-				$input.range(message);
+				document.execCommand("insertText", false, message);
 				if (!isError)
 					$input.caret($input.caret() + message.length);
 			} else {
-				// use range instead of caret here as otherwise the editor will be scrolled to the bottom
-				$input.range(message); 
+				document.execCommand("insertText", false, message);
 				if (isError)
 					$input.range($input.caret()-message.length, $input.caret());
 			}
 		} 
+		onedev.server.markdown.fireInputEvent($input);
 	},
 	onInputUrlDomReady: function(containerId) {
 		var $container = $("#"+containerId);

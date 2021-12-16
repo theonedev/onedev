@@ -93,9 +93,9 @@ abstract class InsertUrlPanel extends Panel {
 	
 	private Collection<FileUpload> uploads = new ArrayList<>();
 	
-	private String url;
+	private String linkUrl;
 	
-	private String text;
+	private String linkText;
 	
 	private String commitMessage;
 	
@@ -103,10 +103,12 @@ abstract class InsertUrlPanel extends Panel {
 	
 	private final boolean isImage;
 	
-	public InsertUrlPanel(String id, MarkdownEditor markdownEditor, boolean isImage) {
+	public InsertUrlPanel(String id, MarkdownEditor markdownEditor, String linkText, boolean isImage) {
 		super(id);
 		this.markdownEditor = markdownEditor;
 		this.isImage = isImage;
+		if (StringUtils.isNotBlank(linkText))
+			this.linkText = linkText;
 	}
 
 	private Component newInputUrlPanel() {
@@ -126,26 +128,26 @@ abstract class InsertUrlPanel extends Panel {
 		
 		form.add(new Label("urlLabel", isImage?"Image URL":"Link URL"));
 		form.add(new Label("urlHelp", isImage?"Absolute or relative url of the image":"Absolute or relative url of the link"));
-		form.add(new TextField<String>("url", new PropertyModel<String>(this, "url")));
+		form.add(new TextField<String>("url", new PropertyModel<String>(this, "linkUrl")));
 		
 		form.add(new Label("textLabel", isImage?"Image Text": "Link Text"));
-		form.add(new TextField<String>("text", new PropertyModel<String>(this, "text")));
+		form.add(new TextField<String>("text", new PropertyModel<String>(this, "linkText")));
 		
 		form.add(new AjaxButton("insert", form) {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				if (StringUtils.isBlank(url)) {
+				if (StringUtils.isBlank(linkUrl)) {
 					if (isImage)
 						error("Image URL should be specified");
 					else
 						error("Link URL should be specified");
 					target.add(fragment);
 				} else {
-					if (text == null)
-						text = UrlUtils.describe(url);
-					markdownEditor.insertUrl(target, isImage, url, text, null);
+					if (linkText == null)
+						linkText = UrlUtils.describe(linkUrl);
+					markdownEditor.insertUrl(target, isImage, linkUrl, linkText, null);
 					onClose(target);
 				}
 			}
@@ -236,8 +238,8 @@ abstract class InsertUrlPanel extends Panel {
 					String baseUrl = context.getDirectoryUrl();
 					String referenceUrl = urlFor(ProjectBlobPage.class, 
 							ProjectBlobPage.paramsOf(context.getProject(), blobIdent)).toString();
-					String relativized = PathUtils.relativize(baseUrl, referenceUrl);		
-					markdownEditor.insertUrl(target, isImage, relativized, blobIdent.getName(), null);
+					String relativized = PathUtils.relativize(baseUrl, referenceUrl);	
+					markdownEditor.insertUrl(target, isImage, relativized, linkText!=null?linkText:blobIdent.getName(), null);
 					onClose(target);
 				}
 
@@ -292,7 +294,8 @@ abstract class InsertUrlPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								markdownEditor.insertUrl(target, true, attachmentUrl, attachmentName, null);
+								markdownEditor.insertUrl(target, true, attachmentUrl, 
+										linkText!=null?linkText:attachmentName, null);
 								onClose(target);
 							}
 
@@ -345,7 +348,8 @@ abstract class InsertUrlPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								markdownEditor.insertUrl(target, false, attachmentUrl, attachmentName, null);
+								markdownEditor.insertUrl(target, false, attachmentUrl, 
+										linkText!=null?linkText:attachmentName, null);
 								onClose(target);
 							}
 
@@ -408,7 +412,8 @@ abstract class InsertUrlPanel extends Panel {
 						throw new RuntimeException(e);
 					}
 					markdownEditor.insertUrl(target, isImage, 
-							attachmentSupport.getAttachmentUrlPath(attachmentName), attachmentName, null);
+							attachmentSupport.getAttachmentUrlPath(attachmentName), 
+							linkText!=null?linkText:attachmentName, null);
 					onClose(target);
 				}
 
@@ -539,7 +544,7 @@ abstract class InsertUrlPanel extends Panel {
 							url = StringUtils.stripEnd(directory, "/") + "/" + UrlUtils.encodePath(fileName);
 						else 
 							url = UrlUtils.encodePath(fileName);
-						markdownEditor.insertUrl(target, isImage, url, fileName, null);
+						markdownEditor.insertUrl(target, isImage, url, linkText!=null?linkText:fileName, null);
 						for (FileUpload upload: uploads) 
 							upload.release();
 						onClose(target);
@@ -643,6 +648,6 @@ abstract class InsertUrlPanel extends Panel {
 		});
 		
 	}
-
+	
 	protected abstract void onClose(AjaxRequestTarget target);
 }

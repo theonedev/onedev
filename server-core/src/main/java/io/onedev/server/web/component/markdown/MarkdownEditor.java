@@ -412,17 +412,18 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					break;
 				case "selectImage":
 				case "selectLink":
+					String selectedText = params.getParameterValue("param1").toOptionalString();
 					new ModalPanel(target) {
 						
 						@Override
 						protected Component newContent(String id) {
-							return new InsertUrlPanel(id, MarkdownEditor.this, action.equals("selectImage")) {
+							return new InsertUrlPanel(id, MarkdownEditor.this, selectedText, action.equals("selectImage")) {
 
 								@Override
 								protected void onClose(AjaxRequestTarget target) {
 									close();
 								}
-								
+
 							};
 						}
 
@@ -564,7 +565,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	protected String getAutosaveKey() {
 		return null;
 	}
-
+	
 	@Nullable
 	public BlobRenderContext getBlobRenderContext() {
 		return blobRenderContext;

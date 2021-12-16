@@ -511,20 +511,11 @@ TextareaController = (function(superClass) {
   };
 
   TextareaController.prototype.insert = function(content, $li) {
-    var $inputor, source, startStr, suffix, text;
+    var $inputor;
     $inputor = this.$inputor;
-    source = $inputor.val();
-    startStr = source.slice(0, Math.max(this.query.headPos - this.at.length, 0));
-    suffix = (suffix = this.getOpt('suffix')) === "" ? suffix : suffix || " ";
-    content += suffix;
-    text = "" + startStr + content + (source.slice(this.query['endPos'] || 0));
-    $inputor.val(text);
-    $inputor.atwhocaret('pos', startStr.length + content.length, {
-      iframe: this.app.iframe
-    });
-    if (!$inputor.is(':focus')) {
-      $inputor.focus();
-    }
+	$inputor.focus();
+	$inputor.range(Math.max(this.query.headPos - this.at.length, 0), $inputor.caret());
+	document.execCommand("insertText", false, content);
     return $inputor.change();
   };
 
