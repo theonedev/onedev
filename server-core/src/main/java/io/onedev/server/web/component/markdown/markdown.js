@@ -2,12 +2,13 @@ onedev.server.markdown = {
 	shortcuts: { // cmd (Mac) or ctrl (non-Mac) plus below keys
 		"b": ".do-bold",
 		"k": ".do-link",
+		".": ".do-image",
 		"i": ".do-italic",
 		"e": ".do-code",
 		"shift-.": ".do-quote",
 		"shift-7": ".do-orderlist",
 		"shift-8": ".do-list",
-		"shift-9": ".do-tasklist" // this does not conform to github as ctrl-shift-l is occupied in MS Edge
+		"shift-l": ".do-tasklist"
 	},
 	getCookiePrefix: function($container) {
 		if ($container.hasClass("compact-mode"))
@@ -130,9 +131,11 @@ onedev.server.markdown = {
 			}
 		}, previewTimeout);
 		
-		var $submit = $input.closest("form")
-				.find(">.btn-primary, :last-child>.btn-primary")
-				.not("[disabled=disabled]");
+		function getSubmit() {
+			return $input.closest("form")
+					.find(">.btn-primary, :last-child>.btn-primary")
+					.not("[disabled=disabled]");
+		}
 		
 	    var fontSize = parseInt(getComputedStyle($input[0]).getPropertyValue('font-size'));
 	    
@@ -171,14 +174,13 @@ onedev.server.markdown = {
 		 */
 		$input.on("keydown", function(e) {
 			if (e.keyCode == 13 && $(".atwho-view").filter(":visible").length == 0) {
-				if ((e.metaKey || e.ctrlKey) && $submit.length != 0) 
+				if ((e.metaKey || e.ctrlKey) && getSubmit().length != 0) 
 					return;
 					
 				e.preventDefault();
 				var input = $input.val();
 				var caret = $input.caret();
 				var inputBeforeCaret = input.substring(0, caret);
-				var inputAfterCaret = input.substring(caret);
 				var lastLineBreakPos = inputBeforeCaret.lastIndexOf('\n');
 				var spaces = "";
 				for (var i=lastLineBreakPos+1; i<inputBeforeCaret.length; i++) {
@@ -345,9 +347,12 @@ onedev.server.markdown = {
 					if (e.shiftKey)
 						key = "shift-" + key;
 					var selector = onedev.server.markdown.shortcuts[key];
-					if (selector) 
+					if (selector) {
+						e.preventDefault();
 						$head.find(selector).click();
+					}
 				}
+				var $submit = getSubmit();
 				if ((e.metaKey || e.ctrlKey) && e.keyCode == 13 && $submit.length != 0) {
 					e.preventDefault();
 					$submit.click();
