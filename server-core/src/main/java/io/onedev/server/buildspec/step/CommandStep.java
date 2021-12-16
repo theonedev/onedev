@@ -41,7 +41,7 @@ public class CommandStep extends Step {
 	}
 
 	@Editable(order=110, description="Specify content of Linux shell script or Windows command batch to execute "
-			+ "under the <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>. Depending on the "
+			+ "under the <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. Depending on the "
 			+ "job executor being used, this may be executed either inside or outside container")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestCommandVariables")

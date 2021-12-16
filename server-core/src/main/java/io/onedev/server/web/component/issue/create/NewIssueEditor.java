@@ -284,17 +284,20 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Issue issue = newIssue();
 		issue.setTitle(titleInput.getConvertedInput());
 		issue.setDescription(descriptionInput.getConvertedInput());
-		for (Milestone milestone: milestoneChoice.getConvertedInput()) {
-			IssueSchedule schedule = new IssueSchedule();
-			schedule.setMilestone(milestone);
-			schedule.setIssue(issue);
-			issue.getSchedules().add(schedule);
-		}
 		
 		fieldEditor.convertInput();
 		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());
 		issue.setFieldValues(FieldUtils.getFieldValues(fieldEditor.newComponentContext(), 
 				fieldEditor.getConvertedInput(), fieldNames));
+		
+		milestoneChoice.convertInput();
+		issue.getSchedules().clear();
+		for (Milestone milestone: milestoneChoice.getConvertedInput()) {
+			IssueSchedule schedule = new IssueSchedule();
+			schedule.setIssue(issue);
+			schedule.setMilestone(milestone);
+			issue.getSchedules().add(schedule);
+		}
 		return issue;
 	}
 	

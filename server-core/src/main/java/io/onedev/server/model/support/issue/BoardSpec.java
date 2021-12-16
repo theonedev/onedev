@@ -100,7 +100,8 @@ public class BoardSpec implements Serializable {
 		this.backlogBaseQuery = backlogBaseQuery;
 	}
 
-	@Editable(order=300, description="Specify issue field to identify different columns of the board")
+	@Editable(order=300, description="Specify issue field to identify different columns of the board. "
+			+ "Only state and single-valued enumeration field can be used here")
 	@ChoiceProvider("getIdentifyFieldChoices")
 	@NotEmpty
 	public String getIdentifyField() {
