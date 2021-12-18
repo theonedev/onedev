@@ -563,8 +563,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.0.19</commons.version>
-		<agent.version>1.1.7</agent.version>
+		<commons.version>2.0.20</commons.version>
+		<agent.version>1.1.8</agent.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<logback.version>1.2.0</logback.version>
 		<antlr.version>4.7.2</antlr.version>
