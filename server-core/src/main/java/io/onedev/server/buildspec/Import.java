@@ -17,6 +17,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -96,9 +97,9 @@ public class Import implements Serializable, Validatable {
 	
 	@Nullable
 	private static Project getInputProject() {
-		String projectName = (String) EditContext.get().getInputValue("projectName");
-		if (projectName != null) {
-			Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
+		String projectPath = (String) EditContext.get().getInputValue("projectPath");
+		if (projectPath != null) {
+			Project project = OneDev.getInstance(ProjectManager.class).find(projectPath);
 			if (project != null && SecurityUtils.canReadCode(project))
 				return project;
 		}
@@ -162,7 +163,10 @@ public class Import implements Serializable, Validatable {
 					ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
 					if (context.getProject().equals(page.getProject()) 
 							&& (page.getMode() == Mode.ADD || page.getMode() == Mode.EDIT)) {
-						accessToken = context.getSecretValue(page.getBlobIdent().revision, accessTokenSecret);
+						String branchName = page.getBlobIdent().revision;
+						if (branchName == null)
+							branchName = "master";
+						accessToken = context.getSecretValue(branchName, accessTokenSecret);
 					} else {
 						accessToken = context.getSecretValue(accessTokenSecret);
 					}
@@ -238,7 +242,10 @@ public class Import implements Serializable, Validatable {
 				}
 			} catch (Exception e) {
 				context.disableDefaultConstraintViolation();
-				context.buildConstraintViolationWithTemplate(e.getMessage()).addConstraintViolation();
+				String message = e.getMessage();
+				if (message == null) 
+					message = Throwables.getStackTraceAsString(e);
+				context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 				return false;
 			} finally {
 				importChain.get().pop();
