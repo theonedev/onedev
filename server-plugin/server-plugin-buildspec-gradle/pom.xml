@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>6.1.2</version>
+		<version>6.1.3</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.buildspec.gradle.GradleModule</moduleClass>
