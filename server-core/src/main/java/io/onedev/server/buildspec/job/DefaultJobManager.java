@@ -422,23 +422,25 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	private JobExecutor getJobExecutor(Build build, TaskLogger jobLogger) {
-		if (build.getJob().getJobExecutor() != null) {
+		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
+		if (jobExecutorName != null) {
 			JobExecutor jobExecutor = null;
 			for (JobExecutor each: settingManager.getJobExecutors()) {
-				if (each.getName().equals(build.getJob().getJobExecutor())) {
+				if (each.getName().equals(jobExecutorName)) {
 					jobExecutor = each;
 					break;
 				} 
 			}
 			if (jobExecutor != null) {
 				if (!jobExecutor.isEnabled())
-					throw new ExplicitException("Specified job executor '" + jobExecutor.getName() + "' is disabled");
+					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is disabled");
 				else if (!isApplicable(jobExecutor, build))
-					throw new ExplicitException("Specified job executor '" + jobExecutor.getName() + "' is not applicable for current job");
+					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not applicable for current job");
 				else
 					return jobExecutor;
 			} else {
-				throw new ExplicitException("Unable to find specified job executor '" + build.getJob().getJobExecutor() + "'");
+				throw new ExplicitException("Unable to find specified job executor '" + jobExecutorName + "'");
 			}
 		} else {
 			if (!settingManager.getJobExecutors().isEmpty()) { 

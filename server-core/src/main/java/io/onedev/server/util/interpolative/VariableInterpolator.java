@@ -144,6 +144,7 @@ public class VariableInterpolator {
 		this(build, build.getParamCombination());
 	}
 
+	@Nullable
 	public String interpolate(@Nullable String value) {
 		if (value != null) {
 			Interpolative interpolative = Interpolative.parse(value);
@@ -157,7 +158,10 @@ public class VariableInterpolator {
 						builder.append(interpolated);
 				}
 			}
-			return builder.toString();
+			if (builder.length() != 0)
+				return builder.toString();
+			else
+				return null;
 		} else {
 			return null;
 		}

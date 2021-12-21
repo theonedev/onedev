@@ -57,10 +57,12 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.RetryCondition;
 import io.onedev.server.web.editable.annotation.SuggestionProvider;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
@@ -142,7 +144,7 @@ public class Job implements NamedElement, Serializable, Validatable {
 
 	@Editable(order=200, description="Optionally specify executor to execute this job. Leave empty to "
 			+ "use any executor as long as its job requirement is satisfied")
-	@ChoiceProvider("getJobExecutorChoices")
+	@Interpolative(literalSuggester="suggestJobExecutors", variableSuggester="suggestVariables")
 	@NameOfEmptyValue("Use Any Applicable Executor")
 	public String getJobExecutor() {
 		return jobExecutor;
@@ -153,7 +155,7 @@ public class Job implements NamedElement, Serializable, Validatable {
 	}
 
 	@SuppressWarnings("unused")
-	private static List<String> getJobExecutorChoices() {
+	private static List<InputSuggestion> suggestJobExecutors(String matchWith) {
 		List<String> applicableJobExecutors = new ArrayList<>();
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
 		ProjectAndBranch projectAndBranch = new ProjectAndBranch(page.getProject(), page.getBlobIdent().revision);
@@ -167,7 +169,8 @@ public class Job implements NamedElement, Serializable, Validatable {
 				}
 			}
 		}
-		return applicableJobExecutors;
+		
+		return SuggestionUtils.suggest(applicableJobExecutors, matchWith);
 	}
 	
 	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>")
