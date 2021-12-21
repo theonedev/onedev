@@ -699,7 +699,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 				};
 				link.setEnabled(SecurityUtils.canReadCode(project));
 				add(link);
-				link.add(new Label("label", project.getPath()));
+				link.add(new Label("label", project.getPath() + ":" + aImport.getTag()));
 			} else {
 				WebMarkupContainer link = new WebMarkupContainer("link");
 				link.add(new WebMarkupContainer("label"));
