@@ -8,8 +8,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.usage.InUseException;
 import io.onedev.server.web.page.simple.SimplePage;
 
@@ -27,7 +27,7 @@ public class InUseErrorPage extends SimplePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("inUseDetail", HtmlUtils.formatAsHtml(exception.getMessage())).setEscapeModelStrings(false));
+		add(new Label("inUseDetail", HtmlEscape.escapeHtml5(exception.getMessage())).setEscapeModelStrings(false));
 	}
 	
 	@Override

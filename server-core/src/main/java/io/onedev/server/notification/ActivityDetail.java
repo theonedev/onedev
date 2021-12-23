@@ -13,7 +13,6 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.PropertyChange;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
@@ -66,18 +65,18 @@ public class ActivityDetail implements Serializable {
 			builder.append("<tr>");
 			if (changes.size() != 1 || !hideNameIfOnlyOneRow) { 
 				builder.append("  <td style='padding:0.4em 0.6em; font-size:0.9em; border-bottom:1px solid #EBEDF3; text-align:left;'>");
-				builder.append(HtmlEscape.escapeHtml5(change.getName()));
+				builder.append("<pre style='margin:0;'>" + HtmlEscape.escapeHtml5(change.getName()) + "</pre>");
 				builder.append("  </td>");
 			}
 			builder.append("  <td style='padding:0.4em 0.6em; font-size:0.9em; border-bottom:1px solid #EBEDF3; text-align:left;'>");
 			if (change.getOldValue() != null)
-				builder.append(HtmlUtils.formatAsHtml(change.getOldValue()));
+				builder.append("<pre style='margin:0;'>" + HtmlEscape.escapeHtml5(change.getOldValue()) + "</pre>");
 			else
 				builder.append("<i>empty</i>");
 			builder.append("  </td>");
 			builder.append("  <td style='padding:0.4em 0.6em; font-size:0.9em; border-bottom:1px solid #EBEDF3; font-size:0.9em; text-align:left;'>");
 			if (change.getNewValue() != null)
-				builder.append(HtmlUtils.formatAsHtml(change.getNewValue()));
+				builder.append("<pre style='margin:0;'>" + HtmlEscape.escapeHtml5(change.getNewValue()) + "</pre>");
 			else
 				builder.append("<i>empty</i>");
 			builder.append("  </td>");

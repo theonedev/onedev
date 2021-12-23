@@ -11,11 +11,8 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Safelist;
-import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
-
-import io.onedev.commons.utils.StringUtils;
 
 public class HtmlUtils {
 
@@ -107,19 +104,6 @@ public class HtmlUtils {
 	public static Document parse(String html) {
 		// Use a faked baseURI, otherwise all relative urls will be stripped out
 		return Jsoup.parseBodyFragment(html, "http://localhost/sanitize");
-	}
-	
-	/**
-	 * Escape text and preserving line breaks and white spaces
-	 * @param text
-	 * @return
-	 */
-	public static String formatAsHtml(String text) {
-		text = HtmlEscape.escapeHtml5(text);
-		text = StringUtils.replace(text, "\n", "<br>");
-		text = StringUtils.replace(text, " ", "&nbsp;");
-		text = StringUtils.replace(text, "\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-		return text;
 	}
 	
 }

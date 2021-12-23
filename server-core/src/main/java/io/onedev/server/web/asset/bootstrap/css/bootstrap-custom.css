@@ -255,7 +255,7 @@ code {
 }
 pre {
     display: block;
-    font-size: 87.5%;
+    font-size: 100%;
     color: var(--dark);
 }
 pre code {
