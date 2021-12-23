@@ -24,7 +24,6 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -32,12 +31,10 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.Configuration;
 import javax.validation.Validation;
-import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.realm.Realm;
@@ -47,8 +44,6 @@ import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.shiro.web.servlet.ShiroFilter;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.wicket.Application;
-import org.apache.wicket.core.request.mapper.StalePageException;
-import org.apache.wicket.protocol.http.PageExpiredException;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -57,19 +52,15 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;
-import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.StaleStateException;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
-import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.type.Type;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Provider;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
@@ -87,7 +78,6 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.DefaultJobManager;
 import io.onedev.server.buildspec.job.JobManager;
@@ -183,11 +173,13 @@ import io.onedev.server.entitymanager.impl.DefaultUserAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.entityreference.DefaultEntityReferenceManager;
 import io.onedev.server.entityreference.EntityReferenceManager;
+import io.onedev.server.exception.ExceptionHandler;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitLfsFilter;
 import io.onedev.server.git.GitSshCommandCreator;
 import io.onedev.server.git.GoGetFilter;
 import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.exception.GitException;
 import io.onedev.server.git.hookcallback.GitPostReceiveCallback;
 import io.onedev.server.git.hookcallback.GitPreReceiveCallback;
 import io.onedev.server.infomanager.CommitInfoManager;
@@ -242,7 +234,9 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.DefaultDao;
+import io.onedev.server.persistence.exception.ConstraintViolationExceptionHandler;
 import io.onedev.server.rest.ProjectResource;
+import io.onedev.server.rest.exception.UnauthenticatedExceptionHandler;
 import io.onedev.server.rest.jersey.DefaultServletContainer;
 import io.onedev.server.rest.jersey.JerseyConfigurator;
 import io.onedev.server.rest.jersey.ResourceConfigProvider;
@@ -297,7 +291,6 @@ import io.onedev.server.web.DefaultUploadItemManager;
 import io.onedev.server.web.DefaultUrlManager;
 import io.onedev.server.web.DefaultWicketFilter;
 import io.onedev.server.web.DefaultWicketServlet;
-import io.onedev.server.web.ExpectedExceptionContribution;
 import io.onedev.server.web.ResourcePackScopeContribution;
 import io.onedev.server.web.UploadItemManager;
 import io.onedev.server.web.WebApplication;
@@ -312,6 +305,7 @@ import io.onedev.server.web.editable.DefaultEditSupportRegistry;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
+import io.onedev.server.web.exception.PageExpiredExceptionHandler;
 import io.onedev.server.web.mapper.DynamicPathPageMapper;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
@@ -659,19 +653,12 @@ public class CoreModule extends AbstractPluginModule {
 			}
 			
 		});
-		contribute(ExpectedExceptionContribution.class, new ExpectedExceptionContribution() {
-			
-			@SuppressWarnings("unchecked")
-			@Override
-			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
-				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
-						ObjectNotFoundException.class, io.onedev.server.exception.ObjectNotFoundException.class, 
-						StaleStateException.class, UnauthorizedException.class, 
-						ExplicitException.class, ValidationException.class, PageExpiredException.class, 
-						StalePageException.class);
-			}
-			
-		});
+		
+		contributeFromPackage(ExceptionHandler.class, ExceptionHandler.class);
+		contributeFromPackage(ExceptionHandler.class, GitException.class);
+		contributeFromPackage(ExceptionHandler.class, UnauthenticatedExceptionHandler.class);
+		contributeFromPackage(ExceptionHandler.class, ConstraintViolationExceptionHandler.class);
+		contributeFromPackage(ExceptionHandler.class, PageExpiredExceptionHandler.class);
 
 		bind(UrlManager.class).to(DefaultUrlManager.class);
 		bind(CodeCommentEventBroadcaster.class);

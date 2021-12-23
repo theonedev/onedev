@@ -1,4 +1,4 @@
-package io.onedev.server.rest.jersey;
+package io.onedev.server.rest.exception;
 
 import io.onedev.commons.utils.ExplicitException;
 

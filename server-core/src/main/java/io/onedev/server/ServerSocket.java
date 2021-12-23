@@ -27,7 +27,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.exception.NotReadyException;
+import io.onedev.server.exception.SystemNotReadyException;
 import io.onedev.server.job.resource.ResourceManager;
 import io.onedev.server.tasklog.JobLogManager;
 
@@ -54,7 +54,7 @@ public class ServerSocket {
 				builder.append(", reason: " + reason);
 			builder.append(")");
 			logger.debug(builder.toString());
-		} catch (NotReadyException e) {
+		} catch (SystemNotReadyException e) {
 		}
     }
 

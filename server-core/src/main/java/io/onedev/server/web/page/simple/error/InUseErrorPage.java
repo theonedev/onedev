@@ -2,8 +2,11 @@ package io.onedev.server.web.page.simple.error;
 
 import java.io.Serializable;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.util.HtmlUtils;
@@ -48,6 +51,11 @@ public class InUseErrorPage extends SimplePage {
 		return "The object you are deleting is still being used";
 	}
 
+	@Override
+	protected void setHeaders(final WebResponse response) {
+		response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+	}
+	
 	@Override
 	protected String getLogoHref() {
 		return "sad-panda";

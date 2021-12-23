@@ -27,7 +27,7 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 			entityClass = (Class<T>) typeArguments.get(0);
 		} else {
 			throw new RuntimeException("Super class of entity manager implementation must "
-					+ "be AbstractEntityManager and must realize the type argument <T>");
+					+ "be BaseEntityManager and must realize the type argument <T>");
 		}
 		this.dao = dao;
     }

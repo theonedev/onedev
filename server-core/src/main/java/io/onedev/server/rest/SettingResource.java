@@ -34,7 +34,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.jersey.InvalidParamException;
+import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 

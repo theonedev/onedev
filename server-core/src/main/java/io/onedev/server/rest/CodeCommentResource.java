@@ -26,7 +26,7 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.jersey.InvalidParamException;
+import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.security.SecurityUtils;

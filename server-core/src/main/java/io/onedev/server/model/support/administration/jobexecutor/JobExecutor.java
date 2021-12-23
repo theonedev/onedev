@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+import javax.ws.rs.core.Response;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -149,10 +150,11 @@ public abstract class JobExecutor implements Serializable {
 	}
 	
 	protected String getErrorMessage(Exception exception) {
-		String errorMessage = ExceptionUtils.getExpectedError(exception);
-		if (errorMessage == null) 
-			errorMessage = Throwables.getStackTraceAsString(exception);
-		return errorMessage;
+		Response response = ExceptionUtils.buildResponse(exception);
+		if (response != null) 
+			return response.getEntity().toString();
+		else
+			return Throwables.getStackTraceAsString(exception);
 	}
 	
 }

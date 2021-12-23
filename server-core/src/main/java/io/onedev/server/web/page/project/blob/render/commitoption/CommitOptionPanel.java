@@ -38,14 +38,14 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.exception.NotTreeException;
-import io.onedev.server.exception.ObjectAlreadyExistsException;
-import io.onedev.server.exception.ObsoleteCommitException;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.exception.NotTreeException;
+import io.onedev.server.git.exception.ObjectAlreadyExistsException;
+import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;

@@ -2,10 +2,13 @@ package io.onedev.server.web.page.simple.error;
 
 import java.io.Serializable;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Throwables;
@@ -19,33 +22,39 @@ import io.onedev.server.web.page.simple.SimplePage;
 
 @SuppressWarnings("serial")
 public class GeneralErrorPage extends SimplePage {
-	
+
 	private static final int MAX_TITLE_LEN = 240;
-	
+
 	private String title;
-	
+
 	private String detailMessage;
-	
+
+	private int statusCode;
+
 	public GeneralErrorPage(Exception exception) {
 		super(new PageParameters());
-		
-		title = ExceptionUtils.getExpectedError(exception);
-		if (title == null) {
+
+		Response response = ExceptionUtils.buildResponse(exception);
+		if (response != null) {
+			title = response.getEntity().toString();
+			statusCode = response.getStatus();
+		} else {
 			title = "An unexpected exception occurred";
 			detailMessage = Throwables.getStackTraceAsString(exception);
+			statusCode = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		}
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
 		WebMarkupContainer container = new WebMarkupContainer("error");
 		container.setOutputMarkupId(true);
 		add(container);
-		
+
 		container.add(new ViewStateAwarePageLink<Void>("home", ProjectListPage.class));
-		
+
 		container.add(new AjaxLink<Void>("showDetail") {
 
 			@Override
@@ -56,13 +65,18 @@ public class GeneralErrorPage extends SimplePage {
 			}
 
 		}.setVisible(SecurityUtils.isAdministrator() && detailMessage != null));
-		
+
 		container.add(new WebMarkupContainer("errorDetail").setVisible(false));
 	}
-	
+
 	@Override
 	public boolean isErrorPage() {
 		return true;
+	}
+
+	@Override
+	protected void setHeaders(final WebResponse response) {
+		response.setStatus(statusCode);
 	}
 
 	@Override
@@ -85,5 +99,5 @@ public class GeneralErrorPage extends SimplePage {
 	protected String getLogoHref() {
 		return "sad-panda";
 	}
-	
+
 }

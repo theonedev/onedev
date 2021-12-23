@@ -17,6 +17,8 @@ import javax.ws.rs.ext.Provider;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.rest.exception.InvalidParamException;
+
 @Provider
 public class ParamCheckFilter implements ContainerRequestFilter {
 

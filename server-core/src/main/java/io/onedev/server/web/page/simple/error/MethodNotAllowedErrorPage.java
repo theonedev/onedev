@@ -1,6 +1,9 @@
 package io.onedev.server.web.page.simple.error;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.web.page.simple.SimplePage;
@@ -28,6 +31,11 @@ public class MethodNotAllowedErrorPage extends SimplePage {
 		return "Method Not Allowed";
 	}
 
+	@Override
+	protected void setHeaders(final WebResponse response) {
+		response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+	}
+	
 	@Override
 	protected String getSubTitle() {
 		return "This http method is not allowed";

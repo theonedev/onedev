@@ -41,16 +41,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.exception.ObjectNotFoundException;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.jersey.InvalidParamException;
+import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.FileCreateOrUpdateRequest;
 import io.onedev.server.rest.support.FileEditRequest;
 import io.onedev.server.search.commit.CommitQuery;

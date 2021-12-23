@@ -1,4 +1,4 @@
-package io.onedev.server.exception;
+package io.onedev.server.git.exception;
 
 import io.onedev.commons.utils.ExplicitException;
 
