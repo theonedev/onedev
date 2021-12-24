@@ -63,6 +63,7 @@ public abstract class AssetServlet extends DefaultServlet {
 			
 		});
 	}
+	
 	@Override
 	public String getInitParameter(String name) {
 		String value = super.getInitParameter(name);
