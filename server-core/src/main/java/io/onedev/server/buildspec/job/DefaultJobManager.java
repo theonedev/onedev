@@ -53,6 +53,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheInstance;
@@ -424,7 +425,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private JobExecutor getJobExecutor(Build build, TaskLogger jobLogger) {
 		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
-		if (jobExecutorName != null) {
+		if (StringUtils.isNotBlank(jobExecutorName)) {
 			JobExecutor jobExecutor = null;
 			for (JobExecutor each: settingManager.getJobExecutors()) {
 				if (each.getName().equals(jobExecutorName)) {
@@ -1202,7 +1203,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										if (explicitException != null)
 											jobLogger.error(explicitException.getMessage());
 										else if (ExceptionUtils.find(e, FailedException.class) == null)
-											jobLogger.error(e.getMessage());
+											jobLogger.error("Error running job", e);
 									} catch (InterruptedException e) {
 									} finally {
 										build.setFinishDate(new Date());

@@ -158,10 +158,10 @@ public class VariableInterpolator {
 						builder.append(interpolated);
 				}
 			}
-			if (builder.length() != 0)
-				return builder.toString();
-			else
-				return null;
+			// Should not return null here even if result is empty in order not to 
+			// surprise caller. For instance command step may have empty line in commands
+			// and we should not convert them to null after interpolation
+			return builder.toString();
 		} else {
 			return null;
 		}
