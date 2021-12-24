@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.executor.servershell;
 
-import static io.onedev.agent.ShellExecutorUtils.getShell;
 import static io.onedev.agent.ShellExecutorUtils.newErrorLogger;
 import static io.onedev.agent.ShellExecutorUtils.newInfoLogger;
 import static io.onedev.agent.ShellExecutorUtils.resolveCachePath;
@@ -26,8 +25,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.validation.constraints.Size;
-
-import org.apache.commons.lang.SystemUtils;
 
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -147,27 +144,19 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 							
 							if (executable instanceof CommandExecutable) {
 								CommandExecutable commandExecutable = (CommandExecutable) executable;
-								File jobScriptFile;
-								if (SystemUtils.IS_OS_WINDOWS) {
-									jobScriptFile = new File(buildDir, "job-commands.bat");
-									try {
-										FileUtils.writeLines(
-												jobScriptFile, 
-												new ArrayList<>(replacePlaceholders(commandExecutable.getCommands(), buildDir)), 
-												"\r\n");
-									} catch (IOException e) {
-										throw new RuntimeException(e);
-									}
-								} else {
-									jobScriptFile = new File(buildDir, "job-commands.sh");
-									try {
-										FileUtils.writeLines(
-												jobScriptFile, 
-												new ArrayList<>(replacePlaceholders(commandExecutable.getCommands(), buildDir)), 
-												"\n");
-									} catch (IOException e) {
-										throw new RuntimeException(e);
-									}
+								if (commandExecutable.getImage() != null) {
+									throw new ExplicitException("This step should be executed by server docker executor, "
+											+ "remote docker executor, or kubernetes executor");
+								}
+								
+								File jobScriptFile = new File(buildDir, "job-commands" + commandExecutable.getScriptExtension());
+								try {
+									FileUtils.writeLines(
+											jobScriptFile, 
+											new ArrayList<>(replacePlaceholders(commandExecutable.getCommands(), buildDir)), 
+											commandExecutable.getEndOfLine());
+								} catch (IOException e) {
+									throw new RuntimeException(e);
 								}
 								
 								for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
@@ -186,13 +175,13 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									}
 								}
 								
-								Commandline shell = getShell();
+								Commandline interpreter = commandExecutable.getInterpreter();
 								Map<String, String> environments = new HashMap<>();
 								environments.put("GIT_HOME", userDir.getAbsolutePath());
-								shell.workingDir(workspaceDir).environments(environments);
-								shell.addArgs(jobScriptFile.getAbsolutePath());
+								interpreter.workingDir(workspaceDir).environments(environments);
+								interpreter.addArgs(jobScriptFile.getAbsolutePath());
 								
-								ExecutionResult result = shell.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+								ExecutionResult result = interpreter.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger));
 								if (result.getReturnCode() != 0) {
 									jobLogger.error("Step \"" + stepNames + "\" is failed: Command failed with exit code " + result.getReturnCode());
 									return false;

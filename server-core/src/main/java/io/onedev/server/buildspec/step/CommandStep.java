@@ -13,23 +13,41 @@ import io.onedev.k8shelper.Executable;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Editable(order=10, name="Execute Shell/Batch Commands")
 public class CommandStep extends Step {
 
 	private static final long serialVersionUID = 1L;
 
+	private boolean runInContainer = true;
+	
 	private String image;
 	
 	private List<String> commands = new ArrayList<>();
 	
 	private boolean useTTY;
 	
-	@Editable(order=100, description="Specify docker image to execute commands inside. "
-			+ "<span class='text-warning'>This property will be ignored if the job is executed by a shell executor</span>")
+	@Editable(order=50, description="Whether or not to run this step inside container")
+	public boolean isRunInContainer() {
+		return runInContainer;
+	}
+
+	public void setRunInContainer(boolean runInContainer) {
+		this.runInContainer = runInContainer;
+	}
+
+	@SuppressWarnings("unused")
+	private static boolean isRunInContainerEnabled() {
+		return (boolean) EditContext.get().getInputValue("runInContainer");
+	}
+	
+	@Editable(order=100, description="Specify container image to execute commands inside")
+	@ShowCondition("isRunInContainerEnabled")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
@@ -40,11 +58,11 @@ public class CommandStep extends Step {
 		this.image = image;
 	}
 
-	@Editable(order=110, description="Specify content of Linux shell script or Windows command batch to execute "
+	@Editable(order=110, description="Specify shell (on Linux/Unix) or batch (on Windows) commands to execute "
 			+ "under the <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. Depending on the "
 			+ "job executor being used, this may be executed either inside or outside container")
 	@Interpolative
-	@Code(language=Code.SHELL, variableProvider="suggestCommandVariables")
+	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@Size(min=1, message="may not be empty")
 	public List<String> getCommands() {
 		return commands;
@@ -67,19 +85,13 @@ public class CommandStep extends Step {
 		this.useTTY = useTTY;
 	}
 
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestVariables(String matchWith) {
+	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false);
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestCommandVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 	
 	@Override
 	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
-		return new CommandExecutable(getImage(), getCommands(), isUseTTY());
+		return new CommandExecutable(runInContainer?getImage():null, getCommands(), isUseTTY());
 	}
 	
 }

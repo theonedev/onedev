@@ -27,6 +27,8 @@ public @interface Code {
 	
 	String SHELL = "Shell";
 	
+	String POWER_SHELL = "PowerShell";
+	
 	String HTML_TEMPLATE = "Java Server Pages";
 	
 	String language();

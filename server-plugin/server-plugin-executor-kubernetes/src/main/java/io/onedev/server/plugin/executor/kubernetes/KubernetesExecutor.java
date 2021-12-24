@@ -785,9 +785,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						containerNames.add(containerName);
 						Map<Object, Object> stepContainerSpec;
 						if (executable instanceof CommandExecutable) {
+							CommandExecutable commandExecutable = (CommandExecutable) executable;
+							if (commandExecutable.getImage() == null) {
+								throw new ExplicitException("This step should be executed by server shell "
+										+ "executor or remote shell executor");
+							}
+							
 							stepContainerSpec = CollectionUtils.newHashMap(
 									"name", containerName, 
-									"image", ((CommandExecutable)executable).getImage());
+									"image", commandExecutable.getImage());
 							if (((CommandExecutable) executable).isUseTTY())
 								stepContainerSpec.put("tty", true);
 						} else { 

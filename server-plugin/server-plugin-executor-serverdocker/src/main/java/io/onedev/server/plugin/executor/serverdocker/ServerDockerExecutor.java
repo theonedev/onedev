@@ -211,15 +211,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 							String containerBuildHome;
 							String containerWorkspace;
-							String containerEntryPoint;
 							if (SystemUtils.IS_OS_WINDOWS) {
 								containerBuildHome = "C:\\onedev-build";
 								containerWorkspace = "C:\\onedev-build\\workspace";
-								containerEntryPoint = "cmd";
 							} else {
 								containerBuildHome = "/onedev-build";
 								containerWorkspace = "/onedev-build/workspace";
-								containerEntryPoint = "sh";
 							}
 							
 							jobContext.reportJobWorkspace(containerWorkspace);
@@ -234,36 +231,14 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									
 									if (executable instanceof CommandExecutable) {
 										CommandExecutable commandExecutable = (CommandExecutable) executable;
-										String[] containerCommand;
-										if (SystemUtils.IS_OS_WINDOWS) {
-											if (hostAuthInfoHome.get() != null)
-												containerCommand = new String[] {"/c", "xcopy /Y /S /K /Q /H /R C:\\Users\\%USERNAME%\\auth-info\\* C:\\Users\\%USERNAME% > nul && C:\\onedev-build\\job-commands.bat"};						
-											else
-												containerCommand = new String[] {"/c", "C:\\onedev-build\\job-commands.bat"};						
-											File scriptFile = new File(hostBuildHome, "job-commands.bat");
-											try {
-												FileUtils.writeLines(
-														scriptFile, 
-														new ArrayList<>(replacePlaceholders(commandExecutable.getCommands(), hostBuildHome)), 
-														"\r\n");
-											} catch (IOException e) {
-												throw new RuntimeException(e);
-											}
-										} else {
-											if (hostAuthInfoHome.get() != null)
-												containerCommand = new String[] {"-c", "cp -r -f -p /root/auth-info/. /root && sh /onedev-build/job-commands.sh"};
-											else
-												containerCommand = new String[] {"/onedev-build/job-commands.sh"};
-											File scriptFile = new File(hostBuildHome, "job-commands.sh");
-											try {
-												FileUtils.writeLines(
-														scriptFile, 
-														new ArrayList<>(replacePlaceholders(commandExecutable.getCommands(), hostBuildHome)), 
-														"\n");
-											} catch (IOException e) {
-												throw new RuntimeException(e);
-											}
+
+										if (commandExecutable.getImage() == null) {
+											throw new ExplicitException("This step should be executed by server shell "
+													+ "executor or remote shell executor");
 										}
+										
+										Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
+												hostBuildHome, commandExecutable, hostAuthInfoHome.get() != null);
 										
 										String containerName = network + "-step-" + stringifyPosition(position);
 										Commandline docker = newDocker();
@@ -298,10 +273,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 										if (commandExecutable.isUseTTY())
 											docker.addArgs("-t");
-										docker.addArgs("-w", containerWorkspace, "--entrypoint=" + containerEntryPoint);
+										docker.addArgs("-w", containerWorkspace, "--entrypoint=" + entrypoint.executable());
 										
 										docker.addArgs(commandExecutable.getImage());
-										docker.addArgs(containerCommand);
+										docker.addArgs(entrypoint.arguments().toArray(new String[0]));
 										
 										ProcessKiller killer = newDockerKiller(newDocker(), containerName, jobLogger);
 										ExecutionResult result = docker.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger), null, killer);

@@ -83,9 +83,13 @@ public class EditableUtils {
 		} else if (element.getAnnotation(Interpolative.class) != null) {
 			String description = getDescription(element, editable);
 			if (description.length() != 0) {
-				if (!description.endsWith("."))
-					description += ".";
-				description += " " + VariableInterpolator.HELP;
+				if (description.endsWith("<br>")) {
+					description += VariableInterpolator.HELP;
+				} else {
+					if (!description.endsWith("."))
+						description += ".";
+					description += " " + VariableInterpolator.HELP;
+				}
 			} else {
 				description = VariableInterpolator.HELP;
 			}

@@ -1216,4 +1216,50 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 	
+	@SuppressWarnings("unused")
+	private void migrate14(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("steps")) {
+							SequenceNode stepsNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node stepsNodeItem: stepsNode.getValue()) {
+								MappingNode stepNode = (MappingNode) stepsNodeItem;
+								if (stepNode.getTag().getValue().equals("!CommandStep")) {
+									stepNode.getValue().add(new NodeTuple(
+											new ScalarNode(Tag.STR, "runInContainer"), 
+											new ScalarNode(Tag.BOOL, "true")));
+								}
+							}
+						}
+					}
+				}
+			} else if (specObjectKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stepTemplateTupleKey.equals("steps")) {
+							SequenceNode stepsNode = (SequenceNode) stepTemplateTuple.getValueNode();
+							for (Node stepsNodeItem: stepsNode.getValue()) {
+								MappingNode stepNode = (MappingNode) stepsNodeItem;
+								if (stepNode.getTag().getValue().equals("!CommandStep")) {
+									stepNode.getValue().add(new NodeTuple(
+											new ScalarNode(Tag.STR, "runInContainer"), 
+											new ScalarNode(Tag.BOOL, "true")));
+								}
+							}
+						}
+					}
+				}				
+			}
+		}			
+	}	
+	
 }

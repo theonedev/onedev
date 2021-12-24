@@ -1,3 +1,8 @@
+# 6.2.0
+
+1. A new property `Run In Container` is added and enabled for all command steps in build spec. If you have steps intended to 
+be executed by shell executor, edit it to disable this property, otherwise the build will fail reporting `This step should be executed by server docker executor, remote docker executor, or kubernetes executor`
+
 # 5.4.0 
 
 1. In case install OneDev into a Kubernetes cluster, Kustomization based deployment is replaced by helm based deployment for flexibility reason

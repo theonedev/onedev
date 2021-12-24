@@ -222,13 +222,11 @@ CodeMirror.defineMode('powershell', function() {
         state.tokenize = tokenMultiString;
         state.startQuote = quoteMatch[0];
         return tokenMultiString(stream, state);
-      } else if (stream.peek().match(/[({]/)) {
+      } else {
         return 'punctuation';
-      } else if (stream.peek().match(varNames)) {
-        // splatted variable
-        return tokenVariable(stream, state);
       }
     }
+	
     return 'error';
   }
 
