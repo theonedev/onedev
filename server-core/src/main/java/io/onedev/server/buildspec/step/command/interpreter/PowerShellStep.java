@@ -1,25 +1,22 @@
-package io.onedev.server.buildspec.step;
+package io.onedev.server.buildspec.step.command.interpreter;
 
 import java.util.List;
 
 import javax.validation.constraints.Size;
 
-import io.onedev.k8shelper.Executable;
+import io.onedev.k8shelper.CommandExecutable;
 import io.onedev.k8shelper.PowerShellExecutable;
-import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.model.Build;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=17, name="Execute PowerShell Commands")
-public class PowerShellStep extends CommandStep {
+@Editable(order=300, name="PowerShell")
+public class PowerShellStep extends Interpreter {
 
 	private static final long serialVersionUID = 1L;
 
 	@Editable(order=110, description="Specify PowerShell commands to execute "
-			+ "under the <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. Depending on the "
-			+ "job executor being used, this may be executed either inside or outside container.<br>"
+			+ "under the <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>.<br>"
 			+ "<b class='text-danger'>NOTE: </b> OneDev checks exit code of the script to determine if step is successful. "
 			+ "Since PowerShell always exit with 0 even if there are script errors, you should handle errors in the script "
 			+ "and exit with non-zero code, or simply add line <code>$ErrorActionPreference = \"Stop\"</code> at start of "
@@ -36,8 +33,8 @@ public class PowerShellStep extends CommandStep {
 	}
 	
 	@Override
-	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
-		return new PowerShellExecutable(getImage(), getCommands(), isUseTTY());
+	public CommandExecutable getExecutable(String image, boolean useTTY) {
+		return new PowerShellExecutable(image, getCommands(), useTTY);
 	}
-	
+
 }

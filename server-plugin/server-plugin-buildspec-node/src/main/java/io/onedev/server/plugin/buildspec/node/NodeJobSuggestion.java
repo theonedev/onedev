@@ -23,8 +23,8 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
-import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetBuildVersionStep;
+import io.onedev.server.buildspec.step.command.CommandStep;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -112,7 +112,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 						"npx ng build"));
 			}
 
-			runCommands.setCommands(commands);
+			runCommands.getInterpreter().setCommands(commands);
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
@@ -173,7 +173,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 						"npx react-scripts build"));
 			}
 
-			runCommands.setCommands(commands);
+			runCommands.getInterpreter().setCommands(commands);
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
@@ -227,7 +227,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 				commands.add("npx jest");
 			}
 
-			runCommands.setCommands(commands);
+			runCommands.getInterpreter().setCommands(commands);
 			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
@@ -279,7 +279,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			} else {
 				commands.add("npx mocha");
 			}
-			runCommands.setCommands(commands);
+			runCommands.getInterpreter().setCommands(commands);
 			
 			job.getSteps().add(runCommands);
 			

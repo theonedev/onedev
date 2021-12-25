@@ -17,8 +17,8 @@ import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CheckoutStep;
-import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.buildspec.step.SetBuildVersionStep;
+import io.onedev.server.buildspec.step.command.CommandStep;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -52,7 +52,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 			CommandStep detectBuildVersion = new CommandStep();
 			detectBuildVersion.setName("detect build version");
 			detectBuildVersion.setImage(imageName);
-			detectBuildVersion.setCommands(Lists.newArrayList(
+			detectBuildVersion.getInterpreter().setCommands(Lists.newArrayList(
 					"echo \"Detecting project version (may require some time while downloading gradle dependencies)...\"",
 					"echo $(gradle properties | grep ^version: | grep -v unspecified | cut -c10-) > buildVersion"));
 			job.getSteps().add(detectBuildVersion);
@@ -65,7 +65,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 			CommandStep runGradle = new CommandStep();
 			runGradle.setName("run gradle");
 			runGradle.setImage(imageName);
-			runGradle.setCommands(Lists.newArrayList("gradle build"));
+			runGradle.getInterpreter().setCommands(Lists.newArrayList("gradle build"));
 			job.getSteps().add(runGradle);
 			
 			setupTriggers(job);
