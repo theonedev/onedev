@@ -58,6 +58,11 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				jobLogger.log(String.format("Executing job (executor: %s, agent: %s)...", getName(), agentData.getName()));
 				jobContext.notifyJobRunning(agentId);
 
+				if (!jobContext.getServices().isEmpty()) {
+					throw new ExplicitException("This job requires services, which can only be supported "
+							+ "by docker aware executors");
+				}
+				
 				for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
 					if (new File(cacheSpec.getPath()).isAbsolute()) {
 						throw new ExplicitException("Shell executor does not support "

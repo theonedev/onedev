@@ -88,6 +88,11 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					jobLogger.log(String.format("Executing job with executor '%s'...", getName()));
 					jobContext.notifyJobRunning(null);
 					
+					if (!jobContext.getServices().isEmpty()) {
+						throw new ExplicitException("This job requires services, which can only be supported "
+								+ "by docker aware executors");
+					}
+					
 					JobManager jobManager = OneDev.getInstance(JobManager.class);		
 					File cacheHomeDir = getCacheHome();
 					

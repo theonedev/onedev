@@ -11,7 +11,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable(order=200, name="Borne Shell")
-public class BorneShellStep extends Interpreter {
+public class BorneShellInterpreter extends Interpreter {
 
 	private static final long serialVersionUID = 1L;
 	

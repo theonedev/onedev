@@ -226,8 +226,10 @@ public class Job implements NamedElement, Serializable, Validatable {
 	}
 
 	@Editable(order=9114, group="Dependencies & Services", description="Optionally specify services required by this job. "
-			+ "<span class='text-warning'>This property will be ignored if the job is executed by a shell executor</span>")
+			+ "<b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors "
+			+ "(server docker executor, remote docker executor, or kubernetes executor)")
 	@ChoiceProvider("getServiceChoices")
+	@NameOfEmptyValue("No required services")
 	public List<String> getRequiredServices() {
 		return requiredServices;
 	}
