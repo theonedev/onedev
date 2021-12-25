@@ -1216,6 +1216,33 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 	
+	private void migrate14_steps(SequenceNode stepsNode) {
+		for (Node stepsNodeItem: stepsNode.getValue()) {
+			MappingNode stepNode = (MappingNode) stepsNodeItem;
+			if (stepNode.getTag().getValue().equals("!CommandStep")) {
+				Node commandsNode = null;
+				for (Iterator<NodeTuple> itStepNodeTuple = stepNode.getValue().iterator(); itStepNodeTuple.hasNext();) {
+					NodeTuple stepNodeTuple = itStepNodeTuple.next();
+					if (((ScalarNode)stepNodeTuple.getKeyNode()).getValue().equals("commands")) {
+						commandsNode = stepNodeTuple.getValueNode();
+						itStepNodeTuple.remove();
+						break;
+					}
+				}
+				if (commandsNode != null) {
+					List<NodeTuple> interpreterTuples = new ArrayList<>();
+					interpreterTuples.add(new NodeTuple(new ScalarNode(Tag.STR, "commands"), commandsNode));
+					stepNode.getValue().add(new NodeTuple(
+							new ScalarNode(Tag.STR, "interpreter"), 
+							new MappingNode(new Tag("!DefaultInterpreter"), interpreterTuples, FlowStyle.BLOCK)));
+				}
+				stepNode.getValue().add(new NodeTuple(
+						new ScalarNode(Tag.STR, "runInContainer"), 
+						new ScalarNode(Tag.BOOL, "true")));
+			}
+		}		
+	}
+	
 	@SuppressWarnings("unused")
 	private void migrate14(VersionedYamlDoc doc, Stack<Integer> versions) {
 		for (NodeTuple specTuple: doc.getValue()) {
@@ -1226,17 +1253,8 @@ public class BuildSpec implements Serializable, Validatable {
 					MappingNode jobNode = (MappingNode) jobsNodeItem;
 					for (NodeTuple jobTuple: jobNode.getValue()) {
 						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
-						if (jobTupleKey.equals("steps")) {
-							SequenceNode stepsNode = (SequenceNode) jobTuple.getValueNode();
-							for (Node stepsNodeItem: stepsNode.getValue()) {
-								MappingNode stepNode = (MappingNode) stepsNodeItem;
-								if (stepNode.getTag().getValue().equals("!CommandStep")) {
-									stepNode.getValue().add(new NodeTuple(
-											new ScalarNode(Tag.STR, "runInContainer"), 
-											new ScalarNode(Tag.BOOL, "true")));
-								}
-							}
-						}
+						if (jobTupleKey.equals("steps")) 
+							migrate14_steps((SequenceNode) jobTuple.getValueNode());
 					}
 				}
 			} else if (specObjectKey.equals("stepTemplates")) {
@@ -1245,17 +1263,8 @@ public class BuildSpec implements Serializable, Validatable {
 					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
 					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
 						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
-						if (stepTemplateTupleKey.equals("steps")) {
-							SequenceNode stepsNode = (SequenceNode) stepTemplateTuple.getValueNode();
-							for (Node stepsNodeItem: stepsNode.getValue()) {
-								MappingNode stepNode = (MappingNode) stepsNodeItem;
-								if (stepNode.getTag().getValue().equals("!CommandStep")) {
-									stepNode.getValue().add(new NodeTuple(
-											new ScalarNode(Tag.STR, "runInContainer"), 
-											new ScalarNode(Tag.BOOL, "true")));
-								}
-							}
-						}
+						if (stepTemplateTupleKey.equals("steps")) 
+							migrate14_steps((SequenceNode) stepTemplateTuple.getValueNode());
 					}
 				}				
 			}
