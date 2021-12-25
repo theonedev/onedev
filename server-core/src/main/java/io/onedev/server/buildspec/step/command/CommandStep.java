@@ -58,8 +58,7 @@ public class CommandStep extends Step {
 		this.image = image;
 	}
 
-	@Editable(order=110, description="Specify command interpreter. The default interpreter interpretes commands "
-			+ "as batch script on Windows, and shell script on Linux/Unix")
+	@Editable(order=110)
 	@NotNull
 	public Interpreter getInterpreter() {
 		return interpreter;

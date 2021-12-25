@@ -9,12 +9,13 @@ import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=100, name="Default")
+@Editable(order=100, name="Default (Shell on Linux, Batch on Windows)")
 public class DefaultInterpreter extends Interpreter {
 
 	private static final long serialVersionUID = 1L;
 
-	@Editable(order=110, description="Specify commands to execute under the <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
+	@Editable(order=110, description="Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute "
+			+ "under the <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@Size(min=1, message="may not be empty")
