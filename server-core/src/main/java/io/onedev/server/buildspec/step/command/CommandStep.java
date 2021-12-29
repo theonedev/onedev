@@ -19,7 +19,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
-@Editable(order=10, name="Execute Commands")
+@Editable(order=100, name="Execute Commands")
 public class CommandStep extends Step {
 
 	private static final long serialVersionUID = 1L;

@@ -40,6 +40,7 @@ import io.onedev.k8shelper.CheckoutExecutable;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.CommandExecutable;
 import io.onedev.k8shelper.CompositeExecutable;
+import io.onedev.k8shelper.ContainerExecutable;
 import io.onedev.k8shelper.LeafExecutable;
 import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.ServerExecutable;
@@ -114,21 +115,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						
 					});
 					
-					File workspaceCache = null;
-					for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
-						if (PathUtils.isCurrent(entry.getValue())) {
-							workspaceCache = entry.getKey().getDirectory(cacheHomeDir);
-							break;
-						}
-					}
-					
-					File workspaceDir;
-					if (workspaceCache != null) {
-						workspaceDir = workspaceCache;
-					} else { 
-						workspaceDir = new File(buildDir, "workspace");
-						FileUtils.createDir(workspaceDir);
-					}
+					File workspaceDir = new File(buildDir, "workspace");
+					FileUtils.createDir(workspaceDir);
 					
 					jobLogger.log("Copying job dependencies...");
 					jobContext.copyDependencies(workspaceDir);
@@ -150,7 +138,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 							if (executable instanceof CommandExecutable) {
 								CommandExecutable commandExecutable = (CommandExecutable) executable;
 								if (commandExecutable.getImage() != null) {
-									throw new ExplicitException("This step should be executed by server docker executor, "
+									throw new ExplicitException("This step can only be executed by server docker executor, "
 											+ "remote docker executor, or kubernetes executor");
 								}
 								
@@ -177,6 +165,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 										} catch (IOException e) {
 											throw new RuntimeException(e);
 										}
+									} else {
+										throw new ExplicitException("Invalid cache path: " + entry.getValue());
 									}
 								}
 								
@@ -188,9 +178,12 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								
 								ExecutionResult result = interpreter.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger));
 								if (result.getReturnCode() != 0) {
-									jobLogger.error("Step \"" + stepNames + "\" is failed: Command failed with exit code " + result.getReturnCode());
+									jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + result.getReturnCode());
 									return false;
 								}
+							} else if (executable instanceof ContainerExecutable) {
+								throw new ExplicitException("This step can only be executed by server docker executor, "
+										+ "remote docker executor, or kubernetes executor");
 							} else if (executable instanceof CheckoutExecutable) {
 								try {
 									CheckoutExecutable checkoutExecutable = (CheckoutExecutable) executable;

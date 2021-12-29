@@ -2,6 +2,7 @@
 
 1. A new property `Run In Container` is added and enabled for all command steps in build spec. If you have steps intended to 
 be executed by shell executor, edit it to disable this property, otherwise the build will fail reporting `This step should be executed by server docker executor, remote docker executor, or kubernetes executor`
+1. Using cache path &quot;.&quot; (to cache workspace itself) in job cache definition is no longer supported
 
 # 5.4.0 
 

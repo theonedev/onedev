@@ -6,7 +6,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=300, name="Publish ESLint Report")
+@Editable(order=3000, name="Publish ESLint Report")
 public class PublishESLintReportStep extends PublishCheckstyleReportStep {
 
 	private static final long serialVersionUID = 1L;

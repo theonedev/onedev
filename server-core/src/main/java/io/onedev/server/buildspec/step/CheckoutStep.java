@@ -10,7 +10,7 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(order=5, name="Checkout Code")
+@Editable(order=50, name="Checkout Code")
 public class CheckoutStep extends Step {
 
 	private static final long serialVersionUID = 1L;

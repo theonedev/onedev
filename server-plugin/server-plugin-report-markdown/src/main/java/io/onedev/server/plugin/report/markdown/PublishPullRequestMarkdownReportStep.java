@@ -18,7 +18,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=120, name="Publish Markdown Report (for Pull Request)", description="This report will be displayed in pull request overview "
+@Editable(order=1200, name="Publish Markdown Report (for Pull Request)", description="This report will be displayed in pull request overview "
 		+ "page if the build belongs to a pull request")
 public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 

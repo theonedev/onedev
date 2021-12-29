@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -59,6 +61,7 @@ import io.onedev.k8shelper.CheckoutExecutable;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.CommandExecutable;
 import io.onedev.k8shelper.CompositeExecutable;
+import io.onedev.k8shelper.ContainerExecutable;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafExecutable;
 import io.onedev.k8shelper.LeafHandler;
@@ -188,21 +191,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							startService(newDocker(), network, jobService.toMap(), jobLogger);
 						}
 						
-						AtomicReference<File> workspaceCache = new AtomicReference<>(null);
-						for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
-							if (PathUtils.isCurrent(entry.getValue())) {
-								workspaceCache.set(entry.getKey().getDirectory(hostCacheHome));
-								break;
-							}
-						}
-						
-						File hostWorkspace;
-						if (workspaceCache.get() != null) {
-							hostWorkspace = workspaceCache.get();
-						} else { 
-							hostWorkspace = new File(hostBuildHome, "workspace");
-							FileUtils.createDir(hostWorkspace);
-						}
+						File hostWorkspace = new File(hostBuildHome, "workspace");
+						FileUtils.createDir(hostWorkspace);
 						
 						AtomicReference<File> hostAuthInfoHome = new AtomicReference<>(null);
 						try {						
@@ -224,6 +214,61 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							
 							boolean successful = entryExecutable.execute(new LeafHandler() {
 
+								private int runStepContainer(String image, @Nullable String entrypoint, 
+										List<String> arguments, Map<String, String> environments, 
+										@Nullable String workingDir, List<Integer> position, boolean useTTY) {
+									String containerName = network + "-step-" + stringifyPosition(position);
+									Commandline docker = newDocker();
+									docker.addArgs("run", "--name=" + containerName, "--network=" + network);
+									if (getRunOptions() != null)
+										docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+									
+									docker.addArgs("-v", getOuterPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
+									if (workingDir != null) {
+										docker.addArgs("-v", getOuterPath(hostWorkspace.getAbsolutePath()) + ":" + workingDir);
+										docker.addArgs("-w", workingDir);
+									} else {
+										docker.addArgs("-w", containerWorkspace);
+									}
+									for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
+										if (!PathUtils.isCurrent(entry.getValue())) {
+											String each = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
+											String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
+											docker.addArgs("-v", getOuterPath(each) + ":" + containerCachePath);
+										} else {
+											throw new ExplicitException("Invalid cache path: " + entry.getValue());
+										}
+									}
+									
+									if (SystemUtils.IS_OS_LINUX) 
+										docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+									
+									if (hostAuthInfoHome.get() != null) {
+										String outerPath = getOuterPath(hostAuthInfoHome.get().getAbsolutePath());
+										if (SystemUtils.IS_OS_WINDOWS) {
+											docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerAdministrator\\auth-info");
+											docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerUser\\auth-info");
+										} else { 
+											docker.addArgs("-v", outerPath + ":/root/auth-info");
+										}
+									}
+									
+									for (Map.Entry<String, String> entry: environments.entrySet()) 
+										docker.addArgs("-e", entry.getKey() + "=" + entry.getValue());
+
+									if (useTTY)
+										docker.addArgs("-t");
+									
+									if (entrypoint != null)
+										docker.addArgs("--entrypoint=" + entrypoint);
+									
+									docker.addArgs(image);
+									docker.addArgs(arguments.toArray(new String[arguments.size()]));
+									
+									ProcessKiller killer = newDockerKiller(newDocker(), containerName, jobLogger);
+									return docker.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger), null, killer).getReturnCode();
+								}
+								
 								@Override
 								public boolean execute(LeafExecutable executable, List<Integer> position) {
 									String stepNames = entryExecutable.getNamesAsString(position);
@@ -233,55 +278,31 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										CommandExecutable commandExecutable = (CommandExecutable) executable;
 
 										if (commandExecutable.getImage() == null) {
-											throw new ExplicitException("This step should be executed by server shell "
+											throw new ExplicitException("This step can only be executed by server shell "
 													+ "executor or remote shell executor");
 										}
 										
 										Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
 												hostBuildHome, commandExecutable, hostAuthInfoHome.get() != null);
 										
-										String containerName = network + "-step-" + stringifyPosition(position);
-										Commandline docker = newDocker();
-										docker.clearArgs();
-										docker.addArgs("run", "--name=" + containerName, "--network=" + network);
-										if (getRunOptions() != null)
-											docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+										int exitCode = runStepContainer(commandExecutable.getImage(), entrypoint.executable(), 
+												entrypoint.arguments(), new HashMap<>(), null, position, commandExecutable.isUseTTY());
 										
-										docker.addArgs("-v", getOuterPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
-										if (workspaceCache.get() != null)
-											docker.addArgs("-v", getOuterPath(workspaceCache.get().getAbsolutePath()) + ":" + containerWorkspace);
-										for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
-											if (!PathUtils.isCurrent(entry.getValue())) {
-												String each = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
-												String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
-												docker.addArgs("-v", getOuterPath(each) + ":" + containerCachePath);
-											}
+										if (exitCode != 0) {
+											jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + exitCode);
+											return false;
 										}
-										
-										if (SystemUtils.IS_OS_LINUX) 
-											docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
-										
-										if (hostAuthInfoHome.get() != null) {
-											String outerPath = getOuterPath(hostAuthInfoHome.get().getAbsolutePath());
-											if (SystemUtils.IS_OS_WINDOWS) {
-												docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerAdministrator\\auth-info");
-												docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerUser\\auth-info");
-											} else { 
-												docker.addArgs("-v", outerPath + ":/root/auth-info");
-											}
-										}
+									} else if (executable instanceof ContainerExecutable) {
+										ContainerExecutable containerExecutable = (ContainerExecutable) executable;
 
-										if (commandExecutable.isUseTTY())
-											docker.addArgs("-t");
-										docker.addArgs("-w", containerWorkspace, "--entrypoint=" + entrypoint.executable());
-										
-										docker.addArgs(commandExecutable.getImage());
-										docker.addArgs(entrypoint.arguments().toArray(new String[0]));
-										
-										ProcessKiller killer = newDockerKiller(newDocker(), containerName, jobLogger);
-										ExecutionResult result = docker.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger), null, killer);
-										if (result.getReturnCode() != 0) {
-											jobLogger.error("Step \"" + stepNames + "\" is failed: Command failed with exit code " + result.getReturnCode());
+										List<String> arguments = new ArrayList<>();
+										if (containerExecutable.getArgs() != null)
+											arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(containerExecutable.getArgs())));
+										int exitCode = runStepContainer(containerExecutable.getImage(), null, arguments, 
+												containerExecutable.getEnvMap(), containerExecutable.getWorkingDir(), 
+												position, containerExecutable.isUseTTY());
+										if (exitCode != 0) {
+											jobLogger.error("Step \"" + stepNames + "\" is failed: Container exited with code " + exitCode);
 											return false;
 										} 
 									} else if (executable instanceof CheckoutExecutable) {

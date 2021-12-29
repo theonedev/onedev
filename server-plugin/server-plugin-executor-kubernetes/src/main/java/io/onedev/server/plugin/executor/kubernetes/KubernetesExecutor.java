@@ -56,6 +56,7 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CommandExecutable;
 import io.onedev.k8shelper.CompositeExecutable;
+import io.onedev.k8shelper.ContainerExecutable;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafExecutable;
@@ -701,6 +702,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String containerAuthInfoHome;
 				String trustCertsHome;
 				String dockerSock;
+				String containerdSock;
 				if (baselineOsInfo.isLinux()) {
 					containerBuildHome = "/onedev-build";
 					containerCacheHome = containerBuildHome + "/cache";
@@ -708,6 +710,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					containerAuthInfoHome = "/root/auth-info";
 					trustCertsHome = containerBuildHome + "/trust-certs";
 					dockerSock = "/var/run/docker.sock";
+					containerdSock = "/run/containerd/containerd.sock";
 				} else {
 					containerBuildHome = "C:\\onedev-build";
 					containerCacheHome = containerBuildHome + "\\cache";
@@ -715,6 +718,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					containerAuthInfoHome = "C:\\Users\\ContainerAdministrator\\auth-info";
 					trustCertsHome = containerBuildHome + "\\trust-certs";
 					dockerSock = null;
+					containerdSock = null;
 				}
 
 				Map<String, String> buildHomeMount = CollectionUtils.newLinkedHashMap(
@@ -738,14 +742,19 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				Map<String, String> dockerSockMount = CollectionUtils.newLinkedHashMap(
 						"name", "docker-sock", 
 						"mountPath", dockerSock);
+				Map<String, String> containerdSockMount = CollectionUtils.newLinkedHashMap(
+						"name", "containerd-sock", 
+						"mountPath", containerdSock);
 				
-				List<Object> volumeMounts = Lists.<Object>newArrayList(buildHomeMount, authInfoMount, cacheHomeMount);
+				List<Object> commonVolumeMounts = Lists.<Object>newArrayList(buildHomeMount, authInfoMount, cacheHomeMount);
 				if (baselineOsInfo.isWindows())
-					volumeMounts.add(authInfoMount2);
+					commonVolumeMounts.add(authInfoMount2);
 				if (trustCertsConfigMapName != null)
-					volumeMounts.add(trustCertsMount);
+					commonVolumeMounts.add(trustCertsMount);
 				if (dockerSock != null)
-					volumeMounts.add(dockerSockMount);
+					commonVolumeMounts.add(dockerSockMount);
+				if (containerdSock != null)
+					commonVolumeMounts.add(containerdSockMount);
 
 				CompositeExecutable entryExecutable;
 				if (jobContext != null) {
@@ -769,11 +778,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					throw new RuntimeException(e);
 				}
 				
-				List<Map<Object, Object>> envs = new ArrayList<>();
-				envs.add(CollectionUtils.newLinkedHashMap(
+				List<Map<Object, Object>> commonEnvs = new ArrayList<>();
+				commonEnvs.add(CollectionUtils.newLinkedHashMap(
 						"name", ENV_SERVER_URL, 
 						"value", getServerUrl()));
-				envs.add(CollectionUtils.newLinkedHashMap(
+				commonEnvs.add(CollectionUtils.newLinkedHashMap(
 						"name", ENV_JOB_TOKEN, 
 						"value", jobToken));
 
@@ -787,19 +796,45 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						if (executable instanceof CommandExecutable) {
 							CommandExecutable commandExecutable = (CommandExecutable) executable;
 							if (commandExecutable.getImage() == null) {
-								throw new ExplicitException("This step should be executed by server shell "
+								throw new ExplicitException("This step can only be executed by server shell "
 										+ "executor or remote shell executor");
 							}
 							
 							stepContainerSpec = CollectionUtils.newHashMap(
 									"name", containerName, 
 									"image", commandExecutable.getImage());
-							if (((CommandExecutable) executable).isUseTTY())
+							if (commandExecutable.isUseTTY())
 								stepContainerSpec.put("tty", true);
+							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
+							stepContainerSpec.put("env", commonEnvs);
+						} else if (executable instanceof ContainerExecutable) {
+							ContainerExecutable containerExecutable = (ContainerExecutable) executable;
+							stepContainerSpec = CollectionUtils.newHashMap(
+									"name", containerName, 
+									"image", containerExecutable.getImage());
+							if (containerExecutable.isUseTTY())
+								stepContainerSpec.put("tty", true);
+							List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
+							if (containerExecutable.getWorkingDir() != null) {
+								volumeMounts.add(CollectionUtils.newLinkedHashMap(
+										"name", "build-home", 
+										"mountPath", containerExecutable.getWorkingDir(),
+										"subPath", "workspace"));
+							}
+							stepContainerSpec.put("volumeMounts", volumeMounts);
+							List<Map<Object, Object>> envs = new ArrayList<>(commonEnvs);
+							for (Map.Entry<String, String> entry: containerExecutable.getEnvMap().entrySet()) {
+								envs.add(CollectionUtils.newLinkedHashMap(
+										"name", entry.getKey(), 
+										"value", entry.getValue()));
+							}
+							stepContainerSpec.put("env", envs);
 						} else { 
 							stepContainerSpec = CollectionUtils.newHashMap(
 									"name", containerName, 
 									"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion);
+							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
+							stepContainerSpec.put("env", commonEnvs);
 						}
 						
 						String positionStr = stringifyPosition(position);
@@ -811,8 +846,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandHome + "\\" + positionStr + ".bat"));
 						}
 
-						stepContainerSpec.put("env", envs);
-						stepContainerSpec.put("volumeMounts", volumeMounts);
 						containerSpecs.add(stepContainerSpec);
 						
 						return null;
@@ -843,16 +876,16 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
 						"command", Lists.newArrayList("java"), 
 						"args", initArgs,
-						"env", envs,
-						"volumeMounts", volumeMounts);
+						"env", commonEnvs,
+						"volumeMounts", commonVolumeMounts);
 				
 				Map<Object, Object> sidecarContainerSpec = CollectionUtils.newHashMap(
 						"name", "sidecar", 
 						"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
 						"command", Lists.newArrayList("java"), 
 						"args", sidecarArgs, 
-						"env", envs, 
-						"volumeMounts", volumeMounts);
+						"env", commonEnvs, 
+						"volumeMounts", commonVolumeMounts);
 				
 				if (jobContext != null) {
 					sidecarContainerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
@@ -886,18 +919,22 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 								"type", "DirectoryOrCreate"));
 				List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, userHomeVolume, cacheHomeVolume);
 				if (trustCertsConfigMapName != null) {
-					Map<Object, Object> trustCertsHomeVolume = CollectionUtils.newLinkedHashMap(
+					volumes.add(CollectionUtils.newLinkedHashMap(
 							"name", "trust-certs-home", 
 							"configMap", CollectionUtils.newLinkedHashMap(
-									"name", trustCertsConfigMapName));			
-					volumes.add(trustCertsHomeVolume);
+									"name", trustCertsConfigMapName)));
 				}
 				if (dockerSock != null) {
-					Map<Object, Object> dockerSockVolume = CollectionUtils.newLinkedHashMap(
+					volumes.add(CollectionUtils.newLinkedHashMap(
 							"name", "docker-sock", 
 							"hostPath", CollectionUtils.newLinkedHashMap(
-									"path", dockerSock));
-					volumes.add(dockerSockVolume);
+									"path", dockerSock)));
+				}
+				if (containerdSock != null) {
+					volumes.add(CollectionUtils.newLinkedHashMap(
+							"name", "containerd-sock", 
+							"hostPath", CollectionUtils.newLinkedHashMap(
+									"path", containerdSock)));
 				}
 				podSpec.put("volumes", volumes);
 
