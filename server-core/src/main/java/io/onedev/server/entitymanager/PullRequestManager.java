@@ -12,6 +12,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -74,5 +75,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	void delete(Collection<PullRequest> requests);
 	
 	void saveDescription(PullRequest request, @Nullable String description);
+	
+	List<ProjectPullRequestStats> queryStats(Collection<Project> projects);
 	
 }

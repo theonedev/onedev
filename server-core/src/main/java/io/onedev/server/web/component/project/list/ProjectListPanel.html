@@ -36,6 +36,44 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="projectFrag">
-		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="path" class="path"></span></a> 
+		<div class="d-flex flex-wrap font-size-h5">
+			<a wicket:id="path" class="mr-auto text-nowrap"><img wicket:id="avatar"> <span wicket:id="label" class="mr-3"></span></a> 
+			<span wicket:id="lastUpdate" class="text-muted font-size-sm"></span>
+		</div>
+		<div class="d-flex flex-wrap">
+			<div wicket:id="codeInfo" class="code-info mt-2 d-flex align-items-center flex-wrap mr-3"></div>
+			<div wicket:id="pullRequestInfo" class="pull-request-info mt-2 d-flex align-items-center flex-wrap"></div>
+		</div>
+		<div class="d-flex flex-wrap">
+			<div wicket:id="issueInfo" class="issue-info mt-2 d-flex align-items-center flex-wrap mr-3"></div>
+			<div wicket:id="buildInfo" class="issue-info mt-2 d-flex align-items-center flex-wrap"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="codeInfoFrag">
+		<wicket:svg href="files" class="icon mr-2"></wicket:svg>
+		<a wicket:id="commits" class="mr-2"><span wicket:id="label"></span></a>			
+		<a wicket:id="branches" class="mr-2"><span wicket:id="label"></span></a>
+		<a wicket:id="tags" class="mr-2"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="issueInfoFrag">
+		<wicket:svg href="bug" class="icon mr-2"></wicket:svg>
+		<a wicket:id="issues" class="mr-2"><span wicket:id="label"></span></a>
+		<wicket:container wicket:id="states">
+			<a wicket:id="link" class="mr-2"><span wicket:id="label"></span></a>
+		</wicket:container>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="buildInfoFrag">
+		<wicket:svg href="play-circle" class="icon mr-2"></wicket:svg>
+		<a wicket:id="builds" class="mr-2"><span wicket:id="label"></span></a>
+		<wicket:container wicket:id="statuses">
+			<a wicket:id="link" class="mr-2"><span wicket:id="label"></span></a>
+		</wicket:container>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="pullRequestInfoFrag">
+		<wicket:svg href="pull-request" class="icon mr-2"></wicket:svg>
+		<a wicket:id="pullRequests" class="mr-2"><span wicket:id="label"></span></a>
+		<wicket:container wicket:id="statuses">
+			<a wicket:id="link" class="mr-2"><span wicket:id="label"></span></a>
+		</wicket:container>
 	</wicket:fragment>
 </wicket:panel>

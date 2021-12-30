@@ -57,7 +57,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
@@ -198,8 +198,9 @@ public class Build extends AbstractEntity implements Referenceable {
 			NAME_LOG, BuildMetric.NAME_REPORT);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, NAME_PULL_REQUEST, 
-			NAME_COMMIT, NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE);
+			NAME_PROJECT, NAME_JOB, NAME_STATUS, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, 
+			NAME_PULL_REQUEST, NAME_COMMIT, NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, 
+			NAME_FINISH_DATE);
 
 	public static final List<String> METRIC_QUERY_FIELDS = Lists.newArrayList(
 			NAME_JOB, NAME_BRANCH, NAME_PULL_REQUEST, BuildMetric.NAME_REPORT);
@@ -230,8 +231,9 @@ public class Build extends AbstractEntity implements Referenceable {
 		// Most significant status comes first, refer to getOverallStatus
 		WAITING, PENDING, RUNNING, FAILED, CANCELLED, TIMED_OUT, SUCCESSFUL;
 		
-		public String getDisplayName() {
-			return StringUtils.capitalize(name().replace('_', ' ').toLowerCase());
+		@Override
+		public String toString() {
+			return WordUtils.toWords(name());
 		}
 		
 		@Nullable

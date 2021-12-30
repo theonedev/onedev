@@ -217,7 +217,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 			@Override
 			public String getObject() {
-				return buildModel.getObject().getStatus().getDisplayName();
+				return buildModel.getObject().getStatus().toString();
 			}
 			
 		}));

@@ -36,7 +36,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.DateUtils;
@@ -181,18 +180,17 @@ public class MarkdownViewer extends GenericPanel<String> {
 					PullRequest request = OneDev.getInstance(PullRequestManager.class).findByFQN(referenceId);
 					// check permission here as target project may not be the same as current project
 					if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
+ 	 					String status = request.getStatus().toString();
 						String statusCss;
-						String status;
-						CloseInfo closeInfo = request.getCloseInfo();
-						if (closeInfo == null) {
-							status = PullRequest.STATE_OPEN;
+						switch (request.getStatus()) {
+						case OPEN:
 							statusCss = "badge-warning";
-						} else {
-							status = closeInfo.getStatus().toString();
-							if (closeInfo.getStatus() == CloseInfo.Status.DISCARDED)
-								statusCss = "badge-danger";
-							else
-								statusCss = "badge-success";
+							break;
+						case MERGED:
+							statusCss = "badge-success";
+							break;
+						default:
+							statusCss = "badge-danger";
 						}
 						
 						String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s')", 

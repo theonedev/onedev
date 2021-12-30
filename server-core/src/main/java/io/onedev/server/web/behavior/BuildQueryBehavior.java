@@ -124,6 +124,11 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestJobs(project, matchWith);
 										else 
 											return null;
+									} else if (fieldName.equals(Build.NAME_STATUS)) {
+										List<String> candidates = new ArrayList<>();
+										for (Build.Status status: Build.Status.values())
+											candidates.add(status.toString());
+										return SuggestionUtils.suggest(candidates, matchWith);
 									} else if (fieldName.equals(Build.NAME_NUMBER)) {
 										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldName.equals(Build.NAME_VERSION)) {

@@ -34,7 +34,7 @@ public class BuildEvent extends ProjectEvent implements CommitAware {
 
 	@Override
 	public String getActivity() {
-		return build.getStatus().getDisplayName();
+		return build.getStatus().toString();
 	}
 
 }

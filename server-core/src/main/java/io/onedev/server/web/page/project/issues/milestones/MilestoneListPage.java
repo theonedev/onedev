@@ -41,7 +41,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.MilestoneAndState;
+import io.onedev.server.util.MilestoneAndIssueState;
 import io.onedev.server.util.MilestoneSort;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -70,17 +70,17 @@ public class MilestoneListPage extends ProjectPage {
 	
 	private final MilestoneSort sort;
 	
-	private final IModel<Collection<MilestoneAndState>> milestoneAndStatesModel = 
-			new LoadableDetachableModel<Collection<MilestoneAndState>>() {
+	private final IModel<Collection<MilestoneAndIssueState>> milestoneAndStatesModel = 
+			new LoadableDetachableModel<Collection<MilestoneAndIssueState>>() {
 
 		@Override
-		protected Collection<MilestoneAndState> load() {
+		protected Collection<MilestoneAndIssueState> load() {
 			List<Milestone> milestones = new ArrayList<>();
 			for (Component row: (WebMarkupContainer)milestonesTable.get("body").get("rows")) {
 				Milestone milestone = (Milestone) row.getDefaultModelObject();
 				milestones.add(milestone);
 			}
-			return OneDev.getInstance(IssueManager.class).queryMilestoneAndStates(getProject(), milestones);
+			return OneDev.getInstance(IssueManager.class).queryMilestoneAndIssueStates(getProject(), milestones);
 		}
 		
 	}; 
@@ -255,7 +255,7 @@ public class MilestoneListPage extends ProjectPage {
 							@Override
 							protected Map<String, Integer> load() {
 								Map<String, Integer> stateStats = new HashMap<>();
-								for (MilestoneAndState milestoneAndState: milestoneAndStatesModel.getObject()) {
+								for (MilestoneAndIssueState milestoneAndState: milestoneAndStatesModel.getObject()) {
 									if (milestoneAndState.getMilestoneId().equals(rowModel.getObject().getId())) {
 										Integer count = stateStats.get(milestoneAndState.getIssueState());
 										if (count != null)

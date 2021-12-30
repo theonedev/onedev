@@ -467,8 +467,10 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														PullRequest.push(request);
 														try {
 															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
+																String statusName = request.getStatus().toString().toLowerCase();
 																changeState(issue, transition.getToState(), new HashMap<>(), 
-																		transition.getRemoveFields(), "State changed as pull request #" + request.getNumber() + " is " + request.getStatusName().toLowerCase());
+																		transition.getRemoveFields(), 
+																		"State changed as pull request #" + request.getNumber() + " is " + statusName);
 															}
 														} finally {
 															PullRequest.pop();

@@ -1016,7 +1016,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getObject() {
-						return rowModel.getObject().getStatus().getDisplayName();
+						return rowModel.getObject().getStatus().toString();
 					}
 					
 				}) {

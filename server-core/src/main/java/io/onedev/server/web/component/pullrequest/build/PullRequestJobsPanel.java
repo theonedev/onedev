@@ -145,7 +145,7 @@ public abstract class PullRequestJobsPanel extends Panel {
 								title = "Some builds are "; 
 							else
 								title = "Builds are "; 
-							title += status.getDisplayName().toLowerCase() + ", click for details";
+							title += status.toString().toLowerCase() + ", click for details";
 						} else {
 							title = "No builds";
 						}

@@ -93,6 +93,7 @@ import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
+import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.FileProtection;
@@ -126,6 +127,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
@@ -276,18 +278,17 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	@Transactional
 	@Override
  	public void discard(PullRequest request, String note) {
+		request.setStatus(Status.DISCARDED);
+		
 		User user = SecurityUtils.getUser();
-		Date date = new Date();
 		
 		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setDate(date);
 		closeInfo.setUser(user);
-		closeInfo.setStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
 		
 		PullRequestChange change = new PullRequestChange();
-		change.setDate(date);
 		change.setData(new PullRequestDiscardData(note));
+		change.setDate(closeInfo.getDate());
 		change.setRequest(request);
 		change.setUser(user);
 		pullRequestChangeManager.save(change);
@@ -432,14 +433,14 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	}
 	
 	private void closeAsMerged(PullRequest request, boolean dueToMerged) {
+		request.setStatus(Status.MERGED);
+		
 		Date date = new DateTime().plusMillis(1).toDate();
 		
 		if (dueToMerged)
 			request.setLastMergePreview(null);
 		
 		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setDate(date);
-		closeInfo.setStatus(CloseInfo.Status.MERGED);
 		request.setCloseInfo(closeInfo);
 		
 		String reason;
@@ -576,7 +577,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	public PullRequest findEffective(ProjectAndBranch target, ProjectAndBranch source) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		Criterion merged = Restrictions.and(
-				Restrictions.eq(PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS, CloseInfo.Status.MERGED), 
+				Restrictions.eq(PullRequest.PROP_STATUS, Status.MERGED), 
 				Restrictions.eq(PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_HEAD_COMMIT_HASH, source.getObjectName()));
 		
 		criteria.add(ofTarget(target)).add(ofSource(source)).add(Restrictions.or(ofOpen(), merged));
@@ -591,7 +592,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		Collection<Criterion> criterions = new ArrayList<>();
 		for (ProjectAndBranch source: sources) {
 			Criterion merged = Restrictions.and(
-					Restrictions.eq(PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS, CloseInfo.Status.MERGED), 
+					Restrictions.eq(PullRequest.PROP_STATUS, Status.MERGED), 
 					Restrictions.eq(PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_HEAD_COMMIT_HASH, source.getObjectName()));
 			criterions.add(Restrictions.and(ofTarget(target), ofSource(source), Restrictions.or(ofOpen(), merged)));
 		}
@@ -1065,6 +1066,26 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			request.setDescription(description);
 			entityReferenceManager.addReferenceChange(request, description);
 			save(request);
+		}
+	}
+
+	@Sessional
+	@Override
+	public List<ProjectPullRequestStats> queryStats(Collection<Project> projects) {
+		if (projects.isEmpty()) {
+			return new ArrayList<>();
+		} else {
+			CriteriaBuilder builder = getSession().getCriteriaBuilder();
+			CriteriaQuery<ProjectPullRequestStats> criteriaQuery = builder.createQuery(ProjectPullRequestStats.class);
+			Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
+			criteriaQuery.multiselect(
+					root.get(PullRequest.PROP_TARGET_PROJECT).get(Project.PROP_ID), 
+					root.get(PullRequest.PROP_STATUS), builder.count(root));
+			criteriaQuery.groupBy(root.get(PullRequest.PROP_TARGET_PROJECT), root.get(PullRequest.PROP_STATUS));
+			
+			criteriaQuery.where(root.get(PullRequest.PROP_TARGET_PROJECT).in(projects));
+			criteriaQuery.orderBy(builder.asc(root.get(PullRequest.PROP_STATUS)));
+			return getSession().createQuery(criteriaQuery).getResultList();
 		}
 	}
 	

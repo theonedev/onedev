@@ -83,8 +83,9 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.storage.AttachmentStorageManager;
-import io.onedev.server.util.MilestoneAndState;
+import io.onedev.server.util.MilestoneAndIssueState;
 import io.onedev.server.util.Pair;
+import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.IssueFacade;
@@ -863,9 +864,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public Collection<MilestoneAndState> queryMilestoneAndStates(Project project, Collection<Milestone> milestones) {
+	public Collection<MilestoneAndIssueState> queryMilestoneAndIssueStates(Project project, Collection<Milestone> milestones) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<MilestoneAndState> criteriaQuery = builder.createQuery(MilestoneAndState.class);
+		CriteriaQuery<MilestoneAndIssueState> criteriaQuery = builder.createQuery(MilestoneAndIssueState.class);
 		Root<IssueSchedule> root = criteriaQuery.from(IssueSchedule.class);
 		Join<Issue, Issue> issueJoin = root.join(IssueSchedule.PROP_ISSUE, JoinType.INNER);
 		criteriaQuery.multiselect(
@@ -1009,6 +1010,28 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		if (afterIssueId != null) 
 			criteria.add(Restrictions.gt("id", afterIssueId));
 		return query(criteria, 0, count);
+	}
+
+	@Sessional
+	@Override
+	public List<ProjectIssueStats> queryStats(Collection<Project> projects) {
+		if (projects.isEmpty()) {
+			return new ArrayList<>();
+		} else {
+			CriteriaBuilder builder = getSession().getCriteriaBuilder();
+			CriteriaQuery<ProjectIssueStats> criteriaQuery = builder.createQuery(ProjectIssueStats.class);
+			Root<Issue> root = criteriaQuery.from(Issue.class);
+			criteriaQuery.multiselect(
+					root.get(Issue.PROP_PROJECT).get(Project.PROP_ID), 
+					root.get(Issue.PROP_STATE_ORDINAL), 
+					builder.count(root));
+			criteriaQuery.groupBy(root.get(Issue.PROP_PROJECT), root.get(Issue.PROP_STATE_ORDINAL));
+			
+			criteriaQuery.where(root.get(Issue.PROP_PROJECT).in(projects));
+			criteriaQuery.orderBy(builder.asc(root.get(Issue.PROP_STATE_ORDINAL)));
+			
+			return getSession().createQuery(criteriaQuery).getResultList();
+		}
 	}
 
 }

@@ -24,7 +24,7 @@ public class PullRequestBuildEvent extends PullRequestEvent {
 			activity = "build #" + build.getNumber() + " (" + build.getVersion() + ")";
 		else
 			activity = "build #" + build.getNumber();
-		activity += " is " + build.getStatus().getDisplayName();
+		activity += " is " + build.getStatus();
 		return activity;
 	}
 

@@ -66,7 +66,7 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 		Build build = event.getBuild();
 		String subject = String.format("[Build %s] %s", build.getFQN(), build.getJobName());
 
-		String summary = build.getStatus().getDisplayName();
+		String summary = build.getStatus().toString();
 		if (build.getVersion() != null)
 			summary = build.getVersion() + " " + summary;
 			

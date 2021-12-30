@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import static io.onedev.server.model.PullRequest.PROP_NO_SPACE_TITLE;
 import static io.onedev.server.model.PullRequest.PROP_NUMBER;
+import static io.onedev.server.model.PullRequest.PROP_STATUS;
 import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.PullRequest.PROP_TITLE;
 import static io.onedev.server.model.PullRequest.PROP_UUID;
@@ -53,6 +54,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -84,7 +86,7 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList="o_targetProject_id"), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_sourceProject_id"), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH), 
-				@Index(columnList=CloseInfo.COLUMN_DATE), @Index(columnList=CloseInfo.COLUMN_STATUS), 
+				@Index(columnList=CloseInfo.COLUMN_DATE), @Index(columnList=PROP_STATUS), 
 				@Index(columnList=CloseInfo.COLUMN_USER), 
 				@Index(columnList="o_numberScope_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
@@ -156,6 +158,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_MERGE_STRATEGY = "mergeStrategy";
 	
+	public static final String PROP_STATUS = "status";
+	
 	public static final String PROP_CLOSE_INFO = "closeInfo";
 	
 	public static final String PROP_LAST_MERGE_PREVIEW = "lastMergePreview";
@@ -172,8 +176,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
 
-	public static final String STATE_OPEN = "Open";
-
 	public static final String REFS_PREFIX = "refs/pull/";
 
 	public static final int MAX_CODE_COMMENTS = 1000;
@@ -181,7 +183,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private static final int MAX_CHECK_ERROR_LEN = 1024;
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NUMBER, NAME_TITLE, NAME_TARGET_PROJECT, NAME_TARGET_BRANCH, 
+			NAME_NUMBER, NAME_STATUS, NAME_TITLE, NAME_TARGET_PROJECT, NAME_TARGET_BRANCH, 
 			NAME_SOURCE_PROJECT, NAME_SOURCE_BRANCH, NAME_DESCRIPTION, 
 			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, 
 			NAME_CLOSE_DATE, NAME_MERGE_STRATEGY, NAME_COMMENT_COUNT);
@@ -191,7 +193,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
 			NAME_CLOSE_DATE, PROP_CLOSE_INFO + "." + CloseInfo.PROP_DATE,
 			NAME_NUMBER, PROP_NUMBER,
-			NAME_STATUS, PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS,
+			NAME_STATUS, PROP_STATUS,
 			NAME_TARGET_PROJECT, PROP_TARGET_PROJECT,
 			NAME_TARGET_BRANCH, PROP_TARGET_BRANCH,
 			NAME_SOURCE_PROJECT, PROP_SOURCE_PROJECT,
@@ -206,6 +208,19 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		}
 	
 	};
+	
+	public enum Status {
+		OPEN, MERGED, DISCARDED;
+		
+		@Override
+		public String toString() {
+			return WordUtils.toWords(name());
+		}
+		
+	}
+	
+	@Column(nullable=false)
+	private Status status = Status.OPEN;
 	
 	@Embedded
 	private CloseInfo closeInfo;
@@ -506,6 +521,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.codeComments = codeComments;
 	}
 
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
 	@Nullable
 	public CloseInfo getCloseInfo() {
 		return closeInfo;
@@ -516,7 +539,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 
 	public boolean isOpen() {
-		return closeInfo == null;
+		return status == Status.OPEN;
 	}
 	
 	/**
@@ -787,11 +810,11 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	public boolean isMerged() {
-		return closeInfo != null && closeInfo.getStatus() == CloseInfo.Status.MERGED;
+		return status == Status.MERGED;
 	}
 	
 	public boolean isDiscarded() {
-		return closeInfo != null && closeInfo.getStatus() == CloseInfo.Status.DISCARDED;
+		return status == Status.DISCARDED;
 	}
 	
 	public boolean isMergedIntoTarget() {
@@ -1147,13 +1170,4 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return null;
 	}
 
-	public String getStatusName() {
-		if (isMerged())
-			return "Merged";
-		else if (isDiscarded())
-			return "Discarded";
-		else
-			return "Open";
-	}
-	
 }

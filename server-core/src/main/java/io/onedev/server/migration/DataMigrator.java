@@ -31,15 +31,14 @@ import org.dom4j.Node;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.common.AbstractHardwareAbstractionLayer;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -3431,4 +3430,22 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate73(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element closeInfoElement = element.element("closeInfo");
+					if (closeInfoElement != null) {
+						Element statusElement = closeInfoElement.element("status");
+						statusElement.detach();
+						element.add(statusElement);
+					} else {
+						element.addElement("status").setText("OPEN");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }

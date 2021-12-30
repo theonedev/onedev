@@ -11,7 +11,8 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.MilestoneAndState;
+import io.onedev.server.util.MilestoneAndIssueState;
+import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -74,7 +75,9 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	void delete(Collection<Issue> issues);
 	
-	Collection<MilestoneAndState> queryMilestoneAndStates(Project project, Collection<Milestone> milestones);
+	Collection<MilestoneAndIssueState> queryMilestoneAndIssueStates(Project project, Collection<Milestone> milestones);
+	
+	List<ProjectIssueStats> queryStats(Collection<Project> projects);
 	
 	Collection<Milestone> queryUsedMilestones(Project project);
 

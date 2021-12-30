@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -64,6 +63,7 @@ import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
+import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -227,10 +227,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 				
 				request.setBaseCommitHash(baseCommitId.name());
 				if (request.getBaseCommitHash().equals(source.getObjectName())) {
-					CloseInfo closeInfo = new CloseInfo();
-					closeInfo.setDate(new Date());
-					closeInfo.setStatus(CloseInfo.Status.MERGED);
-					request.setCloseInfo(closeInfo);
+					request.setStatus(Status.MERGED);
+					request.setCloseInfo(new CloseInfo());
 				}
 	
 				PullRequestUpdate update = new PullRequestUpdate();

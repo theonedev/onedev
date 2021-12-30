@@ -7,7 +7,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.pullrequest.CloseInfo;
 
 @SuppressWarnings("serial")
 public class RequestStatusBadge extends Label {
@@ -19,12 +18,7 @@ public class RequestStatusBadge extends Label {
 
 			@Override
 			protected String load() {
-				PullRequest request = requestModel.getObject();
-				CloseInfo closeInfo = request.getCloseInfo();
-				if (closeInfo == null)
-					return PullRequest.STATE_OPEN;
-				else 
-					return closeInfo.getStatus().toString();
+				return requestModel.getObject().getStatus().toString();
 			}
 			
 		});
@@ -40,13 +34,14 @@ public class RequestStatusBadge extends Label {
 			@Override
 			public String getObject() {
 				PullRequest request = getPullRequest();
-				CloseInfo closeInfo = request.getCloseInfo();
-				if (closeInfo == null)
+				switch (request.getStatus()) {
+				case OPEN:
 					return "badge badge-warning request-status";
-				else if (closeInfo.getStatus() == CloseInfo.Status.MERGED)
+				case MERGED:
 					return "badge badge-success request-status";
-				else
+				default:
 					return "badge badge-danger request-status";
+				}
 			}
 			
 		}));

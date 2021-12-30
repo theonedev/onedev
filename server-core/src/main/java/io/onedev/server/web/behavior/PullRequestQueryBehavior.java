@@ -21,13 +21,13 @@ import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -94,6 +94,11 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 											|| fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
+									} else if (fieldName.equals(PullRequest.NAME_STATUS)) {
+										List<String> candidates = new ArrayList<>();
+										for (PullRequest.Status status: PullRequest.Status.values())
+											candidates.add(status.toString());
+										return SuggestionUtils.suggest(candidates, matchWith);
 									} else if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
 											|| fieldName.equals(PullRequest.NAME_SOURCE_PROJECT)) {
 										if (!matchWith.contains("*"))

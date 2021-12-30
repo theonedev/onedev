@@ -279,4 +279,9 @@ public class DefaultIssueInfoManager extends AbstractSingleEnvironmentManager
 		});
 	}
 
+	@Override
+	public Map<String, Integer> getStateStats(Long projectId) {
+		return null;
+	}
+
 }

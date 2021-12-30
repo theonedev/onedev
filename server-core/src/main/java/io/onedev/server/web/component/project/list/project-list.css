@@ -1,6 +1,4 @@
-@media(max-width: 575px) {
-	.project-list table>thead {
-		display: none;
-	}
+.project-list table>thead {
+	display: none;
 }
 

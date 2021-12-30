@@ -182,6 +182,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							switch (fieldName) {
 							case PullRequest.NAME_NUMBER:
 								return new NumberCriteria(project, value, operator);
+							case PullRequest.NAME_STATUS:
+								try {
+									return new StatusCriteria(PullRequest.Status.valueOf(value.toUpperCase()));
+								} catch (IllegalArgumentException e) {
+									throw new ExplicitException("Invalid status: " + value);
+								}
 							case PullRequest.NAME_MERGE_STRATEGY:
 								return new MergeStrategyCriteria(MergeStrategy.fromString(value));
 							case PullRequest.NAME_SOURCE_BRANCH:
@@ -280,6 +286,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 			break;
 		case PullRequestQueryLexer.Is:
 			if (!fieldName.equals(PullRequest.NAME_NUMBER)
+					&& !fieldName.equals(PullRequest.NAME_STATUS)
 					&& !fieldName.equals(PullRequest.NAME_MERGE_STRATEGY)
 					&& !fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
 					&& !fieldName.equals(PullRequest.NAME_TARGET_BRANCH)

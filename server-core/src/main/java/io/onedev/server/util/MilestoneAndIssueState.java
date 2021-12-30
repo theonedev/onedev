@@ -1,14 +1,16 @@
 package io.onedev.server.util;
 
-import io.onedev.server.model.Milestone;
+import java.io.Serializable;
 
-public class MilestoneAndState extends Pair<Milestone, String> {
+public class MilestoneAndIssueState implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private final Long milestoneId;
 	
 	private final String issueState;
 	
-	public MilestoneAndState(Long milestoneId, String issueState) {
+	public MilestoneAndIssueState(Long milestoneId, String issueState) {
 		this.milestoneId = milestoneId;
 		this.issueState = issueState;
 	}

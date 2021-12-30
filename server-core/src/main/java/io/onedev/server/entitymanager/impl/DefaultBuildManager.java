@@ -85,6 +85,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.criteria.Criteria;
@@ -1014,6 +1015,28 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		if (status != null)
 			agentCriteria.add(Restrictions.eq(Build.PROP_STATUS, status));
 		return query(criteria);
+	}
+
+	@Sessional
+	@Override
+	public List<ProjectBuildStats> queryStats(Collection<Project> projects) {
+		if (projects.isEmpty()) {
+			return new ArrayList<>();
+		} else {
+			CriteriaBuilder builder = getSession().getCriteriaBuilder();
+			CriteriaQuery<ProjectBuildStats> criteriaQuery = builder.createQuery(ProjectBuildStats.class);
+			Root<Build> root = criteriaQuery.from(Build.class);
+			criteriaQuery.multiselect(
+					root.get(Build.PROP_PROJECT).get(Project.PROP_ID), 
+					root.get(Build.PROP_STATUS), 
+					builder.count(root));
+			criteriaQuery.groupBy(root.get(Build.PROP_PROJECT), root.get(Build.PROP_STATUS));
+			
+			criteriaQuery.where(root.get(Build.PROP_PROJECT).in(projects));
+			criteriaQuery.orderBy(builder.asc(root.get(Build.PROP_STATUS)));
+			
+			return getSession().createQuery(criteriaQuery).getResultList();
+		}
 	}
 	
 }

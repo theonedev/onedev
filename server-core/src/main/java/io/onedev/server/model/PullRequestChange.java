@@ -28,7 +28,7 @@ public class PullRequestChange extends AbstractEntity {
 	private User user;
 	
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 	
 	@Lob
 	@Column(length=65535)

@@ -15,6 +15,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.criteria.Criteria;
@@ -80,5 +81,7 @@ public interface BuildManager extends EntityManager<Build> {
 	void delete(Collection<Build> builds);
 	
 	Collection<Build> query(Agent agent, @Nullable Build.Status status);
+	
+	List<ProjectBuildStats> queryStats(Collection<Project> projects);
 	
 }

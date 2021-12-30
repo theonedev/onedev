@@ -970,11 +970,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			public String getObject() {
-				PullRequest request = getPullRequest();
-				if (request.isOpen())
-					return "OPEN";
-				else
-					return request.getCloseInfo().getStatus().toString();
+				return getPullRequest().getStatus().toString();
 			}
 			
 		}) {
