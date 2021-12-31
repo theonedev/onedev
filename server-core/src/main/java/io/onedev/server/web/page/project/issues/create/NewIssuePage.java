@@ -11,6 +11,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -41,6 +42,9 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 	
 	public NewIssuePage(PageParameters params) {
 		super(params);
+		
+		if (!getProject().isIssueManagementEnabled())
+			throw new ExplicitException("Issue management not enabled in this project");
 		
 		User currentUser = getLoginUser();
 		if (currentUser == null)
