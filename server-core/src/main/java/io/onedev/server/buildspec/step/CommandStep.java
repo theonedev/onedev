@@ -1,4 +1,4 @@
-package io.onedev.server.buildspec.step.command;
+package io.onedev.server.buildspec.step;
 
 import java.util.List;
 
@@ -10,9 +10,8 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.Executable;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.buildspec.step.Step;
-import io.onedev.server.buildspec.step.command.interpreter.DefaultInterpreter;
-import io.onedev.server.buildspec.step.command.interpreter.Interpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
+import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -68,7 +67,7 @@ public class CommandStep extends Step {
 		this.interpreter = interpreter;
 	}
 
-	@Editable(order=120, name="Enable TTY Mode", description="Many commands print outputs with ANSI colors in "
+	@Editable(order=10000, name="Enable TTY Mode", description="Many commands print outputs with ANSI colors in "
 			+ "TTY mode to help identifying problems easily. However some commands running in this mode may "
 			+ "wait for user input to cause build hanging. This can normally be fixed by adding extra options "
 			+ "to the command")
@@ -87,7 +86,7 @@ public class CommandStep extends Step {
 	
 	@Override
 	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
-		return interpreter.getExecutable(runInContainer?getImage():null, isUseTTY());
+		return getInterpreter().getExecutable(isRunInContainer()?getImage():null, isUseTTY());
 	}
 	
 }

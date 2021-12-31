@@ -1054,11 +1054,13 @@ public class ProjectListPanel extends Panel {
 				
 				fragment.add(new Label("lastUpdate", "Updated " + DateUtils.formatAge(project.getUpdateDate())));
 				
-				if (project.isCodeManagementEnabled() && SecurityUtils.canReadCode(project)) {
+				int commitCount;
+				if (project.isCodeManagementEnabled() && SecurityUtils.canReadCode(project)
+						&& (commitCount=OneDev.getInstance(CommitInfoManager.class).getCommitCount(project)) != 0) {
 					Fragment commitInfoFrag = new Fragment("codeInfo", "codeInfoFrag", ProjectListPanel.this);
 					PageParameters params = ProjectCommitsPage.paramsOf(project, null);
 					Link<Void> commitsLink = new BookmarkablePageLink<Void>("commits", ProjectCommitsPage.class, params);
-					commitsLink.add(new Label("label", OneDev.getInstance(CommitInfoManager.class).getCommitCount(project) + " commits"));
+					commitsLink.add(new Label("label", commitCount + " commits"));
 					commitInfoFrag.add(commitsLink);
 					
 					params = ProjectBranchesPage.paramsOf(project);

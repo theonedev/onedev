@@ -1,4 +1,4 @@
-package io.onedev.server.buildspec.step.command.interpreter;
+package io.onedev.server.buildspec.step.commandinterpreter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
