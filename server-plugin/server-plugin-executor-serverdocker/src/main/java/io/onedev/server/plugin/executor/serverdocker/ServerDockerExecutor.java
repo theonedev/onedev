@@ -55,7 +55,6 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.commons.utils.command.ProcessKiller;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CheckoutExecutable;
 import io.onedev.k8shelper.CloneInfo;
@@ -240,7 +239,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										}
 									}
 									
-									if (!SystemUtils.IS_OS_WINDOWS) 
+									if (SystemUtils.IS_OS_WINDOWS) 
+										docker.addArgs("-v", "//./pipe/docker_engine://./pipe/docker_engine");
+									else
 										docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
 									
 									if (hostAuthInfoHome.get() != null) {
@@ -265,8 +266,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									docker.addArgs(image);
 									docker.addArgs(arguments.toArray(new String[arguments.size()]));
 									
-									ProcessKiller killer = newDockerKiller(newDocker(), containerName, jobLogger);
-									return docker.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger), null, killer).getReturnCode();
+									ExecutionResult result = docker.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger), null, 
+											newDockerKiller(newDocker(), containerName, jobLogger));
+									return result.getReturnCode();
 								}
 								
 								@Override

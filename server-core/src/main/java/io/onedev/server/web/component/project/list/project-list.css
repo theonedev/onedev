@@ -1,4 +1,9 @@
 .project-list table>thead {
 	display: none;
 }
-
+.project-list .row-selector {
+	padding-top: 1rem;
+}
+.project-list .project-summary {
+	margin-left: 2px;
+}

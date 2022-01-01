@@ -703,7 +703,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String trustCertsHome;
 				String dockerSock;
 				String containerdSock;
-				if (baselineOsInfo.isLinux()) {
+				if (baselineOsInfo.isWindows()) {
+					containerBuildHome = "C:\\onedev-build";
+					containerCacheHome = containerBuildHome + "\\cache";
+					containerCommandHome = containerBuildHome + "\\command";
+					containerAuthInfoHome = "C:\\Users\\ContainerAdministrator\\auth-info";
+					trustCertsHome = containerBuildHome + "\\trust-certs";
+					dockerSock = "\\\\.\\pipe\\docker_engine";
+					containerdSock = "\\\\.\\pipe\\containerd-containerd";
+				} else {
 					containerBuildHome = "/onedev-build";
 					containerCacheHome = containerBuildHome + "/cache";
 					containerCommandHome = containerBuildHome + "/command";
@@ -711,14 +719,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					trustCertsHome = containerBuildHome + "/trust-certs";
 					dockerSock = "/var/run/docker.sock";
 					containerdSock = "/run/containerd/containerd.sock";
-				} else {
-					containerBuildHome = "C:\\onedev-build";
-					containerCacheHome = containerBuildHome + "\\cache";
-					containerCommandHome = containerBuildHome + "\\command";
-					containerAuthInfoHome = "C:\\Users\\ContainerAdministrator\\auth-info";
-					trustCertsHome = containerBuildHome + "\\trust-certs";
-					dockerSock = null;
-					containerdSock = null;
 				}
 
 				Map<String, String> buildHomeMount = CollectionUtils.newLinkedHashMap(
@@ -751,10 +751,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					commonVolumeMounts.add(authInfoMount2);
 				if (trustCertsConfigMapName != null)
 					commonVolumeMounts.add(trustCertsMount);
-				if (dockerSock != null)
-					commonVolumeMounts.add(dockerSockMount);
-				if (containerdSock != null)
-					commonVolumeMounts.add(containerdSockMount);
+				commonVolumeMounts.add(dockerSockMount);
+				commonVolumeMounts.add(containerdSockMount);
 
 				CompositeExecutable entryExecutable;
 				if (jobContext != null) {
@@ -924,18 +922,14 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							"configMap", CollectionUtils.newLinkedHashMap(
 									"name", trustCertsConfigMapName)));
 				}
-				if (dockerSock != null) {
-					volumes.add(CollectionUtils.newLinkedHashMap(
-							"name", "docker-sock", 
-							"hostPath", CollectionUtils.newLinkedHashMap(
-									"path", dockerSock)));
-				}
-				if (containerdSock != null) {
-					volumes.add(CollectionUtils.newLinkedHashMap(
-							"name", "containerd-sock", 
-							"hostPath", CollectionUtils.newLinkedHashMap(
-									"path", containerdSock)));
-				}
+				volumes.add(CollectionUtils.newLinkedHashMap(
+						"name", "docker-sock", 
+						"hostPath", CollectionUtils.newLinkedHashMap(
+								"path", dockerSock)));
+				volumes.add(CollectionUtils.newLinkedHashMap(
+						"name", "containerd-sock", 
+						"hostPath", CollectionUtils.newLinkedHashMap(
+								"path", containerdSock)));
 				podSpec.put("volumes", volumes);
 
 				String podName = "job";
@@ -1399,6 +1393,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			WINDOWS_VERSIONS.put(18363, "1909");
 			WINDOWS_VERSIONS.put(19041, "2004");
 			WINDOWS_VERSIONS.put(19042, "20H2");
+			WINDOWS_VERSIONS.put(19043, "2004");
 		}
 		
 		private final String osName;
