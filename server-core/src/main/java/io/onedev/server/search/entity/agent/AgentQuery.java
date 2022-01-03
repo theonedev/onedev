@@ -4,7 +4,7 @@ import static io.onedev.server.model.Agent.NAME_CPU;
 import static io.onedev.server.model.Agent.NAME_IP_ADDRESS;
 import static io.onedev.server.model.Agent.NAME_MEMORY;
 import static io.onedev.server.model.Agent.NAME_NAME;
-import static io.onedev.server.model.Agent.NAME_OS;
+import static io.onedev.server.model.Agent.NAME_OS_NAME;
 import static io.onedev.server.model.Agent.NAME_OS_ARCH;
 import static io.onedev.server.model.Agent.NAME_OS_VERSION;
 import static io.onedev.server.model.Agent.ORDER_FIELDS;
@@ -24,7 +24,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import io.onedev.agent.AgentOs;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -147,8 +146,8 @@ public class AgentQuery extends EntityQuery<Agent> {
 							switch (fieldName) {
 							case NAME_NAME:
 								return new NameCriteria(value);
-							case NAME_OS:
-								return new OsCriteria(AgentOs.valueOf(value.toUpperCase()));
+							case NAME_OS_NAME:
+								return new OsCriteria(value);
 							case NAME_OS_VERSION:
 								return new OsVersionCriteria(value);
 							case NAME_OS_ARCH:

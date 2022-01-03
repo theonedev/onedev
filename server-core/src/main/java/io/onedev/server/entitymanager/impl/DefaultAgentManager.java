@@ -21,6 +21,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.util.collections.ConcurrentHashSet;
 import org.eclipse.jetty.websocket.api.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -45,6 +46,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;
 import io.onedev.server.model.AgentToken;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -66,22 +68,27 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	
 	private final ListenerRegistry listenerRegistry;
 	
+	private final TransactionManager transactionManager;
+	
 	private final String agentVersion;
 	
 	private final Collection<String> agentLibs;
 	
 	private final Map<Long, Session> agentSessions = new ConcurrentHashMap<>();
 	
-	private final Set<String> osArchs = new HashSet<>();
+	private final Set<String> osNames = new ConcurrentHashSet<>();
+	
+	private final Set<String> osArchs = new ConcurrentHashSet<>();
 	
 	@Inject
 	public DefaultAgentManager(Dao dao, AgentAttributeManager attributeManager, AgentTokenManager tokenManager, 
-			ListenerRegistry listenerRegistry) {
+			ListenerRegistry listenerRegistry, TransactionManager transactionManager) {
 		super(dao);
 		
 		this.attributeManager = attributeManager;
 		this.tokenManager = tokenManager;
 		this.listenerRegistry = listenerRegistry;
+		this.transactionManager = transactionManager;
 	
 		Properties props = new Properties();
 		agentLibs = new HashSet<>();
@@ -101,9 +108,12 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		Query<String> query = dao.getSession().createQuery(String.format("select %s from Agent", Agent.PROP_OS_ARCH));
-		for (String osArch: query.list()) 
-			osArchs.add(osArch);
+		Query<Object[]> query = dao.getSession().createQuery(String.format("select %s, %s from Agent", 
+				Agent.PROP_OS_NAME, Agent.PROP_OS_ARCH));
+		for (Object[] row: query.list()) { 
+			osNames.add((String) row[0]);
+			osArchs.add((String) row[1]);
+		}
 	}
 	
 	@Override
@@ -139,9 +149,9 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 					throw new ExplicitException("Name '" + data.getName() + "' already used by another agent");
 				agent = new Agent();
 				agent.setToken(token);
-				agent.setOs(data.getOs());
-				agent.setOsVersion(data.getOsVersion());
-				agent.setOsArch(data.getOsArch());
+				agent.setOsName(data.getOsInfo().getOsName());
+				agent.setOsVersion(data.getOsInfo().getOsVersion());
+				agent.setOsArch(data.getOsInfo().getOsArch());
 				agent.setName(data.getName());
 				agent.setCpu(data.getCpu());
 				agent.setMemory(data.getMemory());
@@ -161,9 +171,9 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				if (agentWithSameName != null && !agentWithSameName.equals(agent))
 					throw new ExplicitException("Name '" + data.getName() + "' already used by another agent");
 				agent.setName(data.getName());
-				agent.setOs(data.getOs());
-				agent.setOsVersion(data.getOsVersion());
-				agent.setOsArch(data.getOsArch());
+				agent.setOsName(data.getOsInfo().getOsName());
+				agent.setOsVersion(data.getOsInfo().getOsVersion());
+				agent.setOsArch(data.getOsInfo().getOsArch());
 				agent.setIpAddress(session.getRemoteAddress().getAddress().getHostAddress());
 				agent.setCpu(data.getCpu());
 				agent.setMemory(data.getMemory());
@@ -197,7 +207,16 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Override
 	public void save(Agent agent) {
 		super.save(agent);
-		osArchs.add(agent.getOsArch());
+		
+    	transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				osNames.add(agent.getOsName());
+				osArchs.add(agent.getOsArch());
+			}
+    		
+    	});
 	}
 
 	@Transactional
@@ -233,6 +252,14 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		return agentSessions.keySet();
 	}
 
+	@Sessional
+	@Override
+	public List<String> getOsNames() {
+		List<String> osNames = new ArrayList<>(this.osNames);
+		Collections.sort(osNames);
+		return osNames;
+	}
+	
 	@Sessional
 	@Override
 	public List<String> getOsArchs() {

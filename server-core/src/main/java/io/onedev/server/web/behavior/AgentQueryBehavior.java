@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-import io.onedev.agent.AgentOs;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
@@ -74,18 +73,14 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = AgentQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {
 									AgentQuery.checkField(fieldName, operator);
-									if (fieldName.equals(Agent.NAME_OS)) {
-										List<String> osNames = new ArrayList<>();
-										for (AgentOs each: AgentOs.values())
-											osNames.add(each.name());
-										return SuggestionUtils.suggest(osNames, matchWith);
-									} else if (fieldName.equals(Agent.NAME_NAME)) {
+									if (fieldName.equals(Agent.NAME_OS_NAME)) 
+										return SuggestionUtils.suggest(OneDev.getInstance(AgentManager.class).getOsNames(), matchWith);
+									else if (fieldName.equals(Agent.NAME_NAME)) 
 										return SuggestionUtils.suggestAgents(matchWith);
-									} else if (fieldName.equals(Agent.NAME_OS_ARCH)) {
+									else if (fieldName.equals(Agent.NAME_OS_ARCH))
 										return SuggestionUtils.suggest(OneDev.getInstance(AgentManager.class).getOsArchs(), matchWith);
-									} else {
+									else 
 										return null;
-									}
 								} catch (ExplicitException ex) {
 								}
 							}

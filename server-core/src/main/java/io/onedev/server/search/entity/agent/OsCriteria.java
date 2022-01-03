@@ -5,7 +5,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.agent.AgentOs;
 import io.onedev.server.model.Agent;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -13,27 +12,27 @@ public class OsCriteria extends Criteria<Agent> {
 
 	private static final long serialVersionUID = 1L;
 
-	private AgentOs value;
+	private String value;
 	
-	public OsCriteria(AgentOs value) {
+	public OsCriteria(String value) {
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
-		return builder.equal(from.get(Agent.PROP_OS), value); 
+		return builder.equal(from.get(Agent.PROP_OS_NAME), value); 
 	}
 
 	@Override
 	public boolean matches(Agent agent) {
-		return agent.getOs() == value;
+		return agent.getOsName().equals(value);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Agent.NAME_OS) + " " 
+		return quote(Agent.NAME_OS_NAME) + " " 
 				+ AgentQuery.getRuleName(AgentQueryLexer.Is) + " " 
-				+ quote(value.name());
+				+ quote(value);
 	}
 	
 }

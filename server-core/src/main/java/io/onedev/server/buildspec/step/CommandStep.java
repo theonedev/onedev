@@ -22,6 +22,11 @@ import io.onedev.server.web.editable.annotation.ShowCondition;
 public class CommandStep extends Step {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String USE_TTY_HELP = "Many commands print outputs with ANSI colors in "
+			+ "TTY mode to help identifying problems easily. However some commands running in this mode may "
+			+ "wait for user input to cause build hanging. This can normally be fixed by adding extra options "
+			+ "to the command";
 
 	private boolean runInContainer = true;
 	
@@ -67,10 +72,7 @@ public class CommandStep extends Step {
 		this.interpreter = interpreter;
 	}
 
-	@Editable(order=10000, name="Enable TTY Mode", description="Many commands print outputs with ANSI colors in "
-			+ "TTY mode to help identifying problems easily. However some commands running in this mode may "
-			+ "wait for user input to cause build hanging. This can normally be fixed by adding extra options "
-			+ "to the command")
+	@Editable(order=10000, name="Enable TTY Mode", description=USE_TTY_HELP)
 	@ShowCondition("isRunInContainerEnabled")
 	public boolean isUseTTY() {
 		return useTTY;

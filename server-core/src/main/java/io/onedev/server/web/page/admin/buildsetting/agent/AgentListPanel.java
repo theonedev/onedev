@@ -63,7 +63,6 @@ import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -837,7 +836,7 @@ class AgentListPanel extends Panel {
 				Agent agent = rowModel.getObject();
 				Link<Void> link = new BookmarkablePageLink<Void>("link", 
 						AgentOverviewPage.class, AgentOverviewPage.paramsOf(agent));
-				link.add(new SpriteImage("icon", agent.getOs().getIcon()));
+				link.add(new AgentIcon("icon", rowModel));
 				link.add(new Label("label", agent.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);

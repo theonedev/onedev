@@ -1,13 +1,13 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.Agent.PROP_CPU;
 import static io.onedev.server.model.Agent.PROP_IP_ADDRESS;
 import static io.onedev.server.model.Agent.PROP_LAST_USED_DATE;
+import static io.onedev.server.model.Agent.PROP_MEMORY;
 import static io.onedev.server.model.Agent.PROP_NAME;
-import static io.onedev.server.model.Agent.PROP_OS;
+import static io.onedev.server.model.Agent.PROP_OS_NAME;
 import static io.onedev.server.model.Agent.PROP_OS_ARCH;
 import static io.onedev.server.model.Agent.PROP_OS_VERSION;
-import static io.onedev.server.model.Agent.PROP_CPU;
-import static io.onedev.server.model.Agent.PROP_MEMORY;
 import static io.onedev.server.model.Agent.PROP_PAUSED;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.agent.AgentData;
-import io.onedev.agent.AgentOs;
+import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.job.resource.ResourceHolder;
@@ -45,7 +45,7 @@ import io.onedev.server.util.CollectionUtils;
 @Table(indexes={
 		@Index(columnList="o_token_id"), @Index(columnList=PROP_IP_ADDRESS),
 		@Index(columnList=PROP_PAUSED), @Index(columnList=PROP_NAME), 
-		@Index(columnList=PROP_OS), @Index(columnList=PROP_OS_VERSION), 
+		@Index(columnList=PROP_OS_NAME), @Index(columnList=PROP_OS_VERSION), 
 		@Index(columnList=PROP_CPU), @Index(columnList=PROP_MEMORY), 
 		@Index(columnList=PROP_OS_ARCH), @Index(columnList=PROP_LAST_USED_DATE)}) 
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -67,9 +67,9 @@ public class Agent extends AbstractEntity {
 	
 	public static final String PROP_IP_ADDRESS = "ipAddress";
 	
-	public static final String NAME_OS = "Os";
+	public static final String NAME_OS_NAME = "Os";
 	
-	public static final String PROP_OS = "os";
+	public static final String PROP_OS_NAME = "osName";
 	
 	public static final String NAME_OS_VERSION = "Os Version";
 	
@@ -90,15 +90,15 @@ public class Agent extends AbstractEntity {
 	public static final String PROP_LAST_USED_DATE = "lastUsedDate";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
-			NAME_NAME, NAME_IP_ADDRESS, NAME_OS, NAME_OS_VERSION, NAME_OS_ARCH, NAME_CPU, NAME_MEMORY);
+			NAME_NAME, NAME_IP_ADDRESS, NAME_OS_NAME, NAME_OS_VERSION, NAME_OS_ARCH, NAME_CPU, NAME_MEMORY);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NAME, NAME_IP_ADDRESS, NAME_OS, NAME_OS_VERSION, NAME_OS_ARCH, NAME_CPU, NAME_MEMORY);
+			NAME_NAME, NAME_IP_ADDRESS, NAME_OS_NAME, NAME_OS_VERSION, NAME_OS_ARCH, NAME_CPU, NAME_MEMORY);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_NAME, PROP_NAME,
 			NAME_IP_ADDRESS, PROP_IP_ADDRESS,
-			NAME_OS, PROP_OS,
+			NAME_OS_NAME, PROP_OS_NAME,
 			NAME_OS_VERSION, PROP_OS_VERSION,
 			NAME_OS_ARCH, PROP_OS_ARCH, 
 			NAME_CPU, PROP_CPU, 
@@ -121,7 +121,7 @@ public class Agent extends AbstractEntity {
 	private String ipAddress;
 	
 	@Column(nullable=false)
-	private AgentOs os;
+	private String osName;
 	
 	@Column(nullable=false)
 	private String osVersion;
@@ -155,12 +155,12 @@ public class Agent extends AbstractEntity {
 		this.name = name;
 	}
 
-	public AgentOs getOs() {
-		return os;
+	public String getOsName() {
+		return osName;
 	}
 
-	public void setOs(AgentOs os) {
-		this.os = os;
+	public void setOsName(String osName) {
+		this.osName = osName;
 	}
 
 	public String getOsVersion() {
@@ -248,7 +248,8 @@ public class Agent extends AbstractEntity {
 	}
 	
 	public AgentData getAgentData() {
-		return new AgentData(getToken().getValue(), os, osVersion, osArch, name, cpu, memory, getAttributeMap());
+		return new AgentData(getToken().getValue(), new OsInfo(osName, osVersion, osArch),  
+				name, cpu, memory, getAttributeMap());
 	}
 	
 }

@@ -1,7 +1,5 @@
 package io.onedev.server.plugin.executor.servershell;
 
-import static io.onedev.agent.ShellExecutorUtils.newErrorLogger;
-import static io.onedev.agent.ShellExecutorUtils.newInfoLogger;
 import static io.onedev.agent.ShellExecutorUtils.resolveCachePath;
 import static io.onedev.agent.ShellExecutorUtils.testCommands;
 import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
@@ -26,6 +24,7 @@ import java.util.function.Consumer;
 
 import javax.validation.constraints.Size;
 
+import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
@@ -43,6 +42,8 @@ import io.onedev.k8shelper.CompositeExecutable;
 import io.onedev.k8shelper.ContainerExecutable;
 import io.onedev.k8shelper.LeafExecutable;
 import io.onedev.k8shelper.LeafHandler;
+import io.onedev.k8shelper.OsExecution;
+import io.onedev.k8shelper.OsInfo;
 import io.onedev.k8shelper.ServerExecutable;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.CacheSpec;
@@ -128,6 +129,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					
 					CompositeExecutable entryExecutable = new CompositeExecutable(jobContext.getActions());
 					
+					OsInfo osInfo = OneDev.getInstance(OsInfo.class);
 					boolean successful = entryExecutable.execute(new LeafHandler() {
 
 						@Override
@@ -137,7 +139,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 							
 							if (executable instanceof CommandExecutable) {
 								CommandExecutable commandExecutable = (CommandExecutable) executable;
-								if (commandExecutable.getImage() != null) {
+								OsExecution execution = commandExecutable.getExecution(osInfo);
+								if (execution.getImage() != null) {
 									throw new ExplicitException("This step can only be executed by server docker executor, "
 											+ "remote docker executor, or kubernetes executor");
 								}
@@ -146,7 +149,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								try {
 									FileUtils.writeLines(
 											jobScriptFile, 
-											new ArrayList<>(replacePlaceholders(commandExecutable.getCommands(), buildDir)), 
+											new ArrayList<>(replacePlaceholders(execution.getCommands(), buildDir)), 
 											commandExecutable.getEndOfLine());
 								} catch (IOException e) {
 									throw new RuntimeException(e);
@@ -176,7 +179,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								interpreter.workingDir(workspaceDir).environments(environments);
 								interpreter.addArgs(jobScriptFile.getAbsolutePath());
 								
-								ExecutionResult result = interpreter.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+								ExecutionResult result = interpreter.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
 								if (result.getReturnCode() != 0) {
 									jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + result.getReturnCode());
 									return false;
@@ -196,12 +199,12 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 									CloneInfo cloneInfo = checkoutExecutable.getCloneInfo();
 									
-									cloneInfo.writeAuthData(userDir, git, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+									cloneInfo.writeAuthData(userDir, git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
 									
 									List<String> trustCertContent = getTrustCertContent();
 									if (!trustCertContent.isEmpty()) {
 										installGitCert(new File(userDir, "trust-cert.pem"), trustCertContent, 
-												git, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+												git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
 									}
 
 									int cloneDepth = checkoutExecutable.getCloneDepth();
@@ -209,7 +212,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
 											cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), 
 											checkoutExecutable.isWithLfs(), checkoutExecutable.isWithSubmodules(),
-											cloneDepth, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+											cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
 								} catch (Exception e) {
 									jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 									return false;

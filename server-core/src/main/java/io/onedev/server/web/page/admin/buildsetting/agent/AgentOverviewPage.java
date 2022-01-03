@@ -22,7 +22,6 @@ import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.model.AgentAttribute;
 import io.onedev.server.web.component.AgentStatusBadge;
-import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
@@ -83,7 +82,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 			
 		});
 		
-		add(new SpriteImage("icon", getAgent().getOs().getIcon()));
+		add(new AgentIcon("icon", agentModel));
 		
 		add(new Label("name", getAgent().getName()));
 		add(new Label("ipAddress", getAgent().getIpAddress()));

@@ -1,14 +1,15 @@
 package io.onedev.server.plugin.executor.kubernetes;
 
 import static io.onedev.k8shelper.KubernetesHelper.ENV_JOB_TOKEN;
+import static io.onedev.k8shelper.KubernetesHelper.ENV_OS_INFO;
 import static io.onedev.k8shelper.KubernetesHelper.ENV_SERVER_URL;
+import static io.onedev.k8shelper.KubernetesHelper.IMAGE_REPO_PREFIX;
 import static io.onedev.k8shelper.KubernetesHelper.LOG_END_MESSAGE;
 import static io.onedev.k8shelper.KubernetesHelper.stringifyPosition;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -29,8 +30,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.text.WordUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +64,9 @@ import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafExecutable;
 import io.onedev.k8shelper.LeafVisitor;
+import io.onedev.k8shelper.OsContainer;
+import io.onedev.k8shelper.OsExecution;
+import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.EnvVar;
@@ -335,7 +341,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private OsInfo getBaselineOsInfo(Collection<NodeSelectorEntry> nodeSelector, TaskLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
-		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem} {.status.nodeInfo.kernelVersion} {.spec.unschedulable}{'|'}{end}");
+		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem} {.status.nodeInfo.kernelVersion} {.status.nodeInfo.architecture} {.spec.unschedulable}{'|'}{end}");
 		for (NodeSelectorEntry entry: nodeSelector) 
 			kubectl.addArgs("-l", entry.getLabelName() + "=" + entry.getLabelValue());
 		
@@ -354,8 +360,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		for (String osInfoString: Splitter.on('|').trimResults().omitEmptyStrings().splitToList(baos.toString())) {
 			osInfoString = osInfoString.replace('\n', ' ').replace('\r', ' ');
 			List<String> fields = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(osInfoString);
-			if (fields.size() == 2 || fields.get(2).equals("false"))
-				osInfos.add(new OsInfo(fields.get(0), fields.get(1)));
+			if (fields.size() == 3 || fields.get(3).equals("false")) {
+				String osName = WordUtils.capitalize(fields.get(0));
+				String osVersion = fields.get(1);
+				if (osName.equals("Windows"))
+					osVersion = StringUtils.substringBeforeLast(osVersion, ".");
+				osInfos.add(new OsInfo(osName, osVersion, fields.get(2)));
+			}
 		}
 
 		if (!osInfos.isEmpty()) {
@@ -690,7 +701,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				String trustCertsConfigMapName = createTrustCertsConfigMap(namespace, jobLogger);
 				
-				OsInfo baselineOsInfo = getBaselineOsInfo(getNodeSelector(), jobLogger);
+				OsInfo osInfo = getBaselineOsInfo(getNodeSelector(), jobLogger);
 				
 				Map<String, Object> podSpec = new LinkedHashMap<>();
 
@@ -703,7 +714,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String trustCertsHome;
 				String dockerSock;
 				String containerdSock;
-				if (baselineOsInfo.isWindows()) {
+				if (osInfo.isWindows()) {
 					containerBuildHome = "C:\\onedev-build";
 					containerCacheHome = containerBuildHome + "\\cache";
 					containerCommandHome = containerBuildHome + "\\command";
@@ -747,7 +758,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"mountPath", containerdSock);
 				
 				List<Object> commonVolumeMounts = Lists.<Object>newArrayList(buildHomeMount, authInfoMount, cacheHomeMount);
-				if (baselineOsInfo.isWindows())
+				if (osInfo.isWindows())
 					commonVolumeMounts.add(authInfoMount2);
 				if (trustCertsConfigMapName != null)
 					commonVolumeMounts.add(trustCertsMount);
@@ -767,14 +778,18 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				List<String> containerNames = Lists.newArrayList("init");
 				
-				String helperImageVersion;
-				try (InputStream is = KubernetesExecutor.class.getClassLoader().getResourceAsStream("k8s-helper-version.properties")) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					IOUtils.copy(is, baos);
-					helperImageVersion = baos.toString();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				String helperImageSuffix;
+				if (osInfo.isWindows()) {  
+					String windowsVersion = OsInfo.WINDOWS_VERSIONS.get(osInfo.getWindowsBuild());
+					if (windowsVersion != null)
+						helperImageSuffix = "windows-" + windowsVersion.toLowerCase();
+					else
+						throw new ExplicitException("Unsupported windows build number: " + osInfo.getWindowsBuild());
+				} else {
+					helperImageSuffix = "linux";
 				}
+				
+				String helperImage = IMAGE_REPO_PREFIX + "-" + helperImageSuffix + ":" + KubernetesHelper.getVersion();
 				
 				List<Map<Object, Object>> commonEnvs = new ArrayList<>();
 				commonEnvs.add(CollectionUtils.newLinkedHashMap(
@@ -783,6 +798,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				commonEnvs.add(CollectionUtils.newLinkedHashMap(
 						"name", ENV_JOB_TOKEN, 
 						"value", jobToken));
+				commonEnvs.add(CollectionUtils.newLinkedHashMap(
+						"name", ENV_OS_INFO,
+						"value", Hex.encodeHexString(SerializationUtils.serialize(osInfo))
+						));
 
 				entryExecutable.traverse(new LeafVisitor<Void>() {
 
@@ -793,35 +812,37 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						Map<Object, Object> stepContainerSpec;
 						if (executable instanceof CommandExecutable) {
 							CommandExecutable commandExecutable = (CommandExecutable) executable;
-							if (commandExecutable.getImage() == null) {
+							OsExecution execution = commandExecutable.getExecution(osInfo);
+							if (execution.getImage() == null) {
 								throw new ExplicitException("This step can only be executed by server shell "
 										+ "executor or remote shell executor");
 							}
 							
 							stepContainerSpec = CollectionUtils.newHashMap(
 									"name", containerName, 
-									"image", commandExecutable.getImage());
+									"image", execution.getImage());
 							if (commandExecutable.isUseTTY())
 								stepContainerSpec.put("tty", true);
 							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
 							stepContainerSpec.put("env", commonEnvs);
 						} else if (executable instanceof ContainerExecutable) {
 							ContainerExecutable containerExecutable = (ContainerExecutable) executable;
+							OsContainer container = containerExecutable.getContainer(osInfo); 
 							stepContainerSpec = CollectionUtils.newHashMap(
 									"name", containerName, 
-									"image", containerExecutable.getImage());
+									"image", container.getImage());
 							if (containerExecutable.isUseTTY())
 								stepContainerSpec.put("tty", true);
 							List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
-							if (containerExecutable.getWorkingDir() != null) {
+							if (container.getWorkingDir() != null) {
 								volumeMounts.add(CollectionUtils.newLinkedHashMap(
 										"name", "build-home", 
-										"mountPath", containerExecutable.getWorkingDir(),
+										"mountPath", container.getWorkingDir(),
 										"subPath", "workspace"));
 							}
 							stepContainerSpec.put("volumeMounts", volumeMounts);
 							List<Map<Object, Object>> envs = new ArrayList<>(commonEnvs);
-							for (Map.Entry<String, String> entry: containerExecutable.getEnvMap().entrySet()) {
+							for (Map.Entry<String, String> entry: container.getEnvMap().entrySet()) {
 								envs.add(CollectionUtils.newLinkedHashMap(
 										"name", entry.getKey(), 
 										"value", entry.getValue()));
@@ -830,13 +851,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						} else { 
 							stepContainerSpec = CollectionUtils.newHashMap(
 									"name", containerName, 
-									"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion);
+									"image", helperImage);
 							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
 							stepContainerSpec.put("env", commonEnvs);
 						}
 						
 						String positionStr = stringifyPosition(position);
-						if (baselineOsInfo.isLinux()) {
+						if (osInfo.isLinux()) {
 							stepContainerSpec.put("command", Lists.newArrayList("sh"));
 							stepContainerSpec.put("args", Lists.newArrayList(containerCommandHome + "/" + positionStr + ".sh"));
 						} else {
@@ -852,7 +873,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				}, new ArrayList<>());
 				
 				String k8sHelperClassPath;
-				if (baselineOsInfo.isLinux()) {
+				if (osInfo.isLinux()) {
 					k8sHelperClassPath = "/k8s-helper/*";
 				} else {
 					k8sHelperClassPath = "C:\\k8s-helper\\*";
@@ -871,7 +892,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				Map<Object, Object> initContainerSpec = CollectionUtils.newHashMap(
 						"name", "init", 
-						"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
+						"image", helperImage, 
 						"command", Lists.newArrayList("java"), 
 						"args", initArgs,
 						"env", commonEnvs,
@@ -879,7 +900,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				Map<Object, Object> sidecarContainerSpec = CollectionUtils.newHashMap(
 						"name", "sidecar", 
-						"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
+						"image", helperImage, 
 						"command", Lists.newArrayList("java"), 
 						"args", sidecarArgs, 
 						"env", commonEnvs, 
@@ -913,7 +934,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				Map<Object, Object> cacheHomeVolume = CollectionUtils.newLinkedHashMap(
 						"name", "cache-home", 
 						"hostPath", CollectionUtils.newLinkedHashMap(
-								"path", baselineOsInfo.getCacheHome(), 
+								"path", osInfo.getCacheHome(), 
 								"type", "DirectoryOrCreate"));
 				List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, userHomeVolume, cacheHomeVolume);
 				if (trustCertsConfigMapName != null) {
@@ -1374,93 +1395,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 		public void setDockerImage(String dockerImage) {
 			this.dockerImage = dockerImage;
-		}
-		
-	}
-
-	private static class OsInfo {
-		
-		private static final Map<Integer, String> WINDOWS_VERSIONS = new LinkedHashMap<>();
-		
-		static {
-			// update this according to 
-			// https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility
-			WINDOWS_VERSIONS.put(14393, "1607");
-			WINDOWS_VERSIONS.put(16299, "1709"); 
-			WINDOWS_VERSIONS.put(17134, "1803"); 
-			WINDOWS_VERSIONS.put(17763, "1809");
-			WINDOWS_VERSIONS.put(18362, "1903");
-			WINDOWS_VERSIONS.put(18363, "1909");
-			WINDOWS_VERSIONS.put(19041, "2004");
-			WINDOWS_VERSIONS.put(19042, "20H2");
-			WINDOWS_VERSIONS.put(19043, "2004");
-		}
-		
-		private final String osName;
-		
-		private final String osVersion;
-		
-		public OsInfo(String osName, String osVersion) {
-			this.osName = osName;
-			this.osVersion = osVersion;
-		}
-
-		public boolean isLinux() {
-			return osName.equalsIgnoreCase("linux");
-		}
-		
-		public boolean isWindows() {
-			return osName.equalsIgnoreCase("windows");
-		}
-		
-		public int getWindowsBuildNumber() {
-			Preconditions.checkState(isWindows());
-			List<String> fields = Splitter.on(".").splitToList(osVersion);
-			return Integer.parseInt(fields.get(fields.size()-2));
-		}
-		
-		public String getCacheHome() {
-			if (osName.equalsIgnoreCase("linux"))
-				return "/var/cache/onedev-build"; 
-			else
-				return "C:\\ProgramData\\onedev-build\\cache";
-		}
-		
-		public static OsInfo getBaseline(Collection<OsInfo> osInfos) {
-			if (osInfos.iterator().next().isLinux()) {
-				for (OsInfo osInfo: osInfos) {
-					if (!osInfo.isLinux())
-						throw new ExplicitException("Linux and non-linux nodes should not be included in same executor");
-				}
-				return osInfos.iterator().next();
-			} else if (osInfos.iterator().next().isWindows()) {
-				OsInfo baseline = null;
-				for (OsInfo osInfo: osInfos) {
-					if (!osInfo.isWindows())
-						throw new ExplicitException("Windows and non-windows nodes should not be included in same executor");
-					if (baseline == null || baseline.getWindowsBuildNumber() > osInfo.getWindowsBuildNumber())
-						baseline = osInfo;
-				}
-				return baseline;
-			} else {
-				throw new ExplicitException("Either Windows or Linux nodes can be included in an executor");
-			}
-		}
-		
-		public String getWindowsVersion() {
-			int buildNumber = getWindowsBuildNumber();
-			String windowsVersion = WINDOWS_VERSIONS.get(buildNumber);
-			if (windowsVersion != null)
-				return windowsVersion;
-			else
-				throw new ExplicitException("Unsupported windows build number: " + buildNumber);
-		}
-		
-		public String getHelperImageSuffix() {
-			if (isLinux())  
-				return "linux";
-			else 
-				return "windows-" + getWindowsVersion().toLowerCase();
 		}
 		
 	}

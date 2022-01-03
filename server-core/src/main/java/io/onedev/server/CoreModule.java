@@ -74,11 +74,13 @@ import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.vladsch.flexmark.Extension;
 
+import io.onedev.agent.ExecutorUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.buildspec.job.DefaultJobManager;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
@@ -458,6 +460,15 @@ public class CoreModule extends AbstractPluginModule {
 					}
 
 		        };
+			}
+	    	
+	    }).in(Singleton.class);
+	    
+	    bind(OsInfo.class).toProvider(new Provider<OsInfo>() {
+
+			@Override
+			public OsInfo get() {
+				return ExecutorUtils.getOsInfo();
 			}
 	    	
 	    }).in(Singleton.class);

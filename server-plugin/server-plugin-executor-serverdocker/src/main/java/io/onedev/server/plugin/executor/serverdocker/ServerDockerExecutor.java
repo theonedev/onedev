@@ -2,10 +2,9 @@ package io.onedev.server.plugin.executor.serverdocker;
 
 import static io.onedev.agent.DockerExecutorUtils.cleanDirAsRoot;
 import static io.onedev.agent.DockerExecutorUtils.createNetwork;
+import static io.onedev.agent.DockerExecutorUtils.isUseProcessIsolation;
 import static io.onedev.agent.DockerExecutorUtils.deleteNetwork;
 import static io.onedev.agent.DockerExecutorUtils.newDockerKiller;
-import static io.onedev.agent.DockerExecutorUtils.newErrorLogger;
-import static io.onedev.agent.DockerExecutorUtils.newInfoLogger;
 import static io.onedev.agent.DockerExecutorUtils.startService;
 import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
@@ -44,6 +43,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 
 import io.onedev.agent.DockerExecutorUtils;
+import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
@@ -64,6 +64,9 @@ import io.onedev.k8shelper.ContainerExecutable;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafExecutable;
 import io.onedev.k8shelper.LeafHandler;
+import io.onedev.k8shelper.OsContainer;
+import io.onedev.k8shelper.OsExecution;
+import io.onedev.k8shelper.OsInfo;
 import io.onedev.k8shelper.ServerExecutable;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
@@ -185,9 +188,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					
 					createNetwork(newDocker(), network, jobLogger);
 					try {
+						OsInfo osInfo = OneDev.getInstance(OsInfo.class);
+						
 						for (Service jobService: jobContext.getServices()) {
 							jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
-							startService(newDocker(), network, jobService.toMap(), jobLogger);
+							startService(newDocker(), network, jobService.toMap(), osInfo, jobLogger);
 						}
 						
 						File hostWorkspace = new File(hostBuildHome, "workspace");
@@ -210,7 +215,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							
 							jobContext.reportJobWorkspace(containerWorkspace);
 							CompositeExecutable entryExecutable = new CompositeExecutable(jobContext.getActions());
-							
 							boolean successful = entryExecutable.execute(new LeafHandler() {
 
 								private int runStepContainer(String image, @Nullable String entrypoint, 
@@ -263,11 +267,15 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									if (entrypoint != null)
 										docker.addArgs("--entrypoint=" + entrypoint);
 									
+									if (isUseProcessIsolation(newDocker(), image, osInfo, jobLogger))
+										docker.addArgs("--isolation=process");
+									
 									docker.addArgs(image);
 									docker.addArgs(arguments.toArray(new String[arguments.size()]));
 									
-									ExecutionResult result = docker.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger), null, 
-											newDockerKiller(newDocker(), containerName, jobLogger));
+									ExecutionResult result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger), 
+											ExecutorUtils.newErrorLogger(jobLogger), null, newDockerKiller(newDocker(), 
+											containerName, jobLogger));
 									return result.getReturnCode();
 								}
 								
@@ -279,15 +287,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									if (executable instanceof CommandExecutable) {
 										CommandExecutable commandExecutable = (CommandExecutable) executable;
 
-										if (commandExecutable.getImage() == null) {
+										OsExecution execution = commandExecutable.getExecution(osInfo);
+										if (execution.getImage() == null) {
 											throw new ExplicitException("This step can only be executed by server shell "
 													+ "executor or remote shell executor");
 										}
 										
 										Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
-												hostBuildHome, commandExecutable, hostAuthInfoHome.get() != null);
+												hostBuildHome, commandExecutable, osInfo, hostAuthInfoHome.get() != null);
 										
-										int exitCode = runStepContainer(commandExecutable.getImage(), entrypoint.executable(), 
+										int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(), 
 												entrypoint.arguments(), new HashMap<>(), null, position, commandExecutable.isUseTTY());
 										
 										if (exitCode != 0) {
@@ -296,13 +305,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										}
 									} else if (executable instanceof ContainerExecutable) {
 										ContainerExecutable containerExecutable = (ContainerExecutable) executable;
-
+										OsContainer container = containerExecutable.getContainer(osInfo);
 										List<String> arguments = new ArrayList<>();
-										if (containerExecutable.getArgs() != null)
-											arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(containerExecutable.getArgs())));
-										int exitCode = runStepContainer(containerExecutable.getImage(), null, arguments, 
-												containerExecutable.getEnvMap(), containerExecutable.getWorkingDir(), 
-												position, containerExecutable.isUseTTY());
+										if (container.getArgs() != null)
+											arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
+										int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(), 
+												container.getWorkingDir(), position, containerExecutable.isUseTTY());
 										if (exitCode != 0) {
 											jobLogger.error("Step \"" + stepNames + "\" is failed: Container exited with code " + exitCode);
 											return false;
@@ -318,12 +326,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 											CloneInfo cloneInfo = checkoutExecutable.getCloneInfo();
 											
-											cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+											cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
 											try {
 												List<String> trustCertContent = getTrustCertContent();
 												if (!trustCertContent.isEmpty()) {
 													installGitCert(new File(hostAuthInfoHome.get(), "trust-cert.pem"), trustCertContent, 
-															git, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+															git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
 												}
 		
 												int cloneDepth = checkoutExecutable.getCloneDepth();
@@ -331,11 +339,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
 														cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), 
 														checkoutExecutable.isWithLfs(), checkoutExecutable.isWithSubmodules(),
-														cloneDepth, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+														cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
 											} finally {
 												git.clearArgs();
 												git.addArgs("config", "--global", "--unset", "core.sshCommand");
-												ExecutionResult result = git.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+												ExecutionResult result = git.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
 												if (result.getReturnCode() != 5 && result.getReturnCode() != 0)
 													result.checkReturnCode();
 											}

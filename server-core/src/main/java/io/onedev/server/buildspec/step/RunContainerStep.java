@@ -67,7 +67,7 @@ public class RunContainerStep extends Step {
 	}
 
 	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container. "
-			+ "Leave empty to use the default working directory (<tt>/onedev-build/workspace</tt>). "
+			+ "Leave empty to use the default working directory. "
 			+ "<a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>Job workspace</a> will be "
 			+ "mounted to the working directory so that the container can access job files")
 	@Nullable

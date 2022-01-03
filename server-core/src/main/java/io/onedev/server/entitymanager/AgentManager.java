@@ -27,6 +27,8 @@ public interface AgentManager extends EntityManager<Agent> {
 
 	Collection<Long> getOnlineAgentIds();
 
+	List<String> getOsNames();
+	
 	List<String> getOsArchs();
 	
 	List<Agent> query(EntityQuery<Agent> agentQuery, int firstResult, int maxResults);
