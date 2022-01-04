@@ -584,6 +584,7 @@ public class Upgrade extends DefaultPersistManager {
 			FileUtils.copyFile(new File(Bootstrap.installDir, "readme.txt"), new File(upgradeDir, "readme.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "license.txt"), new File(upgradeDir, "license.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "version.txt"), new File(upgradeDir, "version.txt"));
+			FileUtils.copyFile(new File(Bootstrap.installDir, "build.txt"), new File(upgradeDir, "build.txt"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
