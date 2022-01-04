@@ -3445,6 +3445,32 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Agents.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element osElement = element.element("os");
+					String osName;
+					
+					switch (osElement.getTextTrim()) {
+					case "WINDOWS":
+						osName = "Windows";
+						break;
+					case "LINUX":
+						osName = "Linux";
+						break;
+					case "FREEBSD":
+						osName = "FreeBSD";
+						break;
+					case "MACOSX":
+						osName = "Mac OS X";
+						break;
+					default:
+						osName = "Other";
+					}
+					element.addElement("osName").setText(osName);
+					osElement.detach();
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}	

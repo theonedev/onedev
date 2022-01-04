@@ -191,7 +191,7 @@ public class BuildImageStep extends Step {
 		List<OsExecution> executions = new ArrayList<>();
 		String imageVersion = KubernetesHelper.getVersion();
 		
-		String image = KubernetesHelper.IMAGE_REPO_PREFIX + "-linux:" + imageVersion;
+		String image = "1dev/docker-cli-alpine:1.0.0";
 		executions.add(new OsExecution(OsMatcher.NON_WINDOWS, image, getNonWindowsCommands()));
 		
 		List<String> commands = getWindowsCommands();

@@ -10,7 +10,7 @@ import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=200, name="bash")
+@Editable(order=200, name="Bash")
 public class BashInterpreter extends Interpreter {
 
 	private static final long serialVersionUID = 1L;
