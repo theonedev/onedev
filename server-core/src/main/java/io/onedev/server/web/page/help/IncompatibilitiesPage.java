@@ -22,23 +22,33 @@ import io.onedev.server.web.page.layout.LayoutPage;
 @SuppressWarnings("serial")
 public class IncompatibilitiesPage extends LayoutPage {
 
+	private static final String FILE_CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = 
+			"checked-incompatibilities-since-upgraded-version.md";
+	
 	private final IModel<String> incompatibilitiesSinceUpgradedVersionModel = new LoadableDetachableModel<String>() {
 
 		@Override
 		protected String load() {
-			File incompatibilitiesSinceUpgradedVersionFile = 
-					new File(Bootstrap.installDir, Upgrade.FILE_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
-			if (incompatibilitiesSinceUpgradedVersionFile.exists()) {
-				try {
+			try {
+				File incompatibilitiesSinceUpgradedVersionFile = 
+						new File(Bootstrap.installDir, Upgrade.FILE_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
+				File checkedIncompatibilitiesSinceUpgradedVersionFile = 
+						new File(Bootstrap.installDir, FILE_CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
+				if (incompatibilitiesSinceUpgradedVersionFile.exists()) {
 					String incompatibilitiesSinceUpgradedVersion = FileUtils.readFileToString(
 							incompatibilitiesSinceUpgradedVersionFile, StandardCharsets.UTF_8);
+					FileUtils.copyFile(incompatibilitiesSinceUpgradedVersionFile, 
+							checkedIncompatibilitiesSinceUpgradedVersionFile);
 					FileUtils.deleteFile(incompatibilitiesSinceUpgradedVersionFile);
 					return incompatibilitiesSinceUpgradedVersion;
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				} else if (checkedIncompatibilitiesSinceUpgradedVersionFile.exists()) {
+					return FileUtils.readFileToString(
+							checkedIncompatibilitiesSinceUpgradedVersionFile, StandardCharsets.UTF_8);
+				} else {
+					return null;
 				}
-			} else {
-				return null;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 		
