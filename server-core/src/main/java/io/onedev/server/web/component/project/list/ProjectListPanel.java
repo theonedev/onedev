@@ -100,7 +100,6 @@ import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
@@ -1197,7 +1196,7 @@ public class ProjectListPanel extends Panel {
 
 					IssueQuery query = new IssueQuery(new ProjectCriteria(project.getPath()));
 					PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), 0);
-					Link<Void> issuesLink = new BookmarkablePageLink<Void>("issues", IssueListPage.class, params);
+					Link<Void> issuesLink = new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, params);
 					issuesLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 						@Override
@@ -1236,7 +1235,7 @@ public class ProjectListPanel extends Panel {
 									new StateCriteria(stateSpec.getName(), IssueQueryLexer.Is)));
 							IssueQuery query = new IssueQuery(criteria);
 							PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), 0);
-							Link<Void> stateLink = new BookmarkablePageLink<Void>("link", IssueListPage.class, params);
+							Link<Void> stateLink = new BookmarkablePageLink<Void>("link", ProjectIssueListPage.class, params);
 							stateLink.add(new Label("label", stats.getStateCount() + " " + stateSpec.getName()));
 							stateLink.add(AttributeAppender.append("style", "color:" + stateSpec.getColor()));
 							item.add(stateLink);
