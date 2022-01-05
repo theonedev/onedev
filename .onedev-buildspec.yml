@@ -149,8 +149,8 @@ jobs:
   - !PublishMarkdownReportStep
     name: publish markdown report
     reportName: Incompatibilities
-    filePatterns: doc/**
-    startPage: doc/incompatibilities.md
+    filePatterns: server-product/system/incompatibilities.md
+    startPage: server-product/system/incompatibilities.md
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CloseMilestoneStep
     name: close milestone
