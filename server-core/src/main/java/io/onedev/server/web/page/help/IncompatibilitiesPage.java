@@ -22,18 +22,15 @@ import io.onedev.server.web.page.layout.LayoutPage;
 @SuppressWarnings("serial")
 public class IncompatibilitiesPage extends LayoutPage {
 
-	private static final String FILE_CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = 
-			"checked-incompatibilities-since-upgraded-version.md";
-	
 	private final IModel<String> incompatibilitiesSinceUpgradedVersionModel = new LoadableDetachableModel<String>() {
 
 		@Override
 		protected String load() {
 			try {
 				File incompatibilitiesSinceUpgradedVersionFile = 
-						new File(Bootstrap.installDir, Upgrade.FILE_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
+						new File(Bootstrap.installDir, Upgrade.INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
 				File checkedIncompatibilitiesSinceUpgradedVersionFile = 
-						new File(Bootstrap.installDir, FILE_CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
+						new File(Bootstrap.installDir, Upgrade.CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION);
 				if (incompatibilitiesSinceUpgradedVersionFile.exists()) {
 					String incompatibilitiesSinceUpgradedVersion = FileUtils.readFileToString(
 							incompatibilitiesSinceUpgradedVersionFile, StandardCharsets.UTF_8);
@@ -87,7 +84,7 @@ public class IncompatibilitiesPage extends LayoutPage {
 						return incompatibilitiesSinceUpgradedVersionModel.getObject();
 					} else {
 						return FileUtils.readFileToString(
-								new File(Bootstrap.installDir, Upgrade.FILE_INCOMPATIBILITIES), 
+								new File(Bootstrap.installDir, Upgrade.INCOMPATIBILITIES), 
 								StandardCharsets.UTF_8);
 					}
 				} catch (IOException e) {

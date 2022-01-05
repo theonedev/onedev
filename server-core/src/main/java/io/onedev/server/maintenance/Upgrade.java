@@ -50,9 +50,11 @@ public class Upgrade extends DefaultPersistManager {
 	
 	private static final Pattern PRODUCT_FILE_NAME_PATTERN = Pattern.compile("io\\.onedev\\.server-product-(.*?)\\.jar");
 	
-	public static final String FILE_INCOMPATIBILITIES = "incompatibilities.md";
+	public static final String INCOMPATIBILITIES = "incompatibilities/incompatibilities.md";
 	
-	public static final String FILE_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = "incompatibilities-since-upgraded-version.md"; 
+	public static final String INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = "incompatibilities/since-upgraded-version.md"; 
+	
+	public static final String CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = "incompatibilities/checked-since-upgraded-version.md"; 
 	
 	@Inject
 	public Upgrade(PhysicalNamingStrategy physicalNamingStrategy,
@@ -589,24 +591,29 @@ public class Upgrade extends DefaultPersistManager {
 			FileUtils.copyFile(new File(Bootstrap.installDir, "license.txt"), new File(upgradeDir, "license.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "version.txt"), new File(upgradeDir, "version.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "build.txt"), new File(upgradeDir, "build.txt"));
-			
+
+			FileUtils.createDir(new File(Bootstrap.installDir, INCOMPATIBILITIES).getParentFile());
+			if (new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists())
+				FileUtils.deleteFile(new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
+			if (new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists())
+				FileUtils.deleteFile(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
 			String incompatibilities = FileUtils.readFileToString(
-					new File(Bootstrap.installDir, FILE_INCOMPATIBILITIES), StandardCharsets.UTF_8);
-			if (new File(upgradeDir, FILE_INCOMPATIBILITIES).exists()) {
+					new File(Bootstrap.installDir, INCOMPATIBILITIES), StandardCharsets.UTF_8);
+			if (new File(upgradeDir, INCOMPATIBILITIES).exists()) {
 				String incompatibilitiesOfUpgradedVersion = FileUtils.readFileToString(
-						new File(upgradeDir, FILE_INCOMPATIBILITIES), StandardCharsets.UTF_8);
-				if (incompatibilities.startsWith(incompatibilitiesOfUpgradedVersion)) {
+						new File(upgradeDir, INCOMPATIBILITIES), StandardCharsets.UTF_8);
+				if (incompatibilities.endsWith(incompatibilitiesOfUpgradedVersion)) {
 					String incompatibilitiesSinceUpgradedVersion = 
-							incompatibilities.substring(incompatibilitiesOfUpgradedVersion.length());
+							incompatibilities.substring(0, incompatibilities.length()-incompatibilitiesOfUpgradedVersion.length());
 					if (StringUtils.isNotBlank(incompatibilitiesSinceUpgradedVersion)) {
 						FileUtils.writeFile(
-								new File(upgradeDir, FILE_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION), 
+								new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION), 
 								incompatibilitiesSinceUpgradedVersion);
 					}
 				}
 			}
-			FileUtils.copyFile(new File(Bootstrap.installDir, FILE_INCOMPATIBILITIES), 
-					new File(upgradeDir, FILE_INCOMPATIBILITIES));
+			FileUtils.copyFile(new File(Bootstrap.installDir, INCOMPATIBILITIES), 
+					new File(upgradeDir, INCOMPATIBILITIES));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
