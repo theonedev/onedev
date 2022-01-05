@@ -63,7 +63,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 			job.getSteps().add(setBuildVersion);
 			
 			CommandStep runGradle = new CommandStep();
-			runGradle.setName("run gradle");
+			runGradle.setName("run gradle build");
 			runGradle.setImage(imageName);
 			runGradle.getInterpreter().setCommands(Lists.newArrayList("gradle build"));
 			job.getSteps().add(runGradle);

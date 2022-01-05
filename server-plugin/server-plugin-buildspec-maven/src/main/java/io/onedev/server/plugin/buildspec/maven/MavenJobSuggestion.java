@@ -66,7 +66,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 			job.getSteps().add(setBuildVersion);
 			
 			CommandStep runMaven = new CommandStep();
-			runMaven.setName("run maven");
+			runMaven.setName("run unit tests");
 			runMaven.setImage(imageName);
 			runMaven.getInterpreter().setCommands(Lists.newArrayList("mvn clean test"));
 
