@@ -1,6 +1,8 @@
 package io.onedev.server.web.component.pullrequest.build;
 
-import static io.onedev.server.model.Build.*;
+import static io.onedev.server.model.Build.NAME_COMMIT;
+import static io.onedev.server.model.Build.NAME_JOB;
+import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
@@ -24,7 +26,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
@@ -45,17 +47,11 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 
 @SuppressWarnings("serial")
-public abstract class PullRequestJobsPanel extends Panel {
+public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInfo>> {
 
 	public PullRequestJobsPanel(String id) {
 		super(id);
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		add(new ListView<JobBuildInfo>("jobs", new LoadableDetachableModel<List<JobBuildInfo>>() {
+		setModel(new LoadableDetachableModel<List<JobBuildInfo>>() {
 
 			@Override
 			protected List<JobBuildInfo> load() {
@@ -91,7 +87,14 @@ public abstract class PullRequestJobsPanel extends Panel {
 				return listOfJobBuildInfo;
 			}
 			
-		}) {
+		});
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new ListView<JobBuildInfo>("jobs", getModel()) {
 
 			@Override
 			protected void populateItem(ListItem<JobBuildInfo> item) {
@@ -190,39 +193,17 @@ public abstract class PullRequestJobsPanel extends Panel {
 	}
 	
 	@Override
+	protected void onConfigure() {
+		super.onConfigure();
+		setVisible(!getModelObject().isEmpty());
+	}
+
+	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new PullRequestJobsCssResourceReference()));
 	}
 
 	protected abstract PullRequest getPullRequest();
-
-	private static class JobBuildInfo {
-		
-		private final String jobName;
-
-		private final boolean required;
-		
-		private final List<Build> builds;
-		
-		public JobBuildInfo(String jobName, boolean required, List<Build> builds) {
-			this.jobName = jobName;
-			this.required = required;
-			this.builds = builds;
-		}
-
-		public String getJobName() {
-			return jobName;
-		}
-
-		public boolean isRequired() {
-			return required;
-		}
-
-		public List<Build> getBuilds() {
-			return builds;
-		}
-		
-	}
 	
 }

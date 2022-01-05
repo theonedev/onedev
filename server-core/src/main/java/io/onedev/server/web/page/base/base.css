@@ -106,6 +106,12 @@ table>thead>tr>th, table>tbody>tr>td {
 	border-top: none;
 }
 
+.navigatorLabel {
+	margin-bottom: 1rem;
+	text-align: center;
+	font-size: 0.9rem;
+}
+
 tr.navigation>td {
 	padding: 20px;
 }

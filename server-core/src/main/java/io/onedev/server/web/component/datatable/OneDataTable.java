@@ -10,7 +10,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.ISortableDataProvider;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
-import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
@@ -41,13 +40,6 @@ public class OneDataTable<T, S> extends DataTable<T, S> {
 				return new OnePagingNavigator(navigatorId, table, pagingHistorySupport);
 			}
 
-			@Override
-			protected WebComponent newNavigatorLabel(String navigatorId, DataTable<?, ?> table) {
-				WebComponent navigatorLabel = new WebComponent(navigatorId);
-				navigatorLabel.setVisible(false);
-				return navigatorLabel;
-			}
-			
 		});
 		addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
 	}

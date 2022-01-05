@@ -843,6 +843,7 @@ public abstract class PullRequestListPanel extends Panel {
 		
 		if (getPagingHistorySupport() != null)
 			requestsTable.setCurrentPage(getPagingHistorySupport().getCurrentPage());
+		
 		requestsTable.addBottomToolbar(new NavigationToolbar(requestsTable) {
 
 			@Override

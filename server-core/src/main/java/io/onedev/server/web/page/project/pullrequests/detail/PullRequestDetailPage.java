@@ -718,12 +718,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						return PullRequestDetailPage.this.getPullRequest();
 					}
 					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!getPullRequest().getCurrentBuilds().isEmpty());
-					}
-
 				});
 				fragment.add(new WebMarkupContainer("jobsHelp") {
 					
