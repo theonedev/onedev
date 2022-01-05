@@ -50,7 +50,7 @@ consideration. As a result of this, password authentication specified previously
 
 1. Submodule authentication
   
-  You will need to use custom http/ssh clone credential with permission to access submodule projects to retrieve source. Refer to [usage scenario](https://code.onedev.io/projects/onedev-manual/blob/master/pages/clone-submodules-via-ssh.md) for an example.
+  You will need to use custom http/ssh clone credential with permission to access submodule projects to retrieve source. Refer to [usage scenario](https://code.onedev.io/projects/162/blob/main/pages/clone-submodules-via-ssh.md) for an example.
   
 2. Project dependency authentication
 

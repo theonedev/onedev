@@ -56,6 +56,7 @@ import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
 import io.onedev.server.web.page.builds.BuildListPage;
+import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.help.MethodDetailPage;
 import io.onedev.server.web.page.help.ResourceDetailPage;
 import io.onedev.server.web.page.help.ResourceListPage;
@@ -161,6 +162,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addHelpPages() {
+		add(new DynamicPathPageMapper("help/incompatibilities", IncompatibilitiesPage.class));
 		add(new DynamicPathPageMapper("help/api", ResourceListPage.class));
 		add(new DynamicPathPageMapper("help/api/${resource}", ResourceDetailPage.class));
 		add(new DynamicPathPageMapper("help/api/${resource}/${method}", MethodDetailPage.class));

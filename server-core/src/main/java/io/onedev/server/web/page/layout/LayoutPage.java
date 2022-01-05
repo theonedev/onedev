@@ -1,15 +1,11 @@
 package io.onedev.server.web.page.layout;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -36,7 +32,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.Plugin;
 import io.onedev.server.OneDev;
@@ -83,6 +78,7 @@ import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
@@ -306,20 +302,7 @@ public abstract class LayoutPage extends BasePage {
 		Plugin product = AppLoader.getProduct();
 		sidebar.add(new Label("productVersion", "Ver. " + product.getVersion()));
 		sidebar.add(new ExternalLink("docLink", OneDev.getInstance().getDocRoot() + "/"));
-		try {
-			String buildNumber = FileUtils.readFileToString(
-					new File(Bootstrap.installDir, "build.txt"), 
-					StandardCharsets.UTF_8);
-			if (buildNumber.length() != 0) {
-				sidebar.add(new ExternalLink("incompatibilities", 
-						"https://code.onedev.io/projects/160/builds/" + buildNumber.trim() 
-						+ "/markdown/Incompatibilities/doc/incompatibilities.md"));
-			} else {
-				sidebar.add(new WebMarkupContainer("incompatibilities").setVisible(false));
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
 		
 		WebMarkupContainer topbar = new WebMarkupContainer("topbar");
 		add(topbar);

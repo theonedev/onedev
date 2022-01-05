@@ -2,6 +2,7 @@ package io.onedev.server.web.page.base;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
@@ -45,8 +46,10 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.maintenance.Upgrade;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
@@ -56,6 +59,7 @@ import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
@@ -79,6 +83,12 @@ public abstract class BasePage extends WebPage {
 
 		if (!isPermitted())
 			unauthorized();
+		
+		if (SecurityUtils.isAdministrator() 
+				&& !(getPage() instanceof IncompatibilitiesPage)
+				&& new File(Bootstrap.installDir, Upgrade.FILE_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists()) {
+			throw new RestartResponseAtInterceptPageException(IncompatibilitiesPage.class);
+		}
 		
 		AbstractPostAjaxBehavior popStateBehavior;
 		add(popStateBehavior = new AbstractPostAjaxBehavior() {

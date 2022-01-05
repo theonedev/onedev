@@ -50,6 +50,10 @@ public class Upgrade extends DefaultPersistManager {
 	
 	private static final Pattern PRODUCT_FILE_NAME_PATTERN = Pattern.compile("io\\.onedev\\.server-product-(.*?)\\.jar");
 	
+	public static final String FILE_INCOMPATIBILITIES = "incompatibilities.md";
+	
+	public static final String FILE_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION = "incompatibilities-since-upgraded-version.md"; 
+	
 	@Inject
 	public Upgrade(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
@@ -585,6 +589,24 @@ public class Upgrade extends DefaultPersistManager {
 			FileUtils.copyFile(new File(Bootstrap.installDir, "license.txt"), new File(upgradeDir, "license.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "version.txt"), new File(upgradeDir, "version.txt"));
 			FileUtils.copyFile(new File(Bootstrap.installDir, "build.txt"), new File(upgradeDir, "build.txt"));
+			
+			String incompatibilities = FileUtils.readFileToString(
+					new File(Bootstrap.installDir, FILE_INCOMPATIBILITIES), StandardCharsets.UTF_8);
+			if (new File(upgradeDir, FILE_INCOMPATIBILITIES).exists()) {
+				String incompatibilitiesOfUpgradedVersion = FileUtils.readFileToString(
+						new File(upgradeDir, FILE_INCOMPATIBILITIES), StandardCharsets.UTF_8);
+				if (incompatibilities.startsWith(incompatibilitiesOfUpgradedVersion)) {
+					String incompatibilitiesSinceUpgradedVersion = 
+							incompatibilities.substring(incompatibilitiesOfUpgradedVersion.length());
+					if (StringUtils.isNotBlank(incompatibilitiesSinceUpgradedVersion)) {
+						FileUtils.writeFile(
+								new File(upgradeDir, FILE_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION), 
+								incompatibilitiesSinceUpgradedVersion);
+					}
+				}
+			}
+			FileUtils.copyFile(new File(Bootstrap.installDir, FILE_INCOMPATIBILITIES), 
+					new File(upgradeDir, FILE_INCOMPATIBILITIES));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
