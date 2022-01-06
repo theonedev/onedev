@@ -1,3 +1,8 @@
+# 6.2.1
+
+1. [build spec] Registry login setting is removed from build image step (introduced in 6.2.0). Specify registry logins 
+in job executor if necessary
+
 # 6.2.0
 
 1. A new property `Run In Container` is added and enabled for all command steps in build spec. If you have steps intended to 

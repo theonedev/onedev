@@ -2,8 +2,8 @@ package io.onedev.server.buildspec.step;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.k8shelper.CheckoutExecutable;
-import io.onedev.k8shelper.Executable;
+import io.onedev.k8shelper.CheckoutFacade;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.job.gitcredential.DefaultCredential;
 import io.onedev.server.buildspec.job.gitcredential.GitCredential;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -64,8 +64,8 @@ public class CheckoutStep extends Step {
 	}
 
 	@Override
-	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
-		return new CheckoutExecutable(cloneDepth!=null?cloneDepth:0, withLfs, withSubmodules, 
+	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
+		return new CheckoutFacade(cloneDepth!=null?cloneDepth:0, withLfs, withSubmodules, 
 				cloneCredential.newCloneInfo(build, jobToken));
 	}
 

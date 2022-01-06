@@ -9,22 +9,22 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.Executable;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.k8shelper.ServerExecutable;
+import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringVisitor;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-public abstract class ServerStep extends Step {
+public abstract class ServerSideStep extends Step {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
-		return new ServerExecutable(this, getFiles().getIncludes(), getFiles().getExcludes(), getPlaceholders());
+	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
+		return new ServerSideFacade(this, getFiles().getIncludes(), getFiles().getExcludes(), getPlaceholders());
 	}
 
 	protected PatternSet getFiles() {

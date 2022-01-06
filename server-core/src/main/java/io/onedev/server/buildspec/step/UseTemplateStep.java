@@ -12,8 +12,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.Action;
-import io.onedev.k8shelper.CompositeExecutable;
-import io.onedev.k8shelper.Executable;
+import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.ParamUtils;
@@ -89,7 +89,7 @@ public class UseTemplateStep extends Step {
 	}
 	
 	@Override
-	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
+	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
 		StepTemplate template = build.getSpec().getStepTemplateMap().get(templateName);
 		if (template == null)
 			throw new ExplicitException("Step template not found: " + templateName);
@@ -116,7 +116,7 @@ public class UseTemplateStep extends Step {
 			
 		}.run();
 		
-		return new CompositeExecutable(actions);
+		return new CompositeFacade(actions);
 	}
 
 }

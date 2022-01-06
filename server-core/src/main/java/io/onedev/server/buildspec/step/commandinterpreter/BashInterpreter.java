@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
-import io.onedev.k8shelper.BashExecutable;
-import io.onedev.k8shelper.CommandExecutable;
+import io.onedev.k8shelper.BashFacade;
+import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -29,8 +29,8 @@ public class BashInterpreter extends Interpreter {
 	}
 
 	@Override
-	public CommandExecutable getExecutable(String image, boolean useTTY) {
-		return new BashExecutable(image, getCommands(), useTTY);
+	public CommandFacade getExecutable(String image, boolean useTTY) {
+		return new BashFacade(image, getCommands(), useTTY);
 	}
 
 }

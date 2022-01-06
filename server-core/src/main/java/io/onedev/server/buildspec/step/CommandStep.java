@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.k8shelper.Executable;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
@@ -87,7 +87,7 @@ public class CommandStep extends Step {
 	}
 	
 	@Override
-	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
+	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
 		return getInterpreter().getExecutable(isRunInContainer()?getImage():null, isUseTTY());
 	}
 	

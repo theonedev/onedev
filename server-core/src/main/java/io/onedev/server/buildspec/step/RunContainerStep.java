@@ -10,8 +10,8 @@ import javax.annotation.Nullable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.k8shelper.ContainerExecutable;
-import io.onedev.k8shelper.Executable;
+import io.onedev.k8shelper.RunContainerFacade;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -35,11 +35,11 @@ public class RunContainerStep extends Step {
 	private boolean useTTY;
 	
 	@Override
-	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
+	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
 		Map<String, String> envMap = new HashMap<>();
 		for (EnvVar var: getEnvVars())
 			envMap.put(var.getName(), var.getValue());
-		return new ContainerExecutable(getImage(), getArgs(), envMap, getWorkingDir(), isUseTTY());
+		return new RunContainerFacade(getImage(), getArgs(), envMap, getWorkingDir(), isUseTTY());
 	}
 
 	@Editable(order=100, description="Specify container image to run. <b class='text-warning'>NOTE:</b> A shell must "

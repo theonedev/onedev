@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.k8shelper.Action;
-import io.onedev.k8shelper.Executable;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
@@ -20,7 +20,7 @@ public abstract class Step implements Serializable {
 
 	private ExecuteCondition condition = ExecuteCondition.ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL;
 	
-	public abstract Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination);
+	public abstract StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination);
 	
 	private String name;
 
@@ -45,7 +45,7 @@ public abstract class Step implements Serializable {
 	}
 
 	public Action getAction(String name, Build build, String jobToken, ParamCombination paramCombination) {
-		return new Action(name, getExecutable(build, jobToken, paramCombination), condition);
+		return new Action(name, getFacade(build, jobToken, paramCombination), condition);
 	}
 	
 	public Action getAction(Build build, String jobToken, ParamCombination paramCombination) {

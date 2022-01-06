@@ -57,16 +57,18 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.Action;
-import io.onedev.k8shelper.CommandExecutable;
-import io.onedev.k8shelper.CompositeExecutable;
-import io.onedev.k8shelper.ContainerExecutable;
+import io.onedev.k8shelper.BuildImageFacade;
+import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.CompositeFacade;
 import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.k8shelper.LeafExecutable;
+import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafVisitor;
 import io.onedev.k8shelper.OsContainer;
 import io.onedev.k8shelper.OsExecution;
 import io.onedev.k8shelper.OsInfo;
+import io.onedev.k8shelper.RegistryLoginFacade;
+import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.EnvVar;
@@ -765,15 +767,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				commonVolumeMounts.add(dockerSockMount);
 				commonVolumeMounts.add(containerdSockMount);
 
-				CompositeExecutable entryExecutable;
+				CompositeFacade entryFacade;
 				if (jobContext != null) {
-					entryExecutable = new CompositeExecutable(jobContext.getActions());
+					entryFacade = new CompositeFacade(jobContext.getActions());
 				} else {
 					List<Action> actions = new ArrayList<>();
-					CommandExecutable executable = new CommandExecutable((String) executionContext, 
+					CommandFacade facade = new CommandFacade((String) executionContext, 
 							Lists.newArrayList("this does not matter"), false);
-					actions.add(new Action("test", executable, ExecuteCondition.ALWAYS));
-					entryExecutable = new CompositeExecutable(actions);
+					actions.add(new Action("test", facade, ExecuteCondition.ALWAYS));
+					entryFacade = new CompositeFacade(actions);
 				}
 				
 				List<String> containerNames = Lists.newArrayList("init");
@@ -803,16 +805,16 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"value", Hex.encodeHexString(SerializationUtils.serialize(osInfo))
 						));
 
-				entryExecutable.traverse(new LeafVisitor<Void>() {
+				entryFacade.traverse(new LeafVisitor<Void>() {
 
 					@Override
-					public Void visit(LeafExecutable executable, List<Integer> position) {
+					public Void visit(LeafFacade facade, List<Integer> position) {
 						String containerName = getContainerName(position);
 						containerNames.add(containerName);
 						Map<Object, Object> stepContainerSpec;
-						if (executable instanceof CommandExecutable) {
-							CommandExecutable commandExecutable = (CommandExecutable) executable;
-							OsExecution execution = commandExecutable.getExecution(osInfo);
+						if (facade instanceof CommandFacade) {
+							CommandFacade commandFacade = (CommandFacade) facade;
+							OsExecution execution = commandFacade.getExecution(osInfo);
 							if (execution.getImage() == null) {
 								throw new ExplicitException("This step can only be executed by server shell "
 										+ "executor or remote shell executor");
@@ -821,17 +823,23 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							stepContainerSpec = CollectionUtils.newHashMap(
 									"name", containerName, 
 									"image", execution.getImage());
-							if (commandExecutable.isUseTTY())
+							if (commandFacade.isUseTTY())
 								stepContainerSpec.put("tty", true);
 							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
 							stepContainerSpec.put("env", commonEnvs);
-						} else if (executable instanceof ContainerExecutable) {
-							ContainerExecutable containerExecutable = (ContainerExecutable) executable;
-							OsContainer container = containerExecutable.getContainer(osInfo); 
+						} else if (facade instanceof BuildImageFacade) {
+							stepContainerSpec = CollectionUtils.newHashMap(
+									"name", containerName, 
+									"image", helperImage);
+							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
+							stepContainerSpec.put("env", commonEnvs);
+						} else if (facade instanceof RunContainerFacade) {
+							RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
+							OsContainer container = runContainerFacade.getContainer(osInfo); 
 							stepContainerSpec = CollectionUtils.newHashMap(
 									"name", containerName, 
 									"image", container.getImage());
-							if (containerExecutable.isUseTTY())
+							if (runContainerFacade.isUseTTY())
 								stepContainerSpec.put("tty", true);
 							List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
 							if (container.getWorkingDir() != null) {
@@ -890,12 +898,20 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					initArgs.add("test");
 				}
 				
+				List<Map<Object, Object>> initEnvs = new ArrayList<>(commonEnvs);
+				List<RegistryLoginFacade> registryLogins = new ArrayList<>();
+				for (RegistryLogin login: getRegistryLogins())
+					registryLogins.add(new RegistryLoginFacade(login.getRegistryUrl(), login.getUserName(), login.getPassword()));
+				initEnvs.add(CollectionUtils.newLinkedHashMap(
+						"name", KubernetesHelper.ENV_REGISTRY_LOGINS,
+						"value", Hex.encodeHexString(SerializationUtils.serialize((Serializable) registryLogins))
+						));
 				Map<Object, Object> initContainerSpec = CollectionUtils.newHashMap(
 						"name", "init", 
 						"image", helperImage, 
 						"command", Lists.newArrayList("java"), 
 						"args", initArgs,
-						"env", commonEnvs,
+						"env", initEnvs,
 						"volumeMounts", commonVolumeMounts);
 				
 				Map<Object, Object> sidecarContainerSpec = CollectionUtils.newHashMap(
@@ -1011,7 +1027,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 									String errorMessage;
 									if (containerName.startsWith("step-")) {
 										List<Integer> position = KubernetesHelper.parsePosition(containerName.substring("step-".length()));
-										errorMessage = "Step \"" + entryExecutable.getNamesAsString(position) 
+										errorMessage = "Step \"" + entryFacade.getNamesAsString(position) 
 												+ ": " + error.getMessage();
 									} else {
 										errorMessage = containerName + ": " + error.getMessage();
@@ -1046,7 +1062,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 								String errorMessage;
 								if (containerName.startsWith("step-")) {
 									List<Integer> position = KubernetesHelper.parsePosition(containerName.substring("step-".length()));
-									errorMessage = "Step \"" + entryExecutable.getNamesAsString(position) 
+									errorMessage = "Step \"" + entryFacade.getNamesAsString(position) 
 											+ " is failed: " + error.getMessage();
 								} else {
 									errorMessage = containerName + ": " + error.getMessage();

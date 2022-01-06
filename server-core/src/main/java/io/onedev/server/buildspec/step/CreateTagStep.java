@@ -22,7 +22,7 @@ import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Multiline;
 
 @Editable(name="Create Tag", order=300)
-public class CreateTagStep extends ServerStep {
+public class CreateTagStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
 	

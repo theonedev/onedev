@@ -19,7 +19,7 @@ import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable(order=1050, name="Publish Artifacts")
-public class PublishArtifactStep extends ServerStep {
+public class PublishArtifactStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
 

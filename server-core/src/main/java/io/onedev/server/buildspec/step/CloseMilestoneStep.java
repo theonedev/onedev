@@ -20,7 +20,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable(name="Close Milestone", order=400)
-public class CloseMilestoneStep extends ServerStep {
+public class CloseMilestoneStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
 	

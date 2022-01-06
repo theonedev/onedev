@@ -55,19 +55,20 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.CacheInstance;
-import io.onedev.k8shelper.CheckoutExecutable;
+import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.CloneInfo;
-import io.onedev.k8shelper.CommandExecutable;
-import io.onedev.k8shelper.CompositeExecutable;
-import io.onedev.k8shelper.ContainerExecutable;
+import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.k8shelper.LeafExecutable;
+import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.OsContainer;
 import io.onedev.k8shelper.OsExecution;
 import io.onedev.k8shelper.OsInfo;
-import io.onedev.k8shelper.ServerExecutable;
+import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.JobContext;
@@ -214,8 +215,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							}
 							
 							jobContext.reportJobWorkspace(containerWorkspace);
-							CompositeExecutable entryExecutable = new CompositeExecutable(jobContext.getActions());
-							boolean successful = entryExecutable.execute(new LeafHandler() {
+							CompositeFacade entryFacade = new CompositeFacade(jobContext.getActions());
+							boolean successful = entryFacade.execute(new LeafHandler() {
 
 								private int runStepContainer(String image, @Nullable String entrypoint, 
 										List<String> arguments, Map<String, String> environments, 
@@ -274,76 +275,79 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									docker.addArgs(arguments.toArray(new String[arguments.size()]));
 									
 									ExecutionResult result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger), 
-											ExecutorUtils.newErrorLogger(jobLogger), null, newDockerKiller(newDocker(), 
+											ExecutorUtils.newWarningLogger(jobLogger), null, newDockerKiller(newDocker(), 
 											containerName, jobLogger));
 									return result.getReturnCode();
 								}
 								
 								@Override
-								public boolean execute(LeafExecutable executable, List<Integer> position) {
-									String stepNames = entryExecutable.getNamesAsString(position);
+								public boolean execute(LeafFacade facade, List<Integer> position) {
+									String stepNames = entryFacade.getNamesAsString(position);
 									jobLogger.notice("Running step \"" + stepNames + "\"...");
 									
-									if (executable instanceof CommandExecutable) {
-										CommandExecutable commandExecutable = (CommandExecutable) executable;
+									if (facade instanceof CommandFacade) {
+										CommandFacade commandFacade = (CommandFacade) facade;
 
-										OsExecution execution = commandExecutable.getExecution(osInfo);
+										OsExecution execution = commandFacade.getExecution(osInfo);
 										if (execution.getImage() == null) {
 											throw new ExplicitException("This step can only be executed by server shell "
 													+ "executor or remote shell executor");
 										}
 										
 										Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
-												hostBuildHome, commandExecutable, osInfo, hostAuthInfoHome.get() != null);
+												hostBuildHome, commandFacade, osInfo, hostAuthInfoHome.get() != null);
 										
 										int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(), 
-												entrypoint.arguments(), new HashMap<>(), null, position, commandExecutable.isUseTTY());
+												entrypoint.arguments(), new HashMap<>(), null, position, commandFacade.isUseTTY());
 										
 										if (exitCode != 0) {
 											jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + exitCode);
 											return false;
 										}
-									} else if (executable instanceof ContainerExecutable) {
-										ContainerExecutable containerExecutable = (ContainerExecutable) executable;
-										OsContainer container = containerExecutable.getContainer(osInfo);
+									} else if (facade instanceof BuildImageFacade || facade instanceof BuildImageFacade) {
+										DockerExecutorUtils.buildImage(newDocker(), (BuildImageFacade) facade, 
+												hostWorkspace, jobLogger);
+									} else if (facade instanceof RunContainerFacade) {
+										RunContainerFacade rubContainerFacade = (RunContainerFacade) facade;
+										OsContainer container = rubContainerFacade.getContainer(osInfo);
 										List<String> arguments = new ArrayList<>();
 										if (container.getArgs() != null)
 											arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
 										int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(), 
-												container.getWorkingDir(), position, containerExecutable.isUseTTY());
+												container.getWorkingDir(), position, rubContainerFacade.isUseTTY());
 										if (exitCode != 0) {
 											jobLogger.error("Step \"" + stepNames + "\" is failed: Container exited with code " + exitCode);
 											return false;
 										} 
-									} else if (executable instanceof CheckoutExecutable) {
+									} else if (facade instanceof CheckoutFacade) {
 										try {
-											CheckoutExecutable checkoutExecutable = (CheckoutExecutable) executable;
+											CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
 											jobLogger.log("Checking out code...");
 											if (hostAuthInfoHome.get() == null)
 												hostAuthInfoHome.set(FileUtils.createTempDir());
 											Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
 											git.workingDir(hostWorkspace).environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
 	
-											CloneInfo cloneInfo = checkoutExecutable.getCloneInfo();
+											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
 											
-											cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
+											cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 											try {
 												List<String> trustCertContent = getTrustCertContent();
 												if (!trustCertContent.isEmpty()) {
 													installGitCert(new File(hostAuthInfoHome.get(), "trust-cert.pem"), trustCertContent, 
-															git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
+															git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 												}
 		
-												int cloneDepth = checkoutExecutable.getCloneDepth();
+												int cloneDepth = checkoutFacade.getCloneDepth();
 												
 												cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
 														cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), 
-														checkoutExecutable.isWithLfs(), checkoutExecutable.isWithSubmodules(),
-														cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
+														checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
+														cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 											} finally {
 												git.clearArgs();
 												git.addArgs("config", "--global", "--unset", "core.sshCommand");
-												ExecutionResult result = git.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newErrorLogger(jobLogger));
+												ExecutionResult result = git.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 												if (result.getReturnCode() != 5 && result.getReturnCode() != 0)
 													result.checkReturnCode();
 											}
@@ -352,15 +356,15 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 											return false;
 										}
 									} else {
-										ServerExecutable serverExecutable = (ServerExecutable) executable;
+										ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
 										
 										File filesDir = FileUtils.createTempDir();
 										try {
-											Collection<String> placeholders = serverExecutable.getPlaceholders();
+											Collection<String> placeholders = serverSideFacade.getPlaceholders();
 											Map<String, String> placeholderValues = readPlaceholderValues(hostBuildHome, placeholders);
 											PatternSet filePatterns = new PatternSet(
-													new HashSet<>(replacePlaceholders(serverExecutable.getIncludeFiles(), placeholderValues)), 
-													new HashSet<>(replacePlaceholders(serverExecutable.getExcludeFiles(), placeholderValues)));
+													new HashSet<>(replacePlaceholders(serverSideFacade.getIncludeFiles(), placeholderValues)), 
+													new HashSet<>(replacePlaceholders(serverSideFacade.getExcludeFiles(), placeholderValues)));
 
 											int baseLen = hostWorkspace.getAbsolutePath().length()+1;
 											for (File file: filePatterns.listFiles(hostWorkspace)) {
@@ -392,8 +396,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								}
 
 								@Override
-								public void skip(LeafExecutable executable, List<Integer> position) {
-									jobLogger.notice("Step \"" + entryExecutable.getNamesAsString(position) + "\" is skipped");
+								public void skip(LeafFacade facade, List<Integer> position) {
+									jobLogger.notice("Step \"" + entryFacade.getNamesAsString(position) + "\" is skipped");
 								}
 								
 							}, new ArrayList<>());

@@ -7,7 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.k8shelper.CommandExecutable;
+import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -26,7 +26,7 @@ public abstract class Interpreter implements Serializable {
 		this.commands = commands;
 	}
 
-	public abstract CommandExecutable getExecutable(@Nullable String image, boolean useTTY);
+	public abstract CommandFacade getExecutable(@Nullable String image, boolean useTTY);
 	
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false);

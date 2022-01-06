@@ -1271,4 +1271,46 @@ public class BuildSpec implements Serializable, Validatable {
 		}			
 	}	
 	
+	private void migrate15_steps(SequenceNode stepsNode) {
+		for (Node stepsNodeItem: stepsNode.getValue()) {
+			MappingNode stepNode = (MappingNode) stepsNodeItem;
+			if (stepNode.getTag().getValue().equals("!BuildImageStep")) {
+				for (Iterator<NodeTuple> itStepNodeTuple = stepNode.getValue().iterator(); itStepNodeTuple.hasNext();) {
+					NodeTuple stepNodeTuple = itStepNodeTuple.next();
+					String key = ((ScalarNode)stepNodeTuple.getKeyNode()).getValue();
+					if (key.equals("useTTY") || key.equals("login"))
+						itStepNodeTuple.remove();
+				}
+			}
+		}		
+	}
+	
+	@SuppressWarnings("unused")
+	private void migrate15(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("steps")) 
+							migrate15_steps((SequenceNode) jobTuple.getValueNode());
+					}
+				}
+			} else if (specObjectKey.equals("stepTemplates")) {
+				SequenceNode stepTemplatesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node stepTemplatesNodeItem: stepTemplatesNode.getValue()) {
+					MappingNode stepTemplateNode = (MappingNode) stepTemplatesNodeItem;
+					for (NodeTuple stepTemplateTuple: stepTemplateNode.getValue()) {
+						String stepTemplateTupleKey = ((ScalarNode)stepTemplateTuple.getKeyNode()).getValue();
+						if (stepTemplateTupleKey.equals("steps")) 
+							migrate15_steps((SequenceNode) stepTemplateTuple.getValueNode());
+					}
+				}				
+			}
+		}			
+	}	
+	
 }

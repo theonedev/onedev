@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
-import io.onedev.k8shelper.CommandExecutable;
+import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -28,8 +28,8 @@ public class DefaultInterpreter extends Interpreter {
 	}
 
 	@Override
-	public CommandExecutable getExecutable(String image, boolean useTTY) {
-		return new CommandExecutable(image, getCommands(), useTTY);
+	public CommandFacade getExecutable(String image, boolean useTTY) {
+		return new CommandFacade(image, getCommands(), useTTY);
 	}
 	
 }

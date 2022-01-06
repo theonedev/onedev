@@ -57,11 +57,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheInstance;
-import io.onedev.k8shelper.CompositeExecutable;
-import io.onedev.k8shelper.Executable;
-import io.onedev.k8shelper.LeafExecutable;
+import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.StepFacade;
+import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafVisitor;
-import io.onedev.k8shelper.ServerExecutable;
+import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.Service;
@@ -74,7 +74,7 @@ import io.onedev.server.buildspec.job.trigger.ScheduleTrigger;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.spec.SecretParam;
-import io.onedev.server.buildspec.step.ServerStep;
+import io.onedev.server.buildspec.step.ServerSideStep;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
@@ -605,12 +605,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 												@Override
 												public Map<String, byte[]> call() {
-													Executable entryExecutable = new CompositeExecutable(getActions());
+													StepFacade entryExecutable = new CompositeFacade(getActions());
 													
-													LeafVisitor<LeafExecutable> visitor = new LeafVisitor<LeafExecutable>() {
+													LeafVisitor<LeafFacade> visitor = new LeafVisitor<LeafFacade>() {
 
 														@Override
-														public LeafExecutable visit(LeafExecutable executable, List<Integer> position) {
+														public LeafFacade visit(LeafFacade executable, List<Integer> position) {
 															if (position.equals(stepPosition))
 																return executable;
 															else
@@ -619,8 +619,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														
 													};															
 													
-													ServerExecutable serverExecutable = (ServerExecutable) entryExecutable.traverse(visitor, new ArrayList<>());
-													ServerStep serverStep = (ServerStep) serverExecutable.getStep();
+													ServerSideFacade serverExecutable = (ServerSideFacade) entryExecutable.traverse(visitor, new ArrayList<>());
+													ServerSideStep serverStep = (ServerSideStep) serverExecutable.getStep();
 													
 													serverStep = new EditableStringTransformer(new Function<String, String>() {
 

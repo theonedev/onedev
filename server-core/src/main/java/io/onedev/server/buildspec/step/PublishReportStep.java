@@ -14,7 +14,7 @@ import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable
-public abstract class PublishReportStep extends ServerStep {
+public abstract class PublishReportStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
 	

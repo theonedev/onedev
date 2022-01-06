@@ -23,7 +23,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable(order=260, name="Set Build Version")
-public class SetBuildVersionStep extends ServerStep {
+public class SetBuildVersionStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
 

@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
-import io.onedev.k8shelper.CommandExecutable;
-import io.onedev.k8shelper.PowerShellExecutable;
+import io.onedev.k8shelper.CommandFacade;
+import io.onedev.k8shelper.PowerShellFacade;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -33,8 +33,8 @@ public class PowerShellInterpreter extends Interpreter {
 	}
 	
 	@Override
-	public CommandExecutable getExecutable(String image, boolean useTTY) {
-		return new PowerShellExecutable(image, getCommands(), useTTY);
+	public CommandFacade getExecutable(String image, boolean useTTY) {
+		return new PowerShellFacade(image, getCommands(), useTTY);
 	}
 
 }
