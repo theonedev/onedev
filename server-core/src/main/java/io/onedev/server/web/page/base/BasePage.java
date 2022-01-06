@@ -86,6 +86,7 @@ public abstract class BasePage extends WebPage {
 		
 		if (SecurityUtils.isAdministrator() 
 				&& !(getPage() instanceof IncompatibilitiesPage)
+				&& !(getPage() instanceof ServerInitPage)
 				&& new File(Bootstrap.installDir, Upgrade.INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists()) {
 			throw new RestartResponseAtInterceptPageException(IncompatibilitiesPage.class);
 		}
