@@ -12,7 +12,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -67,7 +66,6 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
@@ -334,20 +332,33 @@ public abstract class PullRequestListPanel extends Panel {
 						return new AjaxLink<Void>(id) {
 
 							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete selected pull requests?"));
-							}
-
-							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<PullRequest> requests = new ArrayList<>();
-								for (IModel<PullRequest> each: selectionColumn.getSelections())
-									requests.add(each.getObject());
-								OneDev.getInstance(PullRequestManager.class).delete(requests);
-								target.add(body);
-								selectionColumn.getSelections().clear();
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<PullRequest> requests = new ArrayList<>();
+										for (IModel<PullRequest> each: selectionColumn.getSelections())
+											requests.add(each.getObject());
+										OneDev.getInstance(PullRequestManager.class).delete(requests);
+										target.add(body);
+										selectionColumn.getSelections().clear();
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete selected builds";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
 							}
 							
 							@Override
