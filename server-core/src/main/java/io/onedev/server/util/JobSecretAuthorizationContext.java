@@ -66,7 +66,7 @@ public class JobSecretAuthorizationContext {
 			for (JobSecret secret: project.getHierarchyJobSecrets()) {
 				if (secret.getName().equals(secretName)) {
 					if (isOnBranches(secret.getAuthorizedBranches())) {			
-						return secret.getValue();
+						return secret.getValue().replace("\r\n", "\n");
 					} else {
 						throw new ExplicitException(String.format(
 								"Job secret not authorized (project: %s, job secret: %s)", 
@@ -108,7 +108,7 @@ public class JobSecretAuthorizationContext {
 						"Job secret not authorized (project: %s, job secret: %s)", 
 						project.getPath(), secretName));
 			}
-			return secret.getValue();
+			return secret.getValue().replace("\r\n", "\n");
 		}
 	}
 	
