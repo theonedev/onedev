@@ -27,63 +27,45 @@
 						<target>1.8</target>
 					</configuration>
 				</plugin>
-                <plugin> 
-                    <groupId>org.eclipse.m2e</groupId>  
-                    <artifactId>lifecycle-mapping</artifactId>  
-                    <version>1.0.0</version>  
-                    <configuration> 
-                        <lifecycleMappingMetadata> 
-                            <pluginExecutions> 
-                                <pluginExecution> 
-                                    <pluginExecutionFilter> 
-                                        <groupId>io.onedev</groupId>  
-                                        <artifactId>plugin-maven</artifactId>  
-                                        <versionRange>[2.0.0,]</versionRange>  
-                                        <goals> 
-                                            <goal>populate-resources</goal>  
-                                        </goals> 
-                                    </pluginExecutionFilter>  
-                                    <action> 
-                                        <execute> 
-                                            <runOnIncremental>true</runOnIncremental>  
-                                            <runOnConfiguration>true</runOnConfiguration> 
-                                        </execute> 
-                                    </action> 
-                                </pluginExecution>  
-                                <pluginExecution> 
-                                    <pluginExecutionFilter> 
-                                        <groupId>org.apache.maven.plugins</groupId>  
-                                        <artifactId>maven-jar-plugin</artifactId>  
-                                        <versionRange>[1.0.0,]</versionRange>  
-                                        <goals> 
-                                            <goal>jar</goal> 
-                                        </goals> 
-                                    </pluginExecutionFilter>  
-                                    <action> 
-                                        <ignore/> 
-                                    </action> 
-                                </pluginExecution> 
-                            </pluginExecutions> 
-                        </lifecycleMappingMetadata> 
-                    </configuration> 
-                </plugin>  
-                <plugin> 
-                    <artifactId>maven-jar-plugin</artifactId>  
-                    <version>3.0.2</version>  
-                    <executions> 
-                        <execution> 
-                            <id>default-jar</id>  
-                            <phase>never</phase>  
-                            <configuration> 
-                                <finalName>unwanted</finalName>  
-                                <classifier>unwanted</classifier> 
-                            </configuration> 
-                        </execution> 
-                    </executions> 
-                </plugin>  
             </plugins> 
         </pluginManagement>  
         <plugins>
+			<plugin>
+				<groupId>io.onedev</groupId>
+				<artifactId>plugin-maven</artifactId>
+				<version>2.0.9</version>
+				<executions>
+					<execution>
+						<?m2e execute onConfiguration,onIncremental?>
+						<id>populate-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>populate-resources</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>package-artifacts</id>
+						<phase>package</phase>
+						<goals>
+							<goal>package-artifacts</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.0.2</version>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+						<phase>never</phase>
+						<configuration>
+							<finalName>unwanted</finalName>
+							<classifier>unwanted</classifier>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>3.0.1</version>
@@ -111,27 +93,6 @@
 					</execution>
 				</executions>
 			</plugin>
-	        <plugin> 
-	            <groupId>io.onedev</groupId>  
-	            <artifactId>plugin-maven</artifactId>  
-	            <version>2.0.9</version>  
-	            <executions> 
-	                <execution> 
-	                    <id>populate-resources</id>  
-	                    <phase>compile</phase>  
-	                    <goals> 
-	                        <goal>populate-resources</goal> 
-	                    </goals> 
-	                </execution>  
-	                <execution> 
-	                    <id>package-artifacts</id>  
-	                    <phase>package</phase>  
-	                    <goals> 
-	                        <goal>package-artifacts</goal> 
-	                    </goals> 
-	                </execution>  
-	            </executions> 
-	        </plugin>  
         </plugins>
 	</build>	
 	<dependencies>

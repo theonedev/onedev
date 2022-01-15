@@ -140,10 +140,23 @@
 			<artifactId>server-plugin-import-bitbucketcloud</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
+		<!-- Add explicit dependencies to make sure standalone plugins use expected lib version -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
 	</dependencies>
 	<properties>
 		<executables>bin/*.sh, boot/wrapper-*</executables>
 		<moduleClass>io.onedev.server.product.ProductModule</moduleClass>
 	</properties>
-
 </project>

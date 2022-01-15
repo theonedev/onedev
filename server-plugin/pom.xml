@@ -45,5 +45,6 @@
     <module>server-plugin-report-spotbugs</module>
     <module>server-plugin-report-pmd</module>
     <module>server-plugin-report-cpd</module>
+    <module>server-plugin-report-cpd2</module>
   </modules>
 </project>

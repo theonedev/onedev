@@ -36,20 +36,6 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.2</version>
-				<executions>
-					<execution>
-						<id>default-jar</id>
-						<phase>never</phase>
-						<configuration>
-							<finalName>unwanted</finalName>
-							<classifier>unwanted</classifier>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>io.onedev</groupId>
 				<artifactId>plugin-maven</artifactId>
 				<version>2.0.9</version>
@@ -68,6 +54,20 @@
 						<goals>
 							<goal>package-artifacts</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.0.2</version>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+						<phase>never</phase>
+						<configuration>
+							<finalName>unwanted</finalName>
+							<classifier>unwanted</classifier>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
