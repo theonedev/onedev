@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -838,34 +839,36 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				String branch = state.blobIdent.revision;
-				if (branch == null)
+				String branch;
+				if (state.blobIdent.revision != null)
+					branch = state.blobIdent.revision;
+				else
 					branch = "master";
-				if (SecurityUtils.canModify(getProject(), branch, BuildSpec.BLOB_PATH)) {
-					add(new ViewStateAwareAjaxLink<Void>("addFile") {
-	
-						@Override
-						public void onClick(AjaxRequestTarget target) {
+				add(new ViewStateAwareAjaxLink<Void>("addFile") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						User user = SecurityUtils.getUser();
+						Project project = getProject();
+						String file = BuildSpec.BLOB_PATH;
+						if (user == null) {
+							Session.get().warn("Please login to perform this operation");
+						} else if (!SecurityUtils.canWriteCode(project)) {
+							Session.get().warn("Code write permission is required for this operation");
+						} else if (project.isReviewRequiredForModification(user, branch, file)
+								|| project.isBuildRequiredForModification(user, branch, file)) {
+							Session.get().warn("This operation is disallowed by branch protection rule");
+						} else {
 							onModeChange(target, Mode.ADD, BuildSpec.BLOB_PATH);
 						}
+					}
 
-						@Override
-						public IModel<?> getBody() {
-							return Model.of("adding " + BuildSpec.BLOB_PATH);
-						}
-						
-					});
-				} else {
-					add(new Label("addFile", "adding " + BuildSpec.BLOB_PATH) {
-
-						@Override
-						protected void onComponentTag(ComponentTag tag) {
-							super.onComponentTag(tag);
-							tag.setName("span");
-						}
-						
-					});
-				}
+					@Override
+					public IModel<?> getBody() {
+						return Model.of("adding " + BuildSpec.BLOB_PATH);
+					}
+					
+				});
 				setOutputMarkupPlaceholderTag(true);
 			}
 

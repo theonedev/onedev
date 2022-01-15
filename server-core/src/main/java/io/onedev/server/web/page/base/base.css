@@ -456,6 +456,10 @@ pre {
 	white-space: pre-wrap;
 }
 
+pre>code {
+	font-size: 0.925em;
+}
+
 .spin {
 	animation-name: spin;
 	animation-duration: 2000ms;
