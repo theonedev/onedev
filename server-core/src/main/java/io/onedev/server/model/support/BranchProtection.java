@@ -308,7 +308,7 @@ public class BranchProtection implements Serializable {
 			Map<String, String> gitEnvs) {
 		Collection<String> requiredJobNames = getRequiredJobs(project, oldObjectId, newObjectId, gitEnvs);
 
-		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId);
+		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId, null);
 		for (Build build: builds) {
 			if (requiredJobNames.contains(build.getJobName()) && build.getStatus() != Status.SUCCESSFUL)
 				return true;

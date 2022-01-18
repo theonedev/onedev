@@ -301,7 +301,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		Collection<Build> builds = buildsCache.get(commitId);
 		if (builds == null) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			builds = buildManager.query(getProject(), commitId, null, null, null, new HashMap<>());
+			builds = buildManager.query(getProject(), commitId, null, null, null, new HashMap<>(), null);
 			buildsCache.put(commitId, builds);
 		}
 		return builds;

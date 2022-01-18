@@ -16,6 +16,7 @@ import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -57,6 +58,7 @@ import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
@@ -230,6 +232,12 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		actionsContainer.add(new AjaxLink<Void>("rebuild") {
 
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to rebuild?"));
+			}
+
 			private void resubmit(Serializable paramBean) {
 				Map<String, List<String>> paramMap = ParamUtils.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
@@ -314,6 +322,11 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected PullRequest getPullRequest() {
 						return getBuild().getRequest();
+					}
+
+					@Override
+					protected String getTriggerChain() {
+						return getBuild().getTriggerChain();
 					}
 					
 				};

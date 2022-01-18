@@ -151,7 +151,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			
 			List<String> lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			for (Build build: buildManager.query(project, commitId, null, null, null, new HashMap<>())) {
+			for (Build build: buildManager.query(project, commitId, null, null, null, new HashMap<>(), null)) {
 				for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
 					for (CodeProblem problem: contribution.getCodeProblems(build, path, context.getProblemReport())) 
 						problems.add(problem.normalizeRange(lines));

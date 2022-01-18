@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
@@ -228,6 +229,11 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 											@Override
 											protected PullRequest getPullRequest() {
 												return context.getPullRequest();
+											}
+
+											@Override
+											protected String getTriggerChain() {
+												return UUID.randomUUID().toString();
 											}
 	
 										});

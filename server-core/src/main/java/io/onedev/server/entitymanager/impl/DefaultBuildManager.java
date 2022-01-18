@@ -263,20 +263,21 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Sessional
 	@Override
-	public Collection<Build> query(Project project, ObjectId commitId) {
-		return query(project, commitId, null);
+	public Collection<Build> query(Project project, ObjectId commitId, String triggerChain) {
+		return query(project, commitId, null, triggerChain);
 	}
 	
 	@Sessional
 	@Override
-	public Collection<Build> query(Project project, ObjectId commitId, String jobName) {
-		return query(project, commitId, jobName, null, null, new HashMap<>());
+	public Collection<Build> query(Project project, ObjectId commitId, String jobName, String triggerChain) {
+		return query(project, commitId, jobName, null, null, new HashMap<>(), triggerChain);
 	}
 	
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName, 
-			String refName, Optional<PullRequest> request, Map<String, List<String>> params) {
+			String refName, Optional<PullRequest> request, Map<String, List<String>> params, 
+			String triggerChain) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -284,6 +285,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
 		predicates.add(builder.equal(root.get(Build.PROP_COMMIT), commitId.name()));
+		if (triggerChain != null)
+			predicates.add(builder.equal(root.get(Build.PROP_TRIGGER_CHAIN), triggerChain));
 		if (jobName != null)
 			predicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
 		if (refName != null)
@@ -572,7 +575,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(Build.PROP_SUBMIT_DATE)));
+			orders.add(builder.desc(root.get(Build.PROP_NUMBER)));
 		criteriaQuery.orderBy(orders);
 	}
 	

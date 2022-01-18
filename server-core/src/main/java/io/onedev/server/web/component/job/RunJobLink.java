@@ -58,6 +58,8 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 	
 	protected abstract Project getProject();
 	
+	protected abstract String getTriggerChain();
+	
 	@Nullable
 	protected abstract PullRequest getPullRequest();
 	
@@ -103,6 +105,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 							Serializable populatedParamBean) {
 						Map<String, List<String>> paramMap = ParamUtils.getParamMap(
 								job, populatedParamBean, job.getParamSpecMap().keySet());
+						String triggerChain = getTriggerChain();
 						List<Build> builds = new ArrayList<>();
 						for (String refName: selectedRefNames) {
 							SubmitReason reason = new SubmitReason() {
@@ -123,11 +126,8 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 								}
 								
 							};
-							Build build = getJobManager().submit(getProject(), commitId, job.getName(), 
-									paramMap, reason);
-							if (build.isFinished())
-								getJobManager().resubmit(build, paramMap, "Resubmitted manually ");
-							builds.add(build);
+							builds.add(getJobManager().submit(getProject(), commitId, job.getName(), 
+									paramMap, triggerChain, reason));
 						}
 						if (builds.size() == 1)
 							setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
@@ -171,9 +171,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 					
 				};
 				Build build = getJobManager().submit(getProject(), commitId, job.getName(), 
-						new HashMap<>(), reason);
-				if (build.isFinished()) 
-					getJobManager().resubmit(build, new HashMap<>(), "Resubmitted manually");
+						new HashMap<>(), getTriggerChain(), reason);
 					
 				setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build));
 			}

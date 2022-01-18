@@ -5,6 +5,7 @@ import static io.onedev.server.model.Build.PROP_FINISH_DATE;
 import static io.onedev.server.model.Build.PROP_FINISH_DAY;
 import static io.onedev.server.model.Build.PROP_JOB;
 import static io.onedev.server.model.Build.PROP_NUMBER;
+import static io.onedev.server.model.Build.PROP_TRIGGER_CHAIN;
 import static io.onedev.server.model.Build.PROP_PENDING_DATE;
 import static io.onedev.server.model.Build.PROP_REF_NAME;
 import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
@@ -100,7 +101,7 @@ import io.onedev.server.web.util.WicketUtils;
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList="o_request_id"),  
-				@Index(columnList=PROP_COMMIT), 
+				@Index(columnList=PROP_COMMIT), @Index(columnList=PROP_TRIGGER_CHAIN),
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), 
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
@@ -136,6 +137,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	public static final String NAME_STATUS = "Status";
 	
 	public static final String PROP_STATUS = "status";
+	
+	public static final String PROP_TRIGGER_CHAIN = "triggerChain";
 	
 	public static final String NAME_SUBMITTER = "Submitter";
 	
@@ -302,6 +305,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private Date retryDate;
 	
+	@Column(nullable=false)
+	private String triggerChain;
+	
 	@JsonIgnore
 	private Integer finishDay;
 	
@@ -448,6 +454,14 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.status = status;
 	}
 	
+	public String getTriggerChain() {
+		return triggerChain;
+	}
+
+	public void setTriggerChain(String triggerChain) {
+		this.triggerChain = triggerChain;
+	}
+
 	public Date getStatusDate() {
 		switch (status) {
 		case FAILED:

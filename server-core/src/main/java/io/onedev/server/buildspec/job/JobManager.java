@@ -19,7 +19,7 @@ public interface JobManager {
 	void schedule(Project project);
 	
 	Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, SubmitReason reason);
+			Map<String, List<String>> paramMap, String triggerChain, SubmitReason reason);
 	
 	void resubmit(Build build, Map<String, List<String>> paramMap, String reason);
 	

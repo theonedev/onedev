@@ -217,7 +217,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Transactional
 	@Override
 	public Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, SubmitReason reason) {
+			Map<String, List<String>> paramMap, String triggerChain, SubmitReason reason) {
     	Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
     	transactionManager.mustRunAfterTransaction(new Runnable() {
 
@@ -248,7 +248,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
         				project.getPath(), commitId.name(), jobName));
         	}
         	
-			return doSubmit(project, commitId, jobName, paramMap, reason); 
+			return doSubmit(project, commitId, jobName, paramMap, triggerChain, reason); 
     	} catch (Throwable e) {
     		throw ExceptionUtils.unchecked(e);
 		} finally {
@@ -257,7 +257,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	private Build doSubmit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, SubmitReason reason) {
+			Map<String, List<String>> paramMap, String triggerChain, SubmitReason reason) {
 		ScriptIdentity.push(new JobIdentity(project, commitId));
 		try {
 			Build build = new Build();
@@ -270,6 +270,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setSubmitter(SecurityUtils.getUser());
 			build.setRefName(reason.getRefName());
 			build.setRequest(reason.getPullRequest());
+			build.setTriggerChain(triggerChain);
 			
 			ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
 			
@@ -281,7 +282,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 			Collection<Build> builds = buildManager.query(project, commitId, jobName, 
 					reason.getRefName(), Optional.ofNullable(reason.getPullRequest()), 
-					paramMapToQuery);
+					paramMapToQuery, triggerChain);
 			
 			if (builds.isEmpty()) {
 				Long projectId = project.getId();
@@ -339,7 +340,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						@Override
 						public void run(Map<String, List<String>> paramMap) {
 							Build dependencyBuild = doSubmit(project, commitId, 
-									interpolated.getJobName(), paramMap, reason);
+									interpolated.getJobName(), paramMap, triggerChain, reason);
 							BuildDependence dependence = new BuildDependence();
 							dependence.setDependency(dependencyBuild);
 							dependence.setDependent(build);
@@ -828,12 +829,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												ThreadContext.bind(userManager.getSystem().asSubject());
 												
 												Project project = projectManager.load(projectId);
+												String triggerChain = UUID.randomUUID().toString();
 												try {
 													new MatrixRunner<List<String>>(paramMatrix) {
 														
 														@Override
 														public void run(Map<String, List<String>> paramMap) {
-															submit(project, commitId, job.getName(), paramMap, match.getReason()); 
+															submit(project, commitId, job.getName(), paramMap, 
+																	triggerChain, match.getReason()); 
 														}
 														
 													}.run();
@@ -1085,13 +1088,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					@Override
 					public void run() {
 						ThreadContext.bind(userManager.getSystem().asSubject());
-						
+
 						Project project = projectManager.load(projectId);
+						String triggerChain = UUID.randomUUID().toString();
 						new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(null, null, trigger.getParams())) {
 							
 							@Override
 							public void run(Map<String, List<String>> paramMap) {
-								Build build = submit(project, commitId, job.getName(), paramMap, reason); 
+								Build build = submit(project, commitId, job.getName(), paramMap, triggerChain, reason); 
 								if (build.isFinished())
 									resubmit(build, paramMap, "Resubmitted by schedule");
 							}

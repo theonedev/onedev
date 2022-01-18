@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -422,6 +423,11 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 					@Override
 					protected PullRequest getPullRequest() {
 						return null;
+					}
+
+					@Override
+					protected String getTriggerChain() {
+						return UUID.randomUUID().toString();
 					}
 					
 				});

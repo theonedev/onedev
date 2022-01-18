@@ -41,11 +41,12 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, 
 			@Nullable String refName, @Nullable Optional<PullRequest> request, 
-			Map<String, List<String>> params);
+			Map<String, List<String>> params, @Nullable String triggerChain);
 
-	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName);
+	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, 
+			@Nullable String triggerChain);
 
-	Collection<Build> query(Project project, ObjectId commitId);
+	Collection<Build> query(Project project, ObjectId commitId, @Nullable String triggerChain);
 
 	Map<ObjectId, Map<String, Collection<StatusInfo>>> queryStatus(Project project, Collection<ObjectId> commitIds);
 

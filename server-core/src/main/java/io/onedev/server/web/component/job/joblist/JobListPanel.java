@@ -71,6 +71,8 @@ public abstract class JobListPanel extends Panel {
 	
 	protected abstract Project getProject();
 	
+	protected abstract String getTriggerChain();
+	
 	@Nullable
 	protected abstract PullRequest getPullRequest();
 	
@@ -124,6 +126,11 @@ public abstract class JobListPanel extends Panel {
 				protected PullRequest getPullRequest() {
 					return JobListPanel.this.getPullRequest();
 				}
+
+				@Override
+				protected String getTriggerChain() {
+					return JobListPanel.this.getTriggerChain();
+				}
 				
 			});
 			
@@ -143,8 +150,9 @@ public abstract class JobListPanel extends Panel {
 				@Override
 				protected List<Build> load() {
 					BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, 
-							job.getName(), refName, Optional.ofNullable(getPullRequest()), new HashMap<>()));
+					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), 
+							commitId, job.getName(), refName, Optional.ofNullable(getPullRequest()), 
+							new HashMap<>(), null));
 					builds.sort(Comparator.comparing(Build::getNumber));
 					return builds;
 				}

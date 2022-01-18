@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -143,7 +144,8 @@ public class JobRunResource {
 			};
 		}
 		
-		return jobManager.submit(project, commitId, jobRun.getJobName(), jobRun.getParams(), reason).getId();
+		return jobManager.submit(project, commitId, jobRun.getJobName(), 
+				jobRun.getParams(), UUID.randomUUID().toString(), reason).getId();
     }
 
 	@Api(order=200)
