@@ -14,6 +14,7 @@ import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotNull;
 
 import org.apache.shiro.authz.Permission;
@@ -50,6 +51,8 @@ import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.util.validation.annotation.RoleName;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -63,8 +66,9 @@ import io.onedev.server.web.editable.annotation.ShowCondition;
 @Entity
 @Table(indexes={@Index(columnList="name")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@ClassValidating
 @Editable
-public class Role extends AbstractEntity implements Permission {
+public class Role extends AbstractEntity implements Permission, Validatable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -378,6 +382,34 @@ public class Role extends AbstractEntity implements Permission {
 		}
 		
 		return permissions;
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		boolean isValid = true;
+		if (!isManageProject() && !isManagePullRequests() && !isManageCodeComments() && getCodePrivilege() == CodePrivilege.NONE) {
+			if (isManageBuilds()) {
+				isValid = false;
+				context.disableDefaultConstraintViolation();
+				context.buildConstraintViolationWithTemplate("Code read privilege is required to manage builds")
+						.addPropertyNode("manageBuilds").addConstraintViolation();
+			} else {
+				for (JobPrivilege privilege: getJobPrivileges()) {
+					if (privilege.isManageJob()) {
+						isValid = false;
+						context.disableDefaultConstraintViolation();
+						context.buildConstraintViolationWithTemplate("Code read privilege is required to manage jobs")
+								.addPropertyNode("jobPrivileges").addConstraintViolation();
+					} else if (privilege.isRunJob()) {
+						isValid = false;
+						context.disableDefaultConstraintViolation();
+						context.buildConstraintViolationWithTemplate("Code read privilege is required to run jobs")
+								.addPropertyNode("jobPrivileges").addConstraintViolation();
+					}
+				}
+			}
+		}
+		return isValid;
 	}
 	
 }
