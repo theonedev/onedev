@@ -48,7 +48,9 @@ public class BuildImageStep extends Step {
 		this.dockerfile = dockerfile;
 	}
 
-	@Editable(order=300, description="Name and optionally a tag in the 'name:tag' format. Multiple tags should be separated with space")
+	@Editable(order=300, description="Specify full tag of the image, for instance <tt>myorg/myrepo:latest</tt>, "
+			+ "<tt>myorg/myrepo:1.0.0</tt>, or <tt>myregistry:5000/myorg/myrepo:1.0.0</tt>. "
+			+ "Multiple tags should be separated with space.<br>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getTags() {
@@ -59,7 +61,9 @@ public class BuildImageStep extends Step {
 		this.tags = tags;
 	}
 
-	@Editable(order=400, name="Publish After Build", description="Whether or not to publish built image to docker registry")
+	@Editable(order=400, name="Publish After Build", description="Whether or not to publish built image to docker registry. "
+			+ "<b>NOTE: </b> Registry login should be specified in job executor running this step if you select to publish "
+			+ "this image")
 	public boolean isPublish() {
 		return publish;
 	}
