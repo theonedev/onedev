@@ -144,7 +144,7 @@ public class TransitionSpec implements Serializable {
 				&& (toState == null || toState.equals(getToState())) 
 				&& getTrigger() instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) getTrigger();
-			if (pressButton.isAuthorized(issue.getProject())) {
+			if (pressButton.isAuthorized(issue)) {
 				IssueQuery parsedQuery = IssueQuery.parse(issue.getProject(), 
 						getTrigger().getIssueQuery(), new IssueQueryParseOption().enableAll(true), true);
 				return parsedQuery.matches(issue);
@@ -177,6 +177,7 @@ public class TransitionSpec implements Serializable {
 			if (setting.getFieldSpec(field) == null)
 				undefinedFields.add(field);
 		}
+		undefinedFields.addAll(getTrigger().getUndefinedFields());
 		return undefinedFields;
 	}
 	
@@ -206,7 +207,8 @@ public class TransitionSpec implements Serializable {
 			else 
 				getRemoveFields().remove(entry.getKey());
 		}
-		return trigger.getQueryUpdater().fixUndefinedFields(resolutions);
+		return getTrigger().getQueryUpdater().fixUndefinedFields(resolutions) 
+				&& getTrigger().fixUndefinedFields(resolutions);
 	}
 	
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {

@@ -56,8 +56,8 @@ public class DefaultIssueFieldManager extends BaseEntityManager<IssueField> impl
 	@Transactional
 	@Override
 	public void onRenameGroup(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueField set value=:newName where type=:groupChoice and value=:oldName");
-		query.setParameter("groupChoice", FieldSpec.GROUP);
+		Query query = getSession().createQuery("update IssueField set value=:newName where type=:type and value=:oldName");
+		query.setParameter("type", FieldSpec.GROUP);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
 		query.executeUpdate();
@@ -66,8 +66,8 @@ public class DefaultIssueFieldManager extends BaseEntityManager<IssueField> impl
 	@Transactional
 	@Override
 	public void onRenameUser(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueField set value=:newName where type=:userChoice and value=:oldName");
-		query.setParameter("userChoice", FieldSpec.USER);
+		Query query = getSession().createQuery("update IssueField set value=:newName where type=:type and value=:oldName");
+		query.setParameter("type", FieldSpec.USER);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
 		query.executeUpdate();

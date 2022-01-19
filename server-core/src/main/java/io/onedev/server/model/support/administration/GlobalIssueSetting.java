@@ -193,7 +193,7 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Closed");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
-		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader"));
+		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", PressButtonTrigger.ROLE_SUBMITTER, "{Assignees}"));
 		pressButton.setIssueQuery("not(any \"Blocked By\" matching(\"State\" is \"Open\")) and not(any \"Child Issue\" matching(\"State\" is \"Open\"))");
 		transition.setTrigger(pressButton);
 		
@@ -244,7 +244,7 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Open");
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
-		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader"));
+		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader", "Issue Reporter"));
 		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);
@@ -390,7 +390,7 @@ public class GlobalIssueSetting implements Serializable {
 	
 	public Collection<String> getUndefinedFields() {
 		Collection<String> undefinedFields = new HashSet<>();
-		for (String fieldName: listFields) {
+		for (String fieldName: getListFields()) {
 			if (!fieldName.equals(Issue.NAME_STATE) && getFieldSpec(fieldName) == null)
 				undefinedFields.add(fieldName);
 		}
@@ -632,7 +632,7 @@ public class GlobalIssueSetting implements Serializable {
 	public Usage onDeleteRole(String roleName) {
 		Usage usage = new Usage();
 		
-		int index = 0;
+		int index = 1;
 		for (TransitionSpec transition: getTransitionSpecs())
 			usage.add(transition.onDeleteRole(roleName).prefix("state transition #" + index++));
 		

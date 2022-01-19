@@ -50,6 +50,7 @@ import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.validation.annotation.RoleName;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -116,6 +117,7 @@ public class Role extends AbstractEntity implements Permission {
 	private Collection<LinkAuthorization> linkAuthorizations = new ArrayList<>();
 	
 	@Editable(order=100)
+	@RoleName
 	@NotEmpty
 	public String getName() {
 		return name;

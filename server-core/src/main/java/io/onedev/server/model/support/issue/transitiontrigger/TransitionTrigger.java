@@ -1,9 +1,13 @@
 package io.onedev.server.model.support.issue.transitiontrigger;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
@@ -34,6 +38,14 @@ public abstract class TransitionTrigger implements Serializable {
 
 	public Usage onDeleteRole(String roleName) {
 		return new Usage();
+	}
+	
+	public Collection<String> getUndefinedFields() {
+		return new HashSet<>();
+	}
+
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		return true;
 	}
 	
 	public IssueQueryUpdater getQueryUpdater() {
