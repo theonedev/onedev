@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -112,7 +111,7 @@ public abstract class CommitStatusPanel extends Panel {
 
 					@Override
 					protected String getTriggerChain() {
-						return UUID.randomUUID().toString();
+						return null;
 					}
 					
 				};

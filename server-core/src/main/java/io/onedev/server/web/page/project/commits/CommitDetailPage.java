@@ -337,7 +337,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 							@Override
 							protected List<Build> load() {
 								BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-								List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, job.getName()));
+								List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, job.getName(), null));
 								builds.sort(Comparator.comparing(Build::getNumber));
 								return builds;
 							}

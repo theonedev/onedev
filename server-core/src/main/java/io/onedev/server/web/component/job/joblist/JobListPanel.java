@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -71,6 +72,7 @@ public abstract class JobListPanel extends Panel {
 	
 	protected abstract Project getProject();
 	
+	@Nullable
 	protected abstract String getTriggerChain();
 	
 	@Nullable
@@ -129,7 +131,10 @@ public abstract class JobListPanel extends Panel {
 
 				@Override
 				protected String getTriggerChain() {
-					return JobListPanel.this.getTriggerChain();
+					String triggerChain = JobListPanel.this.getTriggerChain();
+					if (triggerChain == null)
+						triggerChain = UUID.randomUUID().toString();
+					return triggerChain;
 				}
 				
 			});
@@ -152,7 +157,7 @@ public abstract class JobListPanel extends Panel {
 					BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), 
 							commitId, job.getName(), refName, Optional.ofNullable(getPullRequest()), 
-							new HashMap<>(), null));
+							new HashMap<>(), getTriggerChain()));
 					builds.sort(Comparator.comparing(Build::getNumber));
 					return builds;
 				}

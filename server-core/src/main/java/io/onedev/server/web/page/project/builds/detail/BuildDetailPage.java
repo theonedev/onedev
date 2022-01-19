@@ -97,21 +97,21 @@ public abstract class BuildDetailPage extends ProjectPage
 	
 	protected final IModel<Build> buildModel;
 	
-	private final IModel<List<Job>> downstreamJobsModel = new LoadableDetachableModel<List<Job>>() {
+	private final IModel<List<Job>> promotionsModel = new LoadableDetachableModel<List<Job>>() {
 
 		@Override
 		protected List<Job> load() {
-			List<Job> downstreamJobs = new ArrayList<>();
+			List<Job> promoteJobs = new ArrayList<>();
 			BuildSpec buildSpec = getProject().getBuildSpec(getBuild().getCommitId());
 			for (Job job: buildSpec.getJobMap().values()) {
 				for (JobDependency dependency: job.getJobDependencies()) {
 					if (dependency.getJobName().equals(getBuild().getJobName()) 
 							&& getBuild().matchParams(dependency.getJobParams())) { 
-						downstreamJobs.add(job);
+						promoteJobs.add(job);
 					}
 				}
 			}
-			return downstreamJobs;
+			return promoteJobs;
 		}
 		
 	};
@@ -302,12 +302,12 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		}.add(new ConfirmClickModifier("Do you really want to cancel this build?")));
 		
-		add(new DropdownLink("downstream") {
+		add(new DropdownLink("promotions") {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new JobListPanel(id, getBuild().getCommitId(),  
-						getBuild().getRefName(), downstreamJobsModel.getObject()) {
+						getBuild().getRefName(), promotionsModel.getObject()) {
 					
 					@Override
 					protected Project getProject() {
@@ -335,7 +335,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!downstreamJobsModel.getObject().isEmpty());
+				setVisible(!promotionsModel.getObject().isEmpty());
 			}
 			
 		});
