@@ -31,6 +31,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -1045,6 +1046,24 @@ public abstract class BuildListPanel extends Panel {
 		
 		body.add(buildsTable = new OneDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
+		
+		body.add(new WebMarkupContainer("tips") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				String href = OneDev.getInstance().getDocRoot() + "/pages/concepts.md#build-promotion";
+				add(new ExternalLink("promotion", href));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.getUser() != null && SecurityUtils.canReadCode(getProject()));
+			}
+			
+		});
 		
 		setOutputMarkupId(true);
 	}
