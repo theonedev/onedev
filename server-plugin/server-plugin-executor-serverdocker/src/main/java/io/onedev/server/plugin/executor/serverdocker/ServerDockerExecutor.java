@@ -2,8 +2,8 @@ package io.onedev.server.plugin.executor.serverdocker;
 
 import static io.onedev.agent.DockerExecutorUtils.cleanDirAsRoot;
 import static io.onedev.agent.DockerExecutorUtils.createNetwork;
-import static io.onedev.agent.DockerExecutorUtils.isUseProcessIsolation;
 import static io.onedev.agent.DockerExecutorUtils.deleteNetwork;
+import static io.onedev.agent.DockerExecutorUtils.isUseProcessIsolation;
 import static io.onedev.agent.DockerExecutorUtils.newDockerKiller;
 import static io.onedev.agent.DockerExecutorUtils.startService;
 import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
@@ -61,13 +61,13 @@ import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.CompositeFacade;
-import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.OsContainer;
 import io.onedev.k8shelper.OsExecution;
 import io.onedev.k8shelper.OsInfo;
+import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
@@ -106,7 +106,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private String dockerExecutable;
 	
-	private transient volatile String outerInstallPath;
+	private static transient volatile String hostInstallPath;
 
 	@Editable(order=400, description="Specify login information for docker registries if necessary")
 	public List<RegistryLogin> getRegistryLogins() {
@@ -227,9 +227,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									if (getRunOptions() != null)
 										docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 									
-									docker.addArgs("-v", getOuterPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
+									docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
 									if (workingDir != null) {
-										docker.addArgs("-v", getOuterPath(hostWorkspace.getAbsolutePath()) + ":" + workingDir);
+										docker.addArgs("-v", getHostPath(hostWorkspace.getAbsolutePath()) + ":" + workingDir);
 										docker.addArgs("-w", workingDir);
 									} else {
 										docker.addArgs("-w", containerWorkspace);
@@ -238,7 +238,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										if (!PathUtils.isCurrent(entry.getValue())) {
 											String each = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
 											String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
-											docker.addArgs("-v", getOuterPath(each) + ":" + containerCachePath);
+											docker.addArgs("-v", getHostPath(each) + ":" + containerCachePath);
 										} else {
 											throw new ExplicitException("Invalid cache path: " + entry.getValue());
 										}
@@ -250,7 +250,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
 									
 									if (hostAuthInfoHome.get() != null) {
-										String outerPath = getOuterPath(hostAuthInfoHome.get().getAbsolutePath());
+										String outerPath = getHostPath(hostAuthInfoHome.get().getAbsolutePath());
 										if (SystemUtils.IS_OS_WINDOWS) {
 											docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerAdministrator\\auth-info");
 											docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerUser\\auth-info");
@@ -476,58 +476,113 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return isValid;
 	}
 	
-	private String getHostMountPath(String dockerNameOrId, String containerMountPath) {
-		AtomicReference<String> hostMountPath = new AtomicReference<>(null);
-		Commandline docker = newDocker();
-		String inspectFormat = String.format(
-				"{{range .Mounts}} {{if eq .Destination \"%s\"}} {{.Source}} {{end}} {{end}}", 
-				containerMountPath);
-		docker.addArgs("container", "inspect", "-f", inspectFormat, dockerNameOrId);						
-		
-		AtomicBoolean noSuchContainer = new AtomicBoolean(false);
-		ExecutionResult result = docker.execute(new LineConsumer() {
-	
-			@Override
-			public void consume(String line) {
-				hostMountPath.set(line.trim());
-			}
-			
-		}, new LineConsumer() {
-	
-			@Override
-			public void consume(String line) {
-				if (line.contains("Error: No such container:"))
-					noSuchContainer.set(true);
-				else
-					logger.error(line);
-			}
-			
-		});
-		
-		if (noSuchContainer.get()) {
-			return null;
-		} else {
-			result.checkReturnCode();
-			return hostMountPath.get();
-		}
-	}
-	
-	private String getOuterPath(String hostPath) {
-		String hostInstallPath = Bootstrap.installDir.getAbsolutePath();
-		Preconditions.checkState(hostPath.startsWith(hostInstallPath + "/")
-				|| hostPath.startsWith(hostInstallPath + "\\"));
-		if (outerInstallPath == null) {
+	private String getHostPath(String path) {
+		String installPath = Bootstrap.installDir.getAbsolutePath();
+		Preconditions.checkState(path.startsWith(installPath + "/")
+				|| path.startsWith(installPath + "\\"));
+		if (hostInstallPath == null) {
 			if (Bootstrap.isInDocker()) {
-				outerInstallPath = getHostMountPath(System.getenv("HOSTNAME"), hostInstallPath);
-				if (outerInstallPath == null)
-					outerInstallPath = getHostMountPath("onedev", hostInstallPath);
-				if (outerInstallPath == null)
-					throw new RuntimeException("Unable to get container information");
+				logger.info("Locating OneDev host install path...");
+				
+				List<String> containerIds = new ArrayList<>();
+				Commandline docker = newDocker();
+				docker.addArgs("ps", "--format={{.ID}}", "-f", "volume=/opt/onedev");
+				docker.execute(new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						containerIds.add(line);
+					}
+					
+				}, new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.error(line);
+					}
+					
+				}).checkReturnCode();
+
+				if (containerIds.isEmpty())
+					throw new IllegalStateException("Unable to find any OneDev container"); 
+					
+				docker.clearArgs();
+				String inspectFormat = String.format(
+						"{{range .Mounts}}{{if eq .Destination \"%s\"}}{{.Source}}{{end}}{{end}}", 
+						installPath);
+				docker.addArgs("container", "inspect", "-f", inspectFormat);						
+				
+				for (String containerId: containerIds)
+					docker.addArgs(containerId);
+				
+				List<String> possibleHostInstallPaths = new ArrayList<>();
+				docker.execute(new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						possibleHostInstallPaths.add(line);
+					}
+					
+				}, new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.error(line);
+					}
+					
+				}).checkReturnCode();
+				
+				if (possibleHostInstallPaths.isEmpty()) {
+					throw new IllegalStateException("Unable to find host install path of OneDev"); 
+				} else if (possibleHostInstallPaths.size() > 1) {
+					File testFile = new File(Bootstrap.installDir, UUID.randomUUID().toString());
+					FileUtils.touchFile(testFile);
+					try {
+						for (String possibleHostInstallPath: possibleHostInstallPaths) {
+							docker.clearArgs();
+							docker.addArgs("run", "--rm", "-v", possibleHostInstallPath + ":/opt/onedev", 
+									"busybox", "ls", "/opt/onedev/" + testFile.getName());
+							AtomicBoolean fileNotExist = new AtomicBoolean(false);
+							ExecutionResult result = docker.execute(new LineConsumer() {
+
+								@Override
+								public void consume(String line) {
+								}
+								
+							}, new LineConsumer() {
+
+								@Override
+								public void consume(String line) {
+									if (line.contains("No such file or directory"))
+										fileNotExist.set(true);
+									else
+										logger.error(line);
+								}
+								
+							});
+							if (fileNotExist.get()) {
+								continue;
+							} else {
+								result.checkReturnCode();
+								hostInstallPath = possibleHostInstallPath;
+								break;
+							}
+						}
+						if (hostInstallPath != null)
+							logger.info("Host install path of OneDev: " + hostInstallPath);
+						else
+							throw new ExplicitException("Unable to find host install path of OneDev");
+					} finally {
+						FileUtils.deleteFile(testFile);
+					}
+				} else {
+					hostInstallPath = possibleHostInstallPaths.iterator().next();
+				}
 			} else {
-				outerInstallPath = hostInstallPath;
+				hostInstallPath = installPath;
 			}
 		}
-		return outerInstallPath + hostPath.substring(hostInstallPath.length());
+		return hostInstallPath + path.substring(installPath.length());
 	}
 	
 	@Override
@@ -561,8 +616,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						containerWorkspacePath = "/onedev-build/workspace";
 						containerCachePath = "/onedev-build/cache";
 					}
-					docker.addArgs("-v", getOuterPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
-					docker.addArgs("-v", getOuterPath(cacheDir.getAbsolutePath()) + ":" + containerCachePath);
+					docker.addArgs("-v", getHostPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
+					docker.addArgs("-v", getHostPath(cacheDir.getAbsolutePath()) + ":" + containerCachePath);
 					
 					docker.addArgs("-w", containerWorkspacePath);
 					docker.addArgs(testData.getDockerImage());
