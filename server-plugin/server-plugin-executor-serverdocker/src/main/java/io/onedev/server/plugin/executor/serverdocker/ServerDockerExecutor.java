@@ -568,16 +568,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								break;
 							}
 						}
-						if (hostInstallPath != null)
-							logger.info("Host install path of OneDev: " + hostInstallPath);
-						else
-							throw new ExplicitException("Unable to find host install path of OneDev");
 					} finally {
 						FileUtils.deleteFile(testFile);
 					}
 				} else {
 					hostInstallPath = possibleHostInstallPaths.iterator().next();
 				}
+				if (hostInstallPath != null)
+					logger.info("Host install path of OneDev: " + hostInstallPath);
+				else
+					throw new ExplicitException("Unable to find host install path of OneDev");
 			} else {
 				hostInstallPath = installPath;
 			}
