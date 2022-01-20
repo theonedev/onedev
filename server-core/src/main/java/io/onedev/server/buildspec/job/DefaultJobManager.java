@@ -1312,14 +1312,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
 				Optional<CacheInstance> result = sortedInstances
 						.stream()
-						.filter(it->it.getCacheKey().equals(cacheSpec.getKey()))
+						.filter(it->it.getCacheKey().equals(cacheSpec.getNormalizedKey()))
 						.filter(it->!allAllocated.contains(it.getName()))
 						.findFirst();
 				CacheInstance allocation;
 				if (result.isPresent()) 
 					allocation = result.get();
 				else
-					allocation = new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getKey());
+					allocation = new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getNormalizedKey());
 				allocations.put(allocation, cacheSpec.getPath());
 				jobContext.getAllocatedCaches().add(allocation.getName());
 				allAllocated.add(allocation.getName());

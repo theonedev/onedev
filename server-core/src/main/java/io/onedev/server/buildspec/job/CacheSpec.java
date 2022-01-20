@@ -39,6 +39,10 @@ public class CacheSpec implements Serializable, Validatable {
 		this.key = key;
 	}
 	
+	public String getNormalizedKey() {
+		return getKey().replaceAll("[^a-zA-Z0-9\\-_\\.]", "-");
+	}
+	
 	@Editable(order=200, description="Specify path to cache. Non-absolute path is considered to be relative to job workspace. "
 			+ "Please note that shell executor only allows non-absolute path here")
 	@Interpolative(variableSuggester="suggestVariables")
