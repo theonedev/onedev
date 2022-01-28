@@ -801,6 +801,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		if (event instanceof CommitAware) {
 			ObjectId commitId = ((CommitAware) event).getCommit().getCommitId();
 			if (!commitId.equals(ObjectId.zeroId())) {
+				String triggerChain = UUID.randomUUID().toString();
 				PullRequest request = null;
 				if (event instanceof PullRequestEvent)
 					request = ((PullRequestEvent) event).getRequest();
@@ -829,7 +830,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												ThreadContext.bind(userManager.getSystem().asSubject());
 												
 												Project project = projectManager.load(projectId);
-												String triggerChain = UUID.randomUUID().toString();
 												try {
 													new MatrixRunner<List<String>>(paramMatrix) {
 														
