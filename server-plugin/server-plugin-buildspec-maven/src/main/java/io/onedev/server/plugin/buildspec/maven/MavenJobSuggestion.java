@@ -130,11 +130,11 @@ public class MavenJobSuggestion implements JobSuggestion {
 	
 			try {
 				if (Integer.parseInt(javaVersion) <= 8)
-					return "maven:3.6.1-jdk-8";
+					return "maven:3.8.4-jdk-8";
 				else
 					return "maven:latest";
 			} catch (NumberFormatException e) {
-				return "maven:3.6.1-jdk-8";
+				return "maven:3.8.4-jdk-8";
 			}		
 		} else {
 			return null;
