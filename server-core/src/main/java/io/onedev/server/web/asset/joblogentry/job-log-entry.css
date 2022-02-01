@@ -1,3 +1,9 @@
+.log-entry>.date {
+	color: var(--gray);	
+}
+.dark-mode .log-entry>.date {
+	color: var(--dark-mode-gray);	
+}
 .log-entry>.font-weight-bold {
     font-weight: 600 !important;
 }
@@ -12,7 +18,7 @@
 	color: black;
 }
 .log-entry>.fg-31 {
-	color: red;
+	color: rgb(255, 58, 58);
 }
 .log-entry>.fg-32 {
 	color: green;
@@ -21,7 +27,7 @@
 	color: orange;
 }
 .log-entry>.fg-34 {
-	color: blue;
+	color: rgb(26, 107, 255);
 }
 .log-entry>.fg-35 {
 	color: darkmagenta;
@@ -36,7 +42,7 @@
 	color: black;
 }
 .log-entry>.fg-91 {
-	color: red;
+	color: rgb(255, 58, 58);
 }
 .log-entry>.fg-92 {
 	color: green;
@@ -45,7 +51,7 @@
 	color: orange;
 }
 .log-entry>.fg-94 {
-	color: blue;
+	color: rgb(26, 107, 255);
 }
 .log-entry>.fg-95 {
 	color: darkmagenta;
@@ -67,7 +73,7 @@
 	background-color: black;
 }
 .log-entry>.bg-41 {
-	background-color: red;
+	background-color: rgb(255, 58, 58);
 }
 .log-entry>.bg-42 {
 	background-color: green;
@@ -76,7 +82,7 @@
 	background-color: orange;
 }
 .log-entry>.bg-44 {
-	background-color: blue;
+	background-color: rgb(26, 107, 255);
 }
 .log-entry>.bg-45 {
 	background-color: darkmagenta;
@@ -91,7 +97,7 @@
 	background-color: black;
 }
 .log-entry>.bg-101 {
-	background-color: red;
+	background-color: rgb(255, 58, 58);
 }
 .log-entry>.bg-102 {
 	background-color: green;
@@ -100,7 +106,7 @@
 	background-color: orange;
 }
 .log-entry>.bg-104 {
-	background-color: blue;
+	background-color: rgb(26, 107, 255);
 }
 .log-entry>.bg-105 {
 	background-color: darkmagenta;
@@ -112,3 +118,113 @@
 	background-color: white;
 }
 
+
+.dark-mode .log-entry>.fg-fg-default {
+	color: var(--dark-mode-light-gray);
+}
+.dark-mode .log-entry>.fg-bg-default {
+	color: var(--dark-mode-dark);
+}
+.dark-mode .log-entry>.fg-30 {
+	color: white;
+}
+.dark-mode .log-entry>.fg-31 {
+	color: rgb(206, 2, 3);
+}
+.dark-mode .log-entry>.fg-32 {
+	color: rgb(0, 163, 0);
+}
+.dark-mode .log-entry>.fg-33 {
+	color: rgb(210, 136, 1);
+}
+.dark-mode .log-entry>.fg-34 {
+	color: rgb(100, 164, 255);
+}
+.dark-mode .log-entry>.fg-35 {
+	color: rgb(193, 0, 194);
+}
+.dark-mode .log-entry>.fg-36 {
+	color: darkturquoise;
+}
+.dark-mode .log-entry>.fg-37 {
+	color: black;
+}
+.dark-mode .log-entry>.fg-90 {
+	color: white;
+}
+.dark-mode .log-entry>.fg-91 {
+	color: rgb(206, 2, 3);
+}
+.dark-mode .log-entry>.fg-92 {
+	color: rgb(0, 163, 0);
+}
+.dark-mode .log-entry>.fg-93 {
+	color: rgb(210, 136, 1);
+}
+.dark-mode .log-entry>.fg-94 {
+	color: rgb(100, 164, 255);
+}
+.dark-mode .log-entry>.fg-95 {
+	color: rgb(193, 0, 194);
+}
+.dark-mode .log-entry>.fg-96 {
+	color: darkturquoise;
+}
+.dark-mode .log-entry>.fg-97 {
+	color: black;
+}
+
+.dark-mode .log-entry>.bg-fg-default {
+	background-color: white;
+}
+.dark-mode .log-entry>.bg-bg-default {
+	background-color: var(--dark-mode-dark);
+}
+.dark-mode .log-entry>.bg-40 {
+	background-color: white;
+}
+.dark-mode .log-entry>.bg-41 {
+	background-color: rgb(206, 2, 3);
+}
+.dark-mode .log-entry>.bg-42 {
+	background-color: rgb(0, 163, 0);
+}
+.dark-mode .log-entry>.bg-43 {
+	background-color: rgb(210, 136, 1);
+}
+.dark-mode .log-entry>.bg-44 {
+	background-color: rgb(100, 164, 255);
+}
+.dark-mode .log-entry>.bg-45 {
+	background-color: rgb(193, 0, 194);
+}
+.dark-mode .log-entry>.bg-46 {
+	background-color: darkturquoise;
+}
+.dark-mode .log-entry>.bg-47 {
+	background-color: black;
+}
+.dark-mode .log-entry>.bg-100 {
+	background-color: white;
+}
+.dark-mode .log-entry>.bg-101 {
+	background-color: rgb(206, 2, 3);
+}
+.dark-mode .log-entry>.bg-102 {
+	background-color: rgb(0, 163, 0);
+}
+.dark-mode .log-entry>.bg-103 {
+	background-color: rgb(210, 136, 1);
+}
+.dark-mode .log-entry>.bg-104 {
+	background-color: rgb(100, 164, 255);
+}
+.dark-mode .log-entry>.bg-105 {
+	background-color: rgb(193, 0, 194);
+}
+.dark-mode .log-entry>.bg-106 {
+	background-color: darkturquoise;
+}
+.dark-mode .log-entry>.bg-107 {
+	background-color: black;
+}

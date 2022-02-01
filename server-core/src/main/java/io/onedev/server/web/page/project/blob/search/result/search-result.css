@@ -1,6 +1,9 @@
 .search-result>.head {
 	border-bottom: 1px solid var(--secondary);
 }
+.dark-mode .search-result>.head {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
 
 .search-result>.body>li .expand {
 	margin-right: -4px;
@@ -19,5 +22,9 @@
 }
 .search-result>.body>li .scope {
 	color: var(--gray);
+	font-size: 12px;
+}
+.dark-mode .search-result>.body>li .scope {
+	color: var(--dark-mode-gray);
 	font-size: 12px;
 }

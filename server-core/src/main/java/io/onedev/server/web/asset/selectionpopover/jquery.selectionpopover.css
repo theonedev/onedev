@@ -3,18 +3,25 @@
 	position: fixed;
 }
 .selection-popover>.content {
-	background: var(--dark);
+	background: var(--light-info);
 	border-radius: 0.42rem;
 	padding: 1rem 0;
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 }
+.dark-mode .selection-popover>.content {
+	background: var(--dark-mode-light-info);
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+}
+
 .selection-popover>.content a, .selection-popover>.content span {
-	color: white;
+	color: var(--info);
 	display: block;
 	white-space: nowrap;
 	padding: 0.3rem 1rem;
 }
 .selection-popover>.content a:hover, .selection-popover>.content a:focus {
-	background-color: var(--gray-dark);
+	background-color: var(--info);
+	color: white;
 }
 
 .selection-popover>.triangle {
@@ -24,5 +31,8 @@
 	height: 0; 
 	border-left: 6px solid transparent;
 	border-right: 6px solid transparent;
-	border-top: 6px solid var(--dark);
+	border-top: 6px solid var(--light-info);
+}
+.dark-mode .selection-popover>.triangle {
+	border-top-color: var(--dark-mode-light-info);
 }

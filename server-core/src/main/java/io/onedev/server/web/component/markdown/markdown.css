@@ -14,7 +14,9 @@
 	padding: 1.6rem;
 	background: white;
 }
-
+.dark-mode .markdown-editor.fullscreen {
+	background: var(--dark-mode-darker);
+}
 .markdown-editor>.head>.warning {
 	margin-bottom: 0;
 	padding-top: 0.6rem;
@@ -31,6 +33,10 @@
 	border-radius: 0.42rem 0.42rem 0 0;
 	padding: 0.3rem;
 }
+.dark-mode .markdown-editor>.head {
+	background: var(--dark-mode-dark);
+	border-color: var(--dark-mode-light-dark);	
+}
 .markdown-editor>.head>.actions>div>a, .markdown-editor>.head>.actions>div>.dropdown>a {
 	padding: 0.15rem;
 	color: var(--gray);
@@ -40,6 +46,11 @@
 	width: 2rem;
 	text-align: center;
 	margin-right: 0.3rem;
+}
+.dark-mode .markdown-editor>.head>.actions>div>a, 
+.dark-mode .markdown-editor>.head>.actions>div>.dropdown>a {
+	color: var(--dark-mode-gray);
+	border-color: var(--dark-mode-dark);
 }
 .markdown-editor.compact-mode>.head .split>.icon {
 	transform: rotate(-90deg);
@@ -51,10 +62,20 @@
 	margin-right: 0.3rem;
 	height: 2rem;
 }
+.dark-mode .markdown-editor>.head>.actions .separator {
+	border-left-color: var(--dark-mode-light-dark);
+}
 .markdown-editor>.head>.actions>div>a:hover, .markdown-editor>.head>.actions>div>a.active, 
 .markdown-editor>.head>.actions>div>.dropdown>a:hover, .markdown-editor>.head>.actions>div>.dropdown>a.active {
 	background: var(--light);
 	border: 1px solid var(--light-gray);
+}
+.dark-mode .markdown-editor>.head>.actions>div>a:hover, 
+.dark-mode .markdown-editor>.head>.actions>div>a.active, 
+.dark-mode .markdown-editor>.head>.actions>div>.dropdown>a:hover, 
+.dark-mode .markdown-editor>.head>.actions>div>.dropdown>a.active {
+	background: var(--dark-mode-light-dark);
+	border-color: var(--dark-mode-lighter-dark);
 }
 
 .markdown-editor .ui-resizable-handle {
@@ -64,6 +85,10 @@
     height: 4px;
     bottom: 0;
 	border-radius: 0 0 0.42rem 0.42rem;
+}
+.dark-mode .markdown-editor .ui-resizable-handle {
+	background: var(--dark-mode-light-dark) url(/icon/dark-grip2.svg) no-repeat scroll center center;
+	background-size: 20px 20px;
 }
 
 .markdown-editor.fullscreen .ui-resizable-handle {
@@ -83,6 +108,10 @@
 	font-size: 1.25rem;
 	color: var(--gray-dark);
 }
+.dark-mode .markdown-editor>.head>.emojis.loading {
+	color: var(--dark-mode-gray);
+}
+
 .markdown-editor>.head>.emojis .emoji {
 	margin-right: 0.8rem;
 	font-size: 1.25rem;
@@ -97,6 +126,10 @@
 	padding: 0.6rem;
 	border-radius: 0 0 0.42rem 0.42rem;
 	background: white;
+}
+.dark-mode .markdown-editor>.body>.preview>.markdown-rendered {
+	border-color: var(--dark-mode-light-dark);
+	background: var(--dark-mode-dark);
 }
 
 .markdown-editor.preview-mode>.body>.edit, .markdown-editor.edit-mode>.body>.preview {
@@ -142,6 +175,9 @@
 }
 .markdown-editor>.body>.preview>.markdown-rendered>.message {
 	color: var(--gray);
+}
+.dark-mode .markdown-editor>.body>.preview>.markdown-rendered>.message {
+	color: var(--dark-mode-gray);
 }
 
 .compact-mode.dropdown a {
@@ -195,12 +231,18 @@
 	border: 2px solid #187DE4;
 }
 
+.dark-mode .markdown-rendered {
+	color: var(--muted);
+}
 .markdown-rendered li {
 	margin-bottom: 0.5rem;
 }
 .markdown-rendered .emoji {
 	width: 1.5rem; 
 	height: 1.5rem;
+}
+.dark-mode .markdown-rendered table thead {
+	color: var(--light);
 }
 .markdown-rendered table {
 	width: auto; 
@@ -212,8 +254,14 @@
 	word-break: break-word!important;
     overflow-wrap: break-word!important;
 }
+.dark-mode .markdown-rendered table th, .dark-mode .markdown-rendered table td {
+	border-color: var(--dark-mode-lighter-dark);
+}
 .markdown-rendered table tr:nth-child(even) td {
 	background: var(--light);
+}
+.dark-mode .markdown-rendered table tr:nth-child(even) td {
+	background: #1b1b29;
 }
 .markdown-rendered h1, .markdown-rendered h2, .markdown-rendered h3, 
 .markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
@@ -226,6 +274,9 @@
 	word-break: normal;
 	border-radius: 0.42rem;
 }
+.dark-mode .markdown-rendered pre.highlight {
+	border-color: var(--dark-mode-lighter-dark);
+}
 .markdown-rendered pre.highlight>code {
 	background: none;
 }
@@ -235,6 +286,11 @@
 	color: var(--gray); 
 	padding: 0 1.23rem;
 }
+.dark-mode .markdown-rendered blockquote {
+	border-left-color: var(--dark-mode-lighter-dark); 
+	color: var(--dark-mode-gray); 
+}
+
 .markdown-rendered img {
 	max-width: 100%;
 }
@@ -333,8 +389,12 @@
 	width: 12px;
 	height: 12px;
 }
+
 .markdown-rendered a.header-link {
 	color: var(--gray-dark);
+}
+.dark-mode .markdown-rendered a.header-link {
+	color: var(--dark-mode-light-gray);
 }
 
 #reference-tooltip {
@@ -346,12 +406,19 @@
 	padding: 1rem; 
 	box-shadow: 0px 10px 30px 0px rgba(82, 63, 105, 0.08);
 }
+.dark-mode #reference-tooltip {
+	background-color: var(--dark-mode-light-info); 
+	color: var(--info);
+}
 
 .markdown-image-loading {
 	position: absolute;
 	left: 0;
 	top: 0;
-	background: url("/img/ajax-indicator-big.gif") center no-repeat;
+	background: url("/img/ajax-indicator-big.png") center no-repeat;
+}
+.dark-mode .markdown-image-loading {
+	background: url("/img/dark-ajax-indicator-big.png") center no-repeat;
 }
 
 .reference.mention {
@@ -368,4 +435,8 @@
 .insert-url .dropzone.dropzone-field {
     border: 2px dashed var(--light-gray);
 	border-radius: 0.42rem;
+}
+.dark-mode .insert-url .dropzone.dropzone-field {
+	background: #1e1e2d;
+    border-color: var(--dark-mode-lighter-dark);
 }

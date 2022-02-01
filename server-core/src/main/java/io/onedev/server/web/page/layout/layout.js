@@ -64,7 +64,7 @@ onedev.server.layout = {
 					$(".sidebar-menu .menu-body .menu-body").each(function() {
 						if ($rightmost.closest(this).length == 0) {
 							var $this = $(this);
-							$this.removeAttr("style").removeClass("ps ps-scroll").hide().prev(".menu-toggle").removeClass("open");	
+							$this.removeAttr("style").removeClass("ps ps-scroll sidebar-dropdown").hide().prev(".menu-toggle").removeClass("open");	
 							var ps = $this.data("ps");
 							if (ps) {
 								ps.destroy();
@@ -80,7 +80,7 @@ onedev.server.layout = {
 							"max-height": ($(window).height() - 50) + "px",
 							"border-radius": "0.42rem", 
 							"padding": "0.5rem 0"
-						});
+						}).addClass("sidebar-dropdown");
 						var $parent = $rightmost.parent().closest(".menu-body");
 						var $toggler = $rightmost.prev(".menu-toggle");
 						$toggler.addClass("open");

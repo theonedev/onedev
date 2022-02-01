@@ -10,6 +10,9 @@
 .input-assist .help {
 	border: 1px dashed var(--secondary);
 }
+.dark-mode .input-assist .help {
+	border-color: var(--dark-mode-dark-gray);
+}
 .input-assist .help li {
 	list-style: disc;
 	margin-left: 1.5rem;
@@ -18,4 +21,7 @@
     background: url(wave.png) repeat-x bottom;
 	position: absolute;
     z-index: 100000;
+}
+.dark-mode .input-error-mark {
+    background: url(wave-dark.png) repeat-x bottom;
 }

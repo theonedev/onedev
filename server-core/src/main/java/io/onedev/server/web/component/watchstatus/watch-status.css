@@ -32,3 +32,6 @@
 .floating .watch-status a:hover {
 	background: var(--light);
 }
+.dark-mode .floating .watch-status a:hover {
+	background: var(--dark-mode-light-dark);
+}

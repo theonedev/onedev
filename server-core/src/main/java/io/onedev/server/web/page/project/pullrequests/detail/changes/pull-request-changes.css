@@ -6,10 +6,20 @@
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	color: var(--gray-dark);
 }
+.dark-mode .commits-selector ul a {
+	color: var(--dark-mode-light-gray);
+}
 .commits-selector ul a:hover {
 	background: var(--light);
 	color: var(--gray-dark) !important;
 }
+.dark-mode .commits-selector ul a:hover {
+	background: var(--dark-mode-light-dark);
+	color: var(--dark-mode-light-gray) !important;
+}
 .commits-selector ul a.selected, .commits-selector ul a.selected:hover {
 	background: var(--light-warning);	
+}
+.dark-mode .commits-selector ul a.selected, .dark-mode .commits-selector ul a.selected:hover {
+	background: var(--dark-mode-lighter-dark);	
 }

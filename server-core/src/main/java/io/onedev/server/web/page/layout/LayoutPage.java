@@ -309,6 +309,33 @@ public abstract class LayoutPage extends BasePage {
 		
 		topbar.add(newTopbarTitle("title"));
 
+		topbar.add(new Link<Void>("darkMode") {
+
+			@Override
+			public void onClick() {
+				toggleDarkMode();
+				setResponsePage(getPageClass(), getPageParameters());
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new SpriteImage("icon", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						if (isDarkMode())
+							return "moon";
+						else
+							return "sun";
+					}
+					
+				}));
+			}
+			
+		});
+		
+		
 		User loginUser = getLoginUser();
 		
 		topbar.add(new Link<Void>("signIn") {

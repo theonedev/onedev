@@ -20,6 +20,10 @@
 	padding-bottom: 0.6rem;
 	border-bottom: 1px solid var(--light-gray);
 }
+.dark-mode .build-spec.parseable>.head {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
+
 .build-spec.parseable>.head>a {
     font-weight: bold;
     font-size: 1.2rem;
@@ -37,20 +41,28 @@
     margin-bottom: 1.5rem;
 }
 .build-spec.parseable>.body>.content>.side>.navs>.nav.active a {
-	background: var(--gray-dark);
-	border-color: var(--gray-dark);
-	color: white;
+	background: var(--light-primary);
+	border-color: var(--light-primary);
+	color: var(--primary);
 }
+.dark-mode .build-spec.parseable>.body>.content>.side>.navs>.nav.active a {
+	background: var(--dark-mode-light-primary);
+	border-color: var(--dark-mode-light-primary);
+}
+
 .build-spec.parseable>.body>.content>.side>.navs>.nav.active a.run:hover,
 .build-spec.parseable>.body>.content>.side>.navs>.nav.active a.delete:hover {
-	background: #5c5e81;
-	border-color: #5c5e81;
+	background: var(--primary);
+	border-color: var(--primary);
 	color: white;
 }
 .build-spec.parseable>.body>.content>.main>.content:not(:empty) {
     border-radius: 0.42rem;
     border: 1px solid var(--light-gray);
     padding: 1.5rem;
+}
+.dark-mode .build-spec.parseable>.body>.content>.main>.content:not(:empty) {
+    border-color: var(--dark-mode-lighter-dark);
 }
 .build-spec.parseable>.properties>.bean-list {
 	flex-grow: 1;

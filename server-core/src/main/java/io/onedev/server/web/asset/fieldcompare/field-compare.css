@@ -1,0 +1,18 @@
+table.field-compare {
+	border: 1px dashed var(--secondary) !important;
+}
+.dark-mode table.field-compare {
+	border-color: var(--dark-mode-dark-gray) !important;
+}
+table.field-compare th, table.field-compare td {
+	border-bottom: 1px dashed var(--secondary) !important;
+}
+.dark-mode table.field-compare th, .dark-mode table.field-compare td {
+	border-bottom-color: var(--dark-mode-dark-gray) !important;
+}
+.dark-mode table.field-compare th {
+	color: var(--dark-mode-light-gray) !important;
+}
+table.field-compare th {
+	font-weight: 600 !important;
+}

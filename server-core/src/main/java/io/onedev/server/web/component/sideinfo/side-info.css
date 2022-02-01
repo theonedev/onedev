@@ -1,12 +1,15 @@
 div.side-info {
 	border-radius: 0 0 0.42rem 0;
 	border-left: 1px solid var(--light-gray);
-	background: white;
 	margin: -2rem -2.25rem -2rem 2rem; 
 	flex-shrink: 0;
 	transition: all var(--transition-duration) ease;
 	width: 360px;
 	background: white;
+}
+.dark-mode div.side-info {
+	border-left: 1px solid var(--dark-mode-light-dark);
+	background: var(--dark-mode-dark);
 }
 div.side-info>.header, div.side-info>.footer {
 	padding: 1.5rem 2rem;
@@ -20,6 +23,10 @@ div.side-info>.header .close {
 	padding-left: 0.6rem;
 	display: none;
 }
+.dark-mode div.side-info>.header .close {
+	border-left-color: var(--dark-mode-dark-gray);
+}
+
 a.side-info {
 	display: none;
 	align-items: center;
@@ -34,6 +41,9 @@ a.side-info {
 		bottom: 0;
 		z-index: 1050;
 		margin: 0;
+	}
+	.dark-mode div.side-info {
+		box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
 	}
 	div.side-info.closed {
 		right: -360px;
@@ -60,6 +70,10 @@ a.side-info {
 	z-index: 1050;
 	margin: 0;
 }
+.dark-mode .hide-side-info div.side-info {
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+}
+
 .hide-side-info div.side-info.closed {
 	right: -360px;
 	box-shadow: none;

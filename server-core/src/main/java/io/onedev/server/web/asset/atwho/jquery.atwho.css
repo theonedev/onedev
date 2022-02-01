@@ -13,20 +13,35 @@
     overflow: auto;
     z-index: 11110 !important;
 }
+.dark-mode .atwho-view {
+    background: var(--dark-mode-dark);
+    border-color: var(--dark-mode-lighter-dark);
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+}
 
 .atwho-view .cur {
-    background: #3699FF;
+    background: var(--primary);
     color: white;
+}
+.dark-mode .atwho-view .cur {
+    background: var(--dark-mode-light-primary);
+    color: var(--primary);
 }
 .atwho-view .cur small {
     color: white;
 }
+.dark-mode .atwho-view .cur small {
+    color: var(--dark-mode-dark);
+}
 .atwho-view strong {
-    color: #3699FF;
+    color: var(--primary);
 }
 .atwho-view .cur strong {
     color: white;
     font:bold;
+}
+.dark-mode .atwho-view .cur strong {
+    color: var(--primary);
 }
 .atwho-view ul {
     /* width: 100px; */
@@ -39,7 +54,9 @@
     padding: 5px 10px;
     border-bottom: 1px solid var(--light-gray);
     cursor: pointer;
-    /* border-top: 1px solid #C8C8C8; */
+}
+.dark-mode .atwho-view ul li {
+    border-bottom-color: var(--dark-mode-lighter-dark);
 }
 .atwho-view ul li:last-child {
 	border-bottom: 0;
@@ -48,4 +65,7 @@
     font-size: smaller;
     color: var(--gray);
     font-weight: normal;
+}
+.dark-mode .atwho-view small {
+    color: var(--dark-mode-gray);
 }

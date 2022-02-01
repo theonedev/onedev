@@ -2,13 +2,16 @@
 	table-layout: fixed;
 }
 .issue-activities tr.activity.new>.avatar {
-	border-left-color: var(--primary);
+	border-left-color: var(--primary) !important;
 }
 
 .issue-activities>table>tbody>tr>td {
 	border-top: 1px solid var(--light-gray);
 	padding: 1.25rem 0;
 	vertical-align: top;
+}
+.dark-mode .issue-activities>table>tbody>tr>td {
+	border-top-color: var(--dark-mode-lighter-dark);
 }
 .issue-activities>table>tbody>tr:first-child>td {
 	border-top: none;
@@ -17,6 +20,9 @@
 	width: 48px;
 	border-left: 4px solid white;
 	padding-left: 8px;
+}
+.dark-mode .issue-activities>table>tbody>tr>td.avatar {
+	border-left-color: var(--dark-mode-dark);
 }
 .issue-activities>table>tbody>tr>td.avatar .avatar {
 	width: 40px;
@@ -44,12 +50,3 @@
 	display: none;
 }
 
-.issue-activities table.field-compare {
-	border: 1px dashed var(--secondary) !important;
-}
-.issue-activities table.field-compare th, .issue-activities table.field-compare td {
-	border-bottom: 1px dashed var(--secondary) !important;
-}
-.issue-activities table.field-compare th {
-	font-weight: 600 !important;
-}

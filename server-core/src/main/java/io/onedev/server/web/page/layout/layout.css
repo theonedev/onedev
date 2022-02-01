@@ -9,7 +9,7 @@
 	position: static !important;
 }
 .sidebar {
-	background-color: #1e1e2d;
+	background-color: var(--dark-mode-dark);
 	width: var(--sidebar-width);
 	position: fixed;
 	left: calc(var(--sidebar-width) * -1);
@@ -23,6 +23,9 @@
 .sidebar.sidebar-docked {
 	left: 0;
     box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);	
+}
+.dark-mode .sidebar.sidebar-docked {
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
 }
 
 .sidebar a {
@@ -151,6 +154,12 @@
     background-color: #1b1b28;
 }
 
+.dark-mode .sidebar-menu .sidebar-dropdown {
+	background: #1b1b28 !important;
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%) !important;	
+	border: 1px solid var(--dark-mode-light-dark);
+}
+
 .sidebar-footer {
 	display: flex;
 	justify-content: space-between;
@@ -166,9 +175,18 @@
 .sidebar-help .dropdown-menu .dropdown-item {
 	color: var(--dark);
 }
+.dark-mode .sidebar-help .dropdown-menu .dropdown-item {
+	color: var(--dark-mode-gray);
+}
+
 .sidebar-help .dropdown-menu .dropdown-item:hover, 
 .sidebar-help .dropdown-menu .dropdown-item:focus {
 	color: #101221 !important;
+}
+.dark-mode .sidebar-help .dropdown-menu .dropdown-item:hover, 
+.dark-mode .sidebar-help .dropdown-menu .dropdown-item:focus {
+    background-color: var(--dark-mode-light-primary) !important;
+    color: #3699ff !important;
 }
 
 .sidebar-help svg {
@@ -190,6 +208,11 @@
 	box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 	transition: all var(--transition-duration) ease;
 }
+.dark-mode .topbar {
+	background: var(--dark-mode-dark);
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+	color: white;
+}
 
 .topbar-left {
 	display: flex;
@@ -201,6 +224,9 @@
 	display: none;
 	margin: 0 1rem 0 -0.4rem;
 	color: var(--gray-dark) !important;
+}
+.dark-mode .topbar-brand {
+	color: white !important;
 }
 .topbar-brand svg {
 	width: var(--brand-size);
@@ -229,10 +255,16 @@
 	align-items: center;
 	min-width: 1px;
 }
+.dark-mode .topbar-title {
+	color: var(--primary);
+}
 
 .topbar-title .dot {
     background-color: #B5B5C3;
 	margin: 0 0.75rem;
+}
+.dark-mode .topbar-title .dot {
+	background-color: #565674;	
 }
 
 .topbar-right {
@@ -252,6 +284,11 @@
 .topbar-right .active>a.topbar-link, 
 .topbar-right .show>a.topbar-link {
     background: rgba(77, 89, 149, 0.06);
+}
+.dark-mode .topbar-right a.topbar-link:hover, 
+.dark-mode .topbar-right .active>a.topbar-link, 
+.dark-mode .topbar-right .show>a.topbar-link {
+    background: var(--dark-mode-light-dark);
 }
 
 .LayoutPage>body>.main {
@@ -340,20 +377,45 @@
 	.sidebar-minimized .menu-body .menu-body .menu-link.active {
 	    background-color: var(--light);
 	}
+	
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link:hover, 
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link:focus,
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link.open, 
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link.active {
+	    background-color: #1b1b28;
+	}
 
 	.sidebar-minimized .menu-body .menu-body .menu-link .menu-text {
 		color: var(--dark);
 	}
 
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link .menu-text {
+		color: var(--dark-mode-gray);
+	}
+	
 	.sidebar-minimized .menu-body .menu-body .menu-link:hover .menu-arrow, 
 	.sidebar-minimized .menu-body .menu-body .menu-link:focus .menu-arrow, 
 	.sidebar-minimized .menu-body .menu-body .menu-link.active .menu-arrow, 
-	.sidebar-minimized .menu-body .menu-body .menu-link.open .menu-arriw {
+	.sidebar-minimized .menu-body .menu-body .menu-link.open .menu-arrow {
 		color: var(--primary);
 	}
 
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link:hover .menu-text, 
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link:focus .menu-text, 
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link.active .menu-text, 
+	.dark-mode .sidebar-minimized .menu-body .menu-body .menu-link.open .menu-text {
+		color: white;
+	}
 }
 .sidebar-body.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
-.sidebar-body.ps.ps-scroll>.ps__rail-y>.ps__thumb-y {
-    background: var(--muted);
+.sidebar-body.ps.ps-scroll>.ps__rail-y>.ps__thumb-y,
+.sidebar-dropdown.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
+.sidebar-dropdown.ps.ps-scroll>.ps__rail-y>.ps__thumb-y {
+    background: var(--gray);
+}
+.dark-mode .sidebar-body.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
+.dark-mode .sidebar-body.ps.ps-scroll>.ps__rail-y>.ps__thumb-y,
+.dark-mode .sidebar-dropdown.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
+.dark-mode .sidebar-dropdown.ps.ps-scroll>.ps__rail-y>.ps__thumb-y {
+    background: rgb(78, 82, 103);
 }

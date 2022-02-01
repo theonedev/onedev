@@ -6,3 +6,6 @@
 	border-top: 1px solid var(--light);
 	padding-top: 0.75rem;
 }
+.dark-mode .problem-popover .problem-content+.problem-content {
+	border-top-color: var(--dark-mode-light-dark);
+}

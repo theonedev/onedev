@@ -3,6 +3,9 @@
 	height: 2rem;
 	border-radius: 4px;
 }
+.dark-mode .source-format select {
+	color: var(--dark-mode-gray);
+}
 
 .source-format>div:last-child {
 	margin-right: 0 !important;

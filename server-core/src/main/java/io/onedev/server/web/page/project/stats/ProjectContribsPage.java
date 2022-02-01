@@ -93,8 +93,8 @@ public class ProjectContribsPage extends ProjectStatsPage {
 		
 		CharSequence callback = userCardBehavior.getCallbackFunction(
 				CallbackParameter.explicit("name"), CallbackParameter.explicit("emailAddress"));
-		String script = String.format("onedev.server.stats.contribs.onDomReady(%s, '%s', %s);", 
-				jsonOfData, topContributorsUrl, callback);
+		String script = String.format("onedev.server.stats.contribs.onDomReady(%s, '%s', %s, %b);", 
+				jsonOfData, topContributorsUrl, callback, isDarkMode());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

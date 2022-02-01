@@ -43,6 +43,7 @@ import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
@@ -272,8 +273,12 @@ public abstract class SymbolTooltipPanel extends Panel {
 				
 				response.render(JavaScriptHeaderItem.forReference(new SymbolTooltipResourceReference()));
 				
-				ResourceReference ajaxIndicator =  new PackageResourceReference(
-						SymbolTooltipPanel.class, "ajax-indicator.gif");
+				ResourceReference ajaxIndicator;
+				if (((BasePage)getPage()).isDarkMode()) 
+					ajaxIndicator =  new PackageResourceReference(SymbolTooltipPanel.class, "dark-ajax-indicator.gif");
+				else
+					ajaxIndicator =  new PackageResourceReference(SymbolTooltipPanel.class, "ajax-indicator.gif");
+					
 				String script = String.format("onedev.server.symboltooltip.init('%s', %s, '%s');", 
 						getMarkupId(), getCallbackFunction(explicit("revision"), explicit("symbol")), 
 						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()));

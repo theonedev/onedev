@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.unbescape.html.HtmlEscape;
 
@@ -15,6 +17,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.PropertyChange;
 import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.asset.fieldcompare.FieldCompareCssResourceReference;
 import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
 import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
@@ -41,8 +44,17 @@ public class ActivityDetail implements Serializable {
 	}
 	
 	public Component render(String componentId) {
-		return new Label(componentId, Emojis.getInstance().apply(htmlVersion))
-				.setEscapeModelStrings(false);
+		return new Label(componentId, Emojis.getInstance().apply(htmlVersion)) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(CssHeaderItem.forReference(new FieldCompareCssResourceReference()));
+			}
+			
+		}.setEscapeModelStrings(false);
 	}
 	
 	private static String compareAsHtml(Map<String, String> oldProperties, Map<String, String> newProperties, 

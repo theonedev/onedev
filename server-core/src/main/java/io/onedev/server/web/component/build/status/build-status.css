@@ -10,4 +10,6 @@
 .build-status-none {
     color: #CCC !important;
 }
-
+.dark-mode .build-status-none {
+	color: var(--dark-mode-gray) !important;
+}

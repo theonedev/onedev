@@ -2,3 +2,6 @@
 	width: 240px;
 	height: 240px;
 }
+.dark-mode .no-commits img {
+	filter: invert(80%);
+}

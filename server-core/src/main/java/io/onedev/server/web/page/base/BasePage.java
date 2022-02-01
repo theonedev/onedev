@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
@@ -37,6 +38,8 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.protocol.ws.api.message.TextMessage;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.visit.IVisit;
@@ -68,6 +71,10 @@ import io.onedev.server.web.websocket.WebSocketManager;
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
 
+	private static final String COOKIE_DARK_MODE = "darkMode";
+
+	private boolean darkMode;
+	
 	private FeedbackPanel sessionFeedback;
 	
 	private RepeatingView rootComponents;
@@ -75,8 +82,32 @@ public abstract class BasePage extends WebPage {
 	public BasePage(PageParameters params) {
 		super(params);
 		checkReady();
+		
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie(COOKIE_DARK_MODE);
+		if (cookie != null) 
+			darkMode = cookie.getValue().equals("yes");
+		else
+			darkMode = false;
 	}
 
+	public boolean isDarkMode() {
+		return darkMode;
+	}
+	
+	public void toggleDarkMode() {
+		darkMode = !darkMode;
+		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+		Cookie cookie;
+		if (darkMode) 
+			cookie = new Cookie(COOKIE_DARK_MODE, "yes");
+		else 
+			cookie = new Cookie(COOKIE_DARK_MODE, "no");
+		cookie.setPath("/");
+		cookie.setMaxAge(Integer.MAX_VALUE);
+		response.addCookie(cookie);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -167,6 +198,9 @@ public abstract class BasePage extends WebPage {
 					builder.append(clazz.getSimpleName()).append(" ");
 					clazz = clazz.getSuperclass();
 				}
+				
+				if (darkMode)
+					builder.append(" dark-mode");
 
 				IVisitor<BeanEditor, BeanEditor> visitor = new IVisitor<BeanEditor, BeanEditor>() {
 	

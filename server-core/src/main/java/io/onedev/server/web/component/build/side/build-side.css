@@ -3,6 +3,10 @@
 	border-top: 1px dashed var(--secondary);
 	padding-top: 1.5rem;
 }
+.dark-mode .build-side>* {
+	border-top-color: var(--dark-mode-dark-gray);
+}
+
 .build-side>div:first-child {
 	border-top: none;
 	padding-top: 0;

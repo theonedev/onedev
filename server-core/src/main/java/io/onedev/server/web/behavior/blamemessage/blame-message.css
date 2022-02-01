@@ -12,6 +12,11 @@
 	white-space: pre-wrap; 
 	word-wrap: break-word;
 }
+.dark-mode .blame-message {
+	background-color: var(--dark-mode-light-info); 
+	color: var(--info);
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+}
 .blame-message>.authoring {
 	margin-bottom: 1rem;
 	font-weight: bold;	

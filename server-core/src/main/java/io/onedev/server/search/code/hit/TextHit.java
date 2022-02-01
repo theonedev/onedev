@@ -38,7 +38,7 @@ public class TextHit extends QueryHit {
 
 	@Override
 	public Image renderIcon(String componentId) {
-		return new NoAntiCacheImage(componentId, new PackageResourceReference(FileHit.class, "bullet.gif"));
+		return new NoAntiCacheImage(componentId, new PackageResourceReference(FileHit.class, "bullet.png"));
 	}
 
 	@Override

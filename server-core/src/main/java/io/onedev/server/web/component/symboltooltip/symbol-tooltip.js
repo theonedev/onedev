@@ -54,7 +54,7 @@ onedev.server.symboltooltip = {
 				}
 
 				var $tooltip = $("<div class='symbol-tooltip overflow-auto' id='" + containerId 
-						+ "-symbol-tooltip'><img src=" + ajaxIndicatorUrl + "></img></div>");
+						+ "-symbol-tooltip'><div class='d-flex align-items-center justify-content-center'><img src=" + ajaxIndicatorUrl + "></img></div></div>");
 				container.tooltip = $tooltip[0];
 				container.tooltip.symbolEl = symbolEl;
 				document.body.appendChild(container.tooltip);

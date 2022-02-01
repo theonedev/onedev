@@ -10,6 +10,9 @@
 	margin-top: 1.8rem;
 	align-items: center !important;
 }
+.dark-mode .commit-list li.date {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
 
 .commit-list li.commit {
 	padding: 0.4rem 0;
@@ -21,8 +24,11 @@
 	font-size: 1.1rem;
 }
 
-.commit-lis .commit-message .highlight {
+.commit-list .commit-message .highlight {
 	background: yellow;
+}
+.dark-mode .commit-list .commit-message .highlight {
+	background: rgb(125, 82, 1);
 }
 
 @media(max-width: 991px) {
@@ -40,6 +46,9 @@
 	}
 	.commit-list li.commit:hover, .commit-list li.commit.hover {
 		background: var(--light);
+	}
+	.dark-mode .commit-list li.commit:hover, .commit-list li.commit.hover {
+		background: var(--dark-mode-light-dark);
 	}
 }
 
@@ -158,4 +167,7 @@
 	background-size: 240px 240px;
 	border-top: none;
 	height: 240px;
+}
+.dark-mode .commit-list .no-commits {
+	filter: invert(80%);
 }

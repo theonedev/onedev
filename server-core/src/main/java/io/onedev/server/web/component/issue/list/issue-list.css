@@ -39,8 +39,14 @@
 .issue-list .linked-issues {
 	border-left: 2px dashed var(--secondary);
 }
+.dark-mode .issue-list .linked-issues {
+	border-left-color: var(--dark-mode-dark-gray);
+}
 .issue-list .linked-issue {
 	margin-top: 0.7rem;
 	padding-top: 1.2rem;
 	border-top: 1px solid var(--light-gray);
+}
+.dark-mode .issue-list .linked-issue {
+	border-top-color: var(--dark-mode-light-dark);
 }

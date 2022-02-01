@@ -6,6 +6,9 @@
 	padding: 1.2rem 1.5rem;
 	border-radius: 0.42rem;
 }
+.dark-mode .pull-request-detail>.card-body>.main>.summary {
+	border-color: var(--dark-mode-dark-gray);
+}
 .pull-request-detail>.card-body>.main>.summary>div {
 	margin-bottom: 1rem;
 }
@@ -33,6 +36,9 @@
 	padding-top: 1rem;
 	margin-top: 1rem;
 	font-size: 1rem !important;
+}
+.dark-mode .pull-request-detail>.card-body>.main>.summary>.contribution {
+	border-top-color: var(--dark-mode-dark-gray);
 }
 
 ul>li>a.code-comments.new .icon {
@@ -65,6 +71,9 @@ ul>li>a.code-comments.new .icon {
 	margin-bottom: 1.5rem;
 	border-top: 1px dashed var(--secondary);
 	padding-top: 1.5rem;
+}
+.dark-mode .pull-request-detail>.card-body>.more-info>.body>* {
+	border-top-color: var(--dark-mode-dark-gray);
 }
 .pull-request-detail>.card-body>.more-info>.body>:first-child {
 	border-top: none;

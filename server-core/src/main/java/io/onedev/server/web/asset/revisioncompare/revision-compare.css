@@ -53,11 +53,18 @@
 	margin-left: 0.5rem;
 	color: var(--gray);
 }
+.dark-mode .revision-compare .help {
+	margin-left: 0.5rem;
+	color: var(--dark-mode-gray);
+}
 .revision-compare .selector {
 	margin-bottom: 1rem;
 }
 .revision-compare .message {
 	color: var(--muted);	
+}
+.dark-mode .revision-compare .message {
+	color: var(--gray);	
 }
 .revision-compare .message:hover, .revision-compare .message:focus {
 	color: var(--primary);

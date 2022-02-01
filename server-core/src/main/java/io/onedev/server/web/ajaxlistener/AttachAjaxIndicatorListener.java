@@ -5,10 +5,14 @@ import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
+import org.apache.wicket.request.resource.PackageResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.img.ImageScope;
+import io.onedev.server.web.page.base.BasePage;
 
 public class AttachAjaxIndicatorListener implements IAjaxCallListener {
 
@@ -19,6 +23,9 @@ public class AttachAjaxIndicatorListener implements IAjaxCallListener {
 	private final AttachMode attachMode;
 	
 	private final boolean indicateSuccessful;
+	
+	private static final ResourceReference DARK_INDICATOR = new PackageResourceReference(
+			ImageScope.class, "dark-ajax-indicator.gif");
 	
 	public AttachAjaxIndicatorListener(Component attachTo, AttachMode attachMode, boolean indicateSuccessful) {
 		this.attachTo = attachTo;
@@ -45,8 +52,13 @@ public class AttachAjaxIndicatorListener implements IAjaxCallListener {
 		Component attachTo = this.attachTo;
 		if (attachTo == null)
 			attachTo = component;
-		IRequestHandler handler = new ResourceReferenceRequestHandler(
-				AbstractPostAjaxBehavior.INDICATOR);
+		IRequestHandler handler;
+		BasePage page = (BasePage) component.getPage();
+		if (page.isDarkMode())
+			handler = new ResourceReferenceRequestHandler(DARK_INDICATOR);
+		else
+			handler = new ResourceReferenceRequestHandler(AbstractPostAjaxBehavior.INDICATOR);
+			
 		CharSequence url = RequestCycle.get().urlFor(handler);
 		String insertAt = attachMode==AttachMode.APPEND?"after":"before";
 		return String.format(""

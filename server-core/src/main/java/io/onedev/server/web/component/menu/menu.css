@@ -10,9 +10,19 @@
 .floating.menu li:hover, .floating.menu li:focus {
 	background-color: var(--light);
 }
+.dark-mode .floating.menu li:hover, .dark-mode .floating.menu li:focus {
+	background-color: var(--dark-mode-light-primary);
+}
+
 .floating.menu li a {
 	padding: 0.75rem 1.25rem;	
 	color: var(--dark);
+}
+.dark-mode .floating.menu li a {
+	color: var(--dark-mode-gray);
+}
+.dark-mode .floating.menu li:hover a, .dark-mode .floating.menu li:focus a {
+	color: var(--primary);
 }
 .floating.menu li a .icon-tick {
 	width: 13px;
@@ -29,4 +39,7 @@
     margin: 0.5rem 0;
     overflow: hidden;
     border-top: 1px solid var(--light-gray);
+}
+.dark-mode .floating.menu li.dropdown-divider div {
+	border-top-color: var(--dark-mode-light-dark);
 }

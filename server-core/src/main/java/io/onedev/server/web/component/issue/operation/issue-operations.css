@@ -8,6 +8,9 @@
 .issue-operations>.state-and-actions>.state.with-separator {
 	border-right: 1px solid var(--light-gray);
 }
+.dark-mode .issue-operations>.state-and-actions>.state.with-separator {
+	border-right-color: var(--dark-mode-lighter-dark);
+}
 
 .issue-operations>.state-and-actions>.state>.issue-state {
     padding: 0.55rem 0.75rem;

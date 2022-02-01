@@ -1,16 +1,24 @@
 .comment-indicator, .comment-trigger {
-	color: var(--info);
+	color: var(--info) !important;
 }
 .comment-indicator.updated, .comment-trigger.updated {
-	color: var(--primary);
+	color: var(--primary) !important;
 }
 .comment-indicator:hover, .comment-indicator.active, 
 .comment-trigger:hover, .comment-trigger.active {
-	color: #5605fb;
+	color: #5605fb !important;
+}
+.dark-mode .comment-indicator:hover, .dark-mode .comment-indicator.active, 
+.dark-mode .comment-trigger:hover, .dark-mode .comment-trigger.active {
+	color: rgb(181, 152, 255) !important;
 }
 .comment-indicator.updated.active, .comment-indicator.updated:hover, 
 .comment-trigger.updated.active, .comment-trigger.updated:hover {
-	color: #0073e9;
+	color: #0073e9 !important;
+}
+.dark-mode .comment-indicator.updated.active, .dark-mode .comment-indicator.updated:hover, 
+.dark-mode .comment-trigger.updated.active, .dark-mode .comment-trigger.updated:hover {
+	color: rgb(124, 164, 233) !important;
 }
 .popover-body>.comment-trigger {
 	display: block;

@@ -10,3 +10,6 @@
 .job-executor>.card-header .badge {
 	font-size: 0.9rem;
 }
+.job-executors>.body>div>div>.card>.card-header {
+	border-bottom: none;
+}

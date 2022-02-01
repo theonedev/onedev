@@ -4,6 +4,10 @@
 	background: white;
 	border-radius: 2px;
 }
+.dark-mode .subtree-dropdown-trigger {
+	background: var(--dark-mode-dark);
+}
+
 .subtree-dropdown-trigger>span {
 	display: block;
 	width: 0; 
@@ -11,6 +15,9 @@
 	border-top: 4px solid transparent;
 	border-bottom: 4px solid transparent;
 	border-left: 4px solid var(--gray-dark);
+}
+.dark-mode .subtree-dropdown-trigger>span {
+	border-left-color: var(--dark-mode-gray);
 }
 
 .subtree-dropdown-trigger:hover, .subtree-dropdown-trigger.dropdown-open {

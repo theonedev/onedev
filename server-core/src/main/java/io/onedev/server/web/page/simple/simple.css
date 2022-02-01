@@ -59,9 +59,20 @@
     color: var(--gray-dark);
 	height: auto;
 }
+.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control {
+    color: white;
+}
+.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control {
+    background-color: var(--dark-mode-dark);
+    border: 1px solid #323248;	
+}
 .SimplePage:not(.force-ordinary-style) .main .form-control:focus {
     background-color: var(--light-gray);
     border-color: var(--light-gray);
+}
+.SimplePage.dark-mode:not(.force-ordinary-style) .main .form-control:focus {
+    background-color: var(--dark-mode-dark);
+    border-color: #474761;	
 }
 .SimplePage .main .wizard .title {
 	margin-top: -6rem;

@@ -3,6 +3,10 @@
 	border-top: 1px solid var(--light); 
 	min-width: 120px;
 }
+.dark-mode .folder-view>table>tbody>tr>td {
+	border-top-color: var(--dark-mode-light-dark); 
+}
+
 .folder-view>table>tbody>tr>td.path {
 	min-width: 200px;
 }
@@ -15,6 +19,11 @@
 	background: var(--light);
 	border-top: 1px solid var(--light-gray);
 	border-bottom: 1px solid var(--light-gray);
+}
+.dark-mode .folder-view>.readme>.head {
+	background: var(--dark-mode-light-dark);
+	border-top-color: var(--dark-mode-lighter-dark);
+	border-bottom-color: var(--dark-mode-lighter-dark);
 }
 .folder-view>.readme>.body {
 	max-width: 900px;

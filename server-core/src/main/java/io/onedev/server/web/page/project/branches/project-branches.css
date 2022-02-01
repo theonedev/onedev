@@ -26,6 +26,9 @@
 .project-branches .body>table td.behind>div {
 	border-right: 2px solid var(--light-dark);
 }
+.dark-mode .project-branches .body>table td.behind>div {
+	border-right-color: var(--dark-mode-lighter-dark);
+}
 .project-branches .body>table td.behind-ahead div.text {
 	margin: 0 8px;
 }
@@ -45,9 +48,15 @@
 	background: var(--light-dark);
 	border-radius: 0 4px 4px 0;
 }
+.dark-mode .project-branches .body>table .ahead .bar {
+	background: var(--dark-mode-lighter-dark);
+}
 .project-branches .body>table .behind .bar {
 	background: var(--light-dark);
 	border-radius: 2px 0 0 2px;
+}
+.dark-mode .project-branches .body>table .behind .bar {
+	background: var(--dark-mode-lighter-dark);
 }
 @media(max-width: 991px) {
 	.project-branches .body>table td {
@@ -57,9 +66,16 @@
 }
 
 #searching-branches {
+	background: url(/img/ajax-indicator-big.png) no-repeat scroll center center;
+	background-size: 64px 64px;
+	width: 64px;
+	height: 64px;
 	position: absolute; 
 	left: 50%; 
 	top: 250px; 
 	z-index: 100; 
 	display: none;
+}
+.dark-mode #searching-branches {
+	background: url(/img/dark-ajax-indicator-big.png) no-repeat scroll center center;
 }

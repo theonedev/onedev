@@ -3,6 +3,9 @@
 	border-radius: 0.42rem;
 	padding: 1px;
 }
+.dark-mode .code-support {
+	border-color: var(--dark-mode-lighter-dark);
+}
 .code-support>div {
 	position: relative;
 	min-height: 100px;

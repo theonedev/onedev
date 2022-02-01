@@ -9,6 +9,18 @@
     box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 	max-width: 720px;
 }
+.dark-mode .symbol-tooltip {
+	background-color: var(--dark-mode-light-info); 
+	color: var(--info);
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+}
+.dark-mode .symbol-tooltip a {
+	color: var(--primary);
+}
+.dark-mode .symbol-tooltip a:hover, .dark-mode .symbol-tooltip a:focus {
+	color: #0073e9;
+}
+
 .symbol-tooltip ul.declarations li {
 	vertical-align: top; 
 	padding: 2px 4px; 
@@ -16,6 +28,9 @@
 }
 .symbol-tooltip ul.declarations .scope {
 	color: var(--gray);
+}
+.dark-mode .symbol-tooltip ul.declarations .scope {
+	color: var(--dark-mode-gray);
 }
 .symbol-tooltip a.find-occurrences[disabled] {
 	opacity: 100%;

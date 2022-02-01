@@ -1,12 +1,18 @@
 .blob-view>.head {
 	border-bottom: 1px solid var(--light-gray);
 }
+.dark-mode .blob-view>.head {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
 .blob-view>.head>.tools>* {
 	margin-left: 1.2rem;
 }
 .blob-view>.head>.tools>.options {
 	padding-left: 1.2rem;
 	border-left: 1px solid var(--light-gray);
+}
+.dark-mode .blob-view>.head>.tools>.options {
+	border-left-color: var(--dark-mode-lighter-dark);
 }
 .blob-view>.head>.tools>.options:empty {
 	display: none !important;

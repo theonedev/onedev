@@ -9,6 +9,9 @@
 .text-diff>caption>div {
 	border-radius: 0.42rem 0.42rem 0 0;
 }
+.dark-mode .text-diff>caption>div {
+    border-color: var(--dark-mode-lighter-dark) !important;
+}
 .text-diff>tbody {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	font-size: 0.9rem;
@@ -27,6 +30,10 @@
 	border-left: 1px solid var(--light-gray);
 	text-align: right;
 	color: var(--gray);
+}
+.dark-mode .text-diff>tbody>tr>td.number {
+	border-left-color: var(--dark-mode-lighter-dark);
+	color: var(--dark-mode-gray);
 }
 .text-diff>tbody>tr>td.number>.coverage {
 	display: block;
@@ -59,8 +66,15 @@
 .text-diff>tbody>tr:not(.expanded)+tr.expanded>td, .text-diff>tbody>tr.expanded+tr:not(.expanded)>td {
 	border-top: 1px solid var(--light-gray);
 }
+.dark-mode .text-diff>tbody>tr:not(.expanded)+tr.expanded>td, 
+.dark-mode .text-diff>tbody>tr.expanded+tr:not(.expanded)>td {
+	border-top-color: var(--dark-mode-lighter-dark);
+}
 .text-diff>tbody>tr>td:last-child {
 	border-right: 1px solid var(--light-gray);
+}
+.dark-mode .text-diff>tbody>tr>td:last-child {
+	border-right-color: var(--dark-mode-lighter-dark);
 }
 .text-diff>tbody>tr:last-child>td:first-child {
 	border-radius: 0 0 0 0.42rem;
@@ -71,20 +85,37 @@
 .text-diff>tbody>tr>td.operation {
 	border-left: 1px solid var(--light-gray);
 }
+.dark-mode .text-diff>tbody>tr>td.operation {
+	border-left-color: var(--dark-mode-lighter-dark);
+}
 .text-diff>tbody>tr>td:FIRST-CHILD {
 	border-left: 1px solid var(--light-gray);
+}
+.dark-mode .text-diff>tbody>tr>td:FIRST-CHILD {
+	border-left-color: var(--dark-mode-lighter-dark);
 }
 .text-diff>tbody>tr:LAST-CHILD>td {
 	border-bottom: 1px solid var(--light-gray);
 }
+.dark-mode .text-diff>tbody>tr:LAST-CHILD>td {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
 .text-diff>tbody>tr.expanded>td {
 	background: #F6F9FC;
+}
+.dark-mode .text-diff>tbody>tr.expanded>td {
+	background: var(--dark-mode-light-dark);
 }
 .text-diff>tbody>tr.expander>td.skipped {
 	padding: 0.5rem 1.2rem;
 	border-left: 1px solid var(--light-gray);
 	background: #F0F8FF;
 	color: var(--gray);
+}
+.dark-mode .text-diff>tbody>tr.expander>td.skipped {
+	border-left-color: var(--dark-mode-lighter-dark);
+	background: rgb(23, 33, 53);
+	color: var(--dark-mode-gray);
 }
 .text-diff>tbody>tr.expander>td.expander {
 	text-align: center;
@@ -98,6 +129,10 @@
 	padding: 2rem 0;
 	margin: -2rem -1px;
 }
+.dark-mode .text-diff>tbody>tr.expander>td.expander a {
+	background: rgb(23, 33, 53);
+	color: var(--gray);
+}
 
 .text-diff>tbody>tr.expander>td.expander>a:hover, 
 .text-diff>tbody>tr.expander>td.expander>a:focus {
@@ -108,41 +143,79 @@
 	background: #ffdddd;
 	border-left: 1px solid #f1c0c0;
 }
+.dark-mode .text-diff>tbody>tr>td.old.number {
+	background: rgb(62, 20, 25);
+	border-left-color: rgb(97, 48, 63);
+}
 .text-diff>tbody>tr>td.old.content {
 	background: #ffecec;
+}
+.dark-mode .text-diff>tbody>tr>td.old.content {
+	background: rgb(49, 16, 20);
 }
 .text-diff>tbody>tr>td.old.operation {
 	border-left: 1px solid #f1c0c0;
 	background: #ffecec;
 }
+.dark-mode .text-diff>tbody>tr>td.old.operation {
+	border-left-color: rgb(97, 48, 63);
+	background: rgb(49, 16, 20);
+}
 .text-diff>tbody>tr>td.old .delete {
-	background-color: #F8B8B8;
-	text-decoration: line-through;
+	background-color: rgb(255, 146, 176);
+}
+.dark-mode .text-diff>tbody>tr>td.old .delete {
+	background-color: rgb(108, 35, 44);
 }
 .text-diff>tbody>tr>td.new.number {
 	background: #dbffdb;
 	border-left: 1px solid #c1e9c1;
 }
+.dark-mode .text-diff>tbody>tr>td.new.number {
+	background: rgb(6, 49, 47);
+	border-left-color: rgb(38, 76, 50);
+}
 .text-diff>tbody>tr>td.new.content {
 	background: #eaffea;
+}
+.dark-mode .text-diff>tbody>tr>td.new.content {
+	background: rgb(4, 38, 36);
 }
 .text-diff>tbody>tr>td.new.operation {
 	border-left: 1px solid #c1e9c1;
 	background: #eaffea;
 }
+.dark-mode .text-diff>tbody>tr>td.new.operation {
+	border-left-color: rgb(38, 76, 50);
+	background: rgb(4, 38, 36);
+}
 .text-diff>tbody>tr>td.new .insert {
-	background-color: #94F094;
+	background-color: rgb(154, 255, 150);
+}
+.dark-mode .text-diff>tbody>tr>td.new .insert {
+	background-color: rgb(5, 96, 78);
 }
 .text-diff>tbody>tr>td.old.new.number {
 	background: #FAF3D0;
 	border-left: 1px solid #EBD049;
 }
+.dark-mode .text-diff>tbody>tr>td.old.new.number {
+	background: rgb(66, 44, 0);
+	border-left-color: rgb(103, 68, 0);
+}
 .text-diff>tbody>tr>td.old.new.content {
 	background: #FCF8E4;
+}
+.dark-mode .text-diff>tbody>tr>td.old.new.content {
+	background: rgb(52, 34, 0);
 }
 .text-diff>tbody>tr>td.old.new.operation {
 	border-left: 1px solid #EBD049;
 	background: #FCF8E4;
+}
+.dark-mode .text-diff>tbody>tr>td.old.new.operation {
+	border-left-color: rgb(103, 68, 0);
+	background: rgb(52, 34, 0);
 }
 .text-diff>tbody>tr>td.content {
 	white-space: pre-wrap;
@@ -154,6 +227,9 @@
 }
 .text-diff>tbody>tr:hover:not(.expander)>td {
 	background: var(--light-primary) !important;
+}
+.dark-mode .text-diff>tbody>tr:hover:not(.expander)>td {
+	background: var(--gray-dark) !important;
 }
 .text-diff>tbody>tr.code {
 	background: inherit;
@@ -169,10 +245,10 @@
 	color: white !important;
 }
 .text-diff>tbody>tr>td.content>span.content-mark.insert {
-	background: #91c8ae;
+	background: var(--success);
 }
 .text-diff>tbody>tr>td.content>span.content-mark.delete {
-	background: #dc9ec9;
+	background: var(--danger);
 }
 
 .text-diff>tbody>tr>td.number>.comment-indicator,

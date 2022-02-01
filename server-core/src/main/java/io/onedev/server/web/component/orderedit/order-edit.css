@@ -28,3 +28,8 @@
 .order-edit .available a:hover, .order-edit .available a:focus {
 	background: var(--light);
 } 
+.dark-mode .order-edit .available a:hover, 
+.dark-mode .order-edit .available a:focus {
+	color: var(--primary) !important;
+	background-color: var(--dark-mode-light-primary);
+} 

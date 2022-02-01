@@ -2,17 +2,31 @@
 	box-shadow: none;
 	border-right: 1px solid var(--light-gray);
 }
+.dark-mode.ProjectBlobPage .sidebar {
+	border-right-color: var(--dark-mode-lighter-dark);
+}
+
 .ProjectBlobPage .topbar {
 	box-shadow: none;
 	border-bottom: 1px solid var(--light-gray);
 }
+.dark-mode.ProjectBlobPage .topbar {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
+
 .project-blob {
 	background: white;
+}
+.dark-mode .project-blob {
+	background: var(--dark-mode-dark);
 }
 
 .project-blob>.head {
 	border-bottom: 1px solid var(--light-gray);
 	min-height: 40px;
+}
+.dark-mode .project-blob>.head {
+	border-bottom-color: var(--dark-mode-lighter-dark);
 }
 
 .project-blob .revision-indexing+.build-support-note {
@@ -27,6 +41,9 @@
 	border-top: 1px solid var(--light-gray);
 	top: 0 !important;
 }
+.dark-mode .project-blob>.search-result {
+	border-top-color: var(--dark-mode-lighter-dark);
+}
 .project-blob>.search-result>.ui-resizable-handle {
 	background: var(--light) url(/icon/grip2.svg) no-repeat scroll center center;
 	background-size: 20px 20px;
@@ -34,6 +51,10 @@
     height: 4px;
     top: 0;
     position: relative;
+}
+.dark-mode .project-blob>.search-result>.ui-resizable-handle {
+	background: var(--dark-mode-light-dark) url(/icon/dark-grip2.svg) no-repeat scroll center center;
+	background-size: 20px 20px;
 }
 
 .floating.get-code {
@@ -50,6 +71,10 @@
 	background: var(--light-danger);
 	margin-left: 4px;
 	padding: 0 2px;
+}
+.dark-mode .markdown-rendered a+.missing, img+.missing {
+	background: var(--dark-mode-light-danger);
+	color: var(--danger);
 }
 .markdown-rendered img+.missing {
 	vertical-align: middle;

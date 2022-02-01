@@ -11,7 +11,7 @@ onedev.server.stats = {
 	},
 	
 	contribs: {
-		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback) {
+		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback, darkMode) {
 			var $contribs = $(".project-contribs");
 			var $overall = $contribs.find(".overall");
 			if (Object.keys(overallContributions).length === 0) {
@@ -86,18 +86,27 @@ onedev.server.stats = {
 					type: 'category',
 					data: overallXAxisData,
 					boundaryGap: false,
+					axisLabel: {
+						color: darkMode?'#cdcdde':'#3F4254'
+					}
 				},
 				yAxis: {
 					minInterval: 1,
-			    	axisLine: {
-			    		show:false
+			        splitLine: {
+			            lineStyle: {
+			                color: darkMode?'#535370':'#E4E6EF'
+			            }
+			        },			    	
+					axisLine: {
+			    		show: false
 			    	},	
 			    	axisLabel: {
 			    		formatter: function(value, index) {
 			    			var result = onedev.server.stats.formatYAxisLabel(value, index, useKiloForOverallChart);
 			    			useKiloForOverallChart = result.useKilo;
 			    			return result.value;
-			    		}
+			    		},
+						color: darkMode?'#cdcdde':'#3F4254'
 			    	},
 				},
 		        toolbox: {
@@ -110,8 +119,8 @@ onedev.server.stats = {
 		                colorAlpha: 0.1
 		            },
 					brushStyle: {
-						color: 'rgba(225, 240, 255, 0.5)',
-						borderColor: 'rgba(54, 153, 255, 0.8)'
+						color: darkMode?'rgba(85, 92, 97, 0.5)':'rgba(225, 240, 255, 0.5)',
+						borderColor: darkMode?'rgba(54, 153, 255, 0.8)':'rgba(54, 153, 255, 0.8)'
 					}
 		        },
 		        series: [ {
@@ -157,7 +166,7 @@ onedev.server.stats = {
 			});
 			
 			function updateTopContributors() {
-				$topContributors.empty().append("<div class='loading'><img src='/img/ajax-indicator-big.gif'></img></div>");
+				$topContributors.empty().append("<div class='loading'></div>");
 				setTimeout(function() {
 					$.ajax({
 						url: topContributorsDataUrl + "&type=" + $contribType.val().toUpperCase() + "&from=" + fromDay + "&to=" + toDay,
@@ -240,20 +249,29 @@ onedev.server.stats = {
 									xAxis: {
 										type: 'category',
 										data: xAxisData,
-										boundaryGap: false
+										boundaryGap: false,
+										axisLabel: {
+											color: darkMode?'#cdcdde':'#3F4254'
+										}
 									},
 									yAxis: {
 										minInterval: 1,
 								    	axisLine: {
-								    		show:false
+								    		show: false
 								    	},	
+								        splitLine: {
+								            lineStyle: {
+								                color: darkMode?'#535370':'#E4E6EF'
+								            }
+								        },			    	
 								    	boundaryGap: [0, (maxValue-maxValueOfContributor)/maxValueOfContributor],
 								    	axisLabel: {
 								    		formatter: function(value, index) {
 								    			var result = onedev.server.stats.formatYAxisLabel(value, index, useKilo);
 								    			useKilo = result.useKilo;
 								    			return result.value;
-								    		}
+								    		},
+											color: darkMode?'#cdcdde':'#3F4254'
 								    	},
 									},
 							        series: [ {
@@ -317,7 +335,7 @@ onedev.server.stats = {
 	},
 	
 	sourceLines: {
-		onDomReady: function(lineIncrements, defaultBranch) {
+		onDomReady: function(lineIncrements, defaultBranch, darkMode) {
 			var numOfTopLanguages = 10;
 			
 			var $chart = $(".source-lines>div>.chart");
@@ -391,7 +409,10 @@ onedev.server.stats = {
 				title: {
 					text: title,
 					left: 'center',
-					top: 10
+					top: 10,
+					textStyle: {
+						color: darkMode?'#cdcdde':'#3F4254'
+					}
 				},
 				grid: {
 					left: '60px',
@@ -402,29 +423,42 @@ onedev.server.stats = {
 				xAxis: {
 					type: 'category',
 					data: xAxisData,
-					boundaryGap: false
+					boundaryGap: false,
+					axisLabel: {
+						color: darkMode?'#cdcdde':'#3F4254'
+					}
 				},
 				yAxis: {
 					minInterval: 1,
 					min: 0,
 			    	axisLine: {
-			    		show:false
+			    		show: false
 			    	},	
+			        splitLine: {
+			            lineStyle: {
+			                color: darkMode?'#535370':'#E4E6EF'
+			            }
+			        },			    	
 			    	boundaryGap: [0, 0],
 			    	axisLabel: {
 			    		formatter: function(value, index) {
 			    			var result = onedev.server.stats.formatYAxisLabel(value, index, useKilo);
 			    			useKilo = result.useKilo;
 			    			return result.value;
-			    		}
+			    		},
+						color: darkMode?'#cdcdde':'#3F4254'
 			    	},
 				},
 				tooltip: {
-					trigger: 'axis'
+					trigger: 'axis',
+					background: "#7E8299"
 				},
 				legend: {
 					top: 40,
-					data: []
+					data: [],
+					textStyle: {
+						color: darkMode?'#cdcdde':'#3F4254'
+					}
 				},
 		        series: []
 			};

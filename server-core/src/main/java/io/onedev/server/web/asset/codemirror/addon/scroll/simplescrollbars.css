@@ -6,11 +6,18 @@
   border: 1px solid var(--secondary);
   border-radius: 2px;
 }
+.dark-mode .CodeMirror-simplescroll-horizontal div, .dark-mode .CodeMirror-simplescroll-vertical div {
+  background: rgb(91, 95, 122);
+  border-color: var(--dark-mode-dark-gray);
+}
 
 .CodeMirror-simplescroll-horizontal, .CodeMirror-simplescroll-vertical {
   position: absolute;
   z-index: 6;
   background: var(--light);
+}
+.dark-mode .CodeMirror-simplescroll-horizontal, .dark-mode .CodeMirror-simplescroll-vertical {
+  background: var(--dark-mode-lighter-dark);
 }
 
 .CodeMirror-simplescroll-horizontal {

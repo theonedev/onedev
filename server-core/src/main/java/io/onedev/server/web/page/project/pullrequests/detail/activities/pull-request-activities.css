@@ -1,5 +1,5 @@
 .pull-request-detail>.card-body>.main>.activities .activity.new>.avatar {
-	border-left-color: var(--primary);
+	border-left-color: var(--primary) !important;
 }
 .pull-request-detail>.card-body>.main>.activities>table {
 	table-layout: fixed;
@@ -10,6 +10,9 @@
 	padding: 1.25rem 0;
 	vertical-align: top;
 }
+.dark-mode .pull-request-detail>.card-body>.main>.activities .activity>td {
+	border-top-color: var(--dark-mode-light-dark);
+}
 .pull-request-detail>.card-body>.main>.activities .activity:first-child>td {
 	border-top: none;
 }
@@ -17,6 +20,9 @@
 	width: 48px;
 	border-left: 4px solid white;
 	padding-left: 8px;
+}
+.dark-mode .pull-request-detail>.card-body>.main>.activities .activity>td.avatar {
+	border-left-color: var(--dark-mode-dark);
 }
 .pull-request-detail>.card-body>.main>.activities .activity>td.avatar .avatar {
 	width: 40px;

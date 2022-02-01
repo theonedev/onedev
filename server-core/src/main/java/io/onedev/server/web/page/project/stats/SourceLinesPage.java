@@ -35,8 +35,8 @@ public class SourceLinesPage extends ProjectStatsPage {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			String jsonOfData = mapper.writeValueAsString(data);
 			String jsonOfDefaultBranch = mapper.writeValueAsString(getProject().getDefaultBranch());
-			String script = String.format("onedev.server.stats.sourceLines.onDomReady(%s, %s);", 
-					jsonOfData, jsonOfDefaultBranch);
+			String script = String.format("onedev.server.stats.sourceLines.onDomReady(%s, %s, %b);", 
+					jsonOfData, jsonOfDefaultBranch, isDarkMode());
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);

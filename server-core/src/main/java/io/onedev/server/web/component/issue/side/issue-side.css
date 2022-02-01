@@ -3,6 +3,9 @@
 	border-top: 1px dashed var(--secondary);
 	padding-top: 1.5rem;
 }
+.dark-mode .issue-side>* {
+	border-top-color: var(--dark-mode-dark-gray);
+}
 .issue-side>div:first-child {
 	border-top: none;
 	padding-top: 0;

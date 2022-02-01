@@ -49,6 +49,11 @@
 	position: relative;
 	right: 0;
 }
+.dark-mode .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
+	border-right-color: var(--dark-mode-lighter-dark);
+	background: var(--dark-mode-light-dark) url(/icon/dark-grip3.svg) no-repeat scroll center center;
+	background-size: 18px 18px;
+}
 
 .revision-diff>.body>.detail>.diffs>.diff:last-child {
 	margin-bottom: 0 !important;

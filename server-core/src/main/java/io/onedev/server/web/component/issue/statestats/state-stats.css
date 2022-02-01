@@ -9,6 +9,9 @@
 	border: 1px solid var(--light-gray);
 	border-radius: 0.42rem;
 }
+.dark-mode .state-stats>span {
+	border-color: var(--dark-mode-dark-gray);
+}
 .state-stats>a {
 	display: inline-block;
 	text-decoration: none;

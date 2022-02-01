@@ -35,13 +35,24 @@
   background-color: white;
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
-
+.dark-mode .select2-container .select2-choices .select2-search-field input,
+.dark-mode .select2-container .select2-choice,
+.dark-mode .select2-container .select2-choices {
+	border-color: #323248;
+	color: white;
+	background-color: var(--dark-mode-dark);
+}
 .select2-search input {
   border-color: #e4e6ef;
   border-radius: 0.42rem;
   color: #555555;
   background-color: white;
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+.dark-mode .select2-search input {
+	border-color: #323248;
+	background-color: var(--dark-mode-dark);
+	color: white;
 }
 
 .input-group>.select2-container:not(:first-child)>.select2-choice ,
@@ -156,12 +167,20 @@
   background: none;
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
+.dark-mode .select2-container .select2-choice .select2-arrow,
+.dark-mode .select2-container .select2-choice div {
+	border-left-color: #323248;
+}
 
 .select2-dropdown-open .select2-choice .select2-arrow,
 .select2-dropdown-open .select2-choice div {
   border-left-color: transparent;
   background: none;
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+.dark-mode .select2-dropdown-open .select2-choice .select2-arrow,
+.dark-mode .select2-dropdown-open .select2-choice div {
+  border-left-color: transparent;
 }
 
 /**
@@ -271,16 +290,29 @@
   background-color: #fff;
   border-color: #80bdff;
 }
+.dark-mode .select2-container-active .select2-choice,
+.dark-mode .select2-container-multi.select2-container-active .select2-choices {
+	border-color: #474761;
+	background-color: var(--dark-mode-dark);
+}
 
 .select2-drop-active {
   border-color: #80bdff;
   outline: 0;
+}
+.dark-mode .select2-drop-active {
+	border-color: #474761;
 }
 
 .select2-drop-auto-width,
 .select2-drop.select2-drop-above.select2-drop-active {
   border-top-color: #66afe9;
 }
+.dark-mode .select2-drop-auto-width,
+.dark-mode .select2-drop.select2-drop-above.select2-drop-active {
+  border-top-color: #474761;
+}
+
 .is-invalid .select2-drop-auto-width,
 .is-invalid .select2-drop.select2-drop-above.select2-drop-active,
 .is-invalid.select2-drop-auto-width,
@@ -359,6 +391,11 @@
   border-color: #e4e6ef;
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
+.dark-mode .select2-container-multi .select2-choices .select2-search-choice {
+  color: white;
+  background: var(--dark-mode-dark);
+  border-color: #323248;
+}
 
 .select2-container-multi .select2-choices .select2-search-choice-focus {
   background: #ebebeb;
@@ -392,8 +429,14 @@
 .select2-results .select2-no-results,
 .select2-results .select2-searching,
 .select2-results .select2-selection-limit {
-  background-color: #fcf8e3;
-  color: #c09853;
+	background-color: #fcf8e3;
+	color: #c09853;
+}
+.dark-mode .select2-results .select2-no-results,
+.dark-mode .select2-results .select2-searching,
+.dark-mode .select2-results .select2-selection-limit {
+    color: #ffa800;
+    background-color: #392f28;
 }
 
 /**
@@ -450,6 +493,9 @@
 
 .select2-container.form-control.select2-drop-above .select2-choice {
 	border-bottom-color: #80bdff;
+}
+.dark-mode .select2-container.form-control.select2-drop-above .select2-choice {
+	border-bottom-color: #474761;
 }
 .is-invalid .select2-container.form-control.select2-drop-above .select2-choice,
 .is-invalid.select2-container.form-control.select2-drop-above .select2-choice {

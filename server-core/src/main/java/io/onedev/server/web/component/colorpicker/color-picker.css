@@ -2,3 +2,18 @@
 	width: 2.8em;
 	height: 2.8em;
 }
+
+.dark-mode .pcr-app {
+	background-color: var(--dark-mode-dark);
+	border: 1px solid var(--dark-mode-light-dark);
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+}
+
+.dark-mode .pcr-app .pcr-interaction .pcr-result {
+	background-color: var(--dark-mode-dark);
+    border: 1px solid #323248;	
+}
+.dark-mode .pcr-app .pcr-interaction .pcr-result:focus {
+	border: 1px solid #474761;
+	box-shadow: none;
+}

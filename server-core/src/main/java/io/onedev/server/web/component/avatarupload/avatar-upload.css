@@ -29,14 +29,17 @@
 }
 .avatar-upload input[type="file"] + label {
     font-weight: normal;
-    border: 1px solid #CECECE;
+    border: 1px solid var(--secondary);
     border-radius: 4px;
     display: inline-block;
     cursor: pointer;
     padding: 6px 12px;
 }
+.dark-mode .avatar-upload input[type="file"] + label {
+    border-color: #474761;
+}
 .avatar-upload input[type="file"]:focus + label {
-    outline: 1px dotted blue;
+    outline: 1px dotted var(--primary);
 	outline: -webkit-focus-ring-color auto 5px;    
 }
 .avatar-upload.no-avatar .preview {

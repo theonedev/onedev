@@ -10,9 +10,17 @@
     margin-bottom: 1rem;
     border-radius: 0.42rem;
 }
+.dark-mode .editable>.group>a {
+    background: var(--dark-mode-light-dark);
+}
 .editable>.group>a:hover, .editable>.group>a:focus, .editable>.group.expanded>a {
-	color: white;
-	background: var(--primary);
+	color: var(--primary);
+	background: var(--light-primary);
+}
+.dark-mode .editable>.group>a:hover, 
+.dark-mode .editable>.group>a:focus, 
+.dark-mode .editable>.group.expanded>a {
+	background: var(--dark-mode-light-primary);
 }
 .editable>.group>a .icon {
     transform: rotate(90deg);
@@ -81,6 +89,9 @@
 }
 .editable table td:last-child {
 	border-right: 1px dashed var(--secondary);
+}
+.dark-mode .editable table th, .dark-mode .editable table td {
+	border-color: var(--dark-mode-lighter-dark);
 }
 .editable table tr:last-child td:first-child {
 	border-bottom-left-radius: 0.42rem;

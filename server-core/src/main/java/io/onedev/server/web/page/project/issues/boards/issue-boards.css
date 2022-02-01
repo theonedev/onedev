@@ -13,12 +13,20 @@
 	border-radius: 0.42rem;
 	background: white;
 }
+.dark-mode .issue-boards>.body>.columns>.column>.content {
+	border-color: var(--dark-mode-lighter-dark);
+	background: var(--dark-mode-dark);
+}
 .issue-boards>.body>.columns>.column>.content>.head {
 	font-weight: 600;
 	padding: 0.5rem 1rem;
 	font-size: 1.1rem;
 	border-bottom: 1px solid var(--light-gray);
-	border-top: 3px solid var(--secondary);
+	border-top: 3px solid var(--light-gray);
+}
+.dark-mode .issue-boards>.body>.columns>.column>.content>.head {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+	border-top-color: var(--dark-mode-lighter-dark);
 }
 .issue-boards>.body>.columns>.column {
 	margin-left: 2rem;
@@ -30,8 +38,14 @@
 .issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-active {
 	background: #FDF2C5;
 } 
+.dark-mode .issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-active {
+	background: var(--dark-mode-light-dark);
+} 
 .issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-hover {
 	background: #FAE280;
+}
+.dark-mode .issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-hover {
+	background: var(--dark-mode-lighter-dark);
 }
 .issue-boards>.body>.columns>.column {
 	margin-left: 2rem;
@@ -53,6 +67,10 @@
 .issue-boards>.body .board-card {
     box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
 	position: relative;
+}
+.dark-mode .issue-boards>.body .board-card {
+	border: 1px solid var(--dark-mode-light-dark);
+    box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.2);
 }
 .issue-boards>.body .board-card .primary {
 	position: relative;
@@ -77,10 +95,16 @@
 .issue-boards>.body .board-card .linked-issues {
 	border-left: 2px dashed var(--secondary);
 }
+.dark-mode .issue-boards>.body .board-card .linked-issues {
+	border-left-color: var(--dark-mode-dark-gray);
+}
 .issue-boards>.body .board-card .linked-issue {
 	margin-top: 0.7rem;
 	padding-top: 0.8rem;
 	border-top: 1px solid var(--light-gray);
+}
+.dark-mode .issue-boards>.body .board-card .linked-issue {
+	border-top-color: var(--dark-mode-light-dark);
 }
 
 .issue-boards>.body .board-card .state {
@@ -90,12 +114,18 @@
 .issue-boards>.body .board-card .state:hover {
 	border-color: var(--gray);
 }
+.dark-mode .issue-boards>.body .board-card .state:hover {
+	border-color: var(--dark-mode-gray);
+}
 
 .issue-boards>.body .board-card.issue-dragging {
 	visibility: hidden;
 }
 .issue-boards>.body .board-card.ui-draggable-dragging {
 	box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.3);	
+}
+.dark-mode .issue-boards>.body .board-card.ui-draggable-dragging {
+	box-shadow: 0px 0px 8px 4px rgba(0, 0, 0, 0.5);	
 }
 
 .board-card-detail .modal-header h5 {

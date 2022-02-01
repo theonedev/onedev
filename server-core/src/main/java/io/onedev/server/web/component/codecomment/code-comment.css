@@ -16,10 +16,16 @@
 	padding-left: 1rem;
 	border-left: 4px solid white;
 }
+.dark-mode .code-comment>.section {
+	border-left-color: var(--dark-mode-dark);
+}
 .code-comment>.section>.detail, .code-comment>.section>form {
 	padding-bottom: 1rem;
 	padding-top: 1rem;
 	border-bottom: 1px solid var(--light);
+}
+.dark-mode .code-comment>.section>.detail, .dark-mode .code-comment>.section>form {
+	border-bottom-color: var(--dark-mode-light-dark);
 }
 .code-comment>.section.new {
 	border-left: 4px solid var(--primary);
