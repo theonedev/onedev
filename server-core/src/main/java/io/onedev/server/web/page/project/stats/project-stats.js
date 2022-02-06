@@ -119,7 +119,7 @@ onedev.server.stats = {
 		                colorAlpha: 0.1
 		            },
 					brushStyle: {
-						color: darkMode?'rgba(85, 92, 97, 0.5)':'rgba(225, 240, 255, 0.5)',
+						color: darkMode?'rgba(55, 60, 63, 0.5)':'rgba(225, 240, 255, 0.5)',
 						borderColor: darkMode?'rgba(54, 153, 255, 0.8)':'rgba(54, 153, 255, 0.8)'
 					}
 		        },

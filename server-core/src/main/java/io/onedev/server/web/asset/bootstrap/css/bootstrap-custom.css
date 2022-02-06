@@ -56,7 +56,7 @@ a, a:not([href]):not([class]) {
 	color: var(--dark-blue);
 }
 .dark-mode a, .dark-mode a:not([href]):not([class]) {
-	color: rgb(144, 158, 208);	
+	color: rgb(155, 171, 225);	
 }
 a:hover, a:focus, a:not([href]):not([class]):hover, a:not([href]):not([class]):focus {
 	text-decoration: none;
@@ -112,7 +112,7 @@ a.link-success:hover, a.link-success:focus {
 	color: #12827c !important;
 }
 .dark-mode a.link-success:hover, .dark-mode a.link-success:focus {
-	color: rgb(32, 238, 229) !important;
+	color: rgb(123, 253, 255) !important;
 }
 .text-warning, a.link-warning {
 	color: var(--warning) !important;
@@ -121,7 +121,7 @@ a.link-warning:hover, a.link-warning:focus {
 	color: #b37600 !important;
 }
 .dark-mode a.link-warning:hover, .dark-mode a.link-warning:focus {
-	color: rgb(255, 202, 83) !important;
+	color: rgb(255, 228, 131) !important;
 }
 .text-info, a.link-info {
 	color: var(--info) !important;
