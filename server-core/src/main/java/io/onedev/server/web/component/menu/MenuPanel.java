@@ -3,6 +3,8 @@ package io.onedev.server.web.component.menu;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -88,8 +90,19 @@ abstract class MenuPanel extends Panel {
 			}
 			
 		});
+		
+		String help = getHelp();
+		if (help != null)
+			add(new Label("help", help));
+		else
+			add(new WebMarkupContainer("help").setVisible(false));
 	}
 	
 	protected abstract List<MenuItem> getMenuItems();
 
+	@Nullable
+	protected String getHelp() {
+		return null;
+	}
+	
 }

@@ -314,7 +314,6 @@ public abstract class LayoutPage extends BasePage {
 			@Override
 			public void onClick() {
 				toggleDarkMode();
-				setResponsePage(getPageClass(), getPageParameters());
 			}
 
 			@Override

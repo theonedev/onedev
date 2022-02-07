@@ -366,7 +366,12 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPage() instanceof ProjectIssueListPage);
+				if (getPage() instanceof ProjectIssueListPage) {
+					ProjectIssueListPage page = (ProjectIssueListPage) getPage();
+					setVisible(SecurityUtils.canManageIssues(page.getProject()));
+				} else {
+					setVisible(false);
+				}
 			}
 			
 		});

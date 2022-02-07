@@ -2,6 +2,8 @@ package io.onedev.server.web.component.menu;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -44,6 +46,11 @@ public abstract class MenuLink extends DropdownLink {
 			protected List<MenuItem> getMenuItems() {
 				return MenuLink.this.getMenuItems(dropdown);
 			}
+
+			@Override
+			protected String getHelp() {
+				return MenuLink.this.getHelp();
+			}
 			
 		};
 	}
@@ -55,4 +62,10 @@ public abstract class MenuLink extends DropdownLink {
 	}
 
 	protected abstract List<MenuItem> getMenuItems(FloatingPanel dropdown);
+	
+	@Nullable
+	protected String getHelp() {
+		return null;
+	}
+	
 }

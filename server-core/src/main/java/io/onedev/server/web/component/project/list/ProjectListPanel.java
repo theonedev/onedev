@@ -878,6 +878,14 @@ public class ProjectListPanel extends Panel {
 				super.onConfigure();
 				setVisible(SecurityUtils.getUser() != null);
 			}
+
+			@Override
+			protected String getHelp() {
+				if (!SecurityUtils.isAdministrator())
+					return "Permission will be checked upon actual operation";
+				else
+					return null;
+			}
 			
 		});
 		
