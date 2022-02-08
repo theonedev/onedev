@@ -5,7 +5,6 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Issue;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class PullRequestReferencedFromIssueData 
 		extends PullRequestChangeData implements ReferencedFromAware<Issue> {
@@ -25,11 +24,6 @@ public class PullRequestReferencedFromIssueData
 	@Override
 	public String getActivity() {
 		return "Referenced from issue";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

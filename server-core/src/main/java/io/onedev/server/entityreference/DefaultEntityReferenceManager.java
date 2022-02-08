@@ -233,15 +233,13 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 			addReferenceChange(comment.getIssue(), comment.getContent());
 		} else if (event.getEntity() instanceof IssueChange) {
 			IssueChange change = (IssueChange) event.getEntity();
-			if (change.getData().getCommentAware() != null)
-				addReferenceChange(change.getIssue(), change.getData().getCommentAware().getComment());
+			addReferenceChange(change.getIssue(), change.getComment());
 		} else if (event.getEntity() instanceof PullRequestComment) {
 			PullRequestComment comment = (PullRequestComment) event.getEntity();
 			addReferenceChange(comment.getRequest(), comment.getContent());
 		} else if (event.getEntity() instanceof PullRequestChange) {
 			PullRequestChange change = (PullRequestChange) event.getEntity();
-			if (change.getData().getCommentAware() != null)
-				addReferenceChange(change.getRequest(), change.getData().getCommentAware().getComment());
+			addReferenceChange(change.getRequest(), change.getComment());
 		} else if (event.getEntity() instanceof CodeCommentReply) {
 			CodeCommentReply reply = (CodeCommentReply) event.getEntity();
 			addReferenceChange(reply.getComment(), reply.getContent());

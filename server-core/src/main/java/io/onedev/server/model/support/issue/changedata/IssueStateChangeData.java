@@ -3,10 +3,7 @@ package io.onedev.server.model.support.issue.changedata;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
 
 public class IssueStateChangeData extends IssueFieldChangeData {
@@ -17,15 +14,11 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	
 	private final String newState;
 	
-	private String comment;
-	
 	public IssueStateChangeData(String oldState, String newState, 
-			Map<String, Input> oldFields, Map<String, Input> newFields, 
-			@Nullable String comment) {
+			Map<String, Input> oldFields, Map<String, Input> newFields) {
 		super(oldFields, newFields);
 		this.oldState = oldState;
 		this.newState = newState;
-		this.comment = comment;
 	}
 
 	@Override
@@ -52,25 +45,6 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 		return oldState;
 	}
 
-	@Override
-	public CommentAware getCommentAware() {
-		return new CommentAware() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public String getComment() {
-				return comment;
-			}
-
-			@Override
-			public void setComment(String comment) {
-				IssueStateChangeData.this.comment = comment;
-			}
-			
-		};
-	}
-	
 	@Override
 	public String getActivity() {
 		return "changed state to '" + newState + "'";

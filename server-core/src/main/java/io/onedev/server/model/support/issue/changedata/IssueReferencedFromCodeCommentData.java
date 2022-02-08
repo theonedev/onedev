@@ -11,7 +11,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class IssueReferencedFromCodeCommentData extends IssueChangeData implements ReferencedFromAware<CodeComment> {
 
@@ -30,11 +29,6 @@ public class IssueReferencedFromCodeCommentData extends IssueChangeData implemen
 	@Override
 	public String getActivity() {
 		return "Referenced from code comment";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

@@ -60,12 +60,13 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
 		change.setRequest(review.getRequest());
+		change.setComment(result.getComment());
 		if (Boolean.TRUE.equals(result.getApproved())) 
-			change.setData(new PullRequestApproveData(result.getComment()));
+			change.setData(new PullRequestApproveData());
 		else if (Boolean.FALSE.equals(result.getApproved()))
-			change.setData(new PullRequestRequestedForChangesData(result.getComment()));
+			change.setData(new PullRequestRequestedForChangesData());
 		else
-			change.setData(new PullRequestReviewWithdrawData(result.getComment()));
+			change.setData(new PullRequestReviewWithdrawData());
 		change.setUser(review.getUser());
 		pullRequestChangeManager.save(change);
 		save(review);

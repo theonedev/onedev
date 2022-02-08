@@ -5,7 +5,6 @@ import java.io.Serializable;
 import javax.annotation.Nullable;
 
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public abstract class PullRequestChangeData implements Serializable {
 
@@ -13,9 +12,6 @@ public abstract class PullRequestChangeData implements Serializable {
 
 	public abstract String getActivity();
 	
-	@Nullable
-	public abstract CommentAware getCommentAware();
-
 	@Nullable
 	public ActivityDetail getActivityDetail() {
 		return null;

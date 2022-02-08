@@ -17,7 +17,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
 
 public class IssueFieldChangeData extends IssueChangeData {
@@ -144,11 +143,6 @@ public class IssueFieldChangeData extends IssueChangeData {
 	@Override
 	public boolean affectsListing() {
 		return true;
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

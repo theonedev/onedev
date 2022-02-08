@@ -11,7 +11,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class IssueReferencedFromPullRequestData extends IssueChangeData implements ReferencedFromAware<PullRequest> {
 
@@ -32,11 +31,6 @@ public class IssueReferencedFromPullRequestData extends IssueChangeData implemen
 		return "Referenced from pull request";
 	}
 
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
-	}
-	
 	@Override
 	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();

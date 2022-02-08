@@ -54,62 +54,56 @@ class IssueChangePanel extends GenericPanel<IssueChange> {
 		else
 			add(new WebMarkupContainer("detail").setVisible(false));
 		
-		if (getChange().getData().getCommentAware() != null) {
-			add(new ProjectCommentPanel("comment") {
+		add(new ProjectCommentPanel("comment") {
 
-				@Override
-				protected String getComment() {
-					return getChange().getData().getCommentAware().getComment();
-				}
+			@Override
+			protected String getComment() {
+				return getChange().getComment();
+			}
 
-				@Override
-				protected List<User> getMentionables() {
-					return OneDev.getInstance(UserManager.class).queryAndSort(getChange().getIssue().getParticipants());
-				}
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(getChange().getIssue().getParticipants());
+			}
 
-				@Override
-				protected void onSaveComment(AjaxRequestTarget target, String comment) {
-					getChange().getData().getCommentAware().setComment(comment);
-					OneDev.getInstance(IssueChangeManager.class).save(getChange());
-				}
+			@Override
+			protected void onSaveComment(AjaxRequestTarget target, String comment) {
+				getChange().setComment(comment);
+				OneDev.getInstance(IssueChangeManager.class).save(getChange());
+			}
 
-				@Override
-				protected Project getProject() {
-					return getChange().getIssue().getProject();
-				}
+			@Override
+			protected Project getProject() {
+				return getChange().getIssue().getProject();
+			}
 
-				@Override
-				protected AttachmentSupport getAttachmentSupport() {
-					return new ProjectAttachmentSupport(getProject(), getChange().getIssue().getUUID(), 
-							SecurityUtils.canManageIssues(getProject()));
-				}
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new ProjectAttachmentSupport(getProject(), getChange().getIssue().getUUID(), 
+						SecurityUtils.canManageIssues(getProject()));
+			}
 
-				@Override
-				protected boolean canModifyOrDeleteComment() {
-					return SecurityUtils.canModifyOrDelete(getChange());
-				}
+			@Override
+			protected boolean canModifyOrDeleteComment() {
+				return SecurityUtils.canModifyOrDelete(getChange());
+			}
 
-				@Override
-				protected String getRequiredLabel() {
-					return null;
-				}
+			@Override
+			protected String getRequiredLabel() {
+				return null;
+			}
 
-				@Override
-				protected ContentVersionSupport getContentVersionSupport() {
-					return null;
-				}
+			@Override
+			protected ContentVersionSupport getContentVersionSupport() {
+				return null;
+			}
 
-				@Override
-				protected DeleteCallback getDeleteCallback() {
-					return null;
-				}
-				
-			});				
-		} else {
-			add(new WebMarkupContainer("comment").setVisible(false));
-			if (detail == null)
-				add(AttributeAppender.append("class", "no-body"));
-		}
+			@Override
+			protected DeleteCallback getDeleteCallback() {
+				return null;
+			}
+			
+		});				
 	}
 
 }

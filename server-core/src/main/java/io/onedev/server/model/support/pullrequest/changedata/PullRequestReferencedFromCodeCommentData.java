@@ -5,7 +5,6 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class PullRequestReferencedFromCodeCommentData 
 		extends PullRequestChangeData implements ReferencedFromAware<CodeComment> {
@@ -25,11 +24,6 @@ public class PullRequestReferencedFromCodeCommentData
 	@Override
 	public String getActivity() {
 		return "Referenced from code comment";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

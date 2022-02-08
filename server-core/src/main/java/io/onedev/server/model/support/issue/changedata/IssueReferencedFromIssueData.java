@@ -11,7 +11,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class IssueReferencedFromIssueData extends IssueChangeData implements ReferencedFromAware<Issue> {
 
@@ -32,11 +31,6 @@ public class IssueReferencedFromIssueData extends IssueChangeData implements Ref
 		return "Referenced from other issue";
 	}
 
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
-	}
-	
 	@Override
 	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();

@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public abstract class IssueChangeData implements Serializable {
 	
@@ -17,9 +16,6 @@ public abstract class IssueChangeData implements Serializable {
 
 	public abstract String getActivity();
 
-	@Nullable
-	public abstract CommentAware getCommentAware();
-	
 	public abstract Map<String, Collection<User>> getNewUsers();
 	
 	public abstract Map<String, Group> getNewGroups();

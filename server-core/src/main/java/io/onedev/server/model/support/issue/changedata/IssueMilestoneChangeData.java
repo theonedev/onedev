@@ -11,7 +11,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class IssueMilestoneChangeData extends IssueChangeData {
 
@@ -37,11 +36,6 @@ public class IssueMilestoneChangeData extends IssueChangeData {
 	@Override
 	public String getActivity() {
 		return "changed milestones";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

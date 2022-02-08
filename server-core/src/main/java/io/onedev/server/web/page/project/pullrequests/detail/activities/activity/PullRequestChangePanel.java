@@ -11,6 +11,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -62,62 +63,56 @@ class PullRequestChangePanel extends GenericPanel<PullRequestChange> {
 		else
 			add(new WebMarkupContainer("detail").setVisible(false));
 		
-		if (getChange().getData().getCommentAware() != null) {
-			add(new ProjectCommentPanel("comment") {
+		add(new ProjectCommentPanel("comment") {
 
-				@Override
-				protected String getComment() {
-					return getChange().getData().getCommentAware().getComment();
-				}
+			@Override
+			protected String getComment() {
+				return getChange().getComment();
+			}
 
-				@Override
-				protected List<User> getMentionables() {
-					return OneDev.getInstance(UserManager.class).queryAndSort(getChange().getRequest().getParticipants());
-				}
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(getChange().getRequest().getParticipants());
+			}
 
-				@Override
-				protected void onSaveComment(AjaxRequestTarget target, String comment) {
-					getChange().getData().getCommentAware().setComment(comment);
-				}
+			@Override
+			protected void onSaveComment(AjaxRequestTarget target, String comment) {
+				getChange().setComment(comment);
+				OneDev.getInstance(PullRequestChangeManager.class).save(getChange());
+			}
 
-				@Override
-				protected Project getProject() {
-					return getChange().getRequest().getProject();
-				}
+			@Override
+			protected Project getProject() {
+				return getChange().getRequest().getProject();
+			}
 
-				@Override
-				protected AttachmentSupport getAttachmentSupport() {
-					return new ProjectAttachmentSupport(getProject(), getChange().getRequest().getUUID(), 
-							SecurityUtils.canManagePullRequests(getProject()));
-				}
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new ProjectAttachmentSupport(getProject(), getChange().getRequest().getUUID(), 
+						SecurityUtils.canManagePullRequests(getProject()));
+			}
 
-				@Override
-				protected boolean canModifyOrDeleteComment() {
-					return SecurityUtils.canModifyOrDelete(getChange());
-				}
+			@Override
+			protected boolean canModifyOrDeleteComment() {
+				return SecurityUtils.canModifyOrDelete(getChange());
+			}
 
-				@Override
-				protected String getRequiredLabel() {
-					return null;
-				}
+			@Override
+			protected String getRequiredLabel() {
+				return null;
+			}
 
-				@Override
-				protected ContentVersionSupport getContentVersionSupport() {
-					return null;
-				}
+			@Override
+			protected ContentVersionSupport getContentVersionSupport() {
+				return null;
+			}
 
-				@Override
-				protected DeleteCallback getDeleteCallback() {
-					return null;
-				}
-				
-			});				
-		} else {
-			add(new WebMarkupContainer("comment").setVisible(false));
-			if (detail == null)
-				add(AttributeAppender.append("class", "no-body"));
-		}
-		
+			@Override
+			protected DeleteCallback getDeleteCallback() {
+				return null;
+			}
+			
+		});						
 	}
 
 	private PullRequestChange getChange() {

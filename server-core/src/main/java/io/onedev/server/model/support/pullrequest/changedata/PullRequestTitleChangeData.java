@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class PullRequestTitleChangeData extends PullRequestChangeData {
 
@@ -22,11 +21,6 @@ public class PullRequestTitleChangeData extends PullRequestChangeData {
 	@Override
 	public String getActivity() {
 		return "changed title";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

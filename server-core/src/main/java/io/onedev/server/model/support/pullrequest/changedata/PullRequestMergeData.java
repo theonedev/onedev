@@ -2,8 +2,6 @@ package io.onedev.server.model.support.pullrequest.changedata;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.util.CommentAware;
-
 public class PullRequestMergeData extends PullRequestChangeData {
 
 	private static final long serialVersionUID = 1L;
@@ -20,11 +18,6 @@ public class PullRequestMergeData extends PullRequestChangeData {
 			return reason;
 		else 
 			return "merged";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 }

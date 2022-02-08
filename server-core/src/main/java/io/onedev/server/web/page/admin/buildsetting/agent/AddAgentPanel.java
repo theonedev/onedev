@@ -71,7 +71,7 @@ class AddAgentPanel extends Panel {
 				AgentToken token = new AgentToken();
 				token.setValue(UUID.randomUUID().toString());
 				OneDev.getInstance(AgentTokenManager.class).save(token);
-				StringBuilder builder = new StringBuilder("docker run -t -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/agent:/agent/work -e serverUrl=");
+				StringBuilder builder = new StringBuilder("docker run -t -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/agent/work:/agent/work -e serverUrl=");
 				builder.append(OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());
 				builder.append(" -e agentToken=").append(token.getValue()).append(" -h myagent").append(" 1dev/agent");
 				Fragment commandFragment = new Fragment("command", "dockerCommandFrag", AddAgentPanel.this);

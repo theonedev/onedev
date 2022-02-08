@@ -6,7 +6,6 @@ import java.util.Map;
 
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommentAware;
 
 public class IssueMilestoneRemoveData extends IssueChangeData {
 
@@ -21,11 +20,6 @@ public class IssueMilestoneRemoveData extends IssueChangeData {
 	@Override
 	public String getActivity() {
 		return "removed from milestone \"" + milestone + "\"";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

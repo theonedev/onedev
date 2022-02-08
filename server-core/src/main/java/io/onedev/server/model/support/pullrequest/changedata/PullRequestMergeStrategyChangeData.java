@@ -5,7 +5,6 @@ import java.util.Map;
 
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class PullRequestMergeStrategyChangeData extends PullRequestChangeData {
 
@@ -23,11 +22,6 @@ public class PullRequestMergeStrategyChangeData extends PullRequestChangeData {
 	@Override
 	public String getActivity() {
 		return "changed merge strategy";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

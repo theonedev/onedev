@@ -6,7 +6,6 @@ import java.util.Map;
 
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommentAware;
 
 public class IssueLinkAddData extends IssueChangeData {
 
@@ -26,11 +25,6 @@ public class IssueLinkAddData extends IssueChangeData {
 		return "added \"" + linkName + "\" (" + issueSummary + ")";
 	}
 
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
-	}
-	
 	@Override
 	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();

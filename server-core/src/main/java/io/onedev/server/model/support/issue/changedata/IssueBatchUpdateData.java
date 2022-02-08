@@ -5,11 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
 
 public class IssueBatchUpdateData extends IssueFieldChangeData {
@@ -24,18 +21,14 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	
 	private final List<String> newMilestones;
 	
-	private String comment;
-	
 	public IssueBatchUpdateData(String oldState, String newState, 
 			List<Milestone> oldMilestones, List<Milestone> newMilestones, 
-			Map<String, Input> oldFields, Map<String, Input> newFields, 
-			@Nullable String comment) {
+			Map<String, Input> oldFields, Map<String, Input> newFields) {
 		super(oldFields, newFields);
 		this.oldState = oldState;
 		this.newState = newState;
 		this.oldMilestones = oldMilestones.stream().map(it->it.getName()).collect(Collectors.toList());
 		this.newMilestones = newMilestones.stream().map(it->it.getName()).collect(Collectors.toList());
-		this.comment = comment;
 	}
 
 	@Override
@@ -72,25 +65,6 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 
 	public List<String> getNewMilestones() {
 		return newMilestones;
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return new CommentAware() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public String getComment() {
-				return comment;
-			}
-
-			@Override
-			public void setComment(String comment) {
-				IssueBatchUpdateData.this.comment = comment;
-			}
-
-		};
 	}
 
 	@Override

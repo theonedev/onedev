@@ -136,6 +136,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	public static final String PROP_COMMENTS = "comments";
 	
+	public static final String PROP_CHANGES = "changes";
+	
 	public static final String NAME_COMMENT_COUNT = "Comment Count";
 	
 	public static final String PROP_COMMENT_COUNT = "commentCount";

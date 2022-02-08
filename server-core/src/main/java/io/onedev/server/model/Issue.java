@@ -131,6 +131,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static final String PROP_COMMENTS = "comments";
 	
+	public static final String PROP_CHANGES = "changes";
+	
 	public static final String NAME_SUBMITTER = "Submitter";
 	
 	public static final String PROP_SUBMITTER = "submitter";

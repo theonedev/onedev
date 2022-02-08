@@ -2,9 +2,11 @@
 	<div class="p-5 token-list">
 		<h6 class="text-center mb-4">Unused Agent Tokens</h6>
 		<div class="alert alert-light alert-notice mb-5">
-			Agent tokens are used to authorize agents. It should be configured via property <tt>agentToken</tt> in 
-			file <tt>&lt;agent dir&gt;/conf/agent.properties</tt>. A token can only be used by one agent. A new 
-			token will be generated automatically when agent is downloaded 
+			Agent tokens are used to authorize agents, and a single token can only be used by a single 
+			agent. It should be configured via environment variable 
+			<tt>agentToken</tt> if agent runs as docker container, or property <tt>agentToken</tt> in 
+			file <tt>&lt;agent dir&gt;/conf/agent.properties</tt> if agent runs on bare metal/virtual machine. 
+			A token will be in-use and removed from this list if agent using it connects to server
 		</div>
 		<div class="mb-4">
 			<a wicket:id="addNew" class="btn btn-primary mr-2">Generate New</a>

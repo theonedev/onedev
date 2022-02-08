@@ -88,12 +88,12 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
-import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.FileProtection;
@@ -232,7 +232,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			
 			PullRequestChange change = new PullRequestChange();
 			change.setDate(new Date());
-			change.setData(new PullRequestSourceBranchRestoreData(note));
+			change.setComment(note);
+			change.setData(new PullRequestSourceBranchRestoreData());
 			change.setRequest(request);
 			change.setUser(SecurityUtils.getUser());
 			pullRequestChangeManager.save(change);
@@ -248,7 +249,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			projectManager.deleteBranch(request.getSourceProject(), request.getSourceBranch());
 			PullRequestChange change = new PullRequestChange();
 			change.setDate(new Date());
-			change.setData(new PullRequestSourceBranchDeleteData(note));
+			change.setComment(note);
+			change.setData(new PullRequestSourceBranchDeleteData());
 			change.setRequest(request);
 			change.setUser(SecurityUtils.getUser());
 			pullRequestChangeManager.save(change);
@@ -263,7 +265,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
-		change.setData(new PullRequestReopenData(note));
+		change.setComment(note);
+		change.setData(new PullRequestReopenData());
 		change.setRequest(request);
 		change.setUser(user);
 		pullRequestChangeManager.save(change);
@@ -287,7 +290,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		request.setCloseInfo(closeInfo);
 		
 		PullRequestChange change = new PullRequestChange();
-		change.setData(new PullRequestDiscardData(note));
+		change.setComment(note);
+		change.setData(new PullRequestDiscardData());
 		change.setDate(closeInfo.getDate());
 		change.setRequest(request);
 		change.setUser(user);

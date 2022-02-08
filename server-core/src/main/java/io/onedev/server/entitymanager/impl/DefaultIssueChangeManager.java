@@ -234,8 +234,9 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setUser(SecurityUtils.getUser());
+		change.setComment(comment);
 		change.setData(new IssueStateChangeData(prevState, issue.getState(), 
-				prevFields, issue.getFieldInputs(), comment));
+				prevFields, issue.getFieldInputs()));
 		save(change);
 	}
 	
@@ -264,13 +265,14 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				IssueChange change = new IssueChange();
 				change.setIssue(issue);
 				change.setUser(SecurityUtils.getUser());
+				change.setComment(comment);
 				
 				List<Milestone> prevMilestoneList = new ArrayList<>(prevMilestones);
 				prevMilestoneList.sort(new Milestone.DatesAndStatusComparator());
 				List<Milestone> currentMilestoneList = new ArrayList<>(issue.getMilestones());
 				currentMilestoneList.sort(new Milestone.DatesAndStatusComparator());
 				change.setData(new IssueBatchUpdateData(prevState, issue.getState(), prevMilestoneList, 
-						currentMilestoneList, prevFields, issue.getFieldInputs(), comment));
+						currentMilestoneList, prevFields, issue.getFieldInputs()));
 				save(change);
 			}
 		}

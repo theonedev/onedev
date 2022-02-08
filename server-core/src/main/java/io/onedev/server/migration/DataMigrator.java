@@ -3496,6 +3496,26 @@ public class DataMigrator {
 						noteElement.detach();
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element commentElement = element.element("data").element("comment");
+					if (commentElement != null) {
+						element.addElement("comment").setText(commentElement.getText());
+						commentElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element commentElement = element.element("data").element("comment");
+					if (commentElement != null) {
+						element.addElement("comment").setText(commentElement.getText());
+						commentElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

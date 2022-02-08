@@ -5,7 +5,6 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class PullRequestReferencedFromPullRequestData 
 		extends PullRequestChangeData implements ReferencedFromAware<PullRequest> {
@@ -25,11 +24,6 @@ public class PullRequestReferencedFromPullRequestData
 	@Override
 	public String getActivity() {
 		return "Referenced from other pull request";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 	@Override

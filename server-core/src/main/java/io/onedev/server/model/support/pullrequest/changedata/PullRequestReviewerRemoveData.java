@@ -1,7 +1,5 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
-import io.onedev.server.util.CommentAware;
-
 public class PullRequestReviewerRemoveData extends PullRequestChangeData {
 
 	private static final long serialVersionUID = 1L;
@@ -15,11 +13,6 @@ public class PullRequestReviewerRemoveData extends PullRequestChangeData {
 	@Override
 	public String getActivity() {
 		return "removed reviewer \"" + reviewer + "\"";
-	}
-
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
 	}
 
 }

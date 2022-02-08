@@ -23,10 +23,7 @@ public class IssueChanged extends IssueEvent {
 
 	@Override
 	public String getMarkdown() {
-		if (change.getData().getCommentAware() != null)
-			return change.getData().getCommentAware().getComment();
-		else
-			return null;
+		return change.getComment();
 	}
 
 	@Override

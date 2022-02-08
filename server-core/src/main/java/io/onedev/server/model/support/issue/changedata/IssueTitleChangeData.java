@@ -7,7 +7,6 @@ import java.util.Map;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.util.CommentAware;
 
 public class IssueTitleChangeData extends IssueChangeData {
 
@@ -27,11 +26,6 @@ public class IssueTitleChangeData extends IssueChangeData {
 		return "changed title";
 	}
 
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
-	}
-	
 	@Override
 	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();
