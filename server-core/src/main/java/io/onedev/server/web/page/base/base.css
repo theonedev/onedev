@@ -672,12 +672,20 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 }
 
 .pressable:not(.btn):not(.input-group-addon) {
-    color: #666;
+    color: var(--gray);
+    position: relative;
+}
+.dark-mode .pressable:not(.btn):not(.input-group-addon) {
+    color: var(--dark-mode-gray);
     position: relative;
 }
 .pressable:hover:not(.btn):not(.input-group-addon), 
 .pressable:active:not(.btn):not(.input-group-addon) {
-    color: black;
+    color: var(--dark);
+}
+.dark-mode .pressable:hover:not(.btn):not(.input-group-addon), 
+.dark-mode .pressable:active:not(.btn):not(.input-group-addon) {
+    color: var(--dark-mode-light-gray);
 }
 .pressable:active:not(.btn):not(.input-group-addon) {
     left: 1px;

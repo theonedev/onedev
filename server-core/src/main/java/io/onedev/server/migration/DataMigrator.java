@@ -3485,4 +3485,19 @@ public class DataMigrator {
 			}
 		}
 	}
+	
+	private void migrate75(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("AgentTokens.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element noteElement = element.element("note");
+					if (noteElement != null)
+						noteElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

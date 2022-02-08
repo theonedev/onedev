@@ -256,7 +256,7 @@
 	min-width: 1px;
 }
 .dark-mode .topbar-title {
-	color: var(--primary);
+	color: var(--dark-mode-light-gray);
 }
 
 .topbar-title .dot {

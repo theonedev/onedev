@@ -88,7 +88,7 @@ public abstract class BasePage extends WebPage {
 		if (cookie != null) 
 			darkMode = cookie.getValue().equals("yes");
 		else
-			darkMode = true;
+			darkMode = false;
 	}
 
 	public boolean isDarkMode() {

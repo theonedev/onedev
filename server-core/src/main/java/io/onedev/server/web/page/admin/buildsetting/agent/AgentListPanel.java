@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -15,7 +14,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -39,7 +37,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
@@ -764,17 +761,11 @@ class AgentListPanel extends Panel {
 		});
 		add(queryForm);
 		
-		add(new DropdownLink("downloadAgent") {
+		add(new DropdownLink("addAgent") {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				if (new File(Bootstrap.installDir, "agent").exists()) {
-					return new AgentDownloadPanel(id);
-				} else {
-					Label label = new Label(id, "Agent package not available");
-					label.add(AttributeAppender.append("class", "p-5"));
-					return label;
-				}
+				return new AddAgentPanel(id);
 			}
 
 		});

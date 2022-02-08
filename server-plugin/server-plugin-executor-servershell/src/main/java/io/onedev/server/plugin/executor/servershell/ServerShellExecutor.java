@@ -34,6 +34,7 @@ import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
+import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.CloneInfo;
@@ -184,7 +185,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + result.getReturnCode());
 									return false;
 								}
-							} else if (facade instanceof RunContainerFacade) {
+							} else if (facade instanceof RunContainerFacade || facade instanceof BuildImageFacade) {
 								throw new ExplicitException("This step can only be executed by server docker executor, "
 										+ "remote docker executor, or kubernetes executor");
 							} else if (facade instanceof CheckoutFacade) {

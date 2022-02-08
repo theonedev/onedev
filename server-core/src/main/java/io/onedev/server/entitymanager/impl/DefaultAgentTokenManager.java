@@ -9,6 +9,8 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.model.AgentToken;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -30,9 +32,19 @@ public class DefaultAgentTokenManager extends BaseEntityManager<AgentToken> impl
 	}
 
 	@SuppressWarnings("unchecked")
+	@Sessional
 	@Override
 	public List<AgentToken> queryUnused() {
 		return getSession().createQuery("select token from AgentToken token left join token.agent agent where agent = null").list();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Transactional
+	@Override
+	public void deleteUnused() {
+		for (AgentToken token: (List<AgentToken>)getSession().createQuery("select token from AgentToken token left join token.agent agent where agent = null").list()) {
+			delete(token);
+		}
 	}
 
 }

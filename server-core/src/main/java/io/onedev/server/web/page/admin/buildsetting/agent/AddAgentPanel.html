@@ -1,0 +1,59 @@
+<wicket:panel>
+	<div class="p-5 add-agent">
+		<h6 class="text-center mb-4">Connect New Agent</h6>
+		<ul wicket:id="tabs" class="nav nav-tabs nav-tabs-line nav-bold mb-4"></ul>
+		<div wicket:id="instructions"></div>
+	</div>
+	<wicket:fragment wicket:id="dockerInstructionsFrag">
+		<a wicket:id="showCommand" class="btn btn-light-primary">Show Command</a> 
+		<div class="text-muted font-size-sm mt-2 mb-3">(a new agent token will be generated each time this button is pressed)</div>					
+		<div wicket:id="command"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="bareMetalInstructionsFrag">
+		<div class="alert alert-light p-0 py-4">
+			<div class="px-3 mb-2">Follow below steps to install agent on remote machine (supports Linux/Windows/Mac OS X/FreeBSD):</div>
+			<ol class="mb-0">
+				<li>Make sure <a href="https://openjdk.java.net" target="_blank">JDK 1.8 or higher</a> is installed</li>
+				<li>Make sure docker engine is installed and docker command line is available in system path</li>
+				<li>Make sure current user has permission to run docker containers</li>
+				<li>Make sure git version 2.11.1 or higher is installed and available in system path</li>
+				<li>Make sure git-lfs is installed and available in system path if you want to retrieve LFS files</li>
+				<li>Download <a wicket:id="agent" class="link-primary">agent package</a>. A new agent token will be included in the package</li>
+				<li>Extract the package into a folder</li>
+				<li>
+					Change property <code>serverUrl</code> in file <code>conf/agent.properties</code> if necessary. The default value is 
+					taken from OneDev server url specified in <i>Administration / System Setting</i> 
+				</li> 
+				<li>From extracted folder, run <code>bin\agent.bat console</code> as administrator on Windows or <code>bin/agent.sh console</code> on other OS </li>
+			</ol>
+		</div>
+		<ul class="text-muted font-size-sm mb-0">
+			<li>
+				Agent is designed to be maintenance free. Once connected to server, it will be updated automatically 
+				upon server upgrade
+			</li>
+			<li>
+				Check <a wicket:id="help" target="_blank">agent management</a> for details, including instructions on how to run agent as service
+			</li>
+		</ul>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="dockerCommandFrag">
+		Start agent on remote Linux machine by running below command: 
+		<div class="text-monospace font-size-sm mt-3 alert alert-light">
+			<span wicket:id="command"></span> <a wicket:id="copy"><wicket:svg href="copy" class="icon"></wicket:svg></a>
+		</div>
+		<ul class="text-muted font-size-sm mb-0">
+			<li>
+				Environment variable <code>serverUrl</code> in above command is taken from OneDev server url
+				specified in <i>Administration / System Setting</i>. Change it if necessary 
+			</li> 
+			<li>
+				Agent is designed to be maintenance free. Once connected to server, it will be updated automatically 
+				upon server upgrade
+			</li>
+			<li>
+				Check <a wicket:id="help" target="_blank">agent management</a> for details, including list of supported environment variables
+			</li>
+		</ul>
+	</wicket:fragment>
+</wicket:panel>

@@ -14,4 +14,6 @@ public interface AgentTokenManager extends EntityManager<AgentToken> {
 	
 	List<AgentToken> queryUnused();
 	
+	void deleteUnused();
+	
 }

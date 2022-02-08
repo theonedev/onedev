@@ -1,0 +1,13 @@
+# Build the docker image for onedev agent
+FROM ubuntu:18.04
+COPY agent /agent
+COPY docker /usr/local/bin/
+RUN apt-get update && apt-get install -y locales curl git git-lfs openjdk-8-jre-headless && rm -rf /var/lib/apt/lists/*
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8 
+WORKDIR /agent/bin
+RUN ["touch", "/agent/IN_DOCKER"]
+CMD ["/agent/boot/wrapper-linux-x86-64","/agent/conf/wrapper.conf"]

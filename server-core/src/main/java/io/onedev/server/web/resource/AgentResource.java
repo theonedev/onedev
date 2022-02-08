@@ -64,32 +64,13 @@ public class AgentResource extends AbstractResource {
 					props.setProperty("serverUrl", OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());
 					
 					AgentToken token = new AgentToken();
-					token.setNote("Token for downloaded agent");
 					token.setValue(UUID.randomUUID().toString());
 					OneDev.getInstance(AgentTokenManager.class).save(token);
 					props.setProperty("agentToken", token.getValue());
 					
 					try (OutputStream os = new FileOutputStream(new File(agentDir, "agent/conf/agent.properties"))) {
-						String comment = String.format(""
-								+ " %s: required property to specify url of OneDev server\n"
-								+ " %s: required property to authenticate to OneDev server.\n"
-								+ "     Will be generated automatically when agent is\n"
-								+ "     downloaded. Can be generated manually from agent\n"
-								+ "     management page if desired\n"
-								+ " %s: optional property to specify name of the agent.\n"
-								+ "     Use host name if omitted\n"
-								+ " %s: optional property to specify cpu capability of the\n"
-								+ "     agent in millis. It is normally (cpu cores)*1000.\n"
-								+ "     Omitted to detect automatically\n"
-								+ " %s: optional property to specify physical memory of the\n"
-								+ "     agent in mega bytes. Omitted to detect automatically\n"
-								+ " %s: optional property to specify path to git command\n"
-								+ "     line. Omitted to search in system path\n"
-								+ " %s: optional property to specify path to docker command\n"
-								+ "     line. Omitted to search in system path\n"
-								+ "", 
-								Agent.SERVER_URL_KEY, Agent.AGENT_TOKEN_KEY, Agent.AGENT_NAME_KEY, 
-								Agent.AGENT_CPU_KEY, Agent.AGENT_MEMORY_KEY, Agent.GIT_PATH_KEY, Agent.DOCKER_PATH_KEY);
+						String comment = "For a list of supported agent properties, please visit:\n" 
+								+ OneDev.getInstance().getDocRoot() + "/pages/agent-management.md#agent-propertiesenvironments";
 						props.store(os, comment);
 					}
 					

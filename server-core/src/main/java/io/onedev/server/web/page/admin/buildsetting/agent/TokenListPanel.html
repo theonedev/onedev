@@ -6,14 +6,13 @@
 			file <tt>&lt;agent dir&gt;/conf/agent.properties</tt>. A token can only be used by one agent. A new 
 			token will be generated automatically when agent is downloaded 
 		</div>
-		<form wicket:id="form" class="mb-5 d-flex">
-			<input wicket:id="note" class="form-control flex-grow-1 mr-3" placeholder="Note of new token"> 
-			<a wicket:id="add" class="btn btn-icon btn-primary flex-shrink-0"><wicket:svg href="plus" class="icon"/></a>
-		</form>
+		<div class="mb-4">
+			<a wicket:id="addNew" class="btn btn-primary mr-2">Generate New</a>
+			<a wicket:id="deleteAll" class="btn btn-danger">Delete All</a>
+		</div>
 		<table wicket:id="tokens" class="table"></table>
 	</div>
 	<wicket:fragment wicket:id="actionsFrag">
 		<a wicket:id="copy" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1"><wicket:svg href="copy" class="icon"/></a>
-		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"/></a>
 	</wicket:fragment>
 </wicket:panel>

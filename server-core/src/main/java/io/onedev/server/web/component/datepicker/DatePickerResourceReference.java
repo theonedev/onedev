@@ -8,10 +8,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.util.WicketUtils;
 
 public class DatePickerResourceReference extends BaseDependentResourceReference {
 	
@@ -34,13 +31,6 @@ public class DatePickerResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(
 				new JavaScriptResourceReference(DatePickerResourceReference.class, "flatpickr-locale.js")
 		));
-		
-		BasePage page = (BasePage) WicketUtils.getPage();
-		if (page.isDarkMode()) {
-			dependencies.add(CssHeaderItem.forReference(
-					new BaseDependentCssResourceReference(DatePickerResourceReference.class, "dark.css")
-			));
-		}
 		
 		return dependencies;
 	}

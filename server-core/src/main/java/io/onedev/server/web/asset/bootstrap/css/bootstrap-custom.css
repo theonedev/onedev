@@ -2164,6 +2164,9 @@ input[type="radio"], input[type="checkbox"] {
 .border {
     border: 1px solid var(--light-gray) !important;
 }
+.border-dashed {
+	border-style: dashed !important;
+}
 .dark-mode .border {
 	border-color: var(--dark-mode-light-dark) !important;
 }
@@ -2563,6 +2566,9 @@ h6, .h6 {
     border-left: 4px solid;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+}
+.dark-mode .alert.alert-notice {
+    border-left: 4px solid;
 }
 .alert.alert-white {
     background-color: white;

@@ -28,8 +28,6 @@ public class AgentToken extends AbstractEntity {
 	@Column(nullable=false, unique=true)
 	private String value;
 	
-	private String note;
-
 	@Nullable
 	public Agent getAgent() {
 		return agent;
@@ -43,13 +41,4 @@ public class AgentToken extends AbstractEntity {
 		this.value = value;
 	}
 
-	@Nullable
-	public String getNote() {
-		return note;
-	}
-
-	public void setNote(String note) {
-		this.note = note;
-	}
-	
 }

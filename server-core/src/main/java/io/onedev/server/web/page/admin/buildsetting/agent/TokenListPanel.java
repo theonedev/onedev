@@ -8,7 +8,6 @@ import java.util.UUID;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -16,15 +15,12 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
@@ -37,8 +33,6 @@ import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
 @SuppressWarnings("serial")
 public class TokenListPanel extends GenericPanel<List<AgentToken>> {
-
-	private String note;
 	
 	public TokenListPanel(String id) {
 		super(id);
@@ -63,24 +57,40 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Form<?> form = new Form<Void>("form");
-		form.add(new TextField<String>("note", new PropertyModel<String>(this, "note")));
-		form.add(new AjaxButton("add") {
+		add(new AjaxLink<Void>("addNew") {
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
+			public void onClick(AjaxRequestTarget target) {
 				AgentToken token = new AgentToken();
 				token.setValue(UUID.randomUUID().toString());
-				token.setNote(note);
 				getTokenManager().save(token);
 				target.add(TokenListPanel.this);
-				
-				note = null;
 			}
 			
 		});
-		add(form);
+		
+		add(new AjaxLink<Void>("deleteAll") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete unused tokens?"));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				getTokenManager().deleteUnused();
+				target.add(TokenListPanel.this);
+				target.add(this);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getUnusedTokens().isEmpty());
+			}
+			
+		});
 		
 		List<IColumn<AgentToken, Void>> columns = new ArrayList<>();
 		
@@ -99,25 +109,6 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 			
 		});
 		
-		columns.add(new AbstractColumn<AgentToken, Void>(Model.of("Note")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<AgentToken>> cellItem, String componentId,
-					IModel<AgentToken> rowModel) {
-				AgentToken token = rowModel.getObject();
-				if (token.getNote() != null)
-					cellItem.add(new Label(componentId, token.getNote()));
-				else
-					cellItem.add(new Label(componentId, "<i>No note</i>").setEscapeModelStrings(false));
-			}
-			
-			@Override
-			public String getCssClass() {
-				return "align-top";
-			}
-			
-		});
-		
 		columns.add(new AbstractColumn<AgentToken, Void>(Model.of("")) {
 
 			@Override
@@ -126,26 +117,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 				Fragment fragment = new Fragment(componentId, "actionsFrag", TokenListPanel.this);
 
 				AgentToken token = rowModel.getObject();
-
 				fragment.add(new CopyToClipboardLink("copy", Model.of(token.getValue())));
-				
-				Long tokenId = token.getId();
-				fragment.add(new AjaxLink<Void>("delete") {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this token?"));
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						getTokenManager().delete(getTokenManager().load(tokenId));
-						target.add(TokenListPanel.this);
-					}
-
-				});
-				
 				cellItem.add(fragment);
 			}
 			
@@ -160,12 +132,12 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 
 			@Override
 			public Iterator<? extends AgentToken> iterator(long first, long count) {
-				return getModelObject().iterator();
+				return getUnusedTokens().iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				return getModelObject().size();
+				return getUnusedTokens().size();
 			}
 
 			@Override
@@ -189,4 +161,8 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 		table.add(new NoRecordsBehavior());
 	}
 
+	private List<AgentToken> getUnusedTokens() {
+		return getModelObject();
+	}
+	
 }
