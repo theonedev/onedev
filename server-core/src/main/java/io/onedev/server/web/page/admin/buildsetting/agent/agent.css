@@ -4,3 +4,6 @@
 .floating .add-agent {
 	width: 600px;
 }
+.floating .add-agent ul {
+	padding-left: 14px;
+}
