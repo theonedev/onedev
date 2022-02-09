@@ -144,46 +144,47 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		List<SidebarMenuItem> menuItems = new ArrayList<>();
 		
 		if (getProject().isCodeManagementEnabled() && SecurityUtils.canReadCode(getProject())) {
-			menuItems.add(new SidebarMenuItem.Page("files", "Files", 
+			List<SidebarMenuItem> codeMenuItems = new ArrayList<>();
+	
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Files", 
 					ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject())));
-			menuItems.add(new SidebarMenuItem.Page("commit", "Commits", 
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Commits", 
 					ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getProject(), null), 
 					Lists.newArrayList(CommitDetailPage.class)));
-			menuItems.add(new SidebarMenuItem.Page("branch", "Branches", 
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Branches", 
 					ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(getProject())));
-			menuItems.add(new SidebarMenuItem.Page("tag", "Tags", 
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Tags", 
 					ProjectTagsPage.class, ProjectTagsPage.paramsOf(getProject())));
-			menuItems.add(new SidebarMenuItem.Page("pull-request", "Pull Requests", 
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Pull Requests", 
 					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0), 
 					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Code Comments", 
+					ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Code Compare", 
+					RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
+			
+			menuItems.add(new SidebarMenuItem.SubMenu("git", "Code", codeMenuItems));
 		}		
 		if (getProject().isIssueManagementEnabled()) {
-			menuItems.add(new SidebarMenuItem.Page("bug", "Issues", 
+			List<SidebarMenuItem> issueMenuItems = new ArrayList<>();
+			
+			issueMenuItems.add(new SidebarMenuItem.Page(null, "List", 
 					ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), 0), 
 					Lists.newArrayList(NewIssuePage.class, IssueDetailPage.class)));
-			menuItems.add(new SidebarMenuItem.Page("split", "Boards", 
+			issueMenuItems.add(new SidebarMenuItem.Page(null, "Boards", 
 					IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject())));
-			
-			menuItems.add(new SidebarMenuItem.Page("milestone", "Milestones", 
+			issueMenuItems.add(new SidebarMenuItem.Page(null, "Milestones", 
 					MilestoneListPage.class, MilestoneListPage.paramsOf(getProject(), false, null), 
 					Lists.newArrayList(NewMilestonePage.class, MilestoneDetailPage.class, MilestoneEditPage.class)));
+			
+			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
 		}
 		
 		if (getProject().isCodeManagementEnabled()) {
 			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", 
 					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0), 
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
-			
-			if (SecurityUtils.canReadCode(getProject())) {
-				menuItems.add(new SidebarMenuItem.Page("comments", "Code Comments", 
-						ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
-				menuItems.add(new SidebarMenuItem.Page("diff", "Code Compare", 
-						RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
-			}
 		}
-		
-		menuItems.add(new SidebarMenuItem.Page("tree", "Child Projects", 
-				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
 		
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 		
@@ -202,6 +203,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		
 		if (!statsMenuItems.isEmpty())
 			menuItems.add(new SidebarMenuItem.SubMenu("statistics", "Statistics", statsMenuItems));
+		
+		menuItems.add(new SidebarMenuItem.Page("tree", "Child Projects", 
+				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
 		
 		if (SecurityUtils.canManage(getProject())) {
 			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();

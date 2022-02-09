@@ -154,6 +154,10 @@
     background-color: #1b1b28;
 }
 
+.sidebar>.sidebar-body>.sidebar-menu+.sidebar-menu {
+	border-top: 1px solid var(--dark-mode-lighter-dark);
+}
+
 .dark-mode .sidebar-menu .sidebar-dropdown {
 	background: #1b1b28 !important;
 	box-shadow: 0 0 30px rgb(0 0 0 / 50%) !important;	
