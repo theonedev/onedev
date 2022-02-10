@@ -231,7 +231,9 @@ public class MilestoneBurndownPage extends MilestoneDetailPage {
 						guidelineYAxisValues.put(xAxisValues.get(0), initialIssueWeight);
 						guidelineYAxisValues.put(xAxisValues.get(xAxisValues.size()-1), 0);
 					}
-					lines.add(new Line("Guide Line", guidelineYAxisValues, "black", null, "dashed"));
+					
+					String color = isDarkMode()?"white":"black";
+					lines.add(new Line("Guide Line", guidelineYAxisValues, color, null, "dashed"));
 					
 					String yAxisValueFormatter;
 					if (field != null && getIssueSetting().getFieldSpec(field) instanceof WorkingPeriodField) {

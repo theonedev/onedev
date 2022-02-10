@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public class LineChartPanel extends GenericPanel<LineSeries> {
@@ -33,9 +34,10 @@ public class LineChartPanel extends GenericPanel<LineSeries> {
 		
 		try {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
-			String script = String.format("onedev.server.lineChart.onDomReady('%s', %s, %s);", 
+			BasePage page = (BasePage) getPage();
+			String script = String.format("onedev.server.lineChart.onDomReady('%s', %s, %s, %b);", 
 					getMarkupId(true), mapper.writeValueAsString(getSeries()), 
-					getSeries().getYAxisValueFormatter());
+					getSeries().getYAxisValueFormatter(), page.isDarkMode());
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);

@@ -2591,8 +2591,8 @@ h6, .h6 {
     box-shadow: 0px 0px 8px 2px rgba(0,0,0,0.1);
 }
 .dark-mode .popover {
-    background-color: var(--dark-mode-dark);
-    border-color: var(--dark-mode-dark);
+    background-color: var(--dark-mode-light-dark);
+    border-color: var(--dark-mode-lighter-dark);
 	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
 }
 .bs-popover-auto[x-placement^=right]>.arrow::before, .bs-popover-right>.arrow::before {
@@ -2609,28 +2609,28 @@ h6, .h6 {
 }
 
 .dark-mode .bs-popover-auto[x-placement^=right]>.arrow::before, .dark-mode .bs-popover-right>.arrow::before {
-    border-right-color: var(--dark-mode-dark); 
+    border-right-color: var(--dark-mode-lighter-dark); 
 }
 .dark-mode .bs-popover-auto[x-placement^=left]>.arrow::before, .dark-mode .bs-popover-left>.arrow::before {
-    border-left-color: var(--dark-mode-dark);
+    border-left-color: var(--dark-mode-lighter-dark);
 }
 .dark-mode .bs-popover-auto[x-placement^=top]>.arrow::before, .dark-mode .bs-popover-top>.arrow::before {
-    border-top-color: var(--dark-mode-dark);
+    border-top-color: var(--dark-mode-lighter-dark);
 }
 .dark-mode .bs-popover-auto[x-placement^=bottom]>.arrow::before, .dark-mode .bs-popover-bottom>.arrow::before {
-    border-bottom-color: var(--dark-mode-dark);
+    border-bottom-color: var(--dark-mode-lighter-dark);
 }
 .dark-mode .bs-popover-auto[x-placement^=right]>.arrow::after, .dark-mode .bs-popover-right>.arrow::after {
-    border-right-color: var(--dark-mode-dark); 
+    border-right-color: var(--dark-mode-lighter-dark); 
 }
 .dark-mode .bs-popover-auto[x-placement^=left]>.arrow::after, .dark-mode .bs-popover-left>.arrow::after {
-    border-left-color: var(--dark-mode-dark);
+    border-left-color: var(--dark-mode-lighter-dark);
 }
 .dark-mode .bs-popover-auto[x-placement^=top]>.arrow::after, .dark-mode .bs-popover-top>.arrow::after {
-    border-top-color: var(--dark-mode-dark);
+    border-top-color: var(--dark-mode-lighter-dark);
 }
 .dark-mode .bs-popover-auto[x-placement^=bottom]>.arrow::after, .dark-mode .bs-popover-bottom>.arrow::after {
-    border-bottom-color: var(--dark-mode-dark);
+    border-bottom-color: var(--dark-mode-lighter-dark);
 }
 
 .popover-header {
@@ -2643,7 +2643,7 @@ h6, .h6 {
 }
 .dark-mode .popover-header {
     color: var(--light);
-    background-color: var(--dark-mode-dark);
+    background-color: var(--dark-mode-light-dark);
     border-bottom-color: var(--dark-mode-lighter-dark);
 }
 .popover-body {

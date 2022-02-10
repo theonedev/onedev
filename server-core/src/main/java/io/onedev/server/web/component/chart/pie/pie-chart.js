@@ -1,5 +1,5 @@
 onedev.server.pieChart = {
-	onDomReady: function(containerId, pieSlices, selectionCallback) {
+	onDomReady: function(containerId, pieSlices, selectionCallback, darkMode) {
 		var $chart = $("#" + containerId + ">.pie-chart");
 		if (pieSlices) {
 			var chart = echarts.init($chart[0]);
@@ -35,6 +35,9 @@ onedev.server.pieChart = {
 			            }
 			            return `${name}  ${value}`;
 			        },
+					textStyle: {
+						color: darkMode?'#cdcdde':'#3F4254'
+					}
 				},
 				series: [{
 					type: "pie",

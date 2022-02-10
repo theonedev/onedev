@@ -1,5 +1,5 @@
 onedev.server.lineChart = {
-	onDomReady: function(containerId, lineSeries, yAxisValueFormatter) {
+	onDomReady: function(containerId, lineSeries, yAxisValueFormatter, darkMode) {
 		var $chart = $("#" + containerId + ">.line-chart");
 		
 		if (lineSeries) {
@@ -7,14 +7,25 @@ onedev.server.lineChart = {
 			option = {
 				xAxis: {
 					type: 'category',
-					data: []
+					data: [],
+					axisLabel: {
+						color: darkMode?'#cdcdde':'#3F4254'
+					}
 				},
 			    yAxis: {
 			        type: 'value',
 					minInterval: 1,
+			        splitLine: {
+			            lineStyle: {
+			                color: darkMode?'#535370':'#E4E6EF'
+			            }
+			        },			    	
 			    	axisLine: {
 			    		show:false
 			    	},	
+			    	axisLabel: {
+						color: darkMode?'#cdcdde':'#3F4254'
+			    	},
 			    },
 				tooltip: {
 					trigger: 'axis' 
@@ -25,7 +36,10 @@ onedev.server.lineChart = {
 				option.legend = {
 					show: true, 
 					x: "center",
-					data: []
+					data: [],
+					textStyle: {
+						color: darkMode?'#cdcdde':'#3F4254'
+					}
 				}
 				for (const i in lineSeries.lines) 
 					option.legend.data.push(lineSeries.lines[i].name);
@@ -35,7 +49,10 @@ onedev.server.lineChart = {
 					}
 					option.title = {
 						text: lineSeries.seriesName,
-						left: 'center'
+						left: 'center',
+						textStyle: {
+							color: darkMode?'#cdcdde':'#3F4254'
+						}
 					}
 					option.legend.top = 30;
 				} 
@@ -45,7 +62,10 @@ onedev.server.lineChart = {
 					title = lineSeries.seriesName + " / " + title;
 				option.title = {
 					text: title,
-					left: 'center'
+					left: 'center',
+					textStyle: {
+						color: darkMode?'#cdcdde':'#3F4254'
+					}
 				}
 			} 
 			

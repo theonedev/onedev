@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public abstract class PieChartPanel extends GenericPanel<List<PieSlice>> {
@@ -63,10 +64,11 @@ public abstract class PieChartPanel extends GenericPanel<List<PieSlice>> {
 			throw new RuntimeException(e);
 		}
 		
+		BasePage page = (BasePage) getPage();
 		CallbackParameter param = CallbackParameter.explicit("sliceName");
 		String callback = selectionBehavior.getCallbackFunction(param).toString();
-		String script = String.format("onedev.server.pieChart.onDomReady('%s', %s, %s);", 
-				getMarkupId(true), jsonOfSlices, callback);
+		String script = String.format("onedev.server.pieChart.onDomReady('%s', %s, %s, %b);", 
+				getMarkupId(true), jsonOfSlices, callback, page.isDarkMode());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

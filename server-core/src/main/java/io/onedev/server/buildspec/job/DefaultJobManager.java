@@ -1258,10 +1258,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 							Map<String, String> placeholderValues = new HashMap<>();
 							placeholderValues.put(BUILD_VERSION, build.getVersion());
-							for (PostBuildAction action: build.getJob().getPostBuildActions()) {
-								action = interpolator.interpolateProperties(action); 
-								if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
-									action.execute(build);
+							if (build.getJob() != null) {
+								for (PostBuildAction action: build.getJob().getPostBuildActions()) {
+									action = interpolator.interpolateProperties(action); 
+									if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
+										action.execute(build);
+								}
+							} else {
+								throw new ExplicitException("Job not found");
 							}
 						} catch (Throwable e) {
 							String message = String.format("Error processing post build actions (project: %s, commit: %s, job: %s)", 
