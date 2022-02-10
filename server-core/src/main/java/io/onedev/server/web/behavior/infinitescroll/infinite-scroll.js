@@ -1,5 +1,5 @@
 onedev.server.infiniteScroll = {
-	onLoad: function(containerId, callback, pageSize, itemSelector) {
+	onLoad: function(containerId, callback, pageSize, itemSelector, darkMode) {
 		var $container = $("#" + containerId);
 		$container.data("callback", callback);
 		$container.data("pageSize", pageSize);
@@ -7,9 +7,9 @@ onedev.server.infiniteScroll = {
 		var $items = onedev.server.infiniteScroll.getItems($container);
 		$container.data("hasMore", $items.length >= pageSize);
 		$container.scroll(function() {
-			onedev.server.infiniteScroll.check(containerId);
+			onedev.server.infiniteScroll.check(containerId, darkMode);
 		});
-		onedev.server.infiniteScroll.check(containerId);
+		onedev.server.infiniteScroll.check(containerId, darkMode);
 	}, 
 	getItems: function($container) {
 		if ($container.data("itemSelector"))
@@ -30,7 +30,7 @@ onedev.server.infiniteScroll = {
 			$container.data("appending", true);
 		}
 	},
-	check: function(containerId) {
+	check: function(containerId, darkMode) {
 		var $container = $("#" + containerId);
 		function isInViewPort($item) {
 			var tolerate = 5;
@@ -41,6 +41,8 @@ onedev.server.infiniteScroll = {
 		var $items = onedev.server.infiniteScroll.getItems($container);
 		var $lastItem = $items.last();
 		
+		var ajaxIndicator = darkMode?"dark-ajax-indicator.gif":"ajax-indicator.gif";
+		
 		if (!$container.data("appending")) {
 			var scrollTop = $container.data("scrollTop");
 			if ($container.data("hasMore") && $lastItem.length != 0) {
@@ -50,12 +52,12 @@ onedev.server.infiniteScroll = {
 					$container.data("callback")($items.length, pageSize);
 					$container.data("appending", true);
 					if ($lastItem.is("li")) {
-						$lastItem.after("<li class='loading-indicator' style='text-align:center;'><img src='/img/ajax-indicator.gif'></img></li>");
+						$lastItem.after("<li class='loading-indicator' style='text-align:center;'><img src='/img/" + ajaxIndicator + "'></img></li>");
 					} else if ($lastItem.is("tr")) {
 						var colspan = $lastItem.children().length;
-						$lastItem.after("<tr class='loading-indicator'><td colspan='" + colspan + "' style='text-align:center;'><img src='/img/ajax-indicator.gif'></img></td></tr>");
+						$lastItem.after("<tr class='loading-indicator'><td colspan='" + colspan + "' style='text-align:center;'><img src='/img/" + ajaxIndicator + "'></img></td></tr>");
 					} else {
-						$lastItem.after("<div class='loading-indicator' style='text-align:center;'><img src='/img/ajax-indicator.gif'></img></div>");
+						$lastItem.after("<div class='loading-indicator' style='text-align:center;'><img src='/img/" + ajaxIndicator + "'></img></div>");
 					}		
 					$container.find(".loading-indicator").scrollIntoView();					
 				} else if (scrollTop) {
@@ -70,13 +72,13 @@ onedev.server.infiniteScroll = {
 			}
 		}
 	}, 
-	onAppended: function(containerId) {
+	onAppended: function(containerId, darkMode) {
 		var $container = $("#" + containerId);
 		$container.data("appending", false);
 		$container.find(".loading-indicator").remove();
 		var $items = onedev.server.infiniteScroll.getItems($container);
 		$container.data("hasMore", $items.length - $container.data("prevItems") >= $container.data("pageSize"));
-		onedev.server.infiniteScroll.check(containerId);
+		onedev.server.infiniteScroll.check(containerId, darkMode);
 		$(window).resize();
 	}
 };

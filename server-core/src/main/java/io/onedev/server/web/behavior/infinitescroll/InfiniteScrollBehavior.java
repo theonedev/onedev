@@ -21,6 +21,8 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.util.WicketUtils;
 
 public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 
@@ -58,13 +60,9 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 
 		appendMore(target, offset, count);
 
-		target.appendJavaScript(String.format("onedev.server.infiniteScroll.onAppended('%s');", 
-				getComponent().getMarkupId()));
-	}
-	
-	public void check(AjaxRequestTarget target) {
-		target.appendJavaScript(String.format("onedev.server.infiniteScroll.check('%s');", 
-				getComponent().getMarkupId()));
+		BasePage page = (BasePage) WicketUtils.getPage();
+		target.appendJavaScript(String.format("onedev.server.infiniteScroll.onAppended('%s', %b);", 
+				getComponent().getMarkupId(), page.isDarkMode()));
 	}
 	
 	@Nullable
@@ -92,9 +90,11 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 		
 		// Run onload script as the container size might be adjusted in window resize event (which 
 		// happens before onload). An example is the issue board columns
-		String script = String.format("onedev.server.infiniteScroll.onLoad('%s', %s, %s, %s);", 
+		BasePage page = (BasePage) WicketUtils.getPage();
+		
+		String script = String.format("onedev.server.infiniteScroll.onLoad('%s', %s, %s, %s, %b);", 
 				component.getMarkupId(true), getCallbackFunction(explicit("offset"), explicit("count")), 
-				pageSize, itemSelector);
+				pageSize, itemSelector, page.isDarkMode());
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
