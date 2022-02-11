@@ -45,6 +45,7 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
 			protected void onInitialize() {
 				super.onInitialize();
 				getSettings().configurePlaceholder(descriptor);
+				getSettings().setAllowClear(true);
 			}
     		
     	};

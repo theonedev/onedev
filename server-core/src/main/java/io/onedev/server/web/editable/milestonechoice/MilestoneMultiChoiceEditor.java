@@ -40,6 +40,7 @@ public class MilestoneMultiChoiceEditor extends PropertyEditor<List<String>> {
 		super.onInitialize();
 
 		List<Milestone> choices = new ArrayList<>();
+		List<Milestone> selections = new ArrayList<>();
 		
 		ComponentContext componentContext = new ComponentContext(this);
 		ComponentContext.push(componentContext);
@@ -52,19 +53,18 @@ public class MilestoneMultiChoiceEditor extends PropertyEditor<List<String>> {
 			} else {
 				choices.addAll(Project.get().getSortedHierarchyMilestones());
 			}
+
+			if (getModelObject() != null) {
+				MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
+				for (String milestoneName: getModelObject()) {
+					Milestone milestone = milestoneManager.findInHierarchy(Project.get(), milestoneName);
+					if (milestone != null && choices.contains(milestone))
+						selections.add(milestone);
+				}
+			} 
 		} finally {
 			ComponentContext.pop();
 		}
-
-		List<Milestone> selections = new ArrayList<>();
-		if (getModelObject() != null) {
-			MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
-			for (String milestoneName: getModelObject()) {
-				Milestone milestone = milestoneManager.findInHierarchy(Project.get(), milestoneName);
-				if (milestone != null && choices.contains(milestone))
-					selections.add(milestone);
-			}
-		} 
 		
 		input = new MilestoneMultiChoice("input", Model.of(selections), Model.of(choices)) {
 
@@ -76,7 +76,6 @@ public class MilestoneMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 		};
         
-        input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

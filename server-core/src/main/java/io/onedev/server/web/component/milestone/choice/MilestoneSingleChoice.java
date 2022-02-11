@@ -19,6 +19,8 @@ public class MilestoneSingleChoice extends Select2Choice<Milestone> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
 			getSettings().setPlaceholder("Choose milestone...");
 		else
@@ -29,12 +31,6 @@ public class MilestoneSingleChoice extends Select2Choice<Milestone> {
 		setConvertEmptyInputStringToNull(true);
 	}
 
-	@Override
-	protected void onBeforeRender() {
-		getSettings().setAllowClear(!isRequired());
-		super.onBeforeRender();
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

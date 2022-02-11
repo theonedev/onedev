@@ -63,8 +63,6 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 		};
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
-        input.setRequired(descriptor.isPropertyRequired());
-        
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 
 			@Override

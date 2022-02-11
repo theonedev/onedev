@@ -36,6 +36,7 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
+import io.onedev.server.model.support.issue.field.spec.MilestoneChoiceField;
 import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
 import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
@@ -339,7 +340,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 				if (validate && !Issue.ORDER_FIELDS.containsKey(fieldName)) {
 					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 					if (validate && !(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
-							&& !(fieldSpec instanceof IntegerField)) {
+							&& !(fieldSpec instanceof IntegerField) && !(fieldSpec instanceof MilestoneChoiceField)) {
 						throw new ExplicitException("Can not order by field: " + fieldName);
 					}
 				}

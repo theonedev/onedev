@@ -69,7 +69,6 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         	
         };
         
-        input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
 
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

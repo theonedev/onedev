@@ -36,6 +36,7 @@ public class MilestoneSingleChoiceEditor extends PropertyEditor<String> {
 		super.onInitialize();
 
 		List<Milestone> choices = new ArrayList<>();
+		Milestone selection;
 		
 		ComponentContext componentContext = new ComponentContext(this);
 		ComponentContext.push(componentContext);
@@ -48,18 +49,17 @@ public class MilestoneSingleChoiceEditor extends PropertyEditor<String> {
 			} else {
 				choices.addAll(Project.get().getSortedHierarchyMilestones());
 			}
+		
+			if (getModelObject() != null)
+				selection = Project.get().getHierarchyMilestone(getModelObject());
+			else
+				selection = null;
+			
+			if (selection != null && !choices.contains(selection))
+				selection = null;
 		} finally {
 			ComponentContext.pop();
 		}
-		
-		Milestone selection;
-		if (getModelObject() != null)
-			selection = Project.get().getHierarchyMilestone(getModelObject());
-		else
-			selection = null;
-		
-		if (selection != null && !choices.contains(selection))
-			selection = null;
 		
     	input = new MilestoneSingleChoice("input", Model.of(selection), Model.of(choices)) {
 
@@ -67,12 +67,11 @@ public class MilestoneSingleChoiceEditor extends PropertyEditor<String> {
 			protected void onInitialize() {
 				super.onInitialize();
 				getSettings().configurePlaceholder(descriptor);
+				getSettings().setAllowClear(!descriptor.isPropertyRequired());
 			}
     		
     	};
         
-        // add this to control allowClear flag of select2
-    	input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

@@ -19,6 +19,7 @@ public class UserSingleChoice extends Select2Choice<User> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
 			getSettings().setPlaceholder("Choose a user...");
 		else
@@ -29,12 +30,6 @@ public class UserSingleChoice extends Select2Choice<User> {
 		setConvertEmptyInputStringToNull(true);
 	}
 
-	@Override
-	protected void onBeforeRender() {
-		getSettings().setAllowClear(!isRequired());
-		super.onBeforeRender();
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

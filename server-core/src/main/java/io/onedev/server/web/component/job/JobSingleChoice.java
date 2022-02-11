@@ -18,6 +18,8 @@ public class JobSingleChoice extends Select2Choice<String> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
 			getSettings().setPlaceholder("Choose job...");
 		else

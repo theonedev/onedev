@@ -69,12 +69,11 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 			protected void onInitialize() {
 				super.onInitialize();
 				getSettings().configurePlaceholder(descriptor);
+				getSettings().setAllowClear(!descriptor.isPropertyRequired());
 			}
     		
     	};
         
-        // add this to control allowClear flag of select2
-    	input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

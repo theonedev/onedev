@@ -67,7 +67,6 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 			
 		};
-        input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){

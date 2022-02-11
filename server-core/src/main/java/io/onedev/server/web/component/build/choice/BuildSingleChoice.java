@@ -17,6 +17,8 @@ public class BuildSingleChoice extends Select2Choice<Build> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
 			getSettings().setPlaceholder("Choose build...");
 		else
@@ -27,12 +29,6 @@ public class BuildSingleChoice extends Select2Choice<Build> {
 		setConvertEmptyInputStringToNull(true);
 	}
 
-	@Override
-	protected void onBeforeRender() {
-		getSettings().setAllowClear(!isRequired());
-		super.onBeforeRender();
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

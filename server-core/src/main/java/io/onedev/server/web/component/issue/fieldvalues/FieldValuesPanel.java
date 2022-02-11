@@ -32,12 +32,14 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -68,11 +70,12 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
-public abstract class FieldValuesPanel extends Panel implements EditContext {
+public abstract class FieldValuesPanel extends Panel implements EditContext, ProjectAware {
 
 	private final Mode userFieldDisplayMode;
 	
@@ -175,6 +178,11 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			protected Serializable getBean() {
 				Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 				return getIssue().getFieldBean(fieldBeanClass, true); 
+			}
+
+			@Override
+			protected Project getProject() {
+				return getIssue().getProject();
 			}
 
 		};
@@ -280,6 +288,18 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					} else {
 						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
 					}
+				} else if (getField().getType().equals(FieldSpec.MILESTONE)) {
+					Milestone milestone = OneDev.getInstance(MilestoneManager.class).findInHierarchy(getIssue().getProject(), value);
+					if (milestone != null) {
+						Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
+						Link<Void> milestoneLink = new BookmarkablePageLink<Void>("link", MilestoneIssuesPage.class, 
+								MilestoneIssuesPage.paramsOf(getIssue().getProject(), milestone));
+						milestoneLink.add(new Label("label", milestone.getName()));
+						linkFrag.add(milestoneLink);
+						valueContainer.add(linkFrag);
+					} else {
+						valueContainer.add(new Label("value", "<i>Not Found</i>").setEscapeModelStrings(false));
+					}
 				} else if (getField().getType().equals(FieldSpec.COMMIT)) {
 					if (ObjectId.isId(value)) {
 						Fragment commmitFragment = new Fragment("value", "commitFrag", FieldValuesPanel.this);
@@ -369,6 +389,11 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		return null;
 	}
 	
+	@Override
+	public Project getProject() {
+		return getIssue().getProject();
+	}
+
 	protected abstract Issue getIssue();
 	
 	@Nullable

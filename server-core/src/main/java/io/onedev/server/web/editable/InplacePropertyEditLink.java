@@ -8,6 +8,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
+import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -50,6 +51,11 @@ public abstract class InplacePropertyEditLink extends DropdownLink {
 				return InplacePropertyEditLink.this.getIssueQuery();
 			}
 
+			@Override
+			public Project getProject() {
+				return InplacePropertyEditLink.this.getProject();
+			}
+
 		};
 	}
 	
@@ -61,6 +67,11 @@ public abstract class InplacePropertyEditLink extends DropdownLink {
 
 	@Nullable
 	protected IssueQuery getIssueQuery() {
+		return null;
+	}
+	
+	@Nullable
+	protected Project getProject() {
 		return null;
 	}
 	

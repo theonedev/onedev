@@ -19,6 +19,8 @@ public class GroupSingleChoice extends Select2Choice<Group> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
 			getSettings().setPlaceholder("Choose group...");
 		else
@@ -27,12 +29,6 @@ public class GroupSingleChoice extends Select2Choice<Group> {
 		getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");
 		setConvertEmptyInputStringToNull(true);
-	}
-
-	@Override
-	protected void onBeforeRender() {
-		getSettings().setAllowClear(!isRequired());
-		super.onBeforeRender();
 	}
 	
 	@Override

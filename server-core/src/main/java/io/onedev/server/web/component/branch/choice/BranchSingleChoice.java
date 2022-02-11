@@ -21,6 +21,7 @@ public class BranchSingleChoice extends Select2Choice<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
 			getSettings().setPlaceholder("Choose branch...");
 		else
@@ -29,12 +30,6 @@ public class BranchSingleChoice extends Select2Choice<String> {
 		getSettings().setFormatSelection("onedev.server.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.branchChoiceFormatter.escapeMarkup");
 		setConvertEmptyInputStringToNull(true);
-	}
-
-	@Override
-	protected void onBeforeRender() {
-		getSettings().setAllowClear(!isRequired());
-		super.onBeforeRender();
 	}
 
 	@Override

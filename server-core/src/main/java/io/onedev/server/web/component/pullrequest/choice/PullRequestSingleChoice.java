@@ -17,6 +17,7 @@ public class PullRequestSingleChoice extends Select2Choice<PullRequest> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		getSettings().setAllowClear(!isRequired());
 		if (isRequired())
 			getSettings().setPlaceholder("Choose pull request...");
 		else
@@ -25,12 +26,6 @@ public class PullRequestSingleChoice extends Select2Choice<PullRequest> {
 		getSettings().setFormatSelection("onedev.server.pullRequestChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.pullRequestChoiceFormatter.escapeMarkup");
 		setConvertEmptyInputStringToNull(true);
-	}
-
-	@Override
-	protected void onBeforeRender() {
-		getSettings().setAllowClear(!isRequired());
-		super.onBeforeRender();
 	}
 	
 	@Override
