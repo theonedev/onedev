@@ -5,6 +5,10 @@
 	margin-bottom: 1.2rem;
 	background: white;
 }
+.dark-mode .imports>.import {
+	border-color: var(--dark-mode-lighter-dark);
+	background: var(--dark-mode-dark);
+}
 .imports>.import:last-child {
 	margin-bottom: 0;
 }

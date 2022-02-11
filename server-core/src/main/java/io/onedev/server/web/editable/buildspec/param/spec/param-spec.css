@@ -2,8 +2,14 @@
 	border-top: 1px dashed var(--secondary);
 	border-top-left-radius: 0.42rem;
 }
+.dark-mode .floating.param-spec .property-choices table tr:first-child td {
+	border-top-color: var(--dark-mode-lighter-dark);
+}
 .floating.param-spec .property-choices table td.property-value {
 	border-right: 1px dashed var(--secondary);
+}
+.dark-mode .floating.param-spec .property-choices table td.property-value {
+	border-right-color: var(--dark-mode-lighter-dark);
 }
 .floating.param-spec .property-choices table tr:first-child td.property-value {
 	border-top-right-radius: 0.42rem;
@@ -14,6 +20,9 @@
 .param-spec-edit .property-choices tr:first-child td {
 	border-top: 1px dashed var(--secondary);
 	border-radius: 0.42rem 0.42rem 0 0;
+}
+.dark-mode .param-spec-edit .property-choices tr:first-child td {
+    border-top-color: var(--dark-mode-lighter-dark);
 }
 .floating.param-spec .property-choices thead, .param-spec-edit .property-choices thead,
 .floating.param-spec .property-applicableProjects, .param-spec-edit .property-applicableProjects,
