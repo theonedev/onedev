@@ -85,3 +85,15 @@
 .dark-mode .CodeMirror-dialog-top {
     border-bottom-color: var(--dark-mode-lighter-dark);
 }
+.dark-mode .CodeMirror-hints {
+	background: var(--dark-mode-dark);
+	border-color: var(--dark-mode-light-dark);
+	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+}
+.dark-mode .CodeMirror-hint {
+	color: var(--muted);
+}
+.dark-mode li.CodeMirror-hint-active {
+    background: var(--dark-mode-light-primary);
+    color: var(--primary);
+}
