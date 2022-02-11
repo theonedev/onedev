@@ -4,8 +4,8 @@
 }
 
 .dark-mode .pcr-app {
-	background-color: var(--dark-mode-dark);
-	border: 1px solid var(--dark-mode-light-dark);
+	background-color: var(--dark-mode-light-dark);
+	border: 1px solid var(--dark-mode-lighter-dark);
 	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
 }
 
