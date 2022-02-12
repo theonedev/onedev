@@ -32,9 +32,6 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.collect.Sets;
@@ -506,50 +503,14 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		});
 		
-		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
-			
-			@Override
-			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
-			}
-			
-			@Override
-			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
-			}
-			
-			@Override
-			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-				return null;
-			}
-			
-			@Override
-			public void onEndRequest(RequestCycle cycle) {
-			}
-			
-			@Override
-			public void onDetach(RequestCycle cycle) {
-			}
-			
-			@Override
-			public void onBeginRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null) 
-					OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
-			}
-			
-		});		
-		
 		setOutputMarkupId(true);
+	}
+
+	@Override
+	protected void onBeforeRender() {
+		if (SecurityUtils.getUser() != null) 
+			OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
+		super.onBeforeRender();
 	}
 
 	@Override

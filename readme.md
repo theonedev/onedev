@@ -57,7 +57,7 @@ Define issue boards to show issues in columns based on values of specified field
 
 ![Issue Boards](doc/images/issue-boards.gif)
 
-### Code Intelligence
+### Out-of-box Code Intelligence
 
 Symbol search and navigation in source code and diff. Outline display and search. Works for every commit. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
 

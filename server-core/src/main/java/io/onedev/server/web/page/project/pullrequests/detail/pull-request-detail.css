@@ -7,7 +7,7 @@
 	border-radius: 0.42rem;
 }
 .dark-mode .pull-request-detail>.card-body>.main>.summary {
-	border-color: var(--dark-mode-dark-gray);
+	border-color: var(--dark-mode-lighter-dark);
 }
 .pull-request-detail>.card-body>.main>.summary>div {
 	margin-bottom: 1rem;
