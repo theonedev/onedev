@@ -360,9 +360,15 @@ public class ProjectBranchesPage extends ProjectPage {
 				return branches;
 			}
 			
-		}, false));
-		
-		baseChoice.setRequired(true);
+		}, false) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				getSettings().setAllowClear(false);
+			}
+			
+		});
 		
 		baseChoice.add(new AjaxFormComponentUpdatingBehavior("change") {
 			
