@@ -4,6 +4,7 @@
 }
 .SimplePage.dark-mode {
 	background: url(/img/dark-mesh.jpg) no-repeat left top fixed;
+	background-size: cover;
 }
 .SimplePage>body {
 	background: transparent;
