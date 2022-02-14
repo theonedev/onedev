@@ -1,4 +1,4 @@
-## Set this as true to stop OneDev server to perform various maintenance tasks such as backup, restore. 
+## Set this as true to stop OneDev server to perform various maintenance tasks such as backup, restore.
 ## Check https://code.onedev.io/projects/162/blob/main/pages/backup-restore.md for details
 maintenance: false
 
@@ -8,22 +8,20 @@ nodeSelector:
   mysql:
     kubernetes.io/os: linux
 
-## Ingress support, check below for more info. 
+## Ingress support, check below for more info.
 ## Check https://code.onedev.io/projects/162/blob/main/pages/deploy-into-k8s-with-helm.md#ingress-setup for details
 ingress:
   ## Optionally specify dns name to access OneDev via ingress controller
   host: ""
- 
   ## Whether or not to enable TLS for above host
-  tls: false 
-
+  tls: false
   ## Will be used as ingressClassName of ingress spec to match controller
-  class: nginx 
+  class: nginx
 
-letsencrypt: 
-  ## Specify an email here to enable LetsEncrypt. 
+letsencrypt:
+  ## Specify an email here to enable LetsEncrypt.
   ## Check https://code.onedev.io/projects/162/blob/main/pages/deploy-into-k8s-with-helm.md#letsencrypt-setup for details
-  email: "" 
+  email: ""
 
 resources:
   onedev:
@@ -35,15 +33,15 @@ volumes:
   onedev:
     ## Optionally specify storage class of persistent volume to store OneDev data including git repositories and indexes. 
     ## Leave empty to use default storage class
-    storageClassName: "" 
+    storageClassName: ""
     size: 100Gi
   mysql:
-    ## Optionally specify storage class of persistent volume to store mysql data. 
+    ## Optionally specify storage class of persistent volume to store mysql data.
     ## Leave empty to use default storage class
-    storageClassName: "" 
+    storageClassName: ""
     size: 20Gi
 
 secrets:
   mysql:
     ## change mysql root password if desired
-    password: changeit 
+    password: changeit
