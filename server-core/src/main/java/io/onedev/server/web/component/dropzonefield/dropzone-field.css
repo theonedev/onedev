@@ -6,7 +6,12 @@
 	font-size: 20px;
 	color: #444;
 }
-
+.dark-mode .dropzone-field .dz-message {
+	color: var(--dark-mode-gray);
+}
+.dark-mode .dropzone .dz-preview.dz-image-preview {
+    background: var(--dark-mode-dark);
+}
 .dropzone .dz-preview .dz-error-message {
     top: 150px !important;
 }
