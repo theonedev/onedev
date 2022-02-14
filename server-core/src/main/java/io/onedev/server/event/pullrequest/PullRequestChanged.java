@@ -9,11 +9,11 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeDat
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
-public class PullRequestChangeEvent extends PullRequestEvent implements CommitAware {
+public class PullRequestChanged extends PullRequestEvent implements CommitAware {
 
 	private final PullRequestChange change;
 	
-	public PullRequestChangeEvent(PullRequestChange change) {
+	public PullRequestChanged(PullRequestChange change) {
 		super(change.getUser(), change.getDate(), change.getRequest());
 		this.change = change;
 	}

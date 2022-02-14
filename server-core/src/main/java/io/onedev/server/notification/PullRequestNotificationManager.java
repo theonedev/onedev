@@ -22,7 +22,7 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
-import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
+import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
 import io.onedev.server.event.pullrequest.PullRequestCommented;
@@ -86,8 +86,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		String url;
 		if (event instanceof PullRequestCommented)
 			url = urlManager.urlFor(((PullRequestCommented)event).getComment());
-		else if (event instanceof PullRequestChangeEvent) 
-			url = urlManager.urlFor(((PullRequestChangeEvent)event).getChange());
+		else if (event instanceof PullRequestChanged) 
+			url = urlManager.urlFor(((PullRequestChanged)event).getChange());
 		else if (event instanceof PullRequestCodeCommentCreated)
 			url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment());
 		else if (event instanceof PullRequestCodeCommentReplied)
@@ -187,10 +187,10 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		
 		String replyAddress = mailManager.getReplyAddress(request);
 		boolean replyable = replyAddress != null;
-		if (event instanceof PullRequestChangeEvent 
+		if (event instanceof PullRequestChanged 
 				&& request.getSubmitter() != null 
 				&& !notifiedUsers.contains(request.getSubmitter())) {
-			PullRequestChangeEvent changeEvent = (PullRequestChangeEvent) event;
+			PullRequestChanged changeEvent = (PullRequestChanged) event;
 			PullRequestChangeData changeData = changeEvent.getChange().getData();
 			if (changeData instanceof PullRequestApproveData
 					|| changeData instanceof PullRequestRequestedForChangesData
@@ -235,8 +235,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		} 
 		
 		boolean notifyWatchers = false;
-		if (event instanceof PullRequestChangeEvent) {
-			PullRequestChangeData changeData = ((PullRequestChangeEvent) event).getChange().getData();
+		if (event instanceof PullRequestChanged) {
+			PullRequestChangeData changeData = ((PullRequestChanged) event).getChange().getData();
 			if (changeData instanceof PullRequestApproveData 
 					|| changeData instanceof PullRequestRequestedForChangesData 
 					|| changeData instanceof PullRequestMergeData 

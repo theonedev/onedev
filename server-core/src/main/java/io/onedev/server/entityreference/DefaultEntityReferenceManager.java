@@ -15,19 +15,20 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
+import io.onedev.server.event.codecomment.CodeCommentReplied;
 import io.onedev.server.event.codecomment.CodeCommentUpdated;
-import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.issue.IssueChanged;
+import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueOpened;
+import io.onedev.server.event.pullrequest.PullRequestChanged;
+import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.ProjectScopedNumber;
 
@@ -227,25 +228,34 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	
 	@Transactional
 	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof IssueComment) {
-			IssueComment comment = (IssueComment) event.getEntity();
-			addReferenceChange(comment.getIssue(), comment.getContent());
-		} else if (event.getEntity() instanceof IssueChange) {
-			IssueChange change = (IssueChange) event.getEntity();
-			addReferenceChange(change.getIssue(), change.getComment());
-		} else if (event.getEntity() instanceof PullRequestComment) {
-			PullRequestComment comment = (PullRequestComment) event.getEntity();
-			addReferenceChange(comment.getRequest(), comment.getContent());
-		} else if (event.getEntity() instanceof PullRequestChange) {
-			PullRequestChange change = (PullRequestChange) event.getEntity();
-			addReferenceChange(change.getRequest(), change.getComment());
-		} else if (event.getEntity() instanceof CodeCommentReply) {
-			CodeCommentReply reply = (CodeCommentReply) event.getEntity();
-			addReferenceChange(reply.getComment(), reply.getContent());
-		}
+	public void on(IssueCommented event) {
+		addReferenceChange(event.getIssue(), event.getComment().getContent());
 	}
 
+	@Transactional
+	@Listen
+	public void on(IssueChanged event) {
+		addReferenceChange(event.getIssue(), event.getChange().getComment());
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestCommented event) {
+		addReferenceChange(event.getRequest(), event.getComment().getContent());
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestChanged event) {
+		addReferenceChange(event.getRequest(), event.getChange().getComment());
+	}
+	
+	@Transactional
+	@Listen
+	public void on(CodeCommentReplied event) {
+		addReferenceChange(event.getComment(), event.getReply().getContent());
+	}
+	
 	@Transactional
 	@Listen
 	public void on(PullRequestOpened event) {

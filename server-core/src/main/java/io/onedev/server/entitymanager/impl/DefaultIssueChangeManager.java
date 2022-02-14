@@ -44,7 +44,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.issue.IssueChanged;
-import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
+import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -498,7 +498,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	@Transactional
 	@Listen
-	public void on(PullRequestChangeEvent event) { 
+	public void on(PullRequestChanged event) { 
 		if (event.getChange().getData() instanceof PullRequestMergeData) 
 			on(event.getRequest(), MergePullRequestTrigger.class);
 		else if (event.getChange().getData() instanceof PullRequestDiscardData) 

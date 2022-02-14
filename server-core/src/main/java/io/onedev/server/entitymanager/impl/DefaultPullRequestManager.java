@@ -74,7 +74,7 @@ import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
-import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
+import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
@@ -648,7 +648,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 
 	@Transactional
 	@Listen
-	public void on(PullRequestChangeEvent event) {
+	public void on(PullRequestChanged event) {
 		PullRequestChangeData data = event.getChange().getData();
 		if (data instanceof PullRequestApproveData || data instanceof PullRequestDiscardData  
 				|| data instanceof PullRequestMergeStrategyChangeData) {
@@ -675,8 +675,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			}
 		} else {
 			boolean minorChange = false;
-			if (event instanceof PullRequestChangeEvent) {
-				PullRequestChangeData changeData = ((PullRequestChangeEvent)event).getChange().getData();
+			if (event instanceof PullRequestChanged) {
+				PullRequestChangeData changeData = ((PullRequestChanged)event).getChange().getData();
 				if (changeData instanceof PullRequestReviewerAddData 
 						|| changeData instanceof PullRequestReviewerRemoveData
 						|| changeData instanceof PullRequestAssigneeAddData

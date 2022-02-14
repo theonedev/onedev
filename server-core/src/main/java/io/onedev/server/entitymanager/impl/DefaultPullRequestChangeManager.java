@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 
 import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
+import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -34,7 +34,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 	@Override
 	public void save(PullRequestChange change) {
 		dao.persist(change);
-		listenerRegistry.post(new PullRequestChangeEvent(change));
+		listenerRegistry.post(new PullRequestChanged(change));
 	}
 	
 	@Transactional
