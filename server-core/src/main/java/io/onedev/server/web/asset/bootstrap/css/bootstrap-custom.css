@@ -3235,3 +3235,7 @@ p {
 .dark-mode h4, .dark-mode h5, .dark-mode h6 {
 	color: var(--light);
 }
+
+.dark-mode hr {
+    border-top-color: var(--dark-mode-lighter-dark);
+}

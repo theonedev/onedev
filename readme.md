@@ -1,6 +1,5 @@
 **NOTE:** We develop OneDev at <a href="https://code.onedev.io/projects/160">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be submitted there
 
-<div align="center">
 <h1>Self-hosted Git Server with Built-in CI/CD</h1>
 
 <div style="font-size: 18px;">
@@ -11,7 +10,6 @@
 </div>
 
 <p style="margin-bottom: 20px;">
-</div>
 
 ## Out-of-box Symbol Search and Navigation
 

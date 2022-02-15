@@ -1,8 +1,11 @@
 .commit-message>.detail {
 	display: none; 
     font-size: 0.9rem;
-	border-left: 4px solid var(--light-gray);
+	border-left: 4px solid var(--light-dark);
     margin: 1rem 0;
     padding: 0 0 0 1rem;
     border-radius: 0;
+}
+.dark-mode .commit-message>.detail {
+	border-left-color: var(--dark-mode-dark-gray);
 }
