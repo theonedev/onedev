@@ -19,5 +19,3 @@ fi
 
 cd helm-chart
 tar zcvf onedev-${buildVersion}.tgz onedev
-
-

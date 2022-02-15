@@ -1,4 +1,4 @@
-{{- if .Values.letsencrypt.email -}}
+{{- if and .Values.ingress.enableDefaultIssuer .Values.letsencrypt.email -}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
