@@ -17,6 +17,13 @@ ingress:
   tls: false
   ## Will be used as ingressClassName of ingress spec to match controller
   class: nginx
+  ## Set to false to disable the default certificate issuer from this chart if you want to use a custom one
+  enableDefaultIssuer: true
+  ## Custom annotations for the ingress
+  annotations: {}
+    # kubernetes.io/tls-acme: "true"
+    # cert-manager.io/issuer: ""
+    # cert-manager.io/cluster-issuer: ""
 
 letsencrypt:
   ## Specify an email here to enable LetsEncrypt.

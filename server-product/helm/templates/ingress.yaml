@@ -3,9 +3,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "onedev.fullname" . }}
-  {{- if .Values.letsencrypt.email }}
+  {{- with .Values.ingress.annotations }}
   annotations:
+    {{- if and $.Values.ingress.enableDefaultIssuer $.Values.letsencrypt.email }}
     cert-manager.io/issuer: "{{ include "onedev.fullname" . }}"
+    {{- end }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.class }}
@@ -24,6 +27,6 @@ spec:
           backend:
             service:
               name: {{ include "onedev.fullname" . }}
-              port: 
+              port:
                 number: 80
 {{- end }}
