@@ -8,6 +8,28 @@ nodeSelector:
   mysql:
     kubernetes.io/os: linux
 
+service:
+  http:
+    # type: ClusterIP
+    port: 80
+    # clusterIP: None
+    #loadBalancerIP:
+    #nodePort:
+    #externalTrafficPolicy:
+    #externalIPs:
+    loadBalancerSourceRanges: []
+    annotations:
+  ssh:
+    # type: LoadBalancer
+    port: 22
+    # clusterIP: None
+    #loadBalancerIP:
+    #nodePort:
+    #externalTrafficPolicy:
+    #externalIPs:
+    loadBalancerSourceRanges: []
+    annotations:
+
 ## Ingress support, check below for more info.
 ## Check https://code.onedev.io/projects/162/blob/main/pages/deploy-into-k8s-with-helm.md#ingress-setup for details
 ingress:

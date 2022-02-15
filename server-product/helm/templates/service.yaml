@@ -1,21 +1,91 @@
+{{ $http := .Values.service.http }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "onedev.fullname" . }}
+  name: {{ include "onedev.fullname" . }}-http
   labels:
     {{- include "onedev.labels" . | nindent 4 }}
     tier: onedev
+  annotations:
+    {{- toYaml $http.annotations | nindent 4 }}
 spec:
-  {{- if not .Values.ingress.host }}
-  type: LoadBalancer
+  {{ $type := $http.type | default (ternary "ClusterIP" "LoadBalancer" (not .Values.ingress.host)) }}
+  type: {{ $type }}
+  {{- if eq $type "LoadBalancer" }}
+    {{- if $http.loadBalancerIP }}
+  loadBalancerIP: {{ $http.loadBalancerIP }}
+    {{- end }}
+    {{- if $http.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- range $http.loadBalancerSourceRanges }}
+    - {{ . }}
+    {{- end }}
+    {{- end }}
+  {{- else if eq $type "ClusterIP" }}
+    {{- if $http.clusterIP }}
+  clusterIP: {{ $http.clusterIP }}
+    {{- end }}
+  {{- end }}
+  {{- if $http.externalIPs }}
+  externalIPs:
+    {{- toYaml $http.externalIPs | nindent 4 }}
+  {{- end }}
+  {{- if $http.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ $http.externalTrafficPolicy }}
   {{- end }}
   ports:
     - name: http
-      port: 80
+      port: {{ $http.port }}
+      {{- if  $http.nodePort }}
+      nodePort: {{ $http.nodePort }}
+      {{- end }}
       targetPort: 6610
       protocol: TCP
+  selector:
+    {{- include "onedev.selectorLabels" . | nindent 4 }}
+    tier: onedev
+---
+{{ $ssh := .Values.service.ssh }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "onedev.fullname" . }}-ssh
+  labels:
+    {{- include "onedev.labels" . | nindent 4 }}
+    tier: onedev
+  annotations:
+    {{- toYaml $ssh.annotations | nindent 4 }}
+spec:
+  {{ $type := $ssh.type | default (ternary "ClusterIP" "LoadBalancer" (not .Values.ingress.host)) }}
+  type: {{ $type }}
+  {{- if eq $type "LoadBalancer" }}
+    {{ if $ssh.loadBalancerIP }}
+  loadBalancerIP: {{ $ssh.loadBalancerIP }}
+    {{- end }}
+    {{- if $ssh.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- range $ssh.loadBalancerSourceRanges }}
+    - {{ . }}
+    {{- end }}
+    {{- end }}
+  {{- else if eq $type "ClusterIP" }}
+    {{- if $ssh.clusterIP }}
+  clusterIP: {{ $ssh.clusterIP }}
+    {{- end }}
+  {{- end }}
+  {{- if $ssh.externalIPs }}
+  externalIPs:
+    {{- toYaml $ssh.externalIPs | nindent 4 }}
+  {{- end }}
+  {{- if $ssh.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ $ssh.externalTrafficPolicy }}
+  {{- end }}
+  ports:
     - name: ssh
-      port: 22
+      port: {{ $ssh.port }}
+      {{- if  $ssh.nodePort }}
+      nodePort: {{ $ssh.nodePort }}
+      {{- end }}
       targetPort: 6611
       protocol: TCP
   selector:
