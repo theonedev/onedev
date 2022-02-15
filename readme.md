@@ -23,8 +23,6 @@ You can also jump to symbol definition in diff while reviewing commits or pull r
 
 ![searchsymbol](doc/images/search-symbol.gif)
 
---- 
-
 ![jumpsymbol](doc/images/symbol.gif)
 
 ## Code Search with Regular Expression
@@ -54,8 +52,6 @@ With customizable issue states, we may address the issue with four states: open,
 
 ![boards](doc/images/boards.png)
 
----
-
 ![fixing-build](doc/images/fixing-build.png)
 
 ## A powerful and Intuitive Query Language
@@ -74,8 +70,6 @@ Matrix jobs, typed parameters, parameter chaining, step templates, build promoti
 
 ![job-def](doc/images/job-command.gif)
 
----
-
 ![run-job](doc/images/build-option.gif)
 
 ## Flexible Pull Request Review Policy and Reviewer Suggestion
@@ -91,8 +85,6 @@ Comment on any part of code or diff to start a lightweight review without openin
 Each discussion is threaded so that you can easily know discussions with new comments/updates.
 
 ![file-comment](doc/images/file-comment.gif)
-
---- 
 
 ![thread-comments](doc/images/threaded-comments.png)
 
