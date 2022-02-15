@@ -283,3 +283,6 @@
 	margin-left: 1rem;
 }
 
+.dark-mode ::selection {
+	background-color: #1e496c;
+}

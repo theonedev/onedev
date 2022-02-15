@@ -47,7 +47,7 @@
 .dark-mode .cm-s-eclipse.CodeMirror {background: var(--dark-mode-dark); color: #e9e9e9;}
 .dark-mode .cm-s-eclipse .CodeMirror-cursor {border-left: 1px solid #bebebe;}
 .dark-mode .CodeMirror-activeline-background {background: var(--gray-dark);}
-.dark-mode .cm-s-eclipse div.CodeMirror-selected {background: #1e496c}
+.dark-mode .cm-s-eclipse div.CodeMirror-selected {background: #1e496c !important;}
 .dark-mode .cm-s-eclipse .CodeMirror-gutters {background: var(--dark-mode-dark); border-right: 1px solid var(--dark-mode-lighter-dark); color: #606366}
 .dark-mode .cm-s-eclipse span.cm-builtin {color: #A9B7C6;}
-.dark-mode .cm-s-eclipse .CodeMirror-matchingbracket {background-color: #3b514d; color: yellow !important;}
+.dark-mode .cm-s-eclipse .CodeMirror-matchingbracket {background-color: #3b514d; color: var(--light) !important;}

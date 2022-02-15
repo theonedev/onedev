@@ -102,7 +102,7 @@ OneDev tracks your cursor in edit window and scrolls the preview window as neces
 
 ## Project Hierarchy to Facilitate Setting Inheritance
 
-Organization is idea for public service. However for self-hosted internal use, we feel that a hierarchical structure is more practical to organize projects. Child projects can inherit settings from parent project and can selectively override some of them if necessary. This reduces a lot of overhead to manage a lot of projects in the company.
+Organization is ideal for public service. However for self-hosted internal use, we feel that a hierarchical structure is more practical to organize projects. Child projects can inherit settings from parent project and can selectively override some of them if necessary. This reduces a lot of overhead to manage a lot of projects in the company.
 
 ----
 
