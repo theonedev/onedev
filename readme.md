@@ -45,8 +45,8 @@ Of course this can be done by many third party applications at GitHub, however t
 
 The simple open/close state of GitHub/GitLab issues does not work well for many workflows. Considering issues submitted by customers:
 
-1. If we close issue upon committing the code, customer will be notified and may ask us for the release fixing the issue.
-2. If we close the issue at release time, QA might be confused at what issues to test as they all remain open at test time. 
+1. If developer closes issue upon committing the code, customer will be notified and may ask for the release fixing the issue.
+2. If developer closes the issue at release time, QA might be confused at what issues to test as they all remain open at test time. 
 
 With customizable issue states, we may address the issue with four states: open, committed, test ready and released:
 
