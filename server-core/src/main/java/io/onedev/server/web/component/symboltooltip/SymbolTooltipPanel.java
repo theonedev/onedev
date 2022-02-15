@@ -30,6 +30,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -46,7 +47,6 @@ import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererer;
-import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
@@ -143,11 +143,13 @@ public abstract class SymbolTooltipPanel extends Panel {
 						List<QueryHit> hits;						
 						// do this check to avoid TooGeneralQueryException
 						if (symbolName.length() >= IndexConstants.NGRAM_SIZE) {
+							int maxQueryEntries = OneDev.getInstance(SettingManager.class)
+									.getPerformanceSetting().getMaxCodeSearchEntries();
 							BlobQuery query = new TextQuery.Builder()
 									.term(symbolName)
 									.wholeWord(true)
 									.caseSensitive(true)
-									.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+									.count(maxQueryEntries)
 									.build();
 							try {
 								SearchManager searchManager = OneDev.getInstance(SearchManager.class);

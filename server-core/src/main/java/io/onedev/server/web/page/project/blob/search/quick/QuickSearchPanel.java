@@ -34,6 +34,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.SearchManager;
@@ -48,7 +49,6 @@ import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererer;
-import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public abstract class QuickSearchPanel extends Panel {
@@ -280,7 +280,9 @@ public abstract class QuickSearchPanel extends Panel {
 					
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
-						List<QueryHit> hits = querySymbols(searchInput, SearchResultPanel.MAX_QUERY_ENTRIES);
+						int maxQueryEntries = OneDev.getInstance(SettingManager.class)
+								.getPerformanceSetting().getMaxCodeSearchEntries();
+						List<QueryHit> hits = querySymbols(searchInput, maxQueryEntries);
 						onMoreQueried(target, hits);
 					}
 					

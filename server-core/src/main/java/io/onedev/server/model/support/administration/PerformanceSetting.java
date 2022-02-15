@@ -21,6 +21,8 @@ public class PerformanceSetting implements Serializable {
 	
 	private int maxUploadFileSize = 20;
 	
+	private int maxCodeSearchEntries = 100;
+	
 	public PerformanceSetting() {
 		HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
 		cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount();
@@ -79,6 +81,15 @@ public class PerformanceSetting implements Serializable {
 
 	public void setMaxUploadFileSize(int maxUploadFileSize) {
 		this.maxUploadFileSize = maxUploadFileSize;
+	}
+
+	@Editable(order=800, description="Maximum number of entries to return when search code in repository")
+	public int getMaxCodeSearchEntries() {
+		return maxCodeSearchEntries;
+	}
+
+	public void setMaxCodeSearchEntries(int maxCodeSearchEntries) {
+		this.maxCodeSearchEntries = maxCodeSearchEntries;
 	}
 
 }

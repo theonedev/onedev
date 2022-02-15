@@ -3520,4 +3520,22 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate76(File dataDir, Stack<Integer> versions) {
+		Map<String, Integer> stateOrdinals = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("PERFORMANCE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("maxCodeSearchEntries").setText("100");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

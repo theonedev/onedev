@@ -38,6 +38,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.SearchManager;
@@ -52,7 +53,6 @@ import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 
 @SuppressWarnings("serial")
 public abstract class AdvancedSearchPanel extends Panel {
@@ -514,6 +514,10 @@ public abstract class AdvancedSearchPanel extends Panel {
 		
 	}
 	
+	private static int getMaxQueryEntries() {
+		return OneDev.getInstance(SettingManager.class).getPerformanceSetting().getMaxCodeSearchEntries();
+	}
+	
 	protected String getDirectory(boolean insideDir) {
 		BlobIdent blobIdent = getCurrentBlob();
 		if (blobIdent == null || blobIdent.path == null || !blobIdent.path.contains("/") || !insideDir) 
@@ -539,6 +543,8 @@ public abstract class AdvancedSearchPanel extends Panel {
 
 		@Override
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
+			int maxQueryEntries = getMaxQueryEntries();
+			
 			SearchManager searchManager = OneDev.getInstance(SearchManager.class);
 			List<QueryHit> hits;
 			BlobQuery query = new SymbolQuery.Builder()
@@ -547,19 +553,19 @@ public abstract class AdvancedSearchPanel extends Panel {
 					.caseSensitive(caseSensitive)
 					.directory(context.getDirectory(insideCurrentDir))
 					.fileNames(fileNames)
-					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+					.count(maxQueryEntries)
 					.build();
 			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject(), true);
 			hits = searchManager.search(context.projectModel.getObject(), commit, query);
 			
-			if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
+			if (hits.size() < maxQueryEntries) {
 				query = new SymbolQuery.Builder()
 						.term(term)
 						.primary(false)
 						.caseSensitive(caseSensitive)
 						.directory(context.getDirectory(insideCurrentDir))
 						.fileNames(fileNames)
-						.count(SearchResultPanel.MAX_QUERY_ENTRIES - hits.size())
+						.count(maxQueryEntries - hits.size())
 						.build();
 				hits.addAll(searchManager.search(context.projectModel.getObject(), commit, query));
 			}
@@ -584,7 +590,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 					.fileNames(term)
 					.caseSensitive(caseSensitive) 
 					.directory(context.getDirectory(insideCurrentDir))
-					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+					.count(getMaxQueryEntries())
 					.build();
 			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject(), true);
 			return searchManager.search(context.projectModel.getObject(), commit, query);
@@ -615,7 +621,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 					.wholeWord(wholeWord)
 					.directory(context.getDirectory(insideCurrentDir))
 					.fileNames(fileNames)
-					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
+					.count(getMaxQueryEntries())
 					.build();
 			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject(), true);
 			return searchManager.search(context.projectModel.getObject(), commit, query);

@@ -30,6 +30,8 @@ import org.eclipse.jgit.lib.FileMode;
 import io.onedev.commons.jsymbol.util.HighlightableLabel;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
@@ -43,8 +45,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
 
-	public static final int MAX_QUERY_ENTRIES = 1000;
-	
 	private enum ExpandStatus {EXPAND_ALL, COLLAPSE_ALL};
 	
 	private static final String HITS_ID = "hits";
@@ -71,10 +71,10 @@ public abstract class SearchResultPanel extends Panel {
 	
 	public SearchResultPanel(String id, BlobRenderContext context, List<QueryHit> hits) {
 		super(id);
-		
+
 		this.context = context;
 		
-		hasMore = (hits.size() == MAX_QUERY_ENTRIES);
+		hasMore = (hits.size() == getMaxQueryEntries());
 		
 		Map<String, MatchedBlob> hitsByBlob = new LinkedHashMap<>();
 
@@ -116,6 +116,10 @@ public abstract class SearchResultPanel extends Panel {
 				
 			});
 		}
+	}
+	
+	private int getMaxQueryEntries() {
+		return OneDev.getInstance(SettingManager.class).getPerformanceSetting().getMaxCodeSearchEntries();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -249,7 +253,7 @@ public abstract class SearchResultPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String message = "(too many matches, displaying " + MAX_QUERY_ENTRIES + " of them)";
+		String message = "(too many matches, displaying " + getMaxQueryEntries() + " of them)";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
 		add(prevMatchLink = new AjaxLink<Void>("prevMatch") {
