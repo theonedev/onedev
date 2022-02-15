@@ -336,7 +336,7 @@ public abstract class BasePage extends WebPage {
 	}
 	
 	protected String getPageTitle() {
-		return "OneDev - Super Easy All-in-One DevOps Platform";
+		return "OneDev: Self-hosted Git Server with Built-in CI/CD";
 	}
 
 	protected int getPageRefreshInterval() {
