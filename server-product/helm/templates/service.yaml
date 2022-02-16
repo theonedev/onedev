@@ -9,7 +9,7 @@ metadata:
   annotations:
     {{- toYaml $http.annotations | nindent 4 }}
 spec:
-  {{ $type := $http.type | default (ternary "ClusterIP" "LoadBalancer" (not .Values.ingress.host)) }}
+  {{ $type := $http.type | default (ternary "LoadBalancer" "ClusterIP" (not .Values.ingress.host)) }}
   type: {{ $type }}
   {{- if eq $type "LoadBalancer" }}
     {{- if $http.loadBalancerIP }}
@@ -56,7 +56,7 @@ metadata:
   annotations:
     {{- toYaml $ssh.annotations | nindent 4 }}
 spec:
-  {{ $type := $ssh.type | default (ternary "ClusterIP" "LoadBalancer" (not .Values.ingress.host)) }}
+  {{ $type := $ssh.type | default (ternary "LoadBalancer" "ClusterIP" (not .Values.ingress.host)) }}
   type: {{ $type }}
   {{- if eq $type "LoadBalancer" }}
     {{ if $ssh.loadBalancerIP }}
