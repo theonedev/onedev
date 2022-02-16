@@ -3521,7 +3521,6 @@ public class DataMigrator {
 	}
 	
 	private void migrate76(File dataDir, Stack<Integer> versions) {
-		Map<String, Integer> stateOrdinals = new HashMap<>();
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -3530,6 +3529,54 @@ public class DataMigrator {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							valueElement.addElement("maxCodeSearchEntries").setText("100");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
+	private void migrate77(File dataDir, Stack<Integer> versions) {
+		Map<String, String> userIds = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementText("id").trim();
+					String name = element.elementText("name").trim();
+					Element fullNameElement = element.element("fullName");
+					if (fullNameElement != null) 
+						userIds.put(fullNameElement.getText().trim(), id);
+					else
+						userIds.put(name, id);
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequestChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					Element assigneeElement = dataElement.element("assignee");
+					if (assigneeElement != null) {
+						String userId = userIds.get(assigneeElement.getText().trim());
+						if (userId != null) {
+							assigneeElement.setName("assigneeId");
+							assigneeElement.setText(userId);
+						} else {
+							element.detach();
+						}
+					}
+					Element reviewerElement = dataElement.element("reviewer");
+					if (reviewerElement != null) {
+						String userId = userIds.get(reviewerElement.getText().trim());
+						if (userId != null) {
+							reviewerElement.setName("reviewerId");
+							reviewerElement.setText(userId);
+						} else {
+							element.detach();
 						}
 					}
 				}

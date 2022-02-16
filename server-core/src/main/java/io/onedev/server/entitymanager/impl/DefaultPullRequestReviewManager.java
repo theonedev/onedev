@@ -100,7 +100,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 				change.setDate(new Date());
 				change.setRequest(request);
 				change.setUser(SecurityUtils.getUser());
-				change.setData(new PullRequestReviewerRemoveData(reviewer.getDisplayName()));
+				change.setData(new PullRequestReviewerRemoveData(reviewer));
 				pullRequestChangeManager.save(change);
 				return true;
 			} else {
@@ -121,7 +121,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
 		change.setRequest(request);
-		change.setData(new PullRequestReviewerAddData(review.getUser().getDisplayName()));
+		change.setData(new PullRequestReviewerAddData(review.getUser()));
 		change.setUser(SecurityUtils.getUser());
 		pullRequestChangeManager.save(change);
 	}
