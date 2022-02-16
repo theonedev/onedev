@@ -7,7 +7,7 @@
 				<div wicket:id="blobNavigator" class="blob-navigator mr-3 py-2"></div>
 			</div>
 			<div wicket:id="blobOperations" class="d-flex align-items-center py-2">
-				<a wicket:id="getCode" title="Code clone or download" class="mr-4 text-nowrap"><wicket:svg href="download2" class="icon"/> Code</a>
+				<a wicket:id="getCode" title="Code clone or download" class="mr-4 text-nowrap link-info"><wicket:svg href="download2" class="icon"/> Clone</a>
 				<a wicket:id="add" title="Add files to current directory" class="mr-3 text-nowrap dropdown-toggle">Add</a>
 				<a wicket:id="search" title="Search files, symbols and texts" class="mr-3 text-nowrap dropdown-toggle">Search</a>
 				<a wicket:id="history" title="Commit history of current path" class="text-nowrap">History</a>
@@ -17,7 +17,7 @@
 			<wicket:svg href="loading" class="icon spin"/>
 			Revision indexing in progress... (search in this revision will be accurate after indexed)
 		</div>
-		<div wicket:id="buildSupportNote" class="build-support-note p-3 text-info flex-shrink-0">
+		<div wicket:id="buildSupportNote" class="build-support-note p-3 flex-shrink-0">
 			<wicket:svg href="bulb" class="icon"/> 
 			Enable build support by <a wicket:id="addFile" class="link-primary"></a>
 		</div>

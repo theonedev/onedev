@@ -178,7 +178,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
 
-	public static final String REFS_PREFIX = "refs/pull/";
+	public static final String REFS_PREFIX = "refs/pulls/";
 
 	public static final int MAX_CODE_COMMENTS = 1000;
 	

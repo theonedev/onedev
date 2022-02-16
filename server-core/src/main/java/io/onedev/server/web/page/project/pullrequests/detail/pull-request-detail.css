@@ -1,6 +1,9 @@
 .pull-request-detail>.card-body {
 	min-height: fit-content;
 }
+.pull-request-detail>.card-body>.main>.status-bar>.status {
+	font-size: 1rem;
+}
 .pull-request-detail>.card-body>.main>.summary {
 	border: 2px dashed var(--light-gray);
 	padding: 1.2rem 1.5rem;
@@ -87,4 +90,16 @@ ul>li>a.code-comments.new .icon {
 .pull-request-detail .more-info .reviews a.delete, 
 .pull-request-detail .more-info .assignments a.delete {
 	margin-left: auto;
+}
+.pull-request-detail .more-info .submission td.name {
+	padding-left: 0;
+}
+.pull-request-detail .more-info .submission td.value {
+	padding-right: 0;
+}
+.pull-request-detail .more-info .submission tr:first-child td {
+	padding-top: 0;
+}
+.pull-request-detail .more-info .submission tr:last-child td {
+	padding-bottom: 0;
 }

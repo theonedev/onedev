@@ -76,7 +76,6 @@ import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -305,7 +304,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		super.onInitialize();
 
 		add(newRequestHead());
-		add(newStatusAndBranchesContainer());
+		add(newStatusBarContainer());
 		WebMarkupContainer summaryContainer = new WebMarkupContainer("requestSummary") {
 
 			@Override
@@ -675,6 +674,24 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected Component newBody(String componentId) {
 				Fragment fragment = new Fragment(componentId, "moreInfoFrag", PullRequestDetailPage.this);
+				
+				fragment.add(new UserIdentPanel("submitter", getPullRequest().getSubmitter(), Mode.NAME));
+				
+				fragment.add(new BranchLink("targetBranch", getPullRequest().getTarget()));
+				if (getPullRequest().getSourceProject() != null) {
+					fragment.add(new BranchLink("sourceBranch", getPullRequest().getSource()));
+				} else {
+					fragment.add(new Label("sourceBranch", "unknown") {
+
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							tag.setName("span");
+						}
+						
+					});
+				}
+				
 				fragment.add(newMergeStrategyContainer());
 				fragment.add(new ReviewListPanel("reviews") {
 
@@ -955,12 +972,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return mergeStrategyContainer;
 	}
 	
-	private WebMarkupContainer newStatusAndBranchesContainer() {
-		WebMarkupContainer statusAndBranchesContainer = new WebMarkupContainer("statusAndBranches");
+	private WebMarkupContainer newStatusBarContainer() {
+		WebMarkupContainer statusBarContainer = new WebMarkupContainer("statusBar");
 		
-		PullRequest request = getPullRequest();
-		
-		statusAndBranchesContainer.add(new Label("status", new AbstractReadOnlyModel<String>() {
+		statusBarContainer.add(new Label("status", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -1006,29 +1021,38 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			
 		});
 		
-		statusAndBranchesContainer.add(new UserIdentPanel("user", request.getSubmitter(), Mode.NAME));
-		statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate()))
-			.add(new AttributeAppender("title", DateUtils.formatDateTime(request.getSubmitDate()))));
-		
-		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget()));
-		if (request.getSourceProject() != null) {
-			statusAndBranchesContainer.add(new BranchLink("source", request.getSource()));
-		} else {
-			statusAndBranchesContainer.add(new Label("source", "unknown") {
+		statusBarContainer.add(new DropdownLink("clone") {
 
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.setName("span");
-				}
-				
-			});
-		}
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment fragment = new Fragment(id, "cloneFrag", PullRequestDetailPage.this);
+				fragment.add(new Label("headRef", getPullRequest().getHeadRef()));
+				fragment.add(new Label("mergeRef", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return getPullRequest().getMergeRef();
+					}
+					
+				}) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getPullRequest().getMergePreview() != null 
+								&& getPullRequest().getMergePreview().getMergeCommitHash() != null);
+					}
+					
+				});
+				return fragment;
+			}
+			
+		});
 		
-		statusAndBranchesContainer.add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
+		statusBarContainer.add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
 				NewPullRequestPage.paramsOf(getProject())));		
 		
-		return statusAndBranchesContainer;
+		return statusBarContainer;
 	}
 
 	private WebMarkupContainer newSummaryContributions() {
