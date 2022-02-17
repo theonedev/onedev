@@ -15,10 +15,9 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -29,7 +28,7 @@ import io.onedev.server.security.SecurityUtils;
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
 public class PullRequestReviewResource {
-
+	
 	private final PullRequestReviewManager reviewManager;
 
 	@Inject
@@ -58,10 +57,7 @@ public class PullRequestReviewResource {
 		if (review.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
 		
-		if (review.getResult() != null)
-			reviewManager.review(review);
-		else
-			reviewManager.addReviewer(review);
+		reviewManager.save(review);
 		return review.getId();
 	}
 	
@@ -70,15 +66,12 @@ public class PullRequestReviewResource {
 	@DELETE
 	public Response delete(@PathParam("reviewId") Long reviewId) {
 		PullRequestReview review = reviewManager.load(reviewId);
-		if (!SecurityUtils.canReadCode(review.getRequest().getProject()) 
-				|| !SecurityUtils.canModify(review.getRequest())) {
+		PullRequest request = review.getRequest();
+		
+		if (!SecurityUtils.canReadCode(request.getProject()) || !SecurityUtils.canModify(request)) 
 			throw new UnauthorizedException();
-		}
 
-		if (!reviewManager.removeReviewer(review, Lists.newArrayList())) {
-			throw new ExplicitException("Reviewer '" + review.getUser().getDisplayName() 
-					+ "' is required and can not be removed");
-		}
+		reviewManager.delete(review);
 		
 		return Response.ok().build();
 	}

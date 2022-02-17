@@ -63,7 +63,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
@@ -142,7 +141,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	private static final int PREVIEW_CALC_PRIORITY = 50;
 	
-	private final PullRequestUpdateManager pullRequestUpdateManager;
+	private final PullRequestUpdateManager updateManager;
 	
 	private final ProjectManager projectManager;
 	
@@ -150,7 +149,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final PullRequestReviewManager pullRequestReviewManager;
+	private final PullRequestReviewManager reviewManager;
 	
 	private final BuildManager buildManager;
 	
@@ -158,40 +157,36 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 
 	private final BatchWorkManager batchWorkManager;
 	
-	private final PullRequestChangeManager pullRequestChangeManager;
-	
-	private final PullRequestAssignmentManager pullRequestAssignmentManager;
+	private final PullRequestChangeManager changeManager;
 	
 	private final TransactionManager transactionManager;
 	
 	private final ExecutorService executorService;
 	
-	private final EntityReferenceManager entityReferenceManager;
+	private final EntityReferenceManager referenceManager;
 	
 	@Inject
-	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
-			PullRequestReviewManager pullRequestReviewManager, MarkdownManager markdownManager, 
+	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager updateManager,  
+			PullRequestReviewManager reviewManager, MarkdownManager markdownManager, 
 			BatchWorkManager batchWorkManager, ListenerRegistry listenerRegistry, 
-			SessionManager sessionManager, PullRequestChangeManager pullRequestChangeManager, 
+			SessionManager sessionManager, PullRequestChangeManager changeManager, 
 			ExecutorService executorService, BuildManager buildManager, 
 			TransactionManager transactionManager, ProjectManager projectManager, 
-			CommitInfoManager commitInfoManager, PullRequestAssignmentManager pullRequestAssignmentManager, 
-			EntityReferenceManager entityReferenceManager) {
+			CommitInfoManager commitInfoManager, EntityReferenceManager referenceManager) {
 		super(dao);
 		
-		this.pullRequestUpdateManager = pullRequestUpdateManager;
-		this.pullRequestReviewManager = pullRequestReviewManager;
+		this.updateManager = updateManager;
+		this.reviewManager = reviewManager;
 		this.transactionManager = transactionManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
 		this.listenerRegistry = listenerRegistry;
-		this.pullRequestChangeManager = pullRequestChangeManager;
+		this.changeManager = changeManager;
 		this.buildManager = buildManager;
 		this.executorService = executorService;
 		this.projectManager = projectManager;
 		this.commitInfoManager = commitInfoManager;
-		this.pullRequestAssignmentManager = pullRequestAssignmentManager;
-		this.entityReferenceManager = entityReferenceManager;
+		this.referenceManager = referenceManager;
 	}
 	
 	@Transactional
@@ -236,7 +231,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			change.setData(new PullRequestSourceBranchRestoreData());
 			change.setRequest(request);
 			change.setUser(SecurityUtils.getUser());
-			pullRequestChangeManager.save(change);
+			changeManager.save(change);
 		}
 	}
 
@@ -253,7 +248,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			change.setData(new PullRequestSourceBranchDeleteData());
 			change.setRequest(request);
 			change.setUser(SecurityUtils.getUser());
-			pullRequestChangeManager.save(change);
+			changeManager.save(change);
 		}
 	}
 	
@@ -269,7 +264,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		change.setData(new PullRequestReopenData());
 		change.setRequest(request);
 		change.setUser(user);
-		pullRequestChangeManager.save(change);
+		changeManager.save(change);
 		
 		MergePreview mergePreview = request.getMergePreview();
 		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
@@ -295,7 +290,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		change.setDate(closeInfo.getDate());
 		change.setRequest(request);
 		change.setUser(user);
-		pullRequestChangeManager.save(change);
+		changeManager.save(change);
 	}
 	
 	@Transactional
@@ -420,12 +415,13 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		request.writeHeadRef();
 		
 		for (PullRequestUpdate update: request.getUpdates())
-			pullRequestUpdateManager.save(update);
-		
-		pullRequestReviewManager.saveReviews(request);
+			updateManager.save(update);
+
+		for (PullRequestReview review: request.getReviews())
+			dao.persist(review);
 		
 		for (PullRequestAssignment assignment: request.getAssignments())
-			pullRequestAssignmentManager.save(assignment);
+			dao.persist(assignment);
 
 		MergePreview mergePreview = request.getMergePreview();
 		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
@@ -458,7 +454,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		change.setDate(date);
 		change.setData(new PullRequestMergeData(reason));
 		change.setRequest(request);
-		pullRequestChangeManager.save(change);
+		changeManager.save(change);
 	}
 
 	@Transactional
@@ -474,7 +470,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 				} else if (request.getTarget().getObjectId(false) == null) {
 					discard(request, "Target branch no longer exists");
 				} else {
-					pullRequestUpdateManager.checkUpdate(request);
+					updateManager.checkUpdate(request);
 					if (request.isMergedIntoTarget()) {
 						closeAsMerged(request, true);
 					} else {
@@ -484,7 +480,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 						 * If the check method runs concurrently, below statements may fail. It will 
 						 * not do any harm except that the transaction rolls back
 						 */
-						pullRequestReviewManager.saveReviews(request);
+						for (PullRequestReview review: request.getReviews()) {
+							if (review.isNew() || review.isDirty())
+								reviewManager.save(review);
+						}
 						
 						Long requestId = request.getId();
 						transactionManager.runAfterCommit(new Runnable() {
@@ -799,7 +798,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 				review.setRequest(request);
 				review.setUser(user);
 				request.getReviews().add(review);
-			} else if (review.getUpdate() == null || review.getUpdate().getId()<update.getId()) {
+			} else if (review.getResult() != null && (review.getUpdate() == null || review.getUpdate().getId()<update.getId())) {
 				review.setResult(null);
 			}
 		}
@@ -956,7 +955,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		List<PullRequest> requests = query.getResultList();
 		if (!requests.isEmpty()) {
 			if (loadReviews)
-				pullRequestReviewManager.populateReviews(requests);
+				reviewManager.populateReviews(requests);
 			if (loadBuilds)
 				buildManager.populateBuilds(requests);
 		}
@@ -1068,7 +1067,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		String prevDescription = request.getDescription();
 		if (!Objects.equal(description, prevDescription)) {
 			request.setDescription(description);
-			entityReferenceManager.addReferenceChange(request, description);
+			referenceManager.addReferenceChange(request, description);
 			save(request);
 		}
 	}

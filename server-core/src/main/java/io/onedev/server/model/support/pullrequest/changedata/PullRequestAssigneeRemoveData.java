@@ -1,5 +1,7 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
+import javax.annotation.Nullable;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
@@ -16,11 +18,16 @@ public class PullRequestAssigneeRemoveData extends PullRequestChangeData {
 	
 	@Override
 	public String getActivity() {
-		User user = OneDev.getInstance(UserManager.class).get(assigneeId);
+		User user = getUser();
 		if (user != null)
 			return "added assignee \"" + user.getDisplayName() + "\"";
 		else
 			return "added assignee unknown";
+	}
+	
+	@Nullable
+	public User getUser() {
+		return OneDev.getInstance(UserManager.class).get(assigneeId);
 	}
 
 }

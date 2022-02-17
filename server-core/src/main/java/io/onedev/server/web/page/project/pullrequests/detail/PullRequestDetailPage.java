@@ -528,7 +528,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				super.onConfigure();
 				
 				setVisible(getPullRequest().isOpen() && !requestedForChanges() 
-						&& getPullRequest().getReviews().stream().anyMatch(it-> it.getResult()==null));
+						&& getPullRequest().getReviews().stream().anyMatch(it-> it.getResult()==null || it.getResult().getApproved()==null));
 			}
 			
 		});
@@ -1116,7 +1116,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getUser());
-					return review != null && review.getResult() == null;
+					return review != null && (review.getResult() == null || review.getResult().getApproved() == null);
 				} else {
 					return false;
 				}
@@ -1143,7 +1143,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							result.setComment(getComment());
 							result.setCommit(request.getLatestUpdate().getHeadCommitHash());
 							review.setResult(result);
-							OneDev.getInstance(PullRequestReviewManager.class).review(review);
+							OneDev.getInstance(PullRequestReviewManager.class).save(review);
 							Session.get().success("Approved");
 							return true;
 						} else {
@@ -1171,7 +1171,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getUser());
-					return review != null && review.getResult() == null;
+					return review != null && (review.getResult() == null || review.getResult().getApproved() == null);
 				} else {
 					return false;
 				}
@@ -1198,7 +1198,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							result.setComment(getComment());
 							result.setCommit(request.getLatestUpdate().getHeadCommitHash());
 							review.setResult(result);
-							OneDev.getInstance(PullRequestReviewManager.class).review(review);
+							OneDev.getInstance(PullRequestReviewManager.class).save(review);
 							Session.get().success("Requested For changes");
 							return true;
 						} else {
@@ -1254,7 +1254,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							result.setComment(getComment());
 							result.setCommit(request.getLatestUpdate().getHeadCommitHash());
 							review.setResult(result);							
-							OneDev.getInstance(PullRequestReviewManager.class).review(review);
+							OneDev.getInstance(PullRequestReviewManager.class).save(review);
 							Session.get().success("Review Withdrawed");
 							return true;
 						} else {

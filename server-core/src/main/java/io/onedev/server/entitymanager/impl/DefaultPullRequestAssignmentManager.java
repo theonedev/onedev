@@ -21,45 +21,41 @@ import io.onedev.server.security.SecurityUtils;
 public class DefaultPullRequestAssignmentManager extends BaseEntityManager<PullRequestAssignment> 
 		implements PullRequestAssignmentManager {
 
-	private final PullRequestChangeManager pullRequestChangeManager;
+	private final PullRequestChangeManager changeManager;
 	
 	@Inject
-	public DefaultPullRequestAssignmentManager(Dao dao, 
-			PullRequestChangeManager pullRequestChangeManager) {
+	public DefaultPullRequestAssignmentManager(Dao dao, PullRequestChangeManager changeManager) {
 		super(dao);
-		this.pullRequestChangeManager = pullRequestChangeManager;
+		this.changeManager = changeManager;
 	}
 
 	@Transactional
 	@Override
-	public void addAssignee(PullRequestAssignment assignment) {
-		save(assignment);
+	public void save(PullRequestAssignment assignment) {
+		super.save(assignment);
 		
-		PullRequest request = assignment.getRequest();
-		request.getAssignments().add(assignment);
-		
+		PullRequest request = assignment.getRequest();		
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
 		change.setRequest(request);
 		change.setData(new PullRequestAssigneeAddData(assignment.getUser()));
 		change.setUser(SecurityUtils.getUser());
-		pullRequestChangeManager.save(change);
+		changeManager.save(change);
 	}
 
 	@Transactional
 	@Override
-	public void removeAssignee(PullRequestAssignment assignment) {
-		delete(assignment);
+	public void delete(PullRequestAssignment assignment) {
+		super.delete(assignment);
 		
 		PullRequest request = assignment.getRequest();
-		request.getAssignments().remove(assignment);
 		
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
 		change.setRequest(request);
 		change.setData(new PullRequestAssigneeRemoveData(assignment.getUser()));
 		change.setUser(SecurityUtils.getUser());
-		pullRequestChangeManager.save(change);
+		changeManager.save(change);
 	}
 		
 }

@@ -23,7 +23,7 @@ public class PullRequestReferencedFromIssueData
 
 	@Override
 	public String getActivity() {
-		return "Referenced from issue";
+		return "referenced from issue";
 	}
 
 	@Override

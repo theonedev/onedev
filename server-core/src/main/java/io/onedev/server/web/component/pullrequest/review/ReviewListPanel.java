@@ -1,10 +1,8 @@
 package io.onedev.server.web.component.pullrequest.review;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -21,6 +19,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.exception.ReviewerRequiredException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
@@ -34,8 +33,6 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 @SuppressWarnings("serial")
 public abstract class ReviewListPanel extends Panel {
 
-	private static final MetaDataKey<ArrayList<User>> UNPREFERABLE_REVIEWERS = new MetaDataKey<ArrayList<User>>() {};
-	
 	private final IModel<List<PullRequestReview>> reviewsModel;
 	
 	public ReviewListPanel(String id) {
@@ -105,19 +102,13 @@ public abstract class ReviewListPanel extends Panel {
 						PullRequest request = getPullRequest();
 						PullRequestReview review = item.getModelObject();
 						
-						ArrayList<User> unpreferableReviewers = getPage().getMetaData(UNPREFERABLE_REVIEWERS);
-						if (unpreferableReviewers == null)
-							unpreferableReviewers = new ArrayList<>();
-						unpreferableReviewers.remove(review.getUser());
-						unpreferableReviewers.add(review.getUser());
-						getPage().setMetaData(UNPREFERABLE_REVIEWERS, unpreferableReviewers);
-
-						PullRequestReviewManager manager = OneDev.getInstance(PullRequestReviewManager.class);
-						if (!manager.removeReviewer(review, unpreferableReviewers)) {
+						try {
+							OneDev.getInstance(PullRequestReviewManager.class).delete(review);
+							if (request.isNew()) 
+								target.add(ReviewListPanel.this);
+						} catch (ReviewerRequiredException e) {
 							getSession().warn("Reviewer '" + review.getUser().getDisplayName() 
 									+ "' is required and can not be removed");
-						} else if (request.isNew()) {
-							target.add(ReviewListPanel.this);
 						}
 						reviewsModel.detach();
 					}

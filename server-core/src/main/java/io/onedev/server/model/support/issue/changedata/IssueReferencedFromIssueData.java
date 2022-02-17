@@ -28,7 +28,7 @@ public class IssueReferencedFromIssueData extends IssueChangeData implements Ref
 
 	@Override
 	public String getActivity() {
-		return "Referenced from other issue";
+		return "referenced from other issue";
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package io.onedev.server.web.component.issue.activities.activity;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -39,12 +40,16 @@ class IssueChangePanel extends GenericPanel<IssueChange> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (getChange().getUser() != null) 
+		String activity = getChange().getData().getActivity();
+		if (getChange().getUser() != null) {
 			add(new Label("user", getChange().getUser().getDisplayName()));
-		else
+		} else {
 			add(new WebMarkupContainer("user").setVisible(false));
+			activity = StringUtils.capitalize(activity);
+		}
 
-		add(new Label("description", getChange().getData().getActivity()));
+		add(new Label("description", activity));
+		
 		add(new Label("age", DateUtils.formatAge(getChange().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getChange().getDate()))));
 		

@@ -54,7 +54,7 @@ public class PullRequestAssignmentResource {
 		
 		if (pullRequest.isMerged())
 			throw new ExplicitException("Pull request is merged");
-		assignmentManager.addAssignee(assignment);
+		assignmentManager.save(assignment);
 		return assignment.getId();
 	}
 	
@@ -71,7 +71,8 @@ public class PullRequestAssignmentResource {
 		if (assignment.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
 		
-		assignmentManager.removeAssignee(assignment);
+		assignmentManager.delete(assignment);
+		
 		return Response.ok().build();
 	}
 	

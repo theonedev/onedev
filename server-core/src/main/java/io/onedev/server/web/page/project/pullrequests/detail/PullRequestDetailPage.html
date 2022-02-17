@@ -60,7 +60,7 @@
 						</wicket:enclosure>
 					</div>
 					<div wicket:id="requestedForChanges" class="requested-for-changes text-danger">
-						<wicket:svg href="times-circle-o" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a> 
+						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a> 
 					</div>
 					<div wicket:id="waitingForReviews" class="waiting-for-reviews text-warning">
 						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as it is <a class="more-info d-inline link-primary">pending review</a>
@@ -111,11 +111,11 @@
 					<td class="value text-right"><span wicket:id="submitter"></span></td>
 				</tr>
 				<tr>
-					<td class="name">Target Branch</td>
+					<td class="name">Target</td>
 					<td class="value text-right"><a wicket:id="targetBranch"></a></td>
 				</tr>
 				<tr>
-					<td class="name">Source Branch</td>
+					<td class="name">Source</td>
 					<td class="value text-right"><a wicket:id="sourceBranch"></a></td>
 				</tr>
 			</table>

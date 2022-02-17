@@ -33,14 +33,13 @@ public abstract class AbstractNotificationManager {
 		this.settingManager = settingManager;
 	}
 	
-	protected String getHtmlBody(Event event, @Nullable String eventSummary, @Nullable String eventBody, 
+	protected String getHtmlBody(Event event, String eventSummary, @Nullable String eventBody, 
 			String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
 		String template = null;
 		
 		Map<String, Object> bindings = new HashMap<>();
 		
-		if (eventSummary != null)
-			eventSummary = HtmlEscape.escapeHtml5(eventSummary);
+		eventSummary = HtmlEscape.escapeHtml5(eventSummary);
 		eventUrl = HtmlEscape.escapeHtml5(eventUrl);
 		
 		bindings.put("event", event);
@@ -76,11 +75,10 @@ public abstract class AbstractNotificationManager {
 		}
 	}
 	
-	protected String getTextBody(Event event, @Nullable String eventSummary, @Nullable String eventBody, 
+	protected String getTextBody(Event event, String eventSummary, @Nullable String eventBody, 
 			String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
 		StringBuilder textBody = new StringBuilder();
-		if (eventSummary != null)
-			textBody.append(eventSummary).append("\n\n");
+		textBody.append(eventSummary).append("\n\n");
 		if (eventBody != null) 
 			textBody.append(eventBody).append("\n\n");
 		

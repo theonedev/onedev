@@ -35,7 +35,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -58,10 +57,10 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CompositeFacade;
-import io.onedev.k8shelper.StepFacade;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafVisitor;
 import io.onedev.k8shelper.ServerSideFacade;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.Service;
@@ -295,7 +294,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 					@Override
 					public void run() {
-						ThreadContext.bind(userManager.getSystem().asSubject());
+						SecurityUtils.bindAsSystem();
 						Project project = projectManager.load(projectId);
 						PullRequest pullRequest;
 						if (pullRequestId != null)
@@ -827,8 +826,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											
 											@Override
 											public void run() {
-												ThreadContext.bind(userManager.getSystem().asSubject());
-												
+												SecurityUtils.bindAsSystem();
 												Project project = projectManager.load(projectId);
 												try {
 													new MatrixRunner<List<String>>(paramMatrix) {
@@ -1087,8 +1085,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 					@Override
 					public void run() {
-						ThreadContext.bind(userManager.getSystem().asSubject());
-
+						SecurityUtils.bindAsSystem();
 						Project project = projectManager.load(projectId);
 						String triggerChain = UUID.randomUUID().toString();
 						new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(null, null, trigger.getParams())) {

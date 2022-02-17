@@ -28,7 +28,7 @@ public class IssueReferencedFromPullRequestData extends IssueChangeData implemen
 
 	@Override
 	public String getActivity() {
-		return "Referenced from pull request";
+		return "referenced from pull request";
 	}
 
 	@Override

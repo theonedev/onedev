@@ -28,7 +28,7 @@ public class IssueReferencedFromCodeCommentData extends IssueChangeData implemen
 
 	@Override
 	public String getActivity() {
-		return "Referenced from code comment";
+		return "referenced from code comment";
 	}
 
 	@Override

@@ -52,7 +52,7 @@ public abstract class AssigneeChoice extends SelectToAddChoice<User> {
 		assignment.setUser(user);
 
 		if (!getPullRequest().isNew())
-			OneDev.getInstance(PullRequestAssignmentManager.class).addAssignee(assignment);
+			OneDev.getInstance(PullRequestAssignmentManager.class).save(assignment);
 		else
 			getPullRequest().getAssignments().add(assignment);
 	};

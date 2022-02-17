@@ -5,11 +5,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
 import com.google.common.collect.Lists;
@@ -20,7 +22,6 @@ import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
@@ -41,16 +42,17 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.security.SecurityUtils;
 
 @Singleton
 public class PullRequestNotificationManager extends AbstractNotificationManager {
@@ -174,37 +176,88 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		else if (committer != null)
 			summary = committer.getDisplayName() + " " + event.getActivity();
 		else
-			summary = event.getActivity();
-		
-		if (event instanceof PullRequestOpened) {
-			for (PullRequestReview review: request.getReviews()) {
-				if (review.getResult() == null) {
-					// reviewers will be sent review invitation separately 
-					notifiedUsers.add(review.getUser());
-				}
-			}
-		}
-		
+			summary = StringUtils.capitalize(event.getActivity());
+				
 		String replyAddress = mailManager.getReplyAddress(request);
 		boolean replyable = replyAddress != null;
-		if (event instanceof PullRequestChanged 
-				&& request.getSubmitter() != null 
-				&& !notifiedUsers.contains(request.getSubmitter())) {
+		
+		Set<User> reviewers = new HashSet<>();
+		Set<User> assignees = new HashSet<>();
+		if (event instanceof PullRequestOpened) {
+			for (PullRequestReview review: request.getReviews()) {
+				if (review.getResult() == null)
+					reviewers.add(review.getUser());
+			}
+			for (PullRequestAssignment assignment: request.getAssignments())
+				assignees.add(assignment.getUser());
+		} else if (event instanceof PullRequestChanged) {
 			PullRequestChanged changeEvent = (PullRequestChanged) event;
 			PullRequestChangeData changeData = changeEvent.getChange().getData();
 			if (changeData instanceof PullRequestApproveData
 					|| changeData instanceof PullRequestRequestedForChangesData
 					|| changeData instanceof PullRequestDiscardData) { 
-				String subject = String.format("[Pull Request %s] (%s) %s", request.getFQN(), 
-						WordUtils.capitalize(changeData.getActivity()), request.getTitle());
-				String threadingReferences = String.format("<%s-%s@onedev>", 
-						changeData.getActivity().replace(' ', '-'), request.getUUID());
-				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), 
+				if (request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
+					String subject = String.format("[Pull Request %s] (%s) %s", request.getFQN(), 
+							WordUtils.capitalize(changeData.getActivity()), request.getTitle());
+					String threadingReferences = String.format("<%s-%s@onedev>", 
+							changeData.getActivity().replace(' ', '-'), request.getUUID());
+					mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), 
+							Lists.newArrayList(), Lists.newArrayList(), subject, 
+							getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+							getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
+							replyAddress, threadingReferences);
+					notifiedUsers.add(request.getSubmitter());
+				}
+			} else if (changeData instanceof PullRequestAssigneeAddData) {
+				PullRequestAssigneeAddData assigneeAddData = (PullRequestAssigneeAddData) changeData;
+				User assignee = assigneeAddData.getUser();
+				if (assignee != null) 
+					assignees.add(assignee);
+			} else if (changeData instanceof PullRequestReviewerAddData) {
+				PullRequestReviewerAddData reviewerAddData = (PullRequestReviewerAddData) changeData;
+				User reviewer = reviewerAddData.getUser();
+				if (reviewer != null) 
+					reviewers.add(reviewer);
+			}
+		}
+
+		for (User assignee: assignees) {
+			pullRequestWatchManager.watch(request, assignee, true);
+			if (!notifiedUsers.contains(assignee)) {
+				String subject = String.format("[Pull Request %s] (Assigned) %s", 
+						request.getFQN(), request.getTitle());
+				String threadingReferences = String.format("<assigned-%s@onedev>", request.getUUID());
+				String assignmentSummary;
+				if (user != null)
+					assignmentSummary = user.getDisplayName() + " assigned to you";
+				else
+					assignmentSummary = "Assigned to you";
+				mailManager.sendMailAsync(Lists.newArrayList(assignee.getEmail()), 
 						Lists.newArrayList(), Lists.newArrayList(), subject, 
-						getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
-						getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
+						getHtmlBody(event, assignmentSummary, event.getHtmlBody(), url, replyable, null), 
+						getTextBody(event, assignmentSummary, event.getTextBody(), url, replyable, null), 
 						replyAddress, threadingReferences);
-				notifiedUsers.add(request.getSubmitter());
+				notifiedUsers.add(assignee);
+			}
+		}
+
+		for (User reviewer: reviewers) {
+			pullRequestWatchManager.watch(request, reviewer, true);
+			if (!notifiedUsers.contains(reviewer)) {
+				String subject = String.format("[Pull Request %s] (Review Invitation) %s", 
+						request.getFQN(), request.getTitle());
+				String threadingReferences = String.format("<review-invitation-%s@onedev>", request.getUUID());
+				String reviewInvitationSummary;
+				if (user != null)
+					reviewInvitationSummary = user.getDisplayName() + " invited you to review";
+				else
+					reviewInvitationSummary = "Invited you to review";
+				mailManager.sendMailAsync(Lists.newArrayList(reviewer.getEmail()), 
+						Lists.newArrayList(), Lists.newArrayList(), subject, 
+						getHtmlBody(event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null), 
+						getTextBody(event, reviewInvitationSummary, event.getTextBody(), url, replyable, null), 
+						replyAddress, threadingReferences);
+				notifiedUsers.add(reviewer);
 			}
 		}
 		
@@ -277,43 +330,4 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		}				
 	}
 	
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.isNew()) {
-			if (event.getEntity() instanceof PullRequestReview) {
-				PullRequestReview review = (PullRequestReview) event.getEntity();
-				PullRequest request = review.getRequest();
-				if (review.getResult() == null && !review.getUser().equals(SecurityUtils.getUser())) {
-					pullRequestWatchManager.watch(request, review.getUser(), true);
-					String url = urlManager.urlFor(request);
-					String subject = String.format("[Pull Request %s] (Review Invitation) %s", 
-							request.getFQN(), request.getTitle());
-					String threadingReferences = "<review-invitation-" + request.getUUID() + "@onedev>";
-					String replyAddress = mailManager.getReplyAddress(request);
-					mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), 
-							Lists.newArrayList(), Lists.newArrayList(), subject, 
-							getHtmlBody(event, null, null, url, replyAddress != null, null), 
-							getTextBody(event, null, null, url, replyAddress != null, null), 
-							replyAddress, threadingReferences);
-				}
-			} else if (event.getEntity() instanceof PullRequestAssignment) {
-				PullRequestAssignment assignment = (PullRequestAssignment) event.getEntity();
-				PullRequest request = assignment.getRequest();
-				if (!assignment.getUser().equals(SecurityUtils.getUser())) {
-					pullRequestWatchManager.watch(request, assignment.getUser(), true);
-					String url = urlManager.urlFor(request);
-					String subject = String.format("[Pull Request %s] (Assigned) %s", request.getFQN(), request.getTitle());
-					String threadingReferences = "<assigned-" + request.getUUID() + "@onedev>";
-					String replyAddress = mailManager.getReplyAddress(request);
-					mailManager.sendMailAsync(Lists.newArrayList(assignment.getUser().getEmail()), 
-							Lists.newArrayList(), Lists.newArrayList(), subject, 
-							getHtmlBody(event, null, null, url, replyAddress != null, null), 
-							getTextBody(event, null, null, url, replyAddress != null, null), 
-							replyAddress, threadingReferences);
-				}
-			}
-		}
-	}
-
 } 

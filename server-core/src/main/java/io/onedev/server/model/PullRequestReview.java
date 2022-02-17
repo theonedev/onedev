@@ -40,6 +40,8 @@ public class PullRequestReview extends AbstractEntity {
 	@Embedded
 	private ReviewResult result;
 	
+	private transient boolean dirty;
+	
 	private transient Optional<PullRequestUpdate> updateOptional;
 	
 	public User getUser() {
@@ -65,6 +67,15 @@ public class PullRequestReview extends AbstractEntity {
 
 	public void setResult(@Nullable ReviewResult result) {
 		this.result = result;
+		dirty = true;
+	}
+	
+	public boolean isDirty() {
+		return dirty;
+	}
+
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
 	}
 
 	@Nullable

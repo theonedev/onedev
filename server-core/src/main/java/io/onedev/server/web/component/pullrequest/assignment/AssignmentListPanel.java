@@ -112,8 +112,7 @@ public abstract class AssignmentListPanel extends Panel {
 							request.getAssignments().remove(assignment);
 							target.add(AssignmentListPanel.this);
 						} else {
-							PullRequestAssignmentManager manager = OneDev.getInstance(PullRequestAssignmentManager.class);
-							manager.removeAssignee(assignment);
+							OneDev.getInstance(PullRequestAssignmentManager.class).delete(assignment);
 						}
 						assignmentsModel.detach();
 					}

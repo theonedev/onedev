@@ -327,10 +327,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	private transient Boolean mergedIntoTarget;
 
-	private transient List<PullRequestUpdate> sortedUpdates;
-	
-	private transient List<PullRequestReview> sortedReviews;
-	
 	private transient Boolean valid;
 	
 	private transient Collection<Long> fixedIssueNumbers;
@@ -471,7 +467,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public void setUpdates(Collection<PullRequestUpdate> updates) {
 		this.updates = updates;
-		sortedUpdates = null;
 	}
 	
 	public Collection<PullRequestComment> getComments() {
@@ -590,30 +585,25 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	 * 			list of sorted updates ordered by id
 	 */
 	public List<PullRequestUpdate> getSortedUpdates() {
-		if (sortedUpdates == null) {
-			Preconditions.checkState(updates.size() >= 1);
-			sortedUpdates = new ArrayList<PullRequestUpdate>(updates);
-			Collections.sort(sortedUpdates);
-		}
+		List<PullRequestUpdate> sortedUpdates = new ArrayList<>(updates);
+		Collections.sort(sortedUpdates);
 		return sortedUpdates;
 	}
 	
 	public List<PullRequestReview> getSortedReviews() {
-		if (sortedReviews == null) {
-			sortedReviews = new ArrayList<>(reviews);
+		List<PullRequestReview> sortedReviews = new ArrayList<>(reviews);
 			
-			Collections.sort(sortedReviews, new Comparator<PullRequestReview>() {
+		Collections.sort(sortedReviews, new Comparator<PullRequestReview>() {
 
-				@Override
-				public int compare(PullRequestReview o1, PullRequestReview o2) {
-					if (o1.getId() != null && o2.getId() != null)
-						return o1.getId().compareTo(o1.getId());
-					else
-						return 0;
-				}
-				
-			});
-		}
+			@Override
+			public int compare(PullRequestReview o1, PullRequestReview o2) {
+				if (o1.getId() != null && o2.getId() != null)
+					return o1.getId().compareTo(o1.getId());
+				else
+					return 0;
+			}
+			
+		});
 		return sortedReviews;
 	}
 
@@ -720,7 +710,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public void setReviews(Collection<PullRequestReview> reviews) {
 		this.reviews = reviews;
-		sortedReviews = null;
 	}
 
 	public Collection<PullRequestAssignment> getAssignments() {

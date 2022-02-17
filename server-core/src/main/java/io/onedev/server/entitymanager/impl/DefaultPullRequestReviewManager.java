@@ -3,21 +3,21 @@ package io.onedev.server.entitymanager.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.exception.ReviewerRequiredException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
@@ -41,35 +41,15 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 
 	private final PullRequestManager pullRequestManager;
 	
-	private final PullRequestChangeManager pullRequestChangeManager;
+	private final PullRequestChangeManager changeManager;
 	
 	@Inject
-	public DefaultPullRequestReviewManager(Dao dao, 
-			PullRequestManager pullRequestManager, 
-			PullRequestChangeManager pullRequestChangeManager) {
+	public DefaultPullRequestReviewManager(Dao dao, PullRequestManager pullRequestManager, 
+			PullRequestChangeManager changeManager) {
 		super(dao);
 		
 		this.pullRequestManager = pullRequestManager;
-		this.pullRequestChangeManager = pullRequestChangeManager;
-	}
-
-	@Transactional
-	@Override
-	public void review(PullRequestReview review) {
-		ReviewResult result = review.getResult();
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(review.getRequest());
-		change.setComment(result.getComment());
-		if (Boolean.TRUE.equals(result.getApproved())) 
-			change.setData(new PullRequestApproveData());
-		else if (Boolean.FALSE.equals(result.getApproved()))
-			change.setData(new PullRequestRequestedForChangesData());
-		else
-			change.setData(new PullRequestReviewWithdrawData());
-		change.setUser(review.getUser());
-		pullRequestChangeManager.save(change);
-		save(review);
+		this.changeManager = changeManager;
 	}
 
 	@Override
@@ -81,70 +61,68 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		return find(criteria);
 	}	
 	
+	@Transactional
+	@Override
+	public void delete(PullRequestReview review) {
+		PullRequest request = review.getRequest();
+		request.getReviews().remove(review);
+		User reviewer = review.getUser();
+		pullRequestManager.checkReviews(request, Lists.newArrayList(reviewer));
+		if (request.isNew()) {
+			if (request.getReview(reviewer) != null)
+				throw new ReviewerRequiredException(reviewer);
+		} else if (request.getReview(reviewer) == null) {
+			dao.remove(review);
+			PullRequestChange change = new PullRequestChange();
+			change.setDate(new Date());
+			change.setRequest(review.getRequest());
+			change.setData(new PullRequestReviewerRemoveData(reviewer));
+			change.setUser(SecurityUtils.getUser());
+			changeManager.save(change);
+			
+			for (PullRequestReview eachReview: request.getReviews()) {
+				if (eachReview.isNew())
+					save(eachReview);
+			}
+		} else {
+			throw new ReviewerRequiredException(reviewer);
+		}
+	}
+
  	@Transactional
 	@Override
-	public boolean removeReviewer(PullRequestReview review, List<User> unpreferableReviewers) {
-		PullRequest request = review.getRequest();
-		User reviewer = review.getUser();
-		request.getReviews().remove(review);
-		request.setReviews(request.getReviews());
-		
-		pullRequestManager.checkReviews(request, unpreferableReviewers);
-		
-		if (request.isNew()) {
-			return request.getReview(reviewer) == null;
+	public void save(PullRequestReview review) {
+ 		boolean isNew = review.isNew();
+ 		review.setDirty(false);
+		super.save(review);
+
+		PullRequestChange change = new PullRequestChange();
+		if (isNew) {
+			change.setDate(new Date());
+			change.setRequest(review.getRequest());
+			change.setData(new PullRequestReviewerAddData(review.getUser()));
+			change.setUser(SecurityUtils.getUser());
+			changeManager.save(change);
 		} else {
-			saveReviews(request);
-			if (request.getReview(reviewer) == null) {
-				PullRequestChange change = new PullRequestChange();
+			ReviewResult result = review.getResult();
+			
+			if (result != null) {
 				change.setDate(new Date());
-				change.setRequest(request);
-				change.setUser(SecurityUtils.getUser());
-				change.setData(new PullRequestReviewerRemoveData(reviewer));
-				pullRequestChangeManager.save(change);
-				return true;
-			} else {
-				return false;
+				change.setRequest(review.getRequest());
+				
+				change.setComment(result.getComment());
+				if (Boolean.TRUE.equals(result.getApproved())) 
+					change.setData(new PullRequestApproveData());
+				else if (Boolean.FALSE.equals(result.getApproved()))
+					change.setData(new PullRequestRequestedForChangesData());
+				else
+					change.setData(new PullRequestReviewWithdrawData());
+				change.setUser(review.getUser());
+				changeManager.save(change);
 			}
 		}
 	}
 
-	@Transactional
-	@Override
-	public void addReviewer(PullRequestReview review) {
-		save(review);
-		
-		PullRequest request = review.getRequest();
-		request.getReviews().add(review);
-		request.setReviews(request.getReviews());
-		
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(request);
-		change.setData(new PullRequestReviewerAddData(review.getUser()));
-		change.setUser(SecurityUtils.getUser());
-		pullRequestChangeManager.save(change);
-	}
-
-	@Transactional
-	@Override
-	public void saveReviews(PullRequest request) {
-		Collection<User> reviewers = request.getReviews().stream()
-				.filter(it->!it.isNew()).map(it->it.getUser()).collect(Collectors.toList());
-		if (!reviewers.isEmpty()) {
-			Query query = getSession().createQuery("delete from PullRequestReview where request=:request and user not in (:reviewers)");
-			query.setParameter("request", request);
-			query.setParameter("reviewers", reviewers);
-			query.executeUpdate();
-		} else {
-			Query query = getSession().createQuery("delete from PullRequestReview where request=:request");
-			query.setParameter("request", request);
-			query.executeUpdate();
-		}
-		for (PullRequestReview review: request.getReviews())
-			save(review);
-	}
-	
 	@Sessional
 	@Override
 	public void populateReviews(Collection<PullRequest> requests) {

@@ -23,7 +23,7 @@ public class PullRequestReferencedFromCodeCommentData
 
 	@Override
 	public String getActivity() {
-		return "Referenced from code comment";
+		return "referenced from code comment";
 	}
 
 	@Override

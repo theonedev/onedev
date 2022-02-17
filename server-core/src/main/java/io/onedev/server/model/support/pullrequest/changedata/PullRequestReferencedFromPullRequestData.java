@@ -23,7 +23,7 @@ public class PullRequestReferencedFromPullRequestData
 
 	@Override
 	public String getActivity() {
-		return "Referenced from other pull request";
+		return "referenced from other pull request";
 	}
 
 	@Override

@@ -53,8 +53,8 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 		review.setRequest(getPullRequest());
 		review.setUser(user);
 		
-		if (!getPullRequest().isNew())
-			OneDev.getInstance(PullRequestReviewManager.class).addReviewer(review);
+		if (!getPullRequest().isNew()) 
+			OneDev.getInstance(PullRequestReviewManager.class).save(review);
 		else
 			getPullRequest().getReviews().add(review);
 	};

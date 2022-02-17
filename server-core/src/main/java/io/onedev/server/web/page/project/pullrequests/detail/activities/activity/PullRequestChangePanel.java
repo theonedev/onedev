@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.pullrequests.detail.activities.activit
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -40,12 +41,16 @@ class PullRequestChangePanel extends GenericPanel<PullRequestChange> {
 		
 		PullRequestChange change = getModelObject();
 
-		if (change.getUser() != null) 
+		String activity = change.getData().getActivity();
+		if (change.getUser() != null) {
 			add(new Label("user", change.getUser().getDisplayName()));
-		else
+		} else {
 			add(new WebMarkupContainer("user").setVisible(false));
+			activity = StringUtils.capitalize(activity);
+		}
 		
-		add(new Label("description", change.getData().getActivity()));
+		add(new Label("description", activity));
+		
 		add(new Label("age", DateUtils.formatAge(change.getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(change.getDate()))));
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {

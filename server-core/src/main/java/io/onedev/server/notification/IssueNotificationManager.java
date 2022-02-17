@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -81,7 +83,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		if (user != null)
 			summary = user.getDisplayName() + " " + event.getActivity();
 		else
-			summary = event.getActivity();
+			summary = StringUtils.capitalize(event.getActivity());
 
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
 
