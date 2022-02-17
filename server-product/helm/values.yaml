@@ -9,22 +9,26 @@ nodeSelector:
     kubernetes.io/os: linux
 
 service:
-  http:
-    # type: ClusterIP
+  main:
     port: 80
+    #nodePort:
+    # type: ClusterIP
     # clusterIP: None
     #loadBalancerIP:
-    #nodePort:
     #externalTrafficPolicy:
     #externalIPs:
     loadBalancerSourceRanges: []
     annotations:
   ssh:
-    # type: LoadBalancer
+    # If separateService is enabled, a separate service is created for SSH with the following options,
+    # otherwise, a port for SSH will be added in the main service with the following options.
+    separateService: false
     port: 22
+    #nodePort:
+    ## The following options are only useful when separateService is set to true
+    # type: LoadBalancer
     # clusterIP: None
     #loadBalancerIP:
-    #nodePort:
     #externalTrafficPolicy:
     #externalIPs:
     loadBalancerSourceRanges: []

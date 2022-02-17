@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "onedev.fullname" . }}-http
+  name: {{ include "onedev.fullname" . }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- if and $.Values.ingress.enableDefaultIssuer $.Values.letsencrypt.email }}
@@ -26,7 +26,7 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ include "onedev.fullname" . }}-http
+              name: {{ include "onedev.fullname" . }}
               port:
                 number: 80
 {{- end }}
