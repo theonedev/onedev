@@ -8,6 +8,32 @@ nodeSelector:
   mysql:
     kubernetes.io/os: linux
 
+service:
+  main:
+    port: 80
+    #nodePort:
+    # type: ClusterIP
+    # clusterIP: None
+    #loadBalancerIP:
+    #externalTrafficPolicy:
+    #externalIPs:
+    loadBalancerSourceRanges: []
+    annotations:
+  ssh:
+    # If separateService is enabled, a separate service is created for SSH with the following options,
+    # otherwise, a port for SSH will be added in the main service with the following options.
+    separateService: false
+    port: 22
+    #nodePort:
+    ## The following options are only useful when separateService is set to true
+    # type: LoadBalancer
+    # clusterIP: None
+    #loadBalancerIP:
+    #externalTrafficPolicy:
+    #externalIPs:
+    loadBalancerSourceRanges: []
+    annotations:
+
 ## Ingress support, check below for more info.
 ## Check https://code.onedev.io/projects/162/blob/main/pages/deploy-into-k8s-with-helm.md#ingress-setup for details
 ingress:
