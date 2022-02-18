@@ -28,10 +28,10 @@
     color: var(--primary);
 }
 .atwho-view .cur small {
-    color: white;
+    color: var(--light-gray);
 }
 .dark-mode .atwho-view .cur small {
-    color: var(--dark-mode-dark);
+    color: rgb(42, 123, 206);
 }
 .atwho-view strong {
     color: var(--primary);
@@ -57,6 +57,7 @@
 }
 .dark-mode .atwho-view ul li {
     border-bottom-color: var(--dark-mode-lighter-dark);
+	color: var(--dark-mode-light-gray);
 }
 .atwho-view ul li:last-child {
 	border-bottom: 0;

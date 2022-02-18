@@ -372,7 +372,7 @@ onedev.server.markdown = {
 	        	}
 	        },
 	        displayTpl: "<li><span class='emoji'>${unicode}</span> ${name} </li>",
-	        insertTpl: ':${name}:',
+	        insertTpl: ":${name}: ",
 	        limit: atWhoLimit
 	    });		
 	    
@@ -393,6 +393,7 @@ onedev.server.markdown = {
 		        		return "<li><span class='avatar'><img src='${avatarUrl}'/></span> ${name}</li>";
 		        	}
 		        },
+				insertTpl: "@${name} ",
 		        limit: atWhoLimit
 		    });	
 	    } 
@@ -437,9 +438,9 @@ onedev.server.markdown = {
 		        },
 		        insertTpl: function() {
 	        		if (matchReference().type) 
-		    			return "#${referenceNumber}";
+		    			return "#${referenceNumber} ";
 	        		else
-                        return '${referenceType} #${referenceNumber}';
+                        return "${referenceType} #${referenceNumber} ";
 		        }, 
 		        limit: atWhoLimit
 		    });		
