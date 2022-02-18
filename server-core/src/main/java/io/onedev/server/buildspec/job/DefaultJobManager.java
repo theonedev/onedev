@@ -353,7 +353,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				
 				for (ProjectDependency dependency: build.getJob().getProjectDependencies()) {
 					dependency = interpolator.interpolateProperties(dependency);
-					Project dependencyProject = projectManager.find(dependency.getProjectPath());
+					Project dependencyProject = projectManager.findByPath(dependency.getProjectPath());
 					if (dependencyProject == null)
 						throw new ExplicitException("Unable to find dependency project: " + dependency.getProjectPath());
 	

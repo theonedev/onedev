@@ -363,7 +363,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     @Sessional
     @Override
-    public Project find(String path) {
+    public Project findByPath(String path) {
     	List<String> names = Splitter.on("/").omitEmptyStrings().trimResults().splitToList(path);
     	Project project = null;
     	for (String name: names) {
@@ -374,6 +374,15 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	return project;
     }
 
+    @Sessional
+    @Override
+    public Project findByServiceDeskName(String serviceDeskName) {
+		EntityCriteria<Project> criteria = newCriteria();
+		criteria.add(Restrictions.ilike(Project.PROP_SERVICE_DESK_NAME, serviceDeskName));
+		criteria.setCacheable(true);
+		return find(criteria);
+    }
+    
     @Sessional
     @Override
     public Project initialize(String path) {
@@ -402,8 +411,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	
     	Project parent = project.getParent();
     	while (parent != null && parent.isNew()) {
-    		parent.setCodeManagementEnabled(false);
-    		parent.setIssueManagementEnabled(false);
+    		parent.setCodeManagement(false);
+    		parent.setIssueManagement(false);
     		parent = parent.getParent();
     	}
     	

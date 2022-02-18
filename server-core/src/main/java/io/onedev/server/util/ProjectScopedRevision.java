@@ -34,7 +34,7 @@ public class ProjectScopedRevision implements Serializable {
 	public static ProjectScopedRevision from(String revisionFQN) {
 		String projectName = StringUtils.substringBefore(revisionFQN, ":");
 		String revision = StringUtils.substringAfter(revisionFQN, ":");
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
+		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectName);
 		if (project != null)
 			return new ProjectScopedRevision(project, revision);
 		else

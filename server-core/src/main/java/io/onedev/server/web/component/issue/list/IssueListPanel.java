@@ -434,7 +434,7 @@ public abstract class IssueListPanel extends Panel {
 							List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
 									.getPermittedProjects(new AccessProject()));
 							
-							Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagementEnabled();
+							Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagement();
 							CollectionUtils.filter(projects, issueManagementEnabledPredicate);							
 							
 							Collections.sort(projects, new Comparator<Project>() {
@@ -1010,7 +1010,7 @@ public abstract class IssueListPanel extends Panel {
 				List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
 						.getPermittedProjects(new AccessProject()));
 				
-				Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagementEnabled();
+				Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagement();
 				CollectionUtils.filter(projects, issueManagementEnabledPredicate);							
 				projects.remove(getProject());
 				

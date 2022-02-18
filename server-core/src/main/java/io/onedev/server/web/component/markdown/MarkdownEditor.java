@@ -362,7 +362,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					List<Map<String, String>> referenceList = new ArrayList<>();
 					Project referenceProject;
 					if (StringUtils.isNotBlank(referenceProjectName)) 
-						referenceProject = OneDev.getInstance(ProjectManager.class).find(referenceProjectName);
+						referenceProject = OneDev.getInstance(ProjectManager.class).findByPath(referenceProjectName);
 					else
 						referenceProject = null;
 					if (referenceProject != null || StringUtils.isBlank(referenceProjectName)) {

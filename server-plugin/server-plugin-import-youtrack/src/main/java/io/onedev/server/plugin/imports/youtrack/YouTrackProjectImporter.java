@@ -63,7 +63,7 @@ public class YouTrackProjectImporter extends ProjectImporter<ImportServer, Proje
 				Project project = projectManager.initialize(projectMapping.getOneDevProject());
 				Preconditions.checkState(project.isNew());
 				project.setDescription(youTrackProjectDescriptions.get(projectMapping.getYouTrackProject()));
-				project.setIssueManagementEnabled(true);
+				project.setIssueManagement(true);
 				
 		       	if (!dryRun) {
 					projectManager.create(project);

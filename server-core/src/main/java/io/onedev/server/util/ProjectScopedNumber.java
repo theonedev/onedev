@@ -24,7 +24,7 @@ public class ProjectScopedNumber {
 		if (fqn.contains("#")) {
 			String projectName = StringUtils.substringBefore(fqn, "#");
 			if (projectName.length() != 0) {
-				Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
+				Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectName);
 				if (project != null) {
 					String numberStr = StringUtils.substringAfter(fqn, "#");
 					try {

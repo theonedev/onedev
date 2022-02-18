@@ -100,7 +100,7 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 		        try {
 		        	String accessToken = OneDev.getInstance(UserManager.class).load(userId).getAccessToken();
 		        	String projectName = StringUtils.substringBefore(command.substring(COMMAND_PREFIX.length()+1), " ");
-		        	Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
+		        	Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectName);
 		        	if (project == null)
 		        		throw new ExplicitException("Project not found: " + projectName);
 		        	String url = OneDev.getInstance(UrlManager.class).cloneUrlFor(project, false);

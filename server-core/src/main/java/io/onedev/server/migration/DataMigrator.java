@@ -3555,7 +3555,14 @@ public class DataMigrator {
 			}
 		}
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("PullRequestChanges.xml")) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("issueManagementEnabled").setName("issueManagement");
+					element.element("codeManagementEnabled").setName("codeManagement");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					Element dataElement = element.element("data");
@@ -3584,5 +3591,5 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
 }

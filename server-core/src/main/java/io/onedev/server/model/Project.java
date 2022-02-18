@@ -192,15 +192,20 @@ public class Project extends AbstractEntity {
 	
 	public static final String PROP_GROUP_AUTHORIZATIONS = "groupAuthorizations";
 	
-	public static final String PROP_CODE_MANAGEMENT_ENABLED = "codeManagementEnabled";
+	public static final String PROP_CODE_MANAGEMENT = "codeManagement";
 	
-	public static final String PROP_ISSUE_MANAGEMENT_ENABLED = "issueManagementEnabled";
+	public static final String PROP_ISSUE_MANAGEMENT = "issueManagement";
+	
+	public static final String NAME_SERVICE_DESK_NAME = "Service Desk Name";
+	
+	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
 	
 	public static final List<String> QUERY_FIELDS = 
-			Lists.newArrayList(NAME_NAME, NAME_PATH, NAME_DESCRIPTION, NAME_UPDATE_DATE);
+			Lists.newArrayList(NAME_NAME, NAME_PATH, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_NAME, PROP_NAME, 
+			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,
 			NAME_UPDATE_DATE, PROP_UPDATE_DATE);
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
@@ -317,9 +322,12 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
-	private boolean codeManagementEnabled = true;
+	private boolean codeManagement = true;
 	
-	private boolean issueManagementEnabled = true;
+	private boolean issueManagement = true;
+	
+	@Column(unique=true)
+	private String serviceDeskName;
 	
 	@JsonIgnore
 	@Lob
@@ -658,7 +666,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ProjectFacade getFacade() {
-		return new ProjectFacade(getId(), getName(), Project.idOf(getParent()));
+		return new ProjectFacade(getId(), getName(), getServiceDeskName(), Project.idOf(getParent()));
 	}
 	
 	/**
@@ -1130,24 +1138,33 @@ public class Project extends AbstractEntity {
 		this.codeComments = codeComments;
 	}
 	
-	@Editable(order=250, name="Code Management", description="Whether or not to enable code management for the project")
-	public boolean isCodeManagementEnabled() {
-		return codeManagementEnabled;
+	@Editable(order=250, description="Whether or not to enable code management for the project")
+	public boolean isCodeManagement() {
+		return codeManagement;
 	}
 
-	public void setCodeManagementEnabled(boolean codeManagementEnabled) {
-		this.codeManagementEnabled = codeManagementEnabled;
+	public void setCodeManagement(boolean codeManagement) {
+		this.codeManagement = codeManagement;
 	}
 
-	@Editable(order=300, name="Issue management", description="Whether or not to enable issue management for the project")
-	public boolean isIssueManagementEnabled() {
-		return issueManagementEnabled;
+	@Editable(order=300, description="Whether or not to enable issue management for the project")
+	public boolean isIssueManagement() {
+		return issueManagement;
 	}
 	
-	public void setIssueManagementEnabled(boolean issueManagementEnabled) {
-		this.issueManagementEnabled = issueManagementEnabled;
+	public void setIssueManagement(boolean issueManagement) {
+		this.issueManagement = issueManagement;
 	}
 	
+	@Nullable
+	public String getServiceDeskName() {
+		return serviceDeskName;
+	}
+
+	public void setServiceDeskName(String serviceDeskName) {
+		this.serviceDeskName = serviceDeskName;
+	}
+
 	public ProjectIssueSetting getIssueSetting() {
 		return issueSetting;
 	}

@@ -100,10 +100,10 @@ public class GitFilter implements Filter {
 			throws IOException {
 		String projectPath = StringUtils.strip(projectInfo, "/");
 
-		Project project = projectManager.find(projectPath);
+		Project project = projectManager.findByPath(projectPath);
 		if (project == null && projectPath.startsWith("projects/")) {
 			projectPath = projectPath.substring("projects/".length());
-			project = projectManager.find(projectPath);
+			project = projectManager.findByPath(projectPath);
 		}
 		if (project == null) 
 			throw new GitException(String.format("Unable to find project '%s'", projectPath));

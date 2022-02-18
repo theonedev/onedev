@@ -749,7 +749,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public List<Issue> query(EntityQuery<Issue> scope, Project project, String term, int count) {
 		if (term.contains("#")) {
 			String projectPath = StringUtils.substringBefore(term, "#");
-			Project specifiedProject = projectManager.find(projectPath);
+			Project specifiedProject = projectManager.findByPath(projectPath);
 			if (specifiedProject != null && SecurityUtils.canAccess(specifiedProject)) {
 				project = specifiedProject;
 				term = StringUtils.substringAfter(term, "#");

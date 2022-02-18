@@ -343,7 +343,7 @@ public class DefaultMailManager implements MailManager {
 						if (serviceDeskSetting != null) {
 							if (designatedProject == null)
 								throw new ExplicitException("No project designated for sender: " + from.getAddress());
-							Project project = projectManager.find(designatedProject);
+							Project project = projectManager.findByPath(designatedProject);
 							if (project == null) {
 								String errorMessage = String.format(
 										"Sender project does not exist (sender: %s, project: %s)", 
@@ -356,89 +356,83 @@ public class DefaultMailManager implements MailManager {
 							throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 						}
 					} else if (receiverAddress.getDomain().equals(systemAddress.getDomain()) 
-							&& receiverAddress.getPrefix().startsWith(systemAddress.getPrefix() + "+")) {
-						String subAddress = receiverAddress.getPrefix().substring(systemAddress.getPrefix().length()+1);
-						String projectName = StringUtils.substringBefore(subAddress, "~");
-						if (projectName.equals(MailManager.TEST_SUB_ADDRESSING)) 
+							&& receiverAddress.getName().startsWith(systemAddress.getName() + "+")) {
+						String subAddress = receiverAddress.getName().substring(systemAddress.getName().length()+1);
+						if (subAddress.equals(MailManager.TEST_SUB_ADDRESS)) {
 							continue;
-						Project project = projectManager.find(projectName);
-						if (project == null) 
-							throw new ExplicitException("Non-existent project specified in receipient address: " +  receiverAddress);
-						
-						String remaining = StringUtils.substringAfter(subAddress, "~");
-						if (remaining.length() == 0) {
+						} else if (subAddress.contains("~")) {
+							Long entityId;
+							try {
+								entityId = Long.parseLong(StringUtils.substringAfter(subAddress, "~"));
+							} catch (NumberFormatException e) { 
+								throw new ExplicitException("Invalid id specified in receipient address: " + receiverAddress);
+							}
+							if (subAddress.contains("issue")) {
+								Issue issue = issueManager.get(entityId);
+								if (issue == null)
+									throw new ExplicitException("Non-existent issue specified in receipient address: " + receiverAddress);
+								if (subAddress.contains("unsubscribe")) {
+									if (user != null) {
+										IssueWatch watch = issueWatchManager.find(issue, user);
+										if (watch != null) {
+											watch.setWatching(false);
+											issueWatchManager.save(watch);
+											String subject = "Unsubscribed successfully from issue " + issue.getFQN(); 
+											String body = "You will no longer receive notifications of issue " + issue.getFQN() + " unless mentioned. "
+													+ "However if you subscribed to certain issue queries, you may still get notifications of newly "
+													+ "created issues matching those queries. In this case, you will need to login to your account "
+													+ "and unsubscribe those queries.";
+											sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(), 
+													subject, body, body, null, getMessageId(message));
+										}
+									}
+								} else {
+									checkPermission(from, issue.getProject(), new AccessProject(), user, authorization);
+									addComment(issue, message, from, receiverEmailAddresses, user, authorization);
+									issues.add(issue);
+								}
+							} else if (subAddress.contains("pullrequest")) {
+								PullRequest pullRequest = pullRequestManager.get(entityId);
+								if (pullRequest == null)
+									throw new ExplicitException("Non-existent pull request specified in receipient address: " + receiverAddress);
+								if (subAddress.contains("unsubscribe")) {
+									if (user != null) {
+										PullRequestWatch watch = pullRequestWatchManager.find(pullRequest, user);
+										if (watch != null) {
+											watch.setWatching(false);
+											pullRequestWatchManager.save(watch);
+											String subject = "Unsubscribed successfully from pull request " + pullRequest.getFQN(); 
+											String body = "You will no longer receive notifications of pull request " + pullRequest.getFQN() 
+													+ " unless mentioned. However if you subscribed to certain pull request queries, you may still "
+													+ "get notifications of newly submitted pull request matching those queries. In this case, you "
+													+ "will need to login to your account and unsubscribe those queries.";
+											sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(), 
+													subject, body, body, null, getMessageId(message));
+										}
+									}
+								} else {
+									checkPermission(from, pullRequest.getTargetProject(), new ReadCode(), user, authorization);
+									addComment(pullRequest, message, from, receiverEmailAddresses, user, authorization);
+									pullRequests.add(pullRequest);
+								}
+							} else {
+								throw new ExplicitException("Invalid receipient address: " + receiverAddress);
+							}
+						} else {
+							Project project = projectManager.findByServiceDeskName(subAddress);
+							if (project == null)
+								project = projectManager.findByPath(subAddress);
+							
+							if (project == null) 
+								throw new ExplicitException("Non-existent project specified in receipient address: " +  receiverAddress);
 							if (serviceDeskSetting != null) {
 								checkPermission(from, project, new AccessProject(), user, authorization);
+								logger.debug("Creating issue via email (project: {})...", project.getPath());
 								issues.add(openIssue(message, project, from, user, authorization));
 							} else {
 								throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 							}
-						} else if (remaining.startsWith("issue")) {
-							remaining = remaining.substring("issue".length());
-							Long issueNumber;
-							try {
-								issueNumber = Long.valueOf(StringUtils.substringBefore(remaining, "~"));
-							} catch (NumberFormatException e) { 
-								throw new ExplicitException("Invalid issue number specified in receipient address: " + receiverAddress);
-							}
-							Issue issue = issueManager.find(project, issueNumber);
-							if (issue == null)
-								throw new ExplicitException("Non-existent issue specified in receipient address: " + receiverAddress);
-							if (remaining.contains("~")) {
-								if (user != null) {
-									IssueWatch watch = issueWatchManager.find(issue, user);
-									if (watch != null) {
-										watch.setWatching(false);
-										issueWatchManager.save(watch);
-										String subject = "Unsubscribed successfully from issue " + issue.getFQN(); 
-										String body = "You will no longer receive notifications of issue " + issue.getFQN() + " unless mentioned. "
-												+ "However if you subscribed to certain issue queries, you may still get notifications of newly "
-												+ "created issues matching those queries. In this case, you will need to login to your account "
-												+ "and unsubscribe those queries.";
-										sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(), 
-												subject, body, body, null, getMessageId(message));
-									}
-								}
-							} else {
-								checkPermission(from, project, new AccessProject(), user, authorization);
-								addComment(issue, message, from, receiverEmailAddresses, user, authorization);
-								issues.add(issue);
-							}
-						} else if (remaining.startsWith("pullrequest")) {
-							remaining = remaining.substring("pullrequest".length());
-							Long pullRequestNumber;
-							try {
-								pullRequestNumber = Long.valueOf(StringUtils.substringBefore(remaining, "~"));
-							} catch (NumberFormatException e) { 
-								throw new ExplicitException("Invalid pull request number specified in receipient address: " + receiverAddress);
-							}
-							PullRequest pullRequest = pullRequestManager.find(project, pullRequestNumber);
-							if (pullRequest == null)
-								throw new ExplicitException("Non-existent pull request specified in receipient address: " + receiverAddress);
-							
-							if (remaining.contains("~")) {
-								if (user != null) {
-									PullRequestWatch watch = pullRequestWatchManager.find(pullRequest, user);
-									if (watch != null) {
-										watch.setWatching(false);
-										pullRequestWatchManager.save(watch);
-										String subject = "Unsubscribed successfully from pull request " + pullRequest.getFQN(); 
-										String body = "You will no longer receive notifications of pull request " + pullRequest.getFQN() 
-												+ " unless mentioned. However if you subscribed to certain pull request queries, you may still "
-												+ "get notifications of newly submitted pull request matching those queries. In this case, you "
-												+ "will need to login to your account and unsubscribe those queries.";
-										sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(), 
-												subject, body, body, null, getMessageId(message));
-									}
-								}
-							} else {
-								checkPermission(from, project, new ReadCode(), user, authorization);
-								addComment(pullRequest, message, from, receiverEmailAddresses, user, authorization);
-								pullRequests.add(pullRequest);
-							}
-						} else {
-							throw new ExplicitException("Invalid receipient address: " + receiverAddress);
-						}							
+						}
 					} else {
 						involved.add(receiver);
 					}
@@ -637,7 +631,7 @@ public class DefaultMailManager implements MailManager {
 		User user = userManager.findByEmail(address.getAddress());
 		if (user == null) {
 			user = new User();
-			user.setName(UserNameValidator.suggestUserName(EmailAddress.parse(address.getAddress()).getPrefix()));
+			user.setName(UserNameValidator.suggestUserName(EmailAddress.parse(address.getAddress()).getName()));
 			user.setEmail(address.getAddress());
 			user.setFullName(address.getPersonal());
 			user.setPassword("impossible password");
@@ -853,8 +847,7 @@ public class DefaultMailManager implements MailManager {
 		MailSetting mailSetting = settingManager.getMailSetting();
 		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getPrefix() + "+" + issue.getProject().getPath() + "~issue" + issue.getNumber()
-					+ "@" + systemAddress.getDomain(); 
+			return systemAddress.getSubAddressed("issue~" + issue.getId()); 
 		} else {
 			return null;
 		}
@@ -865,8 +858,7 @@ public class DefaultMailManager implements MailManager {
 		MailSetting mailSetting = settingManager.getMailSetting();
 		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getPrefix() + "+" + request.getProject().getPath() + "~pullrequest" + request.getNumber()
-					+ "@" + systemAddress.getDomain(); 
+			return systemAddress.getSubAddressed("pullrequest~" + request.getId()); 
 		} else {
 			return null;
 		}
@@ -877,8 +869,7 @@ public class DefaultMailManager implements MailManager {
 		MailSetting mailSetting = settingManager.getMailSetting();
 		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getPrefix() + "+" + issue.getProject().getPath() + "~issue" + issue.getNumber() + "~unsubscribe"
-					+ "@" + systemAddress.getDomain(); 
+			return systemAddress.getSubAddressed("issueunsubscribe~" + issue.getId()); 
 		} else {
 			return null;
 		}
@@ -889,8 +880,7 @@ public class DefaultMailManager implements MailManager {
 		MailSetting mailSetting = settingManager.getMailSetting();
 		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getPrefix() + "+" + request.getProject().getPath() + "~pullrequest" + request.getNumber() + "~unsubscribe"
-					+ "@" + systemAddress.getDomain(); 
+			return systemAddress.getSubAddressed("pullrequestunsubscribe~" + request.getId()); 
 		} else {
 			return null;
 		}

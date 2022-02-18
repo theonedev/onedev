@@ -14,6 +14,12 @@
 				<a wicket:id="forkNow" class="btn btn-sm btn-light btn-hover-primary btn-icon" title="Fork now"><wicket:svg href="fork" class="icon"/></a>
 			</div>			
 		</div>
+		<wicket:enclosure child="serviceDesk">
+		<div class="mt-2">
+		<a wicket:id="serviceDesk"><wicket:svg href="mail" class="icon"></wicket:svg> <span wicket:id="label"></span></a>
+		<div class="font-size-sm mt-1 text-muted">Issues can be created in this project by sending email to this address</div>
+		</div>
+		</wicket:enclosure>
 		<div wicket:id="description" class="mt-4"></div>
 	</div>
 </wicket:panel>

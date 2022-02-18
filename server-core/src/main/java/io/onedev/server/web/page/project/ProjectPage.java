@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -68,6 +69,7 @@ import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersP
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
+import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
@@ -143,7 +145,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		
 		List<SidebarMenuItem> menuItems = new ArrayList<>();
 		
-		if (getProject().isCodeManagementEnabled() && SecurityUtils.canReadCode(getProject())) {
+		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
 			List<SidebarMenuItem> codeMenuItems = new ArrayList<>();
 	
 			codeMenuItems.add(new SidebarMenuItem.Page(null, "Files", 
@@ -165,7 +167,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 			menuItems.add(new SidebarMenuItem.SubMenu("git", "Code", codeMenuItems));
 		}		
-		if (getProject().isIssueManagementEnabled()) {
+		if (getProject().isIssueManagement()) {
 			List<SidebarMenuItem> issueMenuItems = new ArrayList<>();
 			
 			issueMenuItems.add(new SidebarMenuItem.Page(null, "List", 
@@ -180,7 +182,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
 		}
 		
-		if (getProject().isCodeManagementEnabled()) {
+		if (getProject().isCodeManagement()) {
 			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", 
 					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0), 
 					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
@@ -188,7 +190,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 		
-		if (getProject().isCodeManagementEnabled() && SecurityUtils.canReadCode(getProject())) {
+		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject())) {
 			statsMenuItems.add(new SidebarMenuItem.Page(null, "Contributions", 
 					ProjectContribsPage.class, ProjectContribsPage.paramsOf(getProject())));
 			statsMenuItems.add(new SidebarMenuItem.Page(null, "Source Lines", 
@@ -215,6 +217,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					AvatarEditPage.class, AvatarEditPage.paramsOf(getProject())));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Authorizations", 
 					ProjectAuthorizationsPage.class, ProjectAuthorizationsPage.paramsOf(getProject())));
+			
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Branch Protection", 
 					BranchProtectionsPage.class, BranchProtectionsPage.paramsOf(getProject())));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Tag Protection", 
@@ -232,6 +235,12 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					DefaultFixedIssueFiltersPage.class, DefaultFixedIssueFiltersPage.paramsOf(getProject())));
 			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build Setting", buildSettingMenuItems));
+
+			if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() != null && getProject().isIssueManagement()) {
+				settingMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Setting", 
+						ProjectServiceDeskSettingPage.class, ProjectServiceDeskSettingPage.paramsOf(getProject())));
+			}
+			
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Web Hooks", 
 					WebHooksPage.class, WebHooksPage.paramsOf(getProject())));
 			

@@ -36,7 +36,7 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 		
 		Project project;
 		if (getModelObject() != null)
-			project = OneDev.getInstance(ProjectManager.class).find(getModelObject());
+			project = OneDev.getInstance(ProjectManager.class).findByPath(getModelObject());
 		else
 			project = null;
 		

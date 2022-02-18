@@ -99,7 +99,7 @@ public class Import implements Serializable, Validatable {
 	private static Project getInputProject() {
 		String projectPath = (String) EditContext.get().getInputValue("projectPath");
 		if (projectPath != null) {
-			Project project = OneDev.getInstance(ProjectManager.class).find(projectPath);
+			Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 			if (project != null && SecurityUtils.canReadCode(project))
 				return project;
 		}
@@ -254,7 +254,7 @@ public class Import implements Serializable, Validatable {
 	}
 	
 	public Project getProject() {
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectPath);
+		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 		if (project == null) 
 			throw new ExplicitException("Unable to find project to import build spec: " + projectPath);
 		else 

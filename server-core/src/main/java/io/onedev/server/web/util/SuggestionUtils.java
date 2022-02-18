@@ -334,7 +334,7 @@ public class SuggestionUtils {
 			if (matchWith.contains(scopeSeparator)) {
 				String projectName = StringUtils.substringBefore(matchWith, scopeSeparator);
 				matchWith = StringUtils.substringAfter(matchWith, scopeSeparator);
-				project = projectManager.find(projectName);
+				project = projectManager.findByPath(projectName);
 				if (project != null) {
 					List<InputSuggestion> projectScopedSuggestions = projectScopedSuggester.suggest(project, matchWith);
 					if (projectScopedSuggestions != null) {

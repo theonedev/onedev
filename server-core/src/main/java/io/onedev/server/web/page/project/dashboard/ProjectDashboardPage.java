@@ -20,9 +20,9 @@ public class ProjectDashboardPage extends ProjectPage {
 		super(params);
 		
 		PageProvider pageProvider;
-		if (getProject().isCodeManagementEnabled() && SecurityUtils.canReadCode(getProject()))
+		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject()))
 			pageProvider = new PageProvider(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
-		else if (getProject().isIssueManagementEnabled()) 
+		else if (getProject().isIssueManagement()) 
 			pageProvider = new PageProvider(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
 		else
 			pageProvider = new PageProvider(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject()));

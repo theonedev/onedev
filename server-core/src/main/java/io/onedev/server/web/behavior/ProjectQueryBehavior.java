@@ -1,7 +1,10 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.search.entity.project.ProjectQuery.getRuleName;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,13 +18,15 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
-import static io.onedev.server.search.entity.project.ProjectQuery.getRuleName;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.search.entity.project.ProjectQueryParser;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -48,9 +53,14 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							List<String> candidates = new ArrayList<>(Project.QUERY_FIELDS);
 							if (childQuery)
 								candidates.remove(Project.NAME_PATH);
+							if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() == null) 
+								candidates.remove(Project.NAME_SERVICE_DESK_NAME);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							return SuggestionUtils.suggest(new ArrayList<>(Project.ORDER_FIELDS.keySet()), matchWith);
+							List<String> candidates = new ArrayList<>(Project.ORDER_FIELDS.keySet());
+							if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() == null) 
+								candidates.remove(Project.NAME_SERVICE_DESK_NAME);
+							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
@@ -78,6 +88,19 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestProjects(matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {
+										if (!matchWith.contains("*")) {
+											ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+											List<String> serviceDeskNames = projectManager.getPermittedProjects(new AccessProject())
+													.stream()
+													.filter(it->it.getServiceDeskName() != null)
+													.map(it->it.getServiceDeskName())
+													.sorted()
+													.collect(Collectors.toList());
+											return SuggestionUtils.suggest(serviceDeskNames, matchWith);
+										} else {
+											return null;
+										}
 									} else {
 										return null;
 									}
@@ -131,7 +154,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(Project.NAME_NAME)) {
+					if (fieldName.equals(Project.NAME_NAME) || fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {
 						hints.add("Use '*' for wildcard match");
 					} else if (fieldName.equals(Project.NAME_DESCRIPTION)) {
 						hints.add("Use '*' for wildcard match");

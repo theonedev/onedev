@@ -1,8 +1,8 @@
 package io.onedev.server.web.page.project;
 
-import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT_ENABLED;
+import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_DESCRIPTION;
-import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT_ENABLED;
+import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_NAME;
 
 import java.util.Collection;
@@ -50,7 +50,7 @@ public class NewProjectPage extends LayoutPage {
 		Project editProject = new Project();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT_ENABLED, PROP_ISSUE_MANAGEMENT_ENABLED);
+				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		ParentBean parentBean = new ParentBean();
@@ -78,16 +78,16 @@ public class NewProjectPage extends LayoutPage {
 								"This name has already been used by another project");
 					} else {
 						newProject.setDescription(editProject.getDescription());
-						newProject.setCodeManagementEnabled(editProject.isCodeManagementEnabled());
-						newProject.setIssueManagementEnabled(editProject.isIssueManagementEnabled());
+						newProject.setCodeManagement(editProject.isCodeManagement());
+						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setDefaultRole(defaultRoleBean.getRole());
 						
 						getProjectManager().create(newProject);
 						
 						Session.get().success("New project created");
-						if (newProject.isCodeManagementEnabled())
+						if (newProject.isCodeManagement())
 							setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
-						else if (newProject.isIssueManagementEnabled())
+						else if (newProject.isIssueManagement())
 							setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(newProject));
 						else
 							setResponsePage(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(newProject));

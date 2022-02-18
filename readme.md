@@ -64,7 +64,7 @@ Queries can be saved and subscribed, so that you won't miss anything interested.
 
 ## A Full-fledge CI/CD Engine without Writing Yaml
 
-OneDev ships with GUI to generate CI/CD Yaml. No need to google around for Yaml grammars. A one-liner docker command to start OneDev server and you have a local CI/CD runner automatically. Concerns about server capability to run massive jobs? Another one-liner to connect self-updating agent from any machine. Want auto-scale up/down CI/CD farm? A helm one-liner to deploy OneDev into k8s cluster. 
+OneDev ships with GUI to generate CI/CD Yaml. No need to google around for Yaml grammars. A one-liner docker command to start OneDev server and you have a local CI/CD runner automatically. Concerns about server capability to run massive jobs? Another one-liner to connect self-updating agent from any machine. Want auto-scale CI/CD farm? A helm one-liner to deploy OneDev into k8s cluster. 
 
 Matrix jobs, typed parameters, parameter chaining, step templates, build promotions… too many neat features to elaborate here…
 

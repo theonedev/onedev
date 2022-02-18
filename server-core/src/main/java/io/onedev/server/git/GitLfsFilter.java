@@ -151,7 +151,7 @@ public class GitLfsFilter implements Filter {
 				LfsObjectAccess lfsObjectAccess = null;
 				sessionManager.openSession();
 				try {
-					Project project = Preconditions.checkNotNull(projectManager.find(getProjectPath(pathInfo)));
+					Project project = Preconditions.checkNotNull(projectManager.findByPath(getProjectPath(pathInfo)));
 					String objectId = StringUtils.substringAfterLast(pathInfo, "/");
 					if (canReadCode(httpRequest, project))  
 						lfsObjectAccess = new LfsObjectAccess(project.getLfsObjectFile(objectId), project.getLfsObjectLock(objectId).readLock());
@@ -177,7 +177,7 @@ public class GitLfsFilter implements Filter {
 				LfsObjectAccess lfsObjectAccess = null;
 				sessionManager.openSession();
 				try {
-					Project project = Preconditions.checkNotNull(projectManager.find(getProjectPath(pathInfo)));
+					Project project = Preconditions.checkNotNull(projectManager.findByPath(getProjectPath(pathInfo)));
 					if (SecurityUtils.canWriteCode(project))  
 						lfsObjectAccess = new LfsObjectAccess(project.getLfsObjectFile(objectId), project.getLfsObjectLock(objectId).writeLock());
 					else 
@@ -212,7 +212,7 @@ public class GitLfsFilter implements Filter {
 			sessionManager.openSession();
 			try {
 				String projectPath = getProjectPath(pathInfo);
-				Project project = projectManager.find(projectPath);
+				Project project = projectManager.findByPath(projectPath);
 				if (project == null) {
 					sendBatchError(httpResponse, SC_NOT_FOUND, 
 							"Project not found: " + projectPath);

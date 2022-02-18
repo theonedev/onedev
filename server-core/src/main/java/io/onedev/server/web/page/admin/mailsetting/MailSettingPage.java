@@ -125,8 +125,7 @@ public class MailSettingPage extends AdministrationPage {
 							mailSetting.getTimeout(), listener));
 					
 					EmailAddress emailAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-					String subAddressed = emailAddress.getPrefix() + "+" 
-							+ MailManager.TEST_SUB_ADDRESSING + "@" + emailAddress.getDomain();
+					String subAddressed = emailAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);
 					logger.log("Sending test mail to " + subAddressed + "...");
 					mailManager.sendMail(mailSetting, 
 							Sets.newHashSet(subAddressed), Lists.newArrayList(), Lists.newArrayList(), uuid, 

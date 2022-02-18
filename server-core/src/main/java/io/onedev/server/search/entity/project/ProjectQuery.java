@@ -126,6 +126,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 						case ProjectQueryLexer.Is:
 							if (fieldName.equals(Project.NAME_NAME))
 								return new NameCriteria(value);
+							else if (fieldName.equals(Project.NAME_SERVICE_DESK_NAME))
+								return new ServiceDeskNameCriteria(value);
 							else
 								return new PathCriteria(value);
 						case ProjectQueryLexer.Contains:
@@ -198,8 +200,11 @@ public class ProjectQuery extends EntityQuery<Project> {
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.Is:
-			if (!fieldName.equals(Project.NAME_NAME) && !fieldName.equals(Project.NAME_PATH)) 
+			if (!fieldName.equals(Project.NAME_NAME) 
+					&& !fieldName.equals(Project.NAME_SERVICE_DESK_NAME) 
+					&& !fieldName.equals(Project.NAME_PATH)) { 
 				throw newOperatorException(fieldName, operator);
+			}
 			break;
 		case ProjectQueryLexer.IsUntil:
 		case ProjectQueryLexer.IsSince:

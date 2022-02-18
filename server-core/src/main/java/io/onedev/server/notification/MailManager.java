@@ -12,7 +12,7 @@ import io.onedev.server.model.support.administration.ReceiveMailSetting;
 
 public interface MailManager {
 	
-	public static final String TEST_SUB_ADDRESSING = "test-sub-addressing";
+	public static final String TEST_SUB_ADDRESS = "test~subaddressing";
 	
 	void sendMail(Collection<String> toList, Collection<String> ccList, 
 			Collection<String> bccList, String subject, String htmlBody, 

@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.project.info;
 
 import static io.onedev.server.model.Project.PROP_DESCRIPTION;
-import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT_ENABLED;
+import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_NAME;
 
 import java.util.Collection;
@@ -53,7 +53,7 @@ abstract class ForkOptionPanel extends Panel {
 		ParentBean parentBean = new ParentBean();
 		
 		String userName = SecurityUtils.getUser().getName();
-		Project parent = getProjectManager().find(userName);
+		Project parent = getProjectManager().findByPath(userName);
 		if (parent != null) {
 			if (SecurityUtils.canCreateChildren(parent))
 				parentBean.setParentPath(parent.getPath());
@@ -64,7 +64,7 @@ abstract class ForkOptionPanel extends Panel {
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());
 		
-		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_ISSUE_MANAGEMENT_ENABLED);
+		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_ISSUE_MANAGEMENT);
 		
 		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);
@@ -95,7 +95,7 @@ abstract class ForkOptionPanel extends Panel {
 					} else {
 						newProject.setForkedFrom(getProject());
 						newProject.setDescription(editProject.getDescription());
-						newProject.setIssueManagementEnabled(editProject.isIssueManagementEnabled());
+						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setDefaultRole(defaultRoleBean.getRole());
 						getProjectManager().fork(getProject(), newProject);
 						Session.get().success("Project forked");

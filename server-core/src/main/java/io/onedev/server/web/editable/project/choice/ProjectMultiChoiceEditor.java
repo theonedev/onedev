@@ -52,7 +52,7 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 		if (getModelObject() != null) {
 			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 			for (String projectPath: getModelObject()) {
-				Project project = projectManager.find(projectPath);
+				Project project = projectManager.findByPath(projectPath);
 				if (project != null && choicesModel.getObject().contains(project))
 					selections.add(project);
 			}

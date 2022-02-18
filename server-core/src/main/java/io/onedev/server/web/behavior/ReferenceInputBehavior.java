@@ -43,7 +43,7 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 			String projectName = matcher.group(4);
 			Project project;
 			if (projectName != null) 
-				project = OneDev.getInstance(ProjectManager.class).find(projectName);
+				project = OneDev.getInstance(ProjectManager.class).findByPath(projectName);
 			else 
 				project = getProject();
 			if (project != null) {

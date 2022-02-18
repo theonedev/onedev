@@ -19,7 +19,10 @@ import io.onedev.server.util.criteria.Criteria;
 public interface ProjectManager extends EntityManager<Project> {
 	
 	@Nullable 
-	Project find(String path);
+	Project findByPath(String path);
+	
+	@Nullable
+	Project findByServiceDeskName(String serviceDeskName);
 	
 	Project initialize(String path);
 	

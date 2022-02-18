@@ -75,7 +75,7 @@ public class ReferenceParser {
 
 				Project referenceProject;
 				if (referenceProjectName != null) {
-					referenceProject = OneDev.getInstance(ProjectManager.class).find(referenceProjectName);
+					referenceProject = OneDev.getInstance(ProjectManager.class).findByPath(referenceProjectName);
 					referenceText += referenceProjectName;
 				} else {
 					referenceProject = project;

@@ -1,8 +1,8 @@
 package io.onedev.server.web.page.project.setting.general;
 
-import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT_ENABLED;
+import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_DESCRIPTION;
-import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT_ENABLED;
+import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT;
 import static io.onedev.server.model.Project.PROP_NAME;
 
 import java.io.Serializable;
@@ -50,7 +50,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		super.onInitialize();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT_ENABLED, PROP_ISSUE_MANAGEMENT_ENABLED);
+				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());
@@ -103,7 +103,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 				String parentError = null;
 				if (!Objects.equal(prevParentPath, parentBean.getParentPath())) {
 					if (parentBean.getParentPath() != null) {
-						Project parent = getProjectManager().find(parentBean.getParentPath());
+						Project parent = getProjectManager().findByPath(parentBean.getParentPath());
 						if (parent == null) 
 							parentError = "Parent project not found";
 						else if (project.isSelfOrAncestorOf(parent)) 

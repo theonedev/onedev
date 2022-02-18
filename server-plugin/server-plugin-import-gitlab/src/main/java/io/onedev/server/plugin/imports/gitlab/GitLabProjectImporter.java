@@ -86,7 +86,7 @@ public class GitLabProjectImporter extends ProjectImporter<ImportServer, Project
 				Project project = projectManager.initialize(projectMapping.getOneDevProject());
 				Preconditions.checkState(project.isNew());
 				project.setDescription(projectNode.get("description").asText(null));
-				project.setIssueManagementEnabled(projectNode.get("issues_enabled").asBoolean());
+				project.setIssueManagement(projectNode.get("issues_enabled").asBoolean());
 				
 				String visibility = projectNode.get("visibility").asText();
 				if (!visibility.equals("private") && how.getPublicRole() != null)

@@ -460,7 +460,7 @@ public class ProjectListPanel extends Panel {
 											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
 											break;
 										} else {
-											Project projectWithSameName = getProjectManager().find(eachProject.getName());
+											Project projectWithSameName = getProjectManager().findByPath(eachProject.getName());
 											if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
 												errorMessage = "A root project with name '" + eachProject.getName() + "' already exists";
 												break;
@@ -720,7 +720,7 @@ public class ProjectListPanel extends Panel {
 											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
 											break;
 										} else {
-											Project projectWithSameName = getProjectManager().find(eachProject.getName());
+											Project projectWithSameName = getProjectManager().findByPath(eachProject.getName());
 											if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
 												errorMessage = "A root project with name '" + eachProject.getName() + "' already exists";
 												break;
@@ -1062,7 +1062,7 @@ public class ProjectListPanel extends Panel {
 				fragment.add(new Label("lastUpdate", "Updated " + DateUtils.formatAge(project.getUpdateDate())));
 				
 				int commitCount;
-				if (project.isCodeManagementEnabled() && SecurityUtils.canReadCode(project)
+				if (project.isCodeManagement() && SecurityUtils.canReadCode(project)
 						&& (commitCount=OneDev.getInstance(CommitInfoManager.class).getCommitCount(project)) != 0) {
 					Fragment commitInfoFrag = new Fragment("codeInfo", "codeInfoFrag", ProjectListPanel.this);
 					PageParameters params = ProjectCommitsPage.paramsOf(project, null);
@@ -1177,7 +1177,7 @@ public class ProjectListPanel extends Panel {
 					fragment.add(new WebMarkupContainer("pullRequestInfo").setVisible(false));
 				}
 				
-				if (project.isIssueManagementEnabled()) {
+				if (project.isIssueManagement()) {
 					IModel<Integer> totalCountModel = new LoadableDetachableModel<Integer>() {
 
 						@Override
@@ -1256,7 +1256,7 @@ public class ProjectListPanel extends Panel {
 					fragment.add(new WebMarkupContainer("issueInfo").setVisible(false));
 				}
 				
-				if (project.isCodeManagementEnabled()) {
+				if (project.isCodeManagement()) {
 					IModel<Integer> totalCountModel = new LoadableDetachableModel<Integer>() {
 
 						@Override

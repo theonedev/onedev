@@ -81,7 +81,7 @@ public class GiteaProjectImporter extends ProjectImporter<ImportServer, ProjectI
 				Project project = projectManager.initialize(projectMapping.getOneDevProject());
 				Preconditions.checkState(project.isNew());
 				project.setDescription(repoNode.get("description").asText(null));
-				project.setIssueManagementEnabled(repoNode.get("has_issues").asBoolean());
+				project.setIssueManagement(repoNode.get("has_issues").asBoolean());
 				
 				boolean isPrivate = repoNode.get("private").asBoolean();
 				if (!isPrivate && how.getPublicRole() != null)

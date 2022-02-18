@@ -43,7 +43,7 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 	public NewIssuePage(PageParameters params) {
 		super(params);
 		
-		if (!getProject().isIssueManagementEnabled())
+		if (!getProject().isIssueManagement())
 			throw new ExplicitException("Issue management not enabled in this project");
 		
 		User currentUser = getLoginUser();

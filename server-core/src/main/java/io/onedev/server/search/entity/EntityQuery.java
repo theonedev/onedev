@@ -74,7 +74,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static Project getProject(String projectPath) {
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectPath);
+		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 		if (project == null)
 			throw new ExplicitException("Unable to find project '" + projectPath + "'");
 		return project;

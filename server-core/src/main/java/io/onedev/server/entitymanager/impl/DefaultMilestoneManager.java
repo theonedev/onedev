@@ -32,7 +32,7 @@ public class DefaultMilestoneManager extends BaseEntityManager<Milestone> implem
 	@Override
 	public Milestone findInHierarchy(String milestoneFQN) {
 		String projectName = StringUtils.substringBefore(milestoneFQN, ":");
-		Project project = projectManager.find(projectName);
+		Project project = projectManager.findByPath(projectName);
 		if (project != null) { 
 			String milestoneName = StringUtils.substringAfter(milestoneFQN, ":");
 			EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);

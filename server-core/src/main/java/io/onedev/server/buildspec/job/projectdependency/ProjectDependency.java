@@ -80,7 +80,7 @@ public class ProjectDependency implements Serializable {
 	static Project getInputProject(EditContext editContext) {
 		String projectPath = (String) editContext.getInputValue("projectPath");
 		if (projectPath != null) {
-			Project project = OneDev.getInstance(ProjectManager.class).find(projectPath);
+			Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 			if (project != null && SecurityUtils.canReadCode(project))
 				return project;
 		}

@@ -55,7 +55,7 @@ public class UserAuthorizationsPage extends UserPage {
 						projectNames.add(authorizationBean.getProjectPath());
 						UserAuthorization authorization = new UserAuthorization();
 						authorization.setUser(getUser());
-						authorization.setProject(OneDev.getInstance(ProjectManager.class).find(authorizationBean.getProjectPath()));
+						authorization.setProject(OneDev.getInstance(ProjectManager.class).findByPath(authorizationBean.getProjectPath()));
 						authorization.setRole(OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()));
 						authorizations.add(authorization);
 					}

@@ -55,7 +55,7 @@ public class GroupAuthorizationsPage extends GroupPage {
 						projectPaths.add(authorizationBean.getProjectPath());
 						GroupAuthorization authorization = new GroupAuthorization();
 						authorization.setGroup(getGroup());
-						authorization.setProject(OneDev.getInstance(ProjectManager.class).find(authorizationBean.getProjectPath()));
+						authorization.setProject(OneDev.getInstance(ProjectManager.class).findByPath(authorizationBean.getProjectPath()));
 						authorization.setRole(OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()));
 						authorizations.add(authorization);
 					}
