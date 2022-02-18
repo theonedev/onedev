@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.wicket.Application;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -23,6 +23,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.MailManager;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.page.simple.SimplePage;
 
@@ -62,46 +63,59 @@ public class PasswordResetPage extends SimplePage {
 		form.add(new TaskButton("resettingPassword") {
 			
 			@Override
-			protected String runTask(TaskLogger logger) {
-				UserManager userManager = OneDev.getInstance(UserManager.class);
-				User user = userManager.findByName(loginNameOrEmail);
-				if (user == null) 
-					user = userManager.findByEmail(loginNameOrEmail);
-				if (user == null) {
-					throw new ExplicitException("No user found with login name or email: " + loginNameOrEmail);
-				} else {
-					SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-					if (settingManager.getMailSetting() != null) {
-						String password = RandomStringUtils.random(10, true, true);								
-						user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
-						userManager.save(user);
-						
-						MailManager mailManager = OneDev.getInstance(MailManager.class);
-						
-						String serverUrl = settingManager.getSystemSetting().getServerUrl();
-						
-						String htmlBody = String.format("Dear %s, "
-							+ "<p style='margin: 16px 0;'>"
-							+ "Per your request, password of your login \"%s\" at <a href=\"%s\">%s</a> has been reset to:<br>"
-							+ "%s<br><br>"
-							+ "Please login and change the password in your earliest convenience.",
-							user.getDisplayName(), user.getName(), serverUrl, serverUrl, password);
+			protected void onCompleted(AjaxRequestTarget target, boolean successful) {
+				super.onCompleted(target, successful);
+				if (successful)
+					setResponsePage(LoginPage.class);
+			}
 
-						String textBody = String.format("Dear %s,\n\n"
-								+ "Per your request, password of account \"%s\" at %s has been reset to:\n"
-								+ "%s",
-								user.getDisplayName(), user.getName(), serverUrl, password);
-						
-						mailManager.sendMail(
-								settingManager.getMailSetting(), 
-								Arrays.asList(user.getEmail()),
-								Lists.newArrayList(), Lists.newArrayList(), 
-								"[Password Reset] Your OneDev Password Has Been Reset", 
-								htmlBody, textBody, null, null);
-						return "Please check your email " + user.getEmail() + " for the reset password";
+			@Override
+			protected String runTask(TaskLogger logger) {
+				OneDev.getInstance(SessionManager.class).openSession();
+				try {
+					UserManager userManager = OneDev.getInstance(UserManager.class);
+					User user = userManager.findByName(loginNameOrEmail);
+					if (user == null) 
+						user = userManager.findByEmail(loginNameOrEmail);
+					if (user == null) {
+						throw new ExplicitException("No user found with login name or email: " + loginNameOrEmail);
 					} else {
-						throw new ExplicitException("Unable to send password reset email as smtp setting is not defined");
+						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+						if (settingManager.getMailSetting() != null) {
+							String password = RandomStringUtils.random(10, true, true);								
+							user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
+							userManager.save(user);
+							
+							MailManager mailManager = OneDev.getInstance(MailManager.class);
+							
+							String serverUrl = settingManager.getSystemSetting().getServerUrl();
+							
+							String htmlBody = String.format("Dear %s, "
+								+ "<p style='margin: 16px 0;'>"
+								+ "Per your request, password of your login \"%s\" at <a href=\"%s\">%s</a> has been reset to:<br>"
+								+ "%s<br><br>"
+								+ "Please login and change the password in your earliest convenience.",
+								user.getDisplayName(), user.getName(), serverUrl, serverUrl, password);
+	
+							String textBody = String.format("Dear %s,\n\n"
+									+ "Per your request, password of account \"%s\" at %s has been reset to:\n"
+									+ "%s",
+									user.getDisplayName(), user.getName(), serverUrl, password);
+							
+							mailManager.sendMail(
+									settingManager.getMailSetting(), 
+									Arrays.asList(user.getEmail()),
+									Lists.newArrayList(), Lists.newArrayList(), 
+									"[Password Reset] Your OneDev Password Has Been Reset", 
+									htmlBody, textBody, null, null);
+							
+							return "Please check your email " + user.getEmail() + " for the reset password";
+						} else {
+							throw new ExplicitException("Unable to send password reset email as smtp setting is not defined");
+						}
 					}
+				} finally {
+					OneDev.getInstance(SessionManager.class).closeSession();
 				}
 			}
 			
@@ -111,7 +125,7 @@ public class PasswordResetPage extends SimplePage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(Application.get().getHomePage());
+				setResponsePage(LoginPage.class);
 			}
 			
 		});

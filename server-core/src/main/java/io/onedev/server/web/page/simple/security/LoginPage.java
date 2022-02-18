@@ -3,7 +3,6 @@ package io.onedev.server.web.page.simple.security;
 import static io.onedev.server.web.page.admin.sso.SsoProcessPage.MOUNT_PATH;
 import static io.onedev.server.web.page.admin.sso.SsoProcessPage.STAGE_INITIATE;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
@@ -27,6 +26,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.simple.SimpleCssResourceReference;
@@ -46,7 +46,7 @@ public class LoginPage extends SimplePage {
 	public LoginPage(PageParameters params) {
 		super(params);
 		
-		if (SecurityUtils.getSubject().isAuthenticated())
+		if (SecurityUtils.getUser() != null)
 			throw new RestartResponseException(getApplication().getHomePage());
 	}
 	
