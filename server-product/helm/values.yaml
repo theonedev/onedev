@@ -46,7 +46,7 @@ ingress:
   ## Set to false to disable the default certificate issuer from this chart if you want to use a custom one
   enableDefaultIssuer: true
   ## Custom annotations for the ingress
-  annotations: {}
+  annotations:
     # kubernetes.io/tls-acme: "true"
     # cert-manager.io/issuer: ""
     # cert-manager.io/cluster-issuer: ""
