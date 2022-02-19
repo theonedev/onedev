@@ -9,7 +9,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -25,24 +24,16 @@ public class CommentCriteria extends Criteria<Issue> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		Join<?, ?> commentJoin = from.join(Issue.PROP_COMMENTS, JoinType.LEFT);
-		Path<String> contentAttribute = commentJoin.get(IssueComment.PROP_CONTENT);
-		commentJoin.on(builder.like(builder.lower(contentAttribute), "%" + value.toLowerCase() + "%"));
-		
-		Join<?, ?> changeJoin = from.join(Issue.PROP_CHANGES, JoinType.LEFT);
-		Path<String> commentAttribute = changeJoin.get(IssueChange.PROP_COMMENT);
-		changeJoin.on(builder.like(builder.lower(commentAttribute), "%" + value.toLowerCase() + "%"));
-		return builder.or(commentJoin.isNotNull(), changeJoin.isNotNull());
+		Join<?, ?> join = from.join(Issue.PROP_COMMENTS, JoinType.LEFT);
+		Path<String> attribute = join.get(IssueComment.PROP_CONTENT);
+		join.on(builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%"));
+		return join.isNotNull();
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		for (IssueComment comment: issue.getComments()) {
 			if (comment.getContent().toLowerCase().contains(value.toLowerCase()))
-				return true;
-		}
-		for (IssueChange change: issue.getChanges()) {
-			if (change.getComment() != null && change.getComment().toLowerCase().contains(value.toLowerCase()))
 				return true;
 		}
 		return false;

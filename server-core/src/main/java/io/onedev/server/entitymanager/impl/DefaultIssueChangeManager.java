@@ -52,6 +52,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
@@ -156,9 +157,23 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Transactional
 	@Override
-	public void save(IssueChange change) {
+	public void save(IssueChange change, String note) {
 		dao.persist(change);
-		listenerRegistry.post(new IssueChanged(change));
+		if (note != null) {
+			IssueComment comment = new IssueComment();
+			comment.setContent(note);
+			comment.setUser(change.getUser());
+			comment.setIssue(change.getIssue());
+			comment.setDate(new DateTime(change.getDate()).plusMillis(1).toDate());
+			dao.persist(comment);
+		}
+		
+		listenerRegistry.post(new IssueChanged(change, note));
+	}
+	
+	@Override
+	public void save(IssueChange change) {
+		save(change, null);
 	}
 	
 	@Transactional
@@ -234,10 +249,9 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setUser(SecurityUtils.getUser());
-		change.setComment(comment);
 		change.setData(new IssueStateChangeData(prevState, issue.getState(), 
 				prevFields, issue.getFieldInputs()));
-		save(change);
+		save(change, comment);
 	}
 	
 	@Transactional
@@ -265,7 +279,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				IssueChange change = new IssueChange();
 				change.setIssue(issue);
 				change.setUser(SecurityUtils.getUser());
-				change.setComment(comment);
 				
 				List<Milestone> prevMilestoneList = new ArrayList<>(prevMilestones);
 				prevMilestoneList.sort(new Milestone.DatesAndStatusComparator());
@@ -273,7 +286,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				currentMilestoneList.sort(new Milestone.DatesAndStatusComparator());
 				change.setData(new IssueBatchUpdateData(prevState, issue.getState(), prevMilestoneList, 
 						currentMilestoneList, prevFields, issue.getFieldInputs()));
-				save(change);
+				save(change, comment);
 			}
 		}
 	}

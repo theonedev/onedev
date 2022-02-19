@@ -110,7 +110,6 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 				change.setDate(new Date());
 				change.setRequest(review.getRequest());
 				
-				change.setComment(result.getComment());
 				if (Boolean.TRUE.equals(result.getApproved())) 
 					change.setData(new PullRequestApproveData());
 				else if (Boolean.FALSE.equals(result.getApproved()))
@@ -118,7 +117,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 				else
 					change.setData(new PullRequestReviewWithdrawData());
 				change.setUser(review.getUser());
-				changeManager.save(change);
+				changeManager.save(change, result.getComment());
 			}
 		}
 	}

@@ -12,8 +12,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.StringUtils;
-
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 
 @Entity
@@ -22,11 +20,7 @@ public class PullRequestChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_COMMENT_LEN = 14000;
-	
 	public static final int DIFF_CONTEXT_SIZE = 3;
-	
-	public static final String PROP_COMMENT = "comment";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -37,9 +31,6 @@ public class PullRequestChange extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Date date = new Date();
-	
-	@Column(length=MAX_COMMENT_LEN)
-	private String comment;
 	
 	@Lob
 	@Column(length=65535)
@@ -78,18 +69,6 @@ public class PullRequestChange extends AbstractEntity {
 		this.date = date;
 	}
 
-	@Nullable
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(@Nullable String comment) {
-		if (comment != null)
-			this.comment = StringUtils.abbreviate(comment, MAX_COMMENT_LEN);
-		else
-			this.comment = null;
-	}
-	
 	public String getAnchor() {
 		return getClass().getSimpleName() + "-" + getId();
 	}

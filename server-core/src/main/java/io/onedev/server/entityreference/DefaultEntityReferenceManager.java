@@ -235,7 +235,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	@Transactional
 	@Listen
 	public void on(IssueChanged event) {
-		addReferenceChange(event.getIssue(), event.getChange().getComment());
+		addReferenceChange(event.getIssue(), event.getComment());
 	}
 	
 	@Transactional
@@ -247,7 +247,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	@Transactional
 	@Listen
 	public void on(PullRequestChanged event) {
-		addReferenceChange(event.getRequest(), event.getChange().getComment());
+		addReferenceChange(event.getRequest(), event.getComment());
 	}
 	
 	@Transactional

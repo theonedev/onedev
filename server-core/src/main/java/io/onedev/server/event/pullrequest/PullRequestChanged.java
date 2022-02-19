@@ -1,5 +1,7 @@
 package io.onedev.server.event.pullrequest;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.PullRequestChange;
@@ -13,9 +15,12 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 
 	private final PullRequestChange change;
 	
-	public PullRequestChanged(PullRequestChange change) {
+	private final String note;
+	
+	public PullRequestChanged(PullRequestChange change, @Nullable String note) {
 		super(change.getUser(), change.getDate(), change.getRequest());
 		this.change = change;
+		this.note = note;
 	}
 
 	public PullRequestChange getChange() {
@@ -24,7 +29,12 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 
 	@Override
 	public String getMarkdown() {
-		return change.getComment();
+		return note;
+	}
+	
+	@Nullable
+	public String getComment() {
+		return note;
 	}
 
 	@Override

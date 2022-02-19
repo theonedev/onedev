@@ -27,6 +27,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 
 	void changeMilestones(Issue issue, Collection<Milestone> milestones);
 	
+	void save(IssueChange change, @Nullable String note);
+	
 	void addSchedule(Issue issue, Milestone milestone);
 	
 	void removeSchedule(Issue issue, Milestone milestone);

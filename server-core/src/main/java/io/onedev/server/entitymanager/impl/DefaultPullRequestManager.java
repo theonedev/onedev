@@ -227,11 +227,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			
 			PullRequestChange change = new PullRequestChange();
 			change.setDate(new Date());
-			change.setComment(note);
 			change.setData(new PullRequestSourceBranchRestoreData());
 			change.setRequest(request);
 			change.setUser(SecurityUtils.getUser());
-			changeManager.save(change);
+			changeManager.save(change, note);
 		}
 	}
 
@@ -244,11 +243,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			projectManager.deleteBranch(request.getSourceProject(), request.getSourceBranch());
 			PullRequestChange change = new PullRequestChange();
 			change.setDate(new Date());
-			change.setComment(note);
 			change.setData(new PullRequestSourceBranchDeleteData());
 			change.setRequest(request);
 			change.setUser(SecurityUtils.getUser());
-			changeManager.save(change);
+			changeManager.save(change, note);
 		}
 	}
 	
@@ -260,11 +258,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
-		change.setComment(note);
 		change.setData(new PullRequestReopenData());
 		change.setRequest(request);
 		change.setUser(user);
-		changeManager.save(change);
+		changeManager.save(change, note);
 		
 		MergePreview mergePreview = request.getMergePreview();
 		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
@@ -285,12 +282,11 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		request.setCloseInfo(closeInfo);
 		
 		PullRequestChange change = new PullRequestChange();
-		change.setComment(note);
 		change.setData(new PullRequestDiscardData());
 		change.setDate(closeInfo.getDate());
 		change.setRequest(request);
 		change.setUser(user);
-		changeManager.save(change);
+		changeManager.save(change, note);
 	}
 	
 	@Transactional

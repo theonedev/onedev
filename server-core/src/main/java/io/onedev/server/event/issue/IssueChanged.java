@@ -3,6 +3,8 @@ package io.onedev.server.event.issue;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
@@ -12,9 +14,12 @@ public class IssueChanged extends IssueEvent {
 
 	private final IssueChange change;
 	
-	public IssueChanged(IssueChange change) {
+	private final String comment;
+	
+	public IssueChanged(IssueChange change, @Nullable String comment) {
 		super(change.getUser(), change.getDate(), change.getIssue());
 		this.change = change;
+		this.comment = comment;
 	}
 
 	public IssueChange getChange() {
@@ -23,7 +28,12 @@ public class IssueChanged extends IssueEvent {
 
 	@Override
 	public String getMarkdown() {
-		return change.getComment();
+		return comment;
+	}
+
+	@Nullable
+	public String getComment() {
+		return comment;
 	}
 
 	@Override

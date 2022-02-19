@@ -67,6 +67,10 @@ public class PullRequestComment extends AbstractEntity {
 		return date;
 	}
 
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
 	public Project getProject() {
 		return request.getTargetProject();
 	}

@@ -77,6 +77,12 @@
 .pull-request-detail>.card-body>.main>.activities .activity>td>.body {
 	margin-top: 1rem;
 }
+.pull-request-detail>.card-body>.main>.activities .activity>td.no-body {
+	vertical-align: middle;
+}
+.pull-request-detail>.card-body>.main>.activities .activity>td.no-body>.body {
+	display: none;
+}
 
 .pull-request-detail>.card-body>.main>.activities .activity.since-changes .avatar div {
 	border-radius: 20px;

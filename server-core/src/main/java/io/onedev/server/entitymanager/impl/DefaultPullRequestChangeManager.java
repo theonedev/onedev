@@ -5,11 +5,14 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.joda.time.DateTime;
+
 import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
@@ -32,9 +35,24 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 
 	@Transactional
 	@Override
-	public void save(PullRequestChange change) {
+	public void save(PullRequestChange change, String note) {
 		dao.persist(change);
-		listenerRegistry.post(new PullRequestChanged(change));
+		
+		if (note != null) {
+			PullRequestComment comment = new PullRequestComment();
+			comment.setContent(note);
+			comment.setUser(change.getUser());
+			comment.setRequest(change.getRequest());
+			comment.setDate(new DateTime(change.getDate()).plusMillis(1).toDate());
+			dao.persist(comment);
+		}
+		
+		listenerRegistry.post(new PullRequestChanged(change, note));
+	}
+	
+	@Override
+	public void save(PullRequestChange change) {
+		save(change, null);
 	}
 	
 	@Transactional

@@ -12,8 +12,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.StringUtils;
-
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
 
 @Entity
@@ -23,10 +21,6 @@ public class IssueChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final int MAX_COMMENT_LEN = 15000;
-	
-	public static final String PROP_COMMENT = "comment";
-	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Issue issue;
@@ -37,9 +31,6 @@ public class IssueChange extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date = new Date();
 	
-	@Column(length=MAX_COMMENT_LEN)
-	private String comment;
-
 	@Lob
 	@Column(length=65535, nullable=false)
 	private IssueChangeData data;
@@ -75,18 +66,6 @@ public class IssueChange extends AbstractEntity {
 
 	public void setData(IssueChangeData data) {
 		this.data = data;
-	}
-
-	@Nullable
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(@Nullable String comment) {
-		if (comment != null)
-			this.comment = StringUtils.abbreviate(comment, MAX_COMMENT_LEN);
-		else
-			this.comment = null;
 	}
 
 	public String getAnchor() {
