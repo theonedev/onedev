@@ -2,7 +2,6 @@ package io.onedev.server.model;
 
 import java.util.Date;
 
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -27,6 +26,7 @@ public class PullRequestChange extends AbstractEntity {
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)
@@ -52,7 +52,6 @@ public class PullRequestChange extends AbstractEntity {
 		this.data = data;
 	}
 
-	@Nullable
 	public User getUser() {
 		return user;
 	}

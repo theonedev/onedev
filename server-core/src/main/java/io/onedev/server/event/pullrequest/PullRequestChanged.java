@@ -47,7 +47,10 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 		ObjectId commitId;
 		if (change.getData() instanceof PullRequestMergeData) {
 			MergePreview preview = getRequest().getMergePreview();
-			commitId = ObjectId.fromString(preview.getMergeCommitHash());
+			if (preview != null)
+				commitId = ObjectId.fromString(preview.getMergeCommitHash());
+			else
+				commitId = ObjectId.zeroId(); // Merged outside
 		} else if (change.getData() instanceof PullRequestDiscardData) {
 			commitId = ObjectId.fromString(getRequest().getLatestUpdate().getTargetHeadCommitHash());
 		} else {

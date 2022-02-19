@@ -107,10 +107,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 		activities.add(new IssueOpenedActivity(getIssue()));
 
 		List<IssueActivity> otherActivities = new ArrayList<>();
-		if (showComments) {
-			for (IssueComment comment: getIssue().getComments())  
-				otherActivities.add(new IssueCommentedActivity(comment));
-		}
 		
 		if (showChangeHistory) {
 			for (IssueChange change: getIssue().getChanges()) {
@@ -121,13 +117,18 @@ public abstract class IssueActivitiesPanel extends Panel {
 			}
 		}
 		
+		if (showComments) {
+			for (IssueComment comment: getIssue().getComments())  
+				otherActivities.add(new IssueCommentedActivity(comment));
+		}
+		
 		otherActivities.sort((o1, o2) -> {
 			if (o1.getDate().getTime()<o2.getDate().getTime())
 				return -1;
 			else if (o1.getDate().getTime()>o2.getDate().getTime())
 				return 1;
-			else
-				return 1;
+			else 
+				return 0;
 		});
 		
 		activities.addAll(otherActivities);

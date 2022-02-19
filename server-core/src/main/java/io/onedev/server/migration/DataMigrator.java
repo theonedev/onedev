@@ -3539,6 +3539,11 @@ public class DataMigrator {
 	
 	private void migrate77(File dataDir, Stack<Integer> versions) {
 		Map<String, String> userIds = new HashMap<>();
+		
+		Long maxPullRequestCommentId = 0L;
+		Long maxIssueCommentId = 0L;
+		File issueCommentsFile = null;
+		File pullRequestCommentsFile = null;
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -3552,8 +3557,43 @@ public class DataMigrator {
 						userIds.put(name, id);
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Long commentId = Long.parseLong(element.elementText("id").trim());
+					if (commentId > maxIssueCommentId)
+						maxIssueCommentId = commentId;
+				}
+				issueCommentsFile = file;
+			} else if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Long commentId = Long.parseLong(element.elementText("id").trim());
+					if (commentId > maxPullRequestCommentId)
+						maxPullRequestCommentId = commentId;
+				}
+				pullRequestCommentsFile = file;
 			}
 		}
+
+		VersionedXmlDoc issueCommentsDom;
+		if (issueCommentsFile == null) {
+			issueCommentsFile = new File(dataDir, "IssueComments.xml");
+			issueCommentsDom = new VersionedXmlDoc();
+			issueCommentsDom.addElement("list");
+		} else {
+			issueCommentsDom = VersionedXmlDoc.fromFile(issueCommentsFile);
+		}
+
+		VersionedXmlDoc pullRequestCommentsDom;
+		if (pullRequestCommentsFile == null) {
+			pullRequestCommentsFile = new File(dataDir, "PullRequestComments.xml");
+			pullRequestCommentsDom = new VersionedXmlDoc();
+			pullRequestCommentsDom.addElement("list");
+		} else {
+			pullRequestCommentsDom = VersionedXmlDoc.fromFile(pullRequestCommentsFile);
+		}
+		
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -3565,6 +3605,8 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
+					if (element.element("user") == null)
+						element.addElement("user").setText("-1");
 					Element dataElement = element.element("data");
 					Element assigneeElement = dataElement.element("assignee");
 					if (assigneeElement != null) {
@@ -3586,10 +3628,50 @@ public class DataMigrator {
 							element.detach();
 						}
 					}
+					Element commentElement = element.element("comment");
+					if (commentElement != null) {
+						Element pullRequestCommentElement = pullRequestCommentsDom.getRootElement()
+								.addElement("io.onedev.server.model.PullRequestComment");
+						pullRequestCommentElement.addElement("content").setText(commentElement.getText().trim());
+						pullRequestCommentElement.addAttribute("revision", "0.0");
+						pullRequestCommentElement.addElement("id").setText(String.valueOf(++maxPullRequestCommentId));
+						pullRequestCommentElement.addElement("request").setText(element.elementText("request").trim());
+						pullRequestCommentElement.addElement("user").setText(element.elementText("user").trim());
+						Element pullRequestCommentDateElement = pullRequestCommentElement.addElement("date");
+						Element dateElement = element.element("date");
+						pullRequestCommentDateElement.setText(dateElement.getText().trim());
+						pullRequestCommentDateElement.addAttribute("class", "sql-timestamp");
+						commentElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.element("user") == null)
+						element.addElement("user").setText("-1");
+					Element commentElement = element.element("comment");
+					if (commentElement != null) {
+						Element issueCommentElement = issueCommentsDom.getRootElement()
+								.addElement("io.onedev.server.model.IssueComment");
+						issueCommentElement.addElement("content").setText(commentElement.getText().trim());
+						issueCommentElement.addAttribute("revision", "0.0");
+						issueCommentElement.addElement("id").setText(String.valueOf(++maxIssueCommentId));
+						issueCommentElement.addElement("issue").setText(element.elementText("issue").trim());
+						issueCommentElement.addElement("user").setText(element.elementText("user").trim());
+						Element issueCommentDateElement = issueCommentElement.addElement("date");
+						Element dateElement = element.element("date");
+						issueCommentDateElement.setText(dateElement.getText().trim());
+						issueCommentDateElement.addAttribute("class", "sql-timestamp");
+						commentElement.detach();
+					}
 				}
 				dom.writeToFile(file, false);
 			}
 		}
+		
+		issueCommentsDom.writeToFile(issueCommentsFile, false);
+		pullRequestCommentsDom.writeToFile(pullRequestCommentsFile, false);
 	}
 
 }

@@ -164,7 +164,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			comment.setContent(note);
 			comment.setUser(change.getUser());
 			comment.setIssue(change.getIssue());
-			comment.setDate(new DateTime(change.getDate()).plusMillis(1).toDate());
+			comment.setDate(change.getDate());
 			dao.persist(comment);
 		}
 		

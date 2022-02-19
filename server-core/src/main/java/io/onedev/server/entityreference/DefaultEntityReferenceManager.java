@@ -30,6 +30,7 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedNumber;
 
 @Singleton
@@ -73,6 +74,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						IssueChange change = new IssueChange();
 						change.setData(referencedFromIssueData);
 						change.setDate(new Date());
+						change.setUser(SecurityUtils.getUser());
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
 						issueChangeManager.save(change);
@@ -99,6 +101,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						PullRequestChange change = new PullRequestChange();
 						change.setData(referencedFromIssueData);
 						change.setDate(new Date());
+						change.setUser(SecurityUtils.getUser());
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
 						pullRequestChangeManager.save(change);
@@ -132,6 +135,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						IssueChange change = new IssueChange();
 						change.setData(referencedFromPullRequestData);
 						change.setDate(new Date());
+						change.setUser(SecurityUtils.getUser());
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
 						issueChangeManager.save(change);
@@ -158,6 +162,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						PullRequestChange change = new PullRequestChange();
 						change.setData(referencedFromPullRequestData);
 						change.setDate(new Date());
+						change.setUser(SecurityUtils.getUser());
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
 						pullRequestChangeManager.save(change);
@@ -191,6 +196,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						IssueChange change = new IssueChange();
 						change.setData(referencedFromCodeCommentData);
 						change.setDate(new Date());
+						change.setUser(SecurityUtils.getUser());
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
 						issueChangeManager.save(change);
@@ -217,6 +223,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						PullRequestChange change = new PullRequestChange();
 						change.setData(referencedFromCodeCommentData);
 						change.setDate(new Date());
+						change.setUser(SecurityUtils.getUser());
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
 						pullRequestChangeManager.save(change);

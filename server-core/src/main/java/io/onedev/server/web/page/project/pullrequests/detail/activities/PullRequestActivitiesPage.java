@@ -145,18 +145,18 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				otherActivities.add(new PullRequestUpdatedActivity(update));
 		}
 
-		if (showComments) {
-			for (PullRequestComment comment: request.getComments()) { 
-				otherActivities.add(new PullRequestCommentedActivity(comment));
-			}
-		}
-		
 		if (showChangeHistory) {
 			for (PullRequestChange change: getPullRequest().getChanges()) {
 				if (!(change.getData() instanceof ReferencedFromAware) 
 						|| ((ReferencedFromAware<?>)change.getData()).getReferencedFrom() != null) {
 					otherActivities.add(new PullRequestChangeActivity(change));
 				}
+			}
+		}
+		
+		if (showComments) {
+			for (PullRequestComment comment: request.getComments()) { 
+				otherActivities.add(new PullRequestCommentedActivity(comment));
 			}
 		}
 		

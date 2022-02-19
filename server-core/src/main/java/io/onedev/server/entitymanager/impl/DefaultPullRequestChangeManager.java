@@ -5,8 +5,6 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.joda.time.DateTime;
-
 import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.event.pullrequest.PullRequestChanged;
@@ -43,7 +41,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			comment.setContent(note);
 			comment.setUser(change.getUser());
 			comment.setRequest(change.getRequest());
-			comment.setDate(new DateTime(change.getDate()).plusMillis(1).toDate());
+			comment.setDate(change.getDate());
 			dao.persist(comment);
 		}
 		
