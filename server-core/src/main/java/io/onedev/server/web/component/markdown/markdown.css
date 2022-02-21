@@ -303,6 +303,12 @@
 	vertical-align: middle;
 }
 
+.markdown-rendered h1, .markdown-rendered h2,
+.markdown-rendered h3, .markdown-rendered h4,
+.markdown-rendered h5, .markdown-rendered h6 {
+	margin-top: 1.5rem;
+}
+
 .markdown-rendered .header-link {
 	display: none;
 	position: absolute;
