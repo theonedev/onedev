@@ -96,13 +96,21 @@ OneDev tracks your cursor in edit window and scrolls the preview window as neces
 
 ![markdown](doc/images/markdown.gif)
 
-## SLOC History By Language Over Time
+## SLOC Trend By Language
+
+OneDev inspects git history of main branch to calculate trend of source lines of code by language efficiently. 
 
 ![stats](doc/images/stats.png)
 
 ## Project Hierarchy to Facilitate Setting Inheritance
 
 Organization is ideal for public service. However for self-hosted internal use, we feel that a hierarchical structure is more practical to organize projects. Child projects can inherit settings from parent project and can selectively override some of them if necessary. This reduces a lot of overhead to manage a lot of projects in the company.
+
+## Fast and Reliable with Moderate Resource Usage
+
+OneDev is carefully designed with performance in mind. With a 2 core 2GB box, you will get all features above for medium sized projects. 
+It has been intensively used for more than 5 years, with battle-proven reliability. Fixing bugs is our highest priority, and there is 
+almost no known bugs in the wild. 
 
 ----
 
