@@ -1,6 +1,5 @@
 onedev.server.sourceEdit = {
-	onDomReady: function(containerId, filePath, mark, indentType, tabSize, lineWrapMode, 
-			autoFocus, autosaveKey) {
+	onDomReady: function(containerId, filePath, mark, indentType, tabSize, lineWrapMode, autoFocus) {
 		var $container = $("#" + containerId);
 		var $sourceEdit = $container.children(".source-edit");
 		var $warning = $sourceEdit.children(".warning");
@@ -40,18 +39,8 @@ onedev.server.sourceEdit = {
 
 		onedev.server.codemirror.bindShortcuts(cm);
 		
-    	var doneTimer;
 		cm.on("change", function() {
 			$sourceEdit.closest("form").addClass("dirty");
-			if (doneTimer) 
-				clearTimeout(doneTimer);
-			doneTimer = setTimeout(function() {
-				var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
-				var content = cm.doc.getValue();
-				if (content.trim().length != 0)
-					localStorage.setItem(autosaveKey, content);
-				cm = null;
-			}, 500);
 		});
 		
 		$code.on("getViewState", function(e) {
@@ -77,16 +66,10 @@ onedev.server.sourceEdit = {
 			$(window).resize();
 		});
 	},
-	onWindowLoad: function(containerId, mark, autosaveKey) {
+	onWindowLoad: function(containerId, mark) {
 		var $container = $("#" + containerId);
 		var $warning = $container.find(">.source-edit>.warning");
 		var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
-		onedev.server.form.registerAutosaveKey($container.closest("form.leave-confirm"), autosaveKey);
-		var autosaveValue = localStorage.getItem(autosaveKey);
-		if (autosaveValue) {
-			cm.doc.setValue(autosaveValue);
-			$warning.show();	
-		}
 		
 		if (mark && onedev.server.viewState.getFromHistory() === undefined 
 				&& onedev.server.viewState.carryOver === undefined) {

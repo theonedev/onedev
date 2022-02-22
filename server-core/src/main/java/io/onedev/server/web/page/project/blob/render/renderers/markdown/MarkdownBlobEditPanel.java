@@ -22,14 +22,7 @@ public class MarkdownBlobEditPanel extends BlobEditPanel {
 
 	@Override
 	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
-		return new MarkdownBlobEditor(componentId, context, initialContent) {
-
-			@Override
-			protected String getAutosaveKey() {
-				return context.getAutosaveKey();
-			}
-
-		};
+		return new MarkdownBlobEditor(componentId, context, initialContent);
 	}
 
 }

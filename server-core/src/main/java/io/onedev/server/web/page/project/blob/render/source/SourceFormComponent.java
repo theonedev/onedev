@@ -69,7 +69,6 @@ abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		String autosaveKey = JavaScriptEscape.escapeJavaScript(getContext().getAutosaveKey());
 		PlanarRange mark = BlobRendererer.getSourceRange(getContext().getPosition());
 		String jsonOfMark;
 		if (mark != null) {
@@ -82,15 +81,14 @@ abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 			jsonOfMark = "undefined";
 		}
 		String script = String.format("onedev.server.sourceEdit.onDomReady("
-				+ "'%s', '%s', %s, '%s', %s, '%s', %b, '%s');", 
+				+ "'%s', '%s', %s, '%s', %s, '%s', %b);", 
 				getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(getContext().getNewPath()), 
 				jsonOfMark,
 				getSourceFormat().getIndentType(), 
 				getSourceFormat().getTabSize(), 
 				getSourceFormat().getLineWrapMode(), 
-				getContext().getMode() == Mode.EDIT || getContext().getInitialNewPath() != null, 
-				autosaveKey);
+				getContext().getMode() == Mode.EDIT || getContext().getInitialNewPath() != null);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 	

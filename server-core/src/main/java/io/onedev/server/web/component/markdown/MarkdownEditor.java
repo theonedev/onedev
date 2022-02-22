@@ -225,7 +225,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		
 		container.add(new WebMarkupContainer("doMention").setVisible(getUserMentionSupport() != null));
 			
-		edit.add(input = new TextArea<String>("input", Model.of(getModelObject())));
+		edit.add(input = new TextArea<String>("input", Model.of(getModelObject())) {
+
+			@Override
+			protected boolean shouldTrimInput() {
+				return MarkdownEditor.this.shouldTrimInput();
+			}
+			
+		});
 		for (AttributeModifier modifier: getInputModifiers()) 
 			input.add(modifier);
 
@@ -505,13 +512,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				explicit("param3")).toString();
 		String attachmentUploadUrl = attachmentUploadBehavior.getCallbackUrl().toString();
 		
-		String autosaveKey = getAutosaveKey();
-		if (autosaveKey != null)
-			autosaveKey = "'" + JavaScriptEscape.escapeJavaScript(autosaveKey) + "'";
-		else
-			autosaveKey = "undefined";
-		
-		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s', %s);", 
+		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s');", 
 				container.getMarkupId(), 
 				actionCallback, 
 				ATWHO_LIMIT, 
@@ -519,8 +520,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				getAttachmentSupport()!=null? getAttachmentSupport().getAttachmentMaxSize(): 0,
 				getUserMentionSupport() != null,
 				getReferenceSupport() != null, 
-				JavaScriptEscape.escapeJavaScript(ProjectPathValidator.PATTERN.pattern()),
-				autosaveKey);
+				JavaScriptEscape.escapeJavaScript(ProjectPathValidator.PATTERN.pattern()));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		script = String.format("onedev.server.markdown.onLoad('%s');", container.getMarkupId());
@@ -559,11 +559,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	
 	protected List<AttributeModifier> getInputModifiers() {
 		return new ArrayList<>();
-	}
-	
-	@Nullable
-	protected String getAutosaveKey() {
-		return null;
 	}
 	
 	@Nullable

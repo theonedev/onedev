@@ -135,7 +135,5 @@ public interface BlobRenderContext extends Serializable {
 	@Nullable
 	String getInitialNewPath();
 	
-	String getAutosaveKey();
-	
 	String appendRaw(String url);
 }

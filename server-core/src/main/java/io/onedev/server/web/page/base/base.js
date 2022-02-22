@@ -154,7 +154,6 @@ onedev.server = {
 			var $dirtyForms = $container.find(selector).addBack(selector);
 			if ($dirtyForms.length != 0) {
 				if (confirm("There are unsaved changes, do you want to discard and continue?")) {
-					onedev.server.form.clearAutosavings($dirtyForms);
 					return true;
 				} else {
 					return false;
@@ -162,16 +161,6 @@ onedev.server = {
 			} else {
 				return true;
 			}
-		},
-		clearAutosavings: function($dirtyForms) {
-			$dirtyForms.each(function() {
-				var autosaveKey = $(this).data("autosaveKey");
-				if (autosaveKey)
-					localStorage.removeItem(autosaveKey);
-			});
-		},
-		registerAutosaveKey: function($form, autosaveKey) {
-			$form.data("autosaveKey", autosaveKey);
 		}
 	},
 	setupAutoSize: function() {
@@ -871,10 +860,6 @@ onedev.server = {
 			if (e.keyCode == 27)
 				e.preventDefault();
 		});
-
-		window.onunload = function() {
-			onedev.server.form.clearAutosavings($("form.leave-confirm.dirty"));
-		};
 	},
 	
 	onWindowLoad: function() {

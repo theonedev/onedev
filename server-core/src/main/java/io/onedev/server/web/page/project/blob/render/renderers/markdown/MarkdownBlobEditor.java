@@ -38,7 +38,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
 @SuppressWarnings("serial")
-abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
+class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 	private final BlobRenderContext context;
 	
@@ -60,14 +60,14 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 				false, context) {
 
 			@Override
-			protected String getAutosaveKey() {
-				return MarkdownBlobEditor.this.getAutosaveKey();
-			}
-
-			@Override
 			protected String renderMarkdown(String markdown) {
 				MarkdownManager manager = OneDev.getInstance(MarkdownManager.class);
 				return manager.process(manager.render(markdown), context.getProject(), context, false);
+			}
+
+			@Override
+			protected boolean shouldTrimInput() {
+				return false;
 			}
 
 			@Override
@@ -160,6 +160,4 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 		}
 	}
 
-	protected abstract String getAutosaveKey();
-	
 }

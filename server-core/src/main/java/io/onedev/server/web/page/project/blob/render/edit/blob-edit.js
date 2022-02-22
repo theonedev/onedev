@@ -76,7 +76,6 @@ onedev.server.blobEdit = {
 			$form.parent().addClass("dirty");
 		else
 			$form.parent().removeClass("dirty");
-		$form.parent().data("autosaveKey", $form.data("autosaveKey"));
 	},
 	restoreFormFlags: function(formId) {
 		var $form = $("#" + formId);
@@ -84,7 +83,6 @@ onedev.server.blobEdit = {
 			$form.addClass("dirty");
 		else
 			$form.removeClass("dirty");
-		$form.data("autosaveKey", $form.parent().data("autosaveKey"));
 	},
 	onNameChanging: function(containerId, addingFile, recreateCallback) {
 		var $body = $("#" + containerId + ">.blob-edit>.body");

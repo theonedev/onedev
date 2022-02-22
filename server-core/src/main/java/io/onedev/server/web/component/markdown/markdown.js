@@ -27,10 +27,9 @@ onedev.server.markdown = {
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentUploadUrl, 
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
-			projectPathPattern, autosaveKey) {
+			projectPathPattern) {
 		var $container = $("#" + containerId);
 		$container.data("callback", callback);		
-		$container.data("autosaveKey", autosaveKey);
 		
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
@@ -109,12 +108,6 @@ onedev.server.markdown = {
 			}
 
 			render();
-
-			if (autosaveKey) {
-				var content = $input.val();
-				if (content.trim().length != 0)
-					localStorage.setItem(autosaveKey, content);
-			}
 		}, previewTimeout);
 		
 		$input.doneEvents("keydown", function(e) {
@@ -820,17 +813,6 @@ onedev.server.markdown = {
 					$preview.height(defaultHeight);
 			}
 		} 
-		
-		var autosaveKey = $container.data("autosaveKey");
-		if (autosaveKey) {
-			onedev.server.form.registerAutosaveKey($container.closest("form.leave-confirm"), autosaveKey);
-			var autosaveValue = localStorage.getItem(autosaveKey);
-			if (autosaveValue && $input.val() != autosaveValue) {
-				$input.val(autosaveValue);
-				$warning.show();		
-				onedev.server.markdown.fireInputEvent($input);
-			}
-		}
 	},
 	onRendered: function(containerId, html) {
 		var $preview = $("#" + containerId + ">.body>.preview");

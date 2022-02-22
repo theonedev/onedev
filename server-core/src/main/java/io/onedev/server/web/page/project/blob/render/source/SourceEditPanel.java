@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
-import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,11 +82,10 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new SourceEditResourceReference()));
 		
-		String autosaveKey = JavaScriptEscape.escapeJavaScript(context.getAutosaveKey());
 		PlanarRange mark = BlobRendererer.getSourceRange(context.getPosition());
 		
-		String script = String.format("onedev.server.sourceEdit.onWindowLoad('%s', %s, '%s');", 
-				getEditor().getMarkupId(), mark != null? getJson(mark): "undefined", autosaveKey);
+		String script = String.format("onedev.server.sourceEdit.onWindowLoad('%s', %s);", 
+				getEditor().getMarkupId(), mark != null? getJson(mark): "undefined");
 		response.render(OnLoadHeaderItem.forScript(script));		
 	}
 	

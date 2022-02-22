@@ -1490,20 +1490,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 
 	@Override
-	public String getAutosaveKey() {
-		if (state.mode == Mode.ADD) {
-			return String.format("autosave:addBlob:%d:%s:%s", 
-					getProject().getId(), state.blobIdent.revision, getNewPath());
-		} else if (state.mode == Mode.EDIT) {
-			return String.format("autosave:editBlob:%d:%s:%s:%s", 
-					getProject().getId(), state.blobIdent.revision, 
-					state.blobIdent.path, getProject().getBlob(state.blobIdent, true).getBlobId());
-		} else {
-			throw new IllegalStateException();
-		}
-	}
-
-	@Override
 	public RefUpdated uploadFiles(Collection<FileUpload> uploads, String directory, String commitMessage) {
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
