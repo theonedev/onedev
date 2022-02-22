@@ -71,8 +71,6 @@ public abstract class InplacePropertyEditLink extends DropdownLink {
 	}
 	
 	@Nullable
-	protected Project getProject() {
-		return null;
-	}
+	protected abstract Project getProject();
 	
 }

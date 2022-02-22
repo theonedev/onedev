@@ -360,6 +360,11 @@ public abstract class IssueSidePanel extends Panel {
 					}
 
 					@Override
+					protected Project getProject() {
+						return getIssue().getProject();
+					}
+
+					@Override
 					protected IssueQuery getIssueQuery() {
 						LinkSide side = model.getObject();
 						if (side.isOpposite()) 
