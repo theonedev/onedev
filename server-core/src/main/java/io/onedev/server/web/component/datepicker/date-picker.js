@@ -26,6 +26,7 @@ onedev.server.datePicker = {
 			setTimeout(function() {
 				if (e.keyCode == 13) { // Enter
 					$input.closest('form').find("input[type='submit'],button[type='submit']").trigger("click");
+					calendar.close();
 				} else if (e.keyCode == 27) { // Esc
 					calendar.close();
 				}

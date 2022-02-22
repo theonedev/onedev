@@ -166,6 +166,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			comment.setIssue(change.getIssue());
 			comment.setDate(change.getDate());
 			dao.persist(comment);
+			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
 		}
 		
 		listenerRegistry.post(new IssueChanged(change, note));

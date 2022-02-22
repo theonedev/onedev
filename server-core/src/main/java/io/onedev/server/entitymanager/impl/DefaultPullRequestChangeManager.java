@@ -43,6 +43,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			comment.setRequest(change.getRequest());
 			comment.setDate(change.getDate());
 			dao.persist(comment);
+			comment.getRequest().setCommentCount(comment.getRequest().getCommentCount()+1);
 		}
 		
 		listenerRegistry.post(new PullRequestChanged(change, note));

@@ -5,31 +5,34 @@ onedev.server.floating = {
 		$floating.data("animation", animation);
 		
 		$floating.data("mouseUpOrTouchStart", function(e) {
-			/*
-			 * Close the floating panel if mouse clicks outside of the floating. Also we 
-			 * do not close the panel if mouse clicks on the element triggering this 
-			 * floating panel, as normally the triggering element already has the logic 
-			 * closing the floating when it is clicked (to achieve the toggle effect) 
-			 */
-			var x = e.pageX;
-			var y = e.pageY;
-			
-			// add this extra check as otherwise clicking on scroll bar of floating will hide the 
-			// floating in IE
-			var contains = $floating.offset().left<x && $floating.offset().left+$floating.outerWidth()>x
-					&& $floating.offset().top<y && $floating.offset().top+$floating.outerHeight()>y;
-					
-		    if (!$floating.is(e.target) && $floating.has(e.target).length === 0 && !contains) {
-		    	var $trigger = $floating.data("trigger");
-			    if (!$trigger || !$trigger.is(e.target) && $trigger.has(e.target).length === 0) {
-					$floating.data("closeCallback")();
-				}
-		    }
+			if ($(".flatpickr-calendar.open").length == 0 && $(".pcr-app.visible").length == 0) {
+				/*
+				 * Close the floating panel if mouse clicks outside of the floating. Also we 
+				 * do not close the panel if mouse clicks on the element triggering this 
+				 * floating panel, as normally the triggering element already has the logic 
+				 * closing the floating when it is clicked (to achieve the toggle effect) 
+				 */
+				var x = e.pageX;
+				var y = e.pageY;
+				
+				// add this extra check as otherwise clicking on scroll bar of floating will hide the 
+				// floating in IE
+				var contains = $floating.offset().left<x && $floating.offset().left+$floating.outerWidth()>x
+						&& $floating.offset().top<y && $floating.offset().top+$floating.outerHeight()>y;
+						
+			    if (!$floating.is(e.target) && $floating.has(e.target).length === 0 && !contains) {
+			    	var $trigger = $floating.data("trigger");
+				    if (!$trigger || !$trigger.is(e.target) && $trigger.has(e.target).length === 0) {
+						$floating.data("closeCallback")();
+					}
+			    }
+			}
 		});
 		$(document).on("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
 		
 		$floating.data("keydown", function(e) {
-			if (e.keyCode == 27 && $(".select2-drop:visible").length == 0 
+			if (e.keyCode == 27 && $(e.target).closest(".flatpickr-calendar").length == 0 
+					&& $(".select2-drop:visible").length == 0 
 					&& $(".flatpickr-calendar.open").length == 0
 					&& $(".pcr-app.visible").length == 0) {
 				$floating.data("closeCallback")();
