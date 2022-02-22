@@ -179,7 +179,9 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				handler.add(component);
+				component.configure();
+				if (component.isVisible())
+					handler.add(component);
 			}
 			
 			@Override
