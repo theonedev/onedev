@@ -3674,4 +3674,52 @@ public class DataMigrator {
 		pullRequestCommentsDom.writeToFile(pullRequestCommentsFile, false);
 	}
 
+	private void migrate78(File dataDir, Stack<Integer> versions) {
+		Map<String, Integer> issueCommentCounts = new HashMap<>();
+		Map<String, Integer> pullRequestCommentCounts = new HashMap<>();
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String issueId = element.elementTextTrim("issue");
+					Integer commentCount = issueCommentCounts.get(issueId);
+					if (commentCount == null) 
+						commentCount = 0;
+					commentCount++;
+					issueCommentCounts.put(issueId, commentCount);
+				}
+			} else if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String pullRequestId = element.elementTextTrim("request");
+					Integer commentCount = pullRequestCommentCounts.get(pullRequestId);
+					if (commentCount == null) 
+						commentCount = 0;
+					commentCount++;
+					pullRequestCommentCounts.put(pullRequestId, commentCount);
+				}
+			}
+		}
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Integer commentCount = issueCommentCounts.get(element.elementTextTrim("id"));
+					if (commentCount == null)
+						commentCount = 0;
+					element.element("commentCount").setText(String.valueOf(commentCount));
+				}
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Integer commentCount = pullRequestCommentCounts.get(element.elementTextTrim("id"));
+					if (commentCount == null)
+						commentCount = 0;
+					element.element("commentCount").setText(String.valueOf(commentCount));
+				}
+			}
+		}
+	}
+	
 }
