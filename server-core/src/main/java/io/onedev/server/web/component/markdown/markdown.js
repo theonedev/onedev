@@ -177,6 +177,8 @@ onedev.server.markdown = {
 				if ((e.metaKey || e.ctrlKey) && getSubmit().length != 0) 
 					return;
 					
+				var scrollTop = $input.scrollTop();
+					
 				e.preventDefault();
 				var input = $input.val();
 				var caret = $input.caret();
@@ -242,8 +244,10 @@ onedev.server.markdown = {
 				
 				// Scroll if necessary to make cursor visible
 				var caretBottom = getCaretCoordinates($input[0], $input.caret()).top + fontSize;
-				if (caretBottom > $input.scrollTop() + $input.height()) {
+				if (caretBottom > scrollTop + $input.height()) {
 					$input.scrollTop(caretBottom - $input.height());
+				} else {
+					$input.scrollTop(scrollTop);
 				}
 			}
 		});
