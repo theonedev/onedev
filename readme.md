@@ -110,7 +110,7 @@ Organization is ideal for public service. However for self-hosted internal use, 
 
 OneDev is carefully designed with performance in mind. With a 2 core 2GB box, you will get all features above for medium sized projects. 
 It has been intensively used for more than 5 years, with battle-proven reliability. Fixing bugs is our highest priority, and there is 
-almost no known bugs in the wild. 
+normally few to no known bugs in the wild. 
 
 ----
 
@@ -118,4 +118,4 @@ almost no known bugs in the wild.
 
 ![yourkit](https://www.yourkit.com/images/yklogo.png) 
 
-[YourKit](https://yourkit.com) supports this project by providing a free open source license of YourKit Java profiler
+[YourKit](https://yourkit.com) supports this project by providing a free open source license of their excellent Java profiler
