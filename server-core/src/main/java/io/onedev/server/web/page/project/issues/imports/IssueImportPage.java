@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.imports.Importer;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
@@ -54,6 +55,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 	protected void onInitialize() {
 		super.onInitialize();
 
+		Long projectId = getProject().getId();
 		add(new ImportPanel<Where, What, How>("importer") {
 
 			@Override
@@ -64,7 +66,8 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 			@Override
 			protected String doImport(Where where, What what, How how, boolean dryRun,
 					TaskLogger logger) {
-				return importer.doImport(where, what, how, getProject(), dryRun, logger);
+				Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+				return importer.doImport(where, what, how, project, dryRun, logger);
 			}
 
 			@Override
