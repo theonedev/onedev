@@ -1191,7 +1191,7 @@ public abstract class IssueListPanel extends Panel {
 					}
 					for (IssueLink link: issue.getSourceLinks()) {
 						LinkSpec spec = link.getSpec();
-						if (spec.getOpposite() == null || spec.getOpposite().getName().equals(linkName))
+						if (spec.getOpposite() == null && spec.getName().equals(linkName))
 							count++;
 					}
 					if (count != 0) {
