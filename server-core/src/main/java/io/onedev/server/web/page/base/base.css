@@ -714,16 +714,16 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 }
 
 .dark-mode * {
-	scrollbar-color: rgb(48, 51, 62) var(--dark-mode-dark);
+	scrollbar-color: rgb(51, 52, 75) rgb(37, 38, 55);
 }
 
 .dark-mode ::-webkit-scrollbar {
-	border-color: var(--dark-mode-dark);
-	background-color: var(--dark-mode-dark);
+	border-color: rgb(37, 38, 55);
+	background-color: rgb(37, 38, 55);
 }
 .dark-mode ::-webkit-scrollbar-corner {
-	background-color: var(--dark-mode-dark);
+	background-color: rgb(37, 38, 55);
 }
 .dark-mode ::-webkit-scrollbar-thumb {
-	background-color: rgb(48, 51, 62);
+	background-color: rgb(51, 52, 75);
 }
