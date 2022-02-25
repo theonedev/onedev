@@ -72,7 +72,7 @@ import com.thoughtworks.xstream.converters.extended.ISO8601SqlTimestampConverter
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
-import com.vladsch.flexmark.Extension;
+import com.vladsch.flexmark.util.misc.Extension;
 
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.commons.bootstrap.Bootstrap;

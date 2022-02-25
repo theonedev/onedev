@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import org.jsoup.nodes.Document;
 
-import com.vladsch.flexmark.ast.Node;
+import com.vladsch.flexmark.util.ast.Node;
 
 import io.onedev.server.model.Project;
 
