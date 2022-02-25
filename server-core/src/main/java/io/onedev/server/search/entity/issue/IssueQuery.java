@@ -32,6 +32,7 @@ import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.CommitField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
+import io.onedev.server.model.support.issue.field.spec.DateTimeField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
@@ -340,7 +341,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 				if (validate && !Issue.ORDER_FIELDS.containsKey(fieldName)) {
 					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 					if (validate && !(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
-							&& !(fieldSpec instanceof IntegerField) && !(fieldSpec instanceof MilestoneChoiceField)) {
+							&& !(fieldSpec instanceof DateTimeField) && !(fieldSpec instanceof IntegerField) 
+							&& !(fieldSpec instanceof MilestoneChoiceField)) {
 						throw new ExplicitException("Can not order by field: " + fieldName);
 					}
 				}
@@ -400,7 +402,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 		case IssueQueryLexer.IsSince:
 			if (!fieldName.equals(Issue.NAME_SUBMIT_DATE) 
 					&& !fieldName.equals(Issue.NAME_UPDATE_DATE) 
-					&& !(fieldSpec instanceof DateField)) {
+					&& !(fieldSpec instanceof DateField)
+					&& !(fieldSpec instanceof DateTimeField)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;

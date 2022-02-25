@@ -60,6 +60,7 @@ import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.CommitField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
+import io.onedev.server.model.support.issue.field.spec.DateTimeField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
@@ -128,7 +129,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								candidates.remove(Issue.NAME_PROJECT);
 							for (FieldSpec field: issueSetting.getFieldSpecs()) {
 								if (field instanceof IntegerField || field instanceof ChoiceField 
-										|| field instanceof DateField || field instanceof MilestoneChoiceField) { 
+										|| field instanceof DateField || field instanceof DateTimeField 
+										|| field instanceof MilestoneChoiceField) { 
 									candidates.add(field.getName());
 								}
 							}
@@ -173,8 +175,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else {
 										FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
-										if (fieldSpec instanceof DateField || fieldName.equals(NAME_SUBMIT_DATE) 
-												|| fieldName.equals(NAME_UPDATE_DATE)) {
+										if (fieldSpec instanceof DateField || fieldSpec instanceof DateTimeField 
+												|| fieldName.equals(NAME_SUBMIT_DATE) || fieldName.equals(NAME_UPDATE_DATE)) {
 											List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 											return !suggestions.isEmpty()? suggestions: null;
 										} else if (fieldSpec instanceof UserChoiceField) {
