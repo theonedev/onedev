@@ -161,7 +161,7 @@ public class GroupListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
 				Fragment fragment = new Fragment(componentId, "nameFrag", GroupListPage.this);
 				Group group = rowModel.getObject();
-				WebMarkupContainer link = new ActionablePageLink<Void>("link", 
+				WebMarkupContainer link = new ActionablePageLink("link", 
 						GroupProfilePage.class, GroupProfilePage.paramsOf(group)) {
 
 					@Override

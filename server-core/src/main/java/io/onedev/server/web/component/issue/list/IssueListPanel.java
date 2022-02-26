@@ -1138,8 +1138,8 @@ public abstract class IssueListPanel extends Panel {
 				else 
 					label = issue.getProject() + "#" + issue.getNumber();
 				
-				ActionablePageLink<Void> numberLink;
-				fragment.add(numberLink = new ActionablePageLink<Void>("number", 
+				ActionablePageLink numberLink;
+				fragment.add(numberLink = new ActionablePageLink("number", 
 						IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
 
 					@Override
@@ -1167,9 +1167,11 @@ public abstract class IssueListPanel extends Panel {
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
 						String script = String.format(""
-								+ "$('#%s a:not(.embedded-reference)').click(function() {"
-								+ "  $('#%s').click();"
-								+ "  return false;"
+								+ "$('#%s a:not(.embedded-reference)').click(function(e) {\n"
+								+ "  if (!e.ctrlKey && !e.metaKey) {\n"
+								+ "    $('#%s').click();\n"
+								+ "    return false;\n"
+								+ "  }\n"
 								+ "});", 
 								getMarkupId(), numberLink.getMarkupId());
 						response.render(OnDomReadyHeaderItem.forScript(script));

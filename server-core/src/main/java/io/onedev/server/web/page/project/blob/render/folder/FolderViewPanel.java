@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.ComponentTag;
@@ -41,7 +42,9 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
 import io.onedev.server.web.component.blob.BlobIcon;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -191,7 +194,7 @@ public class FolderViewPanel extends Panel {
 			protected void populateItem(ListItem<BlobIdent> item) {
 				BlobIdent blobIdent = item.getModelObject();
 				
-				AjaxLink<Void> pathLink = new ViewStateAwareAjaxLink<Void>("pathLink") {
+				WebMarkupContainer pathLink = new WebMarkupContainer("pathLink") {
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
@@ -202,12 +205,23 @@ public class FolderViewPanel extends Panel {
 						tag.put("href", urlFor(ProjectBlobPage.class, params));
 					}
 
+				}; 
+				
+				pathLink.add(new CtrlAwareOnClickAjaxBehavior() {
+
 					@Override
-					public void onClick(AjaxRequestTarget target) {
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.setPreventDefault(true);
+						attributes.getAjaxCallListeners().add(new TrackViewStateListener(false));
+					}
+
+					@Override
+					protected void respond(AjaxRequestTarget target) {
 						context.onSelect(target, blobIdent, null);
 					}
 					
-				}; 
+				});
 
 				pathLink.add(new BlobIcon("icon", Model.of(blobIdent)));
 				

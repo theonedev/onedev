@@ -171,7 +171,7 @@ public class UserListPage extends AdministrationPage {
 					IModel<User> rowModel) {
 				User user = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
-				WebMarkupContainer link = new ActionablePageLink<Void>("link", UserProfilePage.class, UserProfilePage.paramsOf(user)) {
+				WebMarkupContainer link = new ActionablePageLink("link", UserProfilePage.class, UserProfilePage.paramsOf(user)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {

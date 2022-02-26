@@ -489,7 +489,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				CodeComment comment = rowModel.getObject();
 				WebMarkupContainer link;
 				if (!comment.isValid()) {
-					link = new ActionablePageLink<Void>("link", InvalidCodeCommentPage.class, 
+					link = new ActionablePageLink("link", InvalidCodeCommentPage.class, 
 							InvalidCodeCommentPage.paramsOf(comment)) {
 
 						@Override

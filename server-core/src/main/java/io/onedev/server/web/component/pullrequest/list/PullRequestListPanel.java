@@ -694,8 +694,8 @@ public abstract class PullRequestListPanel extends Panel {
 				else
 					label = "#" + request.getNumber();
 					
-				ActionablePageLink<Void> numberLink;
-				fragment.add(numberLink = new ActionablePageLink<Void>("number", 
+				ActionablePageLink numberLink;
+				fragment.add(numberLink = new ActionablePageLink("number", 
 						PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request)) {
 
 					@Override
@@ -726,9 +726,11 @@ public abstract class PullRequestListPanel extends Panel {
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
 						String script = String.format(""
-								+ "$('#%s a:not(.embedded-reference)').click(function() {"
-								+ "  $('#%s').click();"
-								+ "  return false;"
+								+ "$('#%s a:not(.embedded-reference)').click(function(e) {\n"
+								+ "  if (!e.ctrlKey && !e.metaKey) {\n"
+								+ "    $('#%s').click();\n"
+								+ "    return false;\n"
+								+ "  }\n"
 								+ "});", 
 								getMarkupId(), numberLink.getMarkupId());
 						response.render(OnDomReadyHeaderItem.forScript(script));
