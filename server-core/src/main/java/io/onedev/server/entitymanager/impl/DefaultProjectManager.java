@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -40,7 +41,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
@@ -90,7 +90,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -364,23 +363,48 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Sessional
     @Override
     public Project findByPath(String path) {
-    	List<String> names = Splitter.on("/").omitEmptyStrings().trimResults().splitToList(path);
-    	Project project = null;
-    	for (String name: names) {
-    		project = find(project, name);
-    		if (project == null)
-    			break;
-    	}
-    	return project;
+		cacheLock.readLock().lock();
+		try {
+			Long projectId = findProjectId(path);
+			if (projectId != null)
+				return load(projectId);
+			else
+				return null;
+		} finally {
+			cacheLock.readLock().unlock();
+		}
     }
 
+    @Nullable
+    private Long findProjectId(String path) {
+    	Long projectId = null;
+    	for (String name: Splitter.on("/").omitEmptyStrings().trimResults().split(path)) {
+    		projectId = findProjectId(projectId, name);
+    		if (projectId == null)
+    			break;
+    	}
+    	return projectId;
+    }
+    
     @Sessional
     @Override
     public Project findByServiceDeskName(String serviceDeskName) {
-		EntityCriteria<Project> criteria = newCriteria();
-		criteria.add(Restrictions.ilike(Project.PROP_SERVICE_DESK_NAME, serviceDeskName));
-		criteria.setCacheable(true);
-		return find(criteria);
+		cacheLock.readLock().lock();
+		try {
+			Long projectId = null;
+			for (ProjectFacade facade: cache.values()) {
+				if (facade.getServiceDeskName().equalsIgnoreCase(serviceDeskName)) {
+					projectId = facade.getId();
+					break;
+				}
+			}
+			if (projectId != null)
+				return load(projectId);
+			else
+				return null;
+		} finally {
+			cacheLock.readLock().unlock();
+		}
     }
     
     @Sessional
@@ -422,14 +446,22 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Sessional
     @Override
     public Project find(Project parent, String name) {
-		EntityCriteria<Project> criteria = newCriteria();
-		if (parent != null)
-			criteria.add(Restrictions.eq(Project.PROP_PARENT, parent));
-		else
-			criteria.add(Restrictions.isNull(Project.PROP_PARENT));
-		criteria.add(Restrictions.ilike(Project.PROP_NAME, name));
-		criteria.setCacheable(true);
-		return find(criteria);
+		cacheLock.readLock().lock();
+		try {
+			Long projectId = null;
+			for (ProjectFacade facade: cache.values()) {
+				if (facade.getName().equalsIgnoreCase(name) && Objects.equals(Project.idOf(parent), facade.getParentId())) {
+					projectId = facade.getId();
+					break;
+				}
+			}
+			if (projectId != null)
+				return load(projectId);
+			else
+				return null;
+		} finally {
+			cacheLock.readLock().unlock();
+		}
     }
     
     @Transactional
@@ -885,5 +917,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		for (Project independent: independents)
 			delete(independent);
 	}
-	
+    
+	@Nullable
+    private Long findProjectId(@Nullable Long parentId, String name) {
+		for (ProjectFacade facade: cache.values()) {
+			if (facade.getName().equalsIgnoreCase(name) && Objects.equals(parentId, facade.getParentId())) 
+				return facade.getId();
+		}
+		return null;
+    }
+    
 }
