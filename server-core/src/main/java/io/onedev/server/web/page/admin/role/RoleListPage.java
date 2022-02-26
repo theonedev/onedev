@@ -159,7 +159,7 @@ public class RoleListPage extends AdministrationPage {
 				
 				Role role = rowModel.getObject();
 				
-				WebMarkupContainer link = new ActionablePageLink<Void>("link", 
+				WebMarkupContainer link = new ActionablePageLink("link", 
 						RoleDetailPage.class, RoleDetailPage.paramsOf(role)) {
 
 					@Override

@@ -1040,7 +1040,7 @@ public class ProjectListPanel extends Panel {
 				Fragment fragment = new Fragment(componentId, "projectFrag", ProjectListPanel.this);
 				Project project = rowModel.getObject();
 				
-				ActionablePageLink<Void> pathLink = new ActionablePageLink<Void>("path", 
+				ActionablePageLink pathLink = new ActionablePageLink("path", 
 						ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project)) {
 
 					@Override

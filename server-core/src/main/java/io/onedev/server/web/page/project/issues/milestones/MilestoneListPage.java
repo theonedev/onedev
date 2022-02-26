@@ -190,7 +190,7 @@ public class MilestoneListPage extends ProjectPage {
 					IModel<Milestone> rowModel) {
 				Milestone milestone = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", MilestoneListPage.this);
-				WebMarkupContainer link = new ActionablePageLink<Void>("link", MilestoneIssuesPage.class, 
+				WebMarkupContainer link = new ActionablePageLink("link", MilestoneIssuesPage.class, 
 						MilestoneIssuesPage.paramsOf(getProject(), milestone, null)) {
 
 					@Override

@@ -800,7 +800,7 @@ public abstract class BuildListPanel extends Panel {
 				Build build = rowModel.getObject();
 				Long buildId = build.getId();
 				
-				AjaxLink<Void> link = new ActionablePageLink<Void>("link", 
+				WebMarkupContainer link = new ActionablePageLink("link", 
 						BuildDashboardPage.class, BuildDashboardPage.paramsOf(build)) {
 
 					@Override

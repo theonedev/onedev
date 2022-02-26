@@ -244,8 +244,8 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 		});
 		
-		ActionablePageLink<Void> numberLink;
-		fragment.add(numberLink = new ActionablePageLink<Void>("number", 
+		ActionablePageLink numberLink;
+		fragment.add(numberLink = new ActionablePageLink("number", 
 				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
 
 			@Override

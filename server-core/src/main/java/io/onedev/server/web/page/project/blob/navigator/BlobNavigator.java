@@ -12,7 +12,6 @@ import org.apache.wicket.ajax.AjaxChannel.Type;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
@@ -44,11 +43,12 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
+import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
 import io.onedev.server.web.component.blob.BlobIcon;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -103,18 +103,7 @@ public class BlobNavigator extends Panel {
 			@Override
 			protected void populateItem(final ListItem<BlobIdent> item) {
 				final BlobIdent blobIdent = item.getModelObject();
-				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-					}
-					
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						context.onSelect(target, blobIdent, null);
-					}
+				WebMarkupContainer link = new WebMarkupContainer("link") {
 
 					@Override
 					protected void onComponentTag(ComponentTag tag) {
@@ -125,6 +114,24 @@ public class BlobNavigator extends Panel {
 					}
 					
 				};
+				
+				link.add(new CtrlAwareOnClickAjaxBehavior() {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.setPreventDefault(true);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+						attributes.getAjaxCallListeners().add(new TrackViewStateListener(false));
+					}
+
+					@Override
+					protected void respond(AjaxRequestTarget target) {
+						context.onSelect(target, blobIdent, null);
+					}
+					
+				});
+				
 				link.setEnabled(!context.getBlobIdent().isTree() || item.getIndex() != getViewSize()-1);
 				
 				if (blobIdent.path != null) {
@@ -199,19 +206,7 @@ public class BlobNavigator extends Panel {
 								BlobIdent blobIdent = model.getObject();
 								Fragment fragment = new Fragment(id, "treeNodeFrag", BlobNavigator.this);
 
-								AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
-
-									@Override
-									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-										super.updateAjaxAttributes(attributes);
-										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-									}
-									
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										context.onSelect(target, model.getObject(), null);
-										dropdown.close();
-									}
+								WebMarkupContainer link = new WebMarkupContainer("link") {
 
 									@Override
 									protected void onComponentTag(ComponentTag tag) {
@@ -223,6 +218,24 @@ public class BlobNavigator extends Panel {
 									}
 									
 								};
+								
+								link.add(new CtrlAwareOnClickAjaxBehavior() {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.setPreventDefault(true);
+										attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+										attributes.getAjaxCallListeners().add(new TrackViewStateListener(false));
+									}
+
+									@Override
+									protected void respond(AjaxRequestTarget target) {
+										context.onSelect(target, model.getObject(), null);
+										dropdown.close();
+									}
+									
+								});
 								
 								link.add(new BlobIcon("icon", model));
 								
