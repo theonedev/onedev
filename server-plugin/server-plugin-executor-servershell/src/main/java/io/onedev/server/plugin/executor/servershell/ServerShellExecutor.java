@@ -24,6 +24,8 @@ import java.util.function.Consumer;
 
 import javax.validation.constraints.Size;
 
+import org.apache.commons.lang.SystemUtils;
+
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -87,6 +89,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 			@Override
 			public void run() {
 				File buildDir = FileUtils.createTempDir("onedev-build");
+				File workspaceDir = new File(buildDir, "workspace");
 				try {
 					jobLogger.log(String.format("Executing job with executor '%s'...", getName()));
 					jobContext.notifyJobRunning(null);
@@ -117,7 +120,6 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						
 					});
 					
-					File workspaceDir = new File(buildDir, "workspace");
 					FileUtils.createDir(workspaceDir);
 					
 					jobLogger.log("Copying job dependencies...");
@@ -268,6 +270,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					if (!successful)
 						throw new FailedException();
 				} finally {
+					// Fix https://code.onedev.io/projects/160/issues/597
+					if (SystemUtils.IS_OS_WINDOWS && workspaceDir.exists())
+						FileUtils.deleteDir(workspaceDir);
 					FileUtils.deleteDir(buildDir);
 				}
 			}

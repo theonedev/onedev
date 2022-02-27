@@ -400,6 +400,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							if (!successful)
 								throw new FailedException();
 						} finally {
+							// Fix https://code.onedev.io/projects/160/issues/597
+							if (SystemUtils.IS_OS_WINDOWS)
+								FileUtils.deleteDir(hostWorkspace);
 							if (hostAuthInfoHome.get() != null)
 								FileUtils.deleteDir(hostAuthInfoHome.get());
 						}
