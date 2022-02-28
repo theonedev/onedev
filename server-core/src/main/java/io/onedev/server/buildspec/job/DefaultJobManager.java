@@ -86,6 +86,7 @@ import io.onedev.server.event.ProjectCreated;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.ScheduledTimeReaches;
+import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildPending;
 import io.onedev.server.event.build.BuildRetrying;
@@ -800,7 +801,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		if (event instanceof CommitAware) {
 			ObjectId commitId = ((CommitAware) event).getCommit().getCommitId();
 			if (!commitId.equals(ObjectId.zeroId())) {
-				String triggerChain = UUID.randomUUID().toString();
+				String triggerChain;
+				if (event instanceof BuildEvent) 
+					triggerChain = ((BuildEvent) event).getBuild().getTriggerChain();
+				else
+					triggerChain = UUID.randomUUID().toString();
 				PullRequest request = null;
 				if (event instanceof PullRequestEvent)
 					request = ((PullRequestEvent) event).getRequest();
