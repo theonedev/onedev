@@ -1,5 +1,6 @@
 package io.onedev.server.rest;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,12 +53,12 @@ public class AgentTokenResource {
     }
 
 	@Api(order=100)
-	@Path("/{tokenId}/agent")
+	@Path("/{tokenId}/agents")
     @GET
-    public Agent getAgent(@PathParam("tokenId") Long agentTokenId) {
+    public Collection<Agent> getAgent(@PathParam("tokenId") Long agentTokenId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	return tokenManager.load(agentTokenId).getAgent();
+    	return tokenManager.load(agentTokenId).getAgents();
     }
 	
 	@Api(order=200)

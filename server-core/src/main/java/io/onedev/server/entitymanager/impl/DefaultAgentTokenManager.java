@@ -35,14 +35,14 @@ public class DefaultAgentTokenManager extends BaseEntityManager<AgentToken> impl
 	@Sessional
 	@Override
 	public List<AgentToken> queryUnused() {
-		return getSession().createQuery("select token from AgentToken token left join token.agent agent where agent = null").list();
+		return getSession().createQuery("select token from AgentToken token left join token.agents agent where agent = null").list();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
 	public void deleteUnused() {
-		for (AgentToken token: (List<AgentToken>)getSession().createQuery("select token from AgentToken token left join token.agent agent where agent = null").list()) {
+		for (AgentToken token: (List<AgentToken>)getSession().createQuery("select token from AgentToken token left join token.agents agent where agent = null").list()) {
 			delete(token);
 		}
 	}

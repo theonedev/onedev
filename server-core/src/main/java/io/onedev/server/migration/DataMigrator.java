@@ -3722,4 +3722,7 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate79(File dataDir, Stack<Integer> versions) {
+	}
+	
 }

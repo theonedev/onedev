@@ -5,8 +5,8 @@ import static io.onedev.server.model.Agent.PROP_IP_ADDRESS;
 import static io.onedev.server.model.Agent.PROP_LAST_USED_DATE;
 import static io.onedev.server.model.Agent.PROP_MEMORY;
 import static io.onedev.server.model.Agent.PROP_NAME;
-import static io.onedev.server.model.Agent.PROP_OS_NAME;
 import static io.onedev.server.model.Agent.PROP_OS_ARCH;
+import static io.onedev.server.model.Agent.PROP_OS_NAME;
 import static io.onedev.server.model.Agent.PROP_OS_VERSION;
 import static io.onedev.server.model.Agent.PROP_PAUSED;
 
@@ -24,8 +24,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
@@ -104,8 +104,8 @@ public class Agent extends AbstractEntity {
 			NAME_CPU, PROP_CPU, 
 			NAME_MEMORY, PROP_MEMORY);	
 	
-	@OneToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false, unique=true)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private AgentToken token;
 	
 	@OneToMany(mappedBy="agent", cascade=CascadeType.REMOVE)

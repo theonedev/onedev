@@ -143,10 +143,8 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		if (token == null) { 
 			throw new ExplicitException("Invalid agent token");
 		} else {
-			Agent agent = token.getAgent();
+			Agent agent = findByName(data.getName());
 			if (agent == null) {
-				if (findByName(data.getName()) != null)
-					throw new ExplicitException("Name '" + data.getName() + "' already used by another agent");
 				agent = new Agent();
 				agent.setToken(token);
 				agent.setOsName(data.getOsInfo().getOsName());
@@ -166,11 +164,9 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 					attributeManager.save(attribute);
 					agent.getAttributes().add(attribute);
 				}
-			} else if (!agentSessions.containsKey(agent.getId())) {
-				Agent agentWithSameName = findByName(data.getName());
-				if (agentWithSameName != null && !agentWithSameName.equals(agent))
-					throw new ExplicitException("Name '" + data.getName() + "' already used by another agent");
-				agent.setName(data.getName());
+			} else if (agentSessions.containsKey(agent.getId())) {
+				throw new ExplicitException("Name '" + data.getName() + "' already used by another agent");
+			} else {
 				agent.setOsName(data.getOsInfo().getOsName());
 				agent.setOsVersion(data.getOsInfo().getOsVersion());
 				agent.setOsArch(data.getOsInfo().getOsArch());
@@ -179,8 +175,6 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setMemory(data.getMemory());
 				save(agent);
 				attributeManager.syncAttributes(agent, data.getAttributes());
-			} else {
-				throw new ExplicitException("Token already used by another agent");
 			}
 
 			Session prevSession = agentSessions.put(agent.getId(), session);
@@ -226,7 +220,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
     	query.setParameter("agent", agent);
     	query.executeUpdate();
 		
-		super.delete(agent);
+		dao.remove(agent);
 		dao.remove(agent.getToken());
 
 		Session prevSession = agentSessions.remove(agent.getId());
@@ -327,8 +321,28 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Transactional
 	@Override
 	public void delete(Collection<Agent> agents) {
-		for (Agent agent: agents)
-			delete(agent);
+		Collection<AgentToken> tokens = new HashSet<>();
+		for (Agent agent: agents) 
+			tokens.add(agent.getToken());
+		
+		for (AgentToken token: tokens) {
+			for (Agent agent: token.getAgents()) {
+		    	Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
+		    	query.setParameter("agent", agent);
+		    	query.executeUpdate();
+		    	
+				dao.remove(agent);
+				
+				Session prevSession = agentSessions.remove(agent.getId());
+				if (prevSession != null) {
+					try {
+						prevSession.disconnect();
+					} catch (IOException e) {
+					}
+				}
+			}
+			dao.remove(token);
+		}
 	}
 
 	@Transactional
