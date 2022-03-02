@@ -403,7 +403,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Remove Selected Agents";
+						return "Remove Selected Offline Agents";
 					}
 					
 					@Override
@@ -419,8 +419,11 @@ class AgentListPanel extends Panel {
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
 										Collection<Agent> agents = new ArrayList<>();
-										for (IModel<Agent> each: selectionColumn.getSelections())
-											agents.add(each.getObject());
+										for (IModel<Agent> each: selectionColumn.getSelections()) {
+											Agent agent = each.getObject();
+											if (!agent.isOnline())
+												agents.add(agent);
+										}
 										OneDev.getInstance(AgentManager.class).delete(agents);
 										selectionColumn.getSelections().clear();
 										target.add(body);
@@ -428,7 +431,7 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to remove selected agents";
+										return "Type <code>yes</code> below to remove selected offline agents";
 									}
 									
 									@Override
@@ -452,7 +455,73 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select agents to remove");
+									tag.put("title", "Please select offline agents to remove");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Unauthorize Selected Agents";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Agent> agents = new ArrayList<>();
+										for (IModel<Agent> each: selectionColumn.getSelections()) {
+											Agent agent = each.getObject();
+											if (!agent.isOnline())
+												agents.add(agent);
+										}
+										OneDev.getInstance(AgentManager.class).unauthorize(agents);
+										selectionColumn.getSelections().clear();
+										target.add(body);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Unauthorize selected agents. Other agents sharing tokens with these agents will also be unauthorized. "
+												+ "Type <code>yes</code> below to confirm";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select offline agents to remove");
 								}
 							}
 							
@@ -660,7 +729,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Remove All Queried Agents";
+						return "Remove All Queried Offline Agents";
 					}
 					
 					@Override
@@ -678,7 +747,9 @@ class AgentListPanel extends Panel {
 									protected void onConfirm(AjaxRequestTarget target) {
 										Collection<Agent> agents = new ArrayList<>();
 										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
-											agents.add(it.next());
+											Agent agent = it.next();
+											if (!agent.isOnline())
+												agents.add(agent);
 										}
 										OneDev.getInstance(AgentManager.class).delete(agents);
 										target.add(body);
@@ -687,7 +758,7 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to remove all queried agents";
+										return "Type <code>yes</code> below to remove all queried offline agents";
 									}
 									
 									@Override
@@ -711,7 +782,72 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No agents to remove");
+									tag.put("title", "No offline agents to remove");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Unauthorize All Queried Agents";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Agent> agents = new ArrayList<>();
+										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
+											agents.add(it.next());
+										}
+										OneDev.getInstance(AgentManager.class).unauthorize(agents);
+										target.add(body);
+										selectionColumn.getSelections().clear();
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Unauthorize all queried agents. Other agents sharing tokens with these agents will also be unauthorized. "
+												+ "Type <code>yes</code> below to confirm";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(agentsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No agents to unauthorize");
 								}
 							}
 							

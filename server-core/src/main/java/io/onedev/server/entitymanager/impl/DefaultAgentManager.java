@@ -221,7 +221,6 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
     	query.executeUpdate();
 		
 		dao.remove(agent);
-		dao.remove(agent.getToken());
 
 		Session prevSession = agentSessions.remove(agent.getId());
 		if (prevSession != null) {
@@ -321,30 +320,37 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Transactional
 	@Override
 	public void delete(Collection<Agent> agents) {
+		for (Agent agent: agents) {
+	    	Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
+	    	query.setParameter("agent", agent);
+	    	query.executeUpdate();
+	    	
+			dao.remove(agent);
+			
+			Session prevSession = agentSessions.remove(agent.getId());
+			if (prevSession != null) {
+				try {
+					prevSession.disconnect();
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
+
+	@Transactional
+	@Override
+	public void unauthorize(Collection<Agent> agents) {
 		Collection<AgentToken> tokens = new HashSet<>();
 		for (Agent agent: agents) 
 			tokens.add(agent.getToken());
 		
 		for (AgentToken token: tokens) {
-			for (Agent agent: token.getAgents()) {
-		    	Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
-		    	query.setParameter("agent", agent);
-		    	query.executeUpdate();
-		    	
-				dao.remove(agent);
-				
-				Session prevSession = agentSessions.remove(agent.getId());
-				if (prevSession != null) {
-					try {
-						prevSession.disconnect();
-					} catch (IOException e) {
-					}
-				}
-			}
+			for (Agent agent: token.getAgents())
+				delete(agent);
 			dao.remove(token);
 		}
 	}
-
+	
 	@Transactional
 	@Override
 	public void restart(Collection<Agent> agents) {

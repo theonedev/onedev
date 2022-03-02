@@ -39,6 +39,8 @@ public interface AgentManager extends EntityManager<Agent> {
 	
 	void delete(Collection<Agent> agents);
 	
+	void unauthorize(Collection<Agent> agents);
+	
 	void restart(Collection<Agent> agents);
 	
 	void pause(Collection<Agent> agents);
