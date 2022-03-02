@@ -133,6 +133,8 @@ public class Agent extends AbstractEntity {
 	
 	private int memory;
 	
+	private boolean temporal;
+	
 	private boolean paused;
 	
 	private Date lastUsedDate;
@@ -211,6 +213,14 @@ public class Agent extends AbstractEntity {
 		this.memory = memory;
 	}
 
+	public boolean isTemporal() {
+		return temporal;
+	}
+
+	public void setTemporal(boolean temporal) {
+		this.temporal = temporal;
+	}
+
 	public Collection<AgentAttribute> getAttributes() {
 		return attributes;
 	}
@@ -249,7 +259,7 @@ public class Agent extends AbstractEntity {
 	
 	public AgentData getAgentData() {
 		return new AgentData(getToken().getValue(), new OsInfo(osName, osVersion, osArch),  
-				name, cpu, memory, getAttributeMap());
+				name, cpu, memory, temporal, getAttributeMap());
 	}
 	
 }

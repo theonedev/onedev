@@ -90,6 +90,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 		add(new Label("osArch", getAgent().getOsArch()));
 		add(new Label("cpu", getAgent().getCpu()));
 		add(new Label("memory", getAgent().getMemory()));
+		add(new Label("temporal", getAgent().isTemporal()));
 		add(new AgentStatusBadge("status", agentModel));
 
 		if (getAgent().isOnline()) {

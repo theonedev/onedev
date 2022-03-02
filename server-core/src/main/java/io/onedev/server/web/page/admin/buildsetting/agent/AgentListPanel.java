@@ -431,7 +431,9 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to remove selected offline agents";
+										return "Removed selected offline agents. Please note that tokens used by these agents will "
+												+ "NOT be removed, and they will reappear here if go online. "
+												+ "Type <code>yes</code> below to confirm";
 									}
 									
 									@Override
@@ -496,8 +498,8 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Unauthorize selected agents. Other agents sharing tokens with these agents will also be unauthorized. "
-												+ "Type <code>yes</code> below to confirm";
+										return "Removing selected agents as well as tokens used by them. Please note that other agents sharing "
+												+ "tokens with these agents will also be removed. Type <code>yes</code> below to confirm";
 									}
 									
 									@Override
@@ -758,7 +760,9 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to remove all queried offline agents";
+										return "Remove all queried offline agents. Please note that this will NOT remove "
+												+ "tokens used by these agents, and they will reappear here if go online. "
+												+ "Type <code>yes</code> below to confirm";
 									}
 									
 									@Override
@@ -822,8 +826,8 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Unauthorize all queried agents. Other agents sharing tokens with these agents will also be unauthorized. "
-												+ "Type <code>yes</code> below to confirm";
+										return "Removing all queried agents as well as tokens used by them. Please note that other agents sharing "
+												+ "tokens with these agents will also be removed. Type <code>yes</code> below to confirm";
 									}
 									
 									@Override
@@ -979,6 +983,11 @@ class AgentListPanel extends Panel {
 				cellItem.add(new Label(componentId, agent.getIpAddress()));
 			}
 			
+			@Override
+			public String getCssClass() {
+				return "d-none d-lg-table-cell";
+			}
+			
 		});
 		
 		columns.add(new AbstractColumn<Agent, Void>(Model.of("CPU")) {
@@ -1017,6 +1026,20 @@ class AgentListPanel extends Panel {
 			@Override
 			public Component getHeader(String componentId) {
 				return new Fragment(componentId, "memoryHeaderFrag", AgentListPanel.this);
+			}
+			
+		});
+		
+		columns.add(new AbstractColumn<Agent, Void>(Model.of("Temporal")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().isTemporal()));
+			}
+			
+			@Override
+			public Component getHeader(String componentId) {
+				return new Fragment(componentId, "temporalHeaderFrag", AgentListPanel.this);
 			}
 			
 		});

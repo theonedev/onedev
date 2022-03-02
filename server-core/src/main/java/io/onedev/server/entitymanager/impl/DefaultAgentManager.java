@@ -153,6 +153,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setName(data.getName());
 				agent.setCpu(data.getCpu());
 				agent.setMemory(data.getMemory());
+				agent.setTemporal(data.isTemporal());
 				agent.setIpAddress(session.getRemoteAddress().getAddress().getHostAddress());
 				save(agent);
 				
@@ -173,6 +174,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setIpAddress(session.getRemoteAddress().getAddress().getHostAddress());
 				agent.setCpu(data.getCpu());
 				agent.setMemory(data.getMemory());
+				agent.setTemporal(data.isTemporal());
 				save(agent);
 				attributeManager.syncAttributes(agent, data.getAttributes());
 			}
@@ -195,7 +197,12 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Override
 	public void agentDisconnected(Long agentId) {
 		agentSessions.remove(agentId);
-		listenerRegistry.post(new AgentDisconnected(load(agentId)));
+		Agent agent = load(agentId);
+		if (agent.isTemporal()) {
+			removeReferences(agent);
+			dao.remove(agent);
+		}
+		listenerRegistry.post(new AgentDisconnected(agent));
 	}
 
 	@Override
@@ -213,13 +220,16 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
     	});
 	}
 
-	@Transactional
-	@Override
-	public void delete(Agent agent) {
+	private void removeReferences(Agent agent) {
     	Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
     	query.setParameter("agent", agent);
     	query.executeUpdate();
-		
+	}
+	
+	@Transactional
+	@Override
+	public void delete(Agent agent) {
+		removeReferences(agent);
 		dao.remove(agent);
 
 		Session prevSession = agentSessions.remove(agent.getId());
@@ -321,10 +331,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Override
 	public void delete(Collection<Agent> agents) {
 		for (Agent agent: agents) {
-	    	Query<?> query = getSession().createQuery("update Build set agent=null where agent=:agent");
-	    	query.setParameter("agent", agent);
-	    	query.executeUpdate();
-	    	
+			removeReferences(agent);
 			dao.remove(agent);
 			
 			Session prevSession = agentSessions.remove(agent.getId());
