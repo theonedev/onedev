@@ -259,7 +259,7 @@ public class Agent extends AbstractEntity {
 	
 	public AgentData getAgentData() {
 		return new AgentData(getToken().getValue(), new OsInfo(osName, osVersion, osArch),  
-				name, cpu, memory, temporal, getAttributeMap());
+				name, ipAddress, cpu, memory, temporal, getAttributeMap());
 	}
 	
 }

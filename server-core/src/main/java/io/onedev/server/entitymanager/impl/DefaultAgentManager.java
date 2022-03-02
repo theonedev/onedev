@@ -154,7 +154,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setCpu(data.getCpu());
 				agent.setMemory(data.getMemory());
 				agent.setTemporal(data.isTemporal());
-				agent.setIpAddress(session.getRemoteAddress().getAddress().getHostAddress());
+				agent.setIpAddress(data.getIpAddress());
 				save(agent);
 				
 				for (Map.Entry<String, String> entry: data.getAttributes().entrySet()) {
@@ -171,7 +171,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setOsName(data.getOsInfo().getOsName());
 				agent.setOsVersion(data.getOsInfo().getOsVersion());
 				agent.setOsArch(data.getOsInfo().getOsArch());
-				agent.setIpAddress(session.getRemoteAddress().getAddress().getHostAddress());
+				agent.setIpAddress(data.getIpAddress());
 				agent.setCpu(data.getCpu());
 				agent.setMemory(data.getMemory());
 				agent.setTemporal(data.isTemporal());
