@@ -19,6 +19,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -55,10 +56,13 @@ import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.pipeline.JobSelectionChange;
+import io.onedev.server.web.component.pipeline.PipelinePanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
@@ -87,6 +91,10 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 				
 				add(new Fragment("content", "parseableFrag", this) {
 	
+					private void resizeWindow(AjaxRequestTarget target) {
+						((BasePage)getPage()).resizeWindow(target);
+					}
+					
 					private void setupPropertiesViewer(@Nullable AjaxRequestTarget target) {
 						Component propertiesViewer;
 						List<Property> properties = new ArrayList<>(buildSpec.getPropertyMap().values()); 
@@ -188,93 +196,112 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 						if (!jobs.isEmpty()) {
 							jobsViewer = new Fragment("content", "jobsFrag", BuildSpecBlobViewPanel.this) {
 	
+								private void notifyJobSelectionChange(AjaxRequestTarget target, @Nullable Job job) {
+									send(this, Broadcast.BREADTH, new JobSelectionChange(target, job));
+								}
+								
 								@Override
 								protected void onInitialize() {
 									super.onInitialize();
-									
-									RepeatingView navsView = new RepeatingView("navs");
-									for (int i=0; i<jobs.size(); i++) {
-										int jobIndex = i;
-										Job job = jobs.get(jobIndex);
-										WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId());
-										AjaxLink<Void> jobLink = new AjaxLink<Void>("job") {
-	
-											@Override
-											public void onClick(AjaxRequestTarget target) {
-												String position = getPosition("jobs/" + job.getName());
-												context.pushState(target, context.getBlobIdent(), position);
-												newJobViewer(target, jobIndex);
-											}
-											
-										};
-										
-										String label = HtmlEscape.escapeHtml5(job.getName());
-										if (!buildSpec.getJobs().contains(job)) {
-											String iconHtml = String.format(
-													"<svg class='icon imported'><use xlink:href='%s'/></svg>", 
-													SpriteImage.getVersionedHref(IconScope.class, "arrow2"));
-											label += iconHtml;
-										} 
-										jobLink.add(new Label("label", label).setEscapeModelStrings(false));
-										
-										nav.add(jobLink);
-										
-										nav.add(new RunJobLink("runJob", context.getCommit().copy(), job.getName(), getContext().getRefName()) {
-	
-											@Override
-											protected Project getProject() {
-												return context.getProject();
-											}
-	
-											@Override
-											protected PullRequest getPullRequest() {
-												return context.getPullRequest();
-											}
 
-											@Override
-											protected String getTriggerChain() {
-												return UUID.randomUUID().toString();
-											}
-	
-										});
-										navsView.add(nav);
-									}
-									add(navsView);
-	
-									newJobViewer(null, getActiveNamedElementIndex(context, Job.class, jobs));
+									Job activeJob = null;
+									int jobIndex = getActiveNamedElementIndex(context, Job.class, jobs, -1);
+									if (jobIndex != -1) 
+										activeJob = jobs.get(jobIndex);
 									
-									add(AttributeAppender.append("class", "jobs elements d-flex flex-nowrap"));
-								}
-	
-								private void newJobViewer(@Nullable AjaxRequestTarget target, int jobIndex) {
-									WebMarkupContainer jobContainer = new WebMarkupContainer("job") {
-										
-										@Override
-										public void renderHead(IHeaderResponse response) {
-											super.renderHead(response);
-											
-											String script = String.format("onedev.server.buildSpec.onNamedElementDomReady(%d);", jobIndex);
-											response.render(OnDomReadyHeaderItem.forScript(script));
-										}
-										
-									};
-									Job job = jobs.get(jobIndex);
-									jobContainer.add(new NamedElementImportNoticePanel<Job>(buildSpec, job.getName()) {
+									add(new PipelinePanel("pipeline", jobs, activeJob) {
 
 										@Override
-										protected Map<String, Job> getElementMap(BuildSpec buildSpec) {
-											return buildSpec.getJobMap();
+										protected Component renderJob(String componentId, Job job) {
+											Fragment fragment = new Fragment(componentId, "jobFrag", BuildSpecBlobViewPanel.this);
+											AjaxLink<Void> jobLink = new AjaxLink<Void>("job") {
+												
+												@Override
+												public void onClick(AjaxRequestTarget target) {
+													String position = getPosition("jobs/" + job.getName());
+													context.pushState(target, context.getBlobIdent(), position);
+													newJobDetail(target, job);
+													notifyJobSelectionChange(target, job);
+													resizeWindow(target);
+												}
+												
+											};
+											
+											String label = HtmlEscape.escapeHtml5(job.getName());
+											if (!buildSpec.getJobs().contains(job)) {
+												String iconHtml = String.format(
+														"<svg class='icon imported'><use xlink:href='%s'/></svg>", 
+														SpriteImage.getVersionedHref(IconScope.class, "arrow2"));
+												label += iconHtml;
+											} 
+											jobLink.add(new Label("label", label).setEscapeModelStrings(false));
+											
+											fragment.add(jobLink);
+											
+											fragment.add(new RunJobLink("runJob", context.getCommit().copy(), job.getName(), getContext().getRefName()) {
+		
+												@Override
+												protected Project getProject() {
+													return context.getProject();
+												}
+		
+												@Override
+												protected PullRequest getPullRequest() {
+													return context.getPullRequest();
+												}
+
+												@Override
+												protected String getTriggerChain() {
+													return UUID.randomUUID().toString();
+												}
+		
+											});
+											fragment.add(AttributeAppender.append("class", "nav btn-group flex-nowrap"));
+											return fragment;
 										}
 										
 									});
-									jobContainer.add(BeanContext.view("content", job));
-									jobContainer.setOutputMarkupId(true);
+									
+									newJobDetail(null, activeJob);									
+									
+									add(AttributeAppender.append("class", "elements jobs d-flex flex-nowrap"));
+								}
+	
+								private void newJobDetail(@Nullable AjaxRequestTarget target, @Nullable Job job) {
+									WebMarkupContainer jobDetail;
+									if (job != null) {
+										jobDetail = new Fragment("detail", "jobDetailFrag", BuildSpecBlobViewPanel.this);
+										jobDetail.add(new NamedElementImportNoticePanel<Job>(buildSpec, job.getName()) {
+
+											@Override
+											protected Map<String, Job> getElementMap(BuildSpec buildSpec) {
+												return buildSpec.getJobMap();
+											}
+											
+										});
+										jobDetail.add(new AjaxLink<Void>("close") {
+
+											@Override
+											public void onClick(AjaxRequestTarget target) {
+												String position = getPosition("jobs");
+												context.pushState(target, context.getBlobIdent(), position);
+												newJobDetail(target, null);
+												notifyJobSelectionChange(target, null);
+											}
+											
+										});
+										jobDetail.add(BeanContext.view("content", job));
+									} else {
+										jobDetail = new WebMarkupContainer("detail");
+										jobDetail.setVisible(false);
+									}
+									jobDetail.setOutputMarkupPlaceholderTag(true);
 									
 									if (target != null) {
-										replace(jobContainer);
-										target.add(jobContainer);
+										replace(jobDetail);
+										target.add(jobDetail);
 									} else {
-										add(jobContainer);
+										add(jobDetail);
 									}
 								}
 								
@@ -342,7 +369,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 									}
 									add(navsView);
 	
-									newServiceViewer(null, getActiveNamedElementIndex(context, Service.class, services));
+									newServiceViewer(null, getActiveNamedElementIndex(context, Service.class, services, 0));
 									
 									add(AttributeAppender.append("class", "services elements d-flex flex-nowrap"));
 								}
@@ -446,7 +473,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 									}
 									add(navsView);
 	
-									newTemplateViewer(null, getActiveNamedElementIndex(context, StepTemplate.class, templates));
+									newTemplateViewer(null, getActiveNamedElementIndex(context, StepTemplate.class, templates, 0));
 									
 									add(AttributeAppender.append("class", "step-templates elements d-flex flex-nowrap"));
 								}
@@ -560,6 +587,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								String position = getPosition("jobs");
 								context.pushState(target, context.getBlobIdent(), position);
 								setupJobsViewer(target);
+								resizeWindow(target);
 							}
 							
 						});
@@ -570,6 +598,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								String position = getPosition("services");
 								context.pushState(target, context.getBlobIdent(), position);
 								setupServicesViewer(target);
+								resizeWindow(target);
 							}
 							
 						});
@@ -580,6 +609,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								String position = getPosition("step-templates");
 								context.pushState(target, context.getBlobIdent(), position);
 								setupStepTemplatesViewer(target);
+								resizeWindow(target);
 							}
 							
 						});
@@ -590,6 +620,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								String position = getPosition("properties");
 								context.pushState(target, context.getBlobIdent(), position);
 								setupPropertiesViewer(target);
+								resizeWindow(target);
 							}
 							
 						});
@@ -600,6 +631,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								String position = getPosition("imports");
 								context.pushState(target, context.getBlobIdent(), position);
 								setupImportsViewer(target);
+								resizeWindow(target);
 							}
 							
 						});

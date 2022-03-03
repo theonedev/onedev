@@ -163,6 +163,9 @@ onedev.server = {
 			}
 		}
 	},
+	isDarkMode: function() {
+		return Cookies.get("darkMode") == "yes";	
+	},
 	setupAutoSize: function() {
 		function doAutosize($textarea) {
 			$textarea.each(function() {
@@ -826,6 +829,8 @@ onedev.server = {
 		onedev.server.icons = icons;
 		
 		$(window).resize(function() {
+			$(".autofit-parent").removeClass("autofit-parent");
+			
 			var $autofit = $(".autofit:visible:not(:has('.autofit:visible'))");
 			/* 
 			 * 1. Do not use parents(":not('html'):not('body')") here as it will select $autofit self in 
@@ -836,7 +841,7 @@ onedev.server = {
              * will not break safari in this case as only the innermost autofit can have scrollbars
 			 */ 
 			$autofit.css("overflow", "auto").parents().not("html").not("body")
-					.css("overflow", "hidden").removeClass("fit-content");
+					.addClass("autofit-parent");
 			$(document).find(".resize-aware").trigger("resized");
 		});
 		

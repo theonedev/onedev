@@ -4,6 +4,15 @@
 .build-spec.parseable {
 	min-width: 800px;
 }
+
+/*
+ * Force to show blob view scrollbar on overflow as otherwise build spec will be invisible
+ * if view port is narrow due to min-width setting aobve
+ */
+.blob-view>.body {
+	overflow-x: auto !important;
+}
+
 .build-spec.unparseable>.title {
     font-size: 1.5rem;
     color: red;
@@ -37,33 +46,47 @@
 .build-spec.parseable>.body>.content>.side {
 	min-width: 220px;
 }
+.build-spec.parseable>.body>.jobs.content>.side {
+	min-width: 360px;
+}
+
 .build-spec.parseable>.body>.content>.side>.navs:not(:empty) {
     margin-bottom: 1.5rem;
 }
-.build-spec.parseable>.body>.content>.side>.navs>.nav.active a {
-	background: var(--light-primary);
-	border-color: var(--light-primary);
-	color: var(--primary);
-}
-.dark-mode .build-spec.parseable>.body>.content>.side>.navs>.nav.active a {
-	background: var(--dark-mode-light-primary);
-	border-color: var(--dark-mode-light-primary);
-}
-
-.build-spec.parseable>.body>.content>.side>.navs>.nav.active a.run:hover,
-.build-spec.parseable>.body>.content>.side>.navs>.nav.active a.delete:hover {
+.build-spec.parseable>.body>.content>.side .nav.active a {
 	background: var(--primary);
 	border-color: var(--primary);
-	color: white;
+	color: var(--white) !important;
 }
-.build-spec.parseable>.body>.content>.main>.content:not(:empty) {
+.dark-mode .build-spec.parseable>.body>.content>.side .nav.active a {
+	background: var(--primary);
+	border-color: var(--primary);
+}
+
+.build-spec.parseable>.body>.content>.side .nav.active a.run:hover,
+.build-spec.parseable>.body>.content>.side .nav.active a.delete:hover {
+	background: #187DE4;
+	border-color: #187DE4;
+}
+.build-spec.parseable>.body>.content>.main {
     border-radius: 0.42rem;
     border: 1px solid var(--light-gray);
     padding: 1.5rem;
 }
-.dark-mode .build-spec.parseable>.body>.content>.main>.content:not(:empty) {
+.build-spec.parseable>.body>.jobs.content>.main {
+	padding: 0;
+	min-width: 360px;
+}
+.build-spec.parseable>.body>.jobs.content>.main>.head {
+	padding: 1.5rem;
+}
+.build-spec.parseable>.body>.jobs.content>.main>.body {
+	padding: 0 1.5rem 1.5rem 1.5rem;
+}
+.dark-mode .build-spec.parseable>.body>.content>.main {
     border-color: var(--dark-mode-lighter-dark);
 }
+
 .build-spec.parseable>.properties>.bean-list {
 	flex-grow: 1;
 }

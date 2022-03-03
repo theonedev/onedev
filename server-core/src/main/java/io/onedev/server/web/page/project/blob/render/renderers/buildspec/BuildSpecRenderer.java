@@ -44,18 +44,18 @@ public class BuildSpecRenderer implements BlobRendererer {
 	}
 	
 	public static <T extends NamedElement> int getActiveNamedElementIndex(BlobRenderContext context, 
-			Class<T> namedElementClass,  List<T> elements) {
+			Class<T> namedElementClass,  List<T> elements, int defaultIndex) {
 		String selection = getSelection(context.getPosition());
 		String urlSegment = getUrlSegment(namedElementClass) + "s/";
 		
 		if (selection != null && selection.startsWith(urlSegment)) {
-			String activeJobName = selection.substring(urlSegment.length());
+			String activeElementName = selection.substring(urlSegment.length());
 			return IntStream.range(0, elements.size())
-				     .filter(i -> activeJobName.equals(elements.get(i).getName()))
+				     .filter(i -> activeElementName.equals(elements.get(i).getName()))
 				     .findFirst()
-				     .orElse(0);										
+				     .orElse(defaultIndex);										
 		} else {
-			return 0;
+			return defaultIndex;
 		}
 	}
 	

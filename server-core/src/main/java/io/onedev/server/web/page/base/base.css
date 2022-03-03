@@ -727,3 +727,8 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 .dark-mode ::-webkit-scrollbar-thumb {
 	background-color: rgb(51, 52, 75);
 }
+
+.autofit-parent {
+	overflow: hidden !important;
+	min-height: inherit !important;
+}

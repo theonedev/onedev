@@ -6,7 +6,7 @@ onedev.server.buildSpec = {
         var $elements = $(".build-spec>.body>.elements");
         var $navs = $elements.find(">.side>.navs");
 		$navs.children().removeClass("active").eq(elementIndex).addClass("active");
-		
+			
 		if (nameChangeCallback) {
 	        var $main = $elements.children(".main");
 	        
@@ -14,7 +14,7 @@ onedev.server.buildSpec = {
 	
 	        function syncName() {
 	            var name = $input.val().trim();
-	            var $name = $navs.children(".active").find("a.select>.label");
+	            var $name = $navs.find(".active").find("a.select>.label");
 	            if (name.length != 0) 
 	                $name.text(name);
 	            else

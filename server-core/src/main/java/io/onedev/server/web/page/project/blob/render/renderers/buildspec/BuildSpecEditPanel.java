@@ -127,7 +127,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 
 						@Override
 						protected int getActiveElementIndex() {
-							return getActiveNamedElementIndex(context, Job.class, buildSpec.getJobs());
+							return getActiveNamedElementIndex(context, Job.class, buildSpec.getJobs(), 0);
 						}
 
 						@Override
@@ -184,7 +184,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 
 						@Override
 						protected int getActiveElementIndex() {
-							return getActiveNamedElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates());
+							return getActiveNamedElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates(), 0);
 						}
 
 						@Override
@@ -241,7 +241,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 
 						@Override
 						protected int getActiveElementIndex() {
-							return getActiveNamedElementIndex(context, Service.class, buildSpec.getServices());
+							return getActiveNamedElementIndex(context, Service.class, buildSpec.getServices(), 0);
 						}
 
 						@Override
@@ -516,15 +516,15 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				private void fixState(AjaxRequestTarget target) {
 					String selection = getSelection();
 					if (selection == null || selection.startsWith("jobs")) {
-						int jobIndex = getActiveNamedElementIndex(context, Job.class, buildSpec.getJobs());
+						int jobIndex = getActiveNamedElementIndex(context, Job.class, buildSpec.getJobs(), 0);
 						if (jobIndex < buildSpec.getJobs().size())
 							replaceState(target, "jobs/" + buildSpec.getJobs().get(jobIndex).getName());
 					} else if (selection.startsWith("services")) {
-						int serviceIndex = getActiveNamedElementIndex(context, Service.class, buildSpec.getServices());
+						int serviceIndex = getActiveNamedElementIndex(context, Service.class, buildSpec.getServices(), 0);
 						if (serviceIndex < buildSpec.getServices().size())
 							replaceState(target, "services/" + buildSpec.getServices().get(serviceIndex).getName());
 					} else if (selection.startsWith("step-templates")) {
-						int stepTemplateIndex = getActiveNamedElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates());
+						int stepTemplateIndex = getActiveNamedElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates(), 0);
 						if (stepTemplateIndex < buildSpec.getStepTemplates().size())
 							replaceState(target, "step-templates/" + buildSpec.getStepTemplates().get(stepTemplateIndex).getName());
 					} else if (selection.equals("new-job")) { 
