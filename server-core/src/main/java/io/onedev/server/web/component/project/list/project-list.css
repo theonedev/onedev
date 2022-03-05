@@ -7,3 +7,6 @@
 .project-list .project-summary {
 	margin-left: 2px;
 }
+.project-list .issue-info a:hover {
+	filter: brightness(125%);
+}
