@@ -148,7 +148,7 @@ onedev.server.pipeline = {
 				});
 			}		
 		}
-		
+		/*		
 		var arrowHead = {
 			left: $job.offset().left - $paper.offset().left,
 			top: $job.offset().top + $job.outerHeight()/2 - $paper.offset().top
@@ -167,6 +167,7 @@ onedev.server.pipeline = {
 			from: dependencyJobIndexString,
 			to: jobIndexString
 		});
+		*/
 	},
 	drawCurve: function(paper, from, to, dependencyJobIndexString, jobIndexString) {
 		var curve = paper.path(

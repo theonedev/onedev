@@ -829,8 +829,6 @@ onedev.server = {
 		onedev.server.icons = icons;
 		
 		$(window).resize(function() {
-			$(".autofit-parent").removeClass("autofit-parent");
-			
 			var $autofit = $(".autofit:visible:not(:has('.autofit:visible'))");
 			/* 
 			 * 1. Do not use parents(":not('html'):not('body')") here as it will select $autofit self in 
@@ -840,8 +838,9 @@ onedev.server = {
              * causes issues when view/edit code in a autofit container. Note that removing fit-content 
              * will not break safari in this case as only the innermost autofit can have scrollbars
 			 */ 
-			$autofit.css("overflow", "auto").parents().not("html").not("body")
-					.addClass("autofit-parent");
+			var $parents = $autofit.css("overflow", "auto").parents().not("html").not("body");
+			$parents.addClass("autofit-parent");
+			$(".autofit-parent").not($parents).removeClass("autofit-parent");
 			$(document).find(".resize-aware").trigger("resized");
 		});
 		
