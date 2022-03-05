@@ -1,10 +1,16 @@
 .dropzone.dropzone-field {
+    border: 2px dashed var(--light-gray);
 	min-height: 100px; 
-	border: 2px dashed #BBB;
+	border-radius: 0.42rem;
 }
+.dark-mode .dropzone.dropzone-field {
+	background: #1e1e2d;
+    border-color: var(--dark-mode-lighter-dark);
+}
+
 .dropzone-field .dz-message {
 	font-size: 20px;
-	color: #444;
+	color: var(--gray);
 }
 .dark-mode .dropzone-field .dz-message {
 	color: var(--dark-mode-gray);
@@ -15,3 +21,4 @@
 .dropzone .dz-preview .dz-error-message {
     top: 150px !important;
 }
+

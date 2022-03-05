@@ -438,11 +438,3 @@
 	color: #0073e9;
 }
 
-.insert-url .dropzone.dropzone-field {
-    border: 2px dashed var(--light-gray);
-	border-radius: 0.42rem;
-}
-.dark-mode .insert-url .dropzone.dropzone-field {
-	background: #1e1e2d;
-    border-color: var(--dark-mode-lighter-dark);
-}

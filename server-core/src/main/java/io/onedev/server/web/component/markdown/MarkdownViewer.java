@@ -20,6 +20,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.StaleStateException;
+import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.commons.loader.AppLoader;
@@ -134,7 +135,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				int taskPosition = params.getParameterValue(SourcePositionTrackExtension.DATA_START_ATTRIBUTE).toInt();
 				boolean taskChecked = params.getParameterValue(TASK_CHECKED).toBoolean();
-				String markdown = getComponent().getDefaultModelObjectAsString();
+				String markdown = HtmlEscape.unescapeHtml(getComponent().getDefaultModelObjectAsString());
 				String beforeTask = markdown.substring(0, taskPosition);
 				String fromTask = markdown.substring(taskPosition);
 				String beforeBracket = StringUtils.substringBefore(fromTask, "[");
