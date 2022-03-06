@@ -34,21 +34,38 @@ onedev.server.issueBoards = {
 					$(ui.helper).outerWidth($card.outerWidth());
 					containerContentWidth = $container.prop("scrollWidth");
 					callback($card.data("issue"));
+					console.log("start");
+					console.log($card.offset().left);
+					console.log($container.scrollLeft());
 				}, 
 				drag: function(event, ui) {
-					var left = ui.position.left;
-					var right = left + $(ui.helper).outerWidth();
-					if (left < $container.scrollLeft()) { 
-						if (left >= 0)
-							$container.scrollLeft(left);
+					var cardLeft = $(ui.helper).offset().left;
+					var containerLeft = $container.offset().left;
+					
+					if (cardLeft < containerLeft) { 
+						var scrollLeft = $container.scrollLeft();
+						var newScrollLeft = scrollLeft - (containerLeft - cardLeft);
+						if (newScrollLeft > 0)
+							$container.scrollLeft(newScrollLeft);
 						else
 							$container.scrollLeft(0);
 					}
-					if ($container.scrollLeft() < right - $container.outerWidth()) {
-						if (right <= containerContentWidth)
-							$container.scrollLeft(right - $container.outerWidth());
+					
+					cardLeft = $(ui.helper).offset().left;
+					containerLeft = $container.offset().left;
+					
+					var cardRight = cardLeft + $(ui.helper).outerWidth();
+					var containerWidth = $container.outerWidth();
+					var containerRight = containerLeft + containerWidth;
+					console.log(cardRight + ">" + containerRight);
+					
+					if (cardRight > containerRight) {
+						var scrollLeft = $container.scrollLeft();
+						var newScrollLeft = scrollLeft + (cardRight - containerRight);
+						if (newScrollLeft <= containerContentWidth - containerWidth)
+							$container.scrollLeft(newScrollLeft);
 						else
-							$container.scrollLeft(containerContentWidth - $container.outerWidth());
+							$container.scrollLeft(containerContentWidth - containerWidth);
 					}
 				},
 				stop: function(event, ui) {
