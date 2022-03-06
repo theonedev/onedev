@@ -157,7 +157,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								}
 								
 							};
-							propertiesViewer.add(AttributeAppender.append("class", "properties"));
+							propertiesViewer.add(AttributeAppender.append("class", "d-flex flex-column properties"));
 						} else {
 							propertiesViewer = new Label("content", "No properties defined");
 							String cssClasses = "properties not-defined alert alert-notice alert-light-warning d-flex";
@@ -540,7 +540,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 						Component importsViewer;
 						if (!buildSpec.getImports().isEmpty()) {
 							importsViewer = PropertyContext.view("content", buildSpec, "imports");
-							importsViewer.add(AttributeAppender.append("class", "imports"));
+							importsViewer.add(AttributeAppender.append("class", "imports autofit pr-2"));
 						} else {
 							importsViewer = new Label("content", "No imports defined");
 							String cssClasses = "imports not-defined alert alert-notice alert-light-warning d-flex";

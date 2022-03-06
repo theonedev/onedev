@@ -22,25 +22,35 @@
         <div wicket:id="detail" class="main d-flex flex-column flex-grow-1 ml-4"></div>
     </wicket:fragment>
     <wicket:fragment wicket:id="servicesFrag">
-        <div class="side flex-shrink-0">
+        <div class="side autofit flex-shrink-0">
         	<div class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
             	<a wicket:id="service" class="select btn btn-secondary justify-content-start"><span wicket:id="label"></span></a>
 	        </div></div>
 		</div>
-        <div wicket:id="service" class="main ml-4 flex-grow-1">
-			<div wicket:id="notice"></div>
-	        <div wicket:id="content" class="content"></div>
+        <div wicket:id="service" class="main d-flex flex-column ml-4 flex-grow-1">
+			<div class="head">
+				<h6 class="mb-0">Service Detail</h6>
+			</div>
+			<div class="body flex-grow-1 autofit">
+				<div wicket:id="notice"></div>
+		        <div wicket:id="content" class="content"></div>
+			</div>
 		</div>
     </wicket:fragment>
     <wicket:fragment wicket:id="stepTemplatesFrag">
-        <div class="side flex-shrink-0">
+        <div class="side autofit flex-shrink-0">
         	<div class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
             	<a wicket:id="template" class="select btn btn-secondary justify-content-start"><span wicket:id="label"></span></a>
 	        </div></div>
 		</div>
-        <div wicket:id="template" class="main ml-4 flex-grow-1">
-			<div wicket:id="notice"></div>
-	        <div wicket:id="content" class="content"></div>
+        <div wicket:id="template" class="main d-flex flex-column ml-4 flex-grow-1">
+			<div class="head">
+				<h6 class="mb-0">Step Template Detail</h6>
+			</div>
+			<div class="body flex-grow-1 autofit">
+				<div wicket:id="notice"></div>
+		        <div wicket:id="content" class="content"></div>
+			</div>
 		</div>
     </wicket:fragment>
 	<wicket:fragment wicket:id="namedElementImportNoticeFrag">
@@ -49,22 +59,24 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="propertiesFrag">
-	    <table class="table">
-	        <thead>
-	            <th>Name</th>
-	            <th>Value</th>
-	        </thead>
-	        <tbody>
-	            <tr wicket:id="properties">
-	                <td>
-	                    <div><span wicket:id="name"></span> <a wicket:id="imported"><wicket:svg href="arrow2" class="icon imported"></wicket:svg></a></div>
-	                </td>
-	                <td>
-	                    <div wicket:id="value"></div>
-	                </td>
-	            </tr>
-	        </tbody>
-	    </table>
+		<div class="autofit">
+		    <table class="table">
+		        <thead>
+		            <th>Name</th>
+		            <th>Value</th>
+		        </thead>
+		        <tbody>
+		            <tr wicket:id="properties">
+		                <td>
+		                    <div><span wicket:id="name"></span> <a wicket:id="imported"><wicket:svg href="arrow2" class="icon imported"></wicket:svg></a></div>
+		                </td>
+		                <td>
+		                    <div wicket:id="value"></div>
+		                </td>
+		            </tr>
+		        </tbody>
+		    </table>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="jobFrag">
     	<a wicket:id="job" class="select btn btn-secondary text-nowrap"><span wicket:id="label"></span></a>

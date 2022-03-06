@@ -1,15 +1,10 @@
 .build-spec {
     padding: 1.5rem;
 }
-.build-spec.parseable {
+.build-spec.parseable>.body>.content {
 	min-width: 800px;
 }
-
-/*
- * Force to show blob view scrollbar on overflow as otherwise build spec will be invisible
- * if view port is narrow due to min-width setting aobve
- */
-.blob-view>.body {
+.build-spec.parseable>.body {
 	overflow-x: auto !important;
 }
 
@@ -45,6 +40,7 @@
 }
 .build-spec.parseable>.body>.content>.side {
 	min-width: 220px;
+	padding-right: 1rem;
 }
 .build-spec.parseable>.body>.jobs.content>.side {
 	min-width: 360px;
@@ -73,14 +69,14 @@
     border: 1px solid var(--light-gray);
     padding: 1.5rem;
 }
-.build-spec.parseable>.body>.jobs.content>.main {
+.build-spec.parseable>.body>.content>.main {
 	padding: 0;
 	min-width: 360px;
 }
-.build-spec.parseable>.body>.jobs.content>.main>.head {
+.build-spec.parseable>.body>.content>.main>.head {
 	padding: 1.5rem;
 }
-.build-spec.parseable>.body>.jobs.content>.main>.body {
+.build-spec.parseable>.body>.content>.main>.body {
 	padding: 0 1.5rem 1.5rem 1.5rem;
 }
 .dark-mode .build-spec.parseable>.body>.content>.main {

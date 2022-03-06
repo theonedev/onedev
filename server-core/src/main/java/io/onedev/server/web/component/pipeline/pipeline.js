@@ -148,20 +148,21 @@ onedev.server.pipeline = {
 				});
 			}		
 		}
-		/*		
+		/*
 		var arrowHead = {
 			left: $job.offset().left - $paper.offset().left,
 			top: $job.offset().top + $job.outerHeight()/2 - $paper.offset().top
 		}
 		var arrowWidth = 8;
-		var arrowHeight = 16;
-		paper.line(arrowHead.left, arrowHead.top, arrowHead.left - arrowWidth, arrowHead.top - arrowHeight/2).attr({
-			stroke: onedev.server.pipeline.lineColor,
-			strokeWidth: onedev.server.pipeline.lineWidth,
-			from: dependencyJobIndexString,
-			to: jobIndexString
-		});
-		paper.line(arrowHead.left, arrowHead.top, arrowHead.left - arrowWidth, arrowHead.top +  arrowHeight/2).attr({
+		var arrowHeight = 8;
+		paper.path(
+			"M" + 
+			arrowHead.left + "," + arrowHead.top + " " +
+			"l" + -1*arrowHeight + "," + -1*arrowWidth/2 + " " +
+			"l" + "0," + arrowWidth + " " + 
+			"Z"
+		).attr({
+			fill: onedev.server.pipeline.lineColor,
 			stroke: onedev.server.pipeline.lineColor,
 			strokeWidth: onedev.server.pipeline.lineWidth,
 			from: dependencyJobIndexString,
