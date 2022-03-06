@@ -120,7 +120,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			 * Bump up event even if some properties are invalid as we may need to do something with 
 			 * partial properties of the bean. For instance to update issue description template
 			 */
-			send(this, Broadcast.BUBBLE, new BeanUpdating(propertyUpdating.getHandler()));
+			send(this, Broadcast.BUBBLE, new BeanUpdating(propertyUpdating.getHandler(), propertyUpdating));
 		}		
 	}
 

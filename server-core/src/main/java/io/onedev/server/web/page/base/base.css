@@ -14,7 +14,7 @@ html {
 }
 
 .is-invalid .form-control, .is-invalid.form-control {
-    border-color: var(--danger);
+    border-color: var(--danger) !important;
 	background: none;
 }
 

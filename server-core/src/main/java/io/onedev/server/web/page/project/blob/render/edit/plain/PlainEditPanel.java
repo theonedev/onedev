@@ -9,6 +9,8 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.Model;
 
+import io.onedev.commons.utils.StringUtils;
+
 @SuppressWarnings("serial")
 public class PlainEditPanel extends FormComponentPanel<byte[]> {
 	
@@ -37,10 +39,13 @@ public class PlainEditPanel extends FormComponentPanel<byte[]> {
 
 	@Override
 	public void convertInput() {
-		if (input.getConvertedInput() != null)
-			setConvertedInput(input.getConvertedInput().getBytes(StandardCharsets.UTF_8));
-		else
+		String value = input.getConvertedInput();
+		if (value != null) {
+			value = StringUtils.replace(value, "\r\n", "\n");
+			setConvertedInput(value.getBytes(StandardCharsets.UTF_8));
+		} else {
 			setConvertedInput(new byte[0]);
+		}
 	}
 
 	@Override

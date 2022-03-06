@@ -1,6 +1,9 @@
 .build-spec {
     padding: 1.5rem;
 }
+.build-spec.not-defined {
+	flex-grow: 0 !important;
+}
 .build-spec.parseable>.body>.content {
 	min-width: 800px;
 }
@@ -42,9 +45,6 @@
 	min-width: 220px;
 	padding-right: 1rem;
 }
-.build-spec.parseable>.body>.jobs.content>.side {
-	min-width: 360px;
-}
 
 .build-spec.parseable>.body>.content>.side>.navs:not(:empty) {
     margin-bottom: 1.5rem;
@@ -67,11 +67,10 @@
 .build-spec.parseable>.body>.content>.main {
     border-radius: 0.42rem;
     border: 1px solid var(--light-gray);
-    padding: 1.5rem;
 }
-.build-spec.parseable>.body>.content>.main {
-	padding: 0;
-	min-width: 360px;
+.build-spec.parseable>.body>.jobs.content>.main {
+	width: 600px;
+	min-width: 600px;
 }
 .build-spec.parseable>.body>.content>.main>.head {
 	padding: 1.5rem;
@@ -90,4 +89,8 @@
 .build-spec .icon.imported {
 	transform: rotate(135deg);
 	margin-left: 0.5rem;
+}
+
+.build-spec .active .drag-indicator {
+	color: var(--light-primary);
 }

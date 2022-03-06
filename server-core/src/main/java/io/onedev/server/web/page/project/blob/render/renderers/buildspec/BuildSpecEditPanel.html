@@ -1,5 +1,5 @@
 <wicket:panel>
-    <div wicket:id="content" class="build-spec build-spec-edit"></div>
+    <div wicket:id="content" class="build-spec build-spec-edit d-flex flex-column flex-grow-1"></div>
     <wicket:fragment wicket:id="parseableFrag">
     	<div class="head">
     		<a wicket:id="jobs" class="jobs">Jobs</a>
@@ -8,7 +8,7 @@
     		<a wicket:id="properties" class="properties">Properties</a>
     		<a wicket:id="imports" class="imports">Imports</a>
     	</div>
-        <div wicket:id="body" class="body">
+        <div wicket:id="body" class="body d-flex flex-column flex-grow-1">
 			<div wicket:id="feedback"></div>
 			<div wicket:id="content" class="content"></div>
 		</div>
@@ -17,28 +17,55 @@
         <div class="title">Error parsing build spec</div>
         <div wicket:id="errorMessage" class="error-message"></div>
     </wicket:fragment>
-	<wicket:fragment wicket:id="namedElementsFrag">
-        <div class="side flex-shrink-0">
+	<wicket:fragment wicket:id="jobsFrag">
+        <div wicket:id="pipeline" class="side flex-grow-1 autofit"></div>
+        <div wicket:id="detail" class="main d-flex flex-column ml-4"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="elementsFrag">
+        <div class="side autofit flex-shrink-0">
             <!-- do not leave white space between navs and nav element as we are using .navs:not(:empty)
             in css -->
-            <div class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
-                <a wicket:id="element" class="select btn btn-secondary justify-content-start">
+            <div wicket:id="navs" class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
+                <a wicket:id="select" class="select btn btn-secondary justify-content-start">
                     <wicket:svg href="grip" class="icon drag-indicator flex-shrink-0 mr-1"/>
                     <span wicket:id="label" class="label"></span>
                 </a>
                 <a wicket:id="delete" title="Delete" class="delete btn btn-secondary btn-icon flex-grow-0 flex-shrink-0"><wicket:svg href="trash" class="icon"></wicket:svg></a>
             </div></div>
             <div class="add btn-group btn-block">
-                <a wicket:id="create" class="create btn btn-success justify-content-start">
+                <a wicket:id="create" class="create btn btn-success justify-content-start no-suggestions">
                     <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add New
                 </a>
-                <a wicket:id="suggestions" class="suggestions btn btn-primary flex-grow-0 flex-shrink-0 btn-icon" title="Suggestions">
-					<wicket:svg href="wand" class="icon"/>
-				</a>
             </div>
         </div>
-        <div class="main flex-grow-1 ml-4">
-			<div wicket:id="element" class="content"></div>
-		</div>
+		<div wicket:id="detail" class="main autofit d-flex flex-column flex-grow-1 ml-4"></div>
 	</wicket:fragment>
+    <wicket:fragment wicket:id="elementDetailFrag">
+		<div class="head">
+			<h6 wicket:id="title" class="mb-0"></h6>
+		</div>
+		<div wicket:id="body" class="body autofit flex-grow-1"></div>
+    </wicket:fragment>
+	<wicket:fragment wicket:id="jobFrag">
+        <a wicket:id="select" class="select btn btn-secondary justify-content-start">
+            <wicket:svg href="grip" class="icon drag-indicator flex-shrink-0 mr-1"/>
+            <span wicket:id="label" class="label"></span>
+        </a>
+        <a wicket:id="delete" title="Delete" class="delete btn btn-secondary btn-icon flex-grow-0 flex-shrink-0"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+	</wicket:fragment>
+    <wicket:fragment wicket:id="jobDetailFrag">
+		<div class="head">
+			<a wicket:id="close" class="close"><wicket:svg href="times" class="icon"/></a>
+			<h6 class="mb-0">Job Detail</h6>
+		</div>
+		<div wicket:id="body" class="body autofit flex-grow-1"></div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="addJobFrag">
+        <a wicket:id="create" class="create btn btn-success justify-content-start">
+            <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add New
+        </a>
+        <a wicket:id="suggestions" class="suggestions btn btn-success flex-grow-0 flex-shrink-0 btn-icon" title="Suggestions">
+			<wicket:svg href="wand" class="icon"/>
+		</a>
+    </wicket:fragment>
 </wicket:panel>

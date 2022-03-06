@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveNamedElementIndex;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveElementIndex;
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
 
 import java.io.Serializable;
@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -18,7 +17,6 @@ import javax.validation.Validator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -33,12 +31,14 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Throwables;
 
@@ -62,17 +62,23 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Indexed;
 import io.onedev.server.util.PathNode.Named;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.pipeline.JobSelectionChange;
+import io.onedev.server.web.component.pipeline.PipelinePanel;
+import io.onedev.server.web.component.pipeline.Sortable;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.EditCompleteAware;
 import io.onedev.server.web.util.AjaxPayload;
@@ -96,6 +102,10 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		}
 	}
 	
+	private void resizeWindow(AjaxRequestTarget target) {
+		((BasePage)getPage()).resizeWindow(target);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -107,58 +117,328 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				private WebMarkupContainer body;
 				
 				private void setupJobsEditor(@Nullable AjaxRequestTarget target) {
-					Fragment jobsEditor = new NamedElementsEditor<Job>() {
+					Fragment jobsEditor = new Fragment("content", "jobsFrag", BuildSpecEditPanel.this) {
 
-						@Override
-						protected List<Job> getElements() {
-							return buildSpec.getJobs();
+						private void notifyJobSelectionChange(AjaxRequestTarget target, @Nullable Job job) {
+							send(this, Broadcast.BREADTH, new JobSelectionChange(target, job));
 						}
-
-						@Override
-						protected List<Job> getSuggestedElements() {
-							List<Job> suggestedJobs = new ArrayList<>();
+						
+						private void setupJobDetail(@Nullable AjaxRequestTarget target, int jobIndex) {
+							Fragment jobsEditor = this;
 							
-							if (context.getBlobIdent().revision != null) {
-								for (JobSuggestion suggestion: OneDev.getExtensions(JobSuggestion.class)) 
-									suggestedJobs.addAll(suggestion.suggestJobs(context.getProject(), context.getCommit()));
-							}
-							return suggestedJobs;
-						}
+							WebMarkupContainer jobDetail;
+							if (jobIndex != -1) {
+								jobDetail = new Fragment("detail", "jobDetailFrag", BuildSpecEditPanel.this);
+								
+								jobDetail.add(new AjaxSubmitLink("close") {
+									
+									@Override
+									protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+										super.onSubmit(target, form);
+										pushState(target, "jobs");
+										setupJobDetail(target, -1);
+										notifyJobSelectionChange(target, null);
+									}
 
-						@Override
-						protected int getActiveElementIndex() {
-							return getActiveNamedElementIndex(context, Job.class, buildSpec.getJobs(), 0);
-						}
+									@Override
+									protected void onError(AjaxRequestTarget target, Form<?> form) {
+										super.onError(target, form);
+										target.add(jobsEditor);
+										resizeWindow(target);
+									}
+									
+								});
+								
+								class JobEditor extends BeanEditor implements JobAware {
 
-						@Override
-						protected BeanEditor newElementEditor(String componentId, Job element) {
-							
-							class JobEditor extends BeanEditor implements JobAware {
+									public JobEditor(String id, Job job) {
+										super(id, new BeanDescriptor(Job.class), Model.of(job));
+									}
 
-								public JobEditor(String id, NamedElement element) {
-									super(id, new BeanDescriptor(Job.class), Model.of(element));
-								}
-
-								@Override
-								public Job getJob() {
-									return (Job) getConvertedInput();
-								}
-
-								@Override
-								public List<ParamSpec> getParamSpecs() {
-									return getJob().getParamSpecs();
+									@Override
+									public Job getJob() {
+										return (Job) getConvertedInput();
+									}
+									
+									@Override
+									public List<ParamSpec> getParamSpecs() {
+										return ((Job) getConvertedInput()).getParamSpecs();
+									}
+									
 								}
 								
+								BeanEditor jobEditor = new JobEditor("body", buildSpec.getJobs().get(jobIndex)) {
+									
+									@Override
+									public void onEvent(IEvent<?> event) {
+										super.onEvent(event);
+										if (event.getPayload() instanceof BeanUpdating) {
+												PropertyUpdating propertyUpdating = ((BeanUpdating) event.getPayload()).getSource();
+											if (propertyUpdating.getPropertyName().equals(Job.PROP_NAME) 
+													|| propertyUpdating.getPropertyName().equals(Job.PROP_JOB_DEPENDENCIES)) {
+												Job job = (Job) getConvertedInput();
+												String selection = "jobs";
+												if (StringUtils.isNotBlank(job.getName())) 
+													selection += "/" + job.getName();
+												int jobIndex = (int) jobDetail.getDefaultModelObject();
+												buildSpec.getJobs().set(jobIndex, job);
+												
+												AjaxRequestTarget target = (AjaxRequestTarget) propertyUpdating.getHandler();
+												replaceState(target, selection);
+												target.add(jobsEditor.get("pipeline"));
+												resizeWindow(target);
+											}
+										} else if (event.getPayload() instanceof FormSubmitted) {
+											int jobIndex = (int) jobDetail.getDefaultModelObject();
+											buildSpec.getJobs().set(jobIndex, (Job) getConvertedInput());
+										}
+									}
+																		
+								};
+								
+								jobDetail.add(jobEditor);
+							} else {
+								jobDetail = new WebMarkupContainer("detail");
+								jobDetail.setVisible(false);
 							}
+							jobDetail.setDefaultModel(Model.of(jobIndex));
+							jobDetail.setOutputMarkupPlaceholderTag(true);
 							
-							return new JobEditor(componentId, element);
+							if (target != null) {
+								replace(jobDetail);
+								target.add(jobDetail);
+							} else {
+								add(jobDetail);
+							}
 						}
-
+						
 						@Override
-						protected void setElements(List<Job> elements) {
-							buildSpec.setJobs(elements);
-						}
+						protected void onInitialize() {
+							super.onInitialize();
+							
+							Fragment jobsEditor = this;
+							
+							add(new PipelinePanel("pipeline") {
 
+								private void addJob(AjaxRequestTarget target, Job job) {
+									getJobs().add(job);
+									pushState(target, "new-job");
+									int jobIndex = getJobs().size()-1;
+									setupJobDetail(target, jobIndex);
+									target.add(jobsEditor);
+									resizeWindow(target);
+								}
+								
+								@Override
+								protected Component renderJob(String componentId, int jobIndex) {
+									WebMarkupContainer jobNav = new Fragment(componentId, "jobFrag", BuildSpecEditPanel.this);
+									
+									jobNav.add(new AjaxSubmitLink("select") {
+
+										@Override
+										protected void onInitialize() {
+											super.onInitialize();
+											add(new Label("label", new LoadableDetachableModel<String>() {
+
+												@Override
+												protected String load() {
+													Job job = getJobs().get(jobIndex);
+													if (job.getName() != null)
+														return HtmlEscape.escapeHtml5(job.getName());
+													else
+														return "<i>Name not specified</i>";
+												}
+												
+											}).setEscapeModelStrings(false));
+										}
+
+										@Override
+										protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+											super.onSubmit(target, form);
+											Job job = getJobs().get(jobIndex);
+											pushState(target, "jobs/" + job.getName());
+											setupJobDetail(target, buildSpec.getJobs().indexOf(job));
+											
+											notifyJobSelectionChange(target, job);
+											resizeWindow(target);
+										}
+
+										@Override
+										protected void onError(AjaxRequestTarget target, Form<?> form) {
+											super.onError(target, form);
+											target.add(jobsEditor);
+											resizeWindow(target);
+										}
+										
+									});
+									
+									jobNav.add(new AjaxLink<Void>("delete") {
+
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											getJobs().remove(jobIndex);
+											
+											Component jobDetail = jobsEditor.get("detail");
+											
+											int activeJobIndex = (int) jobDetail.getDefaultModelObject();
+											if (jobIndex == activeJobIndex) {
+												replaceState(target, "jobs");
+												setupJobDetail(target, -1);
+											} else if (jobIndex < activeJobIndex) {
+												jobDetail.setDefaultModelObject(activeJobIndex-1);
+											}
+											target.appendJavaScript("onedev.server.form.markDirty($('.build-spec').closest('form'));");
+											target.add(jobsEditor.get("pipeline"));
+											resizeWindow(target);
+										}
+										
+									});
+									
+									jobNav.add(AttributeAppender.append("class", "nav btn-group flex-nowrap"));
+									
+									return jobNav;
+								}
+
+								@Override
+								protected Component renderAction(String componentId) {
+									Fragment fragment = new Fragment(componentId, "addJobFrag", BuildSpecEditPanel.this);
+									
+									AjaxSubmitLink createLink = new AjaxSubmitLink("create") {
+
+										@Override
+										protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+											super.onSubmit(target, form);
+											addJob(target, new Job());
+										}
+
+										@Override
+										protected void onError(AjaxRequestTarget target, Form<?> form) {
+											super.onError(target, form);
+											target.add(jobsEditor);
+											resizeWindow(target);
+										}
+										
+									};
+									
+									fragment.add(createLink);
+									
+									List<Job> suggestedJobs = new ArrayList<>();
+									
+									if (context.getBlobIdent().revision != null) {
+										for (JobSuggestion suggestion: OneDev.getExtensions(JobSuggestion.class)) 
+											suggestedJobs.addAll(suggestion.suggestJobs(context.getProject(), context.getCommit()));
+									}
+									
+									if (!suggestedJobs.isEmpty()) {
+										fragment.add(new MenuLink("suggestions") {
+
+											@Override
+											protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+												List<MenuItem> menuItems = new ArrayList<>();
+												for (Job job: suggestedJobs) {
+													menuItems.add(new MenuItem() {
+
+														@Override
+														public String getLabel() {
+															return job.getName();
+														}
+
+														@Override
+														public WebMarkupContainer newLink(String id) {
+															return new AjaxSubmitLink(id, createLink.findParent(Form.class)) {
+
+																@Override
+																protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+																	super.onSubmit(target, form);
+																	addJob(target, job);
+																	dropdown.close();
+																}
+
+																@Override
+																protected void onError(AjaxRequestTarget target, Form<?> form) {
+																	super.onError(target, form);
+																	target.add(jobsEditor.get("pipeline"));
+																	resizeWindow(target);
+																}
+																
+															};
+														}
+														
+													});
+												}
+												return menuItems;
+											}
+											
+										});
+									} else {
+										fragment.add(new WebMarkupContainer("suggestions").setVisible(false));
+									}
+									
+									fragment.add(AttributeAppender.append("class", "add-job nav btn-group"));
+									return fragment;
+								}
+
+								@Override
+								protected List<Job> getJobs() {
+									return buildSpec.getJobs();
+								}
+
+								@Override
+								protected int getActiveJobIndex() {
+									return (int) jobsEditor.get("detail").getDefaultModelObject();
+								}
+
+								@Override
+								protected Sortable getSortable() {
+									return new Sortable() {
+
+										@Override
+										public void onSort(AjaxRequestTarget target, int fromIndex, int toIndex) {
+											if (fromIndex < toIndex) {
+												for (int i=0; i<toIndex-fromIndex; i++)  
+													Collections.swap(getJobs(), fromIndex+i, fromIndex+i+1);
+											} else {
+												for (int i=0; i<fromIndex-toIndex; i++) 
+													Collections.swap(getJobs(), fromIndex-i, fromIndex-i-1);
+											}
+											
+											Component jobDetail = jobsEditor.get("detail");
+
+											int activeIndex = (int) jobDetail.getDefaultModelObject();
+											
+											if (fromIndex < activeIndex) {
+												if (toIndex >= activeIndex) 
+													jobDetail.setDefaultModelObject(activeIndex-1);
+											} else if (fromIndex == activeIndex) {
+												jobDetail.setDefaultModelObject(toIndex);
+											} else {
+												if (toIndex <= activeIndex) 
+													jobDetail.setDefaultModelObject(activeIndex+1);
+											}
+											
+											target.add(jobsEditor.get("pipeline"));
+											resizeWindow(target);
+										}
+										
+									};
+								}
+								
+							}.setOutputMarkupId(true));
+							
+							setupJobDetail(null, getActiveElementIndex(context, Job.class, buildSpec.getJobs(), -1));
+							
+							add(AttributeAppender.append("class", "elements d-flex flex-nowrap jobs"));
+							
+							setOutputMarkupId(true);
+						}
+						
+						@Override
+						public void renderHead(IHeaderResponse response) {
+							super.renderHead(response);
+							response.render(OnDomReadyHeaderItem.forScript(
+									String.format("onedev.server.buildSpec.onTabDomReady('.jobs');")));
+						}
+						
 					};
 					
 					if (target != null) {
@@ -170,21 +450,11 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				}
 				
 				private void setupStepTemplatesEditor(@Nullable AjaxRequestTarget target) {
-					Fragment stepTemplatesEditor = new NamedElementsEditor<StepTemplate>() {
+					Fragment stepTemplatesEditor = new ElementsEditor<StepTemplate>() {
 
 						@Override
 						protected List<StepTemplate> getElements() {
 							return buildSpec.getStepTemplates();
-						}
-
-						@Override
-						protected List<StepTemplate> getSuggestedElements() {
-							return new ArrayList<>();
-						}
-
-						@Override
-						protected int getActiveElementIndex() {
-							return getActiveNamedElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates(), 0);
 						}
 
 						@Override
@@ -206,11 +476,6 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							return new StepTemplateEditor(componentId, element);
 						}
 
-						@Override
-						protected void setElements(List<StepTemplate> elements) {
-							buildSpec.setStepTemplates(elements);
-						}
-
 					};
 					
 					if (target != null) {
@@ -222,26 +487,11 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				}
 				
 				private void setupServicesEditor(@Nullable AjaxRequestTarget target) {
-					Fragment servicesEditor = new NamedElementsEditor<Service>() {
+					Fragment servicesEditor = new ElementsEditor<Service>() {
 
 						@Override
 						protected List<Service> getElements() {
 							return buildSpec.getServices();
-						}
-
-						@Override
-						protected void setElements(List<Service> elements) {
-							buildSpec.setServices(elements);
-						}
-
-						@Override
-						protected List<Service> getSuggestedElements() {
-							return new ArrayList<>();
-						}
-
-						@Override
-						protected int getActiveElementIndex() {
-							return getActiveNamedElementIndex(context, Service.class, buildSpec.getServices(), 0);
 						}
 
 						@Override
@@ -278,7 +528,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						}
 						
 					});
-					propertiesEditor.add(AttributeAppender.append("class", "properties"));
+					propertiesEditor.add(AttributeAppender.append("class", "properties pr-3"));
 					propertiesEditor.setOutputMarkupId(true);
 					if (target != null) {
 						body.replace(propertiesEditor);
@@ -307,7 +557,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						}
 						
 					});
-					importsEditor.add(AttributeAppender.append("class", "imports"));
+					importsEditor.add(AttributeAppender.append("class", "imports pr-3"));
 					importsEditor.setOutputMarkupId(true);
 					if (target != null) {
 						body.replace(importsEditor);
@@ -328,12 +578,14 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target,  "jobs");
 							setupJobsEditor(target);
+							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
+							resizeWindow(target);
 						}
 						
 					});
@@ -345,12 +597,14 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target, "services");
 							setupServicesEditor(target);
+							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
+							resizeWindow(target);
 						}
 						
 					});
@@ -362,12 +616,14 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target, "step-templates");
 							setupStepTemplatesEditor(target);
+							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
+							resizeWindow(target);
 						}
 						
 					});
@@ -379,12 +635,14 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target, "properties");
 							setupPropertiesEditor(target);
+							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
+							resizeWindow(target);
 						}
 						
 					});
@@ -396,12 +654,14 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target, "imports");
 							setupImportsEditor(target);
+							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
+							resizeWindow(target);
 						}
 						
 					});
@@ -452,7 +712,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 									String selection = "jobs/" + buildSpec.getJobs().get(indexed.getIndex()).getName();
 									replaceState(target, selection);
 									setupJobsEditor(target);
-									((BeanEditor)body.get("content:element")).error(path, violation.getMessage());
+									((BeanEditor)body.get("content:detail:body")).error(path, violation.getMessage());
 								}
 								break;
 							case "services":
@@ -467,7 +727,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 									String selection = "services/" + buildSpec.getServices().get(indexed.getIndex()).getName();
 									replaceState(target, selection);
 									setupServicesEditor(target);
-									((BeanEditor)body.get("content:element")).error(path, violation.getMessage());
+									((BeanEditor)body.get("content:detail:body")).error(path, violation.getMessage());
 								}
 								break;
 							case "stepTemplates":
@@ -482,7 +742,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 									String selection = "step-templates/" + buildSpec.getStepTemplates().get(indexed.getIndex()).getName();
 									replaceState(target, selection);
 									setupStepTemplatesEditor(target);
-									((BeanEditor)body.get("content:element")).error(path, violation.getMessage());
+									((BeanEditor)body.get("content:detail:body")).error(path, violation.getMessage());
 								}
 								break;
 							case "properties":
@@ -516,15 +776,15 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				private void fixState(AjaxRequestTarget target) {
 					String selection = getSelection();
 					if (selection == null || selection.startsWith("jobs")) {
-						int jobIndex = getActiveNamedElementIndex(context, Job.class, buildSpec.getJobs(), 0);
-						if (jobIndex < buildSpec.getJobs().size())
+						int jobIndex = getActiveElementIndex(context, Job.class, buildSpec.getJobs(), -1);
+						if (jobIndex >= 0 && jobIndex < buildSpec.getJobs().size())
 							replaceState(target, "jobs/" + buildSpec.getJobs().get(jobIndex).getName());
 					} else if (selection.startsWith("services")) {
-						int serviceIndex = getActiveNamedElementIndex(context, Service.class, buildSpec.getServices(), 0);
+						int serviceIndex = getActiveElementIndex(context, Service.class, buildSpec.getServices(), 0);
 						if (serviceIndex < buildSpec.getServices().size())
 							replaceState(target, "services/" + buildSpec.getServices().get(serviceIndex).getName());
 					} else if (selection.startsWith("step-templates")) {
-						int stepTemplateIndex = getActiveNamedElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates(), 0);
+						int stepTemplateIndex = getActiveElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates(), 0);
 						if (stepTemplateIndex < buildSpec.getStepTemplates().size())
 							replaceState(target, "step-templates/" + buildSpec.getStepTemplates().get(stepTemplateIndex).getName());
 					} else if (selection.equals("new-job")) { 
@@ -619,297 +879,247 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		
 	}
 	
-	private abstract class NamedElementsEditor<T extends NamedElement> extends Fragment {
+	private abstract class ElementsEditor<T extends NamedElement> extends Fragment {
 		
 		private final Class<T> elementClass;
 		
 		@SuppressWarnings("unchecked")
-		public NamedElementsEditor() {
-			super("content", "namedElementsFrag", BuildSpecEditPanel.this);
+		public ElementsEditor() {
+			super("content", "elementsFrag", BuildSpecEditPanel.this);
 			
-			List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(NamedElementsEditor.class, getClass());
+			List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ElementsEditor.class, getClass());
 			elementClass = (Class<T>) typeArguments.get(0);
 		}
 
 		protected abstract List<T> getElements();
 		
-		protected abstract void setElements(List<T> elements);
-		
-		protected abstract List<T> getSuggestedElements();
-		
-		protected abstract int getActiveElementIndex();
-		
 		protected abstract BeanEditor newElementEditor(String componentId, T element);
 		
-		private void newElementNav(@Nullable AjaxRequestTarget target, RepeatingView navsView, int elementIndex) {
-			WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId(), Model.of(elementIndex));
+		private void setupElementDetail(@Nullable AjaxRequestTarget target, int elementIndex) {
+			WebMarkupContainer elementDetail;
 			
-			Fragment elementsEdit = this;
-			
-			nav.add(new AjaxSubmitLink("element") {
-
-				private int getElementIndex() {
-					return (int) nav.getDefaultModelObject();
-				}
+			if (elementIndex != -1) {
+				elementDetail = new Fragment("detail", "elementDetailFrag", BuildSpecEditPanel.this);
+				elementDetail.setDefaultModel(Model.of(elementIndex));
 				
-				@Override
-				protected void onInitialize() {
-					super.onInitialize();
-					add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-						@Override
-						public String getObject() {
-							return getElement().getName();
-						}
-						
-					}));
-				}
-
-				private NamedElement getElement() {
-					return getElements().get(getElementIndex());
-				}
+				elementDetail.add(new Label("title", EditableUtils.getDisplayName(elementClass) + " Detail"));
 				
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
-					pushState(target, getUrlSegment(elementClass) + "s/" + getElement().getName());
-					setupElementEditor(target, nav);
-				}
-
-				@Override
-				protected void onError(AjaxRequestTarget target, Form<?> form) {
-					super.onError(target, form);
-					target.add(elementsEdit);
-				}
+				BeanEditor elementEditor = newElementEditor("body", getElements().get(elementIndex));
 				
-			});
-			
-			nav.add(new AjaxLink<Void>("delete") {
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					int elementIndex = (int) nav.getDefaultModelObject();
-					Component elementEdit = elementsEdit.get("element");
-					boolean found = false;
-					for (Iterator<Component> it = navsView.iterator(); it.hasNext();) {
-						Component child = it.next();
-						if (child == nav) {
-							it.remove();
-							found = true;
-						} else if (found) {
-							child.setDefaultModelObject((int)child.getDefaultModelObject()-1);
+				elementEditor.add(new Behavior() {
+					
+					@SuppressWarnings("unchecked")
+					@Override
+					public void onEvent(Component component, IEvent<?> event) {
+						super.onEvent(component, event);
+						if (event.getPayload() instanceof BeanUpdating) {
+							PropertyUpdating propertyUpdating = ((BeanUpdating) event.getPayload()).getSource();
+							if (propertyUpdating.getPropertyName().equals(Job.PROP_NAME)) {
+								T element = (T) elementEditor.getConvertedInput();
+								String selection = getUrlSegment(elementClass) + "s";
+								if (StringUtils.isNotBlank(element.getName())) 
+									selection += "/" + element.getName();
+								int elementIndex = (int) elementDetail.getDefaultModelObject();
+								getElements().set(elementIndex, element);
+								
+								AjaxRequestTarget target = (AjaxRequestTarget) propertyUpdating.getHandler();
+								replaceState(target, selection);
+								target.add(ElementsEditor.this.get("navs"));
+								resizeWindow(target);
+							}
+						} else if (event.getPayload() instanceof FormSubmitted) {
+							int elementIndex = (int) elementDetail.getDefaultModelObject();
+							getElements().set(elementIndex, (T) elementEditor.getConvertedInput());
 						}
 					}
-					target.appendJavaScript(String.format(
-							"$('.build-spec>.body>.elements>.side>.navs>.nav:eq(%d)').remove();", 
-							elementIndex));
-					getElements().remove(elementIndex);
-					int activeElementIndex = getElements().indexOf(elementEdit.getDefaultModelObject());
-					if (activeElementIndex == -1) {
-						replaceState(target, getUrlSegment(elementClass) + "s");
-						if (!getElements().isEmpty()) {
-							setupElementEditor(target, navsView.iterator().next());
-						} else {
-							elementEdit = new WebMarkupContainer("element");
-							elementEdit.setOutputMarkupId(true);
-							elementsEdit.replace(elementEdit);
-							target.add(elementEdit);
-						}
-					}
-					target.appendJavaScript("onedev.server.form.markDirty($('.build-spec').closest('form'));");
-				}
-				
-			});
-			
-			navsView.add(nav);
+					
+				});
+				elementDetail.add(elementEditor);
+				elementDetail.setOutputMarkupId(true);
+			} else {
+				elementDetail = new WebMarkupContainer("detail");
+				elementDetail.setOutputMarkupPlaceholderTag(true).setVisible(false);
+			}
+			elementDetail.setDefaultModel(Model.of(elementIndex));
 			
 			if (target != null) {
-				String script = String.format(
-						"$('.build-spec>.body>.elements>.side>.navs').append(\"<div id='%s'></div>\");", 
-						nav.getMarkupId(true));
-				target.prependJavaScript(script);
-				target.add(nav);
+				replace(elementDetail);
+				target.add(elementDetail);
+			} else {
+				add(elementDetail);
 			}
 		}
 		
-		private void setupElementEditor(@Nullable AjaxRequestTarget target, Component nav) {
-			AbstractPostAjaxBehavior nameChangeBehavior = new AbstractPostAjaxBehavior() {
-				
+		@Override
+		protected void onInitialize() {
+			super.onInitialize();
+
+			WebMarkupContainer navs = new WebMarkupContainer("navs") {
+
 				@Override
-				protected void respond(AjaxRequestTarget target) {
-					IRequestParameters params = RequestCycle.get().getRequest().getRequestParameters();
-					String name = params.getParameterValue("name").toOptionalString();
+				public void renderHead(IHeaderResponse response) {
+					super.renderHead(response);
 					
-					String selection = getUrlSegment(elementClass) + "s";
-					if (StringUtils.isNotBlank(name)) 
-						selection += "/" + name;
-					replaceState(target, selection);
+					int elementIndex = (int) ElementsEditor.this.get("detail").getDefaultModelObject();
+					String script = String.format("onedev.server.buildSpec.markElementActive(%d);", elementIndex);
+					response.render(OnDomReadyHeaderItem.forScript(script));
 				}
 				
 			};
 			
-			int elementIndex = (int) nav.getDefaultModelObject();
-			BeanEditor elementEditor = newElementEditor("element", getElements().get(elementIndex));
-			
-			elementEditor.add(new Behavior() {
-				
-				@SuppressWarnings("unchecked")
+			navs.add(new ListView<T>("navs", new AbstractReadOnlyModel<List<T>>() {
+
 				@Override
-				public void onEvent(Component component, IEvent<?> event) {
-					super.onEvent(component, event);
-					if (event.getPayload() instanceof FormSubmitted) {
-						int elementIndex = (int) nav.getDefaultModelObject();
-						List<T> elements = new ArrayList<>(getElements());
-						elements.set(elementIndex, (T) elementEditor.getConvertedInput());
-						setElements(elements);
-					}
+				public List<T> getObject() {
+					return getElements();
 				}
 				
+			}) {
+
 				@Override
-				public void renderHead(Component component, IHeaderResponse response) {
-					super.renderHead(component, response);
+				protected void populateItem(ListItem<T> item) {
+					item.add(new AjaxSubmitLink("select") {
+
+						@Override
+						protected void onInitialize() {
+							super.onInitialize();
+							add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+								@Override
+								public String getObject() {
+									T element = getElements().get(item.getIndex());
+									if (element.getName() != null)
+										return HtmlEscape.escapeHtml5(element.getName());
+									else
+										return "<i>Name not specified</i>";
+								}
+								
+							}).setEscapeModelStrings(false));
+						}
+
+						@Override
+						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+							super.onSubmit(target, form);
+							pushState(target, getUrlSegment(elementClass) + "s/" + item.getModelObject().getName());
+							setupElementDetail(target, item.getIndex());
+							target.appendJavaScript(String.format(
+									"onedev.server.buildSpec.markElementActive(%d);", item.getIndex()));
+							resizeWindow(target);
+						}
+
+						@Override
+						protected void onError(AjaxRequestTarget target, Form<?> form) {
+							super.onError(target, form);
+							target.add(ElementsEditor.this);
+							resizeWindow(target);
+						}
+						
+					});
 					
-					int elementIndex = (int) nav.getDefaultModelObject();
-					CharSequence callback = nameChangeBehavior.getCallbackFunction(CallbackParameter.explicit("name"));
-					String script = String.format("onedev.server.buildSpec.onNamedElementDomReady(%d, %s);", elementIndex, callback);
-					response.render(OnDomReadyHeaderItem.forScript(script));
+					item.add(new AjaxLink<Void>("delete") {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							getElements().remove(item.getIndex());
+							
+							Component elementDetail = ElementsEditor.this.get("detail");
+							
+							int activeElementIndex = (int) elementDetail.getDefaultModelObject();
+							if (item.getIndex() == activeElementIndex) {
+								if (getElements().isEmpty()) {
+									replaceState(target, getUrlSegment(elementClass) + "s");
+									setupElementDetail(target, -1);
+								} else {
+									replaceState(target, getUrlSegment(elementClass) + "s/" + getElements().get(0).getName());
+									setupElementDetail(target, 0);
+								}
+							} else if (item.getIndex() < activeElementIndex) {
+								elementDetail.setDefaultModelObject(activeElementIndex-1);
+							}
+							target.appendJavaScript("onedev.server.form.markDirty($('.build-spec').closest('form'));");
+							target.add(ElementsEditor.this.get("navs"));
+							resizeWindow(target);
+						}
+						
+					});
 				}
 				
 			});
-			elementEditor.add(nameChangeBehavior);
-
-			elementEditor.setOutputMarkupId(true);
-			if (target != null) {
-				replace(elementEditor);
-				target.add(elementEditor);
-			} else {
-				add(elementEditor);
-			}
-		}
-		
-		@SuppressWarnings("deprecation")
-		private void addElement(AjaxRequestTarget target, RepeatingView elementNavs) {
-			pushState(target, "new-" +  getUrlSegment(elementClass));
-			int elementIndex = getElements().size()-1;
-			newElementNav(target, elementNavs, elementIndex);
-			setupElementEditor(target, elementNavs.get(elementNavs.size()-1));
-		}
-		
-		@SuppressWarnings("deprecation")
-		@Override
-		protected void onInitialize() {
-			super.onInitialize();
-			
-			RepeatingView elementNavs = new RepeatingView("navs");
-			
-			for (int i=0; i<getElements().size(); i++)
-				newElementNav(null, elementNavs, i);
-			
-			add(elementNavs);
 			
 			if (!getElements().isEmpty()) {
-				int elementIndex = getActiveElementIndex();
-				setupElementEditor(null, elementNavs.get(elementIndex));
+				int elementIndex = getActiveElementIndex(context, elementClass, getElements(), 0);
+				setupElementDetail(null, elementIndex);
 			} else {
-				add(new WebMarkupContainer("element").setOutputMarkupId(true));
+				setupElementDetail(null, -1);
 			}
+			
+			navs.add(new SortBehavior() {
+
+				@Override
+				protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+					int fromIndex = from.getItemIndex();
+					int toIndex = to.getItemIndex();
+					
+					if (fromIndex < toIndex) {
+						for (int i=0; i<toIndex-fromIndex; i++)  
+							Collections.swap(getElements(), fromIndex+i, fromIndex+i+1);
+					} else {
+						for (int i=0; i<fromIndex-toIndex; i++) 
+							Collections.swap(getElements(), fromIndex-i, fromIndex-i-1);
+					}
+					
+					Component jobDetail = get("detail");
+
+					int activeIndex = (int) jobDetail.getDefaultModelObject();
+					
+					if (fromIndex < activeIndex) {
+						if (toIndex >= activeIndex) 
+							jobDetail.setDefaultModelObject(activeIndex-1);
+					} else if (fromIndex == activeIndex) {
+						jobDetail.setDefaultModelObject(toIndex);
+					} else {
+						if (toIndex <= activeIndex) 
+							jobDetail.setDefaultModelObject(activeIndex+1);
+					}
+					
+					target.add(get("navs"));
+					resizeWindow(target);
+				}
+				
+			}.sortable(null));
+			
+			add(navs.setOutputMarkupId(true));
 			
 			AjaxSubmitLink createLink = new AjaxSubmitLink("create") {
 
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					super.onSubmit(target, form);
+					T newElement;
 					try {
-						getElements().add(elementClass.newInstance());
+						newElement = elementClass.newInstance();
 					} catch (InstantiationException | IllegalAccessException e) {
 						throw new RuntimeException(e);
 					}
-					addElement(target, elementNavs);
+					
+					getElements().add(newElement);
+					pushState(target, "new-" +  getUrlSegment(elementClass));
+					int elementIndex = getElements().size()-1;
+					setupElementDetail(target, elementIndex);
+					target.add(ElementsEditor.this);
+					resizeWindow(target);
 				}
 
 				@Override
 				protected void onError(AjaxRequestTarget target, Form<?> form) {
 					super.onError(target, form);
-					target.add(NamedElementsEditor.this);
+					target.add(ElementsEditor.this);
+					resizeWindow(target);
 				}
 				
 			};
 			
-			List<T> suggestedElements = getSuggestedElements();
-			
-			if (suggestedElements.isEmpty())
-				createLink.add(AttributeAppender.append("class", "no-suggestions"));
-			
 			add(createLink);
-			
-			if (!suggestedElements.isEmpty()) {
-				add(new MenuLink("suggestions") {
-
-					@Override
-					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-						List<MenuItem> menuItems = new ArrayList<>();
-						for (T element: suggestedElements) {
-							menuItems.add(new MenuItem() {
-
-								@Override
-								public String getLabel() {
-									return element.getName();
-								}
-
-								@Override
-								public WebMarkupContainer newLink(String id) {
-									return new AjaxSubmitLink(id, createLink.findParent(Form.class)) {
-
-										@Override
-										protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-											super.onSubmit(target, form);
-											getElements().add(element);
-											addElement(target, elementNavs);
-											dropdown.close();
-										}
-
-										@Override
-										protected void onError(AjaxRequestTarget target, Form<?> form) {
-											super.onError(target, form);
-											dropdown.close();
-											target.add(NamedElementsEditor.this);
-										}
-										
-									};
-								}
-								
-							});
-						}
-						return menuItems;
-					}
-					
-				});
-			} else {
-				add(new WebMarkupContainer("suggestions").setVisible(false));
-			}			
-			
-			add(new SortBehavior() {
-
-				@Override
-				protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-					int fromIndex = from.getItemIndex();
-					int toIndex = to.getItemIndex();
-					if (fromIndex < toIndex) {
-						for (int i=0; i<toIndex-fromIndex; i++) { 
-							elementNavs.swap(fromIndex+i, fromIndex+i+1);
-							Collections.swap(getElements(), fromIndex+i, fromIndex+i+1);
-						}
-					} else {
-						for (int i=0; i<fromIndex-toIndex; i++) {
-							elementNavs.swap(fromIndex-i, fromIndex-i-1);
-							Collections.swap(getElements(), fromIndex-i, fromIndex-i-1);
-						}
-					}
-					for (int i=0; i<elementNavs.size(); i++)
-						elementNavs.get(i).setDefaultModelObject(i);
-				}
-				
-			}.sortable(".side>.navs"));
 			
 			add(AttributeAppender.append("class", "elements d-flex flex-nowrap " + getUrlSegment(elementClass) + "s"));
 			setOutputMarkupId(true);

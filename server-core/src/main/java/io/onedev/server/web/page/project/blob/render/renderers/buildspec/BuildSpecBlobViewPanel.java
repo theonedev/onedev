@@ -1,8 +1,9 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveNamedElementIndex;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveElementIndex;
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getPosition;
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getSelection;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -157,7 +158,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								}
 								
 							};
-							propertiesViewer.add(AttributeAppender.append("class", "d-flex flex-column properties"));
+							propertiesViewer.add(AttributeAppender.append("class", "properties autofit pr-3"));
 						} else {
 							propertiesViewer = new Label("content", "No properties defined");
 							String cssClasses = "properties not-defined alert alert-notice alert-light-warning d-flex";
@@ -181,18 +182,18 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 						}
 					}
 					
-					private <T extends NamedElement> List<T> getNamedElementsToShow(List<T> elements, Map<String, T> elementMap) {
-						List<T> elementsToShow = new ArrayList<>(elements);
+					private <T extends NamedElement> List<T> getAllElements(List<T> elements, Map<String, T> elementMap) {
+						List<T> allElements = new ArrayList<>(elements);
 						for (T element: elementMap.values()) {
 							if (!elements.contains(element))
-								elementsToShow.add(element);
+								allElements.add(element);
 						}
-						return elementsToShow;
+						return allElements;
 					}
 					
 					private void setupJobsViewer(@Nullable AjaxRequestTarget target) {
 						Component jobsViewer;
-						List<Job> jobs = getNamedElementsToShow(buildSpec.getJobs(), buildSpec.getJobMap());
+						List<Job> jobs = getAllElements(buildSpec.getJobs(), buildSpec.getJobMap());
 						if (!jobs.isEmpty()) {
 							jobsViewer = new Fragment("content", "jobsFrag", BuildSpecBlobViewPanel.this) {
 	
@@ -204,29 +205,29 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								protected void onInitialize() {
 									super.onInitialize();
 
-									Job activeJob = null;
-									int jobIndex = getActiveNamedElementIndex(context, Job.class, jobs, -1);
-									if (jobIndex != -1) 
-										activeJob = jobs.get(jobIndex);
+									int activeJobIndex = getActiveElementIndex(context, Job.class, jobs, -1);
 									
-									add(new PipelinePanel("pipeline", jobs, activeJob) {
+									add(new PipelinePanel("pipeline") {
 
 										@Override
-										protected Component renderJob(String componentId, Job job) {
-											Fragment fragment = new Fragment(componentId, "jobFrag", BuildSpecBlobViewPanel.this);
-											AjaxLink<Void> jobLink = new AjaxLink<Void>("job") {
+										protected Component renderJob(String componentId, int jobIndex) {
+											Fragment jobNav = new Fragment(componentId, "jobFrag", BuildSpecBlobViewPanel.this);
+											
+											AjaxLink<Void> jobLink = new AjaxLink<Void>("select") {
 												
 												@Override
 												public void onClick(AjaxRequestTarget target) {
+													Job job = getJobs().get(jobIndex);
 													String position = getPosition("jobs/" + job.getName());
 													context.pushState(target, context.getBlobIdent(), position);
-													newJobDetail(target, job);
+													setupJobDetail(target, jobIndex);
 													notifyJobSelectionChange(target, job);
 													resizeWindow(target);
 												}
 												
 											};
 											
+											Job job = getJobs().get(jobIndex);
 											String label = HtmlEscape.escapeHtml5(job.getName());
 											if (!buildSpec.getJobs().contains(job)) {
 												String iconHtml = String.format(
@@ -236,9 +237,9 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 											} 
 											jobLink.add(new Label("label", label).setEscapeModelStrings(false));
 											
-											fragment.add(jobLink);
+											jobNav.add(jobLink);
 											
-											fragment.add(new RunJobLink("runJob", context.getCommit().copy(), job.getName(), getContext().getRefName()) {
+											jobNav.add(new RunJobLink("run", context.getCommit().copy(), job.getName(), getContext().getRefName()) {
 		
 												@Override
 												protected Project getProject() {
@@ -256,25 +257,36 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 												}
 		
 											});
-											fragment.add(AttributeAppender.append("class", "nav btn-group flex-nowrap"));
-											return fragment;
+											jobNav.add(AttributeAppender.append("class", "nav btn-group flex-nowrap"));
+											return jobNav;
+										}
+
+										@Override
+										protected List<Job> getJobs() {
+											return jobs;
+										}
+
+										@Override
+										protected int getActiveJobIndex() {
+											return activeJobIndex;
 										}
 										
 									});
 									
-									newJobDetail(null, activeJob);									
+									setupJobDetail(null, activeJobIndex);									
 									
 									add(AttributeAppender.append("class", "elements jobs d-flex flex-nowrap"));
 								}
 	
-								private void newJobDetail(@Nullable AjaxRequestTarget target, @Nullable Job job) {
+								private void setupJobDetail(@Nullable AjaxRequestTarget target, int jobIndex) {
 									WebMarkupContainer jobDetail;
-									if (job != null) {
+									if (jobIndex != -1) {
+										Job job = buildSpec.getJobs().get(jobIndex);
 										jobDetail = new Fragment("detail", "jobDetailFrag", BuildSpecBlobViewPanel.this);
-										jobDetail.add(new NamedElementImportNoticePanel<Job>(buildSpec, job.getName()) {
+										jobDetail.add(new ElementImportNoticePanel(buildSpec, Job.class, job.getName()) {
 
 											@Override
-											protected Map<String, Job> getElementMap(BuildSpec buildSpec) {
+											protected Map<String, ? extends NamedElement> getElementMap(BuildSpec buildSpec) {
 												return buildSpec.getJobMap();
 											}
 											
@@ -285,7 +297,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 											public void onClick(AjaxRequestTarget target) {
 												String position = getPosition("jobs");
 												context.pushState(target, context.getBlobIdent(), position);
-												newJobDetail(target, null);
+												setupJobDetail(target, -1);
 												notifyJobSelectionChange(target, null);
 											}
 											
@@ -330,83 +342,21 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 					
 					private void setupServicesViewer(@Nullable AjaxRequestTarget target) {
 						Component servicesViewer;
-						List<Service> services = getNamedElementsToShow(buildSpec.getServices(), buildSpec.getServiceMap());
+						List<Service> services = getAllElements(buildSpec.getServices(), buildSpec.getServiceMap());
 						if (!services.isEmpty()) {
-							servicesViewer = new Fragment("content", "servicesFrag", BuildSpecBlobViewPanel.this) {
-	
-								@Override
-								protected void onInitialize() {
-									super.onInitialize();
-									
-									RepeatingView navsView = new RepeatingView("navs");
-									for (int i=0; i<services.size(); i++) {
-										int serviceIndex = i;
-										Service service = services.get(serviceIndex);
-										WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId());
-										AjaxLink<Void> serviceLink = new AjaxLink<Void>("service") {
-	
-											@Override
-											public void onClick(AjaxRequestTarget target) {
-												String position = getPosition("services/" + service.getName());
-												context.pushState(target, context.getBlobIdent(), position);
-												newServiceViewer(target, serviceIndex);
-											}
-											
-										};
-										
-										String label = HtmlEscape.escapeHtml5(service.getName());
-										if (!buildSpec.getServices().contains(service)) {
-											String iconHtml = String.format(
-													"<svg class='icon imported'><use xlink:href='%s'/></svg>", 
-													SpriteImage.getVersionedHref(IconScope.class, "arrow2"));
-											label += iconHtml;
-										} 
-										serviceLink.add(new Label("label", label).setEscapeModelStrings(false));
-										
-										nav.add(serviceLink);
-										
-										navsView.add(nav);
-									}
-									add(navsView);
-	
-									newServiceViewer(null, getActiveNamedElementIndex(context, Service.class, services, 0));
-									
-									add(AttributeAppender.append("class", "services elements d-flex flex-nowrap"));
-								}
-	
-								private void newServiceViewer(@Nullable AjaxRequestTarget target, int serviceIndex) {
-									WebMarkupContainer serviceContainer = new WebMarkupContainer("service") {
-										
-										@Override
-										public void renderHead(IHeaderResponse response) {
-											super.renderHead(response);
-											
-											String script = String.format("onedev.server.buildSpec.onNamedElementDomReady(%d);", serviceIndex);
-											response.render(OnDomReadyHeaderItem.forScript(script));
-										}
-										
-									};
-									
-									Service service = services.get(serviceIndex);
-									
-									serviceContainer.add(new NamedElementImportNoticePanel<Service>(buildSpec, service.getName()) {
+							servicesViewer = new ElementsViewer<Service>(buildSpec) {
 
-										@Override
-										protected Map<String, Service> getElementMap(BuildSpec buildSpec) {
-											return buildSpec.getServiceMap();
-										}
-										
-									});
-									
-									serviceContainer.add(BeanContext.view("content", service));
-									serviceContainer.setOutputMarkupId(true);
-									
-									if (target != null) {
-										replace(serviceContainer);
-										target.add(serviceContainer);
-									} else {
-										add(serviceContainer);
-									}
+								@Override
+								protected List<Service> getElements(boolean includeImported) {
+									if (includeImported)
+										return services;
+									else
+										return buildSpec.getServices();
+								}
+
+								@Override
+								protected Map<String, Service> getElementMap(BuildSpec buildSpec) {
+									return buildSpec.getServiceMap();
 								}
 								
 							};
@@ -434,83 +384,21 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 					
 					private void setupStepTemplatesViewer(@Nullable AjaxRequestTarget target) {
 						Component templatesViewer;
-						List<StepTemplate> templates = getNamedElementsToShow(buildSpec.getStepTemplates(), buildSpec.getStepTemplateMap());
+						List<StepTemplate> templates = getAllElements(buildSpec.getStepTemplates(), buildSpec.getStepTemplateMap());
 						if (!templates.isEmpty()) {
-							templatesViewer = new Fragment("content", "stepTemplatesFrag", BuildSpecBlobViewPanel.this) {
-	
-								@Override
-								protected void onInitialize() {
-									super.onInitialize();
-									
-									RepeatingView navsView = new RepeatingView("navs");
-									for (int i=0; i<templates.size(); i++) {
-										int templateIndex = i;
-										StepTemplate template = templates.get(templateIndex);
-										WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId());
-										AjaxLink<Void> templateLink = new AjaxLink<Void>("template") {
-	
-											@Override
-											public void onClick(AjaxRequestTarget target) {
-												String position = getPosition("step-templates/" + template.getName());
-												context.pushState(target, context.getBlobIdent(), position);
-												newTemplateViewer(target, templateIndex);
-											}
-											
-										};
-										
-										String label = HtmlEscape.escapeHtml5(template.getName());
-										if (!buildSpec.getStepTemplates().contains(template)) {
-											String iconHtml = String.format(
-													"<svg class='icon imported'><use xlink:href='%s'/></svg>", 
-													SpriteImage.getVersionedHref(IconScope.class, "arrow2"));
-											label += iconHtml;
-										} 
-										templateLink.add(new Label("label", label).setEscapeModelStrings(false));
-										
-										nav.add(templateLink);
-										
-										navsView.add(nav);
-									}
-									add(navsView);
-	
-									newTemplateViewer(null, getActiveNamedElementIndex(context, StepTemplate.class, templates, 0));
-									
-									add(AttributeAppender.append("class", "step-templates elements d-flex flex-nowrap"));
-								}
-	
-								private void newTemplateViewer(@Nullable AjaxRequestTarget target, int templateIndex) {
-									WebMarkupContainer templateContainer = new WebMarkupContainer("template") {
-										
-										@Override
-										public void renderHead(IHeaderResponse response) {
-											super.renderHead(response);
-											
-											String script = String.format("onedev.server.buildSpec.onNamedElementDomReady(%d);", templateIndex);
-											response.render(OnDomReadyHeaderItem.forScript(script));
-										}
-										
-									};
-									
-									StepTemplate template = templates.get(templateIndex);
-									
-									templateContainer.add(new NamedElementImportNoticePanel<StepTemplate>(buildSpec, template.getName()) {
+							templatesViewer = new ElementsViewer<StepTemplate>(buildSpec) {
 
-										@Override
-										protected Map<String, StepTemplate> getElementMap(BuildSpec buildSpec) {
-											return buildSpec.getStepTemplateMap();
-										}
-										
-									});
-									
-									templateContainer.add(BeanContext.view("content", template));
-									templateContainer.setOutputMarkupId(true);
-									
-									if (target != null) {
-										replace(templateContainer);
-										target.add(templateContainer);
-									} else {
-										add(templateContainer);
-									}
+								@Override
+								protected List<StepTemplate> getElements(boolean includeImported) {
+									if (includeImported)
+										return templates;
+									else
+										return buildSpec.getStepTemplates();
+								}
+
+								@Override
+								protected Map<String, StepTemplate> getElementMap(BuildSpec buildSpec) {
+									return buildSpec.getStepTemplateMap();
 								}
 								
 							};
@@ -540,7 +428,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 						Component importsViewer;
 						if (!buildSpec.getImports().isEmpty()) {
 							importsViewer = PropertyContext.view("content", buildSpec, "imports");
-							importsViewer.add(AttributeAppender.append("class", "imports autofit pr-2"));
+							importsViewer.add(AttributeAppender.append("class", "imports autofit pr-3"));
 						} else {
 							importsViewer = new Label("content", "No imports defined");
 							String cssClasses = "imports not-defined alert alert-notice alert-light-warning d-flex";
@@ -680,25 +568,124 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 	protected boolean isViewPlainSupported() {
 		return true;
 	}
-
-	private abstract class NamedElementImportNoticePanel<T extends NamedElement> extends Fragment {
-
+	
+	private abstract class ElementsViewer<T extends NamedElement> extends Fragment {
+		
+		private final BuildSpec buildSpec;
+		
 		private final Class<T> elementClass;
+		
+		@SuppressWarnings("unchecked")
+		public ElementsViewer(BuildSpec buildSpec) {
+			super("content", "elementsFrag", BuildSpecBlobViewPanel.this);
+			
+			this.buildSpec = buildSpec;
+			
+			List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ElementsViewer.class, getClass());
+			elementClass = (Class<T>) typeArguments.get(0);
+		}
+
+		@Override
+		protected void onInitialize() {
+			super.onInitialize();
+			
+			RepeatingView navsView = new RepeatingView("navs");
+			
+			String urlSegment = getUrlSegment(elementClass);
+			for (int i=0; i<getElements(true).size(); i++) {
+				int elementIndex = i;
+				NamedElement element = getElements(true).get(elementIndex);
+				WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId());
+				AjaxLink<Void> elementLink = new AjaxLink<Void>("select") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						String position = getPosition(urlSegment + "s/" + element.getName());
+						context.pushState(target, context.getBlobIdent(), position);
+						setupElementViewer(target, elementIndex);
+					}
+					
+				};
+				
+				String label = HtmlEscape.escapeHtml5(element.getName());
+				if (!getElements(false).contains(element)) {
+					String iconHtml = String.format(
+							"<svg class='icon imported'><use xlink:href='%s'/></svg>", 
+							SpriteImage.getVersionedHref(IconScope.class, "arrow2"));
+					label += iconHtml;
+				} 
+				elementLink.add(new Label("label", label).setEscapeModelStrings(false));
+				
+				nav.add(elementLink);
+				
+				navsView.add(nav);
+			}
+			add(navsView);
+
+			setupElementViewer(null, getActiveElementIndex(context, elementClass, getElements(true), 0));
+			
+			add(AttributeAppender.append("class", "elements d-flex flex-nowrap " + urlSegment + "s"));
+		}
+
+		private void setupElementViewer(@Nullable AjaxRequestTarget target, int elementIndex) {
+			WebMarkupContainer detailContainer = new WebMarkupContainer("detail") {
+				
+				@Override
+				public void renderHead(IHeaderResponse response) {
+					super.renderHead(response);
+					
+					String script = String.format("onedev.server.buildSpec.markElementActive(%d);", elementIndex);
+					response.render(OnDomReadyHeaderItem.forScript(script));
+				}
+				
+			};
+			
+			T element = getElements(true).get(elementIndex);
+			
+			detailContainer.add(new ElementImportNoticePanel(buildSpec, elementClass, element.getName()) {
+
+				@Override
+				protected Map<String, ? extends NamedElement> getElementMap(BuildSpec buildSpec) {
+					return ElementsViewer.this.getElementMap(buildSpec);
+				}
+				
+			});
+			
+			detailContainer.add(new Label("title", EditableUtils.getDisplayName(elementClass) + " Detail"));
+			
+			detailContainer.add(BeanContext.view("content", element));
+			detailContainer.setOutputMarkupId(true);
+			
+			if (target != null) {
+				replace(detailContainer);
+				target.add(detailContainer);
+			} else {
+				add(detailContainer);
+			}
+		}
+		
+		protected abstract Map<String, T> getElementMap(BuildSpec buildSpec);
+		
+		protected abstract List<T> getElements(boolean includeImported);
+		
+	}
+
+	private abstract class ElementImportNoticePanel extends Fragment {
+
+		private final Class<? extends NamedElement> elementClass;
 		
 		private final String elementName;
 		
 		private Import aImport;
 		
-		@SuppressWarnings("unchecked")
-		public NamedElementImportNoticePanel(BuildSpec buildSpec, String elementName) {
-			super("notice", "namedElementImportNoticeFrag", BuildSpecBlobViewPanel.this);
-			
-			List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(
-					NamedElementImportNoticePanel.class, getClass());
-			elementClass = (Class<T>) typeArguments.get(0);
+		public ElementImportNoticePanel(BuildSpec buildSpec, 
+				Class<? extends NamedElement> elementClass, String elementName) {
+			super("notice", "elementImportNoticeFrag", BuildSpecBlobViewPanel.this);
+
+			this.elementClass = elementClass;
 			this.elementName = elementName;
 			
-			T element = getElementMap(buildSpec).get(elementName);
+			NamedElement element = getElementMap(buildSpec).get(elementName);
 			for (Import aImport: buildSpec.getImports()) {
 				try {
 					if (getElementMap(aImport.getBuildSpec()).get(elementName) == element) {
@@ -745,7 +732,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 			}
 		}
 		
-		protected abstract Map<String, T> getElementMap(BuildSpec buildSpec);
+		protected abstract Map<String, ? extends NamedElement> getElementMap(BuildSpec buildSpec);
 
 		@Override
 		protected void onConfigure() {

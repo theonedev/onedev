@@ -24,6 +24,14 @@ public class JobIndex implements Serializable {
 		this.row = row;
 	}
 	
+	public int getColumn() {
+		return column;
+	}
+
+	public int getRow() {
+		return row;
+	}
+
 	@Nullable
 	public static JobIndex of(List<List<Job>> pipeline, @Nullable Job job) {
 		for (int columnIndex = 0; columnIndex < pipeline.size(); columnIndex++) {
@@ -34,6 +42,10 @@ public class JobIndex implements Serializable {
 			}
 		}
 		return null;
+	}
+	
+	public Job getJob(List<List<Job>> pipeline) {
+		return pipeline.get(column).get(row);
 	}
 	
 	public String toJson() {

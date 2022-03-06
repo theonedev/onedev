@@ -43,7 +43,7 @@ public class BuildSpecRenderer implements BlobRendererer {
 		return EditableUtils.getDisplayName(namedElementClass).replace(' ', '-').toLowerCase();
 	}
 	
-	public static <T extends NamedElement> int getActiveNamedElementIndex(BlobRenderContext context, 
+	public static <T extends NamedElement> int getActiveElementIndex(BlobRenderContext context, 
 			Class<T> namedElementClass,  List<T> elements, int defaultIndex) {
 		String selection = getSelection(context.getPosition());
 		String urlSegment = getUrlSegment(namedElementClass) + "s/";

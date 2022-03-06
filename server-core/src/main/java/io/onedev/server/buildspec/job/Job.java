@@ -73,6 +73,8 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	public static final String SELECTION_PREFIX = "jobs/";
 	
+	public static final String PROP_NAME = "name";
+	
 	public static final String PROP_JOB_DEPENDENCIES = "jobDependencies";
 	
 	public static final String PROP_REQUIRED_SERVICES = "requiredServices";

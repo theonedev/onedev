@@ -13,6 +13,9 @@
 .pipeline .pipeline-row {
 	margin-bottom: 3rem;
 }
+.pipeline .pipeline-row.pipeline-actions {
+	margin-bottom: 0;
+}
 .pipeline>.dependencies {
 	position: absolute;
 	left: 0;

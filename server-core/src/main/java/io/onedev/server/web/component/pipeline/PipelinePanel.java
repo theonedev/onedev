@@ -11,48 +11,113 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobDependency;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
 
 @SuppressWarnings("serial")
 public abstract class PipelinePanel extends Panel {
 
-	private final List<List<Job>> pipeline;
+	private final IModel<List<List<Job>>> pipelineModel = new LoadableDetachableModel<List<List<Job>>>() {
+
+		@Override
+		protected List<List<Job>> load() {
+			if (!getJobs().isEmpty()) {
+				return buildPipeline(new ArrayList<>(getJobs()));
+			} else {
+				// add an empty column as job add action is rendered in first column
+				List<List<Job>> pipeline = new ArrayList<>();
+				pipeline.add(new ArrayList<>());
+				return pipeline;
+			}
+		}
+		
+	};
 	
-	private final Job activeJob;
-	
-	public PipelinePanel(String id, List<Job> jobs, @Nullable Job activeJob) {
+	public PipelinePanel(String id) {
 		super(id);
-		pipeline = buildPipeline(jobs);
-		this.activeJob = activeJob;
+	}
+
+	@Override
+	protected void onDetach() {
+		pipelineModel.detach();
+		super.onDetach();
+	}
+	
+	private List<List<Job>> getPipeline() {
+		return pipelineModel.getObject();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		Sortable sortable = getSortable();
+		if (sortable != null) { 
+			String startScript = String.format(""
+					+ "onedev.server.pipeline.showConnections('%s', false);", 
+					getMarkupId());
+			String stopScript = String.format(""
+					+ "if (ui.item.fromList == ui.item.toList && ui.item.fromItem == ui.item.toItem)"
+					+ "  onedev.server.pipeline.showConnections('%s', true);",
+					getMarkupId());
+			add(new SortBehavior() {
+
+				@Override
+				protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+					int fromIndex = getJobs().indexOf(new JobIndex(from.getListIndex(), from.getItemIndex()).getJob(getPipeline()));
+					int toIndex = getJobs().indexOf(new JobIndex(to.getListIndex(), to.getItemIndex()).getJob(getPipeline()));
+					pipelineModel.detach();
+					sortable.onSort(target, fromIndex, toIndex);
+				}
+				
+			}.sortable(".pipeline>.pipeline-column")
+					.startScript(startScript)
+					.stopScript(stopScript)
+					.items(".pipeline-row:not(.pipeline-action)"));
+		}
+	}
+
+	@Override
+	protected void onBeforeRender() {
+		super.onBeforeRender();
 		
 		RepeatingView columnsView = new RepeatingView("columns");
-		for (List<Job> column: pipeline) {
+		int columnIndex = 0;
+		for (List<Job> column: getPipeline()) {
 			WebMarkupContainer columnContainer = new WebMarkupContainer(columnsView.newChildId());
 			RepeatingView rowsView = new RepeatingView("rows");
 			for (Job job: column) 
-				rowsView.add(renderJob(rowsView.newChildId(), job));
+				rowsView.add(renderJob(rowsView.newChildId(), getJobs().indexOf(job)));
+			if (columnIndex == 0) {
+				Component action = renderAction(rowsView.newChildId());
+				if (action != null) {
+					action.add(AttributeAppender.append("class", "pipeline-action"));
+					rowsView.add(action);
+				}
+			}
 			columnContainer.add(rowsView);
 			columnsView.add(columnContainer);
+			columnIndex++;
 		}
-		add(columnsView);
+		addOrReplace(columnsView);
 	}
 
 	@Override
@@ -60,7 +125,7 @@ public abstract class PipelinePanel extends Panel {
 		if (event.getPayload() instanceof JobSelectionChange) {
 			JobSelectionChange jobSelectionChange = (JobSelectionChange) event.getPayload();
 			
-			JobIndex activeJobIndex = JobIndex.of(pipeline, jobSelectionChange.getJob());
+			JobIndex activeJobIndex = JobIndex.of(getPipeline(), jobSelectionChange.getJob());
 			String script = String.format("onedev.server.pipeline.markJobActive($(\"#%s>.pipeline\"), %s);", 
 					getMarkupId(), activeJobIndex!=null?activeJobIndex.toJson():"undefined");
 			jobSelectionChange.getHandler().appendJavaScript(script);
@@ -80,7 +145,9 @@ public abstract class PipelinePanel extends Panel {
 				leafJobs.add(job);
 			}
 		}
-		Preconditions.checkState(!leafJobs.isEmpty());
+		
+		if (leafJobs.isEmpty()) 
+			leafJobs.add(jobs.remove(0));
 		pipeline.add(leafJobs);
 		
 		if (!jobs.isEmpty())
@@ -92,23 +159,30 @@ public abstract class PipelinePanel extends Panel {
 	private String buildDependencyMap() {
 		Map<String, List<String>> dependencyMap = new HashMap<>();
 		
-		Map<String, String> jobIndexMap = new HashMap<>();
+		Map<String, JobIndex> jobIndexMap = new HashMap<>();
 		
 		int columnIndex = 0;
-		for (List<Job> column: pipeline) {
+		for (List<Job> column: getPipeline()) {
 			int rowIndex = 0;
 			for (Job job: column) {
-				jobIndexMap.put(job.getName(), new JobIndex(columnIndex, rowIndex).toString());
+				jobIndexMap.put(job.getName(), new JobIndex(columnIndex, rowIndex));
 				rowIndex++;
 			}
 			columnIndex++;
 		}
 		
-		for (List<Job> column: pipeline) {
+		for (List<Job> column: getPipeline()) {
 			for (Job job: column) {
-				dependencyMap.put(
-						jobIndexMap.get(job.getName()), 
-						job.getJobDependencies().stream().map(it->jobIndexMap.get(it.getJobName())).collect(Collectors.toList())); 
+				JobIndex jobIndex = jobIndexMap.get(job.getName());
+				if (jobIndex != null) {
+					List<String> dependencyJobIndexStrings = new ArrayList<>();
+					for (JobDependency dependency: job.getJobDependencies()) {
+						JobIndex dependencyJobIndex = jobIndexMap.get(dependency.getJobName());
+						if (dependencyJobIndex != null && dependencyJobIndex.getColumn() < jobIndex.getColumn())
+							dependencyJobIndexStrings.add(dependencyJobIndex.toString());
+					}
+					dependencyMap.put(jobIndex.toString(), dependencyJobIndexStrings);
+				}
 			}
 		}
 		try {
@@ -122,13 +196,35 @@ public abstract class PipelinePanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new PipelineResourceReference()));
-		
-		JobIndex activeJobIndex = JobIndex.of(pipeline, activeJob);
-		String script = String.format("onedev.server.pipeline.onDomReady('%s', %s, %s);", 
-				getMarkupId(), buildDependencyMap(), activeJobIndex!=null?activeJobIndex.toJson():"undefined");
-		response.render(OnDomReadyHeaderItem.forScript(script));
-	}
 
-	protected abstract Component renderJob(String componentId, Job job);
+		String activePipelineJobIndex;
+		int activeJobIndex = getActiveJobIndex();
+		if (activeJobIndex != -1)
+			activePipelineJobIndex = JobIndex.of(getPipeline(), getJobs().get(activeJobIndex)).toJson();
+		else
+			activePipelineJobIndex = "undefined";
+		
+		// Run script via OnLoad in order for icons to be fully loaded before drawing 
+		// dependency line
+		String script = String.format("onedev.server.pipeline.onWindowLoad('%s', %s, %s);", 
+				getMarkupId(), buildDependencyMap(), activePipelineJobIndex);
+		response.render(OnLoadHeaderItem.forScript(script));
+	}
 	
+	protected abstract List<Job> getJobs();
+	
+	@Nullable
+	protected abstract int getActiveJobIndex();
+
+	protected abstract Component renderJob(String componentId, int jobIndex);
+	
+	@Nullable
+	protected Component renderAction(String componentId) {
+		return null;
+	}
+	
+	@Nullable
+	protected Sortable getSortable() {
+		return null;
+	}
 }

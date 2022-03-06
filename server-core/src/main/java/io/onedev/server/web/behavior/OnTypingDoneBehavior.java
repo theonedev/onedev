@@ -25,7 +25,7 @@ public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBeha
 	}
 
 	public OnTypingDoneBehavior() {
-		this(250);
+		this(350);
 	}
 	
 	@Override

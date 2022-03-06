@@ -1,7 +1,7 @@
 onedev.server.pipeline = {
 	lineWidth: 2,
 	lineColor: onedev.server.isDarkMode()?"#535370":"#D1D3E0",
-	onDomReady: function(containerId, dependencies, activeJobIndex) {
+	onWindowLoad: function(containerId, dependencies, activeJobIndex) {
 		function getJobIndex(jobIndexString) {
 			var splitted = jobIndexString.split("-");	
 			return {
@@ -206,6 +206,16 @@ onedev.server.pipeline = {
 				});
 				paper.append(e);
 			});
-		}		
+			$pipeline.find(".active").scrollIntoView();
+		}
+	},
+	showConnections: function(containerId, show) {
+		var $pipeline = $("#" + containerId + ">.pipeline");
+		var paper = Snap($pipeline.children(".dependencies")[0]);
+		paper.selectAll("path, line").forEach(function(e) {
+			e.attr({
+				strokeWidth: show?onedev.server.pipeline.lineWidth:0
+			});
+		});
 	}
 }

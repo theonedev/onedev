@@ -47,6 +47,45 @@
 					} 
 				}
 			}
+			
+			var scrollParentLeft, scrollParentRight, thisLeft, thisRight;
+			if ($scrollParent[0] == document) {
+				scrollParentLeft = 0;
+				scrollParentRight = $(window).width();
+				thisLeft = $this.offset().left - $(window).scrollLeft();
+			} else {
+				scrollParentLeft = $scrollParent.offset().left;
+				scrollParentRight = scrollParentLeft + $scrollParent.width();
+				thisLeft = $this.offset().left;
+			}		
+			var thisWidth = $this.outerWidth();
+			thisRight = thisLeft + thisWidth;
+
+			if (thisWidth > scrollParentRight - scrollParentLeft) {
+				var scrollOffset = Math.floor(thisLeft - scrollParentLeft);
+				if (animation)
+					$scrollParent.animate({scrollLeft: $scrollParent.scrollLeft() + scrollOffset});
+				else
+					$scrollParent.scrollLeft($scrollParent.scrollLeft() + scrollOffset);
+			} else {
+				var beyondLeft = scrollParentLeft - thisLeft;
+				if (beyondLeft > 0) {
+					beyondLeft = Math.ceil(beyondLeft);
+					if (animation)
+						$scrollParent.animate({scrollLeft: $scrollParent.scrollLeft() - beyondLeft});
+					else
+						$scrollParent.scrollLeft($scrollParent.scrollLeft() - beyondLeft);
+				} else {
+					var beyondRight = thisRight - scrollParentRight;
+					if (beyondRight > 0) {
+						beyondRight = Math.ceil(beyondRight);
+						if (animation)
+							$scrollParent.animate({scrollLeft: $scrollParent.scrollLeft() + beyondRight});
+						else
+							$scrollParent.scrollLeft($scrollParent.scrollLeft() + beyondRight);
+					} 
+				}
+			}
 		}
     	
     	return this;

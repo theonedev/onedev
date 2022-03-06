@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior.sortable;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -29,9 +31,13 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 	
 	private int distance = 5;
 	
-	private String change;
+	private String startScript;
 	
-	private String update;
+	private String changeFunction;
+	
+	private String updateFunction;
+	
+	private String stopScript;
 	
 	private String helperClass;
 	
@@ -59,13 +65,23 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 		return this;
 	}
 	
-	public SortBehavior change(String change) {
-		this.change = change;
+	public SortBehavior startScript(String startScript) {
+		this.startScript = startScript;
 		return this;
 	}
 	
-	public SortBehavior update(String update) {
-		this.update = update;
+	public SortBehavior changeFunction(String changeFunction) {
+		this.changeFunction = changeFunction;
+		return this;
+	}
+	
+	public SortBehavior updateFunction(String updateFunction) {
+		this.updateFunction = updateFunction;
+		return this;
+	}
+	
+	public SortBehavior stopScript(String stopScript) {
+		this.stopScript = stopScript;
 		return this;
 	}
 	
@@ -84,9 +100,13 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 		return this;
 	}
 	
-	public SortBehavior sortable(String sortable) {
+	public SortBehavior sortable(@Nullable String sortable) {
 		this.sortable = sortable;
 		return this;
+	}
+	
+	public SortBehavior sortable() {
+		return sortable(null);
 	}
 	
 	public SortBehavior distance(int distance) {
@@ -170,19 +190,27 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 			script.append("placeholder:'" + placeholder + "',");
 		if (helperClass != null)
 			script.append("helper:function(event,item){return item.addClass('" + helperClass + "');},");
-		script.append("start:function(event,ui){" +
+		script.append("start:function(event,ui) {" +
 				"ui.item.fromList=" + listIndex + ";" +
-				"ui.item.fromItem=" + itemIndex + ";},");
-		if (change != null)
-			script.append("change:" + change + ",");
-		if (update != null)
-			script.append("update:" + update + ",");
-		script.append("stop:function(event, ui){");
+				"ui.item.fromItem=" + itemIndex + ";");
+		if (startScript != null) 
+			script.append(startScript);
+		script.append("},");
+		if (changeFunction != null)
+			script.append("change:" + changeFunction + ",");
+		if (updateFunction != null)
+			script.append("update:" + updateFunction + ",");
+		script.append("stop:function(event, ui) {");
 		if (helperClass != null)
 			script.append("ui.item.removeClass('" + helperClass + "');");			
 		script.append("var fromList=ui.item.fromList; var fromItem=ui.item.fromItem;" +
 				"var toList=" + listIndex + "; var toItem=" + itemIndex + ";" +
-				getCallbackScript() + ";}});");
+				"ui.item.toList = toList; ui.item.toItem = toItem;" + 
+				getCallbackScript() + ";");
+		if (stopScript != null)
+			script.append(stopScript);
+		script.append("}});");
+		
 		return script.toString();
 	}
 	
