@@ -616,7 +616,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	@Transactional
-	@Listen
+	@Listen(1)
 	public void on(SystemStarted event) {
 		logger.info("Checking projects...");
 		cacheLock.writeLock().lock();
