@@ -1,9 +1,13 @@
-package io.onedev.server.web.component.build.simplelist;
+package io.onedev.server.web.component.build.minilist;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -23,9 +27,9 @@ import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 
 @SuppressWarnings("serial")
-public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
+public class MiniBuildListPanel extends GenericPanel<List<Build>> {
 
-	public SimpleBuildListPanel(String id, IModel<List<Build>> model) {
+	public MiniBuildListPanel(String id, IModel<List<Build>> model) {
 		super(id, model);
 	}
 
@@ -65,6 +69,9 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 						builder.append(" (" + build.getVersion() + ")");
 					buildLink.add(new Label("title", builder.toString())); 
 					item.add(buildLink);
+
+					if (build.equals(getActiveBuild()))
+						item.add(AttributeAppender.append("class", "active"));
 				}
 				
 			});
@@ -74,8 +81,19 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 		}
 	}
 
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new MiniBuildListCssResourceReference()));
+	}
+
 	protected Component newListLink(String componentId) {
 		return new WebMarkupContainer(componentId).setVisible(false);
 	}
 
+	@Nullable
+	protected Build getActiveBuild() {
+		return null;
+	}
+	
 }

@@ -1,0 +1,188 @@
+package io.onedev.server.web.component.job.jobinfo;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.eclipse.jgit.lib.ObjectId;
+
+import com.google.common.collect.Lists;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.web.asset.pipelinebutton.PipelineButtonCssResourceReference;
+import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.job.RunJobLink;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+
+@SuppressWarnings("serial")
+public abstract class JobInfoButton extends Panel {
+
+	public JobInfoButton(String id) {
+		super(id);
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		DropdownLink detailLink = new DropdownLink("detail") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				IModel<List<Build>> buildsModel = new LoadableDetachableModel<List<Build>>() {
+
+					@Override
+					protected List<Build> load() {
+						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+						List<Build> builds = new ArrayList<>(buildManager.query(getProject(), getCommitId(), getJobName(), getPipelineOf().getPipeline()));
+						builds.sort(Comparator.comparing(Build::getNumber));
+						return builds;
+					}
+					
+				};						
+				
+				return new MiniBuildListPanel(id, buildsModel) {
+
+					@Override
+					protected Component newListLink(String componentId) {
+						return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
+								ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(getCommitId(), getJobName(), getPipelineOf(), null, null), 0)) {
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setVisible(!getBuilds().isEmpty());
+							}
+							
+						};
+					}
+
+					@Override
+					protected Build getActiveBuild() {
+						return JobInfoButton.this.getActiveBuild();
+					}
+
+				};
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				String cssClasses = "btn btn-outline-secondary";
+				Build.Status status = getProject().getCommitStatus(getCommitId(), getPipelineOf().getPipeline(), null, null).get(getJobName());
+				String title;
+				if (status != null) {
+					if (status != Status.SUCCESSFUL)
+						title = "Some builds are "; 
+					else
+						title = "Builds are "; 
+					title += status.toString().toLowerCase() + ", click for details";
+				} else {
+					title = "No builds";
+					cssClasses += " no-builds";
+				}
+				tag.put("class", cssClasses);
+				tag.put("title", title);
+			}
+			
+		};
+		detailLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {
+
+			@Override
+			protected Status load() {
+				return getProject().getCommitStatus(getCommitId(), getPipelineOf().getPipeline(), null, null).get(getJobName());
+			}
+			
+		}));
+		
+		detailLink.add(new Label("name", getJobName()));
+		
+		detailLink.add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.add(component);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Lists.newArrayList("job-status:" + getProject().getId() + ":" + getCommitId().name() + ":" + getJobName());
+			}
+			
+		});
+		
+		detailLink.setOutputMarkupId(true);
+		add(detailLink);
+		
+		add(new RunJobLink("run", getCommitId(), getJobName(), null) {
+
+			@Override
+			protected Project getProject() {
+				return JobInfoButton.this.getProject();
+			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return null;
+			}
+
+			@Override
+			protected String getPipeline() {
+				if (getPipelineOf() != null)
+					return getPipelineOf().getPipeline();
+				else
+					return UUID.randomUUID().toString();
+			}
+			
+		});
+	}
+	
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new PipelineButtonCssResourceReference()));
+	}
+
+	protected abstract Project getProject();
+	
+	protected abstract ObjectId getCommitId();
+	
+	protected abstract String getJobName();
+	
+	@Nullable
+	protected Build getActiveBuild() {
+		return null;
+	}
+
+	@Nullable
+	protected Build getPipelineOf() {
+		return null;
+	}
+
+}

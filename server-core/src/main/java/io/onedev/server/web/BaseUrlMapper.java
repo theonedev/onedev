@@ -77,6 +77,7 @@ import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
@@ -138,7 +139,7 @@ import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.resource.ServerLogResourceReference;
 import io.onedev.server.web.resource.SvgSpriteResourceReference;
 
-public class OneUrlMapper extends CompoundRequestMapper {
+public class BaseUrlMapper extends CompoundRequestMapper {
 
 	@Override
 	public CompoundRequestMapper add(IRequestMapper mapper) {
@@ -147,7 +148,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		return super.add(mapper);
 	}
 
-	public OneUrlMapper(WebApplication app) {
+	public BaseUrlMapper(WebApplication app) {
 		add(new DynamicPathPageMapper("init", ServerInitPage.class));
 		add(new DynamicPathPageMapper("loading", BrowserInfoPage.class));
 		add(new DynamicPathPageMapper("issues", IssueListPage.class));
@@ -311,6 +312,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		
 		add(new DynamicPathPageMapper("projects/${project}/builds", ProjectBuildsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/builds/${build}", BuildDashboardPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/builds/${build}/pipeline", BuildPipelinePage.class));
 		add(new DynamicPathPageMapper("projects/${project}/builds/${build}/log", BuildLogPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/builds/${build}/changes", BuildChangesPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/builds/${build}/fixed-issues", FixedIssuesPage.class));

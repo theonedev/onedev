@@ -40,7 +40,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
+import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -110,7 +110,7 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new SimpleBuildListPanel(id, new LoadableDetachableModel<List<Build>>() {
+						return new MiniBuildListPanel(id, new LoadableDetachableModel<List<Build>>() {
 
 							@Override
 							protected List<Build> load() {

@@ -28,14 +28,7 @@
 		        <wicket:enclosure child="jobs">
 			    <li class="list-group-item refs d-flex flex-wrap">
 		            <div wicket:id="jobs" class="job mr-3">
-						<span class="btn-group">
-							<a wicket:id="detail" class="btn btn-outline-secondary">
-								<svg wicket:id="status" class="status mr-2"></svg>
-								<b wicket:id="name" class="name"></b>
-								<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
-							</a>					
-			                <a wicket:id="run" class="run btn btn-outline-secondary btn-icon" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
-						</span>
+						<span wicket:id="jobInfo"></span>
 		            </div>
 				</li>
 		        </wicket:enclosure>

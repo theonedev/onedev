@@ -785,7 +785,7 @@ public class Project extends AbstractEntity {
 	}
 
 	public Map<String, Status> getCommitStatus(ObjectId commitId, 
-			@Nullable PullRequest request, @Nullable String refName) {
+			@Nullable String pipeline, @Nullable PullRequest request, @Nullable String refName) {
 		Map<String, Collection<StatusInfo>> commitStatusInfos = getCommitStatusCache().get(commitId);
 		if (commitStatusInfos == null) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
@@ -796,7 +796,8 @@ public class Project extends AbstractEntity {
 		for (Map.Entry<String, Collection<StatusInfo>> entry: commitStatusInfos.entrySet()) {
 			Collection<Status> statuses = new ArrayList<>();
 			for (StatusInfo statusInfo: entry.getValue()) {
-				if ((refName == null || refName.equals(statusInfo.getRefName())) 
+				if ((pipeline == null || pipeline.equals(statusInfo.getPipeline()))
+						&& (refName == null || refName.equals(statusInfo.getRefName())) 
 						&& Objects.equals(PullRequest.idOf(request), statusInfo.getRequestId())) {
 					statuses.add(statusInfo.getStatus());
 				}

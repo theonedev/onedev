@@ -252,7 +252,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 												}
 
 												@Override
-												protected String getTriggerChain() {
+												protected String getPipeline() {
 													return UUID.randomUUID().toString();
 												}
 		

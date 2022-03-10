@@ -7,6 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
+import io.onedev.server.web.asset.pipelinebutton.PipelineButtonCssResourceReference;
 import io.onedev.server.web.asset.snapsvg.SnapSvgResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
@@ -24,6 +25,7 @@ public class BuildSpecResourceReference extends BaseDependentResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new SnapSvgResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
+		dependencies.add(CssHeaderItem.forReference(new PipelineButtonCssResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
 				BuildSpecResourceReference.class, "build-spec.css")));
 		return dependencies;

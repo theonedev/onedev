@@ -115,7 +115,7 @@ public class RunJobAction extends PostBuildAction {
 				};
 				JobManager jobManager = OneDev.getInstance(JobManager.class);
 				jobManager.submit(build.getProject(), build.getCommitId(), getJobName(), 
-						paramMap, build.getTriggerChain(), reason); 
+						paramMap, build.getPipeline(), reason); 
 			}
 			
 		}.run();

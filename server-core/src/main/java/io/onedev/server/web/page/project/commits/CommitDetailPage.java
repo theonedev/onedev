@@ -3,13 +3,11 @@ package io.onedev.server.web.page.project.commits;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -19,9 +17,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -45,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.PlanarRange;
@@ -56,7 +51,6 @@ import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -65,7 +59,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
@@ -77,23 +70,17 @@ import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
-import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.RunJobLink;
-import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.util.RevisionDiff;
 
@@ -328,92 +315,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 				ObjectId commitId = getCommit().copy();
 				Job job = item.getModelObject();
 				
-				DropdownLink detailLink = new DropdownLink("detail") {
-
-					@Override
-					protected Component newContent(String id, FloatingPanel dropdown) {
-						IModel<List<Build>> buildsModel = new LoadableDetachableModel<List<Build>>() {
-
-							@Override
-							protected List<Build> load() {
-								BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-								List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, job.getName(), null));
-								builds.sort(Comparator.comparing(Build::getNumber));
-								return builds;
-							}
-							
-						};						
-						
-						return new SimpleBuildListPanel(id, buildsModel) {
-
-							@Override
-							protected Component newListLink(String componentId) {
-								return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
-										ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName(), null, null), 0)) {
-									
-									@Override
-									protected void onConfigure() {
-										super.onConfigure();
-										setVisible(!getBuilds().isEmpty());
-									}
-									
-								};
-							}
-
-						};
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						
-						String cssClasses = "btn btn-outline-secondary";
-						Build.Status status = getProject().getCommitStatus(commitId, null, null).get(job.getName());
-						String title;
-						if (status != null) {
-							if (status != Status.SUCCESSFUL)
-								title = "Some builds are "; 
-							else
-								title = "Builds are "; 
-							title += status.toString().toLowerCase() + ", click for details";
-						} else {
-							title = "No builds";
-							cssClasses += " no-builds";
-						}
-						tag.put("class", cssClasses);
-						tag.put("title", title);
-					}
-					
-				};
-				detailLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {
-
-					@Override
-					protected Status load() {
-						return getProject().getCommitStatus(commitId, null, null).get(job.getName());
-					}
-					
-				}));
-				
-				detailLink.add(new Label("name", job.getName()));
-				
-				detailLink.add(new WebSocketObserver() {
-					
-					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
-					}
-					
-					@Override
-					public Collection<String> getObservables() {
-						return Lists.newArrayList("job-status:" + getProject().getId() + ":" + commitId.name() + ":" + job.getName());
-					}
-					
-				});
-				
-				detailLink.setOutputMarkupId(true);
-				item.add(detailLink);
-				
-				item.add(new RunJobLink("run", commitId, job.getName(), null) {
+				item.add(new JobInfoButton("jobInfo") {
 
 					@Override
 					protected Project getProject() {
@@ -421,15 +323,15 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 					}
 
 					@Override
-					protected PullRequest getPullRequest() {
-						return null;
+					protected ObjectId getCommitId() {
+						return commitId;
 					}
 
 					@Override
-					protected String getTriggerChain() {
-						return UUID.randomUUID().toString();
+					protected String getJobName() {
+						return job.getName();
 					}
-					
+
 				});
 			}
 

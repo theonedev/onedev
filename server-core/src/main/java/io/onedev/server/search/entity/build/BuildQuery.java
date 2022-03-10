@@ -151,6 +151,8 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new DependsOnCriteria(project, value);
 						else if (ctx.DependenciesOf() != null) 
 							return new DependenciesOfCriteria(project, value);
+						else if (ctx.InPipelineOf() != null) 
+							return new InPipelineOfCriteria(project, value);
 						else if (ctx.RanOn() != null)
 							return new RanOnCriteria(value);
 						else 

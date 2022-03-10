@@ -94,16 +94,18 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = BuildQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == BuildQueryLexer.SubmittedBy || operator == BuildQueryLexer.CancelledBy)
+								if (operator == BuildQueryLexer.SubmittedBy || operator == BuildQueryLexer.CancelledBy) {
 									return SuggestionUtils.suggestUsers(matchWith);
-								else if (operator == BuildQueryLexer.DependsOn || operator == BuildQueryLexer.DependenciesOf)
+								} else if (operator == BuildQueryLexer.DependsOn || operator == BuildQueryLexer.DependenciesOf 
+										|| operator == BuildQueryLexer.InPipelineOf) {
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-								else if (operator == BuildQueryLexer.FixedIssue)
+								} else if (operator == BuildQueryLexer.FixedIssue) {
 									return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-								else if (operator == BuildQueryLexer.RanOn)
+								} else if (operator == BuildQueryLexer.RanOn) {
 									return SuggestionUtils.suggestAgents(matchWith);
-								else 
+								} else { 
 									return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+								}
 							} else {
 								String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {

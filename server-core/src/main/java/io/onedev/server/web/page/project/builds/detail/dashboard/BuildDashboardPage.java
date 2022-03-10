@@ -10,6 +10,7 @@ import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 
 @SuppressWarnings("serial")
 public class BuildDashboardPage extends BuildDetailPage {
@@ -18,7 +19,9 @@ public class BuildDashboardPage extends BuildDetailPage {
 		super(params);
 		
 		PageProvider pageProvider;
-		if (SecurityUtils.canAccessLog(getBuild()))
+		if (SecurityUtils.canReadCode(getProject()))
+			pageProvider = new PageProvider(BuildPipelinePage.class, BuildPipelinePage.paramsOf(getBuild()));
+		else if (SecurityUtils.canAccessLog(getBuild()))
 			pageProvider = new PageProvider(BuildLogPage.class, BuildLogPage.paramsOf(getBuild()));
 		else if (getBuild().getArtifactsDir().exists())
 			pageProvider = new PageProvider(BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild()));

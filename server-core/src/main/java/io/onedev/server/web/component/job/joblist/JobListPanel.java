@@ -35,7 +35,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
+import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
@@ -73,7 +73,7 @@ public abstract class JobListPanel extends Panel {
 	protected abstract Project getProject();
 	
 	@Nullable
-	protected abstract String getTriggerChain();
+	protected abstract String getPipeline();
 	
 	@Nullable
 	protected abstract PullRequest getPullRequest();
@@ -98,7 +98,7 @@ public abstract class JobListPanel extends Panel {
 		add(jobsView);
 		for (Job job: accessibleJobsModel.getObject()) {
 			WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
-			Status status = getProject().getCommitStatus(commitId, getPullRequest(), refName).get(job.getName());
+			Status status = getProject().getCommitStatus(commitId, null, getPullRequest(), refName).get(job.getName());
 					
 			Link<Void> defLink = new JobDefLink("name", commitId, job.getName()) {
 
@@ -130,17 +130,17 @@ public abstract class JobListPanel extends Panel {
 				}
 
 				@Override
-				protected String getTriggerChain() {
-					String triggerChain = JobListPanel.this.getTriggerChain();
-					if (triggerChain == null)
-						triggerChain = UUID.randomUUID().toString();
-					return triggerChain;
+				protected String getPipeline() {
+					String pipeline = JobListPanel.this.getPipeline();
+					if (pipeline == null)
+						pipeline = UUID.randomUUID().toString();
+					return pipeline;
 				}
 				
 			});
 			
 			jobItem.add(new BookmarkablePageLink<Void>("showInList", ProjectBuildsPage.class, 
-					ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName(), refName, getPullRequest()), 0)) {
+					ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName(), null, refName, getPullRequest()), 0)) {
 				
 				@Override
 				protected void onConfigure() {
@@ -157,13 +157,13 @@ public abstract class JobListPanel extends Panel {
 					BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), 
 							commitId, job.getName(), refName, Optional.ofNullable(getPullRequest()), 
-							new HashMap<>(), getTriggerChain()));
+							new HashMap<>(), getPipeline()));
 					builds.sort(Comparator.comparing(Build::getNumber));
 					return builds;
 				}
 				
 			};
-			jobItem.add(new SimpleBuildListPanel("detail", buildsModel));
+			jobItem.add(new MiniBuildListPanel("detail", buildsModel));
 			
 			jobItem.setOutputMarkupId(true);
 			jobsView.add(jobItem);

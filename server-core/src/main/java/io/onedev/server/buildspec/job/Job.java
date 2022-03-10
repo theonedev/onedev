@@ -8,6 +8,7 @@ import static io.onedev.server.model.Build.NAME_TAG;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.InPipelineOf;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.requirement.JobRequirement;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.ComponentContext;
@@ -437,11 +439,13 @@ public class Job implements NamedElement, Serializable, Validatable {
 	}
 	
 	public static String getBuildQuery(ObjectId commitId, String jobName, 
-			@Nullable String refName, @Nullable PullRequest request) {
+			@Nullable Build pipelineOf, @Nullable String refName, @Nullable PullRequest request) {
 		String query = "" 
 				+ Criteria.quote(NAME_COMMIT) + " " + getRuleName(Is) + " " + Criteria.quote(commitId.name()) 
 				+ " " + getRuleName(And) + " "
 				+ Criteria.quote(NAME_JOB) + " " + getRuleName(Is) + " " + Criteria.quote(jobName);
+		if (pipelineOf != null) 
+			query = query + " " + getRuleName(And) + " " + getRuleName(InPipelineOf) + " " + Criteria.quote("#" + pipelineOf.getNumber());
 		if (request != null) {
 			query = query 
 					+ " " + getRuleName(And) + " " 

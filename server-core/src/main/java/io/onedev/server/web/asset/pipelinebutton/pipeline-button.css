@@ -1,0 +1,26 @@
+.active .btn.btn-outline-secondary {
+    color: var(--primary);
+    background-color: transparent;
+    border-color: var(--primary) !important;
+}
+.active .btn.btn-outline-secondary:hover:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
+.active .btn.btn-outline-secondary:focus:not(.disabled):not(:disabled):not([disabled]):not(.btn-text),
+.active .btn.btn-outline-secondary:active:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
+.active .btn.btn-outline-secondary.active:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
+.active .show>.btn.btn-outline-secondary.dropdown-toggle, .show .btn.btn-outline-secondary.btn-dropdown {
+	color: var(--primary);
+    background-color: var(--light-primary);
+}
+.active .btn.btn-outline-secondary .drag-indicator {
+	color: var(--primary);
+}
+.dark-mode .active .btn.btn-outline-secondary:hover:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
+.dark-mode .active .btn.btn-outline-secondary:focus:not(.disabled):not(:disabled):not([disabled]):not(.btn-text),
+.dark-mode .active .btn.btn-outline-secondary:active:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
+.dark-mode .active .btn.btn-outline-secondary.active:not(.disabled):not(:disabled):not([disabled]):not(.btn-text), 
+.dark-mode .active .show>.btn.btn-outline-secondary.dropdown-toggle, 
+.dark-mode .active .show .btn.btn-outline-secondary.btn-dropdown {
+	color: var(--primary);
+    background-color: var(--dark-mode-light-primary);
+}
+

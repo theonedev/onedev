@@ -84,6 +84,7 @@ import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
@@ -325,8 +326,8 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 					@Override
-					protected String getTriggerChain() {
-						return getBuild().getTriggerChain();
+					protected String getPipeline() {
+						return getBuild().getPipeline();
 					}
 					
 				};
@@ -375,6 +376,9 @@ public abstract class BuildDetailPage extends ProjectPage
 			protected List<Tab> load() {
 				List<Tab> tabs = new ArrayList<>();
 
+				if (SecurityUtils.canReadCode(getProject())) 
+					tabs.add(new BuildTab("In Pipeline", BuildPipelinePage.class));
+				
 				if (SecurityUtils.canAccessLog(getBuild())) {
 					tabs.add(new BuildTab("Log", BuildLogPage.class) {
 	

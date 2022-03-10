@@ -68,7 +68,7 @@ public abstract class CommitStatusPanel extends Panel {
 
 		@Override
 		protected Status load() {
-			return Status.getOverallStatus(getProject().getCommitStatus(commitId, getPullRequest(), refName).values());
+			return Status.getOverallStatus(getProject().getCommitStatus(commitId, null, getPullRequest(), refName).values());
 		}
 		
 	};
@@ -110,7 +110,7 @@ public abstract class CommitStatusPanel extends Panel {
 					}
 
 					@Override
-					protected String getTriggerChain() {
+					protected String getPipeline() {
 						return null;
 					}
 					

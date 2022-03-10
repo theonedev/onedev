@@ -1,0 +1,12 @@
+.active a.build {
+	background-color: var(--light-primary);
+}
+.active a.build:hover {
+	background-color: var(--light-primary) !important;
+}
+.dark-mode .active a.build {
+	background-color: var(--dark-mode-light-primary);
+}
+.dark-mode .active a.build:hover {
+	background-color: var(--dark-mode-light-primary) !important;
+}

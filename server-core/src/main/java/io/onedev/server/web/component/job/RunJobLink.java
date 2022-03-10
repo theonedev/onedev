@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
@@ -37,7 +38,6 @@ import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 
 @SuppressWarnings("serial")
 public abstract class RunJobLink extends AjaxLink<Void> {
@@ -58,7 +58,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 	
 	protected abstract Project getProject();
 	
-	protected abstract String getTriggerChain();
+	protected abstract String getPipeline();
 	
 	@Nullable
 	protected abstract PullRequest getPullRequest();
@@ -105,7 +105,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 							Serializable populatedParamBean) {
 						Map<String, List<String>> paramMap = ParamUtils.getParamMap(
 								job, populatedParamBean, job.getParamSpecMap().keySet());
-						String triggerChain = getTriggerChain();
+						String pipeline = getPipeline();
 						List<Build> builds = new ArrayList<>();
 						for (String refName: selectedRefNames) {
 							SubmitReason reason = new SubmitReason() {
@@ -127,12 +127,14 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 								
 							};
 							builds.add(getJobManager().submit(getProject(), commitId, job.getName(), 
-									paramMap, triggerChain, reason));
+									paramMap, pipeline, reason));
 						}
 						if (builds.size() == 1)
 							setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
 						else
 							close();
+						if (builds.stream().allMatch(it->it.isFinished()))
+							Session.get().warn("Build already fired in current pipeline");
 					}
 
 					@Override
@@ -171,9 +173,10 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 					
 				};
 				Build build = getJobManager().submit(getProject(), commitId, job.getName(), 
-						new HashMap<>(), getTriggerChain(), reason);
-					
-				setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build));
+						new HashMap<>(), getPipeline(), reason);
+				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
+				if (build.isFinished())
+					Session.get().warn("Build already fired in current pipeline");
 			}
 		} else {
 			new MessageModal(target) {

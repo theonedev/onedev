@@ -49,21 +49,6 @@
 .build-spec.parseable>.body>.content>.side>.navs:not(:empty) {
     margin-bottom: 1.5rem;
 }
-.build-spec.parseable>.body>.content>.side .nav.active a {
-	background: var(--primary);
-	border-color: var(--primary);
-	color: var(--white) !important;
-}
-.dark-mode .build-spec.parseable>.body>.content>.side .nav.active a {
-	background: var(--primary);
-	border-color: var(--primary);
-}
-
-.build-spec.parseable>.body>.content>.side .nav.active a.run:hover,
-.build-spec.parseable>.body>.content>.side .nav.active a.delete:hover {
-	background: #187DE4;
-	border-color: #187DE4;
-}
 .build-spec.parseable>.body>.content>.main {
     border-radius: 0.42rem;
     border: 1px solid var(--light-gray);
@@ -89,8 +74,4 @@
 .build-spec .icon.imported {
 	transform: rotate(135deg);
 	margin-left: 0.5rem;
-}
-
-.build-spec .active .drag-indicator {
-	color: var(--light-primary);
 }
