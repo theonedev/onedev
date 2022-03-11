@@ -3,6 +3,6 @@ onedev.server.onQuickSearchDomReady = function(containerId, callback) {
 	
 	$body.children("input").doneEvents("inputchange", function() {
 		callback("input", $(this).val());
-	}, 100).selectByKey($body);
+	}, 100).selectByTyping($body);
 	
 };

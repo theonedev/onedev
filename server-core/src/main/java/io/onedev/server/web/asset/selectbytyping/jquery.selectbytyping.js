@@ -3,23 +3,19 @@
  */
 (function ( $ ) {
  
-    $.fn.selectByKey = function(container, selectable) {
+    $.fn.selectByTyping = function(container) {
     	var $input = jQuery(this);
 
-		var $container = $(container);
-		
-		if (!selectable)
-			selectable = ".selectable";
-	
 		function onReturn() {
 			if (onedev.server.form.confirmLeave()) 
-				$container.find(".active").filter(selectable).find("a").addBack("a").click();
+				$(container).find(".active.selectable").find("a").addBack("a").click();
 		}
 		
 		function onKeyup(e) {
+			var $container = $(container);
 			e.preventDefault();
-			var $active = $container.find(".active").filter(selectable);
-			var $selectables = $container.find(selectable);
+			var $active = $container.find(".active.selectable");
+			var $selectables = $container.find(".selectable");
 			var index = $selectables.index($active);
 			if (index > 0) {
 				index--;
@@ -31,9 +27,10 @@
 		};
 		
 		function onKeydown(e) {
+			var $container = $(container);
 			e.preventDefault();
-			var $active = $container.find(".active").filter(selectable);
-			var $selectables = $container.find(selectable);
+			var $active = $container.find(".active.selectable");
+			var $selectables = $container.find(".selectable");
 			var index = $selectables.index($active);
 			if (index < $selectables.length-1) {
 				index++;
@@ -44,7 +41,9 @@
 			}
 		};
 		
-		$input.bind("keydown", "return", onReturn).bind("keydown", "up", onKeyup).bind("keydown", "down", onKeydown);		    	
+		$input.bind("keydown", "return", onReturn)
+				.bind("keydown", "up", onKeyup)
+				.bind("keydown", "down", onKeydown);		    	
 		
     	return this;
     };

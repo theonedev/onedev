@@ -25,23 +25,17 @@
 		</div>
 	</div>
 	<div wicket:id="symbolTooltip"></div>
-	<wicket:fragment wicket:id="outlineNodeFrag">
-		<img wicket:id="icon"> <a wicket:id="link"><span wicket:id="label"></span></a>
-	</wicket:fragment>
 	<wicket:fragment wicket:id="outlineSearchFrag">
 	<div class="outline-search">
 		<div class="modal-header">
 			<h5 class="modal-title">Outline Search</h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
-		<div class="modal-body">
-			<input wicket:id="input" class="form-control">
-			<div wicket:id="result" class="result overflow-auto mt-3"></div>
-		</div>
+		<div wicket:id="body" class="modal-body"></div>
 	</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="outlineSearchNodeFrag">
-		<a wicket:id="link" class="selectable"><img wicket:id="icon"> <span wicket:id="label"></span></a>
+	<wicket:fragment wicket:id="outlineNodeFrag">
+		<a wicket:id="link"><img wicket:id="icon"> <span wicket:id="label"></span></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="newCommentFrag">
 		<form wicket:id="form" class="new-comment leave-confirm">

@@ -1,4 +1,5 @@
-package io.onedev.server.web.page.project.blob.render.source;
+
+package	io.onedev.server.web.page.project.blob.render.source;
 
 import java.util.List;
 
@@ -11,11 +12,10 @@ import io.onedev.server.web.asset.codemirror.CodeMirrorResourceReference;
 import io.onedev.server.web.asset.codeproblem.CodeProblemResourceReference;
 import io.onedev.server.web.asset.commentindicator.CommentIndicatorCssResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
-import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
-import io.onedev.server.web.asset.selectbykey.SelectByKeyResourceReference;
+import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.asset.selectionpopover.SelectionPopoverResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
@@ -35,8 +35,7 @@ public class SourceViewResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new SelectByKeyResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new SelectByTypingResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));

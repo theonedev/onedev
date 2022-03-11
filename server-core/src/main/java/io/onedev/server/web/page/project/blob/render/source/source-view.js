@@ -635,13 +635,6 @@ onedev.server.sourceView = {
 	onTabSizeChange: function(tabSize) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		cm.setOption("tabSize", tabSize);
-	},
-	onOutlineSearchDomReady: function(containerId, callback) {
-		var $body = $("#" + containerId + ">.outline-search>.modal-body");
-		
-		$body.children("input").doneEvents("inputchange", function() {
-			callback("input", $(this).val());
-		}, 100).selectByKey($body);
 	}
 };
 

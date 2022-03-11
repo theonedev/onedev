@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
-import io.onedev.server.web.asset.selectbykey.SelectByKeyResourceReference;
+import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -22,7 +22,7 @@ public class QuickSearchResourceReference extends BaseDependentResourceReference
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
-		dependencies.add(JavaScriptHeaderItem.forReference(new SelectByKeyResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new SelectByTypingResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(QuickSearchResourceReference.class, "quick-search.css")));

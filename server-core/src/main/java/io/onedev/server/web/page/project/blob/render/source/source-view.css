@@ -118,6 +118,7 @@
 	background: var(--gray-dark);	
 }
 
-.outline-search .result {
+.outline-search .filterable-tree>.content {
 	height: 400px;
+	overflow: auto;
 }
