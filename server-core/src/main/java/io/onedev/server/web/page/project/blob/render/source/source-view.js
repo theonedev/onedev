@@ -639,55 +639,9 @@ onedev.server.sourceView = {
 	onOutlineSearchDomReady: function(containerId, callback) {
 		var $body = $("#" + containerId + ">.outline-search>.modal-body");
 		
-		var $input = $body.children("input");
-		
-		$input.doneEvents("inputchange", function() {
+		$body.children("input").doneEvents("inputchange", function() {
 			callback("input", $(this).val());
-		}, 100);
-
-		function onReturn() {
-			if (onedev.server.form.confirmLeave()) {
-				var $result = $body.children(".result");
-				var $active = $result.find("a.active");
-				if ($active.length != 0) {
-					callback("return", $active.data("symbolindex"));
-				}
-			}
-		}
-		
-		function onKeyup(e) {
-			e.preventDefault();
-			var $result = $body.children(".result");
-			var $active = $result.find("a.active");
-			var $selectables = $result.find("a.selectable");
-			var index = $selectables.index($active);
-			if (index > 0) {
-				index--;
-				var $prev = $selectables.eq(index);
-				$active.removeClass("active");
-				$prev.addClass("active");
-				$result.find("a.active").scrollIntoView();
-			}
-		};
-		
-		function onKeydown(e) {
-			e.preventDefault();
-			var $result = $body.children(".result");
-			var $active = $result.find("a.active");
-			var $selectables = $result.find("a.selectable");
-			var index = $selectables.index($active);
-			if (index < $selectables.length-1) {
-				index++;
-				var $next = $selectables.eq(index);
-				$active.removeClass("active");
-				$next.addClass("active");
-				$result.find("a.active").scrollIntoView();
-			}
-		};
-		
-		$body.children().bind("keydown", "return", onReturn);
-		$body.children().bind("keydown", "up", onKeyup);
-		$body.children().bind("keydown", "down", onKeydown);		
+		}, 100).selectByKey($body);
 	}
 };
 

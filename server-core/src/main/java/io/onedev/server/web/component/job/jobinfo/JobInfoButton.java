@@ -58,7 +58,7 @@ public abstract class JobInfoButton extends Panel {
 					@Override
 					protected List<Build> load() {
 						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-						List<Build> builds = new ArrayList<>(buildManager.query(getProject(), getCommitId(), getJobName(), getPipelineOf().getPipeline()));
+						List<Build> builds = new ArrayList<>(buildManager.query(getProject(), getCommitId(), getJobName(), getPipeline()));
 						builds.sort(Comparator.comparing(Build::getNumber));
 						return builds;
 					}
@@ -94,7 +94,7 @@ public abstract class JobInfoButton extends Panel {
 				super.onComponentTag(tag);
 				
 				String cssClasses = "btn btn-outline-secondary";
-				Build.Status status = getProject().getCommitStatus(getCommitId(), getPipelineOf().getPipeline(), null, null).get(getJobName());
+				Build.Status status = getProject().getCommitStatus(getCommitId(), getPipeline(), null, null).get(getJobName());
 				String title;
 				if (status != null) {
 					if (status != Status.SUCCESSFUL)
@@ -115,7 +115,7 @@ public abstract class JobInfoButton extends Panel {
 
 			@Override
 			protected Status load() {
-				return getProject().getCommitStatus(getCommitId(), getPipelineOf().getPipeline(), null, null).get(getJobName());
+				return getProject().getCommitStatus(getCommitId(), getPipeline(), null, null).get(getJobName());
 			}
 			
 		}));
@@ -162,7 +162,6 @@ public abstract class JobInfoButton extends Panel {
 		});
 	}
 	
-
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -174,6 +173,11 @@ public abstract class JobInfoButton extends Panel {
 	protected abstract ObjectId getCommitId();
 	
 	protected abstract String getJobName();
+	
+	@Nullable
+	private String getPipeline() {
+		return getPipelineOf()!=null? getPipelineOf().getPipeline(): null;
+	}
 	
 	@Nullable
 	protected Build getActiveBuild() {

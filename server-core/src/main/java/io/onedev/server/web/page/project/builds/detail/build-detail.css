@@ -8,3 +8,10 @@
 .build-detail>.card-body>.main>.error-message {
 	max-height: 100px;
 }
+
+.build-pipeline .pipeline-row>.btn-group {
+	width: 100%;
+}
+.build-pipeline .pipeline-row>.btn-group>.run {
+	flex-grow: 0;
+}

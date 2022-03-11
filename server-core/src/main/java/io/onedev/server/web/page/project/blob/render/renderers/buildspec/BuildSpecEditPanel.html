@@ -26,7 +26,7 @@
             <!-- do not leave white space between navs and nav element as we are using .navs:not(:empty)
             in css -->
             <div wicket:id="navs" class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
-                <a wicket:id="select" class="select btn btn-outline-secondary justify-content-start">
+                <a wicket:id="select" class="select btn btn-outline-secondary text-nowrap justify-content-start">
                     <wicket:svg href="grip" class="icon drag-indicator flex-shrink-0 mr-1"/>
                     <span wicket:id="label" class="label"></span>
                 </a>
@@ -47,7 +47,7 @@
 		<div wicket:id="body" class="body autofit flex-grow-1"></div>
     </wicket:fragment>
 	<wicket:fragment wicket:id="jobFrag">
-        <a wicket:id="select" class="select btn btn-outline-secondary justify-content-start">
+        <a wicket:id="select" class="select btn btn-outline-secondary text-nowrap justify-content-start">
             <wicket:svg href="grip" class="icon drag-indicator flex-shrink-0 mr-1"/>
             <span wicket:id="label" class="label"></span>
         </a>
@@ -64,7 +64,7 @@
         <a wicket:id="create" class="create btn btn-primary justify-content-start">
             <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add New
         </a>
-        <a wicket:id="suggestions" class="suggestions btn btn-success flex-grow-0 flex-shrink-0 btn-icon" title="Suggestions">
+        <a wicket:id="suggestions" class="suggestions btn btn-primary flex-grow-0 flex-shrink-0 btn-icon" title="Suggestions">
 			<wicket:svg href="wand" class="icon"/>
 		</a>
     </wicket:fragment>
