@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -200,6 +201,8 @@ public class Project extends AbstractEntity {
 	
 	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
 	
+	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
+	
 	public static final List<String> QUERY_FIELDS = 
 			Lists.newArrayList(NAME_NAME, NAME_PATH, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
 
@@ -326,8 +329,10 @@ public class Project extends AbstractEntity {
 	
 	private boolean issueManagement = true;
 	
-	@Column(unique=true)
-	private String serviceDeskName;
+	// SQL Server does not allow duplicate null values for unique column. So we use 
+	// special prefix to indicate null
+	@Column(unique=true, nullable=false)
+	private String serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString();
 	
 	@JsonIgnore
 	@Lob
@@ -1159,11 +1164,17 @@ public class Project extends AbstractEntity {
 	
 	@Nullable
 	public String getServiceDeskName() {
-		return serviceDeskName;
+		if (serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
+			return null;
+		else
+			return serviceDeskName;
 	}
 
-	public void setServiceDeskName(String serviceDeskName) {
-		this.serviceDeskName = serviceDeskName;
+	public void setServiceDeskName(@Nullable String serviceDeskName) {
+		if (serviceDeskName != null)
+			this.serviceDeskName = serviceDeskName;
+		else if (!this.serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
+			this.serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString();
 	}
 
 	public ProjectIssueSetting getIssueSetting() {
