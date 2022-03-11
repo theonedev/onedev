@@ -23,7 +23,9 @@ public class ServiceDeskNameCriteria extends Criteria<Project> {
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Project.PROP_SERVICE_DESK_NAME);
-		return builder.like(builder.lower(attribute), value.replace("*", "%"));
+		return builder.and(
+				builder.like(builder.lower(attribute), value.replace("*", "%")), 
+				builder.not(builder.like(attribute, Project.NULL_SERVICE_DESK_PREFIX + "%")));
 	}
 
 	@Override

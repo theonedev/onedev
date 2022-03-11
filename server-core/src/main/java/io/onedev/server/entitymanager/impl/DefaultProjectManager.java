@@ -393,7 +393,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		try {
 			Long projectId = null;
 			for (ProjectFacade facade: cache.values()) {
-				if (facade.getServiceDeskName().equalsIgnoreCase(serviceDeskName)) {
+				if (serviceDeskName.equals(facade.getServiceDeskName())) {
 					projectId = facade.getId();
 					break;
 				}

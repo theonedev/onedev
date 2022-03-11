@@ -35,6 +35,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Pair;
 import oshi.SystemInfo;
@@ -3777,6 +3778,19 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) 
 					element.addElement("temporal").setText(("false"));
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
+	private void migrate81(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.element("serviceDeskName") == null) 
+						element.addElement("serviceDeskName").setText(Project.NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString());
+				}				
 				dom.writeToFile(file, false);
 			}
 		}
