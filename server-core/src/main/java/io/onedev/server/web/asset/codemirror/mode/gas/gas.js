@@ -342,4 +342,6 @@ CodeMirror.defineMode("gas", function(_config, parserConfig) {
   };
 });
 
+CodeMirror.defineMIME("text/x-gas", {name: "gas", architecture: "unknown"});
+
 });

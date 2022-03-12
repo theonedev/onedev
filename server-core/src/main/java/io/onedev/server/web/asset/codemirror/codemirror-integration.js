@@ -55,8 +55,6 @@ onedev.server.codemirror = {
         // specify mode via mime does not work for gfm (github flavored markdown)
         if (modeInfo.mode === "gfm")
             cm.setOption("mode", "gfm");
-        else if (modeInfo.mode == "gas")
-			cm.setOption("mode", {name: "gas", architecture: "ARMv6"});
 		else		
             cm.setOption("mode", modeInfo.mime);
         CodeMirror.autoLoadMode(cm, modeInfo.mode);
