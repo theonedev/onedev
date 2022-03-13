@@ -14,11 +14,12 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=1100, name="Publish Markdown Report")
+@Editable(order=1100, group=StepGroup.PUBLISH_REPORTS, name="Markdown")
 public class PublishMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;

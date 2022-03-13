@@ -2,11 +2,12 @@ package io.onedev.server.plugin.report.checkstyle;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=3000, name="Publish ESLint Report")
+@Editable(order=3000, group=StepGroup.PUBLISH_REPORTS, name="ESLint")
 public class PublishESLintReportStep extends PublishCheckstyleReportStep {
 
 	private static final long serialVersionUID = 1L;

@@ -25,6 +25,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.git.BlobIdent;
@@ -38,7 +39,7 @@ import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 
-@Editable(order=8030, name="Publish CPD Report")
+@Editable(order=8030, group=StepGroup.PUBLISH_REPORTS, name="CPD")
 public class PublishCPDReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;

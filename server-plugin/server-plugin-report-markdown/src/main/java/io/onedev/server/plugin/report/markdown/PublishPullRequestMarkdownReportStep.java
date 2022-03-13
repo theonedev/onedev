@@ -14,12 +14,13 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=1200, name="Publish Markdown Report (for Pull Request)", description="This report will be displayed in pull request overview "
-		+ "page if the build belongs to a pull request")
+@Editable(order=1200, group=StepGroup.PUBLISH_REPORTS, name="Pull Request Markdown", 
+		description="This report will be displayed in pull request overview page if build is triggered by pull request")
 public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;

@@ -37,14 +37,15 @@ public class EditableUtils {
 	}
 	
 	/**
-	 * Get category of specified element from category parameter of {@link Editable} annotation.
+	 * Get group of specified element from group parameter of {@link Editable} annotation.
 	 *
 	 * @param element
-	 * 			annotated element to get category from
+	 * 			annotated element to get group from
 	 * @return
-	 * 			category name of specified element, or <tt>null</tt> if not defined
+	 * 			group name of specified element, or <tt>null</tt> if not defined
 	 */
-	public static @Nullable String getCategory(AnnotatedElement element) {
+	@Nullable
+	public static String getGroup(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
 		if (editable != null && editable.group().trim().length() != 0)
 			return editable.group();
@@ -60,7 +61,8 @@ public class EditableUtils {
 	 * @return
 	 * 			icon name of specified element, or <tt>null</tt> if not defined
 	 */
-	public static @Nullable String getIcon(AnnotatedElement element) {
+	@Nullable
+	public static String getIcon(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
 		if (editable != null && editable.icon().trim().length() != 0)
 			return editable.icon();
@@ -76,7 +78,8 @@ public class EditableUtils {
 	 * @return
 	 * 			defined description, or <tt>null</tt> if description can not be found
 	 */
-	public static @Nullable String getDescription(AnnotatedElement element) {
+	@Nullable
+	public static String getDescription(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
 		if (editable == null) {
 			return null;

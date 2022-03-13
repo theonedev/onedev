@@ -2,11 +2,12 @@ package io.onedev.server.plugin.report.clover;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=9900, name="Publish Jest Coverage Report")
+@Editable(order=9900, group=StepGroup.PUBLISH_REPORTS, name="Jest Coverage")
 public class PublishJestCoverageReportStep extends PublishCloverReportStep {
 
 	private static final long serialVersionUID = 1L;

@@ -13,7 +13,9 @@ import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=160, name="Build/Publish Docker Image")
+@Editable(order=160, name="Build Docker Image", description="Build and optionally publish docker image. "
+		+ "Registry logins should be specified in the job executor executing this step if registry authentication "
+		+ "is required for build or publish")
 public class BuildImageStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -61,9 +63,7 @@ public class BuildImageStep extends Step {
 		this.tags = tags;
 	}
 
-	@Editable(order=400, name="Publish After Build", description="Whether or not to publish built image to docker registry. "
-			+ "<b>NOTE: </b> Registry login should be specified in job executor running this step if you select to publish "
-			+ "this image")
+	@Editable(order=400, name="Publish After Build", description="Whether or not to publish built image to docker registry")
 	public boolean isPublish() {
 		return publish;
 	}

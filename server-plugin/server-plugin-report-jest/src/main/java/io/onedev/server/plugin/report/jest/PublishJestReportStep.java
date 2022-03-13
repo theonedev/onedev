@@ -15,6 +15,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.PublishUnitTestReportStep;
 import io.onedev.server.plugin.report.unittest.UnitTestReport;
@@ -23,7 +24,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=7000, name="Publish Jest Test Report")
+@Editable(order=7000, group=StepGroup.PUBLISH_REPORTS, name="Jest Test")
 public class PublishJestReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;

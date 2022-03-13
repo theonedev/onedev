@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
@@ -33,6 +34,7 @@ import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -88,10 +90,11 @@ import io.onedev.server.util.match.MatchScoreProvider;
 import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
-import io.onedev.server.web.component.filterabletree.FilterableTreePanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -980,63 +983,37 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		target.appendJavaScript("onedev.server.sourceView.onCloseComment();");
 	}
 	
-	private Component newOutlineSearchPanel(String id, ModalPanel modal) {
-		Fragment fragment = new Fragment(id, "outlineSearchFrag", SourceViewPanel.this);
-		fragment.add(new AjaxLink<Void>("close") {
+	private NestedTree<Symbol> newOutlineSearchTree(ModalPanel modal, List<Symbol> symbols, Set<Symbol> state) {
+		NestedTree<Symbol> tree = new NestedTree<Symbol>("content", newSymbolTreeProvider(symbols), Model.ofSet(state)) {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				modal.close();
-			}
-			
-		});
-
-		fragment.add(new FilterableTreePanel<Symbol>("body") {
-
-			@Override
-			protected List<Symbol> getNodes(String matchWith) {
-				MatchScoreProvider<Symbol> matchScoreProvider = new MatchScoreProvider<Symbol>() {
-
-					@Override
-					public double getMatchScore(Symbol object) {
-						return MatchScoreUtils.getMatchScore(object.getName(), matchWith);
-					}
-					
-				};
-				
-				return MatchScoreUtils.filterAndSort(symbols, matchScoreProvider);
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new HumanTheme());				
 			}
 
 			@Override
-			protected List<Symbol> getChildNodes(List<Symbol> nodes, Symbol parentNode) {
-				return getChildSymbols(nodes, parentNode);
-			}
-
-			@Override
-			protected Symbol getParentNode(Symbol childNode) {
-				return childNode.getOutlineParent();
-			}
-
-			@Override
-			protected Component renderNode(List<Symbol> nodes, Symbol node) {
+			protected Component newContentComponent(String id, IModel<Symbol> nodeModel) {
 				Fragment fragment = new Fragment(id, "outlineNodeFrag", SourceViewPanel.this);
+				
+				Symbol symbol = nodeModel.getObject();
 				
 				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						modal.close();
-						context.onSelect(target, context.getBlobIdent(), BlobRendererer.getSourcePosition(node.getPosition()));
+						context.onSelect(target, context.getBlobIdent(), BlobRendererer.getSourcePosition(symbol.getPosition()));
 					}
 					
 				};
-				link.add(node.renderIcon("icon"));
-				link.add(node.render("label", null));
+				link.add(symbol.renderIcon("icon"));
+				link.add(symbol.render("label", null));
 				link.add(AttributeAppender.replace("class", "selectable"));
 				
-				for (Symbol each: nodes) {
+				for (Symbol each: symbols) {
 					if (each.isDisplayInOutline()) {
-						if (node == each)
+						if (symbol == each)
 							link.add(AttributeAppender.append("class", "active"));
 						break;
 					}
@@ -1047,8 +1024,86 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				
 				return fragment;
 			}
+			
+		};		
 
+		tree.setOutputMarkupId(true);
+		
+		return tree;
+	}
+	
+	private Component newOutlineSearchPanel(String id, ModalPanel modal) {
+		Fragment fragment = new Fragment(id, "outlineSearchFrag", SourceViewPanel.this) {
+			
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				response.render(JavaScriptHeaderItem.forReference(new SelectByTypingResourceReference()));
+				
+				String script = String.format("$('#%s>.outline-search>.modal-body>input').selectByTyping('#%s>.outline-search>.modal-body>div');", 
+						getMarkupId(), getMarkupId());
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		};
+		fragment.add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				modal.close();
+			}
+			
 		});
+
+		TextField<String> searchField = new TextField<>("input", Model.of(""));
+		fragment.add(searchField);
+		
+		searchField.add(new OnTypingDoneBehavior(100) {
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setChannel(new AjaxChannel("outline-search", AjaxChannel.Type.DROP));
+			}
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				String searchInput = StringUtils.trimToNull(searchField.getInput());
+				
+				MatchScoreProvider<Symbol> matchScoreProvider = new MatchScoreProvider<Symbol>() {
+
+					@Override
+					public double getMatchScore(Symbol object) {
+						return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+					}
+					
+				};
+				
+				List<Symbol> matchedSymbols = MatchScoreUtils.filterAndSort(symbols, matchScoreProvider);
+				
+				List<Symbol> filteredSymbols = new ArrayList<>();
+				for (Symbol matchSymbol: matchedSymbols) {
+					Symbol currentSymbol = matchSymbol;
+					while (currentSymbol != null) {
+						if (!filteredSymbols.contains(currentSymbol))
+							filteredSymbols.add(currentSymbol);
+						currentSymbol = currentSymbol.getOutlineParent();
+					}
+				}
+				
+				Set<Symbol> state = new HashSet<>(filteredSymbols);
+				NestedTree<Symbol> tree = newOutlineSearchTree(modal, filteredSymbols, state);
+				fragment.replace(tree);
+				target.add(tree);
+			}
+			
+		});	
+		
+		Set<Symbol> state = new HashSet<>((getChildSymbols(symbols, null)));
+		fragment.add(newOutlineSearchTree(modal, symbols, state));
+		
+		fragment.setOutputMarkupId(true);
 		
 		return fragment;
 	}

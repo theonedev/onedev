@@ -7,8 +7,7 @@
     	var $input = jQuery(this);
 
 		function onReturn() {
-			if (onedev.server.form.confirmLeave()) 
-				$(container).find(".active.selectable").find("a").addBack("a").click();
+			$(container).find(".active.selectable").find("a").addBack("a").click();
 		}
 		
 		function onKeyup(e) {

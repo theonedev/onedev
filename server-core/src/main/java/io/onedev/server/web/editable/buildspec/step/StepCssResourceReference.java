@@ -1,8 +1,8 @@
 package io.onedev.server.web.editable.buildspec.step;
 
-import org.apache.wicket.request.resource.CssResourceReference;
+import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 
-public class StepCssResourceReference extends CssResourceReference {
+public class StepCssResourceReference extends BaseDependentCssResourceReference {
 
 	private static final long serialVersionUID = 1L;
 

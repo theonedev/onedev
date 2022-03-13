@@ -19,6 +19,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.coverage.Coverage;
@@ -32,7 +33,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=9910, name="Publish Clover Coverage Report")
+@Editable(order=9910, group=StepGroup.PUBLISH_REPORTS, name="Clover Coverage")
 public class PublishCloverReportStep extends PublishCoverageReportStep {
 
 	private static final long serialVersionUID = 1L;

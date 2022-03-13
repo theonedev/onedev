@@ -17,6 +17,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.PublishUnitTestReportStep;
 import io.onedev.server.plugin.report.unittest.UnitTestReport;
@@ -26,7 +27,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=7010, name="Publish JUnit Report")
+@Editable(order=7010, group=StepGroup.PUBLISH_REPORTS, name="JUnit")
 public class PublishJUnitReportStep extends PublishUnitTestReportStep {
 
 	private static final long serialVersionUID = 1L;

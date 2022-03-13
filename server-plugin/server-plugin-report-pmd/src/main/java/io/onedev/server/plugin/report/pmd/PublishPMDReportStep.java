@@ -19,6 +19,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.git.BlobIdent;
@@ -30,7 +31,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=8020, name="Publish PMD Report")
+@Editable(order=8020, group=StepGroup.PUBLISH_REPORTS, name="PMD")
 public class PublishPMDReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;

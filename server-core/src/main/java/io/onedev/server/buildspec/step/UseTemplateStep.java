@@ -30,7 +30,7 @@ import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
 import io.onedev.server.web.editable.annotation.VariableOption;
 
-@Editable(order=10000, name="Use Step Template", description="Step to use specified template")
+@Editable(order=10000, name="Use Step Template", description="Run specified step template")
 public class UseTemplateStep extends Step {
 
 	private static final long serialVersionUID = 1L;

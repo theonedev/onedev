@@ -118,7 +118,6 @@
 	background: var(--gray-dark);	
 }
 
-.outline-search .filterable-tree>.content {
-	height: 400px;
-	overflow: auto;
+.outline-search>.modal-body>.content {
+	height: 480px;
 }

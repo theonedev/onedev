@@ -19,6 +19,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.git.BlobIdent;
@@ -30,12 +31,14 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=8000, name="Publish Checkstyle Report")
+@Editable(order=8000, group=StepGroup.PUBLISH_REPORTS, name="Checkstyle")
 public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
 	private static final int TAB_WIDTH = 8;
+	
+	public static final String HH = "hh";
 	
 	@Editable(order=100, description="Specify checkstyle result xml file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/checkstyle-result.xml</tt>. "
