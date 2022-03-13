@@ -28,9 +28,18 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="binaryFileFrag">
-	<div class="alert alert-notice alert-light-warning m-4">
-		Binary file
-	</div>
+		<div class="border-bottom d-flex align-items-center px-3 py-2 justify-content-between">
+			<span wicket:id="size"></span>
+			<span>
+				<a wicket:id="download" class="btn btn-icon btn-xs btn-light btn-hover-primary ml-4" title="Download"><wicket:svg href="download" class="icon"/></a>
+				<span wicket:id="delete" class="ml-1">
+					<a wicket:id="link" class="btn btn-icon btn-xs btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"/></a>
+				</span>
+			</span>
+		</div>	
+		<div class="alert alert-notice alert-light-warning m-4">
+			Binary file
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="lfsObjectMissingFrag">
 	<div class="alert alert-notice alert-light-warning m-4">

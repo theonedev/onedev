@@ -34,9 +34,8 @@
 }
 
 html, body {
-	font-size: 13px;
+	font-size: 14px;
     font-weight: 400;
-    font-family: Poppins, Helvetica, "sans-serif";
     -ms-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -2583,7 +2582,6 @@ h6, .h6 {
 }
 
 .popover {
-    font-family: Poppins, Helvetica, "sans-serif";
     font-size: 0.9rem;
     background-color: white;
     border: 1px solid white;
@@ -2654,7 +2652,6 @@ h6, .h6 {
     color: var(--dark-mode-light-gray);
 }
 .tooltip {
-    font-family: Poppins, Helvetica, "sans-serif";
     font-size: 0.9rem;
 }
 .tooltip-inner {

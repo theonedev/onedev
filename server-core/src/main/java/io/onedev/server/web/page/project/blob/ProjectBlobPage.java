@@ -23,6 +23,8 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.IEvent;
@@ -32,6 +34,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -57,6 +60,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
@@ -94,6 +98,7 @@ import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
@@ -122,6 +127,7 @@ import io.onedev.server.web.page.project.blob.search.advanced.AdvancedSearchPane
 import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
+import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.FileUpload;
@@ -778,7 +784,57 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 						&& getProject().getBlob(getBlobIdent(), true).getText() != null) {
 					blobContent = new SourceViewPanel(BLOB_CONTENT_ID, this, false);
 				} else {
-					blobContent = new Fragment(BLOB_CONTENT_ID, "binaryFileFrag", this);
+					Fragment fragment = new Fragment(BLOB_CONTENT_ID, "binaryFileFrag", this);
+					
+					long size = getProject().getBlob(getBlobIdent(), true).getSize();
+					fragment.add(new Label("size", FileUtils.byteCountToDisplaySize(size)));
+					
+					fragment.add(new ResourceLink<Void>("download", new RawBlobResourceReference(), 
+							RawBlobResource.paramsOf(getProject(), getBlobIdent())));
+					
+					WebMarkupContainer deleteContainer = new WebMarkupContainer("delete");
+					fragment.add(deleteContainer);
+					
+					if (SecurityUtils.canWriteCode(getProject()) && isOnBranch()) {
+						User user = SecurityUtils.getUser();
+						String revision = getBlobIdent().revision;
+						String path = getBlobIdent().path;
+						boolean reviewRequired = getProject().isReviewRequiredForModification(user, revision, path);
+						boolean buildRequired = getProject().isBuildRequiredForModification(user, revision, path);
+						
+						String title;
+						if (reviewRequired) 
+							title = "Review required for deletion. Submit pull request instead";
+						else if (buildRequired) 
+							title = "Build required for deletion. Submit pull request instead";
+						else 
+							title = "Delete from branch " + getBlobIdent().revision;
+						deleteContainer.add(AttributeAppender.append("title", title));
+						
+						AjaxLink<Void> deleteLink = new ViewStateAwareAjaxLink<Void>("link") {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+							}
+							
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								onModeChange(target, Mode.DELETE, null);
+							}
+
+						};
+
+						if (reviewRequired || buildRequired) {
+							deleteLink.add(AttributeAppender.append("class", "disabled"));
+							deleteLink.setEnabled(false);
+						}
+						deleteContainer.add(deleteLink);
+					} else {
+						deleteContainer.add(new WebMarkupContainer("link")).setVisible(false);
+					}					
+					blobContent = fragment;
 				}		
 			}
 		}

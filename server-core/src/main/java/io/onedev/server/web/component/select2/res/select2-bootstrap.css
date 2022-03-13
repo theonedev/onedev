@@ -288,11 +288,11 @@
   -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
   transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
   background-color: #fff;
-  border-color: #80bdff;
+  border-color: #80bdff !important;
 }
 .dark-mode .select2-container-active .select2-choice,
 .dark-mode .select2-container-multi.select2-container-active .select2-choices {
-	border-color: #474761;
+	border-color: #474761 !important;
 	background-color: var(--dark-mode-dark);
 }
 

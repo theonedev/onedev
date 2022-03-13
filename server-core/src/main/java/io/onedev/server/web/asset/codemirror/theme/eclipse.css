@@ -14,7 +14,7 @@
 .cm-s-eclipse span.cm-qualifier { color: #555; }
 .cm-s-eclipse span.cm-builtin { color: #30a; }
 .cm-s-eclipse span.cm-bracket { color: #cc7; }
-.cm-s-eclipse span.cm-tag { color: #170; }
+.cm-s-eclipse span.cm-tag { color: rgb(131, 92, 77); }
 .cm-s-eclipse span.cm-attribute { color: #00c; }
 .cm-s-eclipse span.cm-link { color: #219; }
 .cm-s-eclipse span.cm-error { color: #f00; }

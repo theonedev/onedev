@@ -6,8 +6,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import io.onedev.server.web.asset.poppins.PoppinsCssResourceReference;
-
 public class BootstrapCssResourceReference extends CssResourceReference {
 
 	private static final long serialVersionUID = 1L;
@@ -21,7 +19,6 @@ public class BootstrapCssResourceReference extends CssResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
 				BootstrapCssResourceReference.class, "css/bootstrap.min.css")));
-	    dependencies.add(CssHeaderItem.forReference(new PoppinsCssResourceReference()));		
 		return dependencies;
 	}
 

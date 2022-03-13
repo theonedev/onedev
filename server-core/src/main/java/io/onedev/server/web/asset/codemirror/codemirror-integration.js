@@ -41,6 +41,8 @@ onedev.server.codemirror = {
 			onedev.server.codemirror.setModeByName(cm, "cobol");
 		} else if (fileName.endsWith(".js")) {
 			onedev.server.codemirror.setModeByName(cm, "jsx");
+		} else if (fileName.endsWith(".ld") || fileName.endsWith(".asm")) {
+			onedev.server.codemirror.setModeByName(cm, "gas");			
 		} else if (fileName == ".onedev-buildspec") {
 			onedev.server.codemirror.setModeByName(cm, "xml");
 		} else {
@@ -53,7 +55,7 @@ onedev.server.codemirror = {
         // specify mode via mime does not work for gfm (github flavored markdown)
         if (modeInfo.mode === "gfm")
             cm.setOption("mode", "gfm");
-        else
+		else		
             cm.setOption("mode", modeInfo.mime);
         CodeMirror.autoLoadMode(cm, modeInfo.mode);
 	},
