@@ -132,11 +132,18 @@ a.link-info:hover, a.link-info:focus {
 	color: rgb(176, 142, 255) !important;
 }
 .text-secondary, a.link-secondary {
-	color: var(--dark) !important;
+	color: var(--gray-dark) !important;
 }
 a.link-secondary:hover, a.link-secondary:focus {
-	color: #b4bad3 !important;
+	color: var(--gray) !important;
 }
+.dark-mode .text-secondary, .dark-mode a.link-secondary {
+	color: var(--light-gray) !important;
+}
+.dark-mode a.link-secondary:hover, .dark-mode a.link-secondary:focus {
+	color: var(--dark-mode-gray) !important;
+}
+
 .text-light, a.link-light {
 	color: var(--light) !important;
 }

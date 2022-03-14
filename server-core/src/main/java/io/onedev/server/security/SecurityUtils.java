@@ -88,6 +88,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return null;
 	}
 	
+	@Nullable
+	public static User toUser(PrincipalCollection principals) {
+		Long userId = (Long) principals.getPrimaryPrincipal();
+		if (!userId.equals(0L))
+			return OneDev.getInstance(UserManager.class).load(userId);
+		else
+			return null;
+	}
+	
 	public static Long getUserId() {
         Object principal = SecurityUtils.getSubject().getPrincipal();
         Preconditions.checkNotNull(principal);
@@ -316,8 +325,12 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
     }
     
     public static Subject asSubject(Long userId) {
+    	return asSubject(asPrincipal(userId));
+    }
+    
+    public static Subject asSubject(PrincipalCollection principals) {
     	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
-        return new Subject.Builder(securityManager).principals(asPrincipal(userId)).buildSubject();
+        return new Subject.Builder(securityManager).principals(principals).buildSubject();
     }
     
     public static Subject asAnonymous() {

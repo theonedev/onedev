@@ -27,6 +27,8 @@ public class SecuritySetting implements Serializable {
 	
 	private String defaultLoginGroupName;
 	
+	private boolean enforce2FA;
+	
 	@Editable(order=100, description="Whether or not to allow anonymous users to access this server")
 	public boolean isEnableAnonymousAccess() {
 		return enableAnonymousAccess;
@@ -54,6 +56,17 @@ public class SecuritySetting implements Serializable {
 
 	public void setDefaultLoginGroupName(String defaultLoginGroupName) {
 		this.defaultLoginGroupName = defaultLoginGroupName;
+	}
+
+	@Editable(order=400, name="Enforce Two-factor Authentication", description="Check this to enforce "
+			+ "all users to set up two-factor authentication upon next login. Users will not be able "
+			+ "to disable two-factor authentication themselves if this option is set")
+	public boolean isEnforce2FA() {
+		return enforce2FA;
+	}
+
+	public void setEnforce2FA(boolean enforce2FA) {
+		this.enforce2FA = enforce2FA;
 	}
 
 	@Nullable

@@ -30,6 +30,7 @@ import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
+import io.onedev.server.web.page.admin.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
 
 @SuppressWarnings("serial")
 public abstract class UserPage extends AdministrationPage {
@@ -72,6 +73,7 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("Authorized Projects", "project", UserAuthorizationsPage.class));
 		tabs.add(new UserTab("SSH Keys", "key", UserSshKeysPage.class));
 		tabs.add(new UserTab("Access Token", "token", UserAccessTokenPage.class));
+		tabs.add(new UserTab("Two-factor Authentication", "shield", UserTwoFactorAuthenticationPage.class));
 		
 		add(new Tabbable("userTabs", tabs));
 	}

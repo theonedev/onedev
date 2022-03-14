@@ -15,7 +15,7 @@
 	margin: auto;
 }
 .SimplePage:not(.force-ordinary-style) .main {
-	width: 450px;
+	width: 480px;
 }
 .SimplePage.GeneralErrorPage .main {
 	width: 900px;
@@ -96,4 +96,15 @@
 }
 .PageNotFoundErrorPage .sub-title {
 	font-size: 1.5rem !important;
+}
+
+.LoginPage .setup-2fa {
+	text-align: left;
+}
+.LoginPage .setup-2fa .modal-header {
+	display: none;
+}
+.LoginPage .setup-2fa .modal-footer {
+	border-top: none;
+	justify-content: center;
 }

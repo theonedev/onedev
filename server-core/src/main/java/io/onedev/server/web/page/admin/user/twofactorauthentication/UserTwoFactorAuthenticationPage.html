@@ -1,0 +1,15 @@
+<wicket:extend>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="disabledFrag">
+		<div class="alert alert-notice alert-light-warning mb-0">
+			Two-factor authentication enhances account security. 
+			It is currently disabled, and can only be enabled by user
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="enabledFrag">
+		<div class="alert alert-notice alert-light-success mb-4">
+			Two-factor authentication is enabled for this account  
+		</div>
+		<a wicket:id="disable" class="btn btn-danger">Disable</a>
+	</wicket:fragment>
+</wicket:extend>

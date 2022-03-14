@@ -6,6 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -22,11 +23,24 @@ public abstract class SimplePage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		add(new SpriteImage("logo", getLogoHref()));
-		add(new Label("title", getTitle()));
+		add(new Label("title", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getTitle();
+			}
+			
+		}));
+	}
+	
+	@Override
+	protected void onBeforeRender() {
+		super.onBeforeRender();
+		
 		if (getSubTitle() != null)
-			add(new Label("subTitle", getSubTitle()));
+			addOrReplace(new Label("subTitle", getSubTitle()));
 		else
-			add(new WebMarkupContainer("subTitle").setVisible(false));
+			addOrReplace(new WebMarkupContainer("subTitle").setVisible(false));
 	}
 
 	@Override

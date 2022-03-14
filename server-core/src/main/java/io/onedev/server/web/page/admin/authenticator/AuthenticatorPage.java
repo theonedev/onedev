@@ -143,26 +143,26 @@ public class AuthenticatorPage extends AdministrationPage {
 				if (authenticated.getFullName() != null) {
 					retrievedInfoBuilder.append("Full Name: ")
 							.append(authenticated.getFullName())
-							.append("\n");
+							.append("<br>");
 				}
 				if (authenticated.getEmail() != null) {
 					retrievedInfoBuilder.append("Email: ")
 							.append(authenticated.getEmail())
-							.append("\n");
+							.append("<br>");
 				}
 				if (authenticated.getGroupNames() != null) {
 					retrievedInfoBuilder.append("Groups: ")
 							.append(Joiner.on(", ").join(authenticated.getGroupNames()))
-							.append("\n");
+							.append("<br>");
 				}
 				if (authenticated.getSshKeys() != null) {
 					retrievedInfoBuilder.append("Number of SSH Keys: ").append(authenticated.getSshKeys().size())
-							.append("\n");
+							.append("<br>");
 				}
 				StringBuilder messageBuilder = 
 						new StringBuilder("Test successful: authentication passed");
 				if (retrievedInfoBuilder.length() != 0) {
-					messageBuilder.append(" with below information retrieved:\n")
+					messageBuilder.append(" with below information retrieved:<br>")
 							.append(retrievedInfoBuilder);
 				} 
 				return messageBuilder.toString();

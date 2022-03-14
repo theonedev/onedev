@@ -1,0 +1,59 @@
+<wicket:panel>
+	<div wicket:id="content" class="setup-2fa"></div>
+	<wicket:fragment wicket:id="pendingVerifyFrag">
+		<form wicket:id="form">
+			<div class="modal-header">
+				<h5 id="modal-title" class="modal-title">Set Up Two-factor Authentication</h5>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="enforceNotice" class="alert alert-light-warning">Two-factor authentication is enforced 
+				for your account to enhance security. Please follow below procedure to set it up</div>
+				<div class="text-secondary font-weight-boldest">
+				1. Scan below QR code with your TOTP authenticators
+				</div>
+				<div>These authenticators normally run 
+				on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.</div>
+			
+				<div class="d-flex justify-content-center my-3">
+					<img wicket:id="QRCode">
+				</div>
+				
+				<div class="text-secondary font-weight-boldest">
+				2. Then enter the passcode shown in the TOTP authenticator to verify
+				</div>
+				<input wicket:id="passcode" placeholder="6-digits passcode" class="form-control mt-2">
+				<div wicket:id="feedback" class="mb-n3 mt-3"></div>
+			</div>
+			<div class="modal-footer">
+				<input wicket:id="verify" type="submit" class="dirty-aware btn btn-primary" value="Verify">
+				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="verifiedFrag">
+		<div class="modal-header">
+			<h5 id="modal-title" class="modal-title">Set Up Two-factor Authentication</h5>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+		</div>
+		<div class="modal-body">
+			<div class="alert alert-light-success font-weight-bolder"><wicket:svg href="tick-circle" class="icon"/> Two-factor authentication is now enabled for your account</div> 
+			
+			<div class="mb-3">
+			<b class="text-danger">IMPORTANT:</b> Please <a wicket:id="download" class="font-weight-bolder">download</a> 
+			recovery codes below and keep 
+			them secret. These codes can be used to provide one-time access to your account in case you 
+			can not access the authentication application. They will <b>NOT</b> be displayed again 
+			</div>
+			<div class="mx-5">
+				<div wicket:id="recoveryCodes" class="d-flex justify-content-between text-monospace font-size-lg font-weight-bold">
+					<div wicket:id="left"></div>
+					<div wicket:id="right"></div>
+				</div>		
+			</div>
+		</div>
+		<div class="modal-footer d-flex justify-content-center">
+			<a wicket:id="ok" class="btn btn-primary">Ok</a>
+		</div>
+	</wicket:fragment>
+</wicket:panel>

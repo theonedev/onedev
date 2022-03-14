@@ -85,6 +85,7 @@ import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
+import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.security.LogoutPage;
@@ -135,10 +136,8 @@ public abstract class LayoutPage extends BasePage {
 							GeneralSecuritySettingPage.class, new PageParameters()));
 					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "External Authentication", 
 							AuthenticatorPage.class, new PageParameters()));
-					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "SSO Providers", 
+					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "Single Sign On", 
 							SsoConnectorListPage.class, new PageParameters()));
-					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "SSH Setting", 
-							SshSettingPage.class, new PageParameters()));
 					
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Security Setting", securitySettingMenuItems));
 					
@@ -156,6 +155,9 @@ public abstract class LayoutPage extends BasePage {
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates", 
 							IssueTemplateListPage.class, new PageParameters()));
 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "SSH Setting", 
+							SshSettingPage.class, new PageParameters()));
+					
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Setting", issueSettingMenuItems));
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors", 
@@ -376,6 +378,10 @@ public abstract class LayoutPage extends BasePage {
 		
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAccessToken", MyAccessTokenPage.class));
 		if (getPage() instanceof MyAccessTokenPage)
+		    item.add(AttributeAppender.append("class", "active"));
+		
+		userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class));
+		if (getPage() instanceof MyTwoFactorAuthenticationPage)
 		    item.add(AttributeAppender.append("class", "active"));
 		
 		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();

@@ -1,31 +1,55 @@
 <wicket:extend>	
-	<form wicket:id="form" method="post">
-		<div wicket:id="feedback"></div>
-		<div class="form-group">
-			<input wicket:id="userName" autocomplete="username" type="text" class="form-control" placeholder="Login name or email address">
-		</div>
-		<div class="form-group">
-			<input wicket:id="password" autocomplete="current-password" type="password" class="form-control" placeholder="Password">
-		</div>
-		<div class="form-group d-flex flex-wrap justify-content-between">
-			<div class="checkbox-inline">
-				<label class="checkbox text-muted">
-					<input wicket:id="rememberMe" id="rememberMe" type="checkbox" class="form-check-input">
-					Remember Me
-				</label>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="passwordCheckFrag">
+		<form wicket:id="form" method="post">
+			<div wicket:id="feedback"></div>
+			<div class="form-group">
+				<input wicket:id="userName" autocomplete="username" type="text" class="form-control" placeholder="Login name or email address">
 			</div>
-			<a wicket:id="forgetPassword" class="text-muted text-hover-primary">Forgot Password?</a>
+			<div class="form-group">
+				<input wicket:id="password" autocomplete="current-password" type="password" class="form-control" placeholder="Password">
+			</div>
+			<div class="form-group d-flex flex-wrap justify-content-between">
+				<div class="checkbox-inline">
+					<label class="checkbox text-muted">
+						<input wicket:id="rememberMe" id="rememberMe" type="checkbox" class="form-check-input">
+						Remember Me
+					</label>
+				</div>
+				<a wicket:id="forgetPassword" class="text-muted text-hover-primary">Forgot Password?</a>
+			</div>
+			<button class="btn btn-primary font-weight-bold" type="submit">Sign in</button>
+		</form>
+		<wicket:enclosure child="registerUser">
+			<div class="signup">
+				<span class="opacity-50 mr-3">Don't have an account yet?</span> <a wicket:id="registerUser" class="text-muted text-hover-primary font-weight-bold">Sign Up!</a>
+			</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="ssoButtons">
+		<div class="sso">
+			<a wicket:id="ssoButtons" class="btn btn-light btn-block mb-3"><img wicket:id="image" class="mr-3"> <span wicket:id="label"></span></a>
 		</div>
-		<button class="btn btn-primary font-weight-bold" type="submit">Sign in</button>
-	</form>
-	<wicket:enclosure child="registerUser">
-		<div class="signup">
-			<span class="opacity-50 mr-3">Don't have an account yet?</span> <a wicket:id="registerUser" class="text-muted text-hover-primary font-weight-bold">Sign Up!</a>
+		</wicket:enclosure>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="passcodeVerifyFrag">
+		<form wicket:id="form" method="post">
+			<div wicket:id="feedback"></div>
+			<div class="form-group">
+				<input wicket:id="passcode" type="text" class="form-control" placeholder="6-digits passcode">
+			</div>
+			<button class="btn btn-primary font-weight-bold" type="submit">Verify</button>
+		</form>
+		<div class="mt-5 font-size-sm text-muted">
+			<a wicket:id="verifyRecoveryCode">Verify by recovery code</a> if you can not access your TOTP authenticator 
 		</div>
-	</wicket:enclosure>
-	<wicket:enclosure child="ssoButtons">
-	<div class="sso">
-		<a wicket:id="ssoButtons" class="btn btn-light btn-block mb-3"><img wicket:id="image" class="mr-3"> <span wicket:id="label"></span></a>
-	</div>
-	</wicket:enclosure>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="recoveryCodeVerifyFrag">
+		<form wicket:id="form" method="post">
+			<div wicket:id="feedback"></div>
+			<div class="form-group">
+				<input wicket:id="recoveryCode" type="text" placeholder="Recovery code" class="form-control">
+			</div>
+			<button class="btn btn-primary font-weight-bold" type="submit">Verify</button>
+		</form>
+	</wicket:fragment>
 </wicket:extend>

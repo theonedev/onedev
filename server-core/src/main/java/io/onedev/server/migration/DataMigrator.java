@@ -3796,13 +3796,28 @@ public class DataMigrator {
 		}
 	}
 	
-	// Migrate to 7.0.0
+	// Migrate to 6.4.0
 	private void migrate82(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) 
 					element.element("triggerChain").setName("pipeline");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					if (element.elementTextTrim("key").equals("SECURITY")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) 
+							valueElement.addElement("enforce2FA").setText("false");
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Groups.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.addElement("enforce2FA").setText("false");
 				dom.writeToFile(file, false);
 			}
 		}

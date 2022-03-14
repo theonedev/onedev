@@ -44,6 +44,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.SsoInfo;
+import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.model.support.build.NamedBuildQuery;
@@ -140,6 +141,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Column(unique=true, nullable=false)
 	private String accessToken = RandomStringUtils.randomAlphanumeric(ACCESS_TOKEN_LEN);
+	
+	@JsonIgnore
+	@Lob
+	@Column(length=65535)
+	private TwoFactorAuthentication twoFactorAuthentication;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -476,6 +482,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.accessToken = accessToken;
 	}
 
+	@Nullable
+	public TwoFactorAuthentication getTwoFactorAuthentication() {
+		return twoFactorAuthentication;
+	}
+
+	public void setTwoFactorAuthentication(TwoFactorAuthentication twoFactorAuthentication) {
+		this.twoFactorAuthentication = twoFactorAuthentication;
+	}
+
 	@Editable(order=300)
 	@NotEmpty
 	@Email
@@ -789,6 +804,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setBuildQuerySubscriptions(LinkedHashSet<String> buildQuerySubscriptions) {
 		this.buildQuerySubscriptions = buildQuerySubscriptions;
+	}
+	
+	public boolean isEnforce2FA() {
+		return OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnforce2FA() 
+				|| getGroups().stream().anyMatch(it->it.isEnforce2FA());
 	}
 
 }

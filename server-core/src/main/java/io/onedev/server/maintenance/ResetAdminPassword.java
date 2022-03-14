@@ -64,6 +64,7 @@ public class ResetAdminPassword extends DefaultPersistManager {
 		}
 		String password = Bootstrap.command.getArgs()[0];
 		root.setPassword(passwordService.encryptPassword(password));
+		root.setTwoFactorAuthentication(null);
 		userManager.save(root);
 		
 		// wait for a short period to have embedded db flushing data

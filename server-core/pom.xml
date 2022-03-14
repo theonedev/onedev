@@ -305,6 +305,14 @@
 			<artifactId>dom4j</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>de.taimos</groupId>
+			<artifactId>totp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 		</dependency>

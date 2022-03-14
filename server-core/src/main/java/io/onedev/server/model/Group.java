@@ -33,6 +33,8 @@ public class Group extends AbstractEntity {
 	
 	private boolean createRootProjects;
 	
+	private boolean enforce2FA;
+	
 	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<GroupAuthorization> authorizations = new ArrayList<>();
@@ -86,6 +88,17 @@ public class Group extends AbstractEntity {
 		this.createRootProjects = createRootProjects;
 	}
 
+	@Editable(order=400, name="Enforce Two-factor Authentication", description="Check this to enforce "
+			+ "all users in this group to set up two-factor authentication upon next login. Users will "
+			+ "not be able to disable two-factor authentication themselves if this option is set")
+	public boolean isEnforce2FA() {
+		return enforce2FA;
+	}
+
+	public void setEnforce2FA(boolean enforce2FA) {
+		this.enforce2FA = enforce2FA;
+	}
+	
 	public Collection<GroupAuthorization> getAuthorizations() {
 		return authorizations;
 	}

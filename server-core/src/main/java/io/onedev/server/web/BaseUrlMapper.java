@@ -55,6 +55,7 @@ import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
+import io.onedev.server.web.page.admin.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.help.MethodDetailPage;
@@ -66,6 +67,7 @@ import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
+import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -176,6 +178,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("my/password", MyPasswordPage.class));
 		add(new DynamicPathPageMapper("my/ssh-keys", MySshKeysPage.class));
 		add(new DynamicPathPageMapper("my/access-token", MyAccessTokenPage.class));
+		add(new DynamicPathPageMapper("my/two-factor-authentication", MyTwoFactorAuthenticationPage.class));
 	}
 
 	private void addResources() {
@@ -224,6 +227,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/users/${user}/password", UserPasswordPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/ssh-keys", UserSshKeysPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/access-token", UserAccessTokenPage.class));
+		add(new DynamicPathPageMapper("administration/users/${user}/two-factor-authentication", UserTwoFactorAuthenticationPage.class));
 		
 		add(new DynamicPathPageMapper("administration/roles", RoleListPage.class));
 		add(new DynamicPathPageMapper("administration/roles/new", NewRolePage.class));
