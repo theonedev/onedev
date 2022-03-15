@@ -66,6 +66,7 @@ import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.TransactionManager;
@@ -712,7 +713,17 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Transactional
 	@Override
-	public void fixFieldValueOrders() {
+	public void fixStateAndFieldOrdinals() {
+		int stateOrdinal = 0;
+		for (StateSpec state: getIssueSetting().getStateSpecs()) {
+			Query query = getSession().createQuery("update Issue set stateOrdinal=:stateOrdinal "
+					+ "where state=:state and stateOrdinal!=:stateOrdinal");
+			query.setParameter("state", state.getName());
+			query.setParameter("stateOrdinal", stateOrdinal);
+			query.executeUpdate();
+			stateOrdinal++;
+		}
+		
 		Query query = getSession().createQuery("select distinct name, value, ordinal from IssueField where type=:choice");
 		query.setParameter("choice", FieldSpec.ENUMERATION);
 

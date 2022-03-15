@@ -62,7 +62,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	void fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions);
 	
-	void fixFieldValueOrders();
+	void fixStateAndFieldOrdinals();
 	
 	void saveDescription(Issue issue, @Nullable String description);
 	
