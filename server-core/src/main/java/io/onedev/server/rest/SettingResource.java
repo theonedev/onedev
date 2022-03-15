@@ -256,6 +256,7 @@ public class SettingResource {
     public Response setIssueSetting(@NotNull GlobalIssueSetting issueSetting) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
+    	issueSetting.setReconciled(false);
     	settingManager.saveIssueSetting(issueSetting);
     	return Response.ok().build();
     }
