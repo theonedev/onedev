@@ -43,7 +43,7 @@ public class RunContainerStep extends Step {
 	}
 
 	@Editable(order=100, description="Specify container image to run. <b class='text-warning'>NOTE:</b> A shell must "
-			+ "exist in the container if the step is executed by kubernetes executor, as OneDev intercepts the "
+			+ "exist in the container if the step is executed by kubernetes executor, as OneDev needs to intercept the "
 			+ "entrypoint to make step containers executing sequentially in the pod")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
@@ -66,10 +66,7 @@ public class RunContainerStep extends Step {
 		this.args = args;
 	}
 
-	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container. "
-			+ "Leave empty to use the default working directory. "
-			+ "<a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>Job workspace</a> will be "
-			+ "mounted to the working directory so that the container can access job files")
+	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container")
 	@Nullable
 	public String getWorkingDir() {
 		return workingDir;

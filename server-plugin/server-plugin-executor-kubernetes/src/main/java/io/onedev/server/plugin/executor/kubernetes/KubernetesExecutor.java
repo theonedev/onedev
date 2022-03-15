@@ -716,8 +716,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String trustCertsHome;
 				String dockerSock;
 				String containerdSock;
+				String containerWorkspace;
 				if (osInfo.isWindows()) {
 					containerBuildHome = "C:\\onedev-build";
+					containerWorkspace = containerBuildHome + "\\workspace";
 					containerCacheHome = containerBuildHome + "\\cache";
 					containerCommandHome = containerBuildHome + "\\command";
 					containerAuthInfoHome = "C:\\Users\\ContainerAdministrator\\auth-info";
@@ -726,6 +728,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					containerdSock = "\\\\.\\pipe\\containerd-containerd";
 				} else {
 					containerBuildHome = "/onedev-build";
+					containerWorkspace = containerBuildHome +"/workspace";
 					containerCacheHome = containerBuildHome + "/cache";
 					containerCommandHome = containerBuildHome + "/command";
 					containerAuthInfoHome = "/root/auth-info";
@@ -804,6 +807,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"name", ENV_OS_INFO,
 						"value", Hex.encodeHexString(SerializationUtils.serialize(osInfo))
 						));
+				commonEnvs.add(CollectionUtils.newLinkedHashMap(
+						"name", "ONEDEV_WORKSPACE",
+						"value", containerWorkspace
+						));
 
 				entryFacade.traverse(new LeafVisitor<Void>() {
 
@@ -841,14 +848,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 									"image", container.getImage());
 							if (runContainerFacade.isUseTTY())
 								stepContainerSpec.put("tty", true);
-							List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
-							if (container.getWorkingDir() != null) {
-								volumeMounts.add(CollectionUtils.newLinkedHashMap(
-										"name", "build-home", 
-										"mountPath", container.getWorkingDir(),
-										"subPath", "workspace"));
-							}
-							stepContainerSpec.put("volumeMounts", volumeMounts);
+							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
 							List<Map<Object, Object>> envs = new ArrayList<>(commonEnvs);
 							for (Map.Entry<String, String> entry: container.getEnvMap().entrySet()) {
 								envs.add(CollectionUtils.newLinkedHashMap(

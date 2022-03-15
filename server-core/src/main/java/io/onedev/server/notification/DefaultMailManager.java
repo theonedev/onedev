@@ -494,6 +494,7 @@ public class DefaultMailManager implements MailManager {
 		
 		Document document = HtmlUtils.parse(content);
 		document.select(".gmail_quote").remove();
+		document.outputSettings().prettyPrint(false);
 		
 		Element quotedSenderElement = null;
 		for (Element element: document.getElementsContainingOwnText(quotedSender)) {
@@ -899,7 +900,7 @@ public class DefaultMailManager implements MailManager {
 			List<String> markdowns = new ArrayList<>();
 			for (Attachment attachment: attachments.nonIdentifiable)
 				markdowns.add(attachment.getMarkdown());
-			text += "\n" + Joiner.on(" &nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp; ").join(markdowns);
+			text += "\n\n" + Joiner.on(" &nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp; ").join(markdowns);
 		}
 		return text;
 	}

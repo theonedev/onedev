@@ -223,12 +223,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 									
 									docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
-									if (workingDir != null) {
-										docker.addArgs("-v", getHostPath(hostWorkspace.getAbsolutePath()) + ":" + workingDir);
-										docker.addArgs("-w", workingDir);
-									} else {
+									
+									if (entrypoint != null) 
 										docker.addArgs("-w", containerWorkspace);
-									}
+									else if (workingDir != null) 
+										docker.addArgs("-w", workingDir);
+									
 									for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
 										if (!PathUtils.isCurrent(entry.getValue())) {
 											String hostCachePath = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
@@ -256,6 +256,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									
 									for (Map.Entry<String, String> entry: environments.entrySet()) 
 										docker.addArgs("-e", entry.getKey() + "=" + entry.getValue());
+									
+									docker.addArgs("-e", "ONEDEV_WORKSPACE=" + containerWorkspace);
 
 									if (useTTY)
 										docker.addArgs("-t");
