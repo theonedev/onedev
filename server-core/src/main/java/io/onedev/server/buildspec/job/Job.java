@@ -103,7 +103,7 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	private List<CacheSpec> caches = new ArrayList<>();
 
-	private int cpuRequirement = 500;
+	private int cpuRequirement = 250;
 	
 	private int memoryRequirement = 256;
 	
