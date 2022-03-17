@@ -334,7 +334,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 							
 							getIssueManager().fixUndefinedFieldValues(edits);
 							
-							Component content = checkFieldValueOrders(CONTENT_ID);
+							Component content = checkStateAndFieldOrdinals(CONTENT_ID);
 							WorkflowReconcilePanel.this.replace(content);
 							target.add(content);
 						}
@@ -345,7 +345,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 					fragment.add(form);
 					return fragment;
 				} else {
-					return checkFieldValueOrders(markupId);
+					return checkStateAndFieldOrdinals(markupId);
 				}
 			}
 
@@ -357,8 +357,8 @@ public abstract class WorkflowReconcilePanel extends Panel {
 		};
 	}
 	
-	private Component checkFieldValueOrders(String markupId) {
-		return new Label(markupId, "Checking field value orders...") {
+	private Component checkStateAndFieldOrdinals(String markupId) {
+		return new Label(markupId, "Checking state and field ordinals...") {
 
 			private AbstractPostAjaxBehavior behavior;
 			
@@ -369,7 +369,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 					
 					@Override
 					protected void respond(AjaxRequestTarget target) {
-						getIssueManager().fixFieldValueOrders();
+						getIssueManager().fixStateAndFieldOrdinals();
 						
 						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 						GlobalIssueSetting issueSetting = settingManager.getIssueSetting();

@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.event.IEvent;
@@ -28,6 +29,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.ReceiveMailSetting;
 import io.onedev.server.notification.MailManager;
+import io.onedev.server.notification.MailPosition;
 import io.onedev.server.notification.MessageListener;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EmailAddress;
@@ -111,18 +113,14 @@ public class MailSettingPage extends AdministrationPage {
 					MessageListener listener = new MessageListener() {
 						
 						@Override
-						public void onReceived(Message message) {
-							try {
-								if (message.getSubject().contains(uuid)) 
-									futureRef.get().cancel(true);
-							} catch (Exception e) {
-								logger.error("Error receiving message", e);
-							}
+						public void onReceived(Message message) throws MessagingException {
+							if (message.getSubject().contains(uuid)) 
+								futureRef.get().cancel(true);
 						}
 						
 					};					
 					futureRef.set(mailManager.monitorInbox(mailSetting.getReceiveMailSetting(), 
-							mailSetting.getTimeout(), listener));
+							mailSetting.getTimeout(), listener, new MailPosition()));
 					
 					EmailAddress emailAddress = EmailAddress.parse(mailSetting.getEmailAddress());
 					String subAddressed = emailAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);

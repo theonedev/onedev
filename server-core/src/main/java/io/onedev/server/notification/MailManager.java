@@ -38,6 +38,7 @@ public interface MailManager {
 	@Nullable
 	public String getUnsubscribeAddress(PullRequest request);
 	
-	Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, int timeout, MessageListener listener);
+	Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, int timeout, 
+			MessageListener listener, MailPosition MailPosition);
 	
 }

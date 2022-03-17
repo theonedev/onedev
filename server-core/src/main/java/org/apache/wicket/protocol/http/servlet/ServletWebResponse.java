@@ -285,7 +285,11 @@ public class ServletWebResponse extends WebResponse
 			}
 			else
 			{
-				String userAgent = webRequest.getContainerRequest().getHeader("User-Agent").toLowerCase();
+				String userAgent = webRequest.getContainerRequest().getHeader("User-Agent");
+				if (userAgent != null)
+					userAgent = userAgent.toLowerCase();
+				else
+					userAgent = "";
 				if (userAgent.contains("bot") || userAgent.contains("crawler") 
 						|| userAgent.contains("spider") || userAgent.contains("crawling")) {
 					httpServletResponse.sendRedirect(url);

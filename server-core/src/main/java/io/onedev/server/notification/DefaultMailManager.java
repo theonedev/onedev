@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.Folder;
+import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -54,9 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.protocol.IMAPProtocol;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -302,8 +301,7 @@ public class DefaultMailManager implements MailManager {
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	protected void onMessage(MailSetting mailSetting, Message message) {
-		try {
+	protected void onMessage(MailSetting mailSetting, Message message) throws MessagingException, IOException {
 			String[] toHeader = message.getHeader("To");
 			String[] fromHeader = message.getHeader("From");
 			String[] ccHeader = message.getHeader("Cc");
@@ -469,9 +467,6 @@ public class DefaultMailManager implements MailManager {
 					}
 				}
 			}
-		} catch (Exception e) {
-			logger.error("Error processing incoming email", e);
-		} 
 	}
 	
 	private void removeNodesAfter(Node node) {
@@ -700,38 +695,38 @@ public class DefaultMailManager implements MailManager {
 					try {
 						MailSetting mailSetting = settingManager.getMailSetting();
 						if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
-							Future<?> future = monitorInbox(mailSetting.getReceiveMailSetting(), mailSetting.getTimeout(), 
-									new MessageListener() {
+							MailPosition mailPosition = new MailPosition();
+							while (thread != null) {
+								Future<?> future = monitorInbox(mailSetting.getReceiveMailSetting(), mailSetting.getTimeout(), 
+										new MessageListener() {
+									
+									@Override
+									public void onReceived(Message message) throws IOException, MessagingException {
+										onMessage(mailSetting, message);
+									}
+									
+								}, mailPosition);
 								
-								@Override
-								public void onReceived(Message message) {
-									onMessage(mailSetting, message);
-								}
-								
-							});
-							try {
-								future.get();
-							} catch (InterruptedException e) {
-								future.cancel(true);
-							} catch (ExecutionException e) {
-								logger.error("Error monitoring inbox", e);
 								try {
-									Thread.sleep(5000);
-								} catch (InterruptedException e2) {
+									future.get();
+								} catch (InterruptedException e) {
+									future.cancel(true);
+									throw e;
+								} catch (ExecutionException e) {
+									if (ExceptionUtils.find(e, FolderClosedException.class) == null)
+										logger.error("Error monitoring inbox", e);
+									else
+										logger.warn("Lost connection to mail server, will reconnect later... ");
+									try {
+										Thread.sleep(5000);
+									} catch (InterruptedException e2) {
+									}
 								}
 							}
 						} else {
-							try {
-								Thread.sleep(60000);
-							} catch (InterruptedException e) {
-							}
+							Thread.sleep(60000);
 						}
-					} catch (Exception e) {
-						logger.error("Error checking mail setting", e);
-						try {
-							Thread.sleep(5000);
-						} catch (InterruptedException e2) {
-						}
+					} catch (InterruptedException e) {
 					}
 				}
 			}
@@ -753,7 +748,8 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	@Override
-	public Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, int timeout, MessageListener listener) {
+	public Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, int timeout, 
+			MessageListener listener, MailPosition lastPosition) {
 		return executorService.submit(new Runnable() {
 
 			@Override
@@ -779,12 +775,36 @@ public class DefaultMailManager implements MailManager {
 					store.connect(receiveMailSetting.getImapUser(), receiveMailSetting.getImapPassword());
 					inbox = (IMAPFolder) store.getFolder("INBOX");
 					inbox.open(Folder.READ_ONLY);
+
+					long uidValidity = inbox.getUIDValidity();
+					
+					if (uidValidity == lastPosition.getUidValidity()) {
+						for (Message message: inbox.getMessagesByUID(lastPosition.getUid(), inbox.getUIDNext())) { 
+							try {
+								lastPosition.setUid(inbox.getUID(message) + 1);
+								listener.onReceived(message);
+							} catch (Exception e) {
+								logger.error("Error processing mail", e);
+							} 
+						}
+					} else {
+						lastPosition.setUidValidity(uidValidity);
+						lastPosition.setUid(inbox.getUIDNext());
+					}
+					
+					IMAPFolder inboxCopy = inbox;
 					inbox.addMessageCountListener(new MessageCountListener() {
 						
 						@Override
 						public void messagesAdded(MessageCountEvent event) {
-							for (Message message: event.getMessages()) 
-								listener.onReceived(message);
+							for (Message message: event.getMessages()) { 
+								try {
+									lastPosition.setUid(inboxCopy.getUID(message) + 1);
+									listener.onReceived(message);
+								} catch (Exception e) {
+									logger.error("Error processing mail", e);
+								} 
+							}
 						}
 
 						@Override
@@ -793,7 +813,6 @@ public class DefaultMailManager implements MailManager {
 
 					});
 
-					IMAPFolder inboxCopy = inbox;
 					future = executorService.submit(new Runnable() {
 
 						@Override
@@ -808,18 +827,6 @@ public class DefaultMailManager implements MailManager {
 						}
 						
 					});
-					
-					while (!future.isDone()) {
-						Thread.sleep(timeout*1000/2);
-		                inbox.doCommand(new IMAPFolder.ProtocolCommand() {
-		                	
-		                    public Object doCommand(IMAPProtocol p) throws ProtocolException {
-		                        p.simpleCommand("NOOP", null);
-		                        return null;
-		                    }
-		                    
-		                });						
-					}
 					future.get();
 				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);
@@ -853,7 +860,7 @@ public class DefaultMailManager implements MailManager {
 			return null;
 		}
 	}
-
+	
 	@Override
 	public String getReplyAddress(PullRequest request) {
 		MailSetting mailSetting = settingManager.getMailSetting();
