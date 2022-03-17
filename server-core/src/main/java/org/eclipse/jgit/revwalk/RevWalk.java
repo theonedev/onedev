@@ -32,10 +32,13 @@ import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.AsyncObjectLoaderQueue;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.MutableObjectId;
+import org.eclipse.jgit.lib.NullProgressMonitor;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectIdOwnerMap;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.ProgressMonitor;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
@@ -131,8 +134,17 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	 */
 	static final int TOPO_DELAY = 1 << 5;
 
+	/**
+	 * Temporary mark for use within {@link TopoNonIntermixSortGenerator}.
+	 * <p>
+	 * This mark indicates the commit has been queued for emission in
+	 * {@link TopoSortGenerator} and can be produced. This mark is removed when
+	 * the commit has been produced.
+	 */
+	static final int TOPO_QUEUED = 1 << 6;
+
 	/** Number of flag bits we keep internal for our own use. See above flags. */
-	static final int RESERVED_FLAGS = 6;
+	static final int RESERVED_FLAGS = 7;
 
 	private static final int APP_FLAGS = -1 & ~((1 << RESERVED_FLAGS) - 1);
 
@@ -171,6 +183,12 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	private boolean firstParent;
 
 	boolean shallowCommitsInitialized;
+
+	private enum GetMergedIntoStrategy {
+		RETURN_ON_FIRST_FOUND,
+		RETURN_ON_FIRST_NOT_FOUND,
+		EVALUATE_ALL
+	}
 
 	/**
 	 * Create a new revision walker for a given repository.
@@ -227,13 +245,13 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	 *             if it cannot open any of the underlying indices.
 	 *
 	 * @since 5.4
+	 * @deprecated use {@code ObjectReader#createReachabilityChecker(RevWalk)}
+	 *             instead.
 	 */
-	public ReachabilityChecker createReachabilityChecker() throws IOException {
-		if (reader.getBitmapIndex() != null) {
-			return new BitmappedReachabilityChecker(this);
-		}
-
-		return new PedestrianReachabilityChecker(true, this);
+	@Deprecated
+	public final ReachabilityChecker createReachabilityChecker()
+			throws IOException {
+		return reader.createReachabilityChecker(this);
 	}
 
 	/**
@@ -413,6 +431,149 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 			filter = oldRF;
 			treeFilter = oldTF;
 		}
+	}
+
+	/**
+	 * Determine the Refs into which a commit is merged.
+	 * <p>
+	 * A commit is merged into a ref if we can find a path of commits that leads
+	 * from that specific ref and ends at <code>commit</code>.
+	 * <p>
+	 *
+	 * @param commit
+	 *            commit the caller thinks is reachable from <code>refs</code>.
+	 * @param refs
+	 *            refs to start iteration from, and which is most likely a
+	 *            descendant (child) of <code>commit</code>.
+	 * @return list of refs that are reachable from <code>commit</code>.
+	 * @throws java.io.IOException
+	 *             a pack file or loose object could not be read.
+	 * @since 5.12
+	 */
+	public List<Ref> getMergedInto(RevCommit commit, Collection<Ref> refs)
+			throws IOException{
+		return getMergedInto(commit, refs, NullProgressMonitor.INSTANCE);
+	}
+
+	/**
+	 * Determine the Refs into which a commit is merged.
+	 * <p>
+	 * A commit is merged into a ref if we can find a path of commits that leads
+	 * from that specific ref and ends at <code>commit</code>.
+	 * <p>
+	 *
+	 * @param commit
+	 *            commit the caller thinks is reachable from <code>refs</code>.
+	 * @param refs
+	 *            refs to start iteration from, and which is most likely a
+	 *            descendant (child) of <code>commit</code>.
+	 * @param monitor
+	 *            the callback for progress and cancellation
+	 * @return list of refs that are reachable from <code>commit</code>.
+	 * @throws java.io.IOException
+	 *             a pack file or loose object could not be read.
+	 * @since 5.12
+	 */
+	public List<Ref> getMergedInto(RevCommit commit, Collection<Ref> refs,
+					ProgressMonitor monitor) throws IOException{
+		return getMergedInto(commit, refs,
+				GetMergedIntoStrategy.EVALUATE_ALL,
+				monitor);
+	}
+
+	/**
+	 * Determine if a <code>commit</code> is merged into any of the given
+	 * <code>refs</code>.
+	 *
+	 * @param commit
+	 *            commit the caller thinks is reachable from <code>refs</code>.
+	 * @param refs
+	 *            refs to start iteration from, and which is most likely a
+	 *            descendant (child) of <code>commit</code>.
+	 * @return true if commit is merged into any of the refs; false otherwise.
+	 * @throws java.io.IOException
+	 *             a pack file or loose object could not be read.
+	 * @since 5.12
+	 */
+	public boolean isMergedIntoAny(RevCommit commit, Collection<Ref> refs)
+			throws IOException {
+		return getMergedInto(commit, refs,
+				GetMergedIntoStrategy.RETURN_ON_FIRST_FOUND,
+				NullProgressMonitor.INSTANCE).size() > 0;
+	}
+
+	/**
+	 * Determine if a <code>commit</code> is merged into all of the given
+	 * <code>refs</code>.
+	 *
+	 * @param commit
+	 *            commit the caller thinks is reachable from <code>refs</code>.
+	 * @param refs
+	 *            refs to start iteration from, and which is most likely a
+	 *            descendant (child) of <code>commit</code>.
+	 * @return true if commit is merged into all of the refs; false otherwise.
+	 * @throws java.io.IOException
+	 *             a pack file or loose object could not be read.
+	 * @since 5.12
+	 */
+	public boolean isMergedIntoAll(RevCommit commit, Collection<Ref> refs)
+			throws IOException {
+		return getMergedInto(commit, refs,
+				GetMergedIntoStrategy.RETURN_ON_FIRST_NOT_FOUND,
+				NullProgressMonitor.INSTANCE).size()
+				== refs.size();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private List<Ref> getMergedInto(RevCommit needle, Collection<Ref> haystacks,
+				Enum returnStrategy, ProgressMonitor monitor) throws IOException {
+		List<Ref> result = new ArrayList<>();
+		List<RevCommit> uninteresting = new ArrayList<>();
+		RevFilter oldRF = filter;
+		TreeFilter oldTF = treeFilter;
+		try {
+			finishDelayedFreeFlags();
+			reset(~freeFlags & APP_FLAGS);
+			filter = RevFilter.ALL;
+			treeFilter = TreeFilter.ALL;
+			for (Ref r: haystacks) {
+				if (monitor.isCancelled()) {
+					return result;
+				}
+				monitor.update(1);
+				RevObject o = parseAny(r.getObjectId());
+				if (!(o instanceof RevCommit)) {
+					continue;
+				}
+				RevCommit c = (RevCommit) o;
+				resetRetain(RevFlag.UNINTERESTING);
+				markStart(c);
+				boolean commitFound = false;
+				RevCommit next;
+				while ((next = next()) != null) {
+					if (References.isSameObject(next, needle)) {
+						result.add(r);
+						if (returnStrategy == GetMergedIntoStrategy.RETURN_ON_FIRST_FOUND) {
+							return result;
+						}
+						commitFound = true;
+						break;
+					}
+				}
+				if(!commitFound){
+					markUninteresting(c);
+					uninteresting.add(c);
+					if (returnStrategy == GetMergedIntoStrategy.RETURN_ON_FIRST_NOT_FOUND) {
+						return result;
+					}
+				}
+			}
+		} finally {
+			roots.addAll(uninteresting);
+			filter = oldRF;
+			treeFilter = oldTF;
+		}
+		return result;
 	}
 
 	/**

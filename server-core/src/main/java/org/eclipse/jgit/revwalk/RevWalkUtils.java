@@ -159,15 +159,12 @@ public final class RevWalkUtils {
 		// Make sure commit is from the same RevWalk
 		commit = revWalk.parseCommit(commit.getId());
 		revWalk.reset();
-		List<Ref> result = new ArrayList<>();
+		List<Ref> filteredRefs = new ArrayList<>();
 		monitor.beginTask(JGitText.get().searchForReachableBranches,
 				refs.size());
 		final int SKEW = 24*3600; // one day clock skew
 
 		for (Ref ref : refs) {
-			if (monitor.isCancelled())
-				return result;
-			monitor.update(1);
 			RevObject maybehead = revWalk.parseAny(ref.getObjectId());
 			if (!(maybehead instanceof RevCommit))
 				continue;
@@ -179,9 +176,9 @@ public final class RevWalkUtils {
 			if (headCommit.getCommitTime() + SKEW < commit.getCommitTime())
 				continue;
 
-			if (revWalk.isMergedInto(commit, headCommit))
-				result.add(ref);
+			filteredRefs.add(ref);
 		}
+		List<Ref> result = revWalk.getMergedInto(commit, filteredRefs, monitor);
 		monitor.endTask();
 		return result;
 	}

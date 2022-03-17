@@ -58,54 +58,53 @@ import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.git.exception.RefUpdateException;
 
 public class GitUtils {
-	
-    public static final int SHORT_SHA_LENGTH = 8;
-    
-    public static boolean isEmptyPath(String path) {
-    	return Strings.isNullOrEmpty(path) || Objects.equal(path, DiffEntry.DEV_NULL);
-    }
-    
-    public static String abbreviateSHA(String sha, int length) {
-        Preconditions.checkArgument(ObjectId.isId(sha));
-        return sha.substring(0, length);
-    }
+
+	public static final int SHORT_SHA_LENGTH = 8;
+
+	public static boolean isEmptyPath(String path) {
+		return Strings.isNullOrEmpty(path) || Objects.equal(path, DiffEntry.DEV_NULL);
+	}
+
+	public static String abbreviateSHA(String sha, int length) {
+		Preconditions.checkArgument(ObjectId.isId(sha));
+		return sha.substring(0, length);
+	}
 
 	public static String abbreviateSHA(String sha) {
 		return abbreviateSHA(sha, SHORT_SHA_LENGTH);
 	}
-	
+
 	public static List<DiffEntry> diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId) {
 		List<DiffEntry> diffs = new ArrayList<>();
-		try (	DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);
+		try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);
 				RevWalk revWalk = new RevWalk(repository);
 				ObjectReader reader = repository.newObjectReader();) {
-	    	diffFormatter.setRepository(repository);
-	    	diffFormatter.setDetectRenames(true);
-	    	diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-	    	
-	    	CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
-	    	if (!oldRevId.equals(ObjectId.zeroId()))
-	    		oldTreeParser.reset(reader, revWalk.parseCommit(oldRevId).getTree());
-	    	
-	    	CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
-	    	if (!newRevId.equals(ObjectId.zeroId()))
-	    		newTreeParser.reset(reader, revWalk.parseCommit(newRevId).getTree());
-	    	
-	    	for (DiffEntry entry: diffFormatter.scan(oldTreeParser, newTreeParser)) {
-	    		if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
-	    				|| !Objects.equal(entry.getOldMode(), entry.getNewMode())
-	    				|| entry.getOldId()==null || !entry.getOldId().isComplete()
-	    				|| entry.getNewId()== null || !entry.getNewId().isComplete()
-	    				|| !entry.getOldId().equals(entry.getNewId())) {
-	    			diffs.add(entry);
-	    		}
-	    	}
+			diffFormatter.setRepository(repository);
+			diffFormatter.setDetectRenames(true);
+			diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+
+			CanonicalTreeParser oldTreeParser = new CanonicalTreeParser();
+			if (!oldRevId.equals(ObjectId.zeroId()))
+				oldTreeParser.reset(reader, revWalk.parseCommit(oldRevId).getTree());
+
+			CanonicalTreeParser newTreeParser = new CanonicalTreeParser();
+			if (!newRevId.equals(ObjectId.zeroId()))
+				newTreeParser.reset(reader, revWalk.parseCommit(newRevId).getTree());
+
+			for (DiffEntry entry : diffFormatter.scan(oldTreeParser, newTreeParser)) {
+				if (!Objects.equal(entry.getOldPath(), entry.getNewPath())
+						|| !Objects.equal(entry.getOldMode(), entry.getNewMode()) || entry.getOldId() == null
+						|| !entry.getOldId().isComplete() || entry.getNewId() == null || !entry.getNewId().isComplete()
+						|| !entry.getOldId().equals(entry.getNewId())) {
+					diffs.add(entry);
+				}
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}			
+		}
 		return diffs;
 	}
-	
+
 	@Nullable
 	public static String getDetailMessage(RevCommit commit) {
 		int start = 0;
@@ -114,14 +113,14 @@ public class GitUtils {
 			int index = fullMessage.indexOf('\n', start);
 			if (index == -1)
 				return null;
-			start = index+1;
+			start = index + 1;
 			int nextIndex = fullMessage.indexOf('\n', start);
 			if (nextIndex == -1)
 				return null;
-			start = nextIndex+1;
+			start = nextIndex + 1;
 			if (fullMessage.substring(index, nextIndex).trim().length() == 0) {
 				String detailMessage = fullMessage.substring(start).trim();
-				return detailMessage.length()!=0?detailMessage:null;
+				return detailMessage.length() != 0 ? detailMessage : null;
 			}
 		}
 	}
@@ -133,19 +132,17 @@ public class GitUtils {
 			return "Sub module";
 		else if (blobType == FileMode.TYPE_SYMLINK)
 			return "Symbol link";
-		else 
+		else
 			return "Folder";
 	}
 
 	public static PersonIdent newPersonIdent(String name, String email, Date when) {
-		return new PersonIdent(name, email, when.getTime(), 
-				SystemReader.getInstance().getTimezone(when.getTime()));
+		return new PersonIdent(name, email, when.getTime(), SystemReader.getInstance().getTimezone(when.getTime()));
 	}
-	
+
 	/**
-	 * Parse the original git raw date to Java date. The raw git date is in
-	 * unix timestamp with timezone like:
-	 * 1392312299 -0800
+	 * Parse the original git raw date to Java date. The raw git date is in unix
+	 * timestamp with timezone like: 1392312299 -0800
 	 * 
 	 * @param input the input raw date string
 	 * @return Java date
@@ -157,7 +154,7 @@ public class GitUtils {
 
 	/**
 	 * Parse the raw user information into PersonIdent object, the raw information
-	 * should be in format <code>[name] [<email>] [epoch timezone]</code>, for 
+	 * should be in format <code>[name] [<email>] [epoch timezone]</code>, for
 	 * example:
 	 * 
 	 * Jacob Thornton <jacobthornton@gmail.com> 1328060294 -0800
@@ -168,32 +165,32 @@ public class GitUtils {
 	public static @Nullable PersonIdent parsePersonIdent(String raw) {
 		if (Strings.isNullOrEmpty(raw))
 			return null;
-		
+
 		int pos1 = raw.indexOf('<');
 		if (pos1 <= 0)
 			throw new IllegalArgumentException("Raw " + raw);
-		
+
 		String name = raw.substring(0, pos1 - 1);
-		
+
 		int pos2 = raw.indexOf('>');
 		if (pos2 <= 0)
 			throw new IllegalArgumentException("Raw " + raw);
-		
+
 		String time = raw.substring(pos2 + 1).trim();
 		Date when = parseRawDate(time);
-		
+
 		String email = raw.substring(pos1 + 1, pos2 - 1);
-		
+
 		return newPersonIdent(name, email, when);
 	}
-	
+
 	public static int comparePath(@Nullable String path1, @Nullable String path2) {
 		List<String> segments1 = splitPath(path1);
 		List<String> segments2 = splitPath(path2);
-	
+
 		int index = 0;
-		for (String segment1: segments1) {
-			if (index<segments2.size()) {
+		for (String segment1 : segments1) {
+			if (index < segments2.size()) {
 				int result = segment1.compareTo(segments2.get(index));
 				if (result != 0)
 					return result;
@@ -202,7 +199,7 @@ public class GitUtils {
 			}
 			index++;
 		}
-		if (index<segments2.size())
+		if (index < segments2.size())
 			return -1;
 		else
 			return 0;
@@ -219,145 +216,137 @@ public class GitUtils {
 
 	public static @Nullable String normalizePath(@Nullable String path) {
 		List<String> pathSegments = splitPath(PathUtils.normalizeDots(path));
-		if (!pathSegments.isEmpty()) 
+		if (!pathSegments.isEmpty())
 			return Joiner.on("/").join(pathSegments);
-		else 
+		else
 			return null;
 	}
 
 	/**
-     * Convert a git reference name to branch name.
-     * 
-     * @param refName
-     *			name of the git reference 	
-     * @return
-     * 			name of the branch, or <tt>null</tt> if specified ref
-     * 			does not represent a branch
-     */ 
-    public static @Nullable String ref2branch(String refName) {
-		if (refName.startsWith(Constants.R_HEADS)) 
+	 * Convert a git reference name to branch name.
+	 * 
+	 * @param refName name of the git reference
+	 * @return name of the branch, or <tt>null</tt> if specified ref does not
+	 *         represent a branch
+	 */
+	public static @Nullable String ref2branch(String refName) {
+		if (refName.startsWith(Constants.R_HEADS))
 			return refName.substring(Constants.R_HEADS.length());
 		else
 			return null;
-    }
-    
-    public static String branch2ref(String branch) {
-    	return Constants.R_HEADS + branch; 
-    }    
+	}
+
+	public static String branch2ref(String branch) {
+		return Constants.R_HEADS + branch;
+	}
 
 	/**
-     * Convert a git reference name to tag name.
-     * 
-     * @param refName
-     *			name of the git reference 	
-     * @return
-     * 			name of the tag, or <tt>null</tt> if specified ref
-     * 			does not represent a tag
-     */ 
-    public static @Nullable String ref2tag(String refName) {
-		if (refName.startsWith(Constants.R_TAGS)) 
+	 * Convert a git reference name to tag name.
+	 * 
+	 * @param refName name of the git reference
+	 * @return name of the tag, or <tt>null</tt> if specified ref does not represent
+	 *         a tag
+	 */
+	public static @Nullable String ref2tag(String refName) {
+		if (refName.startsWith(Constants.R_TAGS))
 			return refName.substring(Constants.R_TAGS.length());
 		else
 			return null;
-    }
-    
-    public static String tag2ref(String tag) {
-    	return Constants.R_TAGS + tag; 
-    }    
-    
-    public static BlobIdent getOldBlobIdent(DiffEntry diffEntry, String oldRev) {
-    	BlobIdent blobIdent;
+	}
+
+	public static String tag2ref(String tag) {
+		return Constants.R_TAGS + tag;
+	}
+
+	public static BlobIdent getOldBlobIdent(DiffEntry diffEntry, String oldRev) {
+		BlobIdent blobIdent;
 		if (diffEntry.getChangeType() != ChangeType.ADD) {
 			blobIdent = new BlobIdent(oldRev, diffEntry.getOldPath(), diffEntry.getOldMode().getBits());
 		} else {
 			blobIdent = new BlobIdent(oldRev, null, null);
 		}
 		return blobIdent;
-    }
-    
-    public static BlobIdent getNewBlobIdent(DiffEntry diffEntry, String newRev) {
-    	BlobIdent blobIdent;
+	}
+
+	public static BlobIdent getNewBlobIdent(DiffEntry diffEntry, String newRev) {
+		BlobIdent blobIdent;
 		if (diffEntry.getChangeType() != ChangeType.DELETE) {
 			blobIdent = new BlobIdent(newRev, diffEntry.getNewPath(), diffEntry.getNewMode().getBits());
 		} else {
 			blobIdent = new BlobIdent(newRev, null, null);
 		}
 		return blobIdent;
-    }
-    
-    /**
-     * @return
-     * 			merge base of specified commits, or <tt>null</tt> if two commits do not have related history. In this 
-     * 			case, these two commits can not be merged
-     */
-    @Nullable
-    public static ObjectId getMergeBase(Repository repository, ObjectId commitId1, ObjectId commitId2) {
+	}
+
+	/**
+	 * @return merge base of specified commits, or <tt>null</tt> if two commits do
+	 *         not have related history. In this case, these two commits can not be
+	 *         merged
+	 */
+	@Nullable
+	public static ObjectId getMergeBase(Repository repository, ObjectId commitId1, ObjectId commitId2) {
 		try (RevWalk revWalk = new RevWalk(repository)) {
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
-			
+
 			revWalk.markStart(revWalk.parseCommit(commitId1));
 			revWalk.markStart(revWalk.parseCommit(commitId2));
 			RevCommit mergeBase = revWalk.next();
-			return mergeBase!=null?mergeBase.copy():null;
+			return mergeBase != null ? mergeBase.copy() : null;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		} 			
-    }
+		}
+	}
 
-    /**
-     * @return
-     * 			merge base of specified commits, or <tt>null</tt> if two commits do not have related history. In this 
-     * 			case, these two commits can not be merged
-     */
-    @Nullable
-	public static ObjectId getMergeBase(Repository repository1, ObjectId commit1, 
-			Repository repository2, ObjectId commit2) {
-		if (repository1.getDirectory() == null 
-				|| !repository1.getDirectory().equals(repository2.getDirectory())) {
+	/**
+	 * @return merge base of specified commits, or <tt>null</tt> if two commits do
+	 *         not have related history. In this case, these two commits can not be
+	 *         merged
+	 */
+	@Nullable
+	public static ObjectId getMergeBase(Repository repository1, ObjectId commit1, Repository repository2,
+			ObjectId commit2) {
+		if (repository1.getDirectory() == null || !repository1.getDirectory().equals(repository2.getDirectory())) {
 			fetch(repository2, commit2, repository1);
 		}
 		return GitUtils.getMergeBase(repository1, commit1, commit2);
 	}
-	
+
 	public static void fetch(Repository fromRepository, ObjectId fromCommit, Repository toRepository) {
-		new FetchCommand(toRepository.getDirectory(), null)
-				.from(fromRepository.getDirectory().getAbsolutePath())
-				.refspec(fromCommit.name())
-				.call();
+		new FetchCommand(toRepository.getDirectory(), null).from(fromRepository.getDirectory().getAbsolutePath())
+				.refspec(fromCommit.name()).call();
 	}
-    
-    public static boolean isMergedInto(Repository repository, @Nullable Map<String, String> gitEnvs, 
-    		ObjectId base, ObjectId tip) {
-    	if (gitEnvs != null && !gitEnvs.isEmpty()) {
-        	IsAncestorCommand cmd = new IsAncestorCommand(repository.getDirectory(), gitEnvs);
-        	cmd.ancestor(base.name()).descendant(tip.name());
-        	return cmd.call();
-    	} else {
-    		try (RevWalk revWalk = new RevWalk(repository)) {
-    			RevCommit baseCommit;
-    			try {
-    				baseCommit = revWalk.parseCommit(base);
-    			} catch (MissingObjectException e) {
-    				return false;
-    			}
-    			return revWalk.isMergedInto(baseCommit, revWalk.parseCommit(tip));
-    		} catch (IOException e) {
-    			throw new RuntimeException(e);
-    		} 			
-    	}
-    }
-    
-    /**
-     * Get commit of specified revision id.
-     * 
-     * @param revWalk
-     * @param revId
-     * @return
-     * 			<tt>null</tt> if specified id does not exist or does not 
-     * 			represent a commit
-     */
-    @Nullable
-    public static RevCommit parseCommit(RevWalk revWalk, ObjectId revId) {
+
+	public static boolean isMergedInto(Repository repository, @Nullable Map<String, String> gitEnvs, ObjectId base,
+			ObjectId tip) {
+		if (gitEnvs != null && !gitEnvs.isEmpty()) {
+			IsAncestorCommand cmd = new IsAncestorCommand(repository.getDirectory(), gitEnvs);
+			cmd.ancestor(base.name()).descendant(tip.name());
+			return cmd.call();
+		} else {
+			try (RevWalk revWalk = new RevWalk(repository)) {
+				RevCommit baseCommit;
+				try {
+					baseCommit = revWalk.parseCommit(base);
+				} catch (MissingObjectException e) {
+					return false;
+				}
+				return revWalk.isMergedInto(baseCommit, revWalk.parseCommit(tip));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	/**
+	 * Get commit of specified revision id.
+	 * 
+	 * @param revWalk
+	 * @param revId
+	 * @return <tt>null</tt> if specified id does not exist or does not represent a
+	 *         commit
+	 */
+	@Nullable
+	public static RevCommit parseCommit(RevWalk revWalk, ObjectId revId) {
 		RevObject peeled;
 		try {
 			peeled = revWalk.peel(revWalk.parseAny(revId));
@@ -370,10 +359,10 @@ public class GitUtils {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-    }
+	}
 
-    @Nullable
-    public static ObjectId resolve(Repository repository, String revision) {
+	@Nullable
+	public static ObjectId resolve(Repository repository, String revision) {
 		try {
 			return repository.resolve(revision);
 		} catch (RevisionSyntaxException | AmbiguousObjectException | IncorrectObjectTypeException e) {
@@ -381,85 +370,83 @@ public class GitUtils {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-    }
+	}
 
-    @Nullable
-    public static ObjectId rebase(Repository repository, ObjectId source, ObjectId target, PersonIdent committer) {
-    	try (	RevWalk revWalk = new RevWalk(repository);
-    			ObjectInserter inserter = repository.newObjectInserter();) {
-    		RevCommit sourceCommit = revWalk.parseCommit(source);
-    		RevCommit targetCommit = revWalk.parseCommit(target);
-    		revWalk.setRevFilter(RevFilter.NO_MERGES);
-    		List<RevCommit> commits = RevWalkUtils.find(revWalk, sourceCommit, targetCommit);
-    		Collections.reverse(commits);
-    		RevCommit headCommit = targetCommit;
-    		for (RevCommit commit: commits) {
-        		ResolveMerger merger = (ResolveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
-        		merger.setBase(commit.getParent(0));
-        		if (merger.merge(headCommit, commit)) {
+	@Nullable
+	public static ObjectId rebase(Repository repository, ObjectId source, ObjectId target, PersonIdent committer) {
+		try (RevWalk revWalk = new RevWalk(repository); ObjectInserter inserter = repository.newObjectInserter();) {
+			RevCommit sourceCommit = revWalk.parseCommit(source);
+			RevCommit targetCommit = revWalk.parseCommit(target);
+			revWalk.setRevFilter(RevFilter.NO_MERGES);
+			List<RevCommit> commits = RevWalkUtils.find(revWalk, sourceCommit, targetCommit);
+			Collections.reverse(commits);
+			RevCommit headCommit = targetCommit;
+			for (RevCommit commit : commits) {
+				ResolveMerger merger = (ResolveMerger) MergeStrategy.RECURSIVE.newMerger(repository, true);
+				merger.setBase(commit.getParent(0));
+				if (merger.merge(headCommit, commit)) {
 					if (!headCommit.getTree().getId().equals(merger.getResultTreeId())) {
-						if (!commit.getTree().getId().equals(merger.getResultTreeId()) 
+						if (!commit.getTree().getId().equals(merger.getResultTreeId())
 								|| !commit.getParent(0).equals(headCommit)) {
-					        CommitBuilder commitBuilder = new CommitBuilder();
-					        commitBuilder.setAuthor(commit.getAuthorIdent());
-					        commitBuilder.setCommitter(committer);
-					        commitBuilder.setParentId(headCommit);
-					        commitBuilder.setMessage(commit.getFullMessage());
-					        commitBuilder.setTreeId(merger.getResultTreeId());
-					        headCommit = revWalk.parseCommit(inserter.insert(commitBuilder));
+							CommitBuilder commitBuilder = new CommitBuilder();
+							commitBuilder.setAuthor(commit.getAuthorIdent());
+							commitBuilder.setCommitter(committer);
+							commitBuilder.setParentId(headCommit);
+							commitBuilder.setMessage(commit.getFullMessage());
+							commitBuilder.setTreeId(merger.getResultTreeId());
+							headCommit = revWalk.parseCommit(inserter.insert(commitBuilder));
 						} else {
 							headCommit = commit;
 						}
 					}
-        		} else {
-        			return null;
-        		}
-    		}
-    		inserter.flush();
-    		return headCommit.copy();
-    	} catch (IOException e) {
-    		throw new RuntimeException(e);
+				} else {
+					return null;
+				}
+			}
+			inserter.flush();
+			return headCommit.copy();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-    }
-    
-    @Nullable
-    public static ObjectId merge(Repository repository, ObjectId targetCommitId, ObjectId sourceCommitId, 
-    		boolean squash, PersonIdent committer, PersonIdent author, String commitMessage, 
-    		boolean useOursOnConflict) {
-    	boolean prevUseOursOnConflict = UseOursOnConflict.get();
-    	UseOursOnConflict.set(useOursOnConflict);
-    	try (	RevWalk revWalk = new RevWalk(repository);
-    			ObjectInserter inserter = repository.newObjectInserter();) {
-    		RevCommit sourceCommit = revWalk.parseCommit(sourceCommitId);
-    		RevCommit targetCommit = revWalk.parseCommit(targetCommitId);
-    		Merger merger = MergeStrategy.RECURSIVE.newMerger(repository, true);
-    		if (merger.merge(targetCommit, sourceCommit)) {
-		        CommitBuilder mergedCommit = new CommitBuilder();
-		        mergedCommit.setAuthor(author);
-		        mergedCommit.setCommitter(committer);
-		        if (squash)
-		        	mergedCommit.setParentId(targetCommit);
-		        else
-		        	mergedCommit.setParentIds(targetCommit, sourceCommit);
-		        mergedCommit.setMessage(commitMessage);
-		        mergedCommit.setTreeId(merger.getResultTreeId());
-		        ObjectId mergedCommitId = inserter.insert(mergedCommit);
-		        inserter.flush();
-		        return mergedCommitId;
-    		} else {
-    			return null;
-    		}
-    	} catch (IOException e) {
-    		throw new RuntimeException(e);
-		} finally {
-			UseOursOnConflict.set(prevUseOursOnConflict);
+	}
+
+	@Nullable
+	public static ObjectId merge(Repository repository, ObjectId targetCommitId, ObjectId sourceCommitId,
+			boolean squash, PersonIdent committer, PersonIdent author, String commitMessage,
+			boolean useOursOnConflict) {
+		try (RevWalk revWalk = new RevWalk(repository); ObjectInserter inserter = repository.newObjectInserter();) {
+			RevCommit sourceCommit = revWalk.parseCommit(sourceCommitId);
+			RevCommit targetCommit = revWalk.parseCommit(targetCommitId);
+			Merger merger;
+			if (useOursOnConflict)
+				merger = MergeStrategy.OURS.newMerger(repository, true);
+			else
+				merger = MergeStrategy.RECURSIVE.newMerger(repository, true);
+			if (merger.merge(targetCommit, sourceCommit)) {
+				CommitBuilder mergedCommit = new CommitBuilder();
+				mergedCommit.setAuthor(author);
+				mergedCommit.setCommitter(committer);
+				if (squash)
+					mergedCommit.setParentId(targetCommit);
+				else
+					mergedCommit.setParentIds(targetCommit, sourceCommit);
+				mergedCommit.setMessage(commitMessage);
+				mergedCommit.setTreeId(merger.getResultTreeId());
+				ObjectId mergedCommitId = inserter.insert(mergedCommit);
+				inserter.flush();
+				return mergedCommitId;
+			} else {
+				return null;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-    }
-    
-    public static Collection<String> getChangedFiles(Repository repository, ObjectId oldCommitId, ObjectId newCommitId) {
+	}
+
+	public static Collection<String> getChangedFiles(Repository repository, ObjectId oldCommitId,
+			ObjectId newCommitId) {
 		Collection<String> changedFiles = new HashSet<>();
-		try (	RevWalk revWalk = new RevWalk(repository);
-				TreeWalk treeWalk = new TreeWalk(repository)) {
+		try (RevWalk revWalk = new RevWalk(repository); TreeWalk treeWalk = new TreeWalk(repository)) {
 			treeWalk.setFilter(TreeFilter.ANY_DIFF);
 			treeWalk.setRecursive(true);
 			RevCommit oldCommit = revWalk.parseCommit(oldCommitId);
@@ -473,12 +460,12 @@ public class GitUtils {
 			throw new RuntimeException(e);
 		}
 		return changedFiles;
-    }
+	}
 
-    public static boolean isValid(File gitDir) {
-    	return new File(gitDir, "objects").exists();
-    }
-    
+	public static boolean isValid(File gitDir) {
+		return new File(gitDir, "objects").exists();
+	}
+
 	public static RefUpdate getRefUpdate(Repository repository, String refName) {
 		try {
 			return repository.updateRef(refName);
@@ -486,44 +473,43 @@ public class GitUtils {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public static void updateRef(RefUpdate refUpdate) {
 		try {
 			RefUpdate.Result result = refUpdate.forceUpdate();
-	        if (result == RefUpdate.Result.LOCK_FAILURE 
-	        		&& refUpdate.getExpectedOldObjectId() != null 
-	        		&& !refUpdate.getExpectedOldObjectId().equals(refUpdate.getOldObjectId())) {
-	        	throw new ObsoleteCommitException(refUpdate.getOldObjectId());
-	        } else if (result != RefUpdate.Result.FAST_FORWARD && result != RefUpdate.Result.FORCED
-	        		&& result != RefUpdate.Result.NEW && result != RefUpdate.Result.NO_CHANGE) {
-	        	throw new RefUpdateException(result);
-	        } 
+			if (result == RefUpdate.Result.LOCK_FAILURE && refUpdate.getExpectedOldObjectId() != null
+					&& !refUpdate.getExpectedOldObjectId().equals(refUpdate.getOldObjectId())) {
+				throw new ObsoleteCommitException(refUpdate.getOldObjectId());
+			} else if (result != RefUpdate.Result.FAST_FORWARD && result != RefUpdate.Result.FORCED
+					&& result != RefUpdate.Result.NEW && result != RefUpdate.Result.NO_CHANGE) {
+				throw new RefUpdateException(result);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public static void deleteRef(RefUpdate refUpdate) {
 		try {
 			refUpdate.setForceUpdate(true);
 			RefUpdate.Result result = refUpdate.delete();
-	        if (result == RefUpdate.Result.LOCK_FAILURE
-	        		&& refUpdate.getExpectedOldObjectId() != null
-	        		&& !refUpdate.getExpectedOldObjectId().equals(refUpdate.getOldObjectId())) {
-	        	throw new ObsoleteCommitException(refUpdate.getOldObjectId());
-	        } else if (result != RefUpdate.Result.FAST_FORWARD && result != RefUpdate.Result.FORCED
-	        		&& result != RefUpdate.Result.NEW && result != RefUpdate.Result.NO_CHANGE) {
-	        	throw new RefUpdateException(result);
-	        } 
+			if (result == RefUpdate.Result.LOCK_FAILURE && refUpdate.getExpectedOldObjectId() != null
+					&& !refUpdate.getExpectedOldObjectId().equals(refUpdate.getOldObjectId())) {
+				throw new ObsoleteCommitException(refUpdate.getOldObjectId());
+			} else if (result != RefUpdate.Result.FAST_FORWARD && result != RefUpdate.Result.FORCED
+					&& result != RefUpdate.Result.NEW && result != RefUpdate.Result.NO_CHANGE) {
+				throw new RefUpdateException(result);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public static void linkRef(RefUpdate refUpdate, String target) {
 		try {
 			RefUpdate.Result result = refUpdate.link(target);
-			if (result != RefUpdate.Result.FORCED && result != RefUpdate.Result.NEW && result != RefUpdate.Result.NO_CHANGE)
+			if (result != RefUpdate.Result.FORCED && result != RefUpdate.Result.NEW
+					&& result != RefUpdate.Result.NO_CHANGE)
 				throw new RefUpdateException(result);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

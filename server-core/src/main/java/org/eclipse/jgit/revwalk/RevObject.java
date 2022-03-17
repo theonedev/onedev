@@ -152,6 +152,7 @@ public abstract class RevObject extends ObjectIdOwnerMap.Entry {
 	 */
 	protected void appendCoreFlags(StringBuilder s) {
 		s.append((flags & RevWalk.TOPO_DELAY) != 0 ? 'o' : '-');
+		s.append((flags & RevWalk.TOPO_QUEUED) != 0 ? 'q' : '-');
 		s.append((flags & RevWalk.TEMP_MARK) != 0 ? 't' : '-');
 		s.append((flags & RevWalk.REWRITE) != 0 ? 'r' : '-');
 		s.append((flags & RevWalk.UNINTERESTING) != 0 ? 'u' : '-');

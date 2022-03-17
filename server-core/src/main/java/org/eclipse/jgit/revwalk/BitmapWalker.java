@@ -16,6 +16,7 @@ import java.util.Arrays;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.internal.revwalk.AddToBitmapFilter;
+import org.eclipse.jgit.internal.revwalk.AddToBitmapWithCacheFilter;
 import org.eclipse.jgit.internal.revwalk.AddUnseenToBitmapFilter;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.BitmapIndex;
@@ -41,6 +42,11 @@ public final class BitmapWalker {
 
 	private long countOfBitmapIndexMisses;
 
+	// Cached bitmap and commit to save walk time.
+	private AnyObjectId prevCommit;
+
+	private Bitmap prevBitmap;
+
 	/**
 	 * Create a BitmapWalker.
 	 *
@@ -53,6 +59,28 @@ public final class BitmapWalker {
 		this.walker = walker;
 		this.bitmapIndex = bitmapIndex;
 		this.pm = (pm == null) ? NullProgressMonitor.INSTANCE : pm;
+	}
+
+	/**
+	 * Set the cached commit for the walker.
+	 *
+	 * @param prevCommit
+	 *            the cached commit.
+	 * @since 5.8
+	 */
+	public void setPrevCommit(AnyObjectId prevCommit) {
+		this.prevCommit = prevCommit;
+	}
+
+	/**
+	 * Set the bitmap associated with the cached commit for the walker.
+	 *
+	 * @param prevBitmap
+	 *            the bitmap associated with the cached commit.
+	 * @since 5.8
+	 */
+	public void setPrevBitmap(Bitmap prevBitmap) {
+		this.prevBitmap = prevBitmap;
 	}
 
 	/**
@@ -169,7 +197,10 @@ public final class BitmapWalker {
 		}
 
 		if (marked) {
-			if (seen == null) {
+			if (prevCommit != null) {
+				walker.setRevFilter(new AddToBitmapWithCacheFilter(prevCommit,
+						prevBitmap, bitmapResult));
+			} else if (seen == null) {
 				walker.setRevFilter(new AddToBitmapFilter(bitmapResult));
 			} else {
 				walker.setRevFilter(

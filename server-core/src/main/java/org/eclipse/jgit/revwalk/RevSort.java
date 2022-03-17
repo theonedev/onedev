@@ -40,6 +40,18 @@ public enum RevSort {
 	TOPO,
 
 	/**
+	 * Topological sorting (all children before parents) without intermixing
+	 * lines of history.
+	 * <p>
+	 * This behavior more closely resembles C Git's git-log --topo-order than
+	 * {@link #TOPO}. See C Git's topo-order <a href=
+	 * "https://git-scm.com/docs/git-log#Documentation/git-log.txt---topo-order">description</a>.
+	 *
+	 * @since 5.8
+	 */
+	TOPO_KEEP_BRANCH_TOGETHER,
+
+	/**
 	 * Flip the output into the reverse ordering.
 	 * <p>
 	 * This strategy can be combined with the others described by this type as

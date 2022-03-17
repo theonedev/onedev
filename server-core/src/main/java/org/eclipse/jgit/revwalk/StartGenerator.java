@@ -135,8 +135,18 @@ class StartGenerator extends Generator {
 		}
 
 		if (walker.hasRevSort(RevSort.TOPO)
-				&& (g.outputType() & SORT_TOPO) == 0)
+				&& walker.hasRevSort(RevSort.TOPO_KEEP_BRANCH_TOGETHER)) {
+			throw new IllegalStateException(JGitText
+					.get().cannotCombineTopoSortWithTopoKeepBranchTogetherSort);
+		}
+
+		if (walker.hasRevSort(RevSort.TOPO)
+				&& (g.outputType() & SORT_TOPO) == 0) {
 			g = new TopoSortGenerator(g);
+		} else if (walker.hasRevSort(RevSort.TOPO_KEEP_BRANCH_TOGETHER)
+				&& (g.outputType() & SORT_TOPO) == 0) {
+			g = new TopoNonIntermixSortGenerator(g);
+		}
 		if (walker.hasRevSort(RevSort.REVERSE))
 			g = new LIFORevQueue(g);
 		if (boundary)

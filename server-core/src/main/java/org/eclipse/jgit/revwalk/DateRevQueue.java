@@ -93,7 +93,7 @@ public class DateRevQueue extends AbstractRevQueue {
 			head = n;
 		} else {
 			Entry p = q.next;
-			while (p != null && p.commit.commitTime > when) {
+			while (p != null && p.commit.commitTime >= when) {
 				q = p;
 				p = q.next;
 			}
