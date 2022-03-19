@@ -149,9 +149,10 @@ public class Upgrade extends DefaultPersistManager {
 					Bootstrap.command.getScript());
 			System.exit(1);
 		}
+		
 		File upgradeDir = new File(Bootstrap.command.getArgs()[0]);
-		if (!upgradeDir.isAbsolute())
-			upgradeDir = new File(Bootstrap.getBinDir(), upgradeDir.getPath());
+		if (!upgradeDir.isAbsolute() && System.getenv("WRAPPER_INIT_DIR") != null)
+			upgradeDir = new File(System.getenv("WRAPPER_INIT_DIR"), upgradeDir.getPath());
 		
 		if (!upgradeDir.exists()) {
 			logger.error("Unable to find directory: {}", upgradeDir.getAbsolutePath());
