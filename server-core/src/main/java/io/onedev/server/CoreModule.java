@@ -100,6 +100,7 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.entitymanager.GroupManager;
@@ -143,6 +144,7 @@ import io.onedev.server.entitymanager.impl.DefaultCodeCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentReplyManager;
 import io.onedev.server.entitymanager.impl.DefaultCommitQueryPersonalizationManager;
+import io.onedev.server.entitymanager.impl.DefaultEmailAddressManager;
 import io.onedev.server.entitymanager.impl.DefaultGitLfsLockManager;
 import io.onedev.server.entitymanager.impl.DefaultGroupAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultGroupManager;
@@ -432,6 +434,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(LinkSpecManager.class).to(DefaultLinkSpecManager.class);
 		bind(IssueLinkManager.class).to(DefaultIssueLinkManager.class);
 		bind(LinkAuthorizationManager.class).to(DefaultLinkAuthorizationManager.class);
+		bind(EmailAddressManager.class).to(DefaultEmailAddressManager.class);
 		
 		bind(WebHookManager.class);
 		

@@ -301,7 +301,7 @@ public class ImportUtils {
 							String email = getEmail(reporterNode);
 							String login = reporterNode.get("login").asText();
 							if (email != null) {
-								User user = OneDev.getInstance(UserManager.class).findByEmail(email);
+								User user = OneDev.getInstance(UserManager.class).findByVerifiedEmailAddress(email);
 								if (user != null) {
 									issue.setSubmitter(user);
 								} else {
@@ -453,7 +453,7 @@ public class ImportUtils {
 										extraIssueInfo.put(fieldName, fullName);
 									} else {
 										if (email != null) {
-											User user = OneDev.getInstance(UserManager.class).findByEmail(email);
+											User user = OneDev.getInstance(UserManager.class).findByVerifiedEmailAddress(email);
 											if (user != null) {
 												fieldValue = user.getName();
 											} else {
@@ -494,7 +494,7 @@ public class ImportUtils {
 											String email = getEmail(valueNode);
 											
 											if (email != null) {
-												User user = OneDev.getInstance(UserManager.class).findByEmail(email);
+												User user = OneDev.getInstance(UserManager.class).findByVerifiedEmailAddress(email);
 												if (user != null) {
 													fieldValue = user.getName();
 												} else {
@@ -727,7 +727,7 @@ public class ImportUtils {
 									String email = getEmail(authorNode);
 									String login = authorNode.get("login").asText();
 									if (email != null) {
-										User user = OneDev.getInstance(UserManager.class).findByEmail(email);
+										User user = OneDev.getInstance(UserManager.class).findByVerifiedEmailAddress(email);
 										if (user != null) {
 											comment.setUser(user);
 										} else {

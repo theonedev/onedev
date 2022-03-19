@@ -20,12 +20,14 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -48,8 +50,9 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
     		MembershipManager membershipManager, GroupManager groupManager, 
     		ProjectManager projectManager, SessionManager sessionManager, 
     		TransactionManager transactionManager, SshKeyManager sshKeyManager, 
-    		PasswordService passwordService) {
-		super(userManager, groupManager, projectManager, sessionManager, settingManager);
+    		PasswordService passwordService, EmailAddressManager emailAddressManager) {
+		super(userManager, groupManager, projectManager, sessionManager, 
+				settingManager, emailAddressManager);
 		
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(passwordService);
@@ -69,11 +72,19 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		User user = new User();
 		user.setName(userName);
 		user.setPassword(User.EXTERNAL_MANAGED);
-		user.setEmail(authenticated.getEmail());
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
-		
 		userManager.save(user);
+		
+		EmailAddress emailAddress = new EmailAddress();
+		emailAddress.setValue(authenticated.getEmail());
+		emailAddress.setVerificationCode(null);
+		emailAddress.setOwner(user);
+		emailAddress.setPrimary(true);
+		emailAddress.setGit(true);
+		emailAddressManager.save(emailAddress);
+		
+		user.getEmailAddresses().add(emailAddress);
 
 		Collection<String> groupNames = authenticated.getGroupNames();
 		if (groupNames == null && defaultGroup != null)
@@ -86,14 +97,26 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
     	return user;
 	}
 	
-	private void updateUser(User user, Authenticated authenticated) {
-		user.setEmail(authenticated.getEmail());
+	private void updateUser(User user, Authenticated authenticated, @Nullable EmailAddress emailAddress) {
+		if (emailAddress != null) {
+			emailAddress.setVerificationCode(null);
+			emailAddressManager.setAsPrimary(emailAddress);
+		} else {
+			emailAddress = new EmailAddress();
+			emailAddress.setValue(authenticated.getEmail());
+			emailAddress.setVerificationCode(null);
+			emailAddress.setOwner(user);
+			emailAddress.setPrimary(true);
+			emailAddress.setGit(true);
+			emailAddressManager.save(emailAddress);
+		}
+		user.setSsoConnector(null);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
 		userManager.save(user);
+		
 		if (authenticated.getGroupNames() != null)
 			membershipManager.syncMemberships(user, authenticated.getGroupNames());
-		
     	if (authenticated.getSshKeys() != null)
     		sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());
 	}
@@ -106,44 +129,54 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 			@Override
 			public AuthenticationInfo call() {
 				try {
-					String userName = (String) token.getPrincipal();
-					User user = userManager.findByName(userName);
-					if (user == null)
-						user = userManager.findByEmail(userName);
-			    	if (user == null) {
+					String userNameOrEmailAddressValue = (String) token.getPrincipal();
+					User user;
+					EmailAddress emailAddress = emailAddressManager.findByValue(userNameOrEmailAddressValue);
+					if (emailAddress != null)
+						user = emailAddress.getOwner();
+					else 
+						user = userManager.findByName(userNameOrEmailAddressValue);
+					if (user != null) {
+						if (user.isExternalManaged()) {
+					    	Authenticator authenticator = settingManager.getAuthenticator();
+			    			if (authenticator != null) {
+			    				UsernamePasswordToken authToken = (UsernamePasswordToken) token;
+			    				authToken = new UsernamePasswordToken(user.getName(), authToken.getPassword(), 
+			    						authToken.isRememberMe(), authToken.getHost());
+			    				Authenticated authenticated = authenticator.authenticate(authToken);
+			    				String emailAddressValue = authenticated.getEmail();
+			    				emailAddress = emailAddressManager.findByValue(emailAddressValue);
+			    				if (emailAddress != null && !emailAddress.getOwner().equals(user)) {
+			    					throw new AuthenticationException("Email address '" + emailAddressValue 
+			    							+ "' has already been used by another user");
+			    				} else {
+				        			updateUser(user, authenticated, emailAddress);
+				        			return user;
+			    				}
+			    			} else {
+			    				throw new AuthenticationException("No external authenticator to authenticate user '" 
+			    						+ userNameOrEmailAddressValue + "'");
+			    			}
+						} else {
+							return user;
+						}
+					} else if (emailAddress == null) {
 				    	Authenticator authenticator = settingManager.getAuthenticator();
 		    			if (authenticator != null) {
 		    				Authenticated authenticated = authenticator.authenticate((UsernamePasswordToken) token);
-		    				String email = authenticated.getEmail();
-		    				if (userManager.findByEmail(email) != null) {
-		    					throw new AuthenticationException("Email '" + email 
-		    							+ "' has already been used by another account");
+		    				String emailAddressValue = authenticated.getEmail();
+		    				if (emailAddressManager.findByValue(emailAddressValue) != null) {
+		    					throw new AuthenticationException("Email address '" + emailAddressValue
+		    							+ "' has already been used by another user");
+		    				} else {
+		    					return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
 		    				}
-		        			user = newUser(userName, authenticated, authenticator.getDefaultGroup());
 		    			} else {
-		    	            throw new UnknownAccountException("Unable to find account data for token [" + token + "] in realm [" + this + "]");
+		    	            throw new UnknownAccountException("Unknown user");
 		    			}
-			    	} else if (user.getPassword().equals(User.EXTERNAL_MANAGED)) {
-		    			if (user.getSsoInfo().getConnector() != null) {
-		    				throw new AuthenticationException("Account '" + userName 
-		    						+ "' is set to authenticate via " + User.AUTH_SOURCE_SSO_PROVIDER 
-		    						+ user.getSsoInfo().getConnector());
-		    			}
-				    	Authenticator authenticator = settingManager.getAuthenticator();
-		    			if (authenticator != null) {
-		    				Authenticated authenticated = authenticator.authenticate((UsernamePasswordToken) token);
-		    				String email = authenticated.getEmail();
-		    				if (!email.equals(user.getEmail()) && userManager.findByEmail(email) != null) { 
-		    					throw new AuthenticationException("Email '" + email 
-		    							+ "' has already been used by another account");
-		    				}
-		        			updateUser(user, authenticated);
-		    			} else {
-		    				throw new AuthenticationException("Account '" + userName + "' is set to authenticate "
-		    						+ "externally but " + User.AUTH_SOURCE_EXTERNAL_AUTHENTICATOR + " is not defined");
-		    			}
-			    	} 				
-			    	return user;
+			    	} else {
+	    	            throw new UnknownAccountException("Unknown user");
+			    	}
 				} catch (Exception e) {
 	    			if (e instanceof AuthenticationException) {
 	    				logger.debug("Authentication not passed", e);

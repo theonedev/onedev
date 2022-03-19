@@ -51,6 +51,7 @@ import io.onedev.server.web.page.admin.user.accesstoken.UserAccessTokenPage;
 import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.user.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
+import io.onedev.server.web.page.admin.user.emailaddresses.UserEmailAddressesPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
@@ -64,6 +65,7 @@ import io.onedev.server.web.page.help.ResourceListPage;
 import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
+import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
@@ -125,6 +127,7 @@ import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
 import io.onedev.server.web.page.simple.error.MethodNotAllowedErrorPage;
 import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
+import io.onedev.server.web.page.simple.security.EmailAddressVerificationPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.security.LogoutPage;
 import io.onedev.server.web.page.simple.security.PasswordResetPage;
@@ -174,6 +177,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	
 	private void addMyPages() {
 		add(new DynamicPathPageMapper("my/profile", MyProfilePage.class));
+		add(new DynamicPathPageMapper("my/email-addresses", MyEmailAddressesPage.class));
 		add(new DynamicPathPageMapper("my/avatar", MyAvatarPage.class));
 		add(new DynamicPathPageMapper("my/password", MyPasswordPage.class));
 		add(new DynamicPathPageMapper("my/ssh-keys", MySshKeysPage.class));
@@ -213,6 +217,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("logout", LogoutPage.class));
 		add(new DynamicPathPageMapper("signup", SignUpPage.class));
 		add(new DynamicPathPageMapper("reset-password", PasswordResetPage.class));
+		add(new DynamicPathPageMapper("verify-email-address/${emailAddress}/${verificationCode}", 
+				EmailAddressVerificationPage.class));
 		add(new DynamicPathPageMapper(SsoProcessPage.MOUNT_PATH + "/${stage}/${connector}", SsoProcessPage.class));
 	}
  	
@@ -221,6 +227,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/users", UserListPage.class));
 		add(new DynamicPathPageMapper("administration/users/new", NewUserPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/profile", UserProfilePage.class));
+		add(new DynamicPathPageMapper("administration/users/${user}/email-setting", UserEmailAddressesPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/groups", UserMembershipsPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/authorizations", UserAuthorizationsPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/avatar", UserAvatarPage.class));

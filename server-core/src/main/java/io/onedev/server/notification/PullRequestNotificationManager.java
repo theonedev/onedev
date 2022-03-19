@@ -34,6 +34,7 @@ import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
@@ -201,11 +202,14 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 							WordUtils.capitalize(changeData.getActivity()), request.getTitle());
 					String threadingReferences = String.format("<%s-%s@onedev>", 
 							changeData.getActivity().replace(' ', '-'), request.getUUID());
-					mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), 
-							Lists.newArrayList(), Lists.newArrayList(), subject, 
-							getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
-							getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
-							replyAddress, threadingReferences);
+					EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified()) {
+						mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()), 
+								Lists.newArrayList(), Lists.newArrayList(), subject, 
+								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+								getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
+								replyAddress, threadingReferences);
+					}
 					notifiedUsers.add(request.getSubmitter());
 				}
 			} else if (changeData instanceof PullRequestAssigneeAddData) {
@@ -232,11 +236,14 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 					assignmentSummary = user.getDisplayName() + " assigned to you";
 				else
 					assignmentSummary = "Assigned to you";
-				mailManager.sendMailAsync(Lists.newArrayList(assignee.getEmail()), 
-						Lists.newArrayList(), Lists.newArrayList(), subject, 
-						getHtmlBody(event, assignmentSummary, event.getHtmlBody(), url, replyable, null), 
-						getTextBody(event, assignmentSummary, event.getTextBody(), url, replyable, null), 
-						replyAddress, threadingReferences);
+				EmailAddress emailAddress = assignee.getPrimaryEmailAddress();
+				if (emailAddress != null && emailAddress.isVerified()) {
+					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()), 
+							Lists.newArrayList(), Lists.newArrayList(), subject, 
+							getHtmlBody(event, assignmentSummary, event.getHtmlBody(), url, replyable, null), 
+							getTextBody(event, assignmentSummary, event.getTextBody(), url, replyable, null), 
+							replyAddress, threadingReferences);
+				}				
 				notifiedUsers.add(assignee);
 			}
 		}
@@ -252,11 +259,15 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 					reviewInvitationSummary = user.getDisplayName() + " invited you to review";
 				else
 					reviewInvitationSummary = "Invited you to review";
-				mailManager.sendMailAsync(Lists.newArrayList(reviewer.getEmail()), 
-						Lists.newArrayList(), Lists.newArrayList(), subject, 
-						getHtmlBody(event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null), 
-						getTextBody(event, reviewInvitationSummary, event.getTextBody(), url, replyable, null), 
-						replyAddress, threadingReferences);
+				
+				EmailAddress emailAddress = reviewer.getPrimaryEmailAddress();
+				if (emailAddress != null && emailAddress.isVerified()) {
+					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()), 
+							Lists.newArrayList(), Lists.newArrayList(), subject, 
+							getHtmlBody(event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null), 
+							getTextBody(event, reviewInvitationSummary, event.getTextBody(), url, replyable, null), 
+							replyAddress, threadingReferences);
+				}
 				notifiedUsers.add(reviewer);
 			}
 		}
@@ -272,15 +283,18 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				User mentionedUser = userManager.findByName(userName);
 				if (mentionedUser != null) { 
 					pullRequestWatchManager.watch(request, mentionedUser, true);
-					if (!notifiedEmailAddresses.stream().anyMatch(mentionedUser.getEmails()::contains)) {
+					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
 						String subject = String.format("[Pull Request %s] (Mentioned You) %s", request.getFQN(), request.getTitle());
 						String threadingReferences = String.format("<mentioned-%s@onedev>", request.getUUID());
 						
-						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), 
-								Sets.newHashSet(), Sets.newHashSet(), subject, 
-								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
-								getTextBody(event, summary, event.getTextBody(), url, replyable, null),
-								replyAddress, threadingReferences);
+						EmailAddress emailAddress = mentionedUser.getPrimaryEmailAddress();
+						if (emailAddress != null && emailAddress.isVerified()) {
+							mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), 
+									Sets.newHashSet(), Sets.newHashSet(), subject, 
+									getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+									getTextBody(event, summary, event.getTextBody(), url, replyable, null),
+									replyAddress, threadingReferences);
+						}
 						notifiedUsers.add(mentionedUser);
 					}					
 				}
@@ -302,7 +316,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		}
 		
 		if (notifyWatchers) {
-			Collection<User> bccUsers = new HashSet<>();
+			Collection<String> bccEmailAddresses = new HashSet<>();
 			
 			for (PullRequestWatch watch: request.getWatches()) {
 				Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);
@@ -310,12 +324,14 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 						&& (visitDate == null || visitDate.before(event.getDate())) 
 						&& (!(event instanceof PullRequestUpdated) || !watch.getUser().equals(request.getSubmitter()))
 						&& !notifiedUsers.contains(watch.getUser())
-						&& !notifiedEmailAddresses.stream().anyMatch(watch.getUser().getEmails()::contains)) {
-					bccUsers.add(watch.getUser());
+						&& !isNotified(notifiedEmailAddresses, watch.getUser())) {
+					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
+					if (emailAddress != null && emailAddress.isVerified())
+						bccEmailAddresses.add(emailAddress.getValue());
 				}
 			}
 
-			if (!bccUsers.isEmpty()) {
+			if (!bccEmailAddresses.isEmpty()) {
 				String subject = String.format("[Pull Request %s] (%s) %s", 
 						request.getFQN(), (event instanceof PullRequestOpened)?"Opened":"Updated", request.getTitle());
 				String threadingReferences = "<" + request.getUUID() + "@onedev>";
@@ -324,8 +340,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				String textBody = getTextBody(event, summary, event.getTextBody(), url, replyable, unsubscribable);
 				mailManager.sendMailAsync(
 						Lists.newArrayList(), Lists.newArrayList(),
-						bccUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
-						subject, htmlBody, textBody, replyAddress, threadingReferences);
+						bccEmailAddresses, subject, htmlBody, textBody, 
+						replyAddress, threadingReferences);
 			}
 		}				
 	}

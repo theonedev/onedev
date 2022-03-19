@@ -132,6 +132,15 @@ ul.feedbackPanel>li:first-child:last-child {
     border-radius: 0 0.42rem 0.42rem 0;
 }
 
+.form-group .feedbackPanel {
+	margin: 0.8rem 0 !important;
+}
+.form-group .feedbackPanelERROR {
+	background-color: inherit !important;
+	border-left: none !important;
+	padding: 0 !important;
+}
+
 table {
 	border-spacing: 0;
 }
@@ -166,6 +175,7 @@ tr.navigation>td {
 /* TABLE COMPONENTS */
 table .row-selector {
 	width: 1px;
+	padding-top: 14px;
 }
 table .row-selector .checkbox span {
 	margin: 0;

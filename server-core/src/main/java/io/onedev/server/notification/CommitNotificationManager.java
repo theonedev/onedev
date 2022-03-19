@@ -24,6 +24,7 @@ import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.CommitQueryPersonalization;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -87,7 +88,9 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 					User.push(user);
 					try {
 						if (CommitQuery.parse(project, queryString).matches(event)) {
-							notifyEmails.add(user.getEmail());
+							EmailAddress emailAddress = user.getPrimaryEmailAddress();
+							if (emailAddress != null && emailAddress.isVerified())
+								notifyEmails.add(emailAddress.getValue());
 							break;
 						}
 					} catch (Exception e) {

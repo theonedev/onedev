@@ -15,6 +15,7 @@ import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 
@@ -63,11 +64,14 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 						String threadingReferences = "<" + event.getComment().getProject().getPath() 
 								+ "-codecomment-" + event.getComment().getId() + "@onedev>";
 
-						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), Lists.newArrayList(), 
-								Lists.newArrayList(), subject, 
-								getHtmlBody(event, summary, processedMarkdown, url, false, null), 
-								getTextBody(event, summary, markdown, url, false, null), 
-								null, threadingReferences);
+						EmailAddress emailAddress = user.getPrimaryEmailAddress();
+						if (emailAddress != null && emailAddress.isVerified()) {
+							mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), Lists.newArrayList(), 
+									Lists.newArrayList(), subject, 
+									getHtmlBody(event, summary, processedMarkdown, url, false, null), 
+									getTextBody(event, summary, markdown, url, false, null), 
+									null, threadingReferences);
+						}
 					}
 				}
 			}

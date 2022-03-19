@@ -61,10 +61,10 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
+import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -91,11 +91,11 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
@@ -1477,11 +1477,11 @@ public class Project extends AbstractEntity {
 		cmd.range(range);
 
 		List<User> authors = new ArrayList<>();
-		UserManager userManager = OneDev.getInstance(UserManager.class);
+		EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
 		for (BlameBlock block: cmd.call()) {
-			User author = userManager.find(block.getCommit().getAuthor());
-			if (author != null && !authors.contains(author))
-				authors.add(author);
+			EmailAddress emailAddress = emailAddressManager.findByPersonIdent(block.getCommit().getAuthor());
+			if (emailAddress != null && emailAddress.isVerified() && !authors.contains(emailAddress.getOwner()))
+				authors.add(emailAddress.getOwner());
 		}
 		
 		return authors;

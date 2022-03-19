@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -152,10 +153,14 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 
 	private String suggestSourceBranch() {
 		User user = getLoginUser();
+		Collection<String> verifiedEmailAddresses = user.getEmailAddresses().stream()
+				.filter(it->it.isVerified())
+				.map(it->it.getValue())
+				.collect(Collectors.toSet());
 		List<Pair<String, Integer>> branchUpdates = new ArrayList<>(); 
 		for (RefInfo refInfo: getProject().getBranchRefInfos()) {
 			RevCommit commit = (RevCommit) refInfo.getPeeledObj();
-			if (commit.getAuthorIdent().getEmailAddress().equals(user.getEmail()))
+			if (verifiedEmailAddresses.contains(commit.getAuthorIdent().getEmailAddress().toLowerCase()))
 				branchUpdates.add(new Pair<>(GitUtils.ref2branch(refInfo.getRef().getName()), commit.getCommitTime()));
 		}
 		branchUpdates.sort(Comparator.comparing(Pair::getSecond));

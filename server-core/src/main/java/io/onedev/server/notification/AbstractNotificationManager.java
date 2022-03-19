@@ -1,6 +1,7 @@
 package io.onedev.server.notification;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +19,10 @@ import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 
 public abstract class AbstractNotificationManager {
@@ -98,6 +101,14 @@ public abstract class AbstractNotificationManager {
 			}
 		}
 		return textBody.toString();
+	}
+	
+	protected boolean isNotified(Collection<String> notifiedEmailAddresses, User user) {
+		for (EmailAddress emailAddress: user.getEmailAddresses()) {
+			if (emailAddress.isVerified() && notifiedEmailAddresses.contains(emailAddress.getValue()))
+				return true;
+		}
+		return false;
 	}
 	
 }

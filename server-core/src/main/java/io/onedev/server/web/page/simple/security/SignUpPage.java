@@ -8,13 +8,14 @@ import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.collect.Sets;
-
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -23,6 +24,7 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.simple.SimplePage;
+import io.onedev.server.web.util.NewUserBean;
 
 @SuppressWarnings("serial")
 public class SignUpPage extends SimplePage {
@@ -40,9 +42,8 @@ public class SignUpPage extends SimplePage {
 	protected void onInitialize() {
 		super.onInitialize();
 	
-		User user = new User();
-		BeanEditor editor = BeanContext.edit("editor", user, 
-				Sets.newHashSet(User.PROP_GIT_EMAIL, User.PROP_ALTERNATE_EMAILS), true);
+		NewUserBean newUserBean = new NewUserBean();
+		BeanEditor editor = BeanContext.edit("editor", newUserBean);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -51,19 +52,38 @@ public class SignUpPage extends SimplePage {
 				super.onSubmit();
 				
 				UserManager userManager = OneDev.getInstance(UserManager.class);
-				User userWithSameName = userManager.findByName(user.getName());
+				User userWithSameName = userManager.findByName(newUserBean.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							"Login name already used by another account");
 				} 
-				User userWithSameEmail = userManager.findByEmail(user.getEmail());
-				if (userWithSameEmail != null) {
-					editor.error(new Path(new PathNode.Named(User.PROP_EMAIL)),
-							"Email already used by another account");
+				
+				EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+				
+				if (emailAddressManager.findByValue(newUserBean.getEmailAddress()) != null) {
+					editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
+							"Email address already used by another user");
 				} 
 				if (editor.isValid()) {
-					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(user.getPassword()));
-					userManager.save(user, null);
+					User user = new User();
+					user.setName(newUserBean.getName());
+					user.setFullName(newUserBean.getFullName());
+					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(newUserBean.getPassword()));
+					
+					EmailAddress emailAddress = new EmailAddress();
+					emailAddress.setValue(newUserBean.getEmailAddress());
+					emailAddress.setOwner(user);
+					
+					OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+
+						@Override
+						public void run() {
+							userManager.save(user);
+							emailAddressManager.save(emailAddress);
+						}
+						
+					});
+					
 					Session.get().success("Welcome to OneDev");
 					SecurityUtils.getSubject().runAs(user.getPrincipals());
 					setResponsePage(MyAvatarPage.class);

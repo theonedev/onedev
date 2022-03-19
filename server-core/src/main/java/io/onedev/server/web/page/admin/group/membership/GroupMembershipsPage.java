@@ -36,6 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -44,6 +45,7 @@ import io.onedev.server.util.match.MatchScoreProvider;
 import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
 import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -324,13 +326,23 @@ public class GroupMembershipsPage extends GroupPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Membership, Void>(Model.of("Email")) {
+		columns.add(new AbstractColumn<Membership, Void>(Model.of("Primary Email")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Membership>> cellItem, String componentId,
 					IModel<Membership> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getUser().getEmail()));
+				EmailAddress emailAddress = rowModel.getObject().getUser().getPrimaryEmailAddress();
+				if (emailAddress != null) {
+					Fragment fragment = new Fragment(componentId, "emailFrag", GroupMembershipsPage.this);
+					fragment.add(new Label("emailAddress", emailAddress.getValue()));
+					fragment.add(new EmailAddressVerificationStatusBadge(
+							"verificationStatus", Model.of(emailAddress)));
+					cellItem.add(fragment);
+				} else {
+					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+				}
 			}
+			
 		});
 		
 		dataProvider = new SortableDataProvider<Membership, Void>() {

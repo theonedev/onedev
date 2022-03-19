@@ -32,11 +32,9 @@ public class AuthorCriteria extends CommitCriteria {
 			if (value == null) { // authored by me
 				User user = SecurityUtils.getUser();
 				if (user != null) {
-					command.authors().add("<" + user.getEmail() + ">");
-					if (user.getGitEmail() != null)
-						command.authors().add("<" + user.getGitEmail() + ">");
-					for (String email: user.getAlternateEmails()) 
-						command.authors().add("<" + email + ">");
+					user.getEmailAddresses().stream().filter(it->it.isVerified()).forEach(it-> {
+						command.authors().add("<" + it.getValue() + ">");
+					});
 				} else {
 					throw new ExplicitException("Please login to perform this query");
 				}
@@ -55,9 +53,8 @@ public class AuthorCriteria extends CommitCriteria {
 				User user = User.get();
 				if (user == null) {
 					throw new ExplicitException("Please login to perform this query");
-				} else if (user.getEmail().equals(authorEmail)
-						|| user.getGitEmail()!=null && user.getGitEmail().equals(authorEmail)
-						|| user.getAlternateEmails().contains(authorEmail)) { 
+				} else if (user.getEmailAddresses().stream()
+						.anyMatch(it-> it.isVerified() && it.getValue().equalsIgnoreCase(authorEmail))) { 
 					return true;
 				}
 			} else {

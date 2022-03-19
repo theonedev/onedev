@@ -1,27 +1,27 @@
 package io.onedev.server.model;
 
 import static io.onedev.server.model.User.PROP_ACCESS_TOKEN;
-import static io.onedev.server.model.User.PROP_EMAIL;
 import static io.onedev.server.model.User.PROP_FULL_NAME;
 import static io.onedev.server.model.User.PROP_NAME;
+import static io.onedev.server.model.User.PROP_SSO_CONNECTOR;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -31,19 +31,18 @@ import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Sets;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
-import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.TwoFactorAuthentication;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
@@ -52,7 +51,6 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.match.MatchScoreUtils;
-import io.onedev.server.util.validation.annotation.EmailList;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
@@ -61,10 +59,8 @@ import io.onedev.server.web.editable.annotation.Password;
 
 @Entity
 @Table(
-		indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_EMAIL), 
-				@Index(columnList=PROP_FULL_NAME), @Index(columnList=SsoInfo.COLUMN_CONNECTOR), 
-				@Index(columnList=SsoInfo.COLUMN_SUBJECT), @Index(columnList=PROP_ACCESS_TOKEN)}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={SsoInfo.COLUMN_CONNECTOR, SsoInfo.COLUMN_SUBJECT})})
+		indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_FULL_NAME), 
+				@Index(columnList=PROP_SSO_CONNECTOR), @Index(columnList=PROP_ACCESS_TOKEN)})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractEntity implements AuthenticationInfo {
@@ -87,25 +83,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String PROP_NAME = "name";
 	
-	public static final String PROP_EMAIL = "email";
-	
-	public static final String PROP_GIT_EMAIL = "gitEmail";
-	
-	public static final String PROP_ALTERNATE_EMAILS = "alternateEmails";
-	
 	public static final String PROP_PASSWORD = "password";
 	
 	public static final String PROP_FULL_NAME = "fullName";
 	
-	public static final String PROP_SSO_INFO = "ssoInfo";
+	public static final String PROP_SSO_CONNECTOR = "ssoConnector";
 	
 	public static final String PROP_ACCESS_TOKEN = "accessToken";
-	
-	public static final String AUTH_SOURCE_BUILTIN_USER_STORE = "Builtin User Store";
-	
-	public static final String AUTH_SOURCE_EXTERNAL_AUTHENTICATOR = "External Authenticator";
-	
-	public static final String AUTH_SOURCE_SSO_PROVIDER = "SSO Provider: ";
 	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
 
@@ -126,20 +110,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private String fullName;
 
 	@JsonIgnore
-	@Embedded
-	private SsoInfo ssoInfo = new SsoInfo();
+	private String ssoConnector;
 	
 	@Column(unique=true, nullable=false)
-	private String email;
-	
-	@Column
-	private String gitEmail;
-	
-	@Lob
-	@Column(nullable=false, length=1024)
-	private ArrayList<String> alternateEmails = new ArrayList<>();
-	
-	@Column(unique=true, nullable=false)
+	@JsonIgnore
 	private String accessToken = RandomStringUtils.randomAlphanumeric(ACCESS_TOKEN_LEN);
 	
 	@JsonIgnore
@@ -189,6 +163,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<SshKey> sshKeys = new ArrayList<>();
 
+    @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<EmailAddress> emailAddresses = new ArrayList<>();
+    
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -225,6 +203,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private LinkedHashSet<String> buildQuerySubscriptions = new LinkedHashSet<>();
 	
     private transient Collection<Group> groups;
+    
+    private transient List<EmailAddress> sortedEmailAddresses;
     
 	public QueryPersonalization<NamedProjectQuery> getProjectQueryPersonalization() {
 		return new QueryPersonalization<NamedProjectQuery>() {
@@ -465,13 +445,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
 	}
-	
-	public SsoInfo getSsoInfo() {
-		return ssoInfo;
+
+	@Nullable
+	public String getSsoConnector() {
+		return ssoConnector;
 	}
 
-	public void setSsoInfo(SsoInfo ssoInfo) {
-		this.ssoInfo = ssoInfo;
+	public void setSsoConnector(String ssoConnector) {
+		this.ssoConnector = ssoConnector;
 	}
 
 	public String getAccessToken() {
@@ -491,39 +472,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.twoFactorAuthentication = twoFactorAuthentication;
 	}
 
-	@Editable(order=300)
-	@NotEmpty
-	@Email
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	@Editable(order=350, description="Specify an email to use for web based git operations if you want to "
-			+ "keep your primary email secret")
-	public String getGitEmail() {
-		return gitEmail;
-	}
-
-	public void setGitEmail(String gitEmail) {
-		this.gitEmail = gitEmail;
-	}
-
-	@Editable(order=400, description="Optionally specify one or more alternate emails with one email per line. "
-			+ "With alternate emails, git commits authored/committed via your old emails can be associated with "
-			+ "your current account")
-	@EmailList
-	public ArrayList<String> getAlternateEmails() {
-		return alternateEmails;
-	}
-
-	public void setAlternateEmails(ArrayList<String> alternateEmails) {
-		this.alternateEmails = alternateEmails;
-	}
-	
 	public Collection<Membership> getMemberships() {
 		return memberships;
 	}
@@ -532,14 +480,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.memberships = memberships;
 	}
 	
-	public Collection<String> getEmails() {
-		Collection<String> emails = Sets.newHashSet(email);
-		if (gitEmail != null)
-			emails.add(gitEmail);
-		emails.addAll(alternateEmails);
-		return emails;
-	}
-
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
@@ -547,13 +487,17 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 				.toString();
 	}
 	
+	@Nullable
 	public PersonIdent asPerson() {
-		if (isSystem())
+		if (isSystem()) {
 			return new PersonIdent(getDisplayName(), "");
-		else if (getGitEmail() != null)
-			return new PersonIdent(getDisplayName(), getGitEmail());
-		else
-			return new PersonIdent(getDisplayName(), getEmail());
+		} else {
+			EmailAddress emailAddress = getGitEmailAddress();
+			if (emailAddress != null && emailAddress.isVerified())
+				return new PersonIdent(getDisplayName(), emailAddress.getValue());
+			else
+		        throw new ExplicitException("No verified email for git operations");
+		}
 	}
 	
 	public String getDisplayName() {
@@ -629,9 +573,17 @@ public class User extends AbstractEntity implements AuthenticationInfo {
         this.sshKeys = sshKeys;
     }
     
-    public boolean isSshKeyExternalManaged() {
+    public Collection<EmailAddress> getEmailAddresses() {
+		return emailAddresses;
+	}
+
+	public void setEmailAddresses(Collection<EmailAddress> emailAddresses) {
+		this.emailAddresses = emailAddresses;
+	}
+
+	public boolean isSshKeyExternalManaged() {
     	if (isExternalManaged()) {
-    		if (getSsoInfo().getConnector() != null) {
+    		if (getSsoConnector() != null) {
     			return false;
     		} else {
 	    		Authenticator authenticator = OneDev.getInstance(SettingManager.class).getAuthenticator();
@@ -645,9 +597,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     public boolean isMembershipExternalManaged() {
     	if (isExternalManaged()) {
     		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-    		if (getSsoInfo().getConnector() != null) {
+    		if (getSsoConnector() != null) {
     			SsoConnector ssoConnector = settingManager.getSsoConnectors().stream()
-    					.filter(it->it.getName().equals(getSsoInfo().getConnector()))
+    					.filter(it->it.getName().equals(getSsoConnector()))
     					.findFirst().orElse(null);
     			return ssoConnector != null && ssoConnector.isManagingMemberships();
     		} else {
@@ -661,12 +613,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
     public String getAuthSource() {
 		if (isExternalManaged()) {
-			if (getSsoInfo().getConnector() != null)
-				return AUTH_SOURCE_SSO_PROVIDER + getSsoInfo().getConnector();
+			if (getSsoConnector() != null)
+				return "SSO Provider: " + getSsoConnector();
 			else
-				return AUTH_SOURCE_EXTERNAL_AUTHENTICATOR;
+				return "External Authenticator";
 		} else {
-			return AUTH_SOURCE_BUILTIN_USER_STORE;
+			return "Builtin User Store";
 		}
     }
 
@@ -811,4 +763,40 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 				|| getGroups().stream().anyMatch(it->it.isEnforce2FA());
 	}
 
+	public List<EmailAddress> getSortedEmailAddresses() {
+		if (sortedEmailAddresses == null) {
+			sortedEmailAddresses = new ArrayList<>(getEmailAddresses());
+			Collections.sort(sortedEmailAddresses, new Comparator<EmailAddress>() {
+
+				@Override
+				public int compare(EmailAddress o1, EmailAddress o2) {
+					if (o1.isPrimary() && o2.isPrimary() || !o1.isPrimary() && !o2.isPrimary()) {
+						if (o1.isGit() && o2.isGit() || !o1.isGit() && !o2.isGit()) 
+							return o1.getId().compareTo(o2.getId());
+						else if (o1.isGit()) 
+							return -1;
+						else 
+							return 1;
+					} else if (o1.isPrimary()) {
+						return -1;
+					} else {
+						return 1;
+					}
+				}
+				
+			});
+		}
+		return sortedEmailAddresses;
+	}
+	
+	@Nullable
+	public EmailAddress getPrimaryEmailAddress() {
+		return getSortedEmailAddresses().stream().filter(it->it.isPrimary()).findFirst().orElse(null);
+	}
+
+	@Nullable
+	public EmailAddress getGitEmailAddress() {
+		return getSortedEmailAddresses().stream().filter(it->it.isGit()).findFirst().orElse(null);
+	}
+	
 }

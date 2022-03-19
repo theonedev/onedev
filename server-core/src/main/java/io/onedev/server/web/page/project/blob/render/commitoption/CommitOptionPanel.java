@@ -285,7 +285,7 @@ public class CommitOptionPanel extends Panel {
 
 				});
 			}
-			
+
 			while(newCommitId == null) {
 				try {
 					newCommitId = new BlobEdits(oldPaths, newBlobs).commit(repository, refName, 

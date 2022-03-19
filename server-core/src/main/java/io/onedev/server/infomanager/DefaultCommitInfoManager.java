@@ -40,14 +40,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
@@ -60,6 +59,7 @@ import io.onedev.server.git.command.ListNumStatsCommand;
 import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.command.RevListCommand.Order;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -73,7 +73,6 @@ import io.onedev.server.util.Pair;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
-import io.onedev.server.util.facade.UserFacade;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.backup.BackupStrategy;
@@ -286,7 +285,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	
 	private final SessionManager sessionManager;
 	
-	private final UserManager userManager;
+	private final EmailAddressManager emailAddressManager;
 	
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
@@ -296,12 +295,13 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	
 	@Inject
 	public DefaultCommitInfoManager(ProjectManager projectManager, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, SessionManager sessionManager, UserManager userManager) {
+			BatchWorkManager batchWorkManager, SessionManager sessionManager, 
+			EmailAddressManager emailAddressManager) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
-		this.userManager = userManager;
+		this.emailAddressManager = emailAddressManager;
 	}
 	
 	private boolean isCommitCollected(byte[] commitBytes) {
@@ -1016,26 +1016,23 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		Store emailToIndexStore = getStore(env, USER_TO_INDEX_STORE);
 		Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
 		Store commitCountStore = getStore(env, COMMIT_COUNTS_STORE);
+
 		return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
 
 			@Override
 			public Integer compute(Transaction txn) {
-				Collection<String> emails = Sets.newHashSet(user.getEmail());
-				if (user.getGitEmail() != null)
-					emails.add(user.getGitEmail());
-				emails.addAll(user.getAlternateEmails());
-				int count = 0;
-				for (String email: emails) {
-					int userIndex = readInt(emailToIndexStore, txn, new StringByteIterable(email), -1);
+				AtomicInteger count = new AtomicInteger(0);
+				user.getEmailAddresses().stream().filter(it->it.isVerified()).forEach(it-> {
+					int userIndex = readInt(emailToIndexStore, txn, new StringByteIterable(it.getValue()), -1);
 					if (userIndex != -1) {
 						int pathIndex = readInt(pathToIndexStore, txn, new StringByteIterable(path), -1);
 						if (pathIndex != -1) {
 							long commitCountKey = (userIndex<<32)|pathIndex;
-							count += readInt(commitCountStore, txn, new LongByteIterable(commitCountKey), 0);
+							count.addAndGet(readInt(commitCountStore, txn, new LongByteIterable(commitCountKey), 0));
 						} 
 					} 
-				}
-				return count;
+				});
+				return count.get();
 			}
 		});
 	}
@@ -1341,9 +1338,15 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 					byte[] userBytes = readBytes(indexToUserStore, txn, new IntByteIterable(userIndex));
 					if (userBytes != null) { 
 						NameAndEmail user = (NameAndEmail) SerializationUtils.deserialize(userBytes);
-						UserFacade facade = userManager.findFacadeByEmail(user.getEmailAddress());
-						if (facade != null)
-							user = facade.getNameAndEmail();
+						EmailAddress emailAddress = emailAddressManager.findByValue(user.getEmailAddress());
+						if (emailAddress != null && emailAddress.isVerified()) {
+							User owner = emailAddress.getOwner();
+							EmailAddress primaryEmailAddress = owner.getPrimaryEmailAddress();
+							if (primaryEmailAddress != null && primaryEmailAddress.isVerified())
+								user = new NameAndEmail(owner.getDisplayName(), primaryEmailAddress.getValue());
+							else
+								user = new NameAndEmail(owner.getDisplayName(), emailAddress.getValue());
+						}
 						userOpt = Optional.of(user);
 					} else { 
 						userOpt = Optional.empty();

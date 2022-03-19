@@ -8,12 +8,16 @@
 				<input wicket:id="addNew" type="hidden" class="form-control">
 			</div>
 			<div class="mb-4">
-				<a wicket:id="delete" class="btn btn-light-danger">Delete</a>
+				<a wicket:id="delete" class="btn btn-light-danger">Delete <wicket:svg href="arrow" class="rotate-90 icon"/></a>
 			</div>
 		</div>
 		<table wicket:id="memberships" class="memberships table"></table>
 	</div>
 	<wicket:fragment wicket:id="nameFrag">
 		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="emailFrag">
+		<span wicket:id="emailAddress"></span>
+		<span wicket:id="verificationStatus" class="ml-1"></span>
 	</wicket:fragment>
 </wicket:extend>

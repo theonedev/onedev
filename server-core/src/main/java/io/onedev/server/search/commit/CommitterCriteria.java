@@ -32,11 +32,9 @@ public class CommitterCriteria extends CommitCriteria {
 			if (value == null) { // committed by me
 				User user = SecurityUtils.getUser();
 				if (user != null) {
-					command.committers().add("<" + user.getEmail() + ">");
-					if (user.getGitEmail() != null)
-						command.committers().add("<" + user.getGitEmail() + ">");
-					for (String email: user.getAlternateEmails())
-						command.committers().add("<" + email + ">");
+					user.getEmailAddresses().stream().filter(it->it.isVerified()).forEach(it-> {
+						command.committers().add("<" + it.getValue() + ">");
+					});
 				} else {
 					throw new ExplicitException("Please login to perform this query");
 				}
@@ -55,9 +53,8 @@ public class CommitterCriteria extends CommitCriteria {
 				User user = User.get();
 				if (user == null) {
 					throw new ExplicitException("Please login to perform this query");
-				} else if (user.getEmail().equals(committerEmail)  
-						|| user.getGitEmail() != null && user.getGitEmail().equals(committerEmail)
-						|| user.getAlternateEmails().contains(committerEmail)) { 
+				} else if (user.getEmailAddresses().stream()
+						.anyMatch(it-> it.isVerified() && it.getValue().equalsIgnoreCase(committerEmail))) { 
 					return true;
 				}
 			} else {

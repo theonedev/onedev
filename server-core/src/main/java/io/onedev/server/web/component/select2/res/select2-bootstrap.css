@@ -191,7 +191,7 @@
  */
 .select2-container .select2-choice .select2-arrow b,
 .select2-container .select2-choice div b {
-  background-position: 0 6px;
+  background-position: 0 8px;
 }
 
 .select2-dropdown-open .select2-choice .select2-arrow b,
@@ -203,28 +203,28 @@
 .input-group-sm .select2-container .select2-choice .select2-arrow b,
 .select2-container.form-control-sm .select2-choice div b,
 .input-group-sm .select2-container .select2-choice div b {
-  background-position: 0 1px;
+  background-position: 0 2px;
 }
 
 .select2-dropdown-open.form-control-sm .select2-choice .select2-arrow b,
 .input-group-sm .select2-dropdown-open .select2-choice .select2-arrow b,
 .select2-dropdown-open.form-control-sm .select2-choice div b,
 .input-group-sm .select2-dropdown-open .select2-choice div b {
-  background-position: -18px 1px;
+  background-position: -18px 2px;
 }
 
 .select2-container.form-control-lg .select2-choice .select2-arrow b,
 .input-group-lg .select2-container .select2-choice .select2-arrow b,
 .select2-container.form-control-lg .select2-choice div b,
 .input-group-lg .select2-container .select2-choice div b {
-  background-position: 0 9px;
+  background-position: 0 10px;
 }
 
 .select2-dropdown-open.form-control-lg .select2-choice .select2-arrow b,
 .input-group-lg .select2-dropdown-open .select2-choice .select2-arrow b,
 .select2-dropdown-open.form-control-lg .select2-choice div b,
 .input-group-lg .select2-dropdown-open .select2-choice div b {
-  background-position: -18px 9px;
+  background-position: -18px 10px;
 }
 
 /**

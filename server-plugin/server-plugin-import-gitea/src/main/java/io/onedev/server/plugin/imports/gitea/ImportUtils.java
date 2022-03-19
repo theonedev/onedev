@@ -94,7 +94,7 @@ public class ImportUtils {
 			if (userNode.hasNonNull("email"))
 				email = userNode.get("email").asText(null);
 			if (email != null)
-				userOpt = Optional.ofNullable(OneDev.getInstance(UserManager.class).findByEmail(email));
+				userOpt = Optional.ofNullable(OneDev.getInstance(UserManager.class).findByVerifiedEmailAddress(email));
 			else
 				userOpt = Optional.empty();
 			users.put(login, userOpt);

@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,11 +29,13 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
@@ -63,6 +64,7 @@ import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.init.Skippable;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.web.util.NewUserBean;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -85,6 +87,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final LinkSpecManager linkSpecManager;
 	
+	private final EmailAddressManager emailAddressManager;
+	
 	private String backupTaskId;
 
 	@Inject
@@ -92,7 +96,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			SettingManager settingManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
 			PasswordService passwordService, RoleManager roleManager, 
-			LinkSpecManager linkSpecManager) {
+			LinkSpecManager linkSpecManager, EmailAddressManager emailAddressManager) {
 		this.userManager = userManager;
 		this.settingManager = settingManager;
 		this.validator = validator;
@@ -102,6 +106,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.passwordService = passwordService;
 		this.roleManager = roleManager;
 		this.linkSpecManager = linkSpecManager;
+		this.emailAddressManager = emailAddressManager;
 	}
 
 	@SuppressWarnings({"serial"})
@@ -113,8 +118,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (system == null) {
 			system = new User();
 			system.setId(User.SYSTEM_ID);
-			system.setName(User.SYSTEM_NAME);
-			system.setEmail("system email");
+			system.setName(User.SYSTEM_NAME.toLowerCase());
+			system.setFullName(User.SYSTEM_NAME);
 			system.setPassword("no password");
     		userManager.replicate(system);
 		}
@@ -122,17 +127,13 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (unknown == null) {
 			unknown = new User();
 			unknown.setId(User.UNKNOWN_ID);
-			unknown.setName(User.UNKNOWN_NAME);
-			unknown.setEmail("unknown email");
+			unknown.setName(User.UNKNOWN_NAME.toLowerCase());
+			unknown.setFullName(User.UNKNOWN_NAME);
 			unknown.setPassword("no password");
     		userManager.replicate(unknown);
 		}
-		User administrator = userManager.get(User.ROOT_ID);		
-		if (administrator == null) {
-			administrator = new User();
-			administrator.setId(User.ROOT_ID);
-			Set<String> excludedProperties = Sets.newHashSet(User.PROP_GIT_EMAIL, User.PROP_ALTERNATE_EMAILS); 
-			manualConfigs.add(new ManualConfig("Create Administrator Account", null, administrator, excludedProperties) {
+		if (userManager.get(User.ROOT_ID) == null) {
+			manualConfigs.add(new ManualConfig("Create Administrator Account", null, new NewUserBean()) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -141,9 +142,20 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					User user = (User) getSetting();
-					user.setPassword(passwordService.encryptPassword(user.getPassword()));
+					NewUserBean newUserBean = (NewUserBean) getSetting();
+					User user = new User();
+					user.setId(User.ROOT_ID);
+					user.setName(newUserBean.getName());
+					user.setFullName(newUserBean.getFullName());
+					user.setPassword(passwordService.encryptPassword(newUserBean.getPassword()));
 		    		userManager.replicate(user);
+		    		
+		    		EmailAddress emailAddress = new EmailAddress();
+		    		emailAddress.setValue(newUserBean.getEmailAddress());
+		    		emailAddress.setVerificationCode(null);
+		    		emailAddress.setOwner(user);
+
+		    		emailAddressManager.save(emailAddress);
 				}
 				
 			});
@@ -400,9 +412,13 @@ public class DefaultDataManager implements DataManager, Serializable {
 				+ "Error detail:\n"
 				+ "%s",
 				url, Throwables.getStackTraceAsString(e));
-		mailManager.sendMail(Lists.newArrayList(root.getEmail()), Lists.newArrayList(),
-				Lists.newArrayList(), "[Backup] OneDev Database Auto-backup Failed", 
-				htmlBody, textBody, null, null);
+		
+		EmailAddress emailAddress = root.getPrimaryEmailAddress();
+		if (emailAddress != null && emailAddress.isVerified()) {
+			mailManager.sendMail(Lists.newArrayList(emailAddress.getValue()), Lists.newArrayList(),
+					Lists.newArrayList(), "[Backup] OneDev Database Auto-backup Failed", 
+					htmlBody, textBody, null, null);
+		}
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {

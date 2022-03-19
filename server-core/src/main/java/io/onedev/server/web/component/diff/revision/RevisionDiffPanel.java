@@ -807,8 +807,7 @@ public abstract class RevisionDiffPanel extends Panel {
 									for (User user: getProject().getAuthors(mark.getPath(), 
 											ObjectId.fromString(mark.getCommitHash()), 
 											new LinearRange(commentRange.getFromRow(), commentRange.getToRow()))) {
-										if (user.getEmail() != null)
-											mentions.append("@").append(user.getName()).append(" ");
+										mentions.append("@").append(user.getName()).append(" ");
 									}
 								}
 								

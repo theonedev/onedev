@@ -37,7 +37,8 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		} else if (value.equals("new") || value.equals(User.SYSTEM_NAME) || value.equals(User.UNKNOWN_NAME)) {
+		} else if (value.equals("new") || value.equals(User.SYSTEM_NAME.toLowerCase()) 
+				|| value.equals(User.UNKNOWN_NAME.toLowerCase())) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0)
@@ -54,7 +55,7 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 
 			@Override
 			public String call() throws Exception {
-				String normalizedUserName = preferredUserName.replaceAll("[^\\w-\\.]", "-");
+				String normalizedUserName = preferredUserName.replaceAll("[^\\w-\\.]", "-").toLowerCase();
 				int suffix = 1;
 				UserManager userManager = OneDev.getInstance(UserManager.class);
 				while (true) {

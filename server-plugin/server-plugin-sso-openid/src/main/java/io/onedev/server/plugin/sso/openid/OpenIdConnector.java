@@ -259,7 +259,7 @@ public class OpenIdConnector extends SsoConnector {
 					groupNames = null;
 				}
 				
-				return new SsoAuthenticated(claims.getSubject(), userName, email, fullName, groupNames, null, this);
+				return new SsoAuthenticated(userName, email, fullName, groupNames, null, this);
 			} else {
 				throw buildException(UserInfoErrorResponse.parse(httpResponse).getErrorObject());
 			}

@@ -3796,10 +3796,62 @@ public class DataMigrator {
 		}
 	}
 	
-	// Migrate to 6.4.0
+	// Migrate to 7.0.0
 	private void migrate82(File dataDir, Stack<Integer> versions) {
+		Set<String> userNames = new HashSet<>();
+		Map<String, String> primaryEmails = new HashMap<>();
+		Map<String, String> gitEmails = new HashMap<>();
+		Map<String, String> alternateEmails = new HashMap<>();
+		
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Builds.xml")) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					String userId = element.elementText("id").trim();
+					Element nameElement = element.element("name");
+					String name = nameElement.getText().trim();
+					if (userNames.add(name.toLowerCase())) 
+						nameElement.setText(name.toLowerCase());
+					else
+						throw new ExplicitException("Duplicated login names found when convert '" + name + "' to lowercase");
+					if (userId.equals("-1")) {
+						element.addElement("fullName").setText("OneDev");
+						element.element("email").detach();
+						element.element("alternateEmails").detach();						
+					} else if (userId.equals("-2")) {
+						element.addElement("fullName").setText("Unknown");
+						element.element("email").detach();
+						element.element("alternateEmails").detach();						
+					} else {
+						Element emailElement = element.element("email");
+						String email = emailElement.getText().trim();
+						if (primaryEmails.put(email.toLowerCase(), userId) != null)
+							throw new ExplicitException("Duplicated email address found when convert '" + email + "' to lowercase");
+						emailElement.detach();
+						
+						Element gitEmailElement = element.element("gitEmail");
+						if (gitEmailElement != null) {
+							String gitEmail = gitEmailElement.getText().trim();
+							gitEmails.put(gitEmail.toLowerCase(), userId);
+							gitEmailElement.detach();
+						}
+						
+						Element alternateEmailsElement = element.element("alternateEmails");
+						for (Element alternateEmailElement: alternateEmailsElement.elements()) {
+							String alternateEmail = alternateEmailElement.getText().trim();
+							alternateEmails.put(alternateEmail.toLowerCase(), userId);
+						}
+						alternateEmailsElement.detach();
+					}
+					
+					Element ssoInfoElement = element.element("ssoInfo");
+					Element connectorElement = ssoInfoElement.element("connector");
+					if (connectorElement != null) 
+						element.addElement("ssoConnector").setText(connectorElement.getText().trim());
+					ssoInfoElement.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Builds.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) 
 					element.element("triggerChain").setName("pipeline");
@@ -3821,6 +3873,51 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
+		
+		VersionedXmlDoc emailAddressesDom;
+		File emailAddressesFile = new File(dataDir, "EmailAddresss.xml");
+		emailAddressesDom = new VersionedXmlDoc();
+		Element listElement = emailAddressesDom.addElement("list");
+		
+		long id = 1;
+		Map<String, Element> primaryEmailElements = new HashMap<>();
+		for (Map.Entry<String, String> entry: primaryEmails.entrySet()) {
+			Element emailAddressElement = listElement.addElement("io.onedev.server.model.EmailAddress");
+			emailAddressElement.addAttribute("revision", "0.0");
+			emailAddressElement.addElement("id").setText(String.valueOf(id++));
+			emailAddressElement.addElement("primary").setText("true");
+			emailAddressElement.addElement("git").setText("true");
+			emailAddressElement.addElement("value").setText(entry.getKey());
+			emailAddressElement.addElement("owner").setText(entry.getValue());
+			primaryEmailElements.put(entry.getValue(), emailAddressElement);
+		}
+		
+		for (Map.Entry<String, String> entry: gitEmails.entrySet()) {
+			if (!primaryEmails.containsKey(entry.getKey())) {
+				Element emailAddressElement = listElement.addElement("io.onedev.server.model.EmailAddress");
+				emailAddressElement.addAttribute("revision", "0.0");
+				emailAddressElement.addElement("id").setText(String.valueOf(id++));
+				emailAddressElement.addElement("primary").setText("false");
+				emailAddressElement.addElement("git").setText("true");
+				emailAddressElement.addElement("value").setText(entry.getKey());
+				emailAddressElement.addElement("owner").setText(entry.getValue());
+				primaryEmailElements.get(entry.getValue()).element("git").setText("false");
+			}
+		}
+		
+		for (Map.Entry<String, String> entry: alternateEmails.entrySet()) {
+			if (!primaryEmails.containsKey(entry.getKey()) && !gitEmails.containsKey(entry.getKey())) {
+				Element emailAddressElement = listElement.addElement("io.onedev.server.model.EmailAddress");
+				emailAddressElement.addAttribute("revision", "0.0");
+				emailAddressElement.addElement("id").setText(String.valueOf(id++));
+				emailAddressElement.addElement("primary").setText("false");
+				emailAddressElement.addElement("git").setText("false");
+				emailAddressElement.addElement("value").setText(entry.getKey());
+				emailAddressElement.addElement("owner").setText(entry.getValue());
+			}
+		}
+		
+		emailAddressesDom.writeToFile(emailAddressesFile, true);
 	}
 			
 }

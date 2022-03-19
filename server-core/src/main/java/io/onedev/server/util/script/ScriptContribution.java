@@ -6,9 +6,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.User;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.support.administration.GroovyScript;
 
 /**
@@ -26,9 +26,10 @@ public abstract class ScriptContribution {
 		Build build = Build.get();
 		if (build != null) {
 			RevCommit commit = Build.get().getProject().getRevCommit(build.getCommitId(), true);
-			User user = OneDev.getInstance(UserManager.class).find(commit.getCommitterIdent());
-			if (user != null)
-				return user.getName();
+			EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+			EmailAddress emailAddress = emailAddressManager.findByPersonIdent(commit.getCommitterIdent());
+			if (emailAddress != null && emailAddress.isVerified())
+				return emailAddress.getOwner().getName();
 			else
 				return null;
 		} else {

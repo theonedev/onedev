@@ -23,9 +23,9 @@ public class MyPasswordPage extends MyPage {
 		
 		if (getLoginUser().getPassword().equals(User.EXTERNAL_MANAGED)) {
 			String message;
-			if (getLoginUser().getSsoInfo().getConnector() != null) {
+			if (getLoginUser().getSsoConnector() != null) {
 				message = "You are currently authenticated via SSO provider '" 
-						+ getLoginUser().getSsoInfo().getConnector() 
+						+ getLoginUser().getSsoConnector() 
 						+ "', please change password there instead";
 			} else {
 				message = "You are currently authenticated via external system, "

@@ -10,9 +10,9 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.UserAvatar;
 
 @SuppressWarnings("serial")
@@ -39,12 +39,14 @@ public class PersonCardPanel extends Panel {
 		
 		StringBuilder builder = new StringBuilder();
 		
+		EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
 		String displayName;
-		UserFacade user = OneDev.getInstance(UserManager.class).findFacadeByEmail(personIdent.getEmailAddress());
-		if (user != null)
-			displayName = user.getDisplayName();
+		EmailAddress emailAddress = emailAddressManager.findByValue(personIdent.getEmailAddress());
+		if (emailAddress != null && emailAddress.isVerified())
+			displayName = emailAddress.getOwner().getDisplayName();
 		else
 			displayName = personIdent.getName();
+		
 		builder.append("<div>" + HtmlEscape.escapeHtml5(displayName) + " <i>(" + gitRole + ")</i></div>");
 		
 		if (StringUtils.isBlank(personIdent.getEmailAddress())) {
@@ -53,8 +55,8 @@ public class PersonCardPanel extends Panel {
 			else
 				builder.append("<i>No OneDev Account</i>");
 		} else {
-			if (user != null) 
-				builder.append("<i>@" + HtmlEscape.escapeHtml5(user.getName()) + "</i>"); 
+			if (emailAddress != null && emailAddress.isVerified()) 
+				builder.append("<i>@" + HtmlEscape.escapeHtml5(emailAddress.getOwner().getName()) + "</i>"); 
 			else 
 				builder.append("<i>No OneDev Account</i>");
 		}

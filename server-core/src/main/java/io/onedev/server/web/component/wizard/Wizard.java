@@ -23,6 +23,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.persistence.TransactionManager;
+
 @SuppressWarnings("serial")
 public abstract class Wizard extends Panel {
 
@@ -116,7 +119,14 @@ public abstract class Wizard extends Panel {
 			@Override
 			public void onSubmit() {
 				super.onSubmit();
-				getActiveStep().complete();
+				OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+
+					@Override
+					public void run() {
+						getActiveStep().complete();
+					}
+					
+				});
 				activeStepIndex++;
 				form.replace(getActiveStep().render("content"));
 			}
@@ -133,7 +143,14 @@ public abstract class Wizard extends Panel {
 			@Override
 			public void onSubmit() {
 				super.onSubmit();
-				getActiveStep().complete();
+				OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+
+					@Override
+					public void run() {
+						getActiveStep().complete();
+					}
+					
+				});
 				finished();
 			}
 			

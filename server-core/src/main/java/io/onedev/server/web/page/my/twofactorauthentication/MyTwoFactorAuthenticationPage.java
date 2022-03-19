@@ -18,7 +18,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
+import io.onedev.server.web.component.user.twofactorauthentication.TwoFactorAuthenticationSetupPanel;
 import io.onedev.server.web.page.my.MyPage;
 
 @SuppressWarnings("serial")
@@ -36,9 +36,9 @@ public class MyTwoFactorAuthenticationPage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (getLoginUser().getSsoInfo().getConnector() != null) {
+		if (getLoginUser().getSsoConnector() != null) {
 			add(new Label("content", "You are currently authenticated via SSO provider '" 
-					+ getLoginUser().getSsoInfo().getConnector() + "', "
+					+ getLoginUser().getSsoConnector() + "', "
 					+ "and two-factor authentication should be configured there")
 					.add(AttributeAppender.append("class", "alert alert-light-warning alert-notice mb-0")));
 		} else if (getLoginUser().getTwoFactorAuthentication() != null) {

@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -51,7 +50,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.interpolative.VariableInterpolator;
@@ -223,14 +221,7 @@ public class SuggestionUtils {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 
-		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
-		criteria.add(Restrictions.or(
-				Restrictions.ilike(User.PROP_NAME, "%" + matchWith + "%"), 
-				Restrictions.ilike(User.PROP_EMAIL, "%" + matchWith + "%"),
-				Restrictions.ilike(User.PROP_FULL_NAME, "%" + matchWith + "%")));
-		criteria.add(Restrictions.gt("id", 0L));
-		
-		for (User user: OneDev.getInstance(UserManager.class).query(criteria)) {
+		for (User user: OneDev.getInstance(UserManager.class).query(matchWith, 0, InputAssistBehavior.MAX_SUGGESTIONS)) {
 			LinearRange match = LinearRange.match(user.getName(), matchWith);
 			String description;
 			if (!user.getDisplayName().equals(user.getName()))
@@ -238,8 +229,6 @@ public class SuggestionUtils {
 			else
 				description = null;
 			suggestions.add(new InputSuggestion(user.getName(), description, match));
-			if (suggestions.size() >= InputAssistBehavior.MAX_SUGGESTIONS)
-				break;
 		}
 		return suggestions;
 	}

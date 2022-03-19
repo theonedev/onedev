@@ -296,6 +296,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		ObjectId mergeCommitId = ObjectId.fromString(
 				Preconditions.checkNotNull(mergePreview.getMergeCommitHash()));
         PersonIdent user = SecurityUtils.getUser().asPerson();
+        
 		Project project = request.getTargetProject();
 		MergeStrategy mergeStrategy = mergePreview.getMergeStrategy();
 		

@@ -1,3 +1,9 @@
+# 7.0.0
+
+1. [RESTful api] Email addresses of a user should now be retrieved via [UserResource.getEmailAddresses](/help/api/io.onedev.server.rest.UserResource/getEmailAddresses), and should be operated via [EmailAddressResource](/help/api/io.onedev.server.rest.EmailAddressResource)
+2. [RESTful api] Access token of a user should now be retrieved via [UserResource.getAccessToken](/help/api/io.onedev.server.rest.UserResource/getAccessToken)
+3. [RESTful api] User query by login name, full name and email should now be done via [UserResource.queryProfile](/help/api/io.onedev.server.rest.UserResource/queryProfile)
+
 # 6.2.1
 
 1. [build spec] Registry login setting is removed from build image step (introduced in 6.2.0). Specify registry logins 

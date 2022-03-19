@@ -26,6 +26,7 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.user.accesstoken.UserAccessTokenPage;
 import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.user.avatar.UserAvatarPage;
+import io.onedev.server.web.page.admin.user.emailaddresses.UserEmailAddressesPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
@@ -66,6 +67,7 @@ public abstract class UserPage extends AdministrationPage {
 		List<PageTab> tabs = new ArrayList<>();
 		
 		tabs.add(new UserTab("Profile", "profile", UserProfilePage.class));
+		tabs.add(new UserTab("Email Addresses", "mail", UserEmailAddressesPage.class));
 		tabs.add(new UserTab("Edit Avatar", "avatar", UserAvatarPage.class));
 			
 		tabs.add(new UserTab("Change Password", "password", UserPasswordPage.class));

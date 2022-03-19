@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -50,7 +51,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 				choices.addAll((List<User>)ReflectionUtils
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
 			} else {
-				choices.addAll(OneDev.getInstance(UserManager.class).query());
+				choices.addAll(getUserManager().query());
 				choices.sort(Comparator.comparing(User::getDisplayName));
 			}
 		} finally {
@@ -59,15 +60,42 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 		List<User> selections = new ArrayList<>();
 		if (getModelObject() != null) {
-			UserManager userManager = OneDev.getInstance(UserManager.class);
 			for (String userName: getModelObject()) {
-				User user = userManager.findByName(userName);
+				User user = getUserManager().findByName(userName);
 				if (user != null && choices.contains(user))
 					selections.add(user);
 			}
 		} 
 		
-		input = new UserMultiChoice("input", Model.of(selections), Model.of(choices)) {
+		List<Long> choiceIds = choices.stream().map(it->it.getId()).collect(Collectors.toList());
+		List<Long> selectionIds = selections.stream().map(it->it.getId()).collect(Collectors.toList());
+		
+		input = new UserMultiChoice("input", new IModel<Collection<User>>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Collection<User> getObject() {
+				return selectionIds.stream().map(it-> getUserManager().load(it)).collect(Collectors.toList());
+			}
+
+			@Override
+			public void setObject(Collection<User> object) {
+				selectionIds.clear();
+				if (object != null)
+					selectionIds.addAll(object.stream().map(it->it.getId()).collect(Collectors.toList()));
+			}
+			
+		}, new LoadableDetachableModel<Collection<User>>() {
+
+			@Override
+			protected Collection<User> load() {
+				return choiceIds.stream().map(it-> getUserManager().load(it)).collect(Collectors.toList());
+			}
+    		
+    	}) {
 
 			@Override
 			protected void onInitialize() {
@@ -89,6 +117,10 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 		});
 		
         add(input);
+	}
+	
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
 	}
 
 	@Override

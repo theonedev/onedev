@@ -203,8 +203,8 @@ public class RepositoryResource {
 		if (project.getTagRef(request.getTagName()) != null) {
 			throw new InvalidParamException("Tag '" + request.getTagName() + "' already exists");
 		} else {
-			PersonIdent tagger = SecurityUtils.getUser().asPerson();
-			project.createTag(request.getTagName(), request.getRevision(), tagger, request.getTagMessage());
+			project.createTag(request.getTagName(), request.getRevision(), 
+					SecurityUtils.getUser().asPerson(), request.getTagMessage());
 		}
 
 		return Response.ok().build();

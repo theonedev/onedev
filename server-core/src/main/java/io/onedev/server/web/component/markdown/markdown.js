@@ -996,7 +996,7 @@ onedev.server.markdown = {
 		$tooltip.find(".title").text(title);
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
-	renderUserTooltip: function(avatarUrl, name, email) {
+	renderUserTooltip: function(avatarUrl, name) {
 		var $tooltip = $("#reference-tooltip");
 		$tooltip.empty().append("" +
 				"<div class='d-flex align-items-center'>" +

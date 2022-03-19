@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.AbstractGitTest;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 
@@ -44,7 +45,14 @@ public class CommitQueryTest extends AbstractGitTest {
 		RefUpdated event = new RefUpdated(project, "refs/heads/master", oldCommitId, newCommitId);
 		
 		User user = new User();
-		user.setEmail(CommitQueryTest.this.user.getEmailAddress());
+		EmailAddress emailAddress = new EmailAddress();
+		emailAddress.setGit(true);
+		emailAddress.setPrimary(true);
+		emailAddress.setOwner(user);
+		emailAddress.setVerificationCode(null);
+		emailAddress.setValue(CommitQueryTest.this.user.getEmailAddress());
+		user.getEmailAddresses().add(emailAddress);
+		
 		User.push(user);
 		try {
 			assertTrue(CommitQuery.parse(project, null).matches(event));

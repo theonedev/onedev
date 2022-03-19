@@ -30,9 +30,9 @@ public class UserTwoFactorAuthenticationPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (getUser().getSsoInfo().getConnector() != null) {
+		if (getUser().getSsoConnector() != null) {
 			add(new Label("content", "This account is currently authenticated via SSO provider '" 
-					+ getUser().getSsoInfo().getConnector() + "', "
+					+ getUser().getSsoConnector() + "', "
 					+ "and two-factor authentication should be configured there")
 					.add(AttributeAppender.append("class", "alert alert-light-warning alert-notice mb-0")));
 		} else if (getUser().getTwoFactorAuthentication() != null) {

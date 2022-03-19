@@ -21,7 +21,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.EmailAddress;
+import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -101,7 +101,7 @@ public abstract class ProjectInfoPanel extends Panel {
         	
         	String subAddressed;
         	
-			EmailAddress emailAddress = EmailAddress.parse(settingManager.getMailSetting().getEmailAddress());
+			ParsedEmailAddress emailAddress = ParsedEmailAddress.parse(settingManager.getMailSetting().getEmailAddress());
 			if (getProject().getServiceDeskName() != null)
 				subAddressed = emailAddress.getSubAddressed(getProject().getServiceDeskName());
 			else

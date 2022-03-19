@@ -17,12 +17,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -67,7 +68,7 @@ class LastCommitsResource extends AbstractResource {
 				
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 				
-				UserManager userManager = OneDev.getInstance(UserManager.class);
+				EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
 				Map<String, LastCommitInfo> map = new HashMap<>();
 				for (Map.Entry<String, LastCommitsOfChildren.Value> entry: lastCommits.entrySet()) {
 					LastCommitInfo info = new LastCommitInfo();
@@ -81,10 +82,15 @@ class LastCommitsResource extends AbstractResource {
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
-					UserFacade user = userManager.findFacadeByEmail(author.getEmailAddress());
-					if (user != null) {
-						info.authorName = user.getDisplayName();
-						info.authorEmailAddress = user.getEmail();
+					EmailAddress emailAddress = emailAddressManager.findByValue(author.getEmailAddress());
+					if (emailAddress != null && emailAddress.isVerified()) {
+						User owner = emailAddress.getOwner();
+						info.authorName = owner.getDisplayName();
+						EmailAddress primaryEmailAddress = owner.getPrimaryEmailAddress();
+						if (primaryEmailAddress != null && primaryEmailAddress.isVerified())
+							info.authorEmailAddress = primaryEmailAddress.getValue();
+						else
+							info.authorEmailAddress = author.getEmailAddress();
 					} else {
 						info.authorName = author.getName();
 						info.authorEmailAddress = author.getEmailAddress();

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import io.onedev.commons.utils.StringUtils;
 
-public class EmailAddress implements Serializable {
+public class ParsedEmailAddress implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -12,7 +12,7 @@ public class EmailAddress implements Serializable {
 	
 	private final String domain;
 	
-	public EmailAddress(String name, String domain) {
+	public ParsedEmailAddress(String name, String domain) {
 		this.name = name;
 		this.domain = domain;
 	}
@@ -25,10 +25,10 @@ public class EmailAddress implements Serializable {
 		return domain;
 	}
 
-	public static EmailAddress parse(String emailAddress) {
+	public static ParsedEmailAddress parse(String emailAddress) {
 		String name = StringUtils.substringBefore(emailAddress, "@");
 		String domain = StringUtils.substringAfter(emailAddress, "@");
-		return new EmailAddress(name, domain);
+		return new ParsedEmailAddress(name, domain);
 	}
 	
 	@Override

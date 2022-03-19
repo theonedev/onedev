@@ -50,9 +50,8 @@ public enum MergeStrategy {
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
 			PersonIdent committer = new PersonIdent(User.SYSTEM_NAME, "");
-			PersonIdent author = request.getSubmitter().asPerson();
-			return GitUtils.merge(repository, targetHead, requestHead, true, committer, author,
-						commitMessage, false);
+			return GitUtils.merge(repository, targetHead, requestHead, true, committer, 
+					request.getSubmitter().asPerson(), commitMessage, false);
 		}
 		
 	},

@@ -1,12 +1,16 @@
 package io.onedev.server.web.editable.userchoice;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -32,6 +36,10 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void onInitialize() {
@@ -48,7 +56,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 				choices.addAll((List<User>)ReflectionUtils
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
 			} else {
-				choices.addAll(OneDev.getInstance(UserManager.class).query());
+				choices.addAll(getUserManager().query());
 				choices.sort(Comparator.comparing(User::getDisplayName));
 			}
 		} finally {
@@ -57,14 +65,43 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 		
 		User selection;
 		if (getModelObject() != null)
-			selection = OneDev.getInstance(UserManager.class).findByName(getModelObject());
+			selection = getUserManager().findByName(getModelObject());
 		else
 			selection = null;
 		
 		if (selection != null && !choices.contains(selection))
 			selection = null;
 		
-    	input = new UserSingleChoice("input", Model.of(selection), Model.of(choices)) {
+		List<Long> choiceIds = choices.stream().map(it->it.getId()).collect(Collectors.toList());
+		
+		AtomicReference<Long> selectionId = new AtomicReference<>(null);
+		if (selection != null)
+			selectionId.set(selection.getId());
+		
+    	input = new UserSingleChoice("input", new IModel<User>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public User getObject() {
+				return selectionId.get()!=null? getUserManager().load(selectionId.get()): null;
+			}
+
+			@Override
+			public void setObject(User object) {
+				selectionId.set(User.idOf(object));
+			}
+    		
+    	}, new LoadableDetachableModel<Collection<User>>() {
+
+			@Override
+			protected Collection<User> load() {
+				return choiceIds.stream().map(it-> getUserManager().load(it)).collect(Collectors.toList());
+			}
+    		
+    	}) {
 
 			@Override
 			protected void onInitialize() {

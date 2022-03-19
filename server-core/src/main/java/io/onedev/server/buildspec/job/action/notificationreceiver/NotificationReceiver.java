@@ -25,6 +25,7 @@ import io.onedev.server.buildspec.job.action.notificationreceiver.NotificationRe
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 
@@ -37,7 +38,7 @@ public class NotificationReceiver {
 	}
 	
 	public static NotificationReceiver parse(String receiverString, @Nullable Build build) {
-		Collection<String> emails = new HashSet<>();
+		Collection<String> emailAddresses = new HashSet<>();
 		
 		CharStream is = CharStreams.fromString(receiverString); 
 		NotificationReceiverLexer lexer = new NotificationReceiverLexer(is);
@@ -61,22 +62,27 @@ public class NotificationReceiver {
 				String userName = getValue(criteria.userCriteria().Value());
 				User user = OneDev.getInstance(UserManager.class).findByName(userName);
 				if (user != null) 
-					emails.add(user.getEmail());
+					addEmailAddress(emailAddresses, user);
 				else 
 					throw new ExplicitException("Unable to find user '" + userName + "'");
 			} else if (criteria.groupCriteria() != null) {
 				String groupName = getValue(criteria.groupCriteria().Value());
 				Group group = OneDev.getInstance(GroupManager.class).find(groupName);
-				if (group != null) 
-					emails.addAll(group.getMembers().stream().map(it->it.getEmail()).collect(Collectors.toList()));
-				else 
+				if (group != null) {
+					emailAddresses.addAll(group.getMembers().stream()
+							.map(it->it.getPrimaryEmailAddress())
+							.filter(it-> it!=null && it.isVerified())
+							.map(it->it.getValue())
+							.collect(Collectors.toList()));
+				} else { 
 					throw new ExplicitException("Unable to find group '" + groupName + "'");
+				}
 			} else if (criteria.Committers() != null) {
 				if (build != null) {
 					for (RevCommit commit: build.getCommits(null)) {
 						PersonIdent committer = commit.getCommitterIdent();
 						if (committer != null && committer.getEmailAddress() != null) 
-							emails.add(committer.getEmailAddress());
+							emailAddresses.add(committer.getEmailAddress());
 					}
 				}
 			} else if (criteria.Authors() != null) {
@@ -84,7 +90,7 @@ public class NotificationReceiver {
 					for (RevCommit commit: build.getCommits(null)) {
 						PersonIdent author = commit.getAuthorIdent();
 						if (author != null && author.getEmailAddress() != null) 
-							emails.add(author.getEmailAddress());
+							emailAddresses.add(author.getEmailAddress());
 					}
 				}
 			} else if (criteria.CommittersSincePreviousSuccessful() != null) {
@@ -92,7 +98,7 @@ public class NotificationReceiver {
 					for (RevCommit commit: build.getCommits(Build.Status.SUCCESSFUL)) {
 						PersonIdent committer = commit.getCommitterIdent();
 						if (committer != null && committer.getEmailAddress() != null) 
-							emails.add(committer.getEmailAddress());
+							emailAddresses.add(committer.getEmailAddress());
 					}
 				}
 			} else if (criteria.AuthorsSincePreviousSuccessful() != null) {
@@ -100,18 +106,24 @@ public class NotificationReceiver {
 					for (RevCommit commit: build.getCommits(Build.Status.SUCCESSFUL)) {
 						PersonIdent author = commit.getAuthorIdent();
 						if (author != null && author.getEmailAddress() != null) 
-							emails.add(author.getEmailAddress());
+							emailAddresses.add(author.getEmailAddress());
 					}
 				}
 			} else if (criteria.Submitter() != null) {
 				if (build != null && build.getSubmitter() != null)
-					emails.add(build.getSubmitter().getEmail());
+					addEmailAddress(emailAddresses, build.getSubmitter());
 			} else {
 				throw new RuntimeException("Unexpected notification receiver criteria");
 			}
 		}			
 		
-		return new NotificationReceiver(emails);
+		return new NotificationReceiver(emailAddresses);
+	}
+	
+	private static void addEmailAddress(Collection<String> emailAddressValues, User user) {
+		EmailAddress emailAddress = user.getPrimaryEmailAddress();
+		if (emailAddress != null && emailAddress.isVerified())
+			emailAddressValues.add(emailAddress.getValue());
 	}
 
 	private static String getValue(TerminalNode terminal) {

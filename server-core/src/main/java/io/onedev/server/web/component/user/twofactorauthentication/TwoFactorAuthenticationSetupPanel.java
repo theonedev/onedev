@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.twofactorauthentication;
+package io.onedev.server.web.component.user.twofactorauthentication;
 
 import java.io.IOException;
 import java.security.SecureRandom;

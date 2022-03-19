@@ -1,36 +1,40 @@
 package io.onedev.server.entitymanager.impl;
 
 import static io.onedev.server.model.User.PROP_PASSWORD;
-import static io.onedev.server.model.User.PROP_SSO_INFO;
-import static io.onedev.server.model.support.SsoInfo.PROP_CONNECTOR;
-import static io.onedev.server.model.support.SsoInfo.PROP_SUBJECT;
+import static io.onedev.server.model.User.PROP_SSO_CONNECTOR;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import io.onedev.commons.loader.Listen;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -39,7 +43,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
 
 @Singleton
@@ -53,48 +56,26 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     
     private final IdManager idManager;
     
+    private final EmailAddressManager emailAddressManager;
+    
     private final TransactionManager transactionManager;
     
-    private final Map<String, Long> userIdByEmail = new ConcurrentHashMap<>();
-    
-    private final Map<Long, UserFacade> cache = new ConcurrentHashMap<>();
-    
+	private final Map<String, Long> idCache = new ConcurrentHashMap<>();
+	
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
-    		IssueFieldManager issueFieldManager, IdManager idManager, TransactionManager transactionManager) {
+    		IssueFieldManager issueFieldManager, IdManager idManager, 
+    		EmailAddressManager emailAddressManager, TransactionManager transactionManager) {
         super(dao);
         
         this.projectManager = projectManager;
         this.settingManager = settingManager;
         this.issueFieldManager = issueFieldManager;
         this.idManager = idManager;
+        this.emailAddressManager = emailAddressManager;
         this.transactionManager = transactionManager;
     }
 
-	@SuppressWarnings("unchecked")
-	@Sessional
-	@Listen
-	public void on(SystemStarted event) {
-		String queryString = String.format("select id, %s, %s, %s, %s, %s from User", 
-				User.PROP_NAME, User.PROP_FULL_NAME, User.PROP_EMAIL, User.PROP_GIT_EMAIL, User.PROP_ALTERNATE_EMAILS);
-		Query<?> query = dao.getSession().createQuery(queryString);
-		for (Object[] fields: (List<Object[]>)query.list()) {
-			Long userId = (Long) fields[0];
-			String name = (String) fields[1];
-			String fullName = (String) fields[2];
-			String email = (String) fields[3];
-			String gitEmail = (String) fields[4];
-			List<String> alternateEmails = (List<String>) fields[5];
-			
-			userIdByEmail.put(email, userId);
-			if (gitEmail != null)
-				userIdByEmail.put(gitEmail, userId);
-			for (String alternateEmail: alternateEmails)
-				userIdByEmail.put(alternateEmail, userId);
-			cache.put(userId, new UserFacade(userId, name, fullName, email, gitEmail, alternateEmails));
-		}
-	}
-	
 	@Transactional
 	@Override
 	public void replicate(User user) {
@@ -105,6 +86,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Transactional
     @Override
 	public void save(User user, String oldName) {
+    	user.setName(user.getName().toLowerCase());
+    	
     	dao.persist(user);
 
     	if (oldName != null && !oldName.equals(user.getName())) {
@@ -120,20 +103,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     		
     		issueFieldManager.onRenameUser(oldName, user.getName());
     	}
-    	
-    	transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				userIdByEmail.put(user.getEmail(), user.getId());
-				if (user.getGitEmail() != null)
-					userIdByEmail.put(user.getGitEmail(), user.getId());
-				for (String alternateEmail: user.getAlternateEmails())
-					userIdByEmail.put(alternateEmail, user.getId());
-				cache.put(user.getId(), new UserFacade(user));
-			}
-    		
-    	});
     }
     
     @Override
@@ -249,29 +218,19 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.executeUpdate();
     	
 		dao.remove(user);
-		
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				cache.remove(user.getId());
-				userIdByEmail.remove(user.getEmail());
-				if (user.getGitEmail() != null)
-					userIdByEmail.remove(user.getGitEmail());
-				for (String email: user.getAlternateEmails())
-					userIdByEmail.remove(email);
-			}
-			
-		});
     }
 
 	@Sessional
     @Override
     public User findByName(String userName) {
-		EntityCriteria<User> criteria = newCriteria();
-		criteria.add(Restrictions.ilike(User.PROP_NAME, userName));
-		criteria.setCacheable(true);
-		return find(criteria);
+		userName = userName.toLowerCase();
+		Long id = idCache.get(userName);
+		if (id != null) {
+			User user = get(id);
+			if (user != null && user.getName().equals(userName))
+				return user;
+		}
+		return null;
     }
 
 	@Sessional
@@ -292,16 +251,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return find(criteria);
     }
 	
-	@Sessional
-    @Override
-    public User findBySsoInfo(SsoInfo ssoInfo) {
-		EntityCriteria<User> criteria = newCriteria();
-		criteria.add(Restrictions.eq(User.PROP_SSO_INFO + "." + SsoInfo.PROP_CONNECTOR, ssoInfo.getConnector()));
-		criteria.add(Restrictions.eq(User.PROP_SSO_INFO + "." + SsoInfo.PROP_SUBJECT, ssoInfo.getSubject()));
-		criteria.setCacheable(true);
-		return find(criteria);
-    }
-	
 	@Override
 	public List<User> query() {
 		EntityCriteria<User> criteria = newCriteria();
@@ -315,47 +264,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return count(true);
 	}
 
-	@Sessional
-    @Override
-    public UserFacade findFacadeByEmail(String email) {
-		Long userId = userIdByEmail.get(email);
-		if (userId != null) {
-			UserFacade user = cache.get(userId);
-			if (user != null && user.isUsingEmail(email))
-				return user;
-		}
-		return null;
-    }
-	
-    @Sessional
-    @Override
-    public UserFacade findFacade(PersonIdent person) {
-    	if (StringUtils.isNotBlank(person.getEmailAddress()))
-    		return findFacadeByEmail(person.getEmailAddress());
-    	else
-    		return null;
-    }
-    
-    @Sessional
-    @Override
-    public UserFacade getFacade(Long userId) {
-    	return cache.get(userId);
-    }
-    
-	@Sessional
-    @Override
-    public User findByEmail(String email) {
-		UserFacade facade = findFacadeByEmail(email);
-		return facade!=null? load(facade.getId()): null;
-    }
-	
-    @Sessional
-    @Override
-    public User find(PersonIdent person) {
-    	UserFacade facade = findFacade(person);
-		return facade!=null? load(facade.getId()): null;
-    }
-    
 	@Override
 	public List<User> queryAndSort(Collection<User> topUsers) {
 		List<User> users = query();
@@ -365,12 +273,53 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return users;
 	}
 
+    @Sessional
+    @Listen
+    public void on(SystemStarted event) {
+    	for (User user: query()) 
+    		idCache.put(user.getName(), user.getId());
+    }
+	
+    @Transactional
+    @Listen
+    public void on(EntityRemoved event) {
+    	if (event.getEntity() instanceof User) {
+    		User user = (User) event.getEntity();
+    		String name = user.getName();
+    		transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					idCache.remove(name);
+				}
+				
+    		});
+    	}
+    }
+    
+    @Transactional
+    @Listen
+    public void on(EntityPersisted event) {
+    	if (event.getEntity() instanceof User) {
+    		User user = (User) event.getEntity();
+    		String name = user.getName();
+    		Long id = user.getId();
+    		transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					idCache.put(name, id);
+				}
+    			
+    		});
+    	}
+    }
+    
 	@Transactional
 	@Override
 	public void onRenameSsoConnector(String oldName, String newName) {
-		String connectorProp = PROP_SSO_INFO + "." + PROP_CONNECTOR;
     	Query<?> query = getSession().createQuery(String.format("update User set %s=:newName "
-    			+ "where %s=:oldName", connectorProp, connectorProp));
+    			+ "where %s=:oldName", oldName, newName));
     	query.setParameter("oldName", oldName);
     	query.setParameter("newName", newName);
     	query.executeUpdate();
@@ -379,13 +328,70 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Transactional
 	@Override
 	public void onDeleteSsoConnector(String name) {
-		String connectorProp = PROP_SSO_INFO + "." + PROP_CONNECTOR;
-		String subjectProp = PROP_SSO_INFO + "." + PROP_SUBJECT;
-    	Query<?> query = getSession().createQuery(String.format("update User set %s=null, %s='%s', %s='12345' "
+    	Query<?> query = getSession().createQuery(String.format("update User set %s=null, %s='12345' "
     			+ "where %s=:name", 
-    			connectorProp, subjectProp, UUID.randomUUID().toString(), PROP_PASSWORD, connectorProp));
+    			PROP_SSO_CONNECTOR, PROP_PASSWORD, PROP_SSO_CONNECTOR));
     	query.setParameter("name", name);
     	query.executeUpdate();
+	}
+
+	private Predicate[] getPredicates(CriteriaBuilder builder, CriteriaQuery<?> query, 
+			Root<User> root, String term) {
+		if (term != null) {
+			term = "%" + term.toLowerCase() + "%";
+			
+			Subquery<EmailAddress> addressQuery = query.subquery(EmailAddress.class);
+			Root<EmailAddress> addressRoot = addressQuery.from(EmailAddress.class);
+			addressQuery.select(addressRoot);
+			
+			Predicate ownerPredicate = builder.equal(addressRoot.get(EmailAddress.PROP_OWNER), root);
+			Predicate valuePredicate = builder.like(addressRoot.get(EmailAddress.PROP_VALUE), term);
+			return new Predicate[] {
+					builder.gt(root.get(AbstractEntity.PROP_ID), 0),
+					builder.or(
+							builder.like(root.get(User.PROP_NAME), term), 
+							builder.like(builder.lower(root.get(User.PROP_FULL_NAME)), term), 
+							builder.exists(addressQuery.where(ownerPredicate, valuePredicate)))};
+		} else {
+			return new Predicate[] {builder.gt(root.get(AbstractEntity.PROP_ID), 0)};
+		}
+	}
+	
+	@Override
+	public List<User> query(String term, int firstResult, int maxResults) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<User> criteriaQuery = builder.createQuery(User.class);
+		Root<User> root = criteriaQuery.from(User.class);
+		
+		criteriaQuery.where(getPredicates(builder, criteriaQuery, root, term));
+		
+		Query<User> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResults);
+		
+		return query.getResultList();
+	}
+
+	@Override
+	public int count(String term) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<User> root = criteriaQuery.from(User.class);
+		
+		criteriaQuery.select(builder.count(root));
+		criteriaQuery.where(getPredicates(builder, criteriaQuery, root, term));
+
+		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
+	}
+
+	@Sessional
+	@Override
+	public User findByVerifiedEmailAddress(String emailAddressValue) {
+		EmailAddress emailAddress = emailAddressManager.findByValue(emailAddressValue);
+		if (emailAddress != null && emailAddress.isVerified())
+			return emailAddress.getOwner();
+		else
+			return null;
 	}
 
 }

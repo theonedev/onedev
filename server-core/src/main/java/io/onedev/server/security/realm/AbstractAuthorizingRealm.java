@@ -16,6 +16,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -35,6 +36,8 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 
     protected final UserManager userManager;
     
+    protected final EmailAddressManager emailAddressManager;
+    
     protected final GroupManager groupManager;
     
     protected final ProjectManager projectManager;
@@ -50,12 +53,13 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 	@Inject
     public AbstractAuthorizingRealm(UserManager userManager, GroupManager groupManager, 
     		ProjectManager projectManager, SessionManager sessionManager, 
-    		SettingManager settingManager) {
+    		SettingManager settingManager, EmailAddressManager emailAddressManager) {
     	this.userManager = userManager;
     	this.groupManager = groupManager;
     	this.projectManager = projectManager;
     	this.sessionManager = sessionManager;
     	this.settingManager = settingManager;
+    	this.emailAddressManager = emailAddressManager;
     }
 
 	private Collection<Permission> getGroupPermissions(Group group, User user) {

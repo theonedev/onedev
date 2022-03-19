@@ -23,6 +23,7 @@ import io.onedev.server.event.build.BuildUpdated;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildQueryPersonalization;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -107,7 +108,9 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 					User.push(user);
 					try {
 						if (BuildQuery.parse(event.getProject(), queryString, true, true).matches(build)) {
-							notifyEmails.add(user.getEmail());
+							EmailAddress emailAddress = user.getPrimaryEmailAddress();
+							if (emailAddress != null && emailAddress.isVerified())
+								notifyEmails.add(emailAddress.getValue());
 							break;
 						}
 					} catch (Exception e) {
@@ -142,7 +145,9 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 					User.push(user);
 					try {
 						if (BuildQuery.parse(null, queryString, true, true).matches(build)) {
-							notifyEmails.add(user.getEmail());
+							EmailAddress emailAddress = user.getPrimaryEmailAddress();
+							if (emailAddress != null && emailAddress.isVerified())
+								notifyEmails.add(emailAddress.getValue());
 							break;
 						}
 					} catch (Exception e) {

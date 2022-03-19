@@ -5,12 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.jgit.lib.PersonIdent;
-
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.util.facade.UserFacade;
 
 public interface UserManager extends EntityManager<User> {
 	
@@ -69,42 +65,15 @@ public interface UserManager extends EntityManager<User> {
 	@Nullable
 	User findByFullName(String fullName);
 
-	@Nullable 
-	User findBySsoInfo(SsoInfo ssoInfo);
-	
 	@Nullable
 	User findByAccessToken(String accessToken);
 	
-	/**
-	 * Find user of specified name.
-	 * <p>
-	 * @param userName
-	 * 			name of the user
-	 * @return
-	 * 			matching user, or <tt>null</tt> if not found 
-	 */
-	@Nullable 
-	User findByEmail(String email);
-
 	@Nullable
-	UserFacade findFacadeByEmail(String email);
+	User findByVerifiedEmailAddress(String emailAddress);
 	
-	/**
-	 * Find user by person
-	 * <p>
-	 * @param person
-	 * 			Git person representation 
-	 * @return
-	 * 			matching user, or <tt>null</tt> if not found 
-	 */
-	@Nullable 
-	User find(PersonIdent person);
+	List<User> query(@Nullable String term, int firstResult, int maxResults);
 	
-	@Nullable
-	UserFacade findFacade(PersonIdent person);
-	
-	@Nullable
-	UserFacade getFacade(Long userId);
+	int count(String term);
 	
 	List<User> queryAndSort(Collection<User> topUsers);
 	

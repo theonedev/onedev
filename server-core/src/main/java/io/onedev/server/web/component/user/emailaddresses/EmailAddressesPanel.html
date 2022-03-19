@@ -1,0 +1,36 @@
+<wicket:panel>
+	<div class="email-addresses">
+		<ul class="alert alert-light px-5 mb-5">
+			<li>Primary email address will be used to receive notifications, show gravatar (if enabled) etc.</li>
+			<li>Git email address will be used as git author/committer for commits created on web UI</li>
+			<li>When determine if <span wicket:id="who"></span> author/committer of a git commit, all emails listed here will be checked</li>
+			<li>Unverified email address is <b>NOT</b> applicable for above functionalities</li>
+		</ul>
+		<table class="table">
+			<tr wicket:id="emailAddresses">
+				<td>
+					<span wicket:id="value" class="font-size-lg"></span>
+					<span wicket:id="primary" class="badge badge-info badge-sm ml-3">Primary</span>
+					<span wicket:id="git" class="badge badge-info badge-sm ml-1">Git</span>
+					<span wicket:id="verificationStatus" class="ml-1"></span>
+					<div wicket:id="externalManagedNote" class="text-warning font-size-sm mt-2"></div>
+				</td>
+				<td>
+					<a wicket:id="operations" title="Operatioins"><wicket:svg href="ellipsis" class="icon"/></a>				
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<div class="mb-2 mt-4 font-weight-bolder">Add New Email Address</div>
+					<div class="form-group">
+						<form wicket:id="form" class="form-inline">
+							<input wicket:id="emailAddress" class="form-control form-control-sm flex-flow-0 mr-3" placeholder="Email Address"> 
+							<button type="submit" class="btn btn-icon btn-sm btn-primary"><wicket:svg href="plus" class="icon"/></button>
+						</form>
+						<div wicket:id="feedback"></div>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</wicket:panel>

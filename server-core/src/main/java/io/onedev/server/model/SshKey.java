@@ -13,7 +13,6 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.sshd.common.config.keys.KeyUtils;
@@ -32,10 +31,7 @@ import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 @Entity
-@Table(
-		indexes={@Index(columnList="o_owner_id"), @Index(columnList="digest")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"digest"})}
-)
+@Table(indexes={@Index(columnList="o_owner_id"), @Index(columnList="digest")})
 @ClassValidating
 public class SshKey extends AbstractEntity implements Validatable {
     
@@ -45,7 +41,7 @@ public class SshKey extends AbstractEntity implements Validatable {
     private String content;
     
     @JsonIgnore
-    @Column(nullable=false)
+    @Column(nullable=false, unique=true)
     private String digest;
 
     @JsonIgnore

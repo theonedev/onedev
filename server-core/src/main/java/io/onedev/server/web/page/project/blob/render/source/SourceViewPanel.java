@@ -437,8 +437,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 					for (User user: context.getProject().getAuthors(context.getBlobIdent().path, context.getCommit(), 
 							new LinearRange(range.getFromRow(), range.getToRow()))) {
-						if (user.getEmail() != null)
-							mentions.append("@").append(user.getName()).append(" ");
+						mentions.append("@").append(user.getName()).append(" ");
 					}
 					
 					form.add(contentInput = new CommentInput("content", Model.of(mentions.toString()), true) {

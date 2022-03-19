@@ -21,6 +21,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.persistence.SessionManager;
@@ -76,9 +77,9 @@ public class PasswordResetPage extends SimplePage {
 					UserManager userManager = OneDev.getInstance(UserManager.class);
 					User user = userManager.findByName(loginNameOrEmail);
 					if (user == null) 
-						user = userManager.findByEmail(loginNameOrEmail);
+						user = userManager.findByVerifiedEmailAddress(loginNameOrEmail);
 					if (user == null) {
-						throw new ExplicitException("No user found with login name or email: " + loginNameOrEmail);
+						throw new ExplicitException("No user found with login name or verified email: " + loginNameOrEmail);
 					} else {
 						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 						if (settingManager.getMailSetting() != null) {
@@ -102,14 +103,27 @@ public class PasswordResetPage extends SimplePage {
 									+ "%s",
 									user.getDisplayName(), user.getName(), serverUrl, password);
 							
+							String emailAddressValue;
+							if (loginNameOrEmail.contains("@")) { 
+								emailAddressValue = loginNameOrEmail;
+							} else {
+								EmailAddress emailAddress = user.getPrimaryEmailAddress();
+								if (emailAddress == null) 
+									throw new ExplicitException("Primary email address not specified");
+								else if (!emailAddress.isVerified())
+									throw new ExplicitException("Your primary email address is not verified");
+								else
+									emailAddressValue = emailAddress.getValue();
+							}
+							
 							mailManager.sendMail(
 									settingManager.getMailSetting(), 
-									Arrays.asList(user.getEmail()),
+									Arrays.asList(emailAddressValue),
 									Lists.newArrayList(), Lists.newArrayList(), 
 									"[Password Reset] Your OneDev Password Has Been Reset", 
 									htmlBody, textBody, null, null);
 							
-							return "Please check your email " + user.getEmail() + " for the reset password";
+							return "Please check your email " + emailAddressValue + " for the reset password";
 						} else {
 							throw new ExplicitException("Unable to send password reset email as smtp setting is not defined");
 						}

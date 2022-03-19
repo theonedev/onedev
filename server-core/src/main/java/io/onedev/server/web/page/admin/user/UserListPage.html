@@ -17,4 +17,8 @@
 		<a wicket:id="impersonate" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Impersonate this user"><wicket:svg href="user-tick" class="icon align-middle"/></a>
 		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this user"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
 	</wicket:fragment>
+	<wicket:fragment wicket:id="emailFrag">
+		<span wicket:id="emailAddress"></span>
+		<span wicket:id="verificationStatus" class="ml-1"></span>
+	</wicket:fragment>
 </wicket:extend>

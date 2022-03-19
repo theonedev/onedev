@@ -7,10 +7,10 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -26,18 +26,17 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.CodeCommentQueryPersonalization;
 import io.onedev.server.model.CommitQueryPersonalization;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.model.IssueWatch;
@@ -50,15 +49,15 @@ import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.NamedProjectQuery;
-import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.validation.annotation.UserName;
 
 @Api(order=5000)
 @Path("/users")
@@ -73,17 +72,21 @@ public class UserResource {
 	
 	private final PasswordService passwordService;
 	
+	private final EmailAddressManager emailAddressManager;
+	
 	@Inject
-	public UserResource(UserManager userManager, SshKeyManager sshKeyManager, PasswordService passwordService) {
+	public UserResource(UserManager userManager, SshKeyManager sshKeyManager, 
+			PasswordService passwordService, EmailAddressManager emailAddressManager) {
 		this.userManager = userManager;
 		this.sshKeyManager = sshKeyManager;
 		this.passwordService = passwordService;
+		this.emailAddressManager = emailAddressManager;
 	}
 
 	@Api(order=100)
 	@Path("/{userId}")
     @GET
-    public User getBasicInfo(@PathParam("userId") Long userId) {
+    public User getProfile(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
@@ -93,11 +96,31 @@ public class UserResource {
 	@Api(order=200)
 	@Path("/me")
     @GET
-    public User getMyBasicInfo() {
+    public User getMyProfile() {
 		User user = SecurityUtils.getUser();
 		if (user == null)
 			throw new UnauthenticatedException();
 		return user;
+    }
+	
+	@Api(order=250)
+	@Path("/{userId}/access-token")
+    @GET
+    public String getAccessToken(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+		return user.getAccessToken();
+    }
+	
+	@Api(order=275)
+	@Path("/{userId}/email-addresses")
+    @GET
+    public Collection<EmailAddress> getEmailAddresses(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+		return user.getEmailAddresses();
     }
 	
 	@Api(order=300)
@@ -116,16 +139,6 @@ public class UserResource {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
     	return userManager.load(userId).getMemberships();
-    }
-	
-	@Api(order=500)
-	@Path("/{userId}/sso-info")
-    @GET
-    public SsoInfo getSsoInfo(@PathParam("userId") Long userId) {
-    	User user = userManager.load(userId);
-    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
-			throw new UnauthorizedException();
-    	return user.getSsoInfo();
     }
 	
 	@Api(order=600)
@@ -258,8 +271,9 @@ public class UserResource {
 	
 	@Api(order=1800)
 	@GET
-    public List<User> queryBasicInfo(@QueryParam("name") String name, @QueryParam("fullName") String fullName, 
-    		@QueryParam("email") String email, @QueryParam("offset") @Api(example="0") int offset, 
+    public List<User> queryProfile(
+    		@QueryParam("term") @Api(description="Any string in login name, full name or email address") String term, 
+    		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		
 		if (!SecurityUtils.isAdministrator())
@@ -268,51 +282,56 @@ public class UserResource {
     	if (count > RestConstants.MAX_PAGE_SIZE)
     		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
-		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
-		criteria.add(Restrictions.gt("id", 0L));
-		if (name != null) 
-			criteria.add(Restrictions.ilike("name", name.replace('*', '%'), MatchMode.EXACT));
-		if (fullName != null) 		
-			criteria.add(Restrictions.ilike("fullName", fullName.replace('*', '%'), MatchMode.EXACT));
-		if (email != null) 		
-			criteria.add(Restrictions.ilike("email", email.replace('*', '%'), MatchMode.EXACT));
-		
-    	return userManager.query(criteria, offset, count);
+    	return userManager.query(term, offset, count);
     }
 	
-	@Api(order=1900, description="Update user of specified id in request body, or create new if id property not provided")
+	@Api(order=1900, description="Create new user")
     @POST
-    public Long createOrUpdate(@NotNull User user) {
-    	if (user.isNew()) {
-    		if (!SecurityUtils.isAdministrator()) {
-    			throw new UnauthorizedException();
-    		} else {
-    			user.setPassword("impossible_password");
-    			checkEmails(user);
-    			userManager.save(user);
-    		}
-    	} else {
-        	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) { 
-				throw new UnauthorizedException();
-        	} else {
-        		checkEmails(user);
-	    		userManager.save(user, (String) user.getCustomData());
-	    	}
-    	}
-    	return user.getId();
+    public Long create(@NotNull @Valid UserCreateData data) {
+		if (SecurityUtils.isAdministrator()) {
+			if (userManager.findByName(data.getName()) != null)
+				throw new ExplicitException("Login name is already used by another user");
+			if (emailAddressManager.findByValue(data.getEmailAddress()) != null)
+				throw new ExplicitException("Email address is already used by another user");
+			
+			User user = new User();
+			user.setName(data.getName());
+			user.setFullName(data.getFullName());
+			user.setPassword(passwordService.encryptPassword(data.getPassword()));
+			userManager.save(user);
+			
+			EmailAddress emailAddress = new EmailAddress();
+			emailAddress.setGit(true);
+			emailAddress.setPrimary(true);
+			emailAddress.setOwner(user);
+			emailAddress.setValue(data.getEmailAddress());
+			emailAddress.setVerificationCode(null);
+			emailAddressManager.save(emailAddress);
+			
+			return user.getId();
+		} else {
+			throw new UnauthenticatedException();
+		}
     }
 	
-	private void checkEmails(User user) {
-		Set<String> emails = Sets.newHashSet(user.getEmail());
-		if (user.getGitEmail() != null)
-			emails.add(user.getGitEmail());
-		emails.addAll(user.getAlternateEmails());
-		for (String email: emails) {
-			User userWithSameEmail = userManager.findByEmail(email);
-			if (userWithSameEmail != null && !userWithSameEmail.equals(user)) 
-				throw new ExplicitException("Email '" + email + "' already used by another user.");
+	@Api(order=1950, description="Update user profile")
+	@Path("/{userId}")
+    @POST
+    public Long updateProfile(@PathParam("userId") Long userId, @NotNull @Valid ProfileUpdateData data) {
+		User user = userManager.load(userId);
+		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getUser())) { 
+			User existingUser = userManager.findByName(data.getName());
+			if (existingUser != null && !existingUser.equals(user))
+				throw new ExplicitException("Login name is already used by another user");
+			
+			user.setName(data.getName());
+			user.setFullName(data.getFullName());
+			userManager.save(user);
+			return user.getId();
+		} else { 
+			throw new UnauthenticatedException();
 		}
-	}
+    }
 	
 	@Api(order=2000)
 	@Path("/{userId}/password")
@@ -322,9 +341,9 @@ public class UserResource {
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
     	} else if (user.getPassword().equals(User.EXTERNAL_MANAGED)) {
-			if (user.getSsoInfo().getConnector() != null) {
+			if (user.getSsoConnector() != null) {
 				throw new ExplicitException("The user is currently authenticated via SSO provider '" 
-						+ user.getSsoInfo().getConnector() + "', please change password there instead");
+						+ user.getSsoConnector() + "', please change password there instead");
 			} else {
 				throw new ExplicitException("The user is currently authenticated via external system, "
 						+ "please change password there instead");
@@ -334,18 +353,6 @@ public class UserResource {
 	    	userManager.save(user);
 	    	return Response.ok().build();
 		}
-    }
-	
-	@Api(order=2100)
-	@Path("/{userId}/sso-info")
-    @POST
-    public Response setSsoInfo(@PathParam("userId") Long userId, @NotNull SsoInfo ssoInfo) {
-    	if (!SecurityUtils.isAdministrator()) 
-			throw new UnauthorizedException();
-    	User user = userManager.load(userId);
-    	user.setSsoInfo(ssoInfo);
-    	userManager.save(user);
-    	return Response.ok().build();
     }
 	
 	@Api(order=2100)
@@ -398,6 +405,92 @@ public class UserResource {
     		userManager.delete(user);
     	return Response.ok().build();
     }
+
+	@EntityCreate(User.class)
+	public static class UserCreateData implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		
+		private String name;
+		
+		private String password;
+		
+		private String fullName;
+		
+		private String emailAddress;
+
+		@Api(order=100, description="Login name of the user")
+		@UserName
+		@NotEmpty
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Api(order=150)
+		@NotEmpty
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+		@Api(order=200)
+		public String getFullName() {
+			return fullName;
+		}
+
+		public void setFullName(String fullName) {
+			this.fullName = fullName;
+		}
+
+		@Api(order=300)
+		@Email
+		@NotEmpty
+		public String getEmailAddress() {
+			return emailAddress;
+		}
+
+		public void setEmailAddress(String emailAddress) {
+			this.emailAddress = emailAddress;
+		}
+		
+	}
+	
+	public static class ProfileUpdateData implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		
+		private String name;
+		
+		private String fullName;
+		
+		@Api(order=100, description="Login name of the user")
+		@UserName
+		@NotEmpty
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Api(order=200)
+		public String getFullName() {
+			return fullName;
+		}
+
+		public void setFullName(String fullName) {
+			this.fullName = fullName;
+		}
+
+	}
 	
 	public static class QueriesAndWatches implements Serializable {
 		

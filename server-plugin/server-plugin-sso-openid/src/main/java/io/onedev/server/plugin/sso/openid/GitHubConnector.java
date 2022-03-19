@@ -74,7 +74,7 @@ public class GitHubConnector extends OpenIdConnector {
 					throw new AuthenticationException("A public email is required");
 				String fullName = (String) json.get("name");
 				
-				return new SsoAuthenticated(userName, userName, email, fullName, null, null, this);
+				return new SsoAuthenticated(userName, email, fullName, null, null, this);
 			} else {
 				throw buildException(UserInfoErrorResponse.parse(httpResponse).getErrorObject());
 			}

@@ -49,11 +49,26 @@
 				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">
 					<img wicket:id="avatar"> 
 					<span wicket:id="name" class="ml-2 d-none d-lg-inline"></span>
+					<span wicket:id="warningIcon"><wicket:svg href="warning-o" class="icon text-warning ml-2"/></span>
 				</a>
 				<div class="dropdown-menu">
+					<wicket:enclosure child="hasUnverifiedLink">
+					<div class="mx-3 my-2 alert alert-light-warning">
+						You have unverified <a wicket:id="hasUnverifiedLink">email addresses</a>
+					</div>
+					</wicket:enclosure>
+					<wicket:enclosure child="noPrimaryAddressLink">
+					<div class="mx-3 my-2 alert alert-light-warning">
+						Primary <a wicket:id="noPrimaryAddressLink">email address</a> not specified
+					</div>
+					</wicket:enclosure>
 					<a wicket:id="myProfile" class="dropdown-item">
 						<wicket:svg href="profile" class="icon mr-2"></wicket:svg>
-						My Profile
+						Profile
+					</a>
+					<a wicket:id="myEmailSetting" class="dropdown-item">
+						<wicket:svg href="mail" class="icon mr-2"></wicket:svg>
+						Email Addresses
 					</a>
 					<a wicket:id="myAvatar" class="dropdown-item">
 						<wicket:svg href="avatar" class="icon mr-2"></wicket:svg>

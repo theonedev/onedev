@@ -20,7 +20,7 @@ import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=5100)
+@Api(order=5150)
 @Path("/issue-query-personalizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

@@ -82,6 +82,7 @@ import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
+import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
@@ -354,14 +355,33 @@ public abstract class LayoutPage extends BasePage {
 		if (loginUser != null) {
 			userInfo.add(new UserAvatar("avatar", loginUser));
 			userInfo.add(new Label("name", loginUser.getDisplayName()));
+			if (loginUser.getEmailAddresses().isEmpty()) {
+				userInfo.add(new WebMarkupContainer("warningIcon"));
+				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
+				userInfo.add(new ViewStateAwarePageLink<Void>("noPrimaryAddressLink", MyEmailAddressesPage.class));
+			} else if (loginUser.getEmailAddresses().stream().anyMatch(it->!it.isVerified())) {
+				userInfo.add(new WebMarkupContainer("warningIcon"));
+				userInfo.add(new ViewStateAwarePageLink<Void>("hasUnverifiedLink", MyEmailAddressesPage.class));
+				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
+			} else {
+				userInfo.add(new WebMarkupContainer("warningIcon").setVisible(false));
+				userInfo.add(new WebMarkupContainer("hasUnverifiedLink").setVisible(false));
+				userInfo.add(new WebMarkupContainer("noPrimaryAddressLink").setVisible(false));
+			}
 		} else {
 			userInfo.add(new WebMarkupContainer("avatar"));
 			userInfo.add(new WebMarkupContainer("name"));
+			userInfo.add(new WebMarkupContainer("warningIcon"));
+			userInfo.add(new WebMarkupContainer("warningLink"));
 		}
 		
 		WebMarkupContainer item;
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myProfile", MyProfilePage.class));
 		if (getPage() instanceof MyProfilePage)
+			item.add(AttributeAppender.append("class", "active"));
+		
+		userInfo.add(item = new ViewStateAwarePageLink<Void>("myEmailSetting", MyEmailAddressesPage.class));
+		if (getPage() instanceof MyEmailAddressesPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAvatar", MyAvatarPage.class));

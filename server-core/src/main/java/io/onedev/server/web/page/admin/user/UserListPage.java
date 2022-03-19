@@ -29,19 +29,17 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
 import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.user.UserAvatar;
@@ -71,19 +69,6 @@ public class UserListPage extends AdministrationPage {
 		super(params);
 		
 		query = params.get(PARAM_QUERY).toString();
-	}
-	
-	private EntityCriteria<User> getCriteria() {
-		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
-		criteria.add(Restrictions.gt("id", 0L));
-		if (query != null) {
-			criteria.add(Restrictions.or(
-					Restrictions.ilike("name", query, MatchMode.ANYWHERE), 
-					Restrictions.ilike("fullName", query, MatchMode.ANYWHERE)));
-		} else {
-			criteria.setCacheable(true);
-		}
-		return criteria;
 	}
 	
 	@Override
@@ -203,7 +188,7 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<User, Void>(Model.of("Email")) {
+		columns.add(new AbstractColumn<User, Void>(Model.of("Primary Email")) {
 
 			@Override
 			public String getCssClass() {
@@ -213,7 +198,16 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
 					IModel<User> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getEmail()));
+				EmailAddress emailAddress = rowModel.getObject().getPrimaryEmailAddress();
+				if (emailAddress != null) {
+					Fragment fragment = new Fragment(componentId, "emailFrag", UserListPage.this);
+					fragment.add(new Label("emailAddress", emailAddress.getValue()));
+					fragment.add(new EmailAddressVerificationStatusBadge(
+							"verificationStatus", Model.of(emailAddress)));
+					cellItem.add(fragment);
+				} else {
+					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+				}
 			}
 			
 		});
@@ -303,14 +297,12 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends User> iterator(long first, long count) {
-				EntityCriteria<User> criteria = getCriteria();
-				criteria.addOrder(Order.asc("name"));
-				return OneDev.getInstance(UserManager.class).query(criteria, (int)first, (int)count).iterator();
+				return getUserManager().query(query, (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				return OneDev.getInstance(UserManager.class).count(getCriteria());
+				return OneDev.getInstance(UserManager.class).count(query);
 			}
 
 			@Override
@@ -347,6 +339,10 @@ public class UserListPage extends AdministrationPage {
 		
 		add(usersTable = new OneDataTable<User, Void>("users", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
+	}
+	
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
 	}
 
 	@Override
