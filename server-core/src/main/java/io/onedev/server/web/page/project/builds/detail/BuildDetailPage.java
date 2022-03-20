@@ -103,11 +103,13 @@ public abstract class BuildDetailPage extends ProjectPage
 		protected List<Job> load() {
 			List<Job> promoteJobs = new ArrayList<>();
 			BuildSpec buildSpec = getProject().getBuildSpec(getBuild().getCommitId());
-			for (Job job: buildSpec.getJobMap().values()) {
-				for (JobDependency dependency: job.getJobDependencies()) {
-					if (dependency.getJobName().equals(getBuild().getJobName()) 
-							&& getBuild().matchParams(dependency.getJobParams())) { 
-						promoteJobs.add(job);
+			if (buildSpec != null) {
+				for (Job job: buildSpec.getJobMap().values()) {
+					for (JobDependency dependency: job.getJobDependencies()) {
+						if (dependency.getJobName().equals(getBuild().getJobName()) 
+								&& getBuild().matchParams(dependency.getJobParams())) { 
+							promoteJobs.add(job);
+						}
 					}
 				}
 			}
