@@ -36,7 +36,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.job.JobManager;
@@ -102,9 +101,8 @@ public abstract class BuildDetailPage extends ProjectPage
 		@Override
 		protected List<Job> load() {
 			List<Job> promoteJobs = new ArrayList<>();
-			BuildSpec buildSpec = getProject().getBuildSpec(getBuild().getCommitId());
-			if (buildSpec != null) {
-				for (Job job: buildSpec.getJobMap().values()) {
+			if (getBuild().getSpec() != null) {
+				for (Job job: getBuild().getSpec().getJobMap().values()) {
 					for (JobDependency dependency: job.getJobDependencies()) {
 						if (dependency.getJobName().equals(getBuild().getJobName()) 
 								&& getBuild().matchParams(dependency.getJobParams())) { 
@@ -344,12 +342,22 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		add(new SideInfoLink("moreInfo"));
 		
+		add(new WebMarkupContainer("buildSpecNotFound") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getBuild().getSpec() == null);
+			}
+			
+		});
+		
 		WebMarkupContainer jobNotFoundContainer = new WebMarkupContainer("jobNotFound") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().getJob() == null);
+				setVisible(getBuild().getSpec() != null && getBuild().getJob() == null);
 			}
 			
 		};
