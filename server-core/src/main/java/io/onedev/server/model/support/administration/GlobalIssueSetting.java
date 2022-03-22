@@ -177,16 +177,10 @@ public class GlobalIssueSetting implements Serializable {
 		stateSpecs.add(open);
 		
 		StateSpec closed = new StateSpec();
-		closed.setColor("#8950FC");
+		closed.setColor("#1BC5BD");
 		closed.setName("Closed");
 		
 		stateSpecs.add(closed);
-		
-		StateSpec released = new StateSpec();
-		released.setColor("#1BC5BD");
-		released.setName("Released");
-		
-		stateSpecs.add(released);
 		
 		TransitionSpec transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
@@ -229,18 +223,7 @@ public class GlobalIssueSetting implements Serializable {
 		transitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open", "Closed"));
-		transition.setToState("Released");
-		buildSuccessful = new BuildSuccessfulTrigger();
-		buildSuccessful.setBranches("master main");
-		buildSuccessful.setJobNames("Release");
-		buildSuccessful.setIssueQuery("fixed in current build");
-		transition.setTrigger(buildSuccessful);
-
-		transitionSpecs.add(transition);
- 		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Closed", "Released"));
+		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Open");
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
@@ -250,7 +233,7 @@ public class GlobalIssueSetting implements Serializable {
 		transitionSpecs.add(transition);
 
 		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Closed", "Released"));
+		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Open");
 		stateTransition = new StateTransitionTrigger();
 		stateTransition.setStates(Lists.newArrayList("Open"));
@@ -262,7 +245,7 @@ public class GlobalIssueSetting implements Serializable {
 		BoardSpec board = new BoardSpec();
 		board.setName(Issue.NAME_STATE);
 		board.setIdentifyField(Issue.NAME_STATE);
-		board.setColumns(Lists.newArrayList("Open", "Closed", "Released"));
+		board.setColumns(Lists.newArrayList("Open", "Closed"));
 		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees"));
 		board.setDisplayLinks(Lists.newArrayList("Child Issue", "Blocked By"));
 		boardSpecs.add(board);
@@ -286,7 +269,6 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
-		namedQueries.add(new NamedIssueQuery("Released", "\"State\" is \"Released\""));
 		namedQueries.add(new NamedIssueQuery("All", null));
 	}
 	
