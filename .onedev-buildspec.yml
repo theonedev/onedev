@@ -137,7 +137,7 @@ jobs:
         | jq '.id')
       - ''
       - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
-        Downloads\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/artifacts\n\n##
+        Installation Guide\n\nhttps://code.onedev.io/projects/162/blob/main/pages/installation-guide.md\n\n##
         Change Log\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
         Incompatibilities\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
       - ''
