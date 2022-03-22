@@ -209,13 +209,28 @@ onedev.server.pipeline = {
 			$pipeline.find(".active").scrollIntoView();
 		}
 	},
-	showConnections: function(containerId, show) {
-		var $pipeline = $("#" + containerId + ">.pipeline");
+	onSortStart: function($uiItem) {
+		var $pipeline = $uiItem.closest(".pipeline");
 		var paper = Snap($pipeline.children(".dependencies")[0]);
 		paper.selectAll("path, line").forEach(function(e) {
 			e.attr({
-				strokeWidth: show?onedev.server.pipeline.lineWidth:0
+				strokeWidth: 0
 			});
 		});
+		$(".ui-sortable-placeholder").width($uiItem.width());
+		if (onedev.server.isDarkMode())
+			$uiItem.parent().css("background", "#2b2b40");
+		else
+			$uiItem.parent().css("background", "#FFFFE8");
+	},
+	onSortStop: function($uiItem) {
+		var $pipeline = $uiItem.closest(".pipeline");
+		var paper = Snap($pipeline.children(".dependencies")[0]);
+		paper.selectAll("path, line").forEach(function(e) {
+			e.attr({
+				strokeWidth: onedev.server.pipeline.lineWidth
+			});
+		});
+		$uiItem.parent().css("background", "inherit");
 	}
 }

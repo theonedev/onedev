@@ -12,9 +12,10 @@
 	 * 			the target may also includes a index property to denote which character to align with in target 
 	 *          input/textarea element
 	 */
-    $.fn.align = function(alignment) {
+    $.fn.align = function(alignment, noNarrowThanTarget) {
     	this.each(function() {
     		var $this = jQuery(this);
+
 			$this.addClass("autosuit");
 
         	var $parent = $this.parent();
@@ -59,6 +60,9 @@
 
         	if (alignment.target.element) {
         		var $targetEl = jQuery(alignment.target.element);
+				if (noNarrowThanTarget)
+					$this.css("minWidth", $targetEl.outerWidth());
+					
         		if (alignment.target.index != undefined) {
     				var coord = getCaretCoordinates(alignment.target.element, alignment.target.index);
         			targetLeft = coord.left + $targetEl.offset().left - $targetEl.scrollLeft();

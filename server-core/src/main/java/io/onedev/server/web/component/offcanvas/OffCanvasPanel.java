@@ -16,7 +16,7 @@ public abstract class OffCanvasPanel extends FloatingPanel {
 	public enum Placement {LEFT, RIGHT}
 	
 	public OffCanvasPanel(AjaxRequestTarget target, Placement placement, @Nullable String width) {
-		super(target, null, Animation.valueOf(placement.name()));
+		super(target, null, false, Animation.valueOf(placement.name()));
 		add(AttributeAppender.append("class", "off-canvas off-canvas-" + placement.name().toLowerCase()));
 		if (width != null)
 			add(AttributeAppender.append("style", "width: " + width).setSeparator(";"));

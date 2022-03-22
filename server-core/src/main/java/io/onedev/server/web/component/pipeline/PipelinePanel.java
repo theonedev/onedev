@@ -71,13 +71,10 @@ public abstract class PipelinePanel extends Panel {
 
 		Sortable sortable = getSortable();
 		if (sortable != null) { 
-			String startScript = String.format(""
-					+ "onedev.server.pipeline.showConnections('%s', false);", 
-					getMarkupId());
-			String stopScript = String.format(""
+			String startScript = "onedev.server.pipeline.onSortStart(ui.item);";
+			String stopScript = ""
 					+ "if (ui.item.fromList == ui.item.toList && ui.item.fromItem == ui.item.toItem)"
-					+ "  onedev.server.pipeline.showConnections('%s', true);",
-					getMarkupId());
+					+ "  onedev.server.pipeline.onSortStop(ui.item);";
 			add(new SortBehavior() {
 
 				@Override

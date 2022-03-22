@@ -33,6 +33,7 @@ import io.onedev.server.web.asset.pipelinebutton.PipelineButtonCssResourceRefere
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.minilist.MiniBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -49,7 +50,7 @@ public abstract class JobInfoButton extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DropdownLink detailLink = new DropdownLink("detail") {
+		DropdownLink detailLink = new DropdownLink("detail", false, AlignPlacement.bottom(0), true) {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {

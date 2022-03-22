@@ -1,5 +1,5 @@
 onedev.server.floating = {
-	init: function(floatingId, alignment, animation, closeCallback) {
+	init: function(floatingId, alignment, noNarrowThanTarget, animation, closeCallback) {
 		var $floating = $("#" + floatingId);
 		$floating.data("closeCallback", closeCallback);
 		$floating.data("animation", animation);
@@ -56,9 +56,9 @@ onedev.server.floating = {
 				$floating.data("closeCallback")();
 			} else {
 				if (alignment) {
-					$floating.align(alignment);
+					$floating.align(alignment, noNarrowThanTarget);
 					setTimeout(function() {
-						$floating.align(alignment);
+						$floating.align(alignment, noNarrowThanTarget);
 						$floating.trigger("resized");
 					}, 0);
 				}

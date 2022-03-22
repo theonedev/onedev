@@ -24,25 +24,28 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 	
 	private final AlignPlacement placement;
 	
+	private final boolean noNarrowThanTarget;
+	
 	private FloatingPanel dropdown;
-
+	
 	public DropdownLink(String id) {
 		this(id, AlignPlacement.bottom(0));
 	}
 	
 	public DropdownLink(String id, AlignPlacement placement) {
-		this(id, false, placement);
+		this(id, false, placement, false);
 	}
 
 	public DropdownLink(String id, boolean alignTargetMouse) {
-		this(id, alignTargetMouse, AlignPlacement.bottom(0));
+		this(id, alignTargetMouse, AlignPlacement.bottom(0), false);
 	}
 	
-	public DropdownLink(String id, boolean alignTargetMouse, AlignPlacement placement) {
+	public DropdownLink(String id, boolean alignTargetMouse, AlignPlacement placement, boolean noNarrowThanTarget) {
 		super(id);
 		
 		this.alignTargetMouse = alignTargetMouse;
 		this.placement = placement;
+		this.noNarrowThanTarget = noNarrowThanTarget;
 	}
 	
 	@Override
@@ -85,7 +88,7 @@ public abstract class DropdownLink extends AjaxLink<Void> {
 				alignFloatingWith =  new ComponentTarget(this);
 			} 
 			
-			dropdown = new FloatingPanel(target, new Alignment(alignFloatingWith, placement)) {
+			dropdown = new FloatingPanel(target, new Alignment(alignFloatingWith, placement), noNarrowThanTarget, null) {
 	
 				@Override
 				protected void onInitialize() {

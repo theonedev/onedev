@@ -28,8 +28,8 @@ public abstract class MenuLink extends DropdownLink {
 		super(id, alignTargetMouse);
 	}
 	
-	public MenuLink(String id, boolean alignTargetMouse, AlignPlacement placement) {
-		super(id, alignTargetMouse, placement);
+	public MenuLink(String id, boolean alignTargetMouse, AlignPlacement placement, boolean noNarrowThanTarget) {
+		super(id, alignTargetMouse, placement, noNarrowThanTarget);
 	}
 	
 	@Override
