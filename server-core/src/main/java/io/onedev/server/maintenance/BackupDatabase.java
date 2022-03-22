@@ -43,8 +43,9 @@ public class BackupDatabase extends DefaultPersistManager {
 			System.exit(1);
 		}
 		File backupFile = new File(Bootstrap.command.getArgs()[0]);
-		if (!backupFile.isAbsolute())
-			backupFile = new File(Bootstrap.getBinDir(), backupFile.getPath());
+		
+		if (!backupFile.isAbsolute() && System.getenv("WRAPPER_INIT_DIR") != null)
+			backupFile = new File(System.getenv("WRAPPER_INIT_DIR"), backupFile.getPath());
 		
 		if (backupFile.exists()) {
 			logger.error("Backup file already exists: {}", backupFile.getAbsolutePath());

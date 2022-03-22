@@ -42,9 +42,10 @@ public class RestoreDatabase extends DefaultPersistManager {
 			logger.error("Missing backup file parameter. Usage: {} <path to database backup file>", Bootstrap.command.getScript());
 			System.exit(1);
 		}
+		
 		File backupFile = new File(Bootstrap.command.getArgs()[0]);
-		if (!backupFile.isAbsolute())
-			backupFile = new File(Bootstrap.getBinDir(), backupFile.getPath());
+		if (!backupFile.isAbsolute() && System.getenv("WRAPPER_INIT_DIR") != null)
+			backupFile = new File(System.getenv("WRAPPER_INIT_DIR"), backupFile.getPath());
 		
 		if (!backupFile.exists()) {
 			logger.error("Unable to find file: {}", backupFile.getAbsolutePath());

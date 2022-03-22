@@ -827,8 +827,7 @@ public class Project extends AbstractEntity {
 	 * @param commitId
 	 * 			commit id to get build spec for 
 	 * @return
-	 * 			build spec of specified commit, or <tt>null</tt> if no build spec is defined and 
-	 * 			auto-detection also can not provide an appropriate build spec  
+	 * 			build spec of specified commit, or <tt>null</tt> if build spec is not defined
 	 * @throws
 	 * 			Exception when build spec is defined but not valid
 	 */
