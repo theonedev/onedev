@@ -439,7 +439,7 @@ public class DefaultPersistManager implements PersistManager {
 	private void exportEntity(Session session, Class<?> entityType, List<Number> ids, int start, int count, int batchSize, File exportDir) {
 		logger.info("Loading table rows ({}->{}) from database...", String.valueOf(start+1), (start + count));
 		
-		Query<?> query = session.createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId");
+		Query<?> query = session.createQuery("from " + entityType.getSimpleName() + " where id>=:fromId and id<=:toId order by id");
 		query.setParameter("fromId", ids.get(start));
 		query.setParameter("toId", ids.get(start+count-1));
 		
