@@ -61,7 +61,7 @@ public class DefaultResourceManager implements ResourceManager {
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	@Listen
+	@Listen(10)
 	public synchronized void on(SystemStarted event) {
 		Map<String, Integer> resources = new HashMap<>();
 		resources.put(ResourceHolder.CPU, 
