@@ -1,0 +1,4 @@
+.add-gpg-trusted-key textarea {
+	font-family: monospace;
+	height: 200px !important;
+}

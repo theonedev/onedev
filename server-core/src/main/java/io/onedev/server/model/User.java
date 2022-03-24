@@ -71,11 +71,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final Long UNKNOWN_ID = -2L;
 	
-	public static final Long SYSTEM_ID = -1L;
+	public static final Long ONEDEV_ID = -1L;
 	
 	public static final Long ROOT_ID = 1L;
 	
-	public static final String SYSTEM_NAME = "OneDev";
+	public static final String ONEDEV_NAME = "OneDev";
+	
+	public static final String ONEDEV_EMAIL_ADDRESS = "noreply@onedev.io";
 	
 	public static final String UNKNOWN_NAME = "Unknown";
 	
@@ -487,10 +489,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 				.toString();
 	}
 	
-	@Nullable
 	public PersonIdent asPerson() {
 		if (isSystem()) {
-			return new PersonIdent(getDisplayName(), "");
+			return new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
 		} else {
 			EmailAddress emailAddress = getGitEmailAddress();
 			if (emailAddress != null && emailAddress.isVerified())
@@ -512,7 +513,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	public boolean isSystem() {
-		return SYSTEM_ID.equals(getId());
+		return ONEDEV_ID.equals(getId());
 	}
 	
 	public boolean isUnknown() {
@@ -797,6 +798,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Nullable
 	public EmailAddress getGitEmailAddress() {
 		return getSortedEmailAddresses().stream().filter(it->it.isGit()).findFirst().orElse(null);
+	}
+	
+	public List<GpgKey> getGpgKeys() {
+		List<GpgKey> gpgKeys = new ArrayList<>();
+		for (EmailAddress emailAddress: getEmailAddresses())
+			gpgKeys.addAll(emailAddress.getGpgKeys());
+		Collections.sort(gpgKeys);
+		return gpgKeys;
 	}
 	
 }

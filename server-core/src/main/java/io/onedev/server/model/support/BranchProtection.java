@@ -53,6 +53,8 @@ public class BranchProtection implements Serializable {
 	
 	private boolean preventCreation = true;
 	
+	private boolean signatureRequired = false;
+	
 	private String reviewRequirement;
 	
 	private transient ReviewRequirement parsedReviewRequirement;
@@ -122,6 +124,15 @@ public class BranchProtection implements Serializable {
 
 	public void setPreventCreation(boolean preventCreation) {
 		this.preventCreation = preventCreation;
+	}
+
+	@Editable(order=360, description="Check this to require valid signature of head commit")
+	public boolean isSignatureRequired() {
+		return signatureRequired;
+	}
+
+	public void setSignatureRequired(boolean signatureRequired) {
+		this.signatureRequired = signatureRequired;
 	}
 
 	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "

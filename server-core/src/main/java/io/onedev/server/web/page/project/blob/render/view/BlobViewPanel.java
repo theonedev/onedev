@@ -74,6 +74,7 @@ public abstract class BlobViewPanel extends Panel {
 			String path = context.getBlobIdent().path;
 			boolean reviewRequired = project.isReviewRequiredForModification(user, revision, path);
 			boolean buildRequired = project.isBuildRequiredForModification(user, revision, path);
+			boolean signatureRequiredButNoSigningKey = project.isCommitSignatureRequiredButNoSigningKey(user, revision);
 
 			WebMarkupContainer edit = new WebMarkupContainer("edit");
 			changeActions.add(edit);
@@ -83,6 +84,8 @@ public abstract class BlobViewPanel extends Panel {
 					title = "Review required for this change. Submit pull request instead";
 				else if (buildRequired) 
 					title = "Build required for this change. Submit pull request instead";
+				else if (signatureRequiredButNoSigningKey)
+					title = "Signature required for this change, please generate system GPG signing key first";
 				else 
 					title = "Edit on branch " + context.getBlobIdent().revision;
 				

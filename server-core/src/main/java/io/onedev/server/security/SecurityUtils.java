@@ -147,6 +147,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canModify(Project project, String branch, String file) {
 		User user = getUser();
 		return canWriteCode(project) 
+				&& !project.isCommitSignatureRequiredButNoSigningKey(user, branch) 
 				&& !project.isReviewRequiredForModification(user, branch, file)
 				&& !project.isBuildRequiredForModification(user, branch, file); 
 	}
@@ -338,7 +339,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
     }
     
 	public static void bindAsSystem() {
-		ThreadContext.bind(asSubject(User.SYSTEM_ID));
+		ThreadContext.bind(asSubject(User.ONEDEV_ID));
 	}
 	
 	public static Runnable inheritSubject(Runnable task) {

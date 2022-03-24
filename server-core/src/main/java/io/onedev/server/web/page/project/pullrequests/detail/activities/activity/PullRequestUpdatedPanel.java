@@ -16,6 +16,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
 
 import com.google.common.collect.Sets;
 
@@ -28,7 +29,8 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
-import io.onedev.server.web.component.commit.status.CommitStatusPanel;
+import io.onedev.server.web.component.commit.status.CommitStatusLink;
+import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -91,13 +93,16 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					
 				});
 
-				CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy(), null) {
-					
-					@Override
-					protected String getCssClasses() {
-						return "btn btn-outline-secondary btn-sm";
-					}
+				item.add(new GitSignaturePanel("signature") {
 
+					@Override
+					protected RevObject getRevObject() {
+						return item.getModelObject();
+					}
+					
+				});
+				item.add(new CommitStatusLink("buildStatus", commit.copy(), null) {
+					
 					@Override
 					protected Project getProject() {
 						return getUpdate().getRequest().getTarget().getProject();
@@ -108,8 +113,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 						return null;
 					}
 					
-				};
-				item.add(commitStatus);
+				});
 				
 				Project project = getUpdate().getRequest().getTarget().getProject();
 				CommitDetailPage.State commitState = new CommitDetailPage.State();

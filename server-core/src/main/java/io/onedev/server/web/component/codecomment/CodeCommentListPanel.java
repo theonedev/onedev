@@ -59,7 +59,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
@@ -544,7 +544,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 		});
 		
-		body.add(commentsTable = new OneDataTable<CodeComment, Void>("comments", columns, dataProvider, 
+		body.add(commentsTable = new DefaultDataTable<CodeComment, Void>("comments", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override

@@ -1,0 +1,31 @@
+<wicket:extend>
+	<div class="card gpg-trusted-keys">
+		<div class="card-body">
+			<div class="alert alert-light alert-notice mb-4">
+				Add GPG public keys to be trusted here. Commits signed with trusted keys will be shown as verified. 
+			</div>
+			<a wicket:id="newKey" class="btn btn-primary btn-icon mb-4" title="Add GPG Key"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			<table wicket:id="keys" class="table table-hover"></table>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="actionFrag">
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this key"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addKeyFrag">
+		<div class="add-gpg-trusted-key">
+			<div class="modal-header">
+				<h5 class="modal-title">Add a GPG Public Key</h5>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+			</div>
+			<form wicket:id="form">
+				<div class="modal-body">
+					<div wicket:id="editor"></div>
+				</div>
+				<div class="modal-footer">
+					<input wicket:id="add" type="submit" class="btn btn-primary dirty-aware" value="Add">
+					<button wicket:id="cancel" type="button" class="btn btn-secondary">Cancel</button>
+				</div>
+			</form>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

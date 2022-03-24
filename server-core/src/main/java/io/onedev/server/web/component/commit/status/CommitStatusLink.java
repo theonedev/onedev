@@ -9,10 +9,12 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.IMarkupSourcingStrategy;
+import org.apache.wicket.markup.html.panel.PanelMarkupSourcingStrategy;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
@@ -34,9 +36,9 @@ import io.onedev.server.web.component.job.joblist.JobListPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
-public abstract class CommitStatusPanel extends Panel {
+public abstract class CommitStatusLink extends DropdownLink {
 
-	private static final Logger logger = LoggerFactory.getLogger(CommitStatusPanel.class);
+	private static final Logger logger = LoggerFactory.getLogger(CommitStatusLink.class);
 	
 	private final ObjectId commitId;
 	
@@ -73,7 +75,7 @@ public abstract class CommitStatusPanel extends Panel {
 		
 	};
 	
-	public CommitStatusPanel(String id, ObjectId commitId, @Nullable String refName) {
+	public CommitStatusLink(String id, ObjectId commitId, @Nullable String refName) {
 		super(id);
 		this.commitId = commitId;
 		this.refName = refName;
@@ -88,67 +90,36 @@ public abstract class CommitStatusPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DropdownLink statusLink = new DropdownLink("status") {
-
+		add(new BuildStatusIcon("icon", statusModel) {
+			
 			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new JobListPanel(id, commitId, refName, jobsModel.getObject()) {
-
-					@Override
-					protected Project getProject() {
-						return CommitStatusPanel.this.getProject();
-					}
-
-					@Override
-					protected void onRunJob(AjaxRequestTarget target) {
-						dropdown.close();
-					}
-
-					@Override
-					protected PullRequest getPullRequest() {
-						return CommitStatusPanel.this.getPullRequest();
-					}
-
-					@Override
-					protected String getPipeline() {
-						return null;
-					}
-					
-				};
+			protected Collection<String> getWebSocketObservables() {
+				return CommitStatusLink.this.getWebSocketObservables();
 			}
+			
+		});
+		
+		add(AttributeAppender.replace("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				
-				String cssClasses = "commit-status text-nowrap ";
-				String title;
+			public String getObject() {
 				Build.Status status = statusModel.getObject();
 				if (status != null) {
+					String title;
 					if (status != Status.SUCCESSFUL)
 						title = "Some builds are "; 
 					else
 						title = "Builds are "; 
 					title += status.toString().toLowerCase() + ", click for details";
+					return title;
 				} else {
-					title = "No builds";
+					return "No builds";
 				}
-				if (getCssClasses() != null)
-					cssClasses += getCssClasses();
-				tag.put("class", cssClasses);
-				tag.put("title", title);
 			}
 			
-		};
-		statusLink.add(new BuildStatusIcon("icon", statusModel) {
-			
-			@Override
-			protected Collection<String> getWebSocketObservables() {
-				return CommitStatusPanel.this.getWebSocketObservables();
-			}
-			
-		});
-		add(statusLink);
+		}));
+		
+		add(AttributeAppender.append("class", "commit-status"));
 	}
 	
 	protected Collection<String> getWebSocketObservables() {
@@ -156,6 +127,38 @@ public abstract class CommitStatusPanel extends Panel {
 			return Sets.newHashSet("commit-status:" + getProject().getId() + ":" + commitId.name());
 		else
 			return new HashSet<>();
+	}
+
+	@Override
+	protected Component newContent(String id, FloatingPanel dropdown) {
+		return new JobListPanel(id, commitId, refName, jobsModel.getObject()) {
+
+			@Override
+			protected Project getProject() {
+				return CommitStatusLink.this.getProject();
+			}
+
+			@Override
+			protected void onRunJob(AjaxRequestTarget target) {
+				dropdown.close();
+			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return CommitStatusLink.this.getPullRequest();
+			}
+
+			@Override
+			protected String getPipeline() {
+				return null;
+			}
+			
+		};
+	}
+
+	@Override
+	protected IMarkupSourcingStrategy newMarkupSourcingStrategy() {
+		return new PanelMarkupSourcingStrategy(false);
 	}
 
 	@Override
@@ -175,11 +178,6 @@ public abstract class CommitStatusPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CommitStatusCssResourceReference()));
-	}
-	
-	@Nullable
-	protected String getCssClasses() {
-		return null;
 	}
 	
 }

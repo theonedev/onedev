@@ -81,7 +81,7 @@ public class NotificationReceiver {
 				if (build != null) {
 					for (RevCommit commit: build.getCommits(null)) {
 						PersonIdent committer = commit.getCommitterIdent();
-						if (committer != null && committer.getEmailAddress() != null) 
+						if (committer != null && StringUtils.isNotBlank(committer.getEmailAddress())) 
 							emailAddresses.add(committer.getEmailAddress());
 					}
 				}
@@ -89,7 +89,7 @@ public class NotificationReceiver {
 				if (build != null) {
 					for (RevCommit commit: build.getCommits(null)) {
 						PersonIdent author = commit.getAuthorIdent();
-						if (author != null && author.getEmailAddress() != null) 
+						if (author != null && StringUtils.isNotBlank(author.getEmailAddress())) 
 							emailAddresses.add(author.getEmailAddress());
 					}
 				}
@@ -97,7 +97,7 @@ public class NotificationReceiver {
 				if (build != null) {
 					for (RevCommit commit: build.getCommits(Build.Status.SUCCESSFUL)) {
 						PersonIdent committer = commit.getCommitterIdent();
-						if (committer != null && committer.getEmailAddress() != null) 
+						if (committer != null && StringUtils.isNotBlank(committer.getEmailAddress())) 
 							emailAddresses.add(committer.getEmailAddress());
 					}
 				}
@@ -105,7 +105,7 @@ public class NotificationReceiver {
 				if (build != null) {
 					for (RevCommit commit: build.getCommits(Build.Status.SUCCESSFUL)) {
 						PersonIdent author = commit.getAuthorIdent();
-						if (author != null && author.getEmailAddress() != null) 
+						if (author != null && StringUtils.isNotBlank(author.getEmailAddress())) 
 							emailAddresses.add(author.getEmailAddress());
 					}
 				}

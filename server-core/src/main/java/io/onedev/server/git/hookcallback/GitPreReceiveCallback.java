@@ -141,14 +141,23 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    			List<String> errorMessages = new ArrayList<>();
 	    			BranchProtection protection = project.getHierarchyBranchProtection(branchName, user);
 					if (oldObjectId.equals(ObjectId.zeroId())) {
-						if (protection.isPreventCreation())
+						if (protection.isPreventCreation()) {
 							errorMessages.add("Can not create this branch according to branch protection setting");
+						} else if (protection.isSignatureRequired() 
+								&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
+							errorMessages.add("Can not create this branch as branch protection setting "
+									+ "requires valid signature on head commit");
+						}
 					} else if (newObjectId.equals(ObjectId.zeroId())) {
 						if (protection.isPreventDeletion()) 
 							errorMessages.add("Can not delete this branch according to branch protection setting");
 					} else if (protection.isPreventForcedPush() 
 							&& !GitUtils.isMergedInto(project.getRepository(), gitEnvs, oldObjectId, newObjectId)) {
 						errorMessages.add("Can not force-push to this branch according to branch protection setting");
+					} else if (protection.isSignatureRequired() 
+							&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
+						errorMessages.add("Can not push to this branch as branch protection rule requires "
+								+ "valid signature for head commit");
 					} else if (protection.isReviewRequiredForPush(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
     					errorMessages.add("Review required for your change. Please submit pull request instead");
 					}
@@ -172,13 +181,22 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    			List<String> errorMessages = new ArrayList<>();
 	    			TagProtection protection = project.getHierarchyTagProtection(tagName, user);
 					if (oldObjectId.equals(ObjectId.zeroId())) {
-						if (protection.isPreventCreation())
+						if (protection.isPreventCreation()) {
 							errorMessages.add("Can not create this tag according to tag protection setting");
+						} else if (protection.isSignatureRequired() 
+								&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
+							errorMessages.add("Can not create this tag as tag protection setting requires "
+									+ "valid tag signature");
+						}
 					} else if (newObjectId.equals(ObjectId.zeroId())) {
 						if (protection.isPreventDeletion())
 							errorMessages.add("Can not delete this tag according to tag protection setting");
 					} else if (protection.isPreventUpdate()) {
 						errorMessages.add("Can not update this tag according to tag protection setting");
+					} else if (protection.isSignatureRequired() 
+							&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
+						errorMessages.add("Can not update this tag as tag protection setting requires "
+								+ "valid tag signature");
 					}
 	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 	    				try {

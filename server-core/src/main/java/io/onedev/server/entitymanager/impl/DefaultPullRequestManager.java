@@ -34,6 +34,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.util.lang.Objects;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
@@ -67,6 +68,7 @@ import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.RefUpdated;
@@ -165,6 +167,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	private final EntityReferenceManager referenceManager;
 	
+	private final SettingManager settingManager;
+	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager updateManager,  
 			PullRequestReviewManager reviewManager, MarkdownManager markdownManager, 
@@ -172,7 +176,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			SessionManager sessionManager, PullRequestChangeManager changeManager, 
 			ExecutorService executorService, BuildManager buildManager, 
 			TransactionManager transactionManager, ProjectManager projectManager, 
-			CommitInfoManager commitInfoManager, EntityReferenceManager referenceManager) {
+			CommitInfoManager commitInfoManager, EntityReferenceManager referenceManager, 
+			SettingManager settingManager) {
 		super(dao);
 		
 		this.updateManager = updateManager;
@@ -187,6 +192,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		this.projectManager = projectManager;
 		this.commitInfoManager = commitInfoManager;
 		this.referenceManager = referenceManager;
+		this.settingManager = settingManager;
 	}
 	
 	@Transactional
@@ -295,15 +301,17 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		MergePreview mergePreview = Preconditions.checkNotNull(request.getMergePreview());
 		ObjectId mergeCommitId = ObjectId.fromString(
 				Preconditions.checkNotNull(mergePreview.getMergeCommitHash()));
-        PersonIdent user = SecurityUtils.getUser().asPerson();
+		User user = SecurityUtils.getUser();
+        PersonIdent person = user.asPerson();
         
 		Project project = request.getTargetProject();
 		MergeStrategy mergeStrategy = mergePreview.getMergeStrategy();
 		
+		PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
+		
 		if (mergeStrategy == CREATE_MERGE_COMMIT
 				|| mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS
-				|| mergeStrategy == CREATE_MERGE_COMMIT_IF_NECESSARY 
-						&& !mergeCommitId.name().equals(mergePreview.getHeadCommitHash())) {
+				|| mergeStrategy == CREATE_MERGE_COMMIT_IF_NECESSARY && !mergeCommitId.name().equals(mergePreview.getHeadCommitHash())) {
 			try (	RevWalk revWalk = new RevWalk(project.getRepository());
 					ObjectInserter inserter = project.getRepository().newObjectInserter()) {
 				RevCommit mergeCommit = revWalk.parseCommit(mergeCommitId);
@@ -311,11 +319,13 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		        if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS)
 		        	commitBuilder.setAuthor(mergeCommit.getAuthorIdent());
 		        else
-		        	commitBuilder.setAuthor(user);
-		        commitBuilder.setCommitter(user);
+		        	commitBuilder.setAuthor(person);
+		        commitBuilder.setCommitter(person);
 		        commitBuilder.setMessage(commitMessage);
 		        commitBuilder.setTreeId(mergeCommit.getTree());
 		        commitBuilder.setParentIds(mergeCommit.getParents());
+		        if (signingKey != null)
+		        	GitUtils.sign(commitBuilder, signingKey);
 		        mergeCommitId = inserter.insert(commitBuilder);
 		        inserter.flush();
 			} catch (Exception e) {
@@ -332,14 +342,15 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	    		mergeCommit = targetHeadCommit;
 	    		for (RevCommit commit: commits) {
 	    			PersonIdent committer = commit.getCommitterIdent();
-	    			if (committer.getName().equals(User.SYSTEM_NAME) && committer.getEmailAddress().length() == 0
-	    					|| !commit.getParent(0).equals(mergeCommit)) {
+	    			if (committer.getName().equals(User.ONEDEV_NAME) || !commit.getParent(0).equals(mergeCommit)) {
 				        CommitBuilder commitBuilder = new CommitBuilder();
 				        commitBuilder.setAuthor(commit.getAuthorIdent());
-				        commitBuilder.setCommitter(user);
+				        commitBuilder.setCommitter(person);
 				        commitBuilder.setParentId(mergeCommit.copy());
 				        commitBuilder.setMessage(commit.getFullMessage());
 				        commitBuilder.setTreeId(commit.getTree().getId());
+				        if (signingKey != null)
+				        	GitUtils.sign(commitBuilder, signingKey);
 				        mergeCommit = revWalk.parseCommit(inserter.insert(commitBuilder));
 	    			} else {
 	    				mergeCommit = commit;
@@ -364,7 +375,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		String targetRef = request.getTargetRef();
 		ObjectId targetHeadCommitId = ObjectId.fromString(mergePreview.getTargetHeadCommitHash());
 		RefUpdate refUpdate = GitUtils.getRefUpdate(project.getRepository(), targetRef);
-		refUpdate.setRefLogIdent(user);
+		refUpdate.setRefLogIdent(person);
 		refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
 		refUpdate.setExpectedOldObjectId(targetHeadCommitId);
 		refUpdate.setNewObjectId(mergeCommitId);

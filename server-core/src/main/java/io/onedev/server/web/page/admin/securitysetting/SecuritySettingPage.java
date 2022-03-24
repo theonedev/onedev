@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.generalsecuritysetting;
+package io.onedev.server.web.page.admin.securitysetting;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -12,9 +12,9 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
-public class GeneralSecuritySettingPage extends AdministrationPage {
+public class SecuritySettingPage extends AdministrationPage {
 
-	public GeneralSecuritySettingPage(PageParameters params) {
+	public SecuritySettingPage(PageParameters params) {
 		super(params);
 	}
 
@@ -32,7 +32,7 @@ public class GeneralSecuritySettingPage extends AdministrationPage {
 				OneDev.getInstance(SettingManager.class).saveSecuritySetting(securitySetting);
 				getSession().success("Security setting has been updated");
 				
-				setResponsePage(GeneralSecuritySettingPage.class);
+				setResponsePage(SecuritySettingPage.class);
 			}
 			
 		};

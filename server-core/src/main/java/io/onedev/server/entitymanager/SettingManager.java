@@ -13,6 +13,7 @@ import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
+import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.PerformanceSetting;
@@ -152,12 +153,16 @@ public interface SettingManager extends EntityManager<Setting> {
 	void saveAgentSetting(AgentSetting agentSetting);
 	
     SshSetting getSshSetting();
+    
+    GpgSetting getGpgSetting();
 
     void savePerformanceSetting(PerformanceSetting performanceSetting);
 
     PerformanceSetting getPerformanceSetting();
 
     void saveSshSetting(SshSetting sshSetting);
+    
+    void saveGpgSetting(GpgSetting gpgSetting);
 
     List<SsoConnector> getSsoConnectors();
     

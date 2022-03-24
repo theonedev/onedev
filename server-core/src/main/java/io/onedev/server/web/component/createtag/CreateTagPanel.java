@@ -9,9 +9,12 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -62,11 +65,20 @@ public abstract class CreateTagPanel extends Panel {
 							"Tag '" + helperBean.getName() + "' already exists, please choose a different name.");
 					target.add(form);
 				} else if (project.getHierarchyTagProtection(tagName, user).isPreventCreation()) {
-						editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
-						target.add(form);
+					editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
+					target.add(form);
 				} else {
-					project.createTag(tagName, revision, user.asPerson(), helperBean.getMessage());
-					onCreate(target, tagName);
+					PGPSecretKeyRing signingKey = OneDev.getInstance(SettingManager.class)
+							.getGpgSetting().getSigningKey();
+					if (project.isTagSignatureRequired(user, tagName) && signingKey == null) {
+						editor.error(new Path(new PathNode.Named("name")), 
+								"Tag signature required per tag protection rule, please generate system GPG "
+								+ "signing key first");
+						target.add(form);
+					} else {
+						project.createTag(tagName, revision, user.asPerson(), helperBean.getMessage(), signingKey);
+						onCreate(target, tagName);
+					}
 				}
 			}
 

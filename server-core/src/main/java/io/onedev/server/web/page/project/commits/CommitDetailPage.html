@@ -15,15 +15,16 @@
 				</li>
 			    <li wicket:id="refs" class="list-group-item refs"></li>
 			    <li class="list-group-item contribution-and-parents d-flex flex-wrap align-items-center">
-					<div class="contribution mr-5">
-						<span wicket:id="contributorAvatars" class="avatars mr-2"></span>
-						<span wicket:id="contribution" class="name"></span>
+					<div class="contribution">
+						<span wicket:id="contributorAvatars" class="avatars"></span>
+						<span wicket:id="contribution" class="name ml-2"></span>
 					</div>
-					<div class="commit mr-4">
+					<a wicket:id="signature" class="ml-2"></a>
+					<div class="commit ml-5">
 						<span wicket:id="hash" class="hash"></span>
 						<a wicket:id="copyHash" class="copy btn btn-xs btn-icon btn-light btn-hover-primary"><wicket:svg href="copy" class="icon"></wicket:svg></a>
 					</div>
-					<div wicket:id="parents" class="parents"></div>
+					<div wicket:id="parents" class="parents ml-4"></div>
 				</li>
 		        <wicket:enclosure child="jobs">
 			    <li class="list-group-item refs d-flex flex-wrap">

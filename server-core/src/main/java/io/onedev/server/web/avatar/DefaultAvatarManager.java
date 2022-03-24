@@ -70,19 +70,18 @@ public class DefaultAvatarManager implements AvatarManager {
 	@Sessional
 	@Override
 	public String getAvatarUrl(PersonIdent personIdent) {
-		if (StringUtils.isBlank(personIdent.getEmailAddress())) {
-			if (personIdent.getName().equals(User.SYSTEM_NAME)) 
-				return AVATARS_BASE_URL + "onedev.png";
-			else  
-				return AVATARS_BASE_URL + "user.png";
+		if (personIdent.getName().equals(User.ONEDEV_NAME)) { 
+			return AVATARS_BASE_URL + "onedev.png";
 		} else {
 			EmailAddress emailAddress = emailAddressManager.findByValue(personIdent.getEmailAddress());
-			if (emailAddress != null && emailAddress.isVerified()) 
+			if (emailAddress != null && emailAddress.isVerified()) { 
 				return getAvatarUrl(emailAddress.getOwner());
-			else if (settingManager.getSystemSetting().isGravatarEnabled())
+			} else if (settingManager.getSystemSetting().isGravatarEnabled() 
+					&& StringUtils.isNotBlank(personIdent.getEmailAddress())) {
 				return Gravatar.getURL(personIdent.getEmailAddress(), GRAVATAR_SIZE);
-			else 
+			} else { 
 				return generateAvatar(personIdent.getName(), personIdent.getEmailAddress());
+			}
 		}
 	}
 	

@@ -57,7 +57,7 @@ import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.util.validation.annotation.UrlSegment;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
-import io.onedev.server.web.page.admin.sso.SsoProcessPage;
+import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 

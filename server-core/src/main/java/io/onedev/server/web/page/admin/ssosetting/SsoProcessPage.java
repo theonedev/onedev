@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.sso;
+package io.onedev.server.web.page.admin.ssosetting;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.RestartResponseAtInterceptPageException;

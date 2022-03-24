@@ -49,7 +49,8 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
-import io.onedev.server.web.page.admin.generalsecuritysetting.GeneralSecuritySettingPage;
+import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
+import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupPage;
@@ -68,11 +69,12 @@ import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationS
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
 import io.onedev.server.web.page.admin.role.RoleListPage;
+import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage;
-import io.onedev.server.web.page.admin.ssh.SshSettingPage;
-import io.onedev.server.web.page.admin.sso.SsoConnectorListPage;
+import io.onedev.server.web.page.admin.sshsetting.SshSettingPage;
+import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
@@ -83,6 +85,7 @@ import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
+import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
@@ -134,11 +137,17 @@ public abstract class LayoutPage extends BasePage {
 					
 					List<SidebarMenuItem> securitySettingMenuItems = new ArrayList<>();
 					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "General Setting", 
-							GeneralSecuritySettingPage.class, new PageParameters()));
+							SecuritySettingPage.class, new PageParameters()));
 					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "External Authentication", 
 							AuthenticatorPage.class, new PageParameters()));
 					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "Single Sign On", 
 							SsoConnectorListPage.class, new PageParameters()));
+					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "SSH Server Key", 
+							SshSettingPage.class, new PageParameters()));
+					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "GPG Signing Key", 
+							GpgSigningKeyPage.class, new PageParameters()));
+					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "GPG Trusted Keys", 
+							GpgTrustedKeysPage.class, new PageParameters()));
 					
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Security Setting", securitySettingMenuItems));
 					
@@ -156,9 +165,6 @@ public abstract class LayoutPage extends BasePage {
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates", 
 							IssueTemplateListPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "SSH Setting", 
-							SshSettingPage.class, new PageParameters()));
-					
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Setting", issueSettingMenuItems));
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors", 
@@ -394,6 +400,10 @@ public abstract class LayoutPage extends BasePage {
 
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
 		if (getPage() instanceof MySshKeysPage)
+		    item.add(AttributeAppender.append("class", "active"));
+		
+		userInfo.add(item = new ViewStateAwarePageLink<Void>("myGpgKeys", MyGpgKeysPage.class));
+		if (getPage() instanceof MyGpgKeysPage)
 		    item.add(AttributeAppender.append("class", "active"));
 		
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAccessToken", MyAccessTokenPage.class));

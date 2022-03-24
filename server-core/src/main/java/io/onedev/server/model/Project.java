@@ -47,19 +47,21 @@ import javax.validation.Validator;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.Permission;
 import org.apache.tika.mime.MediaType;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectInserter;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.TagBuilder;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -105,9 +107,13 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.Submodule;
 import io.onedev.server.git.command.BlameCommand;
+import io.onedev.server.git.command.GetRawCommitCommand;
+import io.onedev.server.git.command.GetRawTagCommand;
 import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
+import io.onedev.server.git.signature.SignatureVerified;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
@@ -200,6 +206,8 @@ public class Project extends AbstractEntity {
 	public static final String NAME_SERVICE_DESK_NAME = "Service Desk Name";
 	
 	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
+	
+	public static final String PROP_GIT_SIGN_STRATEGY = "gitSignStrategy";
 	
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
@@ -1099,20 +1107,36 @@ public class Project extends AbstractEntity {
 		}
     }
     
-    public void createTag(String tagName, String tagRevision, PersonIdent taggerIdent, @Nullable String tagMessage) {
-		try {
-			TagCommand tag = git().tag();
-			tag.setName(tagName);
-			if (tagMessage != null)
-				tag.setMessage(tagMessage);
-			tag.setTagger(taggerIdent);
-			tag.setObjectId(getRevCommit(tagRevision, true));
-			tag.call();
+    public void createTag(String tagName, String tagRevision, PersonIdent taggerIdent, 
+    		@Nullable String tagMessage, @Nullable PGPSecretKeyRing signingKey) {
+		try (	RevWalk revWalk = new RevWalk(getRepository()); 
+				ObjectInserter inserter = getRepository().newObjectInserter();) {
+			TagBuilder tagBuilder = new TagBuilder();
+			tagBuilder.setTag(tagName);
+			if (tagMessage != null) {
+				if (!tagMessage.endsWith("\n"))
+					tagMessage += "\n";
+				tagBuilder.setMessage(tagMessage);
+			}
+			tagBuilder.setTagger(taggerIdent);
 			
+			RevCommit commit = getRevCommit(tagRevision, true);
+			tagBuilder.setObjectId(commit);
+
+			if (signingKey != null) 
+				GitUtils.sign(tagBuilder, signingKey);
+
+			ObjectId tagId = inserter.insert(tagBuilder);
+			inserter.flush();
+
 			String refName = GitUtils.tag2ref(tagName);
-			cacheObjectId(refName, tag.getObjectId());
+			RefUpdate refUpdate = getRepository().updateRef(refName);
+			refUpdate.setNewObjectId(tagId);
+			GitUtils.updateRef(refUpdate);
+
+			cacheObjectId(refName, commit);
 			
-	    	ObjectId commitId = tag.getObjectId().copy();
+	    	ObjectId commitId = commit.copy();
 	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
 				@Override
@@ -1130,7 +1154,7 @@ public class Project extends AbstractEntity {
 				}
 	    		
 	    	});			
-		} catch (GitAPIException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
     }
@@ -1415,6 +1439,7 @@ public class Project extends AbstractEntity {
 		boolean noCreation = false;
 		boolean noDeletion = false;
 		boolean noUpdate = false;
+		boolean signatureRequired = false;
 		for (TagProtection protection: getHierarchyTagProtections()) {
 			if (protection.isEnabled() 
 					&& UserMatch.parse(protection.getUserMatch()).matches(this, user)
@@ -1422,6 +1447,7 @@ public class Project extends AbstractEntity {
 				noCreation = noCreation || protection.isPreventCreation();
 				noDeletion = noDeletion || protection.isPreventDeletion();
 				noUpdate = noUpdate || protection.isPreventUpdate();
+				signatureRequired = signatureRequired || protection.isSignatureRequired();
 			}
 		}
 		
@@ -1429,6 +1455,7 @@ public class Project extends AbstractEntity {
 		protection.setPreventCreation(noCreation);
 		protection.setPreventDeletion(noDeletion);
 		protection.setPreventUpdate(noUpdate);
+		protection.setSignatureRequired(signatureRequired);
 		
 		return protection;
 	}
@@ -1437,6 +1464,8 @@ public class Project extends AbstractEntity {
 		boolean noCreation = false;
 		boolean noDeletion = false;
 		boolean noForcedPush = false;
+		boolean signatureRequired = false;
+		
 		Set<String> jobNames = new HashSet<>();
 		List<FileProtection> fileProtections = new ArrayList<>();
 		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null, true);
@@ -1447,6 +1476,7 @@ public class Project extends AbstractEntity {
 				noCreation = noCreation || protection.isPreventCreation();
 				noDeletion = noDeletion || protection.isPreventDeletion();
 				noForcedPush = noForcedPush || protection.isPreventForcedPush();
+				signatureRequired = signatureRequired || protection.isSignatureRequired();
 				jobNames.addAll(protection.getJobNames());
 				fileProtections.addAll(protection.getFileProtections());
 				reviewRequirement.mergeWith(protection.getParsedReviewRequirement());
@@ -1459,6 +1489,7 @@ public class Project extends AbstractEntity {
 		protection.setPreventCreation(noCreation);
 		protection.setPreventDeletion(noDeletion);
 		protection.setPreventForcedPush(noForcedPush);
+		protection.setSignatureRequired(signatureRequired);
 		protection.setParsedReviewRequirement(reviewRequirement);
 		
 		return protection;
@@ -1627,6 +1658,24 @@ public class Project extends AbstractEntity {
 		return getHierarchyBranchProtection(branch, user).isReviewRequiredForModification(user, this, branch, file);
 	}
 
+	public boolean isCommitSignatureRequiredButNoSigningKey(User user, String branch) {
+		return getHierarchyBranchProtection(branch, user).isSignatureRequired()
+				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null;
+	}
+	
+	public boolean isCommitSignatureRequired(User user, String branch) {
+		return getHierarchyBranchProtection(branch, user).isSignatureRequired();
+	}
+	
+	public boolean isTagSignatureRequired(User user, String tag) {
+		return getHierarchyTagProtection(tag, user).isSignatureRequired();
+	}
+	
+	public boolean isTagSignatureRequiredButNoSigningKey(User user, String tag) {
+		return getHierarchyTagProtection(tag, user).isSignatureRequired()
+				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null;
+	}
+	
 	public boolean isReviewRequiredForPush(User user, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
 		return getHierarchyBranchProtection(branch, user).isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
@@ -1855,6 +1904,31 @@ public class Project extends AbstractEntity {
 		if (patterns.length() == 0)
 			patterns = null;
 		return patterns;
+	}
+	
+	public boolean hasValidCommitSignature(RevCommit commit) {
+		SignatureVerificationKeyLoader keyLoader = OneDev.getInstance(SignatureVerificationKeyLoader.class);
+		return GitUtils.verifySignature(commit, keyLoader) instanceof SignatureVerified;
+	}
+	
+	public boolean hasValidCommitSignature(ObjectId commitId, Map<String, String> gitEnvs) {
+		GetRawCommitCommand cmd = new GetRawCommitCommand(getGitDir(), gitEnvs);
+		cmd.revision(commitId.name());
+		byte[] commitRawData = cmd.call();
+		SignatureVerificationKeyLoader keyLoader = OneDev.getInstance(SignatureVerificationKeyLoader.class);
+		return GitUtils.verifyCommitSignature(commitRawData, keyLoader) instanceof SignatureVerified;
+	}
+	
+	public boolean hasValidTagSignature(ObjectId tagId, Map<String, String> gitEnvs) {
+		GetRawTagCommand cmd = new GetRawTagCommand(getGitDir(), gitEnvs);
+		cmd.revision(tagId.name());
+		byte[] tagRawData = cmd.call();
+		SignatureVerificationKeyLoader keyLoader = OneDev.getInstance(SignatureVerificationKeyLoader.class);
+		return tagRawData != null && GitUtils.verifyTagSignature(tagRawData, keyLoader) instanceof SignatureVerified;
+	}
+	
+	public boolean isCommitSignatureRequirementSatisfied(User user, String branch, RevCommit commit) {
+		return !isCommitSignatureRequired(user, branch) || hasValidCommitSignature(commit);
 	}
 	
 	public static boolean containsPath(@Nullable String patterns, String path) {

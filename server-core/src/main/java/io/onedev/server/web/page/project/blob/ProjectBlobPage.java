@@ -46,6 +46,7 @@ import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandle
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -101,7 +102,7 @@ import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.commit.status.CommitStatusPanel;
+import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
@@ -297,8 +298,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 		List<QueryHit> queryHits;
 		if (state.query != null) {
-			int maxQueryEntries = OneDev.getInstance(SettingManager.class)
-					.getPerformanceSetting().getMaxCodeSearchEntries();
+			int maxQueryEntries = getSettingManager().getPerformanceSetting().getMaxCodeSearchEntries();
 			BlobQuery query = new TextQuery.Builder()
 					.term(state.query)
 					.wholeWord(true)
@@ -421,6 +421,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			logger.error("Error checking build requirement", e);
 		}
 
+		AtomicBoolean signatureRequiredButNoSigningKey = new AtomicBoolean(true);
+		try {
+			signatureRequiredButNoSigningKey.set(revision!=null 
+					&& getProject().isCommitSignatureRequiredButNoSigningKey(getLoginUser(), revision)); 
+		} catch (Exception e) {
+			logger.error("Error checking signature requirement", e);
+		}
+		
 		blobOperations.add(new MenuLink("add") {
 
 			@Override
@@ -501,6 +509,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				} else if (buildRequired.get()) {
 					tag.append("class", "disabled", " ");
 					tag.put("title", "Build required for this change. Submit pull request instead");
+				} else if (signatureRequiredButNoSigningKey.get()) {
+					tag.append("class", "disabled", " ");
+					tag.put("title", "Signature required for this change, please generate system GPG signing key first");
 				} else {
 					tag.put("title", "Add on branch " + state.blobIdent.revision);
 				}
@@ -515,7 +526,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 						&& isOnBranch() && state.blobIdent.isTree() 
 						&& SecurityUtils.canWriteCode(project)) {
 					setVisible(true);
-					setEnabled(!reviewRequired.get() && !buildRequired.get());
+					setEnabled(!reviewRequired.get() && !buildRequired.get() && !signatureRequiredButNoSigningKey.get());
 				} else {
 					setVisible(false);
 				}
@@ -864,7 +875,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	private void newCommitStatus(@Nullable AjaxRequestTarget target) {
 		Component commitStatus;
 		if (resolvedRevision != null) {
-			commitStatus = new CommitStatusPanel("buildStatus", resolvedRevision, getRefName()) {
+			commitStatus = new CommitStatusLink("buildStatus", resolvedRevision, getRefName()) {
 
 				@Override
 				protected Project getProject() {
@@ -915,7 +926,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 						} else if (!SecurityUtils.canWriteCode(project)) {
 							Session.get().warn("Code write permission is required for this operation");
 						} else if (project.isReviewRequiredForModification(user, branch, file)
-								|| project.isBuildRequiredForModification(user, branch, file)) {
+								|| project.isBuildRequiredForModification(user, branch, file)
+								|| project.isCommitSignatureRequiredButNoSigningKey(user, branch)) {
 							Session.get().warn("This operation is disallowed by branch protection rule");
 						} else {
 							onModeChange(target, Mode.ADD, BuildSpec.BLOB_PATH);
@@ -1570,6 +1582,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				throw new BlobEditException("Review required for this change. Please submit pull request instead");
 			else if (getProject().isBuildRequiredForModification(user, blobIdent.revision, blobPath)) 
 				throw new BlobEditException("Build required for this change. Please submit pull request instead");
+			else if (getProject().isCommitSignatureRequiredButNoSigningKey(user, blobIdent.revision)) 
+				throw new BlobEditException("Signature required for this change, please generate system GPG signing key first");
 			
 			BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
 			newBlobs.put(blobPath, blobContent);
@@ -1584,10 +1598,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		else
 			prevCommitId = ObjectId.zeroId();
 
+		PGPSecretKeyRing signingKey = getSettingManager().getGpgSetting().getSigningKey();
+		
 		while (true) {
 			try {
 				ObjectId newCommitId = blobEdits.commit(getProject().getRepository(), refName, prevCommitId, 
-						prevCommitId, user.asPerson(), commitMessage);
+						prevCommitId, user.asPerson(), commitMessage, signingKey);
 				return new RefUpdated(getProject(), refName, prevCommitId, newCommitId);
 			} catch (ObjectAlreadyExistsException|NotTreeException e) {
 				throw new BlobEditException(e.getMessage());
@@ -1595,6 +1611,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				prevCommitId = e.getOldCommitId();
 			}
 		}
+	}
+	
+	private SettingManager getSettingManager() {
+		return OneDev.getInstance(SettingManager.class);
 	}
 
 	@Override

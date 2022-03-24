@@ -43,6 +43,7 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -74,8 +75,9 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.CommitQueryBehavior;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
-import io.onedev.server.web.component.commit.status.CommitStatusPanel;
+import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
+import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
@@ -638,12 +640,17 @@ public abstract class CommitListPanel extends Panel {
 			item.add(new CopyToClipboardLink("copyHash", Model.of(commit.name())));
 			
 			getCommitIdsToQueryStatus().add(commit.copy());
-			CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy(), null) {
-
+			
+			item.add(new GitSignaturePanel("signature") {
+				
 				@Override
-				protected String getCssClasses() {
-					return "btn btn-outline-secondary";
+				protected RevObject getRevObject() {
+					return commitsModel.getObject().current.get(index);
 				}
+				
+			});
+			
+			item.add(new CommitStatusLink("buildStatus", commit.copy(), null) {
 
 				@Override
 				protected Project getProject() {
@@ -655,21 +662,8 @@ public abstract class CommitListPanel extends Panel {
 					return null;
 				}
 				
-			};
-			item.add(commitStatus);
-			
-			item.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-				@Override
-				protected String load() {
-					commitStatus.configure();
-					if (commitStatus.isVisible())
-						return "commit with-status";
-					else
-						return "commit";
-				}
-				
-			}));
+			});
+			item.add(AttributeAppender.append("class", "commit"));
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);
 			DateTime dateTime = new DateTime(current.get(index+1).getCommitterIdent().getWhen());

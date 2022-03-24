@@ -18,7 +18,8 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
-import io.onedev.server.web.page.admin.generalsecuritysetting.GeneralSecuritySettingPage;
+import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
+import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.authorization.GroupAuthorizationsPage;
@@ -39,12 +40,13 @@ import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationS
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
 import io.onedev.server.web.page.admin.role.RoleListPage;
+import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage;
-import io.onedev.server.web.page.admin.ssh.SshSettingPage;
-import io.onedev.server.web.page.admin.sso.SsoConnectorListPage;
-import io.onedev.server.web.page.admin.sso.SsoProcessPage;
+import io.onedev.server.web.page.admin.sshsetting.SshSettingPage;
+import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
+import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.accesstoken.UserAccessTokenPage;
@@ -66,6 +68,7 @@ import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
+import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
@@ -181,6 +184,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("my/avatar", MyAvatarPage.class));
 		add(new DynamicPathPageMapper("my/password", MyPasswordPage.class));
 		add(new DynamicPathPageMapper("my/ssh-keys", MySshKeysPage.class));
+		add(new DynamicPathPageMapper("my/gpg-keys", MyGpgKeysPage.class));
 		add(new DynamicPathPageMapper("my/access-token", MyAccessTokenPage.class));
 		add(new DynamicPathPageMapper("my/two-factor-authentication", MyTwoFactorAuthenticationPage.class));
 	}
@@ -256,10 +260,12 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 				PullRequestNotificationTemplatePage.class));
 		add(new DynamicPathPageMapper("administration/settings/performance", PerformanceSettingPage.class));
 		add(new DynamicPathPageMapper("administration/settings/backup", DatabaseBackupPage.class));
-		add(new DynamicPathPageMapper("administration/settings/security", GeneralSecuritySettingPage.class));
+		add(new DynamicPathPageMapper("administration/settings/security", SecuritySettingPage.class));
 		add(new DynamicPathPageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 		add(new DynamicPathPageMapper("administration/settings/sso-connectors", SsoConnectorListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/ssh", SshSettingPage.class));
+ 		add(new DynamicPathPageMapper("administration/settings/gpg-signing-key", GpgSigningKeyPage.class));
+ 		add(new DynamicPathPageMapper("administration/settings/gpg-trusted-keys", GpgTrustedKeysPage.class));
 
 		add(new DynamicPathPageMapper("administration/agents", AgentListPage.class));
 		add(new DynamicPathPageMapper("administration/agents/${agent}/overview", AgentOverviewPage.class));

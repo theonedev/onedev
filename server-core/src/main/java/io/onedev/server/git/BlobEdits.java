@@ -13,7 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.Constants;
@@ -221,7 +224,7 @@ public class BlobEdits implements Serializable {
 	 * 			 
 	 */
 	public ObjectId commit(Repository repository, String refName, ObjectId expectedOldCommitId, ObjectId parentCommitId, 
-			PersonIdent authorAndCommitter, String commitMessage) {
+			PersonIdent authorAndCommitter, String commitMessage, @Nullable PGPSecretKeyRing signingKey) {
 		
 		try (	RevWalk revWalk = new RevWalk(repository); 
 				TreeWalk treeWalk = new TreeWalk(repository);
@@ -249,6 +252,9 @@ public class BlobEdits implements Serializable {
 	        	commit.setTreeId(treeId);
 	        else 
 	        	commit.setTreeId(inserter.insert(new TreeFormatter()));
+	        
+	        if (signingKey != null)
+	        	GitUtils.sign(commit, signingKey);
 	        
 	        ObjectId commitId = inserter.insert(commit);
 	        inserter.flush();

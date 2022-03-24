@@ -50,7 +50,7 @@ import io.onedev.server.util.criteria.OrCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AgentQueryBehavior;
 import io.onedev.server.web.component.AgentStatusBadge;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -1053,7 +1053,7 @@ class AgentListPanel extends Panel {
 			
 		});
 		
-		body.add(agentsTable = new OneDataTable<Agent, Void>("agents", columns, dataProvider, 
+		body.add(agentsTable = new DefaultDataTable<Agent, Void>("agents", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);

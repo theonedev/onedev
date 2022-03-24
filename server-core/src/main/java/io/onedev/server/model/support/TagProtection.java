@@ -35,6 +35,8 @@ public class TagProtection implements Serializable {
 	
 	private boolean preventCreation = true;
 	
+	private boolean signatureRequired;
+	
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -105,6 +107,15 @@ public class TagProtection implements Serializable {
 
 	public void setPreventCreation(boolean preventCreation) {
 		this.preventCreation = preventCreation;
+	}
+
+	@Editable(order=560, description="Check this to require valid signature of head commit")
+	public boolean isSignatureRequired() {
+		return signatureRequired;
+	}
+
+	public void setSignatureRequired(boolean signatureRequired) {
+		this.signatureRequired = signatureRequired;
 	}
 
 	public void onRenameGroup(String oldName, String newName) {

@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -40,7 +41,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -49,6 +52,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.FileCreateOrUpdateRequest;
@@ -67,10 +71,13 @@ public class RepositoryResource {
 	private static final int MAX_COMMITS = 10000;
 	
 	private final ProjectManager projectManager;
+	
+	private final SettingManager settingManager;
 
 	@Inject
-	public RepositoryResource(ProjectManager projectManager) {
+	public RepositoryResource(ProjectManager projectManager, SettingManager settingManager) {
 		this.projectManager = projectManager;
+		this.settingManager = settingManager;
 	}
 
 	@Api(order=10, description="List all branches")
@@ -120,15 +127,22 @@ public class RepositoryResource {
 	@POST
 	public Response createBranch(@PathParam("projectId") Long projectId, @NotNull CreateBranchRequest request) {
 		Project project = projectManager.load(projectId);
-		if (!SecurityUtils.canCreateBranch(project, request.getBranchName())) {
+		User user = SecurityUtils.getUser();
+		if (!SecurityUtils.canWriteCode(project)) 
 			throw new UnauthorizedException();
-		}
-
-		if (project.getBranchRef(request.getBranchName()) != null) {
+		else if (project.getBranchRef(request.getBranchName()) != null) 
 			throw new InvalidParamException("Branch '" + request.getBranchName() + "' already exists");
-		} else {
-			project.createBranch(request.getBranchName(), request.getRevision());
+		else if (project.getHierarchyBranchProtection(request.getBranchName(), user).isPreventCreation()) 
+			throw new ExplicitException("Branch creation prohibited by branch protection rule");
+		
+		if (!project.isCommitSignatureRequirementSatisfied(
+				user, request.getBranchName(), 
+				project.getRevCommit(request.getRevision(), true))) {
+			throw new ExplicitException("Can not create this branch as branch protection setting "
+					+ "requires valid signature on head commit");
 		}
+		
+		project.createBranch(request.getBranchName(), request.getRevision());
 
 		return Response.ok().build();
 	}
@@ -203,8 +217,16 @@ public class RepositoryResource {
 		if (project.getTagRef(request.getTagName()) != null) {
 			throw new InvalidParamException("Tag '" + request.getTagName() + "' already exists");
 		} else {
+			PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
+			
+			User user = SecurityUtils.getUser();
+			if (project.isTagSignatureRequired(user, request.getTagName()) && signingKey == null) {
+				throw new ExplicitException("Tag signature required per tag protection rule, "
+						+ "please generate system GPG signing key first");
+			}
+			
 			project.createTag(request.getTagName(), request.getRevision(), 
-					SecurityUtils.getUser().asPerson(), request.getTagMessage());
+					SecurityUtils.getUser().asPerson(), request.getTagMessage(), signingKey);
 		}
 
 		return Response.ok().build();
@@ -397,15 +419,17 @@ public class RepositoryResource {
 				));
 		}
 
-		ObjectId newCommitId = new BlobEdits(oldPaths, newBlobs)
-			.commit(
-				repository,
-				ref.getName(),
-				oldCommitId,
-				oldCommitId,
-				SecurityUtils.getUser().asPerson(),
-				request.getCommitMessage()
-			);
+		User user = SecurityUtils.getUser();
+		PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
+		
+		if (project.isCommitSignatureRequired(user, revisionAndPath.getRevision()) && signingKey == null) {
+			throw new ExplicitException("Signature required per branch protection rule, "
+					+ "please generate system GPG signing key first");
+		}
+		
+		ObjectId newCommitId = new BlobEdits(oldPaths, newBlobs).commit(
+				repository, ref.getName(), oldCommitId, oldCommitId,
+				user.asPerson(), request.getCommitMessage(), signingKey);
 		
 		FileEditResponse response = new FileEditResponse();
 		response.commitHash = newCommitId.name();

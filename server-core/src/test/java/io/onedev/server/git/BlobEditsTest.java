@@ -44,7 +44,8 @@ public class BlobEditsTest extends AbstractGitTest {
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
 		BlobEdits edits = new BlobEdits(Sets.newHashSet("/server/src/com/example/a//a.java"), Maps.newHashMap());
-		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test delete");
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
+				user, "test delete", null);
 		
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
@@ -71,7 +72,8 @@ public class BlobEditsTest extends AbstractGitTest {
 
 		BlobEdits edits = new BlobEdits(Sets.newHashSet("/server/src/com/example/c//c.java"), Maps.newHashMap());
 		try {
-			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test delete");
+			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
+					user, "test delete", null);
 			assertTrue("An ObjectNotExistException should be thrown", false);
 		} catch (ObjectNotFoundException e) {
 		}
@@ -97,7 +99,8 @@ public class BlobEditsTest extends AbstractGitTest {
 		newBlobs.put("client/c.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
 		newBlobs.put("client/d.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
 		BlobEdits edits = new BlobEdits(oldPaths, newBlobs);
-		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename");
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
+				user, "test rename", null);
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/a.java", revTree));
@@ -127,7 +130,7 @@ public class BlobEditsTest extends AbstractGitTest {
 		newBlobs.put("client/c.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
 		BlobEdits edits = new BlobEdits(Sets.newHashSet("server/src/com/example/a"), newBlobs);
 		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, 
-				"test rename");
+				"test rename", null);
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
 			assertNotNull(TreeWalk.forPath(git.getRepository(), "client/c.java", revTree));
@@ -150,10 +153,12 @@ public class BlobEditsTest extends AbstractGitTest {
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
 		Map<String, BlobContent> newBlobs = new HashMap<>();
-		newBlobs.put("client/a.java/a.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/a.java/a.java", 
+				new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
 		BlobEdits edits = new BlobEdits(Sets.newHashSet("server/src/com/example/a/a.java"), newBlobs);
 		try {
-			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test rename tree");
+			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
+					user, "test rename tree", null);
 			assertTrue("A NotTreeException should be thrown", false);
 		} catch (NotTreeException e) {
 		}
@@ -174,10 +179,13 @@ public class BlobEditsTest extends AbstractGitTest {
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		Map<String, BlobContent> newBlobs = new HashMap<>();
-		newBlobs.put("/server/src/com/example/c/c.java", new BlobContent.Immutable("c".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("/server/src/com/example/d/d.java", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("/server/src/com/example/c/c.java", 
+				new BlobContent.Immutable("c".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("/server/src/com/example/d/d.java", 
+				new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
 		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
-		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
+				user, "test add", null);
 		
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
@@ -193,7 +201,8 @@ public class BlobEditsTest extends AbstractGitTest {
 		newBlobs = new HashMap<>();
 		newBlobs.put("/common/common.java", new BlobContent.Immutable("common".getBytes(), FileMode.REGULAR_FILE));
 		edits = new BlobEdits(Sets.newHashSet(), newBlobs);
-		newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
+		newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
+				user, "test add", null);
 		
 		try (RevWalk revWalk = new RevWalk(git.getRepository())) {
 			RevTree revTree = revWalk.parseCommit(newCommitId).getTree();
@@ -218,7 +227,8 @@ public class BlobEditsTest extends AbstractGitTest {
 		newBlobs.put("/dir/file/a.java", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
 		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
 		try {
-			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
+			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
+					user, "test add", null);
 			assertTrue("An ObjectAlreadyException should be thrown", false);
 		} catch (ObjectAlreadyExistsException e) {
 		}
@@ -234,16 +244,25 @@ public class BlobEditsTest extends AbstractGitTest {
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		Map<String, BlobContent> newBlobs = new HashMap<>();
-		newBlobs.put("client/dir2/file4", new BlobContent.Immutable("c".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("client/security/dir1/file2", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("client/security/dir2/file3", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("client/dir1/file1", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("client/security/dir1/subdir/file", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("client/dir1/file0", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("server/file2", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("server/file1", new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/dir2/file4", 
+				new BlobContent.Immutable("c".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/security/dir1/file2", 
+				new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/security/dir2/file3", 
+				new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/dir1/file1", 
+				new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/security/dir1/subdir/file", 
+				new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/dir1/file0", 
+				new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("server/file2", 
+				new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("server/file1", 
+				new BlobContent.Immutable("d".getBytes(), FileMode.REGULAR_FILE));
 		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
-		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, 
+				oldCommitId, oldCommitId, user, "test add", null);
 
 		List<String> paths = new ArrayList<>();
 		try (	RevWalk revWalk = new RevWalk(git.getRepository());
@@ -290,9 +309,11 @@ public class BlobEditsTest extends AbstractGitTest {
 		}
 		
 		Map<String, BlobContent> newBlobs = new HashMap<>();
-		newBlobs.put("a.b/file2.java", new BlobContent.Immutable("hello".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("a.b/file2.java", 
+				new BlobContent.Immutable("hello".getBytes(), FileMode.REGULAR_FILE));
 		BlobEdits edits = new BlobEdits(Sets.newHashSet("a.b/file2.java"), newBlobs);
-		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test modify");
+		ObjectId newCommitId = edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
+				user, "test modify", null);
 
 		List<String> newPaths = new ArrayList<>();
 		try (	RevWalk revWalk = new RevWalk(git.getRepository());
@@ -321,13 +342,16 @@ public class BlobEditsTest extends AbstractGitTest {
 
 		Set<String> oldPaths = Sets.newHashSet("server/src/com/example/b/b.java");
 		Map<String, BlobContent> newBlobs = new HashMap<>();
-		newBlobs.put("client/a.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("server/src/a.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
-		newBlobs.put("server/src/com/example/b/b.java", new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("client/a.java", 
+				new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("server/src/a.java", 
+				new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("server/src/com/example/b/b.java", 
+				new BlobContent.Immutable("a".getBytes(), FileMode.REGULAR_FILE));
 		
 		BlobEdits edits = new BlobEdits(oldPaths, newBlobs);
 		ObjectId newCommitId = edits.commit(git.getRepository(), refName, 
-				oldCommitId, oldCommitId, user, "test rename tree");
+				oldCommitId, oldCommitId, user, "test rename tree", null);
 		
 		List<String> paths = new ArrayList<>();
 		try (	RevWalk revWalk = new RevWalk(git.getRepository());
@@ -359,10 +383,11 @@ public class BlobEditsTest extends AbstractGitTest {
 		ObjectId newCommitId = git.getRepository().resolve(refName);
 
 		Map<String, BlobContent> newBlobs = new HashMap<>();
-		newBlobs.put("/server/src/com/example/c/c.java", new BlobContent.Immutable("c".getBytes(), FileMode.REGULAR_FILE));
+		newBlobs.put("/server/src/com/example/c/c.java", 
+				new BlobContent.Immutable("c".getBytes(), FileMode.REGULAR_FILE));
 		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
 		try {
-			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add");
+			edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, user, "test add", null);
 			assertTrue("An ObsoleteCommitException should be thrown", false);
 		} catch (ObsoleteCommitException e) {
 			assertTrue(newCommitId.equals(e.getOldCommitId()));

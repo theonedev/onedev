@@ -78,7 +78,7 @@ import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.JobDefLink;
@@ -1044,7 +1044,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});		
 		
-		body.add(buildsTable = new OneDataTable<Build, Void>("builds", columns, dataProvider, 
+		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		body.add(new WebMarkupContainer("tips") {

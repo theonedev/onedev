@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.ssh;
+package io.onedev.server.web.page.admin.sshsetting;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -71,7 +71,7 @@ public class SshSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "SSH Setting");
+		return new Label(componentId, "SSH Server Key");
 	}
     
 }

@@ -37,7 +37,7 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		} else if (value.equals("new") || value.equals(User.SYSTEM_NAME.toLowerCase()) 
+		} else if (value.equals("new") || value.equals(User.ONEDEV_NAME.toLowerCase()) 
 				|| value.equals(User.UNKNOWN_NAME.toLowerCase())) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
@@ -63,7 +63,7 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 					if (suffix > 1)
 						suggestedUserName += suffix;
 					if (!suggestedUserName.equals("new") 
-							&& !suggestedUserName.equals(User.SYSTEM_NAME)
+							&& !suggestedUserName.equals(User.ONEDEV_NAME)
 							&& !suggestedUserName.equals(User.UNKNOWN_NAME)
 							&& userManager.findByName(suggestedUserName) == null) {
 						return suggestedUserName;

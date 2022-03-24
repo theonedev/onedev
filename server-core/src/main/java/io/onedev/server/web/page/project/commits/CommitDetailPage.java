@@ -36,6 +36,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +75,7 @@ import io.onedev.server.web.component.branch.create.CreateBranchLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
+import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
 import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -282,6 +284,15 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
+		
+		add(new GitSignaturePanel("signature") {
+			
+			@Override
+			protected RevObject getRevObject() {
+				return getCommit();
+			}
+			
+		});
 
 		add(new Label("hash", GitUtils.abbreviateSHA(getCommit().name())));
 		add(new CopyToClipboardLink("copyHash", Model.of(getCommit().name())));

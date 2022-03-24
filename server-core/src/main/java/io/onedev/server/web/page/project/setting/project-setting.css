@@ -4,7 +4,7 @@
 	display: block;
 }
 
-.project-setting .job-secrets .job-secret-edit textarea {
+.job-secret-edit textarea {
     font-family: monospace;
 }
 

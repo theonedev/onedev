@@ -40,7 +40,7 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -337,7 +337,7 @@ public class UserListPage extends AdministrationPage {
 			
 		};
 		
-		add(usersTable = new OneDataTable<User, Void>("users", columns, dataProvider, 
+		add(usersTable = new DefaultDataTable<User, Void>("users", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 	

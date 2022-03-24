@@ -59,6 +59,9 @@
 							Please follow <a wicket:id="resolveInstructions" class="link-primary" href="javascript:void(0);">this instruction</a> to resolve the conflicts
 						</wicket:enclosure>
 					</div>
+					<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-danger">
+						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as valid signature is required for head commit   
+					</div>
 					<div wicket:id="requestedForChanges" class="requested-for-changes text-danger">
 						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a> 
 					</div>

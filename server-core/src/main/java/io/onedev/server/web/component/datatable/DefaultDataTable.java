@@ -21,9 +21,9 @@ import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public class OneDataTable<T, S> extends DataTable<T, S> {
+public class DefaultDataTable<T, S> extends DataTable<T, S> {
 
-	public OneDataTable(final String id, final List<? extends IColumn<T, S>> columns,
+	public DefaultDataTable(final String id, final List<? extends IColumn<T, S>> columns,
 			final ISortableDataProvider<T, S> dataProvider, final int rowsPerPage, 
 			@Nullable PagingHistorySupport pagingHistorySupport) {
 		super(id, columns, dataProvider, rowsPerPage);

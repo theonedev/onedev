@@ -87,7 +87,7 @@ import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
@@ -1346,7 +1346,7 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		body.add(projectsTable = new OneDataTable<Project, Void>("projects", columns, dataProvider, 
+		body.add(projectsTable = new DefaultDataTable<Project, Void>("projects", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);

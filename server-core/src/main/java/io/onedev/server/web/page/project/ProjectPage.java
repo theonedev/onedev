@@ -234,10 +234,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Fixed Issue Filters", 
 					DefaultFixedIssueFiltersPage.class, DefaultFixedIssueFiltersPage.paramsOf(getProject())));
 			
-			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build Setting", buildSettingMenuItems));
+			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build", buildSettingMenuItems));
 
-			if (OneDev.getInstance(SettingManager.class).getServiceDeskSetting() != null && getProject().isIssueManagement()) {
-				settingMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Setting", 
+			if (getSettingManager().getServiceDeskSetting() != null && getProject().isIssueManagement()) {
+				settingMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk", 
 						ProjectServiceDeskSettingPage.class, ProjectServiceDeskSettingPage.paramsOf(getProject())));
 			}
 			
@@ -277,6 +277,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		return menus;
 	}
 
+	private SettingManager getSettingManager() {
+		return OneDev.getInstance(SettingManager.class);
+	}
+	
 	@Override
 	protected void onDetach() {
 		projectModel.detach();

@@ -25,6 +25,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -37,6 +38,8 @@ import org.unbescape.javascript.JavaScriptEscape;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobContent;
@@ -244,13 +247,16 @@ public class CommitOptionPanel extends Panel {
 			User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
 			String revision = context.getBlobIdent().revision;
-
-			String refName = revision!=null?GitUtils.branch2ref(revision):"refs/heads/master";
 			ObjectId prevCommitId;
 			if (revision != null)
 				prevCommitId = context.getProject().getObjectId(revision, true);
 			else
 				prevCommitId = ObjectId.zeroId();
+
+			if (revision == null)
+				revision = "master";
+			
+			String refName = GitUtils.branch2ref(revision);
 			
 			Repository repository = context.getProject().getRepository();
 			ObjectId newCommitId = null;
@@ -258,12 +264,16 @@ public class CommitOptionPanel extends Panel {
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
 				String newPath = context.getNewPath();
-				if (revision != null && context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
+				if (context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
 					form.error("Review required for this change. Please submit pull request instead");
 					target.add(form);
 					return false;
-				} else if (revision != null && context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
+				} else if (context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
 					form.error("Build required for this change. Please submit pull request instead");
+					target.add(form);
+					return false;
+				} else if (context.getProject().isCommitSignatureRequiredButNoSigningKey(user, revision)) {
+					form.error("Signature required for this change, but no signing key is specified");
 					target.add(form);
 					return false;
 				}
@@ -286,10 +296,13 @@ public class CommitOptionPanel extends Panel {
 				});
 			}
 
+			PGPSecretKeyRing signingKey = OneDev.getInstance(SettingManager.class)
+					.getGpgSetting().getSigningKey();
+			
 			while(newCommitId == null) {
 				try {
 					newCommitId = new BlobEdits(oldPaths, newBlobs).commit(repository, refName, 
-							prevCommitId, prevCommitId, user.asPerson(), commitMessage);
+							prevCommitId, prevCommitId, user.asPerson(), commitMessage, signingKey);
 				} catch (ObjectAlreadyExistsException e) {
 					form.error("A path with same name already exists. "
 							+ "Please choose a different name and try again.");

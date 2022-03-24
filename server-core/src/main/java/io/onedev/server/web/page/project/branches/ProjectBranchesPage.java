@@ -78,9 +78,9 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
-import io.onedev.server.web.component.commit.status.CommitStatusPanel;
+import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -454,11 +454,18 @@ public class ProjectBranchesPage extends ProjectPage {
 							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected branch");
 							target.add(form);
 						} else {
-							getProject().createBranch(branchName, helperBean.getRevision());
-							modal.close();
-							target.add(branchesTable);
-							
-							getSession().success("Branch '" + branchName + "' created");
+							RevCommit commit = getProject().getRevCommit(helperBean.getRevision(), true);
+							if (!getProject().isCommitSignatureRequirementSatisfied(user, branchName, commit)) {
+								editor.error(new Path(new PathNode.Named("name")), 
+										"Valid signature required for head commit of this branch per branch protection rule");
+								target.add(form);
+							} else {
+								getProject().createBranch(branchName, helperBean.getRevision());
+								modal.close();
+								target.add(branchesTable);
+								
+								getSession().success("Branch '" + branchName + "' created");
+							}
 						}
 					}
 
@@ -510,7 +517,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				link.add(new Label("name", branch));
 				fragment.add(link);
 				
-				fragment.add(new CommitStatusPanel("buildStatus", ref.getRef().getObjectId(), ref.getRef().getName()) {
+				fragment.add(new CommitStatusLink("buildStatus", ref.getRef().getObjectId(), ref.getRef().getName()) {
 
 					@Override
 					protected Project getProject() {
@@ -760,7 +767,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			}
 		};		
 		
-		add(branchesTable = new OneDataTable<RefInfo, Void>("branches", columns, dataProvider, 
+		add(branchesTable = new DefaultDataTable<RefInfo, Void>("branches", columns, dataProvider, 
 				PAGE_SIZE, pagingHistorySupport) {
 			
 			@Override

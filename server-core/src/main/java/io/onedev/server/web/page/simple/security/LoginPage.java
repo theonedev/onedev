@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.simple.security;
 
-import static io.onedev.server.web.page.admin.sso.SsoProcessPage.MOUNT_PATH;
-import static io.onedev.server.web.page.admin.sso.SsoProcessPage.STAGE_INITIATE;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;

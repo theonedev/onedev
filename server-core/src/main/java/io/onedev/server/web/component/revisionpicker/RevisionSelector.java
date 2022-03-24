@@ -35,6 +35,7 @@ import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
@@ -44,6 +45,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -275,19 +277,21 @@ public abstract class RevisionSelector extends Panel {
 			if (itemValues.size() < count && !found) {
 				Project project = projectModel.getObject();
 				try {
+					User user = SecurityUtils.getUser();
+					RevCommit commit = project.getRevCommit(revision, true);
 					if (project.getRepository().resolve(revInput) != null) {
 						itemValues.add(COMMIT_FLAG + revInput);
 					} else if (branchesActive) {
 						if (canCreateBranch) {
-							if (SecurityUtils.canCreateBranch(project, revInput))
-								itemValues.add(ADD_FLAG + revInput);
-						}
-					} else {
-						if (canCreateTag) {
-							if (SecurityUtils.canCreateTag(project, revInput)) { 
+							if (SecurityUtils.canCreateBranch(project, revInput)
+									&& project.isCommitSignatureRequirementSatisfied(user, revInput, commit)) {
 								itemValues.add(ADD_FLAG + revInput);
 							}
 						}
+					} else if (canCreateTag 
+							&& SecurityUtils.canCreateTag(project, revInput) 
+							&& !project.isTagSignatureRequiredButNoSigningKey(user, revInput)) { 
+						itemValues.add(ADD_FLAG + revInput);
 					}
 				} catch (RevisionSyntaxException | AmbiguousObjectException | IncorrectObjectTypeException e) {
 				} catch (IOException e) {

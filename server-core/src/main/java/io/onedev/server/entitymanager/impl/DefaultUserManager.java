@@ -119,7 +119,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Sessional
     @Override
     public User getSystem() {
-    	return load(User.SYSTEM_ID);
+    	return load(User.ONEDEV_ID);
     }
     
     @Sessional

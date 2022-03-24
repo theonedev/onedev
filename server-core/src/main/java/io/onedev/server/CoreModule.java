@@ -102,6 +102,7 @@ import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
+import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
@@ -146,6 +147,7 @@ import io.onedev.server.entitymanager.impl.DefaultCodeCommentReplyManager;
 import io.onedev.server.entitymanager.impl.DefaultCommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultEmailAddressManager;
 import io.onedev.server.entitymanager.impl.DefaultGitLfsLockManager;
+import io.onedev.server.entitymanager.impl.DefaultGpgKeyManager;
 import io.onedev.server.entitymanager.impl.DefaultGroupAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultGroupManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueChangeManager;
@@ -186,6 +188,8 @@ import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.git.exception.GitException;
 import io.onedev.server.git.hookcallback.GitPostReceiveCallback;
 import io.onedev.server.git.hookcallback.GitPreReceiveCallback;
+import io.onedev.server.git.signature.DefaultSignatureVerificationKeyLoader;
+import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.DefaultCommitInfoManager;
 import io.onedev.server.infomanager.DefaultIssueInfoManager;
@@ -435,6 +439,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueLinkManager.class).to(DefaultIssueLinkManager.class);
 		bind(LinkAuthorizationManager.class).to(DefaultLinkAuthorizationManager.class);
 		bind(EmailAddressManager.class).to(DefaultEmailAddressManager.class);
+		bind(GpgKeyManager.class).to(DefaultGpgKeyManager.class);
 		
 		bind(WebHookManager.class);
 		
@@ -597,6 +602,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(GitLfsFilter.class);
 		bind(GitPreReceiveCallback.class);
 		bind(GitPostReceiveCallback.class);
+		bind(SignatureVerificationKeyLoader.class).to(DefaultSignatureVerificationKeyLoader.class);
 		contribute(SshCommandCreator.class, GitSshCommandCreator.class);
 	}
 	

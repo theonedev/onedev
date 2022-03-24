@@ -512,6 +512,15 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		});		
 		
+		summaryContainer.add(new WebMarkupContainer("noValidCommitSignature") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isOpen() && !getPullRequest().isSignatureRequirementSatisfied());
+			}
+			
+		});
 		summaryContainer.add(new WebMarkupContainer("requestedForChanges") {
 
 			@Override

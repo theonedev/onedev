@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.sso;
+package io.onedev.server.web.page.admin.ssosetting;
 
 import java.io.Serializable;
 

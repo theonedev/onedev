@@ -1,0 +1,10 @@
+@media(max-width: 767px) {
+	.gpg-key-list .expanded {
+		display: none;
+	}
+}
+
+.insert-gpg-key textarea {
+	font-family: monospace;
+	height: 200px !important;
+}

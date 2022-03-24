@@ -47,6 +47,7 @@ import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
+import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.PerformanceSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
@@ -114,12 +115,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
-		User system = userManager.get(User.SYSTEM_ID);
+		User system = userManager.get(User.ONEDEV_ID);
 		if (system == null) {
 			system = new User();
-			system.setId(User.SYSTEM_ID);
-			system.setName(User.SYSTEM_NAME.toLowerCase());
-			system.setFullName(User.SYSTEM_NAME);
+			system.setId(User.ONEDEV_ID);
+			system.setName(User.ONEDEV_NAME.toLowerCase());
+			system.setFullName(User.ONEDEV_NAME);
 			system.setPassword("no password");
     		userManager.replicate(system);
 		}
@@ -215,6 +216,12 @@ public class DefaultDataManager implements DataManager, Serializable {
             sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
             
             settingManager.saveSshSetting(sshSetting);
+        }
+		
+		setting = settingManager.getSetting(Key.GPG);
+		if (setting == null || setting.getValue() == null) {
+			GpgSetting gpgSetting = new GpgSetting();
+            settingManager.saveGpgSetting(gpgSetting);
         }
 		
 		setting = settingManager.getSetting(Key.SECURITY);

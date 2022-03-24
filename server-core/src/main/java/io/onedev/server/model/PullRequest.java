@@ -940,6 +940,11 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 				.containsAll(requiredJobs);
 	}
 	
+	public boolean isSignatureRequirementSatisfied() {
+		return getProject().isCommitSignatureRequirementSatisfied(getSubmitter(), 
+				getTargetBranch(), getLatestUpdate().getHeadCommit());
+	}
+	
 	@Override
 	public Project getAttachmentProject() {
 		return targetProject;
@@ -1003,7 +1008,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 							comparisonBase = mergeBase1;
 							break;
 						} else {
-							PersonIdent person = new PersonIdent("OneDev", "");
+							PersonIdent person = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
 							comparisonBase = GitUtils.merge(repo, oldCommitId, mergeBase1, false, 
 									person, person, "helper commit", true);
 							break;
@@ -1099,6 +1104,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
     		return "Waiting for approvals";
     	if (!isRequiredBuildsSuccessful())
     		return "Some required builds not passed";
+    	if (!isSignatureRequirementSatisfied())
+    		return "No valid signature for head commit";
     	return null;
 	}
 

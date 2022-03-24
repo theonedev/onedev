@@ -36,10 +36,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
 
 import com.google.common.base.Preconditions;
@@ -48,6 +50,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -61,9 +64,10 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.commit.status.CommitStatusPanel;
+import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -238,11 +242,20 @@ public class ProjectTagsPage extends ProjectPage {
 							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
 							target.add(form);
 						} else {
-							getProject().createTag(tagName, helperBean.getRevision(), user.asPerson(), helperBean.getMessage());
-							modal.close();
-							target.add(tagsTable);
-							
-							getSession().success("Tag '" + tagName + "' created");
+							PGPSecretKeyRing signingKey = OneDev.getInstance(SettingManager.class)
+									.getGpgSetting().getSigningKey();
+							if (getProject().isTagSignatureRequired(user, tagName) && signingKey == null) {
+								editor.error(new Path(new PathNode.Named("name")), "Tag signature required per "
+										+ "tag protection rule, please generate system GPG signing key first"); 
+								target.add(form);
+							} else {
+								getProject().createTag(tagName, helperBean.getRevision(), user.asPerson(), 
+										helperBean.getMessage(), signingKey);
+								modal.close();
+								target.add(tagsTable);
+								
+								getSession().success("Tag '" + tagName + "' created");
+							}
 						}
 					}
 
@@ -300,7 +313,7 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("name", tagName));
 				fragment.add(link);
 				
-				fragment.add(new CommitStatusPanel("buildStatus", ref.getPeeledObj().copy(), ref.getRef().getName()) {
+				fragment.add(new CommitStatusLink("buildStatus", ref.getPeeledObj().copy(), ref.getRef().getName()) {
 
 					@Override
 					protected Project getProject() {
@@ -315,6 +328,15 @@ public class ProjectTagsPage extends ProjectPage {
 				});
 
 				if (ref.getObj() instanceof RevTag) {
+					fragment.add(new GitSignaturePanel("signature") {
+
+						@Override
+						protected RevObject getRevObject() {
+							return rowModel.getObject().getObj();
+						}
+						
+					});
+					
 					RevTag revTag = (RevTag) ref.getObj();
 					Fragment annotatedFragment = new Fragment("annotated", "annotatedFrag", ProjectTagsPage.this);
 					if (revTag.getTaggerIdent() != null) 
@@ -332,6 +354,7 @@ public class ProjectTagsPage extends ProjectPage {
 					
 					fragment.add(annotatedFragment);
 				} else {
+					fragment.add(new WebMarkupContainer("signature").setVisible(false));
 					fragment.add(new WebMarkupContainer("annotated").setVisible(false));
 				}
 
@@ -431,7 +454,7 @@ public class ProjectTagsPage extends ProjectPage {
 			}
 		};		
 		
-		add(tagsTable = new OneDataTable<RefInfo, Void>("tags", columns, dataProvider, 
+		add(tagsTable = new DefaultDataTable<RefInfo, Void>("tags", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport) {
 			
 			@Override

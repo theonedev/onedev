@@ -45,7 +45,7 @@ import io.onedev.server.util.MilestoneAndIssueState;
 import io.onedev.server.util.MilestoneSort;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ActionablePageLink;
@@ -364,7 +364,7 @@ public class MilestoneListPage extends ProjectPage {
 			
 		};
 		
-		add(milestonesTable = new OneDataTable<Milestone, Void>("milestones", columns, dataProvider, 
+		add(milestonesTable = new DefaultDataTable<Milestone, Void>("milestones", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));		
 		milestonesTable.setOutputMarkupId(true);
 	}

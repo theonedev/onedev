@@ -59,11 +59,19 @@ abstract class CreateBranchPanel extends Panel {
 							"Branch '" + branchName + "' already exists, please choose a different name");
 					target.add(form);
 				} else if (project.getHierarchyBranchProtection(branchName, user).isPreventCreation()) {
-					editor.error(new Path(new PathNode.Named("name")), "Unable to create protected branch");
+					editor.error(new Path(new PathNode.Named("name")), 
+							"Creation of this branch is prohibited per branch protection rule");
 					target.add(form);
 				} else {
-					project.createBranch(branchName, revision);
-					onCreate(target, branchName);
+					if (!project.isCommitSignatureRequirementSatisfied(user, 
+							branchName, project.getRevCommit(revision, true))) {
+						editor.error(new Path(new PathNode.Named("name")), 
+								"Valid signature required for head commit of this branch per branch protection rule");
+						target.add(form);
+					} else {
+						project.createBranch(branchName, revision);
+						onCreate(target, branchName);
+					}
 				}
 			}
 

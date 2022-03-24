@@ -12,11 +12,12 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 
 public enum MergeStrategy {
+	
 	CREATE_MERGE_COMMIT("Add all commits from source branch to target branch with a merge commit.") {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {
-			PersonIdent user = new PersonIdent(User.SYSTEM_NAME, "");
+			PersonIdent user = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
 			Repository repository = request.getTargetProject().getRepository();
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
@@ -35,7 +36,7 @@ public enum MergeStrategy {
 			if (GitUtils.isMergedInto(repository, null, targetHead, requestHead)) {
 				return requestHead;
 			} else {
-				PersonIdent user = new PersonIdent(User.SYSTEM_NAME, "");
+				PersonIdent user = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
 				return GitUtils.merge(repository, targetHead, requestHead, false, user, user,
 							commitMessage, false);
 			}
@@ -49,7 +50,7 @@ public enum MergeStrategy {
 			Repository repository = request.getTargetProject().getRepository();
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			PersonIdent committer = new PersonIdent(User.SYSTEM_NAME, "");
+			PersonIdent committer = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
 			return GitUtils.merge(repository, targetHead, requestHead, true, committer, 
 					request.getSubmitter().asPerson(), commitMessage, false);
 		}
@@ -62,7 +63,7 @@ public enum MergeStrategy {
 			Repository repository = request.getTargetProject().getRepository();
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			PersonIdent user = new PersonIdent(User.SYSTEM_NAME, "");
+			PersonIdent user = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
 			return GitUtils.rebase(repository, requestHead, targetHead, user);
 		}
 		
@@ -89,5 +90,5 @@ public enum MergeStrategy {
 
 	@Nullable
 	public abstract ObjectId merge(PullRequest request, String commitMessage);
-	
+
 }

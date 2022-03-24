@@ -46,7 +46,7 @@ import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -392,7 +392,7 @@ public class GroupMembershipsPage extends GroupPage {
 			
 		};
 		
-		add(membershipsTable = new OneDataTable<Membership, Void>("memberships", columns, dataProvider, 
+		add(membershipsTable = new DefaultDataTable<Membership, Void>("memberships", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 

@@ -26,6 +26,7 @@ import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
+import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.PerformanceSetting;
@@ -82,6 +83,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	private volatile Long agentSettingId;
 	
     private volatile Long sshSettingId;
+    
+    private volatile Long gpgSettingId;
     
     private volatile Long ssoConnectorsId;
     
@@ -743,5 +746,31 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		usage.add(getIssueSetting().onDeleteLink(linkName));
 		return usage.prefix("administration");
 	}
-	
+
+	@Sessional
+    @Override
+    public GpgSetting getGpgSetting() {
+        Setting setting;
+        if (gpgSettingId == null) {
+            setting = getSetting(Key.GPG);
+            Preconditions.checkNotNull(setting);
+            gpgSettingId = setting.getId();
+        } else {
+            setting = load(gpgSettingId);
+        }
+        return (GpgSetting)setting.getValue();
+    }
+
+    @Transactional
+    @Override
+    public void saveGpgSetting(GpgSetting gpgSetting) {
+        Setting setting = getSetting(Key.GPG);
+        if (setting == null) {
+            setting = new Setting();
+            setting.setKey(Key.GPG);
+        }
+        setting.setValue(gpgSetting);
+        dao.persist(setting);
+    }
+
 }

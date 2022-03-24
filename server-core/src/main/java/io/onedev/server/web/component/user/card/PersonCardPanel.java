@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.user.card;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -49,17 +48,13 @@ public class PersonCardPanel extends Panel {
 		
 		builder.append("<div>" + HtmlEscape.escapeHtml5(displayName) + " <i>(" + gitRole + ")</i></div>");
 		
-		if (StringUtils.isBlank(personIdent.getEmailAddress())) {
-			if (personIdent.getName().equals(User.SYSTEM_NAME))
-				builder.append("<i>System Account</i>");
-			else
-				builder.append("<i>No OneDev Account</i>");
-		} else {
-			if (emailAddress != null && emailAddress.isVerified()) 
-				builder.append("<i>@" + HtmlEscape.escapeHtml5(emailAddress.getOwner().getName()) + "</i>"); 
-			else 
-				builder.append("<i>No OneDev Account</i>");
-		}
+		if (personIdent.getName().equals(User.ONEDEV_NAME)) 
+			builder.append("<i>System Account</i>");
+		else if (emailAddress != null && emailAddress.isVerified()) 
+			builder.append("<i>@" + HtmlEscape.escapeHtml5(emailAddress.getOwner().getName()) + "</i>"); 
+		else 
+			builder.append("<i>No OneDev Account</i>");
+		
 		container.add(new Label("info", builder.toString()).setEscapeModelStrings(false));
 	}
 
