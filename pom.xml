@@ -577,7 +577,7 @@
 		<shiro.version>1.7.1</shiro.version>
 		<jgit.version>5.7.0.202003110725-r</jgit.version>
 		<flexmark.version>0.62.2</flexmark.version>
-		<groovy.version>3.0.7</groovy.version>
+		<groovy.version>3.0.10</groovy.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jackson.version>2.12.1</jackson.version>
 	</properties>
