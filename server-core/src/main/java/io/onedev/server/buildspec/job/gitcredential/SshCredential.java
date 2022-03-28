@@ -57,7 +57,14 @@ public class SshCredential implements GitCredential, Validatable {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return new SshCloneInfo(cloneUrl, build.getJobSecretAuthorizationContext().getSecretValue(keySecret), knownHosts.toString());
+		
+		knownHosts.append("\n");
+		
+		String privateKey = build.getJobSecretAuthorizationContext().getSecretValue(keySecret);
+		if (!privateKey.endsWith("\n"))
+			privateKey = privateKey + "\n";
+		
+		return new SshCloneInfo(cloneUrl, privateKey, knownHosts.toString());
 	}
 
 	@Override

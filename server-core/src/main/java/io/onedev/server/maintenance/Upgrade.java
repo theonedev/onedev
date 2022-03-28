@@ -525,6 +525,9 @@ public class Upgrade extends DefaultPersistManager {
 					"io.onedev.commons.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "wrapper.pidfile=../status/onedev.pid", "");
 			
+			if (!wrapperConf.contains("wrapper.disable_console_input")) 
+				wrapperConf += "\r\nwrapper.disable_console_input=TRUE";
+			
 			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, StandardCharsets.UTF_8);
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");

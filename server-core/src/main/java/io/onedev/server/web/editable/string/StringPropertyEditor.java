@@ -40,7 +40,14 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		Method getter = getDescriptor().getPropertyGetter();
 		if (getter.getAnnotation(Multiline.class) != null) {
 			Fragment fragment = new Fragment("content", "multiLineFrag", this);
-			fragment.add(input = new TextArea<String>("input", Model.of(getModelObject())));
+			fragment.add(input = new TextArea<String>("input", Model.of(getModelObject())) {
+
+				@Override
+				protected boolean shouldTrimInput() {
+					return false;
+				}
+				
+			});
 			input.setType(getDescriptor().getPropertyClass());
 			add(fragment);
 		} else {

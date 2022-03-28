@@ -979,7 +979,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	@Sessional
-	@Listen
+	@Listen(100000)
 	public void on(SystemStarted event) {
 		thread = new Thread(this);
 		thread.start();	
