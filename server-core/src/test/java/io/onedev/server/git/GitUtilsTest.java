@@ -7,14 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.openpgp.PGPKeyRingGenerator;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -27,11 +22,6 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.git.command.GetRawCommitCommand;
-import io.onedev.server.git.signature.SignatureVerificationKey;
-import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
-import io.onedev.server.git.signature.SignatureVerified;
-import io.onedev.server.util.GpgUtils;
 
 public class GitUtilsTest extends AbstractGitTest {
 
@@ -462,49 +452,5 @@ public class GitUtilsTest extends AbstractGitTest {
 			deleteDir(tempDir, 3);
 		}			
 	}	
-	
-	@Test
-	public void testSignature() throws Exception {
-		PGPKeyRingGenerator ringGenerator = GpgUtils.generateKeyRingGenerator("noreply@onedev.io");
-		PGPSecretKeyRing signingKey = ringGenerator.generateSecretKeyRing();
 		
-		addFileAndCommit("file", "", "first commit");
-		
-		String refName = "refs/heads/master";
-		ObjectId oldCommitId = git.getRepository().resolve(refName);
-
-		Map<String, BlobContent> newBlobs = new HashMap<>();
-		newBlobs.put("file", 
-				new BlobContent.Immutable("content".getBytes(), FileMode.REGULAR_FILE));
-		BlobEdits edits = new BlobEdits(Sets.newHashSet(), newBlobs);
-		edits.commit(git.getRepository(), refName, oldCommitId, oldCommitId, 
-				user, "\r\r\n\r\nsecond\n  \ncommit\n\r\n", signingKey);
-		
-		SignatureVerificationKeyLoader keyLoader = new SignatureVerificationKeyLoader() {
-			
-			@Override
-			public SignatureVerificationKey getSignatureVerificationKey(long keyId) {
-				return new SignatureVerificationKey() {
-					
-					@Override
-					public boolean shouldVerifyDataWriter() {
-						return false;
-					}
-					
-					@Override
-					public PGPPublicKey getPublicKey() {
-						return signingKey.getPublicKey();
-					}
-					
-				};
-			}
-			
-		};			
-		
-		GetRawCommitCommand getRawCommit = new GetRawCommitCommand(gitDir, null);
-		byte[] raw = getRawCommit.revision("master").call();
-		
-		assertTrue(GitUtils.verifyCommitSignature(raw, keyLoader) instanceof SignatureVerified);
-	}
-	
 }

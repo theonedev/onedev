@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
@@ -44,7 +45,10 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 	
 	@Override
 	public ObjectMapper get() {
-        ObjectMapper mapper = new ObjectMapper();
+		JsonMapper.Builder builder = JsonMapper.builder();
+		builder.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
+        ObjectMapper mapper = builder.build();
+        
         TypeResolverBuilder<?> typer = new StdTypeResolverBuilder() {
 
             @Override
@@ -87,7 +91,6 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);	
-		mapper.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
 		
 		for (ObjectMapperConfigurator each: configurators)
 			each.configure(mapper);
