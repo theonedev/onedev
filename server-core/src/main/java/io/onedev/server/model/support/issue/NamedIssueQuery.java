@@ -5,7 +5,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class NamedIssueQuery implements NamedQuery {
@@ -35,9 +34,8 @@ public class NamedIssueQuery implements NamedQuery {
 		this.name = name;
 	}
 
-	@Editable
+	@Editable(placeholder="All")
 	@IssueQuery(withCurrentUserCriteria = true)
-	@NameOfEmptyValue("All")
 	@Override
 	public String getQuery() {
 		return query;

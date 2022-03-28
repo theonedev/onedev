@@ -8,7 +8,6 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class IssueTemplate implements Serializable {
@@ -19,10 +18,10 @@ public class IssueTemplate implements Serializable {
 
 	private String issueDescription;
 	
-	@Editable(order=100, name="Applicable Issues", description="Optionally specify issues applicable for this template. "
+	@Editable(order=100, name="Applicable Issues", placeholder="All", 
+			description="Optionally specify issues applicable for this template. "
 			+ "Leave empty for all")
 	@io.onedev.server.web.editable.annotation.IssueQuery(withOrder = false)
-	@NameOfEmptyValue("All")
 	public String getIssueQuery() {
 		return issueQuery;
 	}

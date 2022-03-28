@@ -19,7 +19,6 @@ import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -77,12 +76,11 @@ public class GroovyScript implements Serializable {
 		return (boolean) EditContext.get().getInputValue("canBeUsedByBuildJobs");
 	}
 
-	@Editable(order=400, description="Optionally specify space-separated projects allowed to "
+	@Editable(order=400, placeholder="All", description="Optionally specify space-separated projects allowed to "
 			+ "execute this script. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. "
 			+ "Leave empty to allow all")
 	@Patterns(suggester="suggestProjects", path=true)
 	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
-	@NameOfEmptyValue("All")
 	public String getAllowedProjects() {
 		return allowedProjects;
 	}
@@ -91,12 +89,11 @@ public class GroovyScript implements Serializable {
 		this.allowedProjects = allowedProjects;
 	}
 	
-	@Editable(order=500, description="Optionally specify space-separated branches allowed to "
+	@Editable(order=500, placeholder="All", description="Optionally specify space-separated branches allowed to "
 		+ "execute this script. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 		+ "Prefix with '-' to exclude. Leave empty to allow all")
 	@Patterns(path=true)
 	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
-	@NameOfEmptyValue("All")
 	public String getAllowedBranches() {
 		return allowedBranches;
 	}

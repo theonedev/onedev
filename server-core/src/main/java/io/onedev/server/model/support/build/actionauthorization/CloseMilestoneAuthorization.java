@@ -6,7 +6,6 @@ import java.util.List;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -17,10 +16,9 @@ public class CloseMilestoneAuthorization extends ActionAuthorization {
 
 	private String milestoneNames;
 
-	@Editable(order=100, description="Specify space-separated milestone names. Use '*' or '?' for wildcard match. "
-			+ "Prefix with '-' to exclude. Leave empty to match all")
+	@Editable(order=100, placeholder="All", description="Specify space-separated milestone names. "
+			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestMilestones")
-	@NameOfEmptyValue("All")
 	public String getMilestoneNames() {
 		return milestoneNames;
 	}

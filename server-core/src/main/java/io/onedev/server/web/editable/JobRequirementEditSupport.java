@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
@@ -30,10 +31,18 @@ public class JobRequirementEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 					        String jobRequirement = model.getObject();
-					        if (jobRequirement != null)
+					        if (jobRequirement != null) {
 					        	return new Label(id, jobRequirement);
-					        else
-								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+					        } else {
+								return new EmptyValueLabel(id) {
+
+									@Override
+									protected AnnotatedElement getElement() {
+										return propertyDescriptor.getPropertyGetter();
+									}
+									
+								};
+					        }
 						}
 						
 					};

@@ -85,7 +85,6 @@ import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
@@ -159,11 +158,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.serviceLocators = serviceLocators;
 	}
 
-	@Editable(name="Kubectl Config File", order=26000, group="More Settings", description=
-			"Specify absolute path to the config file used by kubectl to access the "
-			+ "cluster. Leave empty to have kubectl determining cluster access "
-			+ "information automatically")
-	@NameOfEmptyValue("Use default")
+	@Editable(name="Kubectl Config File", order=26000, group="More Settings", 
+			placeholder="Use default", description="Specify absolute path to the config file "
+					+ "used by kubectl to access the cluster. Leave empty to have kubectl "
+					+ "determining cluster access information automatically")
 	public String getConfigFile() {
 		return configFile;
 	}
@@ -172,10 +170,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.configFile = configFile;
 	}
 
-	@Editable(name="Path to kubectl", order=27000, group="More Settings", description=
-			"Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. "
+	@Editable(name="Path to kubectl", order=27000, group="More Settings", placeholder="Use default", 
+			description="Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. "
 			+ "If left empty, OneDev will try to find the utility from system path")
-	@NameOfEmptyValue("Use default")
 	public String getKubeCtlPath() {
 		return kubeCtlPath;
 	}

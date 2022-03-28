@@ -113,7 +113,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			if (getIngressUrl() != null)
 				logger.warn("Please set up the server at " + getIngressUrl());
 			else
-				logger.warn("Please set up the server at " + guessServerUrl(false));
+				logger.warn("Please set up the server at " + guessServerUrl());
 			initStage = new InitStage("Server Setup", manualConfigs);
 			
 			initStage.waitForFinish();
@@ -155,7 +155,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		}
 	}
 	
-	public String guessServerUrl(boolean ssh) {
+	public String guessServerUrl() {
 	    Url serverUrl = null;
 	    
 		String k8sService = System.getenv("k8s_service");
@@ -183,12 +183,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			
 			String externalIp = externalIpRef.get();
 			
-			if (externalIp != null) {
-				if (ssh)
-					serverUrl = buildServerUrl(externalIp, "ssh", 22);
-				else 
-					serverUrl = buildServerUrl(externalIp, "http", 80);
-			} 			
+			if (externalIp != null) 
+				serverUrl = buildServerUrl(externalIp, "http", 80);
 		} 
 		
 		if (serverUrl == null) {
@@ -216,9 +212,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			}
 			
 			ServerConfig serverConfig = serverConfigProvider.get();
-			if (ssh) 
-				serverUrl = buildServerUrl(host, "ssh", serverConfig.getSshPort());
-			else if (serverConfig.getHttpsPort() != 0) 
+			if (serverConfig.getHttpsPort() != 0) 
                 serverUrl = buildServerUrl(host, "https", serverConfig.getHttpsPort());
 			else 
                 serverUrl = buildServerUrl(host, "http", serverConfig.getHttpPort());
@@ -232,8 +226,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 
         serverUrl.setHost(host);
         serverUrl.setProtocol(protocol);
-        if (!protocol.equals("ssh") || port != 22)
-        	serverUrl.setPort(port);
+        serverUrl.setPort(port);
        
 		return serverUrl;
 	}

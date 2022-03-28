@@ -11,7 +11,6 @@ import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable
@@ -25,11 +24,11 @@ public class ServiceLocator implements Serializable {
 	
 	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
 	
-	@Editable(order=100, name="Applicable Names", description="Optionally specify space-separated "
-			+ "service names applicable for this locator. Use '*' or '?' for wildcard match. "
-			+ "Prefix with '-' to exclude. Leave empty to match all")
+	@Editable(order=100, name="Applicable Names", placeholder="All", description=""
+			+ "Optionally specify space-separated service names applicable for this locator. "
+			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
+			+ "Leave empty to match all")
 	@Patterns
-	@NameOfEmptyValue("All")
 	public String getServiceNames() {
 		return serviceNames;
 	}
@@ -38,11 +37,11 @@ public class ServiceLocator implements Serializable {
 		this.serviceNames = serviceNames;
 	}
 	
-	@Editable(order=200, name="Applicable Images", description="Optionally specify space-separated "
-			+ "service images applicable for this locator. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+	@Editable(order=200, name="Applicable Images", placeholder="All", description=""
+			+ "Optionally specify space-separated service images applicable for this locator. "
+			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(path=true)
-	@NameOfEmptyValue("All")
 	public String getServiceImages() {
 		return serviceImages;
 	}

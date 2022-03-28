@@ -1,10 +1,7 @@
 package io.onedev.server.web.editable.workingperiod;
 
-import java.lang.reflect.Method;
-
 import javax.validation.ValidationException;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
@@ -14,11 +11,8 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
 public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
@@ -50,15 +44,7 @@ public class WorkingPeriodPropertyEditor extends PropertyEditor<Integer> {
 			}
 			
 		});
-		
-		Method getter = getDescriptor().getPropertyGetter();
-		if (getter.getAnnotation(OmitName.class) != null) {
-			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(getter)));
-		} else {
-			NameOfEmptyValue nameOfEmptyValue = getter.getAnnotation(NameOfEmptyValue.class);
-			if (nameOfEmptyValue != null)
-				input.add(AttributeModifier.replace("placeholder", nameOfEmptyValue.value()));
-		}
+		input.add(newPlaceholderModifier());
 	}
 
 	@Override

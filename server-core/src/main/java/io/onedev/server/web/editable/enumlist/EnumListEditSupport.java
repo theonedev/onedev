@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.enumlist;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -41,7 +42,14 @@ public class EnumListEditSupport implements EditSupport {
 						            }
 						            return new Label(id, content);
 						        } else { 
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							

@@ -28,7 +28,6 @@ import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.JobRequirement;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @ExtensionPoint
 @Editable
@@ -63,11 +62,10 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=10000, name="Job Requirement", description="Optionally specify job requirement of this executor. "
-			+ "Only satisfied jobs can use this executor")
+	@Editable(order=10000, name="Job Requirement", placeholder="Can be used by any jobs", 
+			description="Optionally specify job requirement of this executor. Only satisfied jobs can use this executor")
 	@JobRequirement
 	@Nullable
-	@NameOfEmptyValue("Can be used by any jobs")
 	public String getJobRequirement() {
 		return jobRequirement;
 	}

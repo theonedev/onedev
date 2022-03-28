@@ -11,7 +11,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable
@@ -23,11 +22,11 @@ public class ProjectDesignation implements Serializable {
 	
 	private String project;
 
-	@Editable(order=100, name="Applicable Senders", description="Specify space-separated sender "
-			+ "email addresses applicable for this entry. Use '*' or '?' for wildcard match. "
-			+ "Prefix with '-' to exclude. Leave empty to match all senders")
+	@Editable(order=100, name="Applicable Senders", placeholder="Any sender", description=""
+			+ "Specify space-separated sender email addresses applicable for this entry. "
+			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
+			+ "Leave empty to match all senders")
 	@Patterns
-	@NameOfEmptyValue("Any sender")
 	public String getSenderEmails() {
 		return senderEmails;
 	}

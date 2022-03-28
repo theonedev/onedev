@@ -80,7 +80,6 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
@@ -122,9 +121,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.runOptions = runOptions;
 	}
 
-	@Editable(order=50100, group="More Settings", description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
+	@Editable(order=50100, group="More Settings", placeholder="Use default", description=""
+			+ "Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
 			+ "Leave empty to use docker executable in PATH")
-	@NameOfEmptyValue("Use default")
 	public String getDockerExecutable() {
 		return dockerExecutable;
 	}

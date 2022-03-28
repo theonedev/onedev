@@ -10,7 +10,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class LinkSpecOpposite implements Serializable {
@@ -45,10 +44,9 @@ public class LinkSpecOpposite implements Serializable {
 		this.multiple = multiple;
 	}
 
-	@Editable(order=300, name="Linkable Issues On the Other Side", description="Optionally specify criteria of "
-			+ "issues which can be linked on the other side")
+	@Editable(order=300, name="Linkable Issues On the Other Side", placeholder="All issues", 
+			description="Optionally specify criteria of issues which can be linked on the other side")
 	@io.onedev.server.web.editable.annotation.IssueQuery
-	@NameOfEmptyValue("All issues")
 	public String getIssueQuery() {
 		return issueQuery;
 	}

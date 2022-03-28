@@ -44,7 +44,7 @@ import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage;
-import io.onedev.server.web.page.admin.sshsetting.SshSettingPage;
+import io.onedev.server.web.page.admin.sshserverkey.SshServerKeyPage;
 import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
@@ -54,10 +54,11 @@ import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage
 import io.onedev.server.web.page.admin.user.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.admin.user.emailaddresses.UserEmailAddressesPage;
+import io.onedev.server.web.page.admin.user.gpgkeys.UserGpgKeysPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
-import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
+import io.onedev.server.web.page.admin.user.sshkeys.UserSshKeysPage;
 import io.onedev.server.web.page.admin.user.twofactorauthentication.UserTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
@@ -237,6 +238,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/users/${user}/avatar", UserAvatarPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/password", UserPasswordPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/ssh-keys", UserSshKeysPage.class));
+		add(new DynamicPathPageMapper("administration/users/${user}/gpg-keys", UserGpgKeysPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/access-token", UserAccessTokenPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/two-factor-authentication", UserTwoFactorAuthenticationPage.class));
 		
@@ -263,7 +265,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/settings/security", SecuritySettingPage.class));
 		add(new DynamicPathPageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 		add(new DynamicPathPageMapper("administration/settings/sso-connectors", SsoConnectorListPage.class));
-		add(new DynamicPathPageMapper("administration/settings/ssh", SshSettingPage.class));
+		add(new DynamicPathPageMapper("administration/settings/ssh-server-key", SshServerKeyPage.class));
  		add(new DynamicPathPageMapper("administration/settings/gpg-signing-key", GpgSigningKeyPage.class));
  		add(new DynamicPathPageMapper("administration/settings/gpg-trusted-keys", GpgTrustedKeysPage.class));
 

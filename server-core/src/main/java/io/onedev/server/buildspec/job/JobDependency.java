@@ -17,7 +17,6 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -70,13 +69,13 @@ public class JobDependency implements Serializable {
 		this.jobParams = jobParams;
 	}
 	
-	@Editable(order=300, name="Artifacts to Retrieve", description="Optionally specify artifacts to retrieve "
-			+ "from the dependency into <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>. "
+	@Editable(order=300, name="Artifacts to Retrieve", placeholder="Do not retrieve", description=""
+			+ "Optionally specify artifacts to retrieve from the dependency into "
+			+ "<a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>. "
 			+ "Only published artifacts (via artifact publish step) can be retrieved. Leave empty to not "
 			+ "retrieve any artifacts")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
-	@NameOfEmptyValue("Do not retrieve")
 	public String getArtifacts() {
 		return artifacts;
 	}

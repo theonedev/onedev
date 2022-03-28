@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.password;
 
+import java.lang.reflect.AnnotatedElement;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -32,7 +34,14 @@ public class PasswordEditSupport implements EditSupport {
 									if (model.getObject() != null) {
 										return new Label(id, "******");
 									} else {
-										return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+										return new EmptyValueLabel(id) {
+
+											@Override
+											protected AnnotatedElement getElement() {
+												return propertyDescriptor.getPropertyGetter();
+											}
+											
+										};
 									}
 								}
 								
@@ -57,7 +66,14 @@ public class PasswordEditSupport implements EditSupport {
 									if (model.getObject() != null) {
 										return new Label(id, "******");
 									} else {
-										return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+										return new EmptyValueLabel(id) {
+
+											@Override
+											protected AnnotatedElement getElement() {
+												return propertyDescriptor.getPropertyGetter();
+											}
+											
+										};
 									}
 								}
 								

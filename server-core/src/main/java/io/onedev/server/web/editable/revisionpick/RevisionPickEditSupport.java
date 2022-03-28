@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.revisionpick;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
@@ -30,10 +31,18 @@ public class RevisionPickEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) 
+								if (model.getObject() != null) {
 						            return new Label(id, model.getObject());
-						        else 
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								} else { 
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
+								}
 							}
 							
 						};

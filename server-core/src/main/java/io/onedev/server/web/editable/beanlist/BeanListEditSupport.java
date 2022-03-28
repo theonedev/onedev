@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.beanlist;
 
 import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -36,7 +37,14 @@ public class BeanListEditSupport implements EditSupport {
 								if (model.getObject() != null) {
 									return new BeanListPropertyViewer(id, propertyDescriptor, model.getObject());
 								} else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 								}
 							}
 							

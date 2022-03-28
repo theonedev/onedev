@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.buildspec.step;
 
 import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -34,7 +35,14 @@ public class StepListEditSupport implements EditSupport {
 								if (model.getObject() != null) {
 									return new StepListViewPanel(id, model.getObject());
 								} else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 								}
 							}
 							

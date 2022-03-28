@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.issue.choice;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
@@ -47,7 +48,14 @@ public class IssueChoiceEditSupport implements EditSupport {
 										return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
 									}
 								} else { 
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 								}
 							}
 							

@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import io.onedev.server.model.support.inputspec.textinput.TextInput;
 import io.onedev.server.model.support.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=100, name=ParamSpec.TEXT)
 public class TextParam extends ParamSpec {
@@ -40,8 +39,7 @@ public class TextParam extends ParamSpec {
 		this.pattern = pattern;
 	}
 
-	@Editable(order=1200, name="Default Value")
-	@NameOfEmptyValue("No default value")
+	@Editable(order=1200, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;

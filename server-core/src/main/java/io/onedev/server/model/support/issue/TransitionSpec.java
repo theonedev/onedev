@@ -32,7 +32,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class TransitionSpec implements Serializable {
@@ -79,9 +78,9 @@ public class TransitionSpec implements Serializable {
 		this.trigger = trigger;
 	}
 	
-	@Editable(order=1000, description="Optionally select fields to remove when this transition happens")
+	@Editable(order=1000, placeholder="No fields to remove", description=""
+			+ "Optionally select fields to remove when this transition happens")
 	@ChoiceProvider("getFieldChoices")
-	@NameOfEmptyValue("No fields to remove")
 	public List<String> getRemoveFields() {
 		return removeFields;
 	}

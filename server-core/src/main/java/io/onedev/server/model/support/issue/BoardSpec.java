@@ -40,7 +40,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateReso
 import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class BoardSpec implements Serializable {
@@ -75,9 +74,9 @@ public class BoardSpec implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Optionally specify a base query to filter/order issues of the board")
+	@Editable(order=200, placeholder="Not specified", description="Optionally specify a base query to "
+			+ "filter/order issues of the board")
 	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true)
-	@NameOfEmptyValue("Not specified")
 	@Nullable
 	public String getBaseQuery() {
 		return baseQuery;
@@ -87,10 +86,9 @@ public class BoardSpec implements Serializable {
 		this.baseQuery = baseQuery;
 	}
 
-	@Editable(order=250, description="Optionally specify a base query to filter/order issues in backlog. "
+	@Editable(order=250, placeholder="Not specified", description="Optionally specify a base query to filter/order issues in backlog. "
 			+ "Backlog issues are those not associating with any milestones")
 	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true)
-	@NameOfEmptyValue("Not specified")
 	@Nullable
 	public String getBacklogBaseQuery() {
 		return backlogBaseQuery;
@@ -149,9 +147,8 @@ public class BoardSpec implements Serializable {
 		return displayColumns;
 	}
 
-	@Editable(order=500, description="Specify fields to display in board card")
+	@Editable(order=500, placeholder="Not displaying any fields", description="Specify fields to display in board card")
 	@ChoiceProvider("getDisplayFieldChoices")
-	@NameOfEmptyValue("Not displaying any fields")
 	public List<String> getDisplayFields() {
 		return displayFields;
 	}
@@ -160,9 +157,8 @@ public class BoardSpec implements Serializable {
 		this.displayFields = displayFields;
 	}
 	
-	@Editable(order=600, description="Specify links to display in board card")
+	@Editable(order=600, placeholder="Not displaying any links", description="Specify links to display in board card")
 	@ChoiceProvider("getDisplayLinkChoices")
-	@NameOfEmptyValue("Not displaying any links")
 	public List<String> getDisplayLinks() {
 		return displayLinks;
 	}

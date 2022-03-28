@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.string;
 
+import java.lang.reflect.AnnotatedElement;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.unbescape.html.HtmlEscape;
@@ -20,10 +22,18 @@ public class StringPropertyViewer extends PropertyViewer {
 
 	@Override
 	protected Component newContent(String id, PropertyDescriptor descriptor) {
-		if (value != null) 
+		if (value != null) {
 			return new Label(id, "<pre class='mb-0'>" + HtmlEscape.escapeHtml5(value) + "</pre>").setEscapeModelStrings(false);
-		else 
-			return new EmptyValueLabel(id, descriptor.getPropertyGetter());
+		} else { 
+			return new EmptyValueLabel(id) {
+
+				@Override
+				protected AnnotatedElement getElement() {
+					return descriptor.getPropertyGetter();
+				}
+				
+			};
+		}
 	}
 
 }

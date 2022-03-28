@@ -14,7 +14,6 @@ import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.validation.annotation.ParamName;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
@@ -35,8 +34,7 @@ public abstract class ParamSpec extends InputSpec {
 		super.setName(name);
 	}
 
-	@Editable(order=30, description="Optionally describes the param")
-	@NameOfEmptyValue("No description")
+	@Editable(order=30, placeholder="No description", description="Optionally describes the param")
 	@Override
 	public String getDescription() {
 		return super.getDescription();
@@ -58,8 +56,8 @@ public abstract class ParamSpec extends InputSpec {
 		super.setAllowMultiple(allowMultiple);
 	}
 
-	@Editable(order=40, name="Show Conditionally", description="Enable if visibility of this param depends on other params")
-	@NameOfEmptyValue("Always")
+	@Editable(order=40, name="Show Conditionally", placeholder="Always", 
+			description="Enable if visibility of this param depends on other params")
 	@Valid
 	@Override
 	public ShowCondition getShowCondition() {

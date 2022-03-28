@@ -7,7 +7,6 @@ import java.util.List;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -18,12 +17,11 @@ public abstract class ActionAuthorization implements Serializable {
 
 	private String authorizedBranches;
 
-	@Editable(order=1000, description="Action is allowed only if build runs on "
+	@Editable(order=1000, placeholder="All", description="Action is allowed only if build runs on "
 			+ "specified branches. Multiple branches should be separated with space. "
 			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestBranches", path=true)
-	@NameOfEmptyValue("All")
 	public String getAuthorizedBranches() {
 		return authorizedBranches;
 	}

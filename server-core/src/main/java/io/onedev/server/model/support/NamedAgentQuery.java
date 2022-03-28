@@ -4,7 +4,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.AgentQuery;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class NamedAgentQuery implements NamedQuery {
@@ -34,9 +33,8 @@ public class NamedAgentQuery implements NamedQuery {
 		this.name = name;
 	}
 
-	@Editable
+	@Editable(placeholder="All")
 	@AgentQuery(forExecutor=false)
-	@NameOfEmptyValue("All")
 	@Override
 	public String getQuery() {
 		return query;

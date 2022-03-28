@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.scriptchoice;
 
+import java.lang.reflect.AnnotatedElement;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -31,7 +33,14 @@ public class ScriptChoiceEditSupport implements EditSupport {
 								if (model.getObject() != null) {
 									return new Label(id, model.getObject());
 								} else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 								}
 							}
 							

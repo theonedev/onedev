@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
@@ -33,7 +34,14 @@ public class ActionConditionEditSupport implements EditSupport {
 					        if (condition != null) {
 					        	return new Label(id, condition);
 					        } else {
-								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								return new EmptyValueLabel(id) {
+
+									@Override
+									protected AnnotatedElement getElement() {
+										return propertyDescriptor.getPropertyGetter();
+									}
+									
+								};
 					        }
 						}
 						

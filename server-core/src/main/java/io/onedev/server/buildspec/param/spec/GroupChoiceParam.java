@@ -11,7 +11,6 @@ import io.onedev.server.model.support.inputspec.groupchoiceinput.choiceprovider.
 import io.onedev.server.model.support.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.inputspec.groupchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=160, name=ParamSpec.GROUP)
 public class GroupChoiceParam extends ParamSpec {
@@ -33,8 +32,7 @@ public class GroupChoiceParam extends ParamSpec {
 		this.choiceProvider = choiceProvider;
 	}
 
-	@Editable(order=1100, name="Default Value")
-	@NameOfEmptyValue("No default value")
+	@Editable(order=1100, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;

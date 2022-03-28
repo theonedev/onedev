@@ -48,7 +48,7 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 
 	private static final long serialVersionUID = 1L;
 
-	private final Settings settings = new Settings();
+	private final Settings settings = new Settings(this);
 
 	private ChoiceProvider<T> provider;
 

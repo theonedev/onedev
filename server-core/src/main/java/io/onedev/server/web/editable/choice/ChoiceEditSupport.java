@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.choice;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -33,7 +34,14 @@ public class ChoiceEditSupport implements EditSupport {
 								if (model.getObject() != null) {
 									return new Label(id, model.getObject());
 								} else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 								}
 							}
 							
@@ -66,7 +74,14 @@ public class ChoiceEditSupport implements EditSupport {
 						            }
 						            return new Label(id, content);
 						        } else { 
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							

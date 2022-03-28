@@ -139,4 +139,5 @@ public class BeanViewer extends Panel {
 		}
 
 	}
+	
 }

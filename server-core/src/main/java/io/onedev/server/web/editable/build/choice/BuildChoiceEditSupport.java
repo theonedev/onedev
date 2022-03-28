@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.build.choice;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,14 @@ public class BuildChoiceEditSupport implements EditSupport {
 						        	}
 						        	return new Label(id, StringUtils.join(buildNumbers, ", ")).setEscapeModelStrings(false);
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							
@@ -83,7 +91,14 @@ public class BuildChoiceEditSupport implements EditSupport {
 									else 
 										return new Label(id, "<i>Not Found</i>").setEscapeModelStrings(false);
 								} else { 
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 								}
 							}
 							

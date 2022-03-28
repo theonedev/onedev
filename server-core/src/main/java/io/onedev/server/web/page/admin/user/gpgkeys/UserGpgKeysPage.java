@@ -1,6 +1,5 @@
-package io.onedev.server.web.page.my.sshkeys;
+package io.onedev.server.web.page.admin.user.gpgkeys;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -9,20 +8,20 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.model.SshKey;
+import io.onedev.server.model.GpgKey;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.sshkey.InsertSshKeyPanel;
-import io.onedev.server.web.component.user.sshkey.SshKeyListPanel;
-import io.onedev.server.web.page.my.MyPage;
+import io.onedev.server.web.component.user.gpgkey.GpgKeyListPanel;
+import io.onedev.server.web.component.user.gpgkey.InsertGpgKeyPanel;
+import io.onedev.server.web.page.admin.user.UserPage;
 
 @SuppressWarnings("serial")
-public class MySshKeysPage extends MyPage {
+public class UserGpgKeysPage extends UserPage {
 	
-	private SshKeyListPanel keyList;
+	private GpgKeyListPanel keyList;
 	
-	public MySshKeysPage(PageParameters params) {
+	public UserGpgKeysPage(PageParameters params) {
 		super(params);
 	}
 
@@ -30,16 +29,6 @@ public class MySshKeysPage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-        add(new Label("sshKeyNote", "Your SSH keys are managed from " + getLoginUser().getAuthSource()) {
-        	
-        	@Override
-        	protected void onConfigure() {
-        		super.onConfigure();
-        		setVisible(getLoginUser().isSshKeyExternalManaged());
-        	}
-        	
-        });
-        
 		add(new ModalLink("newKey") {
             
             @Override
@@ -49,7 +38,7 @@ public class MySshKeysPage extends MyPage {
 
 			@Override
             protected Component newContent(String id, ModalPanel modal) {
-                return new InsertSshKeyPanel(id) {
+                return new InsertGpgKeyPanel(id) {
 
                     @Override
                     protected void onSave(AjaxRequestTarget target) {
@@ -59,7 +48,7 @@ public class MySshKeysPage extends MyPage {
 
 					@Override
 					protected User getUser() {
-						return getLoginUser();
+						return UserGpgKeysPage.this.getUser();
 					}
 
 					@Override
@@ -70,18 +59,13 @@ public class MySshKeysPage extends MyPage {
 				};
             }
             
-            @Override
-            protected void onConfigure() {
-            	super.onConfigure();
-            	setVisible(!getLoginUser().isSshKeyExternalManaged());
-            }
 		});
             
-		keyList = new SshKeyListPanel("keyList", new LoadableDetachableModel<List<SshKey>>() {
+		keyList = new GpgKeyListPanel("keyList", new LoadableDetachableModel<List<GpgKey>>() {
 			
 		    @Override
-		    protected List<SshKey> load() {
-		        return new ArrayList<>(getLoginUser().getSshKeys());
+		    protected List<GpgKey> load() {
+		    	return getUser().getGpgKeys();
 		    }
 		    
 		});
@@ -91,7 +75,7 @@ public class MySshKeysPage extends MyPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "My SSH Keys");
+		return new Label(componentId, "User GPG Keys");
 	}
 	
 }

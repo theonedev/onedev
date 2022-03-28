@@ -6,7 +6,6 @@ import java.util.List;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -17,10 +16,10 @@ public class CreateTagAuthorization extends ActionAuthorization {
 
 	private String tagNames;
 
-	@Editable(order=100, description="Specify space-separated tag names. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+	@Editable(order=100, placeholder="All", description="Specify space-separated tag names. "
+			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestTags", path=true)
-	@NameOfEmptyValue("All")
 	public String getTagNames() {
 		return tagNames;
 	}

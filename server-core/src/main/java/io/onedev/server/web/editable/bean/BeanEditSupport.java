@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.bean;
 
 import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,7 +44,14 @@ public class BeanEditSupport implements EditSupport {
 								}
 								return BeanContext.view(id, model.getObject(), excludedProperties, true);
 							} else {
-								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								return new EmptyValueLabel(id) {
+
+									@Override
+									protected AnnotatedElement getElement() {
+										return propertyDescriptor.getPropertyGetter();
+									}
+									
+								};
 							}
 						}
 						

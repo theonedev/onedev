@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import io.onedev.server.model.support.inputspec.integerinput.IntegerInput;
 import io.onedev.server.model.support.inputspec.integerinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=400, name=ParamSpec.INTEGER)
 public class IntegerParam extends ParamSpec {
@@ -39,8 +38,7 @@ public class IntegerParam extends ParamSpec {
 		this.maxValue = maxValue;
 	}
 
-	@Editable(order=1200, name="Default Value")
-	@NameOfEmptyValue("No default value")
+	@Editable(order=1200, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;

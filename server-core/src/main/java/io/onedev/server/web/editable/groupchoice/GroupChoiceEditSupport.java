@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.groupchoice;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
@@ -38,7 +39,14 @@ public class GroupChoiceEditSupport implements EditSupport {
 						        if (teamNames != null && !teamNames.isEmpty()) {
 						            return new Label(id, StringUtils.join(teamNames, ", " ));
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							
@@ -64,7 +72,14 @@ public class GroupChoiceEditSupport implements EditSupport {
 						        if (teamName != null) {
 						            return new Label(id, teamName);
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							

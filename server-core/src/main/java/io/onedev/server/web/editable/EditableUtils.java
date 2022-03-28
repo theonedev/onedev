@@ -134,6 +134,26 @@ public class EditableUtils {
 		}
 	}
 
+	@Nullable
+	public static String getPlaceholder(AnnotatedElement element) {
+		Editable editable = element.getAnnotation(Editable.class);
+		String placeholder = editable.placeholder();
+		if (placeholder.length() != 0) {
+			return placeholder;
+		} else if (editable.placeholderProvider().length() != 0) {
+			Class<?> clazz;
+			if (element instanceof Class) 
+				clazz = (Class<?>) element;
+			else if (element instanceof Method)
+				clazz = ((Method) element).getDeclaringClass();
+			else 
+				throw new RuntimeException("Unexpected element type: " + element);
+			return (String) ReflectionUtils.invokeStaticMethod(clazz, editable.placeholderProvider());
+		} else {
+			return null;
+		}
+	}
+	
 	/**
 	 * Get display order parameter defined in {@link Editable} annotation of specified element.
 	 * 

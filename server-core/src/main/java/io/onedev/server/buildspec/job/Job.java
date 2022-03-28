@@ -7,8 +7,8 @@ import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
 import static io.onedev.server.model.Build.NAME_TAG;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.InPipelineOf;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -60,7 +60,6 @@ import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.RetryCondition;
 import io.onedev.server.web.editable.annotation.SuggestionProvider;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -146,10 +145,9 @@ public class Job implements NamedElement, Serializable, Validatable {
 		return new ArrayList<>();
 	}
 
-	@Editable(order=200, description="Optionally specify executor to execute this job. Leave empty to "
-			+ "use any executor as long as its job requirement is satisfied")
+	@Editable(order=200, placeholder="Use Any Applicable Executor", description="Optionally specify executor "
+			+ "to execute this job. Leave empty to use any executor as long as its job requirement is satisfied")
 	@Interpolative(literalSuggester="suggestJobExecutors", variableSuggester="suggestVariables")
-	@NameOfEmptyValue("Use Any Applicable Executor")
 	public String getJobExecutor() {
 		return jobExecutor;
 	}
@@ -229,11 +227,11 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.projectDependencies = projectDependencies;
 	}
 
-	@Editable(order=9114, group="Dependencies & Services", description="Optionally specify services required by this job. "
+	@Editable(order=9114, group="Dependencies & Services", placeholder="No required services", 
+			description="Optionally specify services required by this job. "
 			+ "<b class='text-warning'>NOTE:</b> Services are only supported by docker aware executors "
 			+ "(server docker executor, remote docker executor, or kubernetes executor)")
 	@ChoiceProvider("getServiceChoices")
-	@NameOfEmptyValue("No required services")
 	public List<String> getRequiredServices() {
 		return requiredServices;
 	}

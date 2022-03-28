@@ -11,7 +11,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.validation.annotation.SecretName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -48,13 +47,12 @@ public class JobSecret implements Serializable {
 		this.value = value;
 	}
 
-	@Editable(order=300, description=""
+	@Editable(order=300, placeholder="All", description=""
 			+ "Optionally specify space-separated branches to authorize.\n"
 			+ "Only builds from authorized branches can access this secret.\n"
 			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to authorize all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
-	@NameOfEmptyValue("All")
 	public String getAuthorizedBranches() {
 		return authorizedBranches;
 	}

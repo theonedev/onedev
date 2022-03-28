@@ -27,6 +27,7 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
@@ -38,7 +39,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.ValueEditor;
 import io.onedev.server.web.editable.annotation.ExcludedProperties;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
@@ -147,11 +147,16 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 			@Override
 			protected String getNullValidDisplayValue() {
-				NameOfEmptyValue nameOfEmptyValue = getDescriptor().getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
-				if (nameOfEmptyValue != null)
-					return nameOfEmptyValue.value();
-				else
-					return super.getNullValidDisplayValue();
+				ComponentContext.push(new ComponentContext(PolymorphicPropertyEditor.this));
+				try {
+					String placeholder = EditableUtils.getPlaceholder(getDescriptor().getPropertyGetter());
+					if (placeholder != null)
+						return placeholder;
+					else
+						return super.getNullValidDisplayValue();
+				} finally {
+					ComponentContext.pop();
+				}
 			}
 			
 		};

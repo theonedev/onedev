@@ -31,7 +31,6 @@ import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.JobChoice;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -135,10 +134,9 @@ public class BranchProtection implements Serializable {
 		this.signatureRequired = signatureRequired;
 	}
 
-	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "
-			+ "specified branch")
+	@Editable(order=400, name="Required Reviewers", placeholder="No one", description="Optionally specify "
+			+ "required reviewers for changes of specified branch")
 	@io.onedev.server.web.editable.annotation.ReviewRequirement
-	@NameOfEmptyValue("No one")
 	public String getReviewRequirement() {
 		return reviewRequirement;
 	}
@@ -158,9 +156,8 @@ public class BranchProtection implements Serializable {
 		reviewRequirement = parsedReviewRequirement.toString();
 	}
 	
-	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
+	@Editable(order=500, name="Required Builds", placeholder="No any", description="Optionally choose required builds")
 	@JobChoice(tagsMode=true)
-	@NameOfEmptyValue("No any")
 	public List<String> getJobNames() {
 		return jobNames;
 	}

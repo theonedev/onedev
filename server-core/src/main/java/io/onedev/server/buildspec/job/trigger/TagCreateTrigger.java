@@ -15,7 +15,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -28,11 +27,11 @@ public class TagCreateTrigger extends JobTrigger {
 	
 	private String branches;
 	
-	@Editable(name="Tags", order=100, description="Optionally specify space-separated tags to check. "
-			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+	@Editable(name="Tags", order=100, placeholder="Any tag", description=""
+			+ "Optionally specify space-separated tags to check. Use '**', '*' or '?' for "
+			+ "<a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all tags")
 	@Patterns(suggester="suggestTags", path=true)
-	@NameOfEmptyValue("Any tag")
 	public String getTags() {
 		return tags;
 	}
@@ -46,12 +45,12 @@ public class TagCreateTrigger extends JobTrigger {
 		return SuggestionUtils.suggestTags(Project.get(), matchWith);
 	}
 
-	@Editable(name="On Branches", order=200, description="This trigger will only be applicable "
-			+ "if tagged commit is on branches specified here. Multiple branches should be "
-			+ "separated with spaces. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+	@Editable(name="On Branches", order=200, placeholder="Any branch", description=""
+			+ "This trigger will only be applicable if tagged commit is on branches specified here. "
+			+ "Multiple branches should be separated with spaces. Use '**', '*' or '?' for "
+			+ "<a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all branches")
 	@Patterns(suggester="suggestBranches", path=true)
-	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;
 	}

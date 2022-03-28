@@ -6,7 +6,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Color;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class StateSpec implements Serializable {
@@ -29,8 +28,7 @@ public class StateSpec implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200)
-	@NameOfEmptyValue("No description")
+	@Editable(order=200, placeholder="No description")
 	public String getDescription() {
 		return description;
 	}

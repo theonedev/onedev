@@ -16,7 +16,6 @@ import io.onedev.server.model.support.inputspec.userchoiceinput.defaultmultivalu
 import io.onedev.server.model.support.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Editable(order=150, name=ParamSpec.USER)
@@ -41,9 +40,8 @@ public class UserChoiceParam extends ParamSpec {
 		this.choiceProvider = choiceProvider;
 	}
 
-	@Editable(order=1100, name="Default Value")
+	@Editable(order=1100, name="Default Value", placeholder="No default value")
 	@ShowCondition("isDefaultValueProviderVisible")
-	@NameOfEmptyValue("No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;
@@ -59,8 +57,7 @@ public class UserChoiceParam extends ParamSpec {
 	}
 	
 	@ShowCondition("isDefaultMultiValueProviderVisible")
-	@Editable(order=1100, name="Default Value")
-	@NameOfEmptyValue("No default value")
+	@Editable(order=1100, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultMultiValueProvider getDefaultMultiValueProvider() {
 		return defaultMultiValueProvider;

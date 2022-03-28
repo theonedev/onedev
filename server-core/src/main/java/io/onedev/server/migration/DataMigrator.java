@@ -3803,8 +3803,19 @@ public class DataMigrator {
 		Map<String, String> gitEmails = new HashMap<>();
 		Map<String, String> alternateEmails = new HashMap<>();
 		
+		String sshServerUrl = null;
+		
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Users.xml")) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					for (Element branchProtectionElement: element.element("branchProtections").elements()) 
+						branchProtectionElement.addElement("signatureRequired").setText("false");
+					for (Element tagProtectionElement: element.element("tagProtections").elements()) 
+						tagProtectionElement.addElement("signatureRequired").setText("false");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) { 
 					String userId = element.elementText("id").trim();
@@ -3859,10 +3870,18 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) { 
-					if (element.elementTextTrim("key").equals("SECURITY")) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SECURITY")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) 
 							valueElement.addElement("enforce2FA").setText("false");
+					} else if (key.equals("SSH")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element sshServerUrlElement = valueElement.element("serverUrl");
+							sshServerUrl = sshServerUrlElement.getText().trim();
+							sshServerUrlElement.detach();
+						}
 					}
 				}
 				dom.writeToFile(file, false);
@@ -3871,6 +3890,22 @@ public class DataMigrator {
 				for (Element element: dom.getRootElement().elements()) 
 					element.addElement("enforce2FA").setText("false");
 				dom.writeToFile(file, false);
+			}
+		}
+
+		if (sshServerUrl != null) {
+			for (File file: dataDir.listFiles()) {
+				if (file.getName().startsWith("Settings.xml")) {
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) { 
+						if (element.elementTextTrim("key").equals("SYSTEM")) {
+							Element valueElement = element.element("value");
+							if (valueElement != null) 
+								valueElement.addElement("sshRootUrl").setText(sshServerUrl);
+						}
+					}
+					dom.writeToFile(file, false);
+				}
 			}
 		}
 		

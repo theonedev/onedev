@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import io.onedev.server.web.editable.annotation.BuildQuery;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class BuildPreservation implements Serializable {
@@ -15,9 +14,8 @@ public class BuildPreservation implements Serializable {
 	
 	private Integer count;
 
-	@Editable(order=100, description="Specify the condition preserved builds must match")
+	@Editable(order=100, placeholder="All", description="Specify the condition preserved builds must match")
 	@BuildQuery(withOrder = false)
-	@NameOfEmptyValue("All")
 	public String getCondition() {
 		return condition;
 	}
@@ -26,8 +24,7 @@ public class BuildPreservation implements Serializable {
 		this.condition = condition;
 	}
 
-	@Editable(order=200, description="Number of builds to preserve")
-	@NameOfEmptyValue("Unlimited")
+	@Editable(order=200, placeholder="Unlimited", description="Number of builds to preserve")
 	public Integer getCount() {
 		return count;
 	}

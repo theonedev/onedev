@@ -73,7 +73,7 @@ import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage;
-import io.onedev.server.web.page.admin.sshsetting.SshSettingPage;
+import io.onedev.server.web.page.admin.sshserverkey.SshServerKeyPage;
 import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
@@ -128,6 +128,8 @@ public abstract class LayoutPage extends BasePage {
 					List<SidebarMenuItem> administrationMenuItems = new ArrayList<>();
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "System Setting", 
 							SystemSettingPage.class, new PageParameters()));
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Security Setting", 
+							SecuritySettingPage.class, new PageParameters()));
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "User Management", UserListPage.class, 
 							new PageParameters(), Lists.newArrayList(NewUserPage.class, UserPage.class)));
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Role Management", RoleListPage.class, 
@@ -135,21 +137,23 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Group Management", GroupListPage.class, 
 							new PageParameters(), Lists.newArrayList(NewGroupPage.class, GroupPage.class)));
 					
-					List<SidebarMenuItem> securitySettingMenuItems = new ArrayList<>();
-					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "General Setting", 
-							SecuritySettingPage.class, new PageParameters()));
-					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "External Authentication", 
+					List<SidebarMenuItem> authenticationMenuItems = new ArrayList<>();
+					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "External Authentication", 
 							AuthenticatorPage.class, new PageParameters()));
-					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "Single Sign On", 
+					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "Single Sign On", 
 							SsoConnectorListPage.class, new PageParameters()));
-					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "SSH Server Key", 
-							SshSettingPage.class, new PageParameters()));
-					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "GPG Signing Key", 
+					
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Authentication Source", authenticationMenuItems));
+					
+					List<SidebarMenuItem> keyManagementMenuItems = new ArrayList<>();
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "SSH Server Key", 
+							SshServerKeyPage.class, new PageParameters()));
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Signing Key", 
 							GpgSigningKeyPage.class, new PageParameters()));
-					securitySettingMenuItems.add(new SidebarMenuItem.Page(null, "GPG Trusted Keys", 
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Trusted Keys", 
 							GpgTrustedKeysPage.class, new PageParameters()));
 					
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Security Setting", securitySettingMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "SSH & GPG Keys", keyManagementMenuItems));
 					
 					List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Custom Fields", 

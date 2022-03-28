@@ -207,8 +207,6 @@ public class Project extends AbstractEntity {
 	
 	public static final String PROP_SERVICE_DESK_NAME = "serviceDeskName";
 	
-	public static final String PROP_GIT_SIGN_STRATEGY = "gitSignStrategy";
-	
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
 	public static final List<String> QUERY_FIELDS = 

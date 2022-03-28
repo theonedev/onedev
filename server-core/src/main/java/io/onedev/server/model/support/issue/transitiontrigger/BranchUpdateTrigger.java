@@ -8,7 +8,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -24,11 +23,10 @@ public class BranchUpdateTrigger extends TransitionTrigger {
 				.getRuleName(IssueQueryLexer.FixedInCurrentCommit));		
 	}
 	
-	@Editable(order=200, name="Applicable Branches", description="Optionally specify space-separated branches "
+	@Editable(order=200, name="Applicable Branches", placeholder="Any branch", description="Optionally specify space-separated branches "
 			+ "applicable for this trigger. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestBranches", path=true)
-	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;
 	}
@@ -46,9 +44,9 @@ public class BranchUpdateTrigger extends TransitionTrigger {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
+	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify issues applicable "
+			+ "for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentCommitCriteria = true)
-	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {
 		return super.getIssueQuery();

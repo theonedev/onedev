@@ -15,6 +15,10 @@ public @interface Editable {
 	
 	String name() default "";
 	
+	String placeholder() default "";
+	
+	String placeholderProvider() default "";
+	
 	int order() default 0;
 	
 	String description() default "";

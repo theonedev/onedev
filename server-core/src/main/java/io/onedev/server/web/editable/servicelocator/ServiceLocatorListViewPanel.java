@@ -32,7 +32,6 @@ import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
 import io.onedev.server.web.component.offcanvas.OffCanvasPanel.Placement;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EmptyValueLabel;
 
 @SuppressWarnings("serial")
 class ServiceLocatorListViewPanel extends Panel {
@@ -60,15 +59,10 @@ class ServiceLocatorListViewPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						if (rowModel.getObject().getServiceNames() != null) {
+						if (rowModel.getObject().getServiceNames() != null)
 							return new Label("label", rowModel.getObject().getServiceNames());
-						} else {
-							try {
-								return new EmptyValueLabel("label", ServiceLocator.class.getDeclaredMethod("getServiceNames"));
-							} catch (NoSuchMethodException | SecurityException e) {
-								throw new RuntimeException(e);
-							}
-						}
+						else 
+							return new Label("label", "<i>All</i>").setEscapeModelStrings(false);
 					}
 					
 				});
@@ -83,15 +77,10 @@ class ServiceLocatorListViewPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						if (rowModel.getObject().getServiceImages() != null) {
+						if (rowModel.getObject().getServiceImages() != null) 
 							return new Label("label", rowModel.getObject().getServiceImages());
-						} else {
-							try {
-								return new EmptyValueLabel("label", ServiceLocator.class.getDeclaredMethod("getServiceImages"));
-							} catch (NoSuchMethodException | SecurityException e) {
-								throw new RuntimeException(e);
-							}
-						}
+						else 
+							return new Label("label", "<i>All</i>").setEscapeModelStrings(false);
 					}
 					
 				});

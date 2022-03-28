@@ -17,6 +17,7 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.SshSetting;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -50,8 +51,10 @@ public class SshCredential implements GitCredential, Validatable {
 	@Override
 	public CloneInfo newCloneInfo(Build build, String jobToken) {
 		String cloneUrl = OneDev.getInstance(UrlManager.class).cloneUrlFor(build.getProject(), true);
-		SshSetting sshSetting = OneDev.getInstance(SettingManager.class).getSshSetting();
-		StringBuilder knownHosts = new StringBuilder(sshSetting.getServerName()).append(" ");
+		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+		SystemSetting systemSetting = settingManager.getSystemSetting();
+		SshSetting sshSetting = settingManager.getSshSetting();
+		StringBuilder knownHosts = new StringBuilder(systemSetting.getSshServerName()).append(" ");
 		try {
 			PublicKeyEntry.appendPublicKeyEntry(knownHosts, sshSetting.getPublicKey());
 		} catch (IOException e) {

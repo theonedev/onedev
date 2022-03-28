@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.parentchoice;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
@@ -34,7 +35,14 @@ public class ParentChoiceEditSupport implements EditSupport {
 							if (model.getObject() != null) {
 					            return new Label(id, model.getObject());
 					        } else {
-								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								return new EmptyValueLabel(id) {
+
+									@Override
+									protected AnnotatedElement getElement() {
+										return propertyDescriptor.getPropertyGetter();
+									}
+									
+								};
 					        }
 						}
 						

@@ -18,10 +18,10 @@ import java.lang.reflect.Method;
 import org.json.JSONException;
 import org.json.JSONStringer;
 
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.component.select2.json.Json;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 
 /**
@@ -34,6 +34,8 @@ public final class Settings implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private AbstractSelect2Choice<?, ?> select2;
+	
 	/**
 	 * Some predefined width option values
 	 */
@@ -67,6 +69,10 @@ public final class Settings implements Serializable {
 	private String separator;
 	private String[] tokenSeparators;
 	private Boolean dropdownAutoWidth;
+	
+	public Settings(AbstractSelect2Choice<?, ?> select2) {
+		this.select2 = select2;
+	}
 
 	public CharSequence toJson() {
 		try {
@@ -117,7 +123,7 @@ public final class Settings implements Serializable {
 			throw new RuntimeException("Could not convert Select2 settings object to Json", e);
 		}
 	}
-
+	
 	public Integer getMinimumInputLength() {
 		return minimumInputLength;
 	}
@@ -406,18 +412,23 @@ public final class Settings implements Serializable {
 	}
 	
 	public void configurePlaceholder(PropertyDescriptor propertyDescriptor) {
-		Method propertyGetter = propertyDescriptor.getPropertyGetter();
-		if (propertyDescriptor.isPropertyRequired()) {
-			if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null)
-				setPlaceholder("Choose " + propertyDescriptor.getDisplayName().toLowerCase() + "...");
-			else
-				setPlaceholder("Choose...");
-		} else if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null) {
-			setPlaceholder(EditableUtils.getDisplayName(propertyDescriptor.getPropertyGetter()));
-		} else {
-			NameOfEmptyValue nameOfEmptyValue = propertyGetter.getAnnotation(NameOfEmptyValue.class);
-			if (nameOfEmptyValue != null)
-				setPlaceholder(nameOfEmptyValue.value());
+		ComponentContext.push(new ComponentContext(select2));
+		try {
+			Method propertyGetter = propertyDescriptor.getPropertyGetter();
+			if (propertyDescriptor.isPropertyRequired()) {
+				if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null)
+					setPlaceholder("Choose " + propertyDescriptor.getDisplayName().toLowerCase() + "...");
+				else
+					setPlaceholder("Choose...");
+			} else if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null) {
+				setPlaceholder(EditableUtils.getDisplayName(propertyDescriptor.getPropertyGetter()));
+			} else {
+				String placeholder = EditableUtils.getPlaceholder(propertyGetter);
+				if (placeholder != null)
+					setPlaceholder(placeholder);
+			}
+		} finally {
+			ComponentContext.pop();
 		}
 	}
 	

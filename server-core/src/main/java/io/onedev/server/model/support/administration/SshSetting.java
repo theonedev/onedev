@@ -8,7 +8,6 @@ import java.security.PublicKey;
 
 import javax.validation.ConstraintValidatorContext;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -18,6 +17,7 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 @ClassValidating
@@ -25,23 +25,10 @@ public class SshSetting implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
-    private String serverUrl;
-
     private String pemPrivateKey;
     
-	@Editable(name="SSH Server URL", order=90, description="This property will be used as base to construct "
-			+ "urls of various ssh services such as git over ssh")
-	@NotEmpty
-    public String getServerUrl() {
-        return serverUrl;
-    }
-
-    public void setServerUrl(String serverUrl) {
-        this.serverUrl = serverUrl;
-    }
-
-    @Editable(name="Server Private Key", order=100, description="Specify the private key (in PEM format) used "
-    		+ "by ssh server to establish connections with client")
+    @Editable(placeholder="PEM private key begins with '-----BEGIN RSA PRIVATE KEY-----'")
+    @OmitName
     @Multiline
     @NotEmpty
     public String getPemPrivateKey() {
@@ -78,19 +65,8 @@ public class SshSetting implements Serializable, Validatable {
 		}
     }
     
-    public String getServerName() {
-    	String serverName = serverUrl;
-    	if (serverName.startsWith("ssh://"))
-    		serverName = serverName.substring("ssh://".length());
-    	serverName = StringUtils.stripEnd(serverName, "/\\");
-    	return StringUtils.substringBefore(serverName, ":");
-    }
-    
     @Override
     public boolean isValid(ConstraintValidatorContext context) {
-		if (serverUrl != null)
-			serverUrl = StringUtils.stripEnd(serverUrl, "/\\");
-    	
         boolean hasErrors = false;
         String propertyNode = "pemPrivateKey";
         try {

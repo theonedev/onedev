@@ -26,7 +26,6 @@ import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=500, name="Remote Shell Executor", description="This executor runs build jobs with remote machines's shell facility via <a href='/administration/agents' target='_blank'>agents</a>")
 @Horizontal
@@ -36,9 +35,9 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	
 	private String agentQuery;
 	
-	@Editable(order=390, name="Agent Selector", description="Specify agents applicable for this executor")
+	@Editable(order=390, name="Agent Selector", placeholder="Any agent", 
+			description="Specify agents applicable for this executor")
 	@io.onedev.server.web.editable.annotation.AgentQuery(forExecutor=true)
-	@NameOfEmptyValue("Any agent")
 	public String getAgentQuery() {
 		return agentQuery;
 	}

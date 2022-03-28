@@ -55,7 +55,9 @@ public class SshKey extends AbstractEntity implements Validatable {
     @JoinColumn(nullable=false)
     private User owner;
 
-    @Editable(name="OpenSSH Public Key", description="Provide a OpenSSH public key. Normally begins with 'ssh-rsa'")
+    @Editable(name="OpenSSH Public Key", placeholder="OpenSSH public key begins with 'ssh-rsa', "
+    		+ "'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521', 'ssh-ed25519', "
+    		+ "'sk-ecdsa-sha2-nistp256@openssh.com', or 'sk-ssh-ed25519@openssh.com'")
     @NotEmpty
     @Multiline
     @OmitName

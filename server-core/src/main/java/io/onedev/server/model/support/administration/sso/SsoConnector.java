@@ -8,7 +8,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.GroupChoice;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public abstract class SsoConnector implements Serializable {
@@ -31,10 +30,9 @@ public abstract class SsoConnector implements Serializable {
 
 	public abstract String getButtonImageUrl();
 
-	@Editable(order=20000, description="Optionally add newly authenticated user to specified "
-			+ "group if membership information is not retrieved")
+	@Editable(order=20000, placeholder="No default group", description="Optionally add newly authenticated "
+			+ "user to specified group if membership information is not retrieved")
 	@GroupChoice
-	@NameOfEmptyValue("No default group")
 	public String getDefaultGroup() {
 		return defaultGroup;
 	}

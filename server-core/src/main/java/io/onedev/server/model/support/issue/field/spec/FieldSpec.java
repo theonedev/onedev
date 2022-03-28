@@ -33,7 +33,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -65,8 +64,7 @@ public abstract class FieldSpec extends InputSpec {
 		super.setName(name);
 	}
 
-	@Editable(order=30, description="Optionally describes the custom field")
-	@NameOfEmptyValue("No description")
+	@Editable(order=30, placeholder="No description", description="Optionally describes the custom field")
 	@Override
 	public String getDescription() {
 		return super.getDescription();
@@ -88,8 +86,8 @@ public abstract class FieldSpec extends InputSpec {
 		super.setAllowMultiple(allowMultiple);
 	}
 
-	@Editable(order=40, name="Show Conditionally", description="Enable if visibility of this field depends on other fields")
-	@NameOfEmptyValue("Always")
+	@Editable(order=40, name="Show Conditionally", placeholder="Always", description="Enable if visibility "
+			+ "of this field depends on other fields")
 	@Valid
 	@Override
 	public ShowCondition getShowCondition() {
@@ -142,12 +140,12 @@ public abstract class FieldSpec extends InputSpec {
 		return Boolean.TRUE.equals(EditContext.get().getInputValue("promptUponIssueOpen"));
 	}
 
-	@Editable(order=10100, description="Specify applicable projects for above option. Multiple projects should be separated by space. "
-			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+	@Editable(order=10100, placeholder="All projects", description="Specify applicable projects for above option. "
+			+ "Multiple projects should be separated by space. Use '**', '*' or '?' for "
+			+ "<a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty for all projects")
 	@io.onedev.server.web.editable.annotation.ShowCondition("isPromptUponIssueOpenEnabled")
 	@Patterns(suggester="suggestProjects", path=true)
-	@NameOfEmptyValue("All projects")
 	public String getApplicableProjects() {
 		return applicableProjects;
 	}

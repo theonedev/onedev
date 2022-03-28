@@ -3,23 +3,42 @@ package io.onedev.server.web.editable;
 import java.lang.reflect.AnnotatedElement;
 
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.util.ComponentContext;
 
 @SuppressWarnings("serial")
-public class EmptyValueLabel extends Label {
+public abstract class EmptyValueLabel extends Label {
 
-	public EmptyValueLabel(String id, AnnotatedElement element) {
-		super(id, "<i>" + getNameOfEmptyValue(element) + "</i>");
+	public EmptyValueLabel(String id) {
+		super(id);
+		
+		setDefaultModel(new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				ComponentContext.push(new ComponentContext(EmptyValueLabel.this));
+				try {
+					String placeholder = EditableUtils.getPlaceholder(getElement());
+					if (placeholder != null)
+						return HtmlEscape.escapeHtml5(placeholder);
+					else
+						return "Not defined";
+				} finally {
+					ComponentContext.pop();
+				}
+			}
+			
+		});
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		setEscapeModelStrings(false);
 	}
-
-	private static String getNameOfEmptyValue(AnnotatedElement element) {
-		NameOfEmptyValue nameOfEmptyValue = element.getAnnotation(NameOfEmptyValue.class);
-		if (nameOfEmptyValue != null)
-			return HtmlEscape.escapeHtml5(nameOfEmptyValue.value());
-		else
-			return "Not defined";
-	}
+	
+	protected abstract AnnotatedElement getElement();
+	
 }

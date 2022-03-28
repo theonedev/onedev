@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.enumeration;
 
+import java.lang.reflect.AnnotatedElement;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -26,10 +28,18 @@ public class EnumEditSupport implements EditSupport {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-					        if (model.getObject() != null)
+					        if (model.getObject() != null) {
 					            return new Label(id, StringUtils.capitalize(model.getObject().name().replace('_', ' ').toLowerCase()));
-					        else 
-								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+					        } else { 
+								return new EmptyValueLabel(id) {
+
+									@Override
+									protected AnnotatedElement getElement() {
+										return propertyDescriptor.getPropertyGetter();
+									}
+									
+								};
+					        }
 						}
 						
 					};

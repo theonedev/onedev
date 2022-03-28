@@ -10,7 +10,6 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -28,11 +27,10 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 				.getRuleName(IssueQueryLexer.FixedInCurrentBuild));		
 	}
 	
-	@Editable(order=100, name="Applicable Jobs", description="Optionally specify space-separated jobs "
+	@Editable(order=100, name="Applicable Jobs", placeholder="Any job", description="Optionally specify space-separated jobs "
 			+ "applicable for this trigger. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
 			+ "Leave empty to match all")
 	@Patterns(suggester = "suggestJobs")
-	@NameOfEmptyValue("Any job")
 	public String getJobNames() {
 		return jobNames;
 	}
@@ -41,11 +39,10 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 		this.jobNames = jobNames;
 	}
 
-	@Editable(order=200, name="Applicable Branches", description="Optionally specify space-separated branches "
+	@Editable(order=200, name="Applicable Branches", placeholder="Any branch", description="Optionally specify space-separated branches "
 			+ "applicable for this trigger. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestBranches", path=true)
-	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;
 	}
@@ -72,9 +69,9 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 			return new ArrayList<>();
 	}
 	
-	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
+	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
+			+ "applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentBuildCriteria = true)
-	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {
 		return super.getIssueQuery();

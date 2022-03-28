@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.userchoice;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -39,7 +40,14 @@ public class UserChoiceEditSupport implements EditSupport {
 						        if (userNames != null && !userNames.isEmpty()) {
 						            return new Label(id, StringUtils.join(userNames, ", " ));
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							
@@ -64,7 +72,14 @@ public class UserChoiceEditSupport implements EditSupport {
 								if (model.getObject() != null) {
 						            return new Label(id, model.getObject());
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							

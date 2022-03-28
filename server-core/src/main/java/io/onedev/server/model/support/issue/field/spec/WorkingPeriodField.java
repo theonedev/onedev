@@ -9,7 +9,6 @@ import io.onedev.server.model.support.inputspec.workingperiodinput.WorkingPeriod
 import io.onedev.server.model.support.inputspec.workingperiodinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=700, name=FieldSpec.WORKING_PERIOD)
 public class WorkingPeriodField extends FieldSpec {
@@ -18,8 +17,7 @@ public class WorkingPeriodField extends FieldSpec {
 
 	private DefaultValueProvider defaultValueProvider;
 	
-	@Editable(order=1000, name="Default Value")
-	@NameOfEmptyValue("No default value")
+	@Editable(order=1000, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;

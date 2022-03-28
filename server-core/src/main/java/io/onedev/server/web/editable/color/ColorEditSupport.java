@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.color;
 
+import java.lang.reflect.AnnotatedElement;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
@@ -30,7 +32,14 @@ public class ColorEditSupport implements EditSupport {
 								String html = String.format("<div style='width: 25px; height: 25px; background: %s; border-radius: 4px;'></div>", model.getObject());
 								return new Label(id, html).setEscapeModelStrings(false);
 							} else {
-								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								return new EmptyValueLabel(id) {
+
+									@Override
+									protected AnnotatedElement getElement() {
+										return propertyDescriptor.getPropertyGetter();
+									}
+									
+								};
 							}
 						}
 						

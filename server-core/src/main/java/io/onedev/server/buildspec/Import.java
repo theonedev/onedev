@@ -38,7 +38,6 @@ import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -131,11 +130,11 @@ public class Import implements Serializable, Validatable {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=500, description="Specify a secret to be used as access token to import build spec "
-			+ "from above project. If not specified, OneDev will try to import build spec anonymously")
+	@Editable(order=500, placeholder="Access Anonymously", description="Specify a secret to be used as "
+			+ "access token to import build spec from above project. If not specified, OneDev will try "
+			+ "to import build spec anonymously")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Nullable
-	@NameOfEmptyValue("Access Anonymously")
 	public String getAccessTokenSecret() {
 		return accessTokenSecret;
 	}

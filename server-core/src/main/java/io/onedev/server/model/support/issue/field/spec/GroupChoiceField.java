@@ -13,7 +13,6 @@ import io.onedev.server.model.support.inputspec.groupchoiceinput.defaultvaluepro
 import io.onedev.server.model.support.inputspec.groupchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=160, name=FieldSpec.GROUP)
 public class GroupChoiceField extends FieldSpec {
@@ -35,8 +34,7 @@ public class GroupChoiceField extends FieldSpec {
 		this.choiceProvider = choiceProvider;
 	}
 
-	@Editable(order=1100, name="Default Value")
-	@NameOfEmptyValue("No default value")
+	@Editable(order=1100, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;

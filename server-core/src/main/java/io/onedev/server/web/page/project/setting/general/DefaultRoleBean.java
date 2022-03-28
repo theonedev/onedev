@@ -8,7 +8,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.RoleChoice;
 
 @Editable
@@ -18,11 +17,10 @@ public class DefaultRoleBean implements Serializable {
 
 	private String roleName;
 
-	@Editable(name="Default Role", description="Default role determines default permissions granted to everyone in the system. "
-			+ "A permission is default permission of the project, if it is contained in any default role of the project "
-			+ "hierarchy (current and all ancestor projects)")
+	@Editable(name="Default Role", placeholder="No default role", description="Default role determines default "
+			+ "permissions granted to everyone in the system. A permission is default permission of the project, "
+			+ "if it is contained in any default role of the project hierarchy (current and all ancestor projects)")
 	@RoleChoice
-	@NameOfEmptyValue("No default role")
 	public String getRoleName() {
 		return roleName;
 	}

@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.emaillist;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -35,10 +36,18 @@ public class EmailListEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null && !model.getObject().isEmpty())
+								if (model.getObject() != null && !model.getObject().isEmpty()) {
 						            return new Label(id, StringUtils.join(model.getObject(), ", "));
-						        else 
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								} else { 
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
+								}
 							}
 							
 						};

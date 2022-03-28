@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
@@ -38,7 +39,14 @@ public class CodeCommentQueryEditSupport implements EditSupport {
 					        if (query != null) {
 					        	return new Label(id, query);
 					        } else {
-								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								return new EmptyValueLabel(id) {
+
+									@Override
+									protected AnnotatedElement getElement() {
+										return propertyDescriptor.getPropertyGetter();
+									}
+									
+								};
 					        }
 						}
 						

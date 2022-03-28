@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.user.ssh;
+package io.onedev.server.web.page.admin.user.sshkeys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +40,11 @@ public class UserSshKeysPage extends UserPage {
         SshKeyListPanel keyList = new SshKeyListPanel("keyList", detachableModel);
         
         add(new ModalLink("newKey") {
+            
+            @Override
+			protected String getModalCssClass() {
+            	return "modal-lg";
+			}
             
             @Override
             protected Component newContent(String id, ModalPanel modal) {

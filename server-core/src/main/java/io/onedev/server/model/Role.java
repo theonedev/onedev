@@ -56,7 +56,6 @@ import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.util.validation.annotation.RoleName;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
 /**
@@ -237,10 +236,9 @@ public class Role extends AbstractEntity implements Permission, Validatable {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
 	}
 	
-	@Editable(order=625, description="Optionally specify issue links allowed to edit")
+	@Editable(order=625, placeholder="None", description="Optionally specify issue links allowed to edit")
 	@ShowCondition("isManageIssuesDisabled")
 	@ChoiceProvider("getIssueLinkChoices")
-	@NameOfEmptyValue("None")
 	public List<String> getEditableIssueLinks() {
 		return editableIssueLinks;
 	}

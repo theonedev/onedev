@@ -17,7 +17,6 @@ import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -30,11 +29,10 @@ public class BranchUpdateTrigger extends JobTrigger {
 	
 	private String paths;
 	
-	@Editable(name="Branches", order=100, description="Optionally specify space-separated branches "
+	@Editable(name="Branches", order=100, placeholder="Any branch", description="Optionally specify space-separated branches "
 			+ "to check. Use '**' or '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
-	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;
 	}
@@ -48,11 +46,10 @@ public class BranchUpdateTrigger extends JobTrigger {
 		return SuggestionUtils.suggestBranches(Project.get(), matchWith);
 	}
 	
-	@Editable(name="Touched Files", order=200, 
+	@Editable(name="Touched Files", order=200, placeholder="Any file", 
 			description="Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 					+ "Prefix with '-' to exclude. Leave empty to match all files")
 	@Patterns(suggester = "getPathSuggestions", path=true)
-	@NameOfEmptyValue("Any file")
 	public String getPaths() {
 		return paths;
 	}

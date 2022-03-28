@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class AuthenticatorBean implements Serializable {
@@ -13,8 +12,7 @@ public class AuthenticatorBean implements Serializable {
 
 	private Authenticator authenticator;
 
-	@Editable
-	@NameOfEmptyValue("No external authentication")
+	@Editable(placeholder="No external authentication")
 	public Authenticator getAuthenticator() {
 		return authenticator;
 	}

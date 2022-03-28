@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.sshsetting;
+package io.onedev.server.web.page.admin.sshserverkey;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -18,9 +18,9 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
-public class SshSettingPage extends AdministrationPage {
+public class SshServerKeyPage extends AdministrationPage {
 
-    public SshSettingPage(PageParameters params) {
+    public SshServerKeyPage(PageParameters params) {
         super(params);
     }
 
@@ -40,7 +40,7 @@ public class SshSettingPage extends AdministrationPage {
                 OneDev.getInstance(SettingManager.class).saveSshSetting(sshSetting);
                 getSession().success("SSH setting has been saved");
                 
-                setResponsePage(SshSettingPage.class);
+                setResponsePage(SshServerKeyPage.class);
             }
             
         };

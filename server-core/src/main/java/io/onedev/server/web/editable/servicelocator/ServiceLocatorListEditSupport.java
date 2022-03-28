@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.servicelocator;
 
 import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -31,10 +32,18 @@ public class ServiceLocatorListEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) 
+								if (model.getObject() != null) {
 									return new ServiceLocatorListViewPanel(id, model.getObject());
-								else 
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								} else { 
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
+								}
 							}
 							
 						};

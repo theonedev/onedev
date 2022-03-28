@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import io.onedev.server.model.support.inputspec.floatinput.FloatInput;
 import io.onedev.server.model.support.inputspec.floatinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=450, name=FieldSpec.FLOAT)
 public class FloatField extends FieldSpec {
@@ -17,8 +16,7 @@ public class FloatField extends FieldSpec {
 
 	private DefaultValueProvider defaultValueProvider;
 	
-	@Editable(order=1200, name="Default Value")
-	@NameOfEmptyValue("No default value")
+	@Editable(order=1200, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;

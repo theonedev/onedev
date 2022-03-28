@@ -22,7 +22,6 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.WicketUtils;
@@ -105,11 +104,11 @@ public class ProjectDependency implements Serializable {
 		return BuildSpec.suggestVariables(matchWith, false, false);
 	}
 	
-	@Editable(order=500, description="Specify a secret to be used as access token to retrieve artifacts "
-			+ "from above project. If not specified, project artifacts will be accessed anonymously")
+	@Editable(order=500, placeholder="Access Anonymously", description="Specify a secret to be used as "
+			+ "access token to retrieve artifacts from above project. If not specified, project "
+			+ "artifacts will be accessed anonymously")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Nullable
-	@NameOfEmptyValue("Access Anonymously")
 	public String getAccessTokenSecret() {
 		return accessTokenSecret;
 	}

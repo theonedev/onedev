@@ -5,7 +5,6 @@ import java.io.Serializable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Password;
 
 @Editable
@@ -19,8 +18,8 @@ public class RegistryLogin implements Serializable {
 	
 	private String password;
 
-	@Editable(order=100, description="Specify registry url. Leave empty for official registry")
-	@NameOfEmptyValue("Default Registry")
+	@Editable(order=100, placeholder="Default registry", 
+			description="Specify registry url. Leave empty for official registry")
 	public String getRegistryUrl() {
 		return registryUrl;
 	}

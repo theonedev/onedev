@@ -20,7 +20,6 @@ import com.google.common.collect.Sets;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
 public class PropertyDescriptor implements Serializable {
@@ -132,15 +131,6 @@ public class PropertyDescriptor implements Serializable {
 		return null;
 	}
 	
-	@Nullable
-	public String getNameOfEmptyValue() {
-		NameOfEmptyValue annotation = findAnnotation(NameOfEmptyValue.class);
-		if (annotation != null)
-			return annotation.value();
-		else
-			return null;
-	}
-
 	public boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor) {
 		return isPropertyVisible(componentContexts, beanDescriptor, Sets.newHashSet());
 	}

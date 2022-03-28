@@ -9,7 +9,6 @@ import io.onedev.server.model.support.inputspec.dateinput.DateInput;
 import io.onedev.server.model.support.inputspec.dateinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.Constants;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=505, name=ParamSpec.DATE)
 public class DateParam extends ParamSpec {
@@ -18,8 +17,7 @@ public class DateParam extends ParamSpec {
 
 	private DefaultValueProvider defaultValueProvider;
 	
-	@Editable(order=1000, name="Default Value")
-	@NameOfEmptyValue("No default value")
+	@Editable(order=1000, name="Default Value", placeholder="No default value")
 	@Valid
 	public DefaultValueProvider getDefaultValueProvider() {
 		return defaultValueProvider;

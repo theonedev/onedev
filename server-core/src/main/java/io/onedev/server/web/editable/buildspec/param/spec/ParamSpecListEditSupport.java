@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.buildspec.param.spec;
 
 import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -34,7 +35,14 @@ public class ParamSpecListEditSupport implements EditSupport {
 								if (model.getObject() != null) {
 									return new ParamSpecListViewPanel(id, elementClass, model.getObject());
 								} else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 								}
 							}
 							

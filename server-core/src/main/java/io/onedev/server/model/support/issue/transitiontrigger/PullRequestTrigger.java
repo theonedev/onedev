@@ -10,7 +10,6 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -25,12 +24,11 @@ public abstract class PullRequestTrigger extends TransitionTrigger {
 				.getRuleName(IssueQueryLexer.FixedInCurrentPullRequest));		
 	}
 	
-	@Editable(name="Target Branches", order=100, 
-			description="Optionally specify space-separated target branches of the pull requests to check. "
-					+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
-					+ "Prefix with '-' to exclude. Leave empty to match all branches")
+	@Editable(name="Target Branches", order=100, placeholder="Any branch", description="Optionally specify "
+			+ "space-separated target branches of the pull requests to check. Use '**', '*' or '?' for "
+			+ "<a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
-	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;
 	}
@@ -39,9 +37,9 @@ public abstract class PullRequestTrigger extends TransitionTrigger {
 		this.branches = branches;
 	}
 
-	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
+	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
+			+ "applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentPullRequestCriteria = true)
-	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {
 		return super.getIssueQuery();

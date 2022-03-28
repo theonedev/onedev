@@ -37,7 +37,6 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -143,38 +142,30 @@ class ServiceLocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
-				if (rowModel.getObject().getServiceNames() != null) {
+				if (rowModel.getObject().getServiceNames() != null) 
 					cellItem.add(new Label(componentId, rowModel.getObject().getServiceNames()));
-				} else {
-					try {
-						cellItem.add(new EmptyValueLabel(componentId, ServiceLocator.class.getDeclaredMethod("getServiceNames")));
-					} catch (NoSuchMethodException | SecurityException e) {
-						throw new RuntimeException(e);
-					}
-				}
+				else 
+					cellItem.add(new Label(componentId, "<i>All</i>").setEscapeModelStrings(false));
 			}
 		});		
 		
 		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("Applicable Images")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
-				if (rowModel.getObject().getServiceImages() != null) {
+			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, 
+					String componentId, IModel<ServiceLocator> rowModel) {
+				if (rowModel.getObject().getServiceImages() != null) 
 					cellItem.add(new Label(componentId, rowModel.getObject().getServiceImages()));
-				} else {
-					try {
-						cellItem.add(new EmptyValueLabel(componentId, ServiceLocator.class.getDeclaredMethod("getServiceImages")));
-					} catch (NoSuchMethodException | SecurityException e) {
-						throw new RuntimeException(e);
-					}
-				}
+				else 
+					cellItem.add(new Label(componentId, "<i>All</i>").setEscapeModelStrings(false));
 			}
 		});	
 		
 		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("#Node Selector Entries")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
+			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, 
+					String componentId, IModel<ServiceLocator> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getNodeSelector().size()));
 			}
 			

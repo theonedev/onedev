@@ -15,7 +15,6 @@ import io.onedev.server.model.Role;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.RoleChoice;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -31,11 +30,11 @@ public class SenderAuthorization implements Serializable {
 	
 	private String authorizedRoleName;
 	
-	@Editable(order=100, name="Applicable Senders", description="Specify space-separated sender "
-			+ "email addresses applicable for this entry. Use '*' or '?' for wildcard match. "
-			+ "Prefix with '-' to exclude. Leave empty to match all senders")
+	@Editable(order=100, name="Applicable Senders", placeholder="Any sender", description=""
+			+ "Specify space-separated sender email addresses applicable for this entry. "
+			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
+			+ "Leave empty to match all senders")
 	@Patterns
-	@NameOfEmptyValue("Any sender")
 	public String getSenderEmails() {
 		return senderEmails;
 	}
@@ -44,11 +43,11 @@ public class SenderAuthorization implements Serializable {
 		this.senderEmails = senderEmails;
 	}
 
-	@Editable(order=150, description="Specify space-separated projects authorized to senders above. "
-			+ "Use '**' or '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to "
-			+ "authorize all projects")
+	@Editable(order=150, placeholder="Any project", description="Specify space-separated projects "
+			+ "authorized to senders above. Use '**' or '*' or '?' for "
+			+ "<a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty to authorize all projects")
 	@Patterns(suggester="suggestProjects", path=true)
-	@NameOfEmptyValue("Any project")
 	public String getAuthorizedProjects() {
 		return authorizedProjects;
 	}

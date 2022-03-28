@@ -150,13 +150,24 @@ public class DefaultDataManager implements DataManager, Serializable {
 					user.setFullName(newUserBean.getFullName());
 					user.setPassword(passwordService.encryptPassword(newUserBean.getPassword()));
 		    		userManager.replicate(user);
-		    		
-		    		EmailAddress emailAddress = new EmailAddress();
-		    		emailAddress.setValue(newUserBean.getEmailAddress());
-		    		emailAddress.setVerificationCode(null);
-		    		emailAddress.setOwner(user);
 
-		    		emailAddressManager.save(emailAddress);
+		    		EmailAddress primaryEmailAddress = null;
+		    		for (EmailAddress emailAddress: emailAddressManager.query()) { 
+		    			if (emailAddress.getOwner().equals(user) && emailAddress.isPrimary()) {
+		    				primaryEmailAddress = emailAddress;
+		    				break;
+		    			}
+		    		}
+		    		
+		    		if (primaryEmailAddress == null) {
+			    		primaryEmailAddress = new EmailAddress();
+			    		primaryEmailAddress.setPrimary(true);
+			    		primaryEmailAddress.setGit(true);
+			    		primaryEmailAddress.setVerificationCode(null);
+			    		primaryEmailAddress.setOwner(user);
+		    		}
+		    		primaryEmailAddress.setValue(newUserBean.getEmailAddress());
+		    		emailAddressManager.save(primaryEmailAddress);
 				}
 				
 			});
@@ -174,7 +185,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 				settingManager.saveSystemSetting(systemSetting);
 				systemSetting = null;
 			} else {
-				systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl(false));
+				systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl());
 			}
 		} else {
 			systemSetting = (SystemSetting) setting.getValue();
@@ -185,7 +196,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 		
 		if (systemSetting != null) {
-			Collection<String> excludedProps = Sets.newHashSet("gravatarEnabled");
+			Collection<String> excludedProps = Sets.newHashSet("sshRootUrl", "gravatarEnabled");
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add("gitConfig");
 				excludedProps.add("curlConfig");
@@ -212,7 +223,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.getSetting(Key.SSH);
 		if (setting == null || setting.getValue() == null) {
 			SshSetting sshSetting = new SshSetting();
-            sshSetting.setServerUrl(OneDev.getInstance().guessServerUrl(true));
             sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
             
             settingManager.saveSshSetting(sshSetting);

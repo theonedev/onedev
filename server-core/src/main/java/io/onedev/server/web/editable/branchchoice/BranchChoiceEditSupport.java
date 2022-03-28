@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.branchchoice;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,14 @@ public class BranchChoiceEditSupport implements EditSupport {
 						        	}
 						            return new Label(id, StringUtils.join(branches, ", " ));
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							
@@ -69,7 +77,14 @@ public class BranchChoiceEditSupport implements EditSupport {
 						        if (projectAndBranch != null) {
 						        	return new Label(id, projectAndBranch);
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							

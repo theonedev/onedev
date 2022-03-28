@@ -1,11 +1,13 @@
 package io.onedev.server.web.editable;
 
+import java.lang.reflect.Method;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -19,6 +21,7 @@ import org.apache.wicket.validation.IValidatable;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
 public abstract class PropertyEditor<T> extends ValueEditor<T> {
@@ -114,4 +117,27 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 
 	public abstract boolean needExplicitSubmit();
 	
+	protected AttributeModifier newPlaceholderModifier() {
+		return AttributeModifier.replace("placeholder", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				ComponentContext.push(new ComponentContext(PropertyEditor.this));
+				try {
+					Method getter = descriptor.getPropertyGetter();
+					
+					String placeholder = EditableUtils.getPlaceholder(getter);
+					if (placeholder != null) 
+						return placeholder;
+					else if (getter.getAnnotation(OmitName.class) != null)  
+						return EditableUtils.getDisplayName(getter);
+					else 
+						return "";
+				} finally {
+					ComponentContext.pop();
+				}
+			}
+			
+		});		
+	}
 }

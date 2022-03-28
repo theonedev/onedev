@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.date;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.Date;
 
 import org.apache.wicket.Component;
@@ -13,7 +14,6 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.WithTime;
 
 @SuppressWarnings("serial")
@@ -40,11 +40,14 @@ public class DateEditSupport implements EditSupport {
 								else
 									return new Label(id, DateUtils.formatDate(model.getObject()));
 							} else {
-								NameOfEmptyValue nameOfEmptyValue = propertyDescriptor.getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
-								if (nameOfEmptyValue != null)
-									return new Label(id, nameOfEmptyValue.value());
-								else 
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								return new EmptyValueLabel(id) {
+
+									@Override
+									protected AnnotatedElement getElement() {
+										return propertyDescriptor.getPropertyGetter();
+									}
+									
+								};
 							}
 						}
 						

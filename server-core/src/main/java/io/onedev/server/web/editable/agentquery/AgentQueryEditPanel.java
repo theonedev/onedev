@@ -1,8 +1,5 @@
 package io.onedev.server.web.editable.agentquery;
 
-import java.lang.reflect.Method;
-
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.FormComponent;
@@ -15,11 +12,8 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.web.behavior.AgentQueryBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 
 @SuppressWarnings("serial")
@@ -39,7 +33,6 @@ public class AgentQueryEditPanel extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Method getter = getDescriptor().getPropertyGetter();
 		add(input = new TextField<String>("input", Model.of(getModelObject())));
 		input.setType(getDescriptor().getPropertyClass());
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
@@ -63,13 +56,7 @@ public class AgentQueryEditPanel extends PropertyEditor<String> {
 			
 		});
 		
-		if (getter.getAnnotation(OmitName.class) != null) {
-			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(getter)));
-		} else {
-			NameOfEmptyValue nameOfEmptyValue = getter.getAnnotation(NameOfEmptyValue.class);
-			if (nameOfEmptyValue != null)
-				input.add(AttributeModifier.replace("placeholder", nameOfEmptyValue.value()));
-		}
+		input.add(newPlaceholderModifier());
 
 		add(newShowSelectedAgentsLink());
 	}

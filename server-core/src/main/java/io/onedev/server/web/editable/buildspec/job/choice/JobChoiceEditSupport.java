@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.buildspec.job.choice;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -39,7 +40,14 @@ public class JobChoiceEditSupport implements EditSupport {
 						        if (jobNames != null && !jobNames.isEmpty()) {
 						            return new Label(id, StringUtils.join(jobNames, ", " ));
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							
@@ -65,7 +73,14 @@ public class JobChoiceEditSupport implements EditSupport {
 						        if (jobName != null) {
 						            return new Label(id, jobName);
 						        } else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 						        }
 							}
 							

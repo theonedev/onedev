@@ -23,7 +23,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.FieldNamesProvider;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -39,11 +38,11 @@ public class IssueCreationSetting implements Serializable {
 	
 	private List<FieldSupply> issueFields = new ArrayList<>();
 
-	@Editable(order=100, name="Applicable Senders", description="Specify space-separated sender "
-			+ "email addresses applicable for this entry. Use '*' or '?' for wildcard match. "
-			+ "Prefix with '-' to exclude. Leave empty to match all senders")
+	@Editable(order=100, name="Applicable Senders", placeholder="Any sender", 
+			description="Specify space-separated sender email addresses applicable for this entry. "
+					+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
+					+ "Leave empty to match all senders")
 	@Patterns
-	@NameOfEmptyValue("Any sender")
 	public String getSenderEmails() {
 		return senderEmails;
 	}
@@ -52,11 +51,10 @@ public class IssueCreationSetting implements Serializable {
 		this.senderEmails = senderEmails;
 	}
 
-	@Editable(order=150, description="Specify space-separated projects applicable for this entry. "
+	@Editable(order=150, placeholder="Any project", description="Specify space-separated projects applicable for this entry. "
 			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to "
 			+ "match all projects")
 	@Patterns(suggester="suggestProjects")
-	@NameOfEmptyValue("Any project")
 	public String getApplicableProjects() {
 		return applicableProjects;
 	}

@@ -1,5 +1,6 @@
 package io.onedev.server.web.editable.code;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -36,7 +37,14 @@ public class CodeEditSupport implements EditSupport {
 								if (code != null && !code.isEmpty()) {
 									return new CodePropertyViewer(id, model.getObject(), annotation.language());
 								} else {
-									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+									return new EmptyValueLabel(id) {
+
+										@Override
+										protected AnnotatedElement getElement() {
+											return propertyDescriptor.getPropertyGetter();
+										}
+										
+									};
 								}
 							}
 							

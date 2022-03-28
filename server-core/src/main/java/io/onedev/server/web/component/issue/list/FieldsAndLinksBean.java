@@ -11,7 +11,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class FieldsAndLinksBean implements Serializable {
@@ -22,9 +21,9 @@ public class FieldsAndLinksBean implements Serializable {
 	
 	private List<String> links;
 
-	@Editable(order=100, name="Display Fields", description="Specify fields to be displayed in the issue list")
+	@Editable(order=100, name="Display Fields", placeholder="Not displaying any fields", 
+			description="Specify fields to be displayed in the issue list")
 	@ChoiceProvider("getFieldChoices")
-	@NameOfEmptyValue("Not displaying any fields")
 	public List<String> getFields() {
 		return fields;
 	}
@@ -42,9 +41,9 @@ public class FieldsAndLinksBean implements Serializable {
 		return choices;
 	}
 	
-	@Editable(order=200, name="Display Links", description="Specify links to be displayed in the issue list")
+	@Editable(order=200, name="Display Links", placeholder="Not displaying any links", 
+			description="Specify links to be displayed in the issue list")
 	@ChoiceProvider("getLinkChoices")
-	@NameOfEmptyValue("Not displaying any links")
 	public List<String> getLinks() {
 		return links;
 	}

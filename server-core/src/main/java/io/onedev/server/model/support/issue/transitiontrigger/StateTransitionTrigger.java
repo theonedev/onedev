@@ -11,7 +11,6 @@ import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=550, name="State of other issue is transited to")
@@ -41,9 +40,9 @@ public class StateTransitionTrigger extends TransitionTrigger {
 		return stateNames;
 	}
 	
-	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
+	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify issues "
+			+ "applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentIssueCriteria = true)
-	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {
 		return super.getIssueQuery();

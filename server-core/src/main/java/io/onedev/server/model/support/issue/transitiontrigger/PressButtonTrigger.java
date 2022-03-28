@@ -31,7 +31,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=100, name="Button is pressed")
 public class PressButtonTrigger extends TransitionTrigger {
@@ -80,9 +79,9 @@ public class PressButtonTrigger extends TransitionTrigger {
 		return choices;
 	}
 
-	@Editable(order=500, description="Optionally select fields to prompt when this button is pressed")
+	@Editable(order=500, placeholder="No fields to prompt", description="Optionally select fields "
+			+ "to prompt when this button is pressed")
 	@ChoiceProvider("getFieldChoices")
-	@NameOfEmptyValue("No fields to prompt")
 	public List<String> getPromptFields() {
 		return promptFields;
 	}
@@ -200,9 +199,9 @@ public class PressButtonTrigger extends TransitionTrigger {
 		}
 	}
 
-	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
+	@Editable(order=1000, name="Applicable Issues", placeholder="All", description="Optionally specify "
+			+ "issues applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentUserCriteria = true)	
-	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {
 		return super.getIssueQuery();

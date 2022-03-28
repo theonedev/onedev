@@ -15,7 +15,6 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.JobChoice;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -75,9 +74,8 @@ public class FileProtection implements Serializable, Validatable {
 		reviewRequirement = parsedReviewRequirement.toString();
 	}
 	
-	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
+	@Editable(order=500, name="Required Builds", placeholder="No any", description="Optionally choose required builds")
 	@JobChoice(tagsMode=true)
-	@NameOfEmptyValue("No any")
 	public List<String> getJobNames() {
 		return jobNames;
 	}

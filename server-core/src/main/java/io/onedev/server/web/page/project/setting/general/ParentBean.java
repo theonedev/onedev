@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.util.validation.annotation.ProjectPath;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ParentChoice;
 
 @Editable
@@ -16,11 +15,10 @@ public class ParentBean implements Serializable {
 
 	private String parentPath;
 
-	@Editable(name="Parent Project", description="Settings and permissions of parent project will be inherited "
-			+ "by this project")
+	@Editable(name="Parent Project", placeholder="No parent", description="Settings and permissions "
+			+ "of parent project will be inherited by this project")
 	@ProjectPath
 	@ParentChoice
-	@NameOfEmptyValue("No parent")
 	public String getParentPath() {
 		return parentPath;
 	}
