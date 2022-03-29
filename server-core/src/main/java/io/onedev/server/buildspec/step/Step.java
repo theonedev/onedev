@@ -56,7 +56,7 @@ public abstract class Step implements Serializable {
 	public static String getGroupedType(Class<? extends Step> stepClass) {
 		Editable editable = stepClass.getAnnotation(Editable.class);
 		if (editable != null && editable.group().length() != 0)
-			return editable.group() + "/" + EditableUtils.getDisplayName(stepClass);
+			return editable.group() + " / " + EditableUtils.getDisplayName(stepClass);
 		else
 			return EditableUtils.getDisplayName(stepClass);
 	}

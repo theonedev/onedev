@@ -219,7 +219,6 @@ abstract class StepEditPanel extends Panel implements BuildSpecAware, ParamSpecA
 										expand(node);
 									else
 										collapse(node);
-									add(AttributeAppender.append("class", "active"));
 								}
 								
 							};
