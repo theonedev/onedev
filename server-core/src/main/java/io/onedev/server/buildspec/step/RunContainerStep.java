@@ -19,7 +19,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=150, name="Run Container")
+@Editable(order=150, name="Run Container", description="Run specified docker container. To access files in "
+		+ "job workspace, either use environment variable <tt>JOB_WORKSPACE</tt>, or specify volume mounts")
 public class RunContainerStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -32,6 +33,8 @@ public class RunContainerStep extends Step {
 
 	private String workingDir;
 	
+	private List<VolumeMount> volumeMounts = new ArrayList<>(); 
+	
 	private boolean useTTY;
 	
 	@Override
@@ -39,7 +42,10 @@ public class RunContainerStep extends Step {
 		Map<String, String> envMap = new HashMap<>();
 		for (EnvVar var: getEnvVars())
 			envMap.put(var.getName(), var.getValue());
-		return new RunContainerFacade(getImage(), getArgs(), envMap, getWorkingDir(), isUseTTY());
+		Map<String, String> mountMap = new HashMap<>();
+		for (VolumeMount mount: getVolumeMounts())
+			mountMap.put(mount.getSourcePath(), mount.getTargetPath());
+		return new RunContainerFacade(getImage(), getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY());
 	}
 
 	@Editable(order=100, description="Specify container image to run. <b class='text-warning'>NOTE:</b> A shell must "
@@ -84,6 +90,15 @@ public class RunContainerStep extends Step {
 
 	public void setEnvVars(List<EnvVar> envVars) {
 		this.envVars = envVars;
+	}
+
+	@Editable(order=500, description="Optionally mount directories or files under job workspace into container")
+	public List<VolumeMount> getVolumeMounts() {
+		return volumeMounts;
+	}
+
+	public void setVolumeMounts(List<VolumeMount> volumeMounts) {
+		this.volumeMounts = volumeMounts;
 	}
 
 	@Editable(order=10000, name="Enable TTY Mode", description="Many commands print outputs with ANSI colors in "

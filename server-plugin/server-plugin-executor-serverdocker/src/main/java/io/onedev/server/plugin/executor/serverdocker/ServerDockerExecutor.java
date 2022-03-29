@@ -214,7 +214,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 								private int runStepContainer(String image, @Nullable String entrypoint, 
 										List<String> arguments, Map<String, String> environments, 
-										@Nullable String workingDir, List<Integer> position, boolean useTTY) {
+										@Nullable String workingDir, Map<String, String> volumeMounts, 
+										List<Integer> position, boolean useTTY) {
 									String containerName = network + "-step-" + stringifyPosition(position);
 									Commandline docker = newDocker();
 									docker.addArgs("run", "--name=" + containerName, "--network=" + network);
@@ -222,6 +223,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 									
 									docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
+									
+									for (Map.Entry<String, String> entry: volumeMounts.entrySet()) {
+										String hostPath = getHostPath(new File(hostWorkspace, entry.getKey()).getAbsolutePath());
+										docker.addArgs("-v", hostPath + ":" + entry.getValue());
+									}
 									
 									if (entrypoint != null) 
 										docker.addArgs("-w", containerWorkspace);
@@ -294,7 +300,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												hostBuildHome, commandFacade, osInfo, hostAuthInfoHome.get() != null);
 										
 										int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(), 
-												entrypoint.arguments(), new HashMap<>(), null, position, commandFacade.isUseTTY());
+												entrypoint.arguments(), new HashMap<>(), null, new HashMap<>(), 
+												position, commandFacade.isUseTTY());
 										
 										if (exitCode != 0) {
 											jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + exitCode);
@@ -310,7 +317,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										if (container.getArgs() != null)
 											arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
 										int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(), 
-												container.getWorkingDir(), position, rubContainerFacade.isUseTTY());
+												container.getWorkingDir(), container.getVolumeMounts(), position, rubContainerFacade.isUseTTY());
 										if (exitCode != 0) {
 											jobLogger.error("Step \"" + stepNames + "\" is failed: Container exited with code " + exitCode);
 											return false;

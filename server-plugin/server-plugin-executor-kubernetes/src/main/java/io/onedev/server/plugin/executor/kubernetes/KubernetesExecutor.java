@@ -845,7 +845,21 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 									"image", container.getImage());
 							if (runContainerFacade.isUseTTY())
 								stepContainerSpec.put("tty", true);
-							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
+							
+							List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
+							for (Map.Entry<String, String> entry: container.getVolumeMounts().entrySet()) {
+								String subPath = StringUtils.stripStart(entry.getKey(), "/\\");
+								if (osInfo.isWindows())
+									subPath = "workspace\\" + subPath;
+								else
+									subPath = "workspace/" + subPath;
+								volumeMounts.add(CollectionUtils.newLinkedHashMap(
+										"name", "build-home", 
+										"mountPath", entry.getValue(),
+										"subPath", subPath));
+							}
+							stepContainerSpec.put("volumeMounts", volumeMounts);
+							
 							List<Map<Object, Object>> envs = new ArrayList<>(commonEnvs);
 							for (Map.Entry<String, String> entry: container.getEnvMap().entrySet()) {
 								envs.add(CollectionUtils.newLinkedHashMap(
