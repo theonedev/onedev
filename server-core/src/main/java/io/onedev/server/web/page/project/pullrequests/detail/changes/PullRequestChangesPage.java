@@ -380,7 +380,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			
 		});
 		
-		DropdownLink selectedCommitsLink = new DropdownLink("comparingCommits", new AlignPlacement(50, 100, 50, 0)) {
+		DropdownLink selectedCommitsLink = new DropdownLink("comparingCommits", false, new AlignPlacement(50, 100, 50, 0), true) {
 			
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
