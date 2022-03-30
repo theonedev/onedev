@@ -8,7 +8,7 @@ public class MailPosition implements Serializable {
 
 	private volatile long uidValidity = -1;
 	
-	private volatile long uid = 0;
+	private volatile long uid = -1;
 
 	public long getUidValidity() {
 		return uidValidity;

@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,8 +30,6 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.event.MessageCountEvent;
-import javax.mail.event.MessageCountListener;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.InternetAddress;
@@ -776,6 +775,29 @@ public class DefaultMailManager implements MailManager {
 			MessageListener listener, MailPosition lastPosition) {
 		return executorService.submit(new Runnable() {
 
+			private void processMessages(IMAPFolder inbox, AtomicInteger messageNumber) throws MessagingException {
+				int currentMessageNumber = inbox.getMessageCount();
+				for (int i=messageNumber.get()+1; i<=currentMessageNumber; i++) {
+					Message message = inbox.getMessage(i);
+					lastPosition.setUid(inbox.getUID(message));
+					logger.trace("Processing inbox messge (subject: {}, uid: {}, seq: {})", 
+							message.getSubject(), lastPosition.getUid(), i);
+					try {
+						listener.onReceived(message);
+					} catch (Exception e) {
+						logger.error("Error processing message", e);
+					} 
+				}
+				messageNumber.set(currentMessageNumber);
+			}
+			
+			private long getUid(IMAPFolder inbox, int messageNumber) throws MessagingException {
+				if (messageNumber != 0)
+					return inbox.getUID(inbox.getMessage(messageNumber));
+				else
+					return -1;
+			}
+			
 			@Override
 			public void run() {
 		        Properties properties = new Properties();
@@ -799,54 +821,48 @@ public class DefaultMailManager implements MailManager {
 					store.connect(receiveMailSetting.getImapUser(), receiveMailSetting.getImapPassword());
 					inbox = (IMAPFolder) store.getFolder("INBOX");
 					inbox.open(Folder.READ_ONLY);
-
-					long uidValidity = inbox.getUIDValidity();
 					
+					long uidValidity = inbox.getUIDValidity();
+					AtomicInteger messageNumber = new AtomicInteger(0);
 					if (uidValidity == lastPosition.getUidValidity()) {
-						for (Message message: inbox.getMessagesByUID(lastPosition.getUid(), inbox.getUIDNext())) { 
-							try {
-								lastPosition.setUid(inbox.getUID(message) + 1);
-								listener.onReceived(message);
-							} catch (Exception e) {
-								logger.error("Error processing mail", e);
-							} 
+						logger.trace("Inbox uid validity unchanged (uid: {})", lastPosition.getUid());
+						if (lastPosition.getUid() != -1) {
+							Message lastMessage = inbox.getMessageByUID(lastPosition.getUid());
+							if (lastMessage != null) {
+								logger.trace("Last processed inbox message found (subject: {}, uid: {}, seq: {})", 
+										lastMessage.getSubject(), lastPosition.getUid(), lastMessage.getMessageNumber());
+								messageNumber.set(lastMessage.getMessageNumber());
+								processMessages(inbox, messageNumber);
+							} else {
+								messageNumber.set(inbox.getMessageCount());
+								lastPosition.setUid(getUid(inbox, messageNumber.get()));
+								logger.trace("Last processed inbox message not found (uid reset to: {})", lastPosition.getUid());
+							}
+						} else {
+							processMessages(inbox, messageNumber);
 						}
 					} else {
 						lastPosition.setUidValidity(uidValidity);
-						lastPosition.setUid(inbox.getUIDNext());
+						messageNumber.set(inbox.getMessageCount());
+						lastPosition.setUid(getUid(inbox, messageNumber.get()));
+						logger.trace("Inbox uid validity changed (uid reset to: {})", lastPosition.getUid());
 					}
-					
+
 					IMAPFolder inboxCopy = inbox;
-					inbox.addMessageCountListener(new MessageCountListener() {
-						
-						@Override
-						public void messagesAdded(MessageCountEvent event) {
-							for (Message message: event.getMessages()) { 
-								try {
-									lastPosition.setUid(inboxCopy.getUID(message) + 1);
-									listener.onReceived(message);
-								} catch (Exception e) {
-									logger.error("Error processing mail", e);
-								} 
-							}
-						}
-
-						@Override
-						public void messagesRemoved(MessageCountEvent e) {
-						}
-
-					});
-
 					future = executorService.submit(new Runnable() {
 
 						@Override
 						public void run() {
 							while (!Thread.interrupted()) { 
 								try {
-									inboxCopy.idle();
+									inboxCopy.idle(true);
+									if (inboxCopy.isOpen()) 
+										processMessages(inboxCopy, messageNumber);
+									else 
+										throw new FolderClosedException(inboxCopy, "Inbox closed for unknown reason");
 								} catch (MessagingException e) {
 									throw new RuntimeException(e);
-								}
+								} 
 							}
 						}
 						
