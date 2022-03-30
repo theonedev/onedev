@@ -39,8 +39,8 @@ public abstract class AbstractNotificationManager {
 		
 		Map<String, Object> bindings = new HashMap<>();
 		
-		eventSummary = HtmlEscape.escapeHtml5(eventSummary);
-		eventUrl = HtmlEscape.escapeHtml5(eventUrl);
+		eventSummary = HtmlEscape.escapeHtml4(eventSummary);
+		eventUrl = HtmlEscape.escapeHtml4(eventUrl);
 		
 		bindings.put("event", event);
 		bindings.put("eventSummary", eventSummary);
