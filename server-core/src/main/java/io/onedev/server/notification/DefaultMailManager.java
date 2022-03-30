@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -750,21 +751,27 @@ public class DefaultMailManager implements MailManager {
 			MessageListener listener, MailPosition lastPosition) {
 		return executorService.submit(new Runnable() {
 
-			private void checkMessages(IMAPFolder inbox) throws MessagingException {
-				logger.trace("Checking inbox messages...");
-				logger.trace("Uid to begin with: " + lastPosition.getUid());
-				long nextUID = inbox.getUIDNext();
-				logger.trace("Next inbox uid: " + nextUID);
-				for (Message message: inbox.getMessagesByUID(lastPosition.getUid(), nextUID)) { 
-					long uid = inbox.getUID(message);
-					lastPosition.setUid(uid + 1);
-					logger.trace("Processing inbox uid: " + uid);
+			private void processMessages(IMAPFolder inbox, AtomicInteger messageNumber) throws MessagingException {
+				int currentMessageNumber = inbox.getMessageCount();
+				for (int i=messageNumber.get()+1; i<=currentMessageNumber; i++) {
+					Message message = inbox.getMessage(i);
+					lastPosition.setUid(inbox.getUID(message));
+					logger.trace("Processing inbox messge (subject: {}, uid: {}, seq: {})", 
+							message.getSubject(), lastPosition.getUid(), i);
 					try {
 						listener.onReceived(message);
 					} catch (Exception e) {
 						logger.error("Error processing message", e);
 					} 
 				}
+				messageNumber.set(currentMessageNumber);
+			}
+			
+			private long getUid(IMAPFolder inbox, int messageNumber) throws MessagingException {
+				if (messageNumber != 0)
+					return inbox.getUID(inbox.getMessage(messageNumber));
+				else
+					return -1;
 			}
 			
 			@Override
@@ -790,19 +797,33 @@ public class DefaultMailManager implements MailManager {
 					store.connect(receiveMailSetting.getImapUser(), receiveMailSetting.getImapPassword());
 					inbox = (IMAPFolder) store.getFolder("INBOX");
 					inbox.open(Folder.READ_ONLY);
-
+					
 					long uidValidity = inbox.getUIDValidity();
-					
+					AtomicInteger messageNumber = new AtomicInteger(0);
 					if (uidValidity == lastPosition.getUidValidity()) {
-						checkMessages(inbox);
+						logger.trace("Inbox uid validity unchanged (uid: {})", lastPosition.getUid());
+						if (lastPosition.getUid() != -1) {
+							Message lastMessage = inbox.getMessageByUID(lastPosition.getUid());
+							if (lastMessage != null) {
+								logger.trace("Last processed inbox message found (subject: {}, uid: {}, seq: {})", 
+										lastMessage.getSubject(), lastPosition.getUid(), lastMessage.getMessageNumber());
+								messageNumber.set(lastMessage.getMessageNumber());
+								processMessages(inbox, messageNumber);
+							} else {
+								messageNumber.set(inbox.getMessageCount());
+								lastPosition.setUid(getUid(inbox, messageNumber.get()));
+								logger.trace("Last processed inbox message not found (uid reset to: {})", lastPosition.getUid());
+							}
+						} else {
+							processMessages(inbox, messageNumber);
+						}
 					} else {
-						logger.trace("Inbox uid validity changed");
 						lastPosition.setUidValidity(uidValidity);
-						lastPosition.setUid(inbox.getUIDNext());
-						logger.trace("Inbox uid validity: " + uidValidity);
-						logger.trace("Next inbox uid: " + lastPosition.getUid());
+						messageNumber.set(inbox.getMessageCount());
+						lastPosition.setUid(getUid(inbox, messageNumber.get()));
+						logger.trace("Inbox uid validity changed (uid reset to: {})", lastPosition.getUid());
 					}
-					
+
 					IMAPFolder inboxCopy = inbox;
 					future = executorService.submit(new Runnable() {
 
@@ -811,7 +832,10 @@ public class DefaultMailManager implements MailManager {
 							while (!Thread.interrupted()) { 
 								try {
 									inboxCopy.idle(true);
-									checkMessages(inboxCopy);
+									if (inboxCopy.isOpen()) 
+										processMessages(inboxCopy, messageNumber);
+									else 
+										throw new FolderClosedException(inboxCopy, "Inbox closed for unknown reason");
 								} catch (MessagingException e) {
 									throw new RuntimeException(e);
 								} 

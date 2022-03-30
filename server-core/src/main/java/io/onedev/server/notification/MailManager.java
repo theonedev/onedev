@@ -40,5 +40,5 @@ public interface MailManager {
 	
 	Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, int timeout, 
 			MessageListener listener, MailPosition MailPosition);
-	
+
 }
