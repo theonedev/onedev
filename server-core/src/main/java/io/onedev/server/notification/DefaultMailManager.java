@@ -29,8 +29,6 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.event.MessageCountEvent;
-import javax.mail.event.MessageCountListener;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.InternetAddress;
@@ -752,6 +750,23 @@ public class DefaultMailManager implements MailManager {
 			MessageListener listener, MailPosition lastPosition) {
 		return executorService.submit(new Runnable() {
 
+			private void checkMessages(IMAPFolder inbox) throws MessagingException {
+				logger.trace("Checking inbox messages...");
+				logger.trace("Uid to begin with: " + lastPosition.getUid());
+				long nextUID = inbox.getUIDNext();
+				logger.trace("Next inbox uid: " + nextUID);
+				for (Message message: inbox.getMessagesByUID(lastPosition.getUid(), nextUID)) { 
+					long uid = inbox.getUID(message);
+					lastPosition.setUid(uid + 1);
+					logger.trace("Processing inbox uid: " + uid);
+					try {
+						listener.onReceived(message);
+					} catch (Exception e) {
+						logger.error("Error processing message", e);
+					} 
+				}
+			}
+			
 			@Override
 			public void run() {
 		        Properties properties = new Properties();
@@ -779,50 +794,27 @@ public class DefaultMailManager implements MailManager {
 					long uidValidity = inbox.getUIDValidity();
 					
 					if (uidValidity == lastPosition.getUidValidity()) {
-						for (Message message: inbox.getMessagesByUID(lastPosition.getUid(), inbox.getUIDNext())) { 
-							try {
-								lastPosition.setUid(inbox.getUID(message) + 1);
-								listener.onReceived(message);
-							} catch (Exception e) {
-								logger.error("Error processing mail", e);
-							} 
-						}
+						checkMessages(inbox);
 					} else {
+						logger.trace("Inbox uid validity changed");
 						lastPosition.setUidValidity(uidValidity);
 						lastPosition.setUid(inbox.getUIDNext());
+						logger.trace("Inbox uid validity: " + uidValidity);
+						logger.trace("Next inbox uid: " + lastPosition.getUid());
 					}
 					
 					IMAPFolder inboxCopy = inbox;
-					inbox.addMessageCountListener(new MessageCountListener() {
-						
-						@Override
-						public void messagesAdded(MessageCountEvent event) {
-							for (Message message: event.getMessages()) { 
-								try {
-									lastPosition.setUid(inboxCopy.getUID(message) + 1);
-									listener.onReceived(message);
-								} catch (Exception e) {
-									logger.error("Error processing mail", e);
-								} 
-							}
-						}
-
-						@Override
-						public void messagesRemoved(MessageCountEvent e) {
-						}
-
-					});
-
 					future = executorService.submit(new Runnable() {
 
 						@Override
 						public void run() {
 							while (!Thread.interrupted()) { 
 								try {
-									inboxCopy.idle();
+									inboxCopy.idle(true);
+									checkMessages(inboxCopy);
 								} catch (MessagingException e) {
 									throw new RuntimeException(e);
-								}
+								} 
 							}
 						}
 						
