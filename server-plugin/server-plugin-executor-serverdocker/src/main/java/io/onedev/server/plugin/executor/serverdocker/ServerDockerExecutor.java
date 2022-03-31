@@ -329,7 +329,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 											if (hostAuthInfoHome.get() == null)
 												hostAuthInfoHome.set(FileUtils.createTempDir());
 											Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
-											git.workingDir(hostWorkspace).environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
+											
+											checkoutFacade.setupWorkingDir(git, hostWorkspace, hostCacheHome, cacheAllocations);
+											git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
 	
 											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
 											

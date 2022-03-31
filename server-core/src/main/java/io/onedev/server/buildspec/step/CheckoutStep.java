@@ -1,14 +1,19 @@
 package io.onedev.server.buildspec.step;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.gitcredential.DefaultCredential;
 import io.onedev.server.buildspec.job.gitcredential.GitCredential;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable(order=50, name="Checkout Code")
 public class CheckoutStep extends Step {
@@ -22,6 +27,8 @@ public class CheckoutStep extends Step {
 	private boolean withSubmodules;
 	
 	private Integer cloneDepth;
+	
+	private String checkoutPath;
 	
 	@Editable(order=100, description="By default code is cloned via an auto-generated credential, "
 			+ "which only has read permission over current project. In case the job needs to <a href='$docRoot/pages/push-in-job.md' target='_blank'>push code to server</a>, or want "
@@ -63,10 +70,26 @@ public class CheckoutStep extends Step {
 		this.cloneDepth = cloneDepth;
 	}
 
+	@Editable(order=300, placeholder="Job workspace", description="Optionally specify path relative to "
+			+ "job workspace to clone code into. Leave empty to use job workspace itself")
+	@Interpolative(variableSuggester="suggestVariables")
+	public String getCheckoutPath() {
+		return checkoutPath;
+	}
+
+	public void setCheckoutPath(String checkoutPath) {
+		this.checkoutPath = checkoutPath;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, false, false);
+	}
+	
 	@Override
 	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
 		return new CheckoutFacade(cloneDepth!=null?cloneDepth:0, withLfs, withSubmodules, 
-				cloneCredential.newCloneInfo(build, jobToken));
+				cloneCredential.newCloneInfo(build, jobToken), checkoutPath);
 	}
 
 }

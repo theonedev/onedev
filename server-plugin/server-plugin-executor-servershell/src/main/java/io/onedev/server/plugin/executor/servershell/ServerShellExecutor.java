@@ -195,7 +195,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
 									jobLogger.log("Checking out code...");
 									Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
-									git.workingDir(workspaceDir);
+									
+									checkoutFacade.setupWorkingDir(git, workspaceDir, cacheHomeDir, cacheAllocations);
+									
 									Map<String, String> environments = new HashMap<>();
 									environments.put("HOME", userDir.getAbsolutePath());
 									git.environments(environments);
