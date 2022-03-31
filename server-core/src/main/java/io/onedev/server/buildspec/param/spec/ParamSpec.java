@@ -80,6 +80,11 @@ public abstract class ParamSpec extends InputSpec {
 		super.setAllowEmpty(allowEmpty);
 	}
 
+	@Override
+	public String getNameOfEmptyValue() {
+		return null;
+	}
+
 	@Nullable
 	public static List<ParamSpec> list() {
 		Component component = ComponentContext.get().getComponent();

@@ -159,13 +159,6 @@ public abstract class FieldSpec extends InputSpec {
 		return SuggestionUtils.suggestProjects(matchWith);
 	}
 	
-	@Override
-	public void appendCommonAnnotations(StringBuffer buffer, int index) {
-		super.appendCommonAnnotations(buffer, index);
-		if (getNameOfEmptyValue() != null)
-			buffer.append("    @NameOfEmptyValue(\"" + escape(getNameOfEmptyValue()) + "\")");
-	}
-
 	private GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}

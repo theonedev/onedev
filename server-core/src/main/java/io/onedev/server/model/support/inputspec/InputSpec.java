@@ -109,6 +109,8 @@ public abstract class InputSpec implements Serializable {
 		this.allowEmpty = allowEmpty;
 	}
 	
+	public abstract String getNameOfEmptyValue();
+	
 	public List<String> getPossibleValues() {
 		return Lists.newArrayList();
 	}
@@ -142,9 +144,19 @@ public abstract class InputSpec implements Serializable {
 	}
 	
 	public void appendCommonAnnotations(StringBuffer buffer, int index) {
-		if (description != null) {
-			buffer.append("    @Editable(name=\"" + escape(name) + "\", description=\"" + 
-					escape(description) + "\", order=" + index + ")\n");
+		if (description != null && getNameOfEmptyValue() != null) {
+			buffer.append("    @Editable(name=\"" + escape(name) 
+					+ "\", placeholder=\"" + escape(getNameOfEmptyValue()) 
+					+ "\", description=\"" + escape(description) 
+					+ "\", order=" + index + ")\n");
+		} else if (description != null) {
+			buffer.append("    @Editable(name=\"" + escape(name) 
+					+ "\", description=\"" + escape(description) 
+					+ "\", order=" + index + ")\n");
+		} else if (getNameOfEmptyValue() != null) {
+			buffer.append("    @Editable(name=\"" + escape(name) 
+					+ "\", placeholder=\"" + escape(getNameOfEmptyValue()) 
+					+ "\", order=" + index + ")\n");
 		} else {
 			buffer.append("    @Editable(name=\"" + escape(name) + 
 					"\", order=" + index + ")\n");

@@ -49,8 +49,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -61,7 +59,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
@@ -70,7 +67,6 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.StatusCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
-import io.onedev.server.search.entity.issue.ProjectCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.search.entity.project.ChildrenOfCriteria;
 import io.onedev.server.search.entity.project.NameCriteria;
@@ -83,7 +79,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectPullRequestStats;
-import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
@@ -1202,8 +1197,7 @@ public class ProjectListPanel extends Panel {
 					};
 					issueInfoFrag.setDefaultModel(totalCountModel);
 
-					IssueQuery query = new IssueQuery(new ProjectCriteria(project.getPath()));
-					PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), 0);
+					PageParameters params = ProjectIssueListPage.paramsOf(project, null, 0);
 					Link<Void> issuesLink = new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, params);
 					issuesLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
@@ -1238,10 +1232,7 @@ public class ProjectListPanel extends Panel {
 							Project project = rowModel.getObject();
 							ProjectIssueStats stats = item.getModelObject();
 							StateSpec stateSpec = issueSetting.getStateSpecs().get(stats.getStateOrdinal());
-							AndCriteria<Issue> criteria = new AndCriteria<>(Lists.newArrayList(
-									new ProjectCriteria(project.getPath()), 
-									new StateCriteria(stateSpec.getName(), IssueQueryLexer.Is)));
-							IssueQuery query = new IssueQuery(criteria);
+							IssueQuery query = new IssueQuery(new StateCriteria(stateSpec.getName(), IssueQueryLexer.Is));
 							PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), 0);
 							Link<Void> stateLink = new BookmarkablePageLink<Void>("link", ProjectIssueListPage.class, params);
 							stateLink.add(new Label("label", stats.getStateCount() + " " + stateSpec.getName()));
