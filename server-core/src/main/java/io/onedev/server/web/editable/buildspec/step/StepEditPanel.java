@@ -331,7 +331,14 @@ abstract class StepEditPanel extends Panel implements BuildSpecAware, ParamSpecA
 
 								@Override
 								public double getMatchScore(TreeNode object) {
-									return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+									String fullName = object.getName();
+									if (object instanceof StepNode) {
+										StepNode stepNode = (StepNode) object;
+										String groupName = EditableUtils.getGroup(stepNode.stepClass);
+										if (groupName != null)
+											fullName = groupName + "/" + fullName;
+									}
+									return MatchScoreUtils.getMatchScore(fullName, searchInput);
 								}
 								
 							};

@@ -399,7 +399,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				}
 				
 				if (SecurityUtils.canReadCode(getProject())) 
-					tabs.add(new BuildTab("In Pipeline", BuildPipelinePage.class));
+					tabs.add(new BuildTab("Pipeline", BuildPipelinePage.class));
 				
 				LockUtils.read(getBuild().getArtifactsLockKey(), new Callable<Void>() {
 

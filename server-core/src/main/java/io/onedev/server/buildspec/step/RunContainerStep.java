@@ -19,7 +19,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=150, name="Run Container", description="Run specified docker container. To access files in "
+@Editable(order=150, name="Run Docker Container", description="Run specified docker container. To access files in "
 		+ "job workspace, either use environment variable <tt>JOB_WORKSPACE</tt>, or specify volume mounts")
 public class RunContainerStep extends Step {
 
