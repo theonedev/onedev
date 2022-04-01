@@ -37,6 +37,8 @@ public class ProjectDependency implements Serializable {
 	
 	private String artifacts = "**";
 	
+	private String destinationPath;
+	
 	private String accessTokenSecret;
 	
 	// change Named("projectPath") also if change name of this property 
@@ -97,6 +99,18 @@ public class ProjectDependency implements Serializable {
 
 	public void setArtifacts(String artifacts) {
 		this.artifacts = artifacts;
+	}
+	
+	@Editable(order=500, placeholder="Job workspace", description=""
+			+ "Optionally specify a path relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a> "
+			+ "to put retrieved artifacts. Leave empty to use job workspace itself")
+	@Interpolative(variableSuggester="suggestVariables")
+	public String getDestinationPath() {
+		return destinationPath;
+	}
+
+	public void setDestinationPath(String destinationPath) {
+		this.destinationPath = destinationPath;
 	}
 	
 	@SuppressWarnings("unused")

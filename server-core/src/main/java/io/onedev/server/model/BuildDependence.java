@@ -37,6 +37,8 @@ public class BuildDependence extends AbstractEntity {
 	
 	private String artifacts;
 	
+	private String destinationPath;
+	
 	public Build getDependent() {
 		return dependent;
 	}
@@ -68,6 +70,15 @@ public class BuildDependence extends AbstractEntity {
 
 	public void setArtifacts(String artifacts) {
 		this.artifacts = artifacts;
+	}
+
+	@Nullable
+	public String getDestinationPath() {
+		return destinationPath;
+	}
+
+	public void setDestinationPath(String destinationPath) {
+		this.destinationPath = destinationPath;
 	}
 
 	@SuppressWarnings("unused")

@@ -1,10 +1,7 @@
 package io.onedev.server.plugin.executor.servershell;
 
-import static io.onedev.agent.ShellExecutorUtils.resolveCachePath;
 import static io.onedev.agent.ShellExecutorUtils.testCommands;
-import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
-import static io.onedev.k8shelper.KubernetesHelper.getCacheInstances;
 import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
 import static io.onedev.k8shelper.KubernetesHelper.readPlaceholderValues;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
@@ -12,15 +9,12 @@ import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import javax.validation.constraints.Size;
 
@@ -32,24 +26,24 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.k8shelper.BuildImageFacade;
+import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.CompositeFacade;
-import io.onedev.k8shelper.RunContainerFacade;
+import io.onedev.k8shelper.JobCache;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.OsExecution;
 import io.onedev.k8shelper.OsInfo;
+import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.git.config.GitConfig;
@@ -102,25 +96,24 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					JobManager jobManager = OneDev.getInstance(JobManager.class);		
 					File cacheHomeDir = getCacheHome();
 					
-					for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
-						if (new File(cacheSpec.getPath()).isAbsolute()) {
-							throw new ExplicitException("Shell executor does not support "
-									+ "absolute cache path: " + cacheSpec.getPath());
-						}
-					}
-					jobLogger.log("Allocating job caches...") ;
-					Map<CacheInstance, Date> cacheInstances = getCacheInstances(cacheHomeDir);
-					Map<CacheInstance, String> cacheAllocations = jobManager.allocateJobCaches(jobToken, new Date(), cacheInstances);
-					checkCacheAllocations(cacheHomeDir, cacheAllocations, new Consumer<File>() {
-	
+					jobLogger.log("Setting up job cache...") ;
+					JobCache cache = new JobCache(cacheHomeDir) {
+
 						@Override
-						public void accept(File directory) {
-							FileUtils.cleanDir(directory);
+						protected Map<CacheInstance, String> allocate(CacheAllocationRequest request) {
+							return jobManager.allocateJobCaches(jobToken, request);							
+						}
+
+						@Override
+						protected void clean(File cacheDir) {
+							FileUtils.cleanDir(cacheDir);							
 						}
 						
-					});
-					
+					};
+					cache.init(true);
 					FileUtils.createDir(workspaceDir);
+					
+					cache.installSymbolinks(workspaceDir);
 					
 					jobLogger.log("Copying job dependencies...");
 					jobContext.copyDependencies(workspaceDir);
@@ -158,24 +151,6 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									throw new RuntimeException(e);
 								}
 								
-								for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
-									if (!PathUtils.isCurrent(entry.getValue())) {
-										File sourceDir = entry.getKey().getDirectory(cacheHomeDir);
-										File destDir = resolveCachePath(workspaceDir, entry.getValue());
-										if (destDir.exists())
-											FileUtils.deleteDir(destDir);
-										else
-											FileUtils.createDir(destDir.getParentFile());
-										try {
-											Files.createSymbolicLink(destDir.toPath(), sourceDir.toPath());
-										} catch (IOException e) {
-											throw new RuntimeException(e);
-										}
-									} else {
-										throw new ExplicitException("Invalid cache path: " + entry.getValue());
-									}
-								}
-								
 								Commandline interpreter = commandFacade.getInterpreter();
 								Map<String, String> environments = new HashMap<>();
 								environments.put("GIT_HOME", userDir.getAbsolutePath());
@@ -196,7 +171,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									jobLogger.log("Checking out code...");
 									Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
 									
-									checkoutFacade.setupWorkingDir(git, workspaceDir, cacheHomeDir, cacheAllocations);
+									checkoutFacade.setupWorkingDir(git, workspaceDir);
 									
 									Map<String, String> environments = new HashMap<>();
 									environments.put("HOME", userDir.getAbsolutePath());

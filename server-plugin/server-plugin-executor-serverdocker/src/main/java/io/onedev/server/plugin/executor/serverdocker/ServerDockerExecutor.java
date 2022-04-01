@@ -6,9 +6,7 @@ import static io.onedev.agent.DockerExecutorUtils.deleteNetwork;
 import static io.onedev.agent.DockerExecutorUtils.isUseProcessIsolation;
 import static io.onedev.agent.DockerExecutorUtils.newDockerKiller;
 import static io.onedev.agent.DockerExecutorUtils.startService;
-import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
-import static io.onedev.k8shelper.KubernetesHelper.getCacheInstances;
 import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
 import static io.onedev.k8shelper.KubernetesHelper.readPlaceholderValues;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
@@ -20,7 +18,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -53,11 +49,13 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.BuildImageFacade;
+import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CheckoutFacade;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.JobCache;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.k8shelper.LeafHandler;
@@ -167,18 +165,22 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					JobManager jobManager = OneDev.getInstance(JobManager.class);		
 					File hostCacheHome = getCacheHome();
 					
-					jobLogger.log("Allocating job caches...") ;
-					Map<CacheInstance, Date> cacheInstances = getCacheInstances(hostCacheHome);
-					Map<CacheInstance, String> cacheAllocations = jobManager.allocateJobCaches(jobToken, new Date(), cacheInstances);
-					checkCacheAllocations(hostCacheHome, cacheAllocations, new Consumer<File>() {
-	
+					jobLogger.log("Setting up job cache...") ;
+					JobCache cache = new JobCache(hostCacheHome) {
+
 						@Override
-						public void accept(File directory) {
-							cleanDirAsRoot(directory, newDocker(), Bootstrap.isInDocker());
+						protected Map<CacheInstance, String> allocate(CacheAllocationRequest request) {
+							return jobManager.allocateJobCaches(jobToken, request);
+						}
+
+						@Override
+						protected void clean(File cacheDir) {
+							cleanDirAsRoot(cacheDir, newDocker(), Bootstrap.isInDocker());							
 						}
 						
-					});
-						
+					};
+					cache.init(false);
+
 					login(jobLogger);
 					
 					createNetwork(newDocker(), network, jobLogger);
@@ -195,9 +197,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						
 						AtomicReference<File> hostAuthInfoHome = new AtomicReference<>(null);
 						try {						
+							cache.installSymbolinks(hostWorkspace);
+							
 							jobLogger.log("Copying job dependencies...");
 							jobContext.copyDependencies(hostWorkspace);
-	
+							
 							String containerBuildHome;
 							String containerWorkspace;
 							if (SystemUtils.IS_OS_WINDOWS) {
@@ -222,64 +226,66 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									if (getRunOptions() != null)
 										docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 									
-									docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
-									
-									for (Map.Entry<String, String> entry: volumeMounts.entrySet()) {
-										String hostPath = getHostPath(new File(hostWorkspace, entry.getKey()).getAbsolutePath());
-										docker.addArgs("-v", hostPath + ":" + entry.getValue());
-									}
-									
-									if (entrypoint != null) 
-										docker.addArgs("-w", containerWorkspace);
-									else if (workingDir != null) 
-										docker.addArgs("-w", workingDir);
-									
-									for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
-										if (!PathUtils.isCurrent(entry.getValue())) {
+									// Uninstall symbol links as docker can not process it well
+									cache.uninstallSymbolinks(hostWorkspace);
+									try {
+										docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
+										
+										for (Map.Entry<String, String> entry: volumeMounts.entrySet()) {
+											String hostPath = getHostPath(new File(hostWorkspace, entry.getKey()).getAbsolutePath());
+											docker.addArgs("-v", hostPath + ":" + entry.getValue());
+										}
+										
+										if (entrypoint != null) 
+											docker.addArgs("-w", containerWorkspace);
+										else if (workingDir != null) 
+											docker.addArgs("-w", workingDir);
+										
+										for (Map.Entry<CacheInstance, String> entry: cache.getAllocations().entrySet()) {
 											String hostCachePath = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
 											String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
 											docker.addArgs("-v", getHostPath(hostCachePath) + ":" + containerCachePath);
-										} else {
-											throw new ExplicitException("Invalid cache path: " + entry.getValue());
 										}
-									}
-									
-									if (SystemUtils.IS_OS_WINDOWS) 
-										docker.addArgs("-v", "//./pipe/docker_engine://./pipe/docker_engine");
-									else
-										docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
-									
-									if (hostAuthInfoHome.get() != null) {
-										String hostPath = getHostPath(hostAuthInfoHome.get().getAbsolutePath());
-										if (SystemUtils.IS_OS_WINDOWS) {
-											docker.addArgs("-v",  hostPath + ":C:\\Users\\ContainerAdministrator\\auth-info");
-											docker.addArgs("-v",  hostPath + ":C:\\Users\\ContainerUser\\auth-info");
-										} else { 
-											docker.addArgs("-v", hostPath + ":/root/auth-info");
+										
+										if (SystemUtils.IS_OS_WINDOWS) 
+											docker.addArgs("-v", "//./pipe/docker_engine://./pipe/docker_engine");
+										else
+											docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+										
+										if (hostAuthInfoHome.get() != null) {
+											String hostPath = getHostPath(hostAuthInfoHome.get().getAbsolutePath());
+											if (SystemUtils.IS_OS_WINDOWS) {
+												docker.addArgs("-v",  hostPath + ":C:\\Users\\ContainerAdministrator\\auth-info");
+												docker.addArgs("-v",  hostPath + ":C:\\Users\\ContainerUser\\auth-info");
+											} else { 
+												docker.addArgs("-v", hostPath + ":/root/auth-info");
+											}
 										}
+										
+										for (Map.Entry<String, String> entry: environments.entrySet()) 
+											docker.addArgs("-e", entry.getKey() + "=" + entry.getValue());
+										
+										docker.addArgs("-e", "ONEDEV_WORKSPACE=" + containerWorkspace);
+	
+										if (useTTY)
+											docker.addArgs("-t");
+										
+										if (entrypoint != null)
+											docker.addArgs("--entrypoint=" + entrypoint);
+										
+										if (isUseProcessIsolation(newDocker(), image, osInfo, jobLogger))
+											docker.addArgs("--isolation=process");
+										
+										docker.addArgs(image);
+										docker.addArgs(arguments.toArray(new String[arguments.size()]));
+										
+										ExecutionResult result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger), 
+												ExecutorUtils.newWarningLogger(jobLogger), null, newDockerKiller(newDocker(), 
+												containerName, jobLogger));
+										return result.getReturnCode();
+									} finally {
+										cache.installSymbolinks(hostWorkspace);
 									}
-									
-									for (Map.Entry<String, String> entry: environments.entrySet()) 
-										docker.addArgs("-e", entry.getKey() + "=" + entry.getValue());
-									
-									docker.addArgs("-e", "ONEDEV_WORKSPACE=" + containerWorkspace);
-
-									if (useTTY)
-										docker.addArgs("-t");
-									
-									if (entrypoint != null)
-										docker.addArgs("--entrypoint=" + entrypoint);
-									
-									if (isUseProcessIsolation(newDocker(), image, osInfo, jobLogger))
-										docker.addArgs("--isolation=process");
-									
-									docker.addArgs(image);
-									docker.addArgs(arguments.toArray(new String[arguments.size()]));
-									
-									ExecutionResult result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger), 
-											ExecutorUtils.newWarningLogger(jobLogger), null, newDockerKiller(newDocker(), 
-											containerName, jobLogger));
-									return result.getReturnCode();
 								}
 								
 								@Override
@@ -330,7 +336,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												hostAuthInfoHome.set(FileUtils.createTempDir());
 											Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
 											
-											checkoutFacade.setupWorkingDir(git, hostWorkspace, hostCacheHome, cacheAllocations);
+											checkoutFacade.setupWorkingDir(git, hostWorkspace);
 											git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
 	
 											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
@@ -362,7 +368,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										}
 									} else {
 										ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
-										
 										File filesDir = FileUtils.createTempDir();
 										try {
 											Collection<String> placeholders = serverSideFacade.getPlaceholders();
@@ -410,6 +415,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							if (!successful)
 								throw new FailedException();
 						} finally {
+							cache.uninstallSymbolinks(hostWorkspace);
 							// Fix https://code.onedev.io/projects/160/issues/597
 							if (SystemUtils.IS_OS_WINDOWS)
 								FileUtils.deleteDir(hostWorkspace);

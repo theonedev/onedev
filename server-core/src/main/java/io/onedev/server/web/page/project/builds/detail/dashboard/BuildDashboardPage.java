@@ -19,10 +19,10 @@ public class BuildDashboardPage extends BuildDetailPage {
 		super(params);
 		
 		PageProvider pageProvider;
-		if (SecurityUtils.canReadCode(getProject()))
-			pageProvider = new PageProvider(BuildPipelinePage.class, BuildPipelinePage.paramsOf(getBuild()));
-		else if (SecurityUtils.canAccessLog(getBuild()))
+		if (SecurityUtils.canAccessLog(getBuild()))
 			pageProvider = new PageProvider(BuildLogPage.class, BuildLogPage.paramsOf(getBuild()));
+		else if (SecurityUtils.canReadCode(getProject()))
+			pageProvider = new PageProvider(BuildPipelinePage.class, BuildPipelinePage.paramsOf(getBuild()));
 		else if (getBuild().getArtifactsDir().exists())
 			pageProvider = new PageProvider(BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild()));
 		else

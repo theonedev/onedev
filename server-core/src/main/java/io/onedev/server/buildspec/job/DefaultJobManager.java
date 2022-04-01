@@ -55,6 +55,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
+import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CompositeFacade;
 import io.onedev.k8shelper.LeafFacade;
@@ -346,6 +347,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							dependence.setDependent(build);
 							dependence.setRequireSuccessful(interpolated.isRequireSuccessful());
 							dependence.setArtifacts(interpolated.getArtifacts());
+							dependence.setDestinationPath(interpolated.getDestinationPath());
 							build.getDependencies().add(dependence);
 						}
 						
@@ -389,6 +391,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					dependence.setDependency(dependencyBuild);
 					dependence.setDependent(build);
 					dependence.setArtifacts(dependency.getArtifacts());
+					dependence.setDestinationPath(dependency.getDestinationPath());
 					build.getDependencies().add(dependence);
 				}
 	
@@ -668,11 +671,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 																public Void call() throws Exception {
 																	File artifactsDir = dependency.getArtifactsDir();
 																	if (artifactsDir.exists()) {
+																		File destDir = targetDir;
+																		if (dependence.getDestinationPath() != null)
+																			destDir = new File(destDir, dependence.getDestinationPath());
 																		PatternSet patternSet = PatternSet.parse(dependence.getArtifacts());
 																		int baseLen = artifactsDir.getAbsolutePath().length() + 1;
 																		for (File file: patternSet.listFiles(artifactsDir)) {
 																			try {
-																				FileUtils.copyFile(file, new File(targetDir, file.getAbsolutePath().substring(baseLen)));
+																				FileUtils.copyFile(file, new File(destDir, file.getAbsolutePath().substring(baseLen)));
 																			} catch (IOException e) {
 																				throw new RuntimeException(e);
 																			}
@@ -1296,17 +1302,16 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public Map<CacheInstance, String> allocateJobCaches(String jobToken, Date currentTime, 
-			Map<CacheInstance, Date> cacheInstances) {
+	public Map<CacheInstance, String> allocateJobCaches(String jobToken, CacheAllocationRequest request) {
 		synchronized (jobContexts) {
 			JobContext jobContext = getJobContext(jobToken, true);
 			
-			List<CacheInstance> sortedInstances = new ArrayList<>(cacheInstances.keySet());
+			List<CacheInstance> sortedInstances = new ArrayList<>(request.getInstances().keySet());
 			sortedInstances.sort(new Comparator<CacheInstance>() {
 	
 				@Override
 				public int compare(CacheInstance o1, CacheInstance o2) {
-					return cacheInstances.get(o2).compareTo(cacheInstances.get(o1));
+					return request.getInstances().get(o2).compareTo(request.getInstances().get(o1));
 				}
 				
 			});
@@ -1335,7 +1340,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 				@Override
 				public void accept(CacheInstance instance) {
-					long ellapsed = currentTime.getTime() - cacheInstances.get(instance).getTime();
+					long ellapsed = request.getCurrentTime().getTime() - request.getInstances().get(instance).getTime();
 					if (ellapsed > jobContext.getCacheTTL() * 24L * 3600L * 1000L) {
 						allocations.put(instance, null);
 						jobContext.getAllocatedCaches().add(instance.getName());
@@ -1345,7 +1350,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				
 			};
 			
-			cacheInstances.keySet()
+			request.getInstances().keySet()
 					.stream()
 					.filter(it->!allAllocated.contains(it.getName()))
 					.forEach(deletionMarker);

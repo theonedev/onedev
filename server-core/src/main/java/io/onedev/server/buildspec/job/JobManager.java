@@ -1,7 +1,6 @@
 package io.onedev.server.buildspec.job;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +9,7 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -27,8 +27,7 @@ public interface JobManager {
 	
 	JobContext getJobContext(String jobToken, boolean mustExist);
 	
-	Map<CacheInstance, String> allocateJobCaches(String jobToken, Date currentTime, 
-			Map<CacheInstance, Date> cacheInstances);
+	Map<CacheInstance, String> allocateJobCaches(String jobToken, CacheAllocationRequest request);
 	
 	@Nullable
 	Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 

@@ -74,10 +74,10 @@ public class KubernetesResource {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
     @POST
-    public byte[] allocateJobCaches(String cacheAllocationRequestString) {
-		CacheAllocationRequest cacheAllocationRequest = CacheAllocationRequest.fromString(cacheAllocationRequestString);
+    public byte[] allocateJobCaches(String requestString) {
+		CacheAllocationRequest request = CacheAllocationRequest.fromString(requestString);
 		return SerializationUtils.serialize((Serializable) jobManager.allocateJobCaches(
-				getJobToken(), cacheAllocationRequest.getCurrentTime(), cacheAllocationRequest.getInstances()));
+				getJobToken(), request));
     }
 	
 	@Path("/run-server-step")

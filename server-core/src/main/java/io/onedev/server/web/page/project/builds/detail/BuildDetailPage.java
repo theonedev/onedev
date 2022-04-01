@@ -386,9 +386,6 @@ public abstract class BuildDetailPage extends ProjectPage
 			protected List<Tab> load() {
 				List<Tab> tabs = new ArrayList<>();
 
-				if (SecurityUtils.canReadCode(getProject())) 
-					tabs.add(new BuildTab("In Pipeline", BuildPipelinePage.class));
-				
 				if (SecurityUtils.canAccessLog(getBuild())) {
 					tabs.add(new BuildTab("Log", BuildLogPage.class) {
 	
@@ -400,6 +397,9 @@ public abstract class BuildDetailPage extends ProjectPage
 						
 					});
 				}
+				
+				if (SecurityUtils.canReadCode(getProject())) 
+					tabs.add(new BuildTab("In Pipeline", BuildPipelinePage.class));
 				
 				LockUtils.read(getBuild().getArtifactsLockKey(), new Callable<Void>() {
 
