@@ -338,7 +338,9 @@ abstract class StepEditPanel extends Panel implements BuildSpecAware, ParamSpecA
 										if (groupName != null)
 											fullName = groupName + "/" + fullName;
 									}
-									return MatchScoreUtils.getMatchScore(fullName, searchInput);
+									return MatchScoreUtils.getMatchScore(
+											StringUtils.deleteWhitespace(fullName), 
+											StringUtils.deleteWhitespace(searchInput));
 								}
 								
 							};

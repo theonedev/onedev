@@ -30,6 +30,8 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.support.administration.PerformanceSetting;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
@@ -50,13 +52,20 @@ public class DefaultResourceManager implements ResourceManager {
 	
 	private final Map<String, QueryCache> queryCaches = new HashMap<>();
 	
+	private final SessionManager sessionManager;
+	
+	private final TransactionManager transactionManager;
+	
 	private final Dao dao;
 	
 	@Inject
-	public DefaultResourceManager(Dao dao, SettingManager settingManager, AgentManager agentManager) {
+	public DefaultResourceManager(Dao dao, SettingManager settingManager, AgentManager agentManager, 
+			SessionManager sessionManager, TransactionManager transactionManager) {
 		this.dao = dao;
 		this.settingManager = settingManager;
 		this.agentManager = agentManager;
+		this.sessionManager = sessionManager;
+		this.transactionManager = transactionManager;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -77,23 +86,48 @@ public class DefaultResourceManager implements ResourceManager {
 
 	@Transactional
 	@Listen
-	public synchronized void on(AgentConnected event) {
-		Agent agent = event.getAgent();
-		agentResourceHolders.put(agent.getId(), new ResourceHolder(agent.getResources()));
-		for (QueryCache cache: queryCaches.values()) {
-			if (cache.query.matches(agent))
-				cache.result.add(agent.getId());
-		}
-		notifyAll();
+	public void on(AgentConnected event) {
+		Long agentId = event.getAgent().getId();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				sessionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						synchronized (DefaultResourceManager.this) {
+							Agent agent = agentManager.load(agentId);
+							agentResourceHolders.put(agentId, new ResourceHolder(agent.getResources()));
+							for (QueryCache cache: queryCaches.values()) {
+								if (cache.query.matches(agent))
+									cache.result.add(agentId);
+							}
+							DefaultResourceManager.this.notifyAll();
+						}
+					}
+					
+				});
+			}
+			
+		});
 	}
 	
 	@Transactional
 	@Listen
-	public synchronized void on(AgentDisconnected event) {
+	public void on(AgentDisconnected event) {
 		Long agentId = event.getAgent().getId();
-		agentResourceHolders.remove(agentId);
-		for (QueryCache cache: queryCaches.values())
-			cache.result.remove(agentId);
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				synchronized (DefaultResourceManager.this) {
+					agentResourceHolders.remove(agentId);
+					for (QueryCache cache: queryCaches.values())
+						cache.result.remove(agentId);
+				}
+			}
+		});
 	}
 	
 	@Transactional
@@ -103,20 +137,33 @@ public class DefaultResourceManager implements ResourceManager {
 			Setting setting = (Setting) event.getEntity();
 			if (setting.getKey() == Setting.Key.PERFORMANCE) {
 				PerformanceSetting performanceSetting = (PerformanceSetting) setting.getValue();
-				synchronized (this) {
-					serverResourceHolder.updateTotalResource(ResourceHolder.CPU, 
-							performanceSetting.getServerJobExecutorCpuQuota());
-					serverResourceHolder.updateTotalResource(ResourceHolder.MEMORY, 
-							performanceSetting.getServerJobExecutorMemoryQuota());
-					notifyAll();
-				}
+				transactionManager.runAfterCommit(new Runnable() {
+
+					@Override
+					public void run() {
+						synchronized (DefaultResourceManager.this) {
+							serverResourceHolder.updateTotalResource(ResourceHolder.CPU, 
+									performanceSetting.getServerJobExecutorCpuQuota());
+							serverResourceHolder.updateTotalResource(ResourceHolder.MEMORY, 
+									performanceSetting.getServerJobExecutorMemoryQuota());
+							DefaultResourceManager.this.notifyAll();
+						}
+					}
+				});
 			}
 		} else if (event.getEntity() instanceof Agent) {
-			synchronized (this) {
-				Agent agent = (Agent) event.getEntity();
-				agentPaused.put(agent.getId(), agent.isPaused());
-				notifyAll();
-			}
+			Long agentId = event.getEntity().getId();
+			boolean paused = ((Agent)event.getEntity()).isPaused();
+			transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					synchronized (DefaultResourceManager.this) {
+						agentPaused.put(agentId, paused);
+						DefaultResourceManager.this.notifyAll();
+					}
+				}
+			});
 		}
 	}
 	
@@ -124,9 +171,16 @@ public class DefaultResourceManager implements ResourceManager {
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Agent) { 
-			synchronized (this) {
-				agentPaused.remove(((Agent) event.getEntity()).getId());
-			}
+			Long agentId = event.getEntity().getId();
+			transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					synchronized (DefaultResourceManager.this) {
+						agentPaused.remove(agentId);
+					}
+				}
+			});
 		}
 	}
 	
@@ -213,7 +267,7 @@ public class DefaultResourceManager implements ResourceManager {
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		} finally {
-			synchronized (this) {
+			synchronized(this) {
 				serverResourceHolder.releaseResources(serverResourceRequirements);
 				agentResourceHolder.releaseResources(agentResourceRequirements);
 				notifyAll();
