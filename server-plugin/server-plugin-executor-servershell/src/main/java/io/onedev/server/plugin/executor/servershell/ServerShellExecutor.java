@@ -3,16 +3,13 @@ package io.onedev.server.plugin.executor.servershell;
 import static io.onedev.agent.ShellExecutorUtils.testCommands;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
-import static io.onedev.k8shelper.KubernetesHelper.readPlaceholderValues;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +47,6 @@ import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.job.resource.ResourceManager;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.servershell.ServerShellExecutor.TestData;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
@@ -199,38 +195,18 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								}
 							} else {
 								ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
-								
-								File filesDir = FileUtils.createTempDir();
 								try {
-									Collection<String> placeholders = serverSideFacade.getPlaceholders();
-									Map<String, String> placeholderValues = readPlaceholderValues(buildDir, placeholders);
-									PatternSet filePatterns = new PatternSet(
-											new HashSet<>(replacePlaceholders(serverSideFacade.getIncludeFiles(), placeholderValues)), 
-											new HashSet<>(replacePlaceholders(serverSideFacade.getExcludeFiles(), placeholderValues)));
-
-									int baseLen = workspaceDir.getAbsolutePath().length()+1;
-									for (File file: filePatterns.listFiles(workspaceDir)) {
-										try {
-											FileUtils.copyFile(file, new File(filesDir, file.getAbsolutePath().substring(baseLen)));
-										} catch (IOException e) {
-											throw new RuntimeException(e);
+									serverSideFacade.execute(buildDir, new ServerSideFacade.Runner() {
+										
+										@Override
+										public Map<String, byte[]> run(File inputDir, Map<String, String> placeholderValues) {
+											return jobContext.runServerStep(position, inputDir, placeholderValues, jobLogger);
 										}
-									}
-
-									Map<String, byte[]> outputFiles = jobContext.runServerStep(position, filesDir, placeholderValues, jobLogger);
-									
-									if (outputFiles != null) {
-										for (Map.Entry<String, byte[]> entry: outputFiles.entrySet()) {
-											FileUtils.writeByteArrayToFile(
-													new File(buildDir, entry.getKey()), 
-													entry.getValue());
-										}
-									}
+										
+									});
 								} catch (Exception e) {
 									jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 									return false;
-								} finally {
-									FileUtils.deleteDir(filesDir);
 								}
 							}
 							jobLogger.success("Step \"" + stepNames + "\" is successful");

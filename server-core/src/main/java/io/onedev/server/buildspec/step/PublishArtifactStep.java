@@ -23,10 +23,25 @@ public class PublishArtifactStep extends ServerSideStep {
 
 	private static final long serialVersionUID = 1L;
 
+	private String sourcePath;
+	
 	private String artifacts;
 	
+	@Editable(order=50, name="From Path", placeholder="Job workspace", description="Optionally specify path "
+			+ "relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a> to publish "
+			+ "artifacts from. Leave empty to use job workspace itself")
+	@Interpolative(variableSuggester="suggestVariables")
+	@Override
+	public String getSourcePath() {
+		return sourcePath;
+	}
+	
+	public void setSourcePath(String sourcePath) {
+		this.sourcePath = sourcePath;
+	}
+	
 	@Editable(order=100, description="Specify files to publish as job artifacts relative to "
-			+ "<a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>. Use * or ? for pattern match")
+			+ "source path specified above. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty
@@ -42,7 +57,7 @@ public class PublishArtifactStep extends ServerSideStep {
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
-	
+
 	@Override
 	protected PatternSet getFiles() {
 		return PatternSet.parse(getArtifacts());

@@ -24,7 +24,13 @@ public abstract class ServerSideStep extends Step {
 
 	@Override
 	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
-		return new ServerSideFacade(this, getFiles().getIncludes(), getFiles().getExcludes(), getPlaceholders());
+		return new ServerSideFacade(this, getSourcePath(), 
+				getFiles().getIncludes(), getFiles().getExcludes(), getPlaceholders());
+	}
+	
+	@Nullable
+	protected String getSourcePath() {
+		return null;
 	}
 
 	protected PatternSet getFiles() {
