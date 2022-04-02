@@ -18,8 +18,8 @@
         <div wicket:id="errorMessage" class="error-message"></div>
     </wicket:fragment>
     <wicket:fragment wicket:id="jobsFrag">
-        <div wicket:id="pipeline" class="side autofit flex-grow-1"></div>
-        <div wicket:id="detail" class="main d-flex flex-column ml-4"></div>
+        <div wicket:id="pipeline" class="side autofit"></div>
+        <div wicket:id="detail" class="main d-flex flex-column flex-grow-1 ml-4 p-2"></div>
     </wicket:fragment>
     <wicket:fragment wicket:id="elementsFrag">
         <div class="side autofit flex-shrink-0">
@@ -27,15 +27,7 @@
             	<a wicket:id="select" class="select btn btn-outline-secondary text-nowrap justify-content-start"><span wicket:id="label"></span></a>
 	        </div></div>
 		</div>
-        <div wicket:id="detail" class="main d-flex flex-column ml-4 flex-grow-1">
-			<div class="head">
-				<h6 wicket:id="title" class="mb-0"></h6>
-			</div>
-			<div class="body flex-grow-1 autofit">
-				<div wicket:id="notice"></div>
-		        <div wicket:id="content" class="content"></div>
-			</div>
-		</div>
+        <div wicket:id="detail" class="main d-flex flex-column flex-grow-1 ml-4 p-2"></div>
     </wicket:fragment>
 	<wicket:fragment wicket:id="elementImportNoticeFrag">
 		<div class="alert alert-light-info">
@@ -64,12 +56,8 @@
     	<a wicket:id="select" class="select btn btn-outline-secondary text-nowrap"><span wicket:id="label"></span></a>
     	<a wicket:id="run" class="run btn btn-outline-secondary btn-icon flex-grow-0 flex-shrink-0" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="jobDetailFrag">
-		<div class="head">
-			<a wicket:id="close" class="close"><wicket:svg href="times" class="icon"/></a>
-			<h6 class="mb-0">Job Detail</h6>
-		</div>
-	    <div class="body flex-grow-1 autofit">
+	<wicket:fragment wicket:id="elementDetailFrag">
+	    <div class="body flex-grow-1 autofit p-3">
 			<div wicket:id="notice"></div>
 			<div wicket:id="content"></div>
 		</div>

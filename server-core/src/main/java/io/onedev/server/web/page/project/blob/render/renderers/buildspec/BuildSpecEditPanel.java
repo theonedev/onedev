@@ -74,7 +74,6 @@ import io.onedev.server.web.component.pipeline.Sortable;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -128,26 +127,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							
 							WebMarkupContainer jobDetail;
 							if (jobIndex != -1) {
-								jobDetail = new Fragment("detail", "jobDetailFrag", BuildSpecEditPanel.this);
-								
-								jobDetail.add(new AjaxSubmitLink("close") {
-									
-									@Override
-									protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-										super.onSubmit(target, form);
-										pushState(target, "jobs");
-										setupJobDetail(target, -1);
-										notifyJobSelectionChange(target, null);
-									}
-
-									@Override
-									protected void onError(AjaxRequestTarget target, Form<?> form) {
-										super.onError(target, form);
-										target.add(jobsEditor);
-										resizeWindow(target);
-									}
-									
-								});
+								jobDetail = new Fragment("detail", "elementDetailFrag", BuildSpecEditPanel.this);
 								
 								class JobEditor extends BeanEditor implements JobAware {
 
@@ -282,8 +262,13 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 											
 											int activeJobIndex = (int) jobDetail.getDefaultModelObject();
 											if (jobIndex == activeJobIndex) {
-												replaceState(target, "jobs");
-												setupJobDetail(target, -1);
+												if (getJobs().isEmpty()) {
+													replaceState(target, "jobs");
+													setupJobDetail(target, -1);
+												} else {
+													replaceState(target, "jobs/" + getJobs().get(0).getName());
+													setupJobDetail(target, 0);
+												}
 											} else if (jobIndex < activeJobIndex) {
 												jobDetail.setDefaultModelObject(activeJobIndex-1);
 											}
@@ -374,7 +359,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 										fragment.add(new WebMarkupContainer("suggestions").setVisible(false));
 									}
 									
-									fragment.add(AttributeAppender.append("class", "add-job nav btn-group"));
+									fragment.add(AttributeAppender.append("class", "add-job nav btn-group flex-nowrap"));
 									return fragment;
 								}
 
@@ -425,7 +410,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 								
 							}.setOutputMarkupId(true));
 							
-							setupJobDetail(null, getActiveElementIndex(context, Job.class, buildSpec.getJobs(), -1));
+							setupJobDetail(null, getActiveElementIndex(context, Job.class, buildSpec.getJobs(), 0));
 							
 							add(AttributeAppender.append("class", "elements d-flex flex-nowrap jobs"));
 							
@@ -576,7 +561,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						@Override
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
-							pushState(target,  "jobs");
+							pushState(target, "jobs");
 							setupJobsEditor(target);
 							resizeWindow(target);
 						}
@@ -776,8 +761,8 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				private void fixState(AjaxRequestTarget target) {
 					String selection = getSelection();
 					if (selection == null || selection.startsWith("jobs")) {
-						int jobIndex = getActiveElementIndex(context, Job.class, buildSpec.getJobs(), -1);
-						if (jobIndex >= 0 && jobIndex < buildSpec.getJobs().size())
+						int jobIndex = getActiveElementIndex(context, Job.class, buildSpec.getJobs(), 0);
+						if (jobIndex < buildSpec.getJobs().size())
 							replaceState(target, "jobs/" + buildSpec.getJobs().get(jobIndex).getName());
 					} else if (selection.startsWith("services")) {
 						int serviceIndex = getActiveElementIndex(context, Service.class, buildSpec.getServices(), 0);
@@ -901,8 +886,6 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 			if (elementIndex != -1) {
 				elementDetail = new Fragment("detail", "elementDetailFrag", BuildSpecEditPanel.this);
 				elementDetail.setDefaultModel(Model.of(elementIndex));
-				
-				elementDetail.add(new Label("title", EditableUtils.getDisplayName(elementClass) + " Detail"));
 				
 				BeanEditor elementEditor = newElementEditor("body", getElements().get(elementIndex));
 				

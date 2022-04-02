@@ -18,8 +18,8 @@
         <div wicket:id="errorMessage" class="error-message"></div>
     </wicket:fragment>
 	<wicket:fragment wicket:id="jobsFrag">
-        <div wicket:id="pipeline" class="side flex-grow-1 autofit"></div>
-        <div wicket:id="detail" class="main d-flex flex-column ml-4"></div>
+        <div wicket:id="pipeline" class="side autofit"></div>
+        <div wicket:id="detail" class="main d-flex flex-column flex-grow-1 ml-4 p-2"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="elementsFrag">
         <div class="side autofit flex-shrink-0">
@@ -38,13 +38,10 @@
                 </a>
             </div>
         </div>
-		<div wicket:id="detail" class="main autofit d-flex flex-column flex-grow-1 ml-4"></div>
+		<div wicket:id="detail" class="main autofit d-flex flex-column flex-grow-1 ml-4 p-2"></div>
 	</wicket:fragment>
     <wicket:fragment wicket:id="elementDetailFrag">
-		<div class="head">
-			<h6 wicket:id="title" class="mb-0"></h6>
-		</div>
-		<div wicket:id="body" class="body autofit flex-grow-1"></div>
+		<div wicket:id="body" class="body autofit flex-grow-1 p-3"></div>
     </wicket:fragment>
 	<wicket:fragment wicket:id="jobFrag">
         <a wicket:id="select" class="select btn btn-outline-secondary text-nowrap justify-content-start">
@@ -53,15 +50,8 @@
         </a>
         <a wicket:id="delete" title="Delete" class="delete btn btn-outline-secondary btn-icon flex-grow-0 flex-shrink-0"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 	</wicket:fragment>
-    <wicket:fragment wicket:id="jobDetailFrag">
-		<div class="head">
-			<a wicket:id="close" class="close"><wicket:svg href="times" class="icon"/></a>
-			<h6 class="mb-0">Job Detail</h6>
-		</div>
-		<div wicket:id="body" class="body autofit flex-grow-1"></div>
-    </wicket:fragment>
     <wicket:fragment wicket:id="addJobFrag">
-        <a wicket:id="create" class="create btn btn-primary justify-content-start">
+        <a wicket:id="create" class="create btn btn-primary justify-content-start text-nowrap">
             <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add New
         </a>
         <a wicket:id="suggestions" class="suggestions btn btn-primary flex-grow-0 flex-shrink-0 btn-icon" title="Suggestions">

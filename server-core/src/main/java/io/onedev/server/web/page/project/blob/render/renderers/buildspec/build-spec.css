@@ -43,7 +43,6 @@
 }
 .build-spec.parseable>.body>.content>.side {
 	min-width: 220px;
-	padding-right: 1rem;
 }
 
 .build-spec.parseable>.body>.content>.side>.navs:not(:empty) {
@@ -54,14 +53,8 @@
     border: 1px solid var(--light-gray);
 }
 .build-spec.parseable>.body>.jobs.content>.main {
-	width: 600px;
-	min-width: 600px;
-}
-.build-spec.parseable>.body>.content>.main>.head {
-	padding: 1.5rem;
-}
-.build-spec.parseable>.body>.content>.main>.body {
-	padding: 0 1.5rem 1.5rem 1.5rem;
+	min-width: 550px;
+	flex-shrink: 100000;
 }
 .dark-mode .build-spec.parseable>.body>.content>.main {
     border-color: var(--dark-mode-lighter-dark);

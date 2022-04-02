@@ -205,7 +205,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								protected void onInitialize() {
 									super.onInitialize();
 
-									int activeJobIndex = getActiveElementIndex(context, Job.class, jobs, -1);
+									int activeJobIndex = getActiveElementIndex(context, Job.class, jobs, 0);
 									
 									add(new PipelinePanel("pipeline") {
 
@@ -279,41 +279,24 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								}
 	
 								private void setupJobDetail(@Nullable AjaxRequestTarget target, int jobIndex) {
-									WebMarkupContainer jobDetail;
-									if (jobIndex != -1) {
-										Job job = buildSpec.getJobs().get(jobIndex);
-										jobDetail = new Fragment("detail", "jobDetailFrag", BuildSpecBlobViewPanel.this);
-										jobDetail.add(new ElementImportNoticePanel(buildSpec, Job.class, job.getName()) {
+									Job job = buildSpec.getJobs().get(jobIndex);
+									Fragment detailFrag = new Fragment("detail", "elementDetailFrag", BuildSpecBlobViewPanel.this);
+									detailFrag.add(new ElementImportNoticePanel(buildSpec, Job.class, job.getName()) {
 
-											@Override
-											protected Map<String, ? extends NamedElement> getElementMap(BuildSpec buildSpec) {
-												return buildSpec.getJobMap();
-											}
-											
-										});
-										jobDetail.add(new AjaxLink<Void>("close") {
-
-											@Override
-											public void onClick(AjaxRequestTarget target) {
-												String position = getPosition("jobs");
-												context.pushState(target, context.getBlobIdent(), position);
-												setupJobDetail(target, -1);
-												notifyJobSelectionChange(target, null);
-											}
-											
-										});
-										jobDetail.add(BeanContext.view("content", job));
-									} else {
-										jobDetail = new WebMarkupContainer("detail");
-										jobDetail.setVisible(false);
-									}
-									jobDetail.setOutputMarkupPlaceholderTag(true);
+										@Override
+										protected Map<String, ? extends NamedElement> getElementMap(BuildSpec buildSpec) {
+											return buildSpec.getJobMap();
+										}
+										
+									});
+									detailFrag.add(BeanContext.view("content", job));
+									detailFrag.setOutputMarkupId(true);
 									
 									if (target != null) {
-										replace(jobDetail);
-										target.add(jobDetail);
+										replace(detailFrag);
+										target.add(detailFrag);
 									} else {
-										add(jobDetail);
+										add(detailFrag);
 									}
 								}
 								
@@ -602,7 +585,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 					public void onClick(AjaxRequestTarget target) {
 						String position = getPosition(urlSegment + "s/" + element.getName());
 						context.pushState(target, context.getBlobIdent(), position);
-						setupElementViewer(target, elementIndex);
+						setupElementDetail(target, elementIndex);
 					}
 					
 				};
@@ -622,13 +605,13 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 			}
 			add(navsView);
 
-			setupElementViewer(null, getActiveElementIndex(context, elementClass, getElements(true), 0));
+			setupElementDetail(null, getActiveElementIndex(context, elementClass, getElements(true), 0));
 			
 			add(AttributeAppender.append("class", "elements d-flex flex-nowrap " + urlSegment + "s"));
 		}
 
-		private void setupElementViewer(@Nullable AjaxRequestTarget target, int elementIndex) {
-			WebMarkupContainer detailContainer = new WebMarkupContainer("detail") {
+		private void setupElementDetail(@Nullable AjaxRequestTarget target, int elementIndex) {
+			Fragment detailFrag = new Fragment("detail", "elementDetailFrag", BuildSpecBlobViewPanel.this) {
 				
 				@Override
 				public void renderHead(IHeaderResponse response) {
@@ -642,7 +625,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 			
 			T element = getElements(true).get(elementIndex);
 			
-			detailContainer.add(new ElementImportNoticePanel(buildSpec, elementClass, element.getName()) {
+			detailFrag.add(new ElementImportNoticePanel(buildSpec, elementClass, element.getName()) {
 
 				@Override
 				protected Map<String, ? extends NamedElement> getElementMap(BuildSpec buildSpec) {
@@ -651,16 +634,14 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 				
 			});
 			
-			detailContainer.add(new Label("title", EditableUtils.getDisplayName(elementClass) + " Detail"));
-			
-			detailContainer.add(BeanContext.view("content", element));
-			detailContainer.setOutputMarkupId(true);
+			detailFrag.add(BeanContext.view("content", element));
+			detailFrag.setOutputMarkupId(true);
 			
 			if (target != null) {
-				replace(detailContainer);
-				target.add(detailContainer);
+				replace(detailFrag);
+				target.add(detailFrag);
 			} else {
-				add(detailContainer);
+				add(detailFrag);
 			}
 		}
 		
