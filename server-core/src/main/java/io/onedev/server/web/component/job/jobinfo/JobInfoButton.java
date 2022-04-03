@@ -9,6 +9,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -136,7 +137,7 @@ public abstract class JobInfoButton extends Panel {
 			}
 			
 		});
-		
+		detailLink.add(AttributeAppender.append("class", "justify-content-start text-nowrap"));
 		detailLink.setOutputMarkupId(true);
 		add(detailLink);
 		
