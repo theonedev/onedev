@@ -122,9 +122,8 @@ public abstract class PipelinePanel extends Panel {
 		if (event.getPayload() instanceof JobSelectionChange) {
 			JobSelectionChange jobSelectionChange = (JobSelectionChange) event.getPayload();
 			
-			JobIndex activeJobIndex = JobIndex.of(getPipeline(), jobSelectionChange.getJob());
 			String script = String.format("onedev.server.pipeline.markJobActive($(\"#%s>.pipeline\"), %s);", 
-					getMarkupId(), activeJobIndex!=null?activeJobIndex.toJson():"undefined");
+					getMarkupId(), JobIndex.of(getPipeline(), jobSelectionChange.getJob()).toJson());
 			jobSelectionChange.getHandler().appendJavaScript(script);
 			
 			event.stop();
@@ -194,23 +193,16 @@ public abstract class PipelinePanel extends Panel {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new PipelineResourceReference()));
 
-		String activePipelineJobIndex;
-		int activeJobIndex = getActiveJobIndex();
-		if (activeJobIndex != -1)
-			activePipelineJobIndex = JobIndex.of(getPipeline(), getJobs().get(activeJobIndex)).toJson();
-		else
-			activePipelineJobIndex = "undefined";
-		
 		// Run script via OnLoad in order for icons to be fully loaded before drawing 
 		// dependency line
 		String script = String.format("onedev.server.pipeline.onWindowLoad('%s', %s, %s);", 
-				getMarkupId(), buildDependencyMap(), activePipelineJobIndex);
+				getMarkupId(), buildDependencyMap(), 
+				JobIndex.of(getPipeline(), getJobs().get(getActiveJobIndex())).toJson());
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 	
 	protected abstract List<Job> getJobs();
 	
-	@Nullable
 	protected abstract int getActiveJobIndex();
 
 	protected abstract Component renderJob(String componentId, int jobIndex);

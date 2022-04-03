@@ -118,7 +118,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				private void setupJobsEditor(@Nullable AjaxRequestTarget target) {
 					Fragment jobsEditor = new Fragment("content", "jobsFrag", BuildSpecEditPanel.this) {
 
-						private void notifyJobSelectionChange(AjaxRequestTarget target, @Nullable Job job) {
+						private void notifyJobSelectionChange(AjaxRequestTarget target, Job job) {
 							send(this, Broadcast.BREADTH, new JobSelectionChange(target, job));
 						}
 						

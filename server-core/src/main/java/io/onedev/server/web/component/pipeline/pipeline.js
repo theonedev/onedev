@@ -9,9 +9,9 @@ onedev.server.pipeline = {
 				row: parseInt(splitted[1])
 			}
 		}
-		
-		var $pipeline = $("#" + containerId + ">.pipeline");
 
+		var $pipeline = $("#" + containerId + ">.pipeline");
+		
 		for (var jobIndexString in dependencies) {
 			var jobIndex = getJobIndex(jobIndexString); 
 			for (var i in dependencies[jobIndexString]) {
@@ -21,8 +21,7 @@ onedev.server.pipeline = {
 			}
 		}
 		
-		if (activeJobIndex)
-			onedev.server.pipeline.markJobActive($pipeline, activeJobIndex);
+		onedev.server.pipeline.markJobActive($pipeline, activeJobIndex);
 	},
 	drawDependencyLine: function($pipeline, dependencyJobIndex, jobIndex) {
 		var dependencyJobIndexString = dependencyJobIndex.column + "-" + dependencyJobIndex.row;
@@ -197,17 +196,15 @@ onedev.server.pipeline = {
 				stroke: onedev.server.pipeline.lineColor
 			});
 		});
-		if (jobIndex) {
-			onedev.server.pipeline.getJob($pipeline, jobIndex).addClass("active");
-			var jobIndexString = jobIndex.column + "-" + jobIndex.row;
-			paper.selectAll("[from='" + jobIndexString + "'], [to='" + jobIndexString + "']").forEach(function(e) {
-				e.attr({
-					stroke: "#3699FF"
-				});
-				paper.append(e);
+		onedev.server.pipeline.getJob($pipeline, jobIndex).addClass("active");
+		var jobIndexString = jobIndex.column + "-" + jobIndex.row;
+		paper.selectAll("[from='" + jobIndexString + "'], [to='" + jobIndexString + "']").forEach(function(e) {
+			e.attr({
+				stroke: "#3699FF"
 			});
-			$pipeline.find(".active").scrollIntoView();
-		}
+			paper.append(e);
+		});
+		$pipeline.find(".active").scrollIntoView();
 	},
 	onSortStart: function($uiItem) {
 		var $pipeline = $uiItem.closest(".pipeline");

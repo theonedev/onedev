@@ -9,6 +9,9 @@
 	max-height: 100px;
 }
 
+.build-pipeline .pipeline-column {
+	flex-grow: 0 !important;
+}
 .build-pipeline .pipeline-row>.btn-group {
 	width: 100%;
 }

@@ -197,7 +197,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 						if (!jobs.isEmpty()) {
 							jobsViewer = new Fragment("content", "jobsFrag", BuildSpecBlobViewPanel.this) {
 	
-								private void notifyJobSelectionChange(AjaxRequestTarget target, @Nullable Job job) {
+								private void notifyJobSelectionChange(AjaxRequestTarget target, Job job) {
 									send(this, Broadcast.BREADTH, new JobSelectionChange(target, job));
 								}
 								

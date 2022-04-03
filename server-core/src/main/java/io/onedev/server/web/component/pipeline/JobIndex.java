@@ -3,11 +3,10 @@ package io.onedev.server.web.component.pipeline;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 
@@ -32,8 +31,7 @@ public class JobIndex implements Serializable {
 		return row;
 	}
 
-	@Nullable
-	public static JobIndex of(List<List<Job>> pipeline, @Nullable Job job) {
+	public static JobIndex of(List<List<Job>> pipeline, Job job) {
 		for (int columnIndex = 0; columnIndex < pipeline.size(); columnIndex++) {
 			List<Job> column = pipeline.get(columnIndex);
 			for (int rowIndex = 0; rowIndex < column.size(); rowIndex++) {
@@ -41,7 +39,7 @@ public class JobIndex implements Serializable {
 					return new JobIndex(columnIndex, rowIndex);
 			}
 		}
-		return null;
+		throw new ExplicitException("Unable to find job: " + job.getName());
 	}
 	
 	public Job getJob(List<List<Job>> pipeline) {
