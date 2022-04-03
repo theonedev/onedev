@@ -567,7 +567,7 @@ public class DefaultMailManager implements MailManager {
 		comment.setUser(user);
 		String content = stripQuotation(readText(issue.getProject(), issue.getUUID(), message));
 		if (content != null) {
-			comment.setContent(content);
+			comment.setContent("<div class='no-color'>" + content + "</div>");
 			issueCommentManager.save(comment, receiverEmailAddresses);
 		}
 	}
@@ -582,7 +582,7 @@ public class DefaultMailManager implements MailManager {
 		comment.setUser(user);
 		String content = stripQuotation(readText(pullRequest.getProject(), pullRequest.getUUID(), message));
 		if (content != null) {
-			comment.setContent(content);
+			comment.setContent("<div class='no-color'>" + content + "</div>");
 			pullRequestCommentManager.save(comment, receiverEmailAddresses);
 		}
 	}
@@ -611,7 +611,7 @@ public class DefaultMailManager implements MailManager {
 
 		String description = readText(project, issue.getUUID(), message);
 		if (StringUtils.isNotBlank(description))
-			issue.setDescription(description);
+			issue.setDescription("<div class='no-color'>" + description + "</div>");
 
 		if (user == null)
 			user = createUser(submitter, project, authorization.getAuthorizedRole());

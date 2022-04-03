@@ -438,3 +438,7 @@
 	color: #0073e9;
 }
 
+.markdown-rendered .no-color * {
+	color: inherit !important;
+	background-color: inherit !important;
+}
