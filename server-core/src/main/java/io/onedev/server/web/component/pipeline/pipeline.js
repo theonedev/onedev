@@ -21,7 +21,8 @@ onedev.server.pipeline = {
 			}
 		}
 		
-		onedev.server.pipeline.markJobActive($pipeline, activeJobIndex);
+		if (activeJobIndex)
+			onedev.server.pipeline.markJobActive($pipeline, activeJobIndex);
 	},
 	drawDependencyLine: function($pipeline, dependencyJobIndex, jobIndex) {
 		var dependencyJobIndexString = dependencyJobIndex.column + "-" + dependencyJobIndex.row;

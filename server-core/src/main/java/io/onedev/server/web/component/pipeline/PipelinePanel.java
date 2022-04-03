@@ -193,11 +193,17 @@ public abstract class PipelinePanel extends Panel {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new PipelineResourceReference()));
 
+		String activePipelineJobIndex;
+		int activeJobIndex = getActiveJobIndex();
+		if (activeJobIndex != -1)
+			activePipelineJobIndex = JobIndex.of(getPipeline(), getJobs().get(activeJobIndex)).toJson();
+		else
+			activePipelineJobIndex = "undefined";
+		
 		// Run script via OnLoad in order for icons to be fully loaded before drawing 
 		// dependency line
 		String script = String.format("onedev.server.pipeline.onWindowLoad('%s', %s, %s);", 
-				getMarkupId(), buildDependencyMap(), 
-				JobIndex.of(getPipeline(), getJobs().get(getActiveJobIndex())).toJson());
+				getMarkupId(), buildDependencyMap(), activePipelineJobIndex);
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 	

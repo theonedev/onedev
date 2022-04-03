@@ -410,7 +410,10 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 								
 							}.setOutputMarkupId(true));
 							
-							setupJobDetail(null, getActiveElementIndex(context, Job.class, buildSpec.getJobs(), 0));
+							if (!buildSpec.getJobs().isEmpty())
+								setupJobDetail(null, getActiveElementIndex(context, Job.class, buildSpec.getJobs(), 0));
+							else
+								setupJobDetail(null, -1);
 							
 							add(AttributeAppender.append("class", "elements d-flex flex-nowrap jobs"));
 							
