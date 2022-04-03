@@ -66,11 +66,13 @@ Queries can be saved and subscribed, so that you won't miss anything interested.
 
 OneDev ships with GUI to generate CI/CD Yaml. No need to google around for Yaml grammars. A one-liner docker command to start OneDev server and you have a local CI/CD runner automatically. Concerns about server capability to run massive jobs? Another one-liner to connect self-updating agent from any machine. Want auto-scale CI/CD farm? A helm one-liner to deploy OneDev into k8s cluster. 
 
-Matrix jobs, typed parameters, parameter chaining, step templates, build promotions… too many neat features to elaborate here…
+Build pipeline, matrix jobs, typed parameters, parameter chaining, step templates, build promotions… too many neat features to elaborate…
 
 ![job-def](doc/images/job-command.gif)
 
 ![run-job](doc/images/build-option.gif)
+
+![pipeline.gif](doc/images/pipeline.gif)
 
 ## Flexible Pull Request Review Policy and Reviewer Suggestion
 
