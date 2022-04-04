@@ -58,6 +58,7 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
 		userManager.save(user);
 
 		EmailAddress emailAddress = new EmailAddress();
+		emailAddress.setOwner(user);
 		emailAddress.setVerificationCode(null);
 		emailAddress.setValue(authenticated.getEmail());
 		emailAddress.setPrimary(true);
