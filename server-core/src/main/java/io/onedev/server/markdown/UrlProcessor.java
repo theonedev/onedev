@@ -1,6 +1,7 @@
 package io.onedev.server.markdown;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -13,7 +14,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -28,6 +32,8 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
 public class UrlProcessor implements MarkdownProcessor {
 
+	private static final Logger logger = LoggerFactory.getLogger(UrlProcessor.class);
+	
 	@Override
 	public void process(Document rendered, Project project, Object context) {
 		if (RequestCycle.get() != null && context instanceof BlobRenderContext && project != null) {
@@ -52,14 +58,14 @@ public class UrlProcessor implements MarkdownProcessor {
 
 				@Override
 				public void tail(Node node, int depth) {
-					if (node.nodeName().equals("a")) {
-						String url = node.attr("href");
-						if (StringUtils.isNotBlank(url)) {
-							url = url.trim();
-							if (UrlUtils.isRelative(url) && !url.startsWith("#")) {
-								Element element = (Element) node;
-								element.attr("href", resolveUrl(blobRenderContext.getDirectoryUrl(), url));
-								try {
+					try {
+						if (node.nodeName().equals("a")) {
+							String url = node.attr("href");
+							if (StringUtils.isNotBlank(url)) {
+								url = url.trim();
+								if (UrlUtils.isRelative(url) && !url.startsWith("#")) {
+									Element element = (Element) node;
+									element.attr("href", resolveUrl(blobRenderContext.getDirectoryUrl(), url));
 									String path = UrlUtils.decodePath(UrlUtils.trimHashAndQuery(url));
 									String directory = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(directory, path);
@@ -83,30 +89,29 @@ public class UrlProcessor implements MarkdownProcessor {
 											missingElement.after(htmlToAddFile);
 										}
 									}
-								} catch (IOException e) {
-									throw new RuntimeException(e);
 								}
 							}
-						}
-					} else if (node.nodeName().equals("img")) {
-						String url = node.attr("src");
-						if (StringUtils.isNotBlank(url)) {
-							url = url.trim();
-							if (UrlUtils.isRelative(url) && !url.startsWith("#")) {
-								Element element = (Element) node;
-								element.attr("src", blobRenderContext.appendRaw(resolveUrl(blobRenderContext.getDirectoryUrl(), url)));
-								try {
+						} else if (node.nodeName().equals("img")) {
+							String url = node.attr("src");
+							if (StringUtils.isNotBlank(url)) {
+								url = url.trim();
+								if (UrlUtils.isRelative(url) && !url.startsWith("#")) {
+									Element element = (Element) node;
+									element.attr("src", blobRenderContext.appendRaw(resolveUrl(blobRenderContext.getDirectoryUrl(), url)));
 									String basePath = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(basePath, UrlUtils.decodePath(UrlUtils.trimHashAndQuery(url)));
 									referencedPath = GitUtils.normalizePath(referencedPath);
 									if (referencedPath != null && (commit == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null)) {
 										element.after("<span class='missing'>!!missing!!</span>");
 									}
-								} catch (IOException e) {
-									throw new RuntimeException(e);
 								}
 							}
 						}
+					} catch (Exception e) {
+						if (ExceptionUtils.find(e, URISyntaxException.class) != null)
+							logger.error("Error parsing url", e);
+						else
+							throw ExceptionUtils.unchecked(e);
 					}
 				}
 			}, rendered);

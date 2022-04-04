@@ -72,7 +72,7 @@
 	margin-left: 4px;
 	padding: 0 2px;
 }
-.dark-mode .markdown-rendered a+.missing, img+.missing {
+.dark-mode .markdown-rendered a+.missing, .dark-mode img+.missing {
 	background: var(--dark-mode-light-danger);
 	color: var(--danger);
 }
