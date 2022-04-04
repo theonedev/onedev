@@ -985,7 +985,7 @@ class AgentListPanel extends Panel {
 			
 			@Override
 			public String getCssClass() {
-				return "d-none d-lg-table-cell";
+				return "d-none d-xl-table-cell";
 			}
 			
 		});
@@ -1000,7 +1000,7 @@ class AgentListPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "d-none d-lg-table-cell";
+				return "d-none d-xl-table-cell";
 			}
 
 			@Override
@@ -1020,7 +1020,7 @@ class AgentListPanel extends Panel {
 			
 			@Override
 			public String getCssClass() {
-				return "d-none d-lg-table-cell";
+				return "d-none d-xl-table-cell";
 			}
 			
 			@Override

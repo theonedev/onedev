@@ -1,3 +1,6 @@
+.agent-list table thead>tr>th, .agent-detail table thead>tr>th {
+	white-space: nowrap;
+}
 .floating .token-list {
 	width: 640px;
 }
