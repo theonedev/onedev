@@ -60,11 +60,11 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
-import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -246,7 +246,16 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 
 				OneDev.getInstance(PullRequestManager.class).checkReviews(request, Lists.newArrayList());
 
-				if (SecurityUtils.canWriteCode(target.getProject())) {
+				List<User> owners = target.getProject().getUserAuthorizations().stream()
+						.filter(it->it.getRole().isOwner())
+						.map(it->it.getUser())
+						.collect(Collectors.toList());
+				if (owners.size() == 1) {
+					PullRequestAssignment assignment = new PullRequestAssignment();
+					assignment.setRequest(request);
+					assignment.setUser(owners.get(0));
+					request.getAssignments().add(assignment);
+				} else if (SecurityUtils.canWriteCode(target.getProject())) {
 					PullRequestAssignment assignment = new PullRequestAssignment();
 					assignment.setRequest(request);
 					assignment.setUser(SecurityUtils.getUser());

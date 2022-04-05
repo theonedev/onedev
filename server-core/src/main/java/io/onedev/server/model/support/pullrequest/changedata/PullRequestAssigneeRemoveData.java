@@ -20,9 +20,9 @@ public class PullRequestAssigneeRemoveData extends PullRequestChangeData {
 	public String getActivity() {
 		User user = getUser();
 		if (user != null)
-			return "added assignee \"" + user.getDisplayName() + "\"";
+			return "removed assignee \"" + user.getDisplayName() + "\"";
 		else
-			return "added assignee unknown";
+			return "removed assignee unknown";
 	}
 	
 	@Nullable
