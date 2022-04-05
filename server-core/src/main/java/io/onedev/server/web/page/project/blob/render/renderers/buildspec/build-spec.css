@@ -44,8 +44,11 @@
 .build-spec.parseable>.body>.content>.side {
 	min-width: 220px;
 }
+.build-spec.parseable>.body>.content>.side .btn-block:last-child {
+	margin-bottom: 0 !important;
+}
 
-.build-spec.parseable>.body>.content>.side>.navs:not(:empty) {
+.build-spec-edit.parseable>.body>.content>.side>.navs:not(:empty) {
     margin-bottom: 1.5rem;
 }
 .build-spec.parseable>.body>.content>.main {
