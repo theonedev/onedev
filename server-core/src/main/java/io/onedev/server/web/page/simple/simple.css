@@ -98,9 +98,6 @@
 	font-size: 1.5rem !important;
 }
 
-.LoginPage .setup-2fa {
-	text-align: left;
-}
 .LoginPage .setup-2fa .modal-header {
 	display: none;
 }

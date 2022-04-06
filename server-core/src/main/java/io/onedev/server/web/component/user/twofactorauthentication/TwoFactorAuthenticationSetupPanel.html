@@ -10,7 +10,7 @@
 				<div wicket:id="enforceNotice" class="alert alert-light-warning">Two-factor authentication is enforced 
 				for your account to enhance security. Please follow below procedure to set it up</div>
 				<div class="text-secondary font-weight-boldest">
-				1. Scan below QR code with your TOTP authenticators
+				Scan below QR code with your TOTP authenticators
 				</div>
 				<div>These authenticators normally run 
 				on your mobile phone, some examples are Google Authenticator, Microsoft Authenticator, Authy, 1Password etc.</div>
@@ -20,7 +20,7 @@
 				</div>
 				
 				<div class="text-secondary font-weight-boldest">
-				2. Then enter the passcode shown in the TOTP authenticator to verify
+				Then enter the passcode shown in the TOTP authenticator to verify
 				</div>
 				<input wicket:id="passcode" placeholder="6-digits passcode" class="form-control mt-2">
 				<div wicket:id="feedback" class="mb-n3 mt-3"></div>
@@ -45,7 +45,7 @@
 			them secret. These codes can be used to provide one-time access to your account in case you 
 			can not access the authentication application. They will <b>NOT</b> be displayed again 
 			</div>
-			<div class="mx-5">
+			<div>
 				<div wicket:id="recoveryCodes" class="d-flex justify-content-between text-monospace font-size-lg font-weight-bold">
 					<div wicket:id="left"></div>
 					<div wicket:id="right"></div>
