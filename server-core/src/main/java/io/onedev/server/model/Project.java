@@ -125,9 +125,12 @@ import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.model.support.build.DefaultFixedIssueFilter;
 import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
+import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
+import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -1933,6 +1936,70 @@ public class Project extends AbstractEntity {
 		PatternSet patternSet = PatternSet.parse(patterns);
 		return patternSet.getIncludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(path, it)) 
 				|| patternSet.getExcludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(path, it));
+	}
+	
+	@Nullable
+	public NamedIssueQuery getNamedIssueQuery(String name) {
+		for (NamedIssueQuery namedQuery: getNamedIssueQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+
+	@Nullable
+	public NamedBuildQuery getNamedBuildQuery(String name) {
+		for (NamedBuildQuery namedQuery: getNamedBuildQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+	
+	@Nullable
+	public NamedPullRequestQuery getNamedPullRequestQuery(String name) {
+		for (NamedPullRequestQuery namedQuery: getNamedPullRequestQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+	
+	public List<NamedIssueQuery> getNamedIssueQueries() {
+		Project current = this;
+		do {
+			List<NamedIssueQuery> namedQueries = current.getIssueSetting().getNamedQueries();
+			if (namedQueries != null)
+				return (ArrayList<NamedIssueQuery>) namedQueries;
+			current = current.getParent();
+		} while (current != null); 
+		
+		return (ArrayList<NamedIssueQuery>) OneDev.getInstance(SettingManager.class).getIssueSetting().getNamedQueries();
+	}
+	
+	public List<NamedBuildQuery> getNamedBuildQueries() {
+		Project current = this;
+		do {
+			List<NamedBuildQuery> namedQueries = current.getBuildSetting().getNamedQueries();
+			if (namedQueries != null)
+				return (ArrayList<NamedBuildQuery>) namedQueries;
+			current = current.getParent();
+		} while (current != null); 
+		
+		return (ArrayList<NamedBuildQuery>) OneDev.getInstance(SettingManager.class).getBuildSetting().getNamedQueries();
+	}
+	
+	public List<NamedPullRequestQuery> getNamedPullRequestQueries() {
+		Project current = this;
+		do {
+			List<NamedPullRequestQuery> namedQueries = current.getPullRequestSetting().getNamedQueries();
+			if (namedQueries != null)
+				return (ArrayList<NamedPullRequestQuery>) namedQueries;
+			current = current.getParent();
+		} while (current != null); 
+		
+		return (ArrayList<NamedPullRequestQuery>) OneDev.getInstance(SettingManager.class)
+				.getPullRequestSetting().getNamedQueries();
 	}
 	
 }

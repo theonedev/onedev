@@ -87,12 +87,12 @@ public class ProjectCommitsPage extends ProjectPage {
 			}
 
 			@Override
-			protected ArrayList<NamedCommitQuery> getGlobalQueries() {
+			protected ArrayList<NamedCommitQuery> getCommonQueries() {
 				return getProject().getNamedCommitQueries();
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedCommitQuery> projectQueries) {
+			protected void onSaveCommonQueries(ArrayList<NamedCommitQuery> projectQueries) {
 				getProject().setNamedCommitQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}

@@ -113,7 +113,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 		handler.add(this);
 	}
 	
-	private boolean canEditGlobalQueries() {
+	private boolean canEditCommonQueries() {
 		return SecurityUtils.isAdministrator() || Project.get() != null && SecurityUtils.canManage(Project.get());
 	}
 	
@@ -143,7 +143,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null && (getQueryPersonalization() != null || canEditGlobalQueries()));
+				setVisible(SecurityUtils.getUser() != null && (getQueryPersonalization() != null || canEditCommonQueries()));
 			}
 
 			@Override
@@ -173,20 +173,20 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				};
 			}
 			
-			private Component newGlobalQueriesEditor(String componentId, ModalPanel modal) {
-				ArrayList<T> queries = getGlobalQueries();
+			private Component newCommonQueriesEditor(String componentId, ModalPanel modal) {
+				ArrayList<T> queries = getCommonQueries();
 				UseDefaultListener useDefaultListener;
 				if (queries == null) {
-					queries = new ArrayList<>(getDefaultQueries());
+					queries = new ArrayList<>(getInheritedCommonQueries());
 					useDefaultListener = null;
-				} else if (getDefaultQueries() != null) {
+				} else if (getInheritedCommonQueries() != null) {
 					useDefaultListener = new UseDefaultListener() {
 						
 						@Override
 						public void onUseDefault(AjaxRequestTarget target) {
 							target.add(SavedQueriesPanel.this);
 							modal.close();
-							onSaveGlobalQueries(null);
+							onSaveCommonQueries(null);
 						}
 						
 					};
@@ -200,7 +200,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onSave(AjaxRequestTarget target, ArrayList<T> queries) {
 						target.add(SavedQueriesPanel.this);
 						modal.close();
-						onSaveGlobalQueries(queries);
+						onSaveCommonQueries(queries);
 					}
 					
 					@Override
@@ -236,7 +236,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					});
 					fragment.add(newPersonalQueriesEditor(TAB_PANEL_ID, modal));
 					
-					if (canEditGlobalQueries()) {
+					if (canEditCommonQueries()) {
 						tabs.add(new AjaxActionTab(Model.of("All Users")) {
 
 							@Override
@@ -247,7 +247,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 							@Override
 							protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-								Component editor = newGlobalQueriesEditor(TAB_PANEL_ID, modal);
+								Component editor = newCommonQueriesEditor(TAB_PANEL_ID, modal);
 								fragment.replace(editor);
 								target.add(editor);
 							}
@@ -258,7 +258,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					fragment.add(new Tabbable("tab", tabs));
 				} else {
 					fragment = new Fragment(id, "editSavedQueriesFrag", SavedQueriesPanel.this);
-					fragment.add(newGlobalQueriesEditor("content", modal));
+					fragment.add(newCommonQueriesEditor("content", modal));
 				}
 				
 				fragment.add(new AjaxLink<Void>("close") {
@@ -357,12 +357,12 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 		});
 		
-		add(new ListView<T>("globalQueries", new LoadableDetachableModel<List<T>>() {
+		add(new ListView<T>("commonQueries", new LoadableDetachableModel<List<T>>() {
 
 			@Override
 			protected List<T> load() {
 				List<T> namedQueries = new ArrayList<>();
-				for (T namedQuery: getGlobalQueries()!=null?getGlobalQueries():getDefaultQueries())
+				for (T namedQuery: getCommonQueries()!=null?getCommonQueries():getInheritedCommonQueries())
 					namedQueries.add(namedQuery);
 				return namedQueries;
 			}
@@ -376,7 +376,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				link.add(new Label("label", namedQuery.getName()));
 				item.add(link);
 				
-				String globalName = NamedQuery.GLOBAL_NAME_PREFIX + namedQuery.getName();
+				String commonName = NamedQuery.COMMON_NAME_PREFIX + namedQuery.getName();
 				
 				item.add(new WatchStatusLink("watchStatus") {
 					
@@ -385,13 +385,13 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 						target.add(this);
 
 						QueryPersonalization<T> personalization = getQueryPersonalization();
-						personalization.getQueryWatchSupport().setWatchStatus(globalName, watchStatus);
+						personalization.getQueryWatchSupport().setWatchStatus(commonName, watchStatus);
 						personalization.onUpdated();
 					}
 					
 					@Override
 					protected WatchStatus getWatchStatus() {
-						return SavedQueriesPanel.this.getWatchStatus(globalName);
+						return SavedQueriesPanel.this.getWatchStatus(commonName);
 					}
 
 					@Override
@@ -412,15 +412,15 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 						QueryPersonalization<T> personalization = getQueryPersonalization();
 						if (subscriptionStatus)
-							personalization.getQuerySubscriptionSupport().getQuerySubscriptions().add(globalName);
+							personalization.getQuerySubscriptionSupport().getQuerySubscriptions().add(commonName);
 						else
-							personalization.getQuerySubscriptionSupport().getQuerySubscriptions().remove(globalName);
+							personalization.getQuerySubscriptionSupport().getQuerySubscriptions().remove(commonName);
 						personalization.onUpdated();
 					}
 					
 					@Override
 					protected boolean isSubscribed() {
-						return getSubscriptionStatus(globalName);
+						return getSubscriptionStatus(commonName);
 					}
 
 					@Override
@@ -546,12 +546,12 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	protected abstract QueryPersonalization<T> getQueryPersonalization();
 	
 	@Nullable
-	protected abstract ArrayList<T> getGlobalQueries();
+	protected abstract ArrayList<T> getCommonQueries();
 
-	protected abstract void onSaveGlobalQueries(ArrayList<T> queries);
+	protected abstract void onSaveCommonQueries(ArrayList<T> queries);
 	
 	@Nullable
-	protected ArrayList<T> getDefaultQueries() {
+	protected ArrayList<T> getInheritedCommonQueries() {
 		return null;
 	}
 	

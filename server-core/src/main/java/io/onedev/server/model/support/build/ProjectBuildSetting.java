@@ -100,26 +100,14 @@ public class ProjectBuildSetting implements Serializable {
 	}
 
 	@Nullable
-	public List<NamedBuildQuery> getNamedQueries(boolean useDefaultIfNotDefined) {
-		if (useDefaultIfNotDefined && namedQueries == null)
-			return new ArrayList<>(getGlobalSetting().getNamedQueries());
-		else
-			return namedQueries;
+	public List<NamedBuildQuery> getNamedQueries() {
+		return namedQueries;
 	}
 
 	public void setNamedQueries(@Nullable List<NamedBuildQuery> namedQueries) {
 		this.namedQueries = namedQueries;
 	}
 
-	@Nullable
-	public NamedBuildQuery getNamedQuery(String name) {
-		for (NamedBuildQuery namedQuery: getNamedQueries(true)) {
-			if (namedQuery.getName().equals(name))
-				return namedQuery;
-		}
-		return null;
-	}
-	
 	private IssueQueryUpdater getQueryUpdater(DefaultFixedIssueFilter filter, int index) {
 		return new IssueQueryUpdater() {
 

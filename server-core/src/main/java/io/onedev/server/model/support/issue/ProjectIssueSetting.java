@@ -46,11 +46,8 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
-	public List<String> getListFields(boolean useDefaultIfNotDefined) {
-		if (useDefaultIfNotDefined && listFields == null)
-			return new ArrayList<>(getGlobalSetting().getListFields());
-		else
-			return listFields;
+	public List<String> getListFields() {
+		return listFields;
 	}
 	
 	public void setListFields(@Nullable List<String> listFields) {
@@ -58,11 +55,8 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
-	public List<String> getListLinks(boolean useDefaultIfNotDefined) {
-		if (useDefaultIfNotDefined && listLinks == null) 
-			return new ArrayList<>(getGlobalSetting().getListLinks());
-		else
-			return listLinks;
+	public List<String> getListLinks() {
+		return listLinks;
 	}
 
 	public void setListLinks(List<String> listLinks) {
@@ -70,11 +64,8 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
-	public List<BoardSpec> getBoardSpecs(boolean useDefaultIfNotDefined) {
-		if (useDefaultIfNotDefined && boardSpecs == null)
-			return new ArrayList<>(getGlobalSetting().getBoardSpecs());
-		else
-			return boardSpecs;
+	public List<BoardSpec> getBoardSpecs() {
+		return boardSpecs;
 	}
 
 	public void setBoardSpecs(@Nullable List<BoardSpec> boardSpecs) {
@@ -82,24 +73,12 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
-	public List<NamedIssueQuery> getNamedQueries(boolean useDefaultIfNotDefined) {
-		if (useDefaultIfNotDefined && namedQueries == null)
-			return new ArrayList<>(getGlobalSetting().getNamedQueries());
-		else
-			return namedQueries;
+	public List<NamedIssueQuery> getNamedQueries() {
+		return namedQueries;
 	}
 
 	public void setNamedQueries(@Nullable List<NamedIssueQuery> namedQueries) {
 		this.namedQueries = namedQueries;
-	}
-
-	@Nullable
-	public NamedIssueQuery getNamedQuery(String name) {
-		for (NamedIssueQuery namedQuery: getNamedQueries(true)) {
-			if (namedQuery.getName().equals(name))
-				return namedQuery;
-		}
-		return null;
 	}
 
 	public void onRenameUser(String oldName, String newName) {

@@ -85,12 +85,12 @@ public class ProjectListPage extends LayoutPage {
 			}
 
 			@Override
-			protected ArrayList<NamedProjectQuery> getGlobalQueries() {
+			protected ArrayList<NamedProjectQuery> getCommonQueries() {
 				return (ArrayList<NamedProjectQuery>) getProjectSetting().getNamedQueries();
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedProjectQuery> namedQueries) {
+			protected void onSaveCommonQueries(ArrayList<NamedProjectQuery> namedQueries) {
 				getProjectSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(SettingManager.class).saveProjectSetting(getProjectSetting());
 			}

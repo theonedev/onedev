@@ -523,8 +523,8 @@ public abstract class IssueListPanel extends Panel {
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(getProject() != null 
-								&& getProject().getIssueSetting().getListFields(false) != null
-								&& getProject().getIssueSetting().getListLinks(false) != null);
+								&& getProject().getIssueSetting().getListFields() != null
+								&& getProject().getIssueSetting().getListLinks() != null);
 					}
 					
 				});
@@ -1367,17 +1367,25 @@ public abstract class IssueListPanel extends Panel {
 	}
 	
 	private List<String> getListFields() {
-		if (getProject() != null)
-			return getProject().getIssueSetting().getListFields(true);
-		else
-			return getGlobalIssueSetting().getListFields();
+		Project current = getProject();
+		while (current != null) {
+			List<String> listFields = current.getIssueSetting().getListFields();
+			if (listFields != null)
+				return listFields;
+			current = current.getParent();
+		}
+		return getGlobalIssueSetting().getListFields();
 	}
 	
 	private List<String> getListLinks() {
-		if (getProject() != null)
-			return getProject().getIssueSetting().getListLinks(true);
-		else
-			return getGlobalIssueSetting().getListLinks();
+		Project current = getProject();
+		while (current != null) {
+			List<String> listLinks = current.getIssueSetting().getListLinks();
+			if (listLinks != null)
+				return listLinks;
+			current = current.getParent();
+		}
+		return getGlobalIssueSetting().getListLinks();
 	}
 	
 	@Override

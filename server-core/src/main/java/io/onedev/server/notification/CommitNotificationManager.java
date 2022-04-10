@@ -68,7 +68,7 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 			for (CommitQueryPersonalization setting: project.getCommitQueryPersonalizations()) {
 				for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions()) {
-					String globalName = NamedQuery.getGlobalName(name);
+					String globalName = NamedQuery.getCommonName(name);
 					if (globalName != null) {
 						fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
 								NamedQuery.find(project.getNamedCommitQueries(), globalName));

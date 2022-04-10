@@ -76,12 +76,12 @@ public class AgentListPage extends AdministrationPage {
 			}
 
 			@Override
-			protected ArrayList<NamedAgentQuery> getGlobalQueries() {
+			protected ArrayList<NamedAgentQuery> getCommonQueries() {
 				return (ArrayList<NamedAgentQuery>) getAgentSetting().getNamedQueries();
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedAgentQuery> namedQueries) {
+			protected void onSaveCommonQueries(ArrayList<NamedAgentQuery> namedQueries) {
 				getAgentSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(SettingManager.class).saveAgentSetting(getAgentSetting());
 			}

@@ -117,7 +117,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 
 			@Override
 			protected Collection<? extends NamedQuery> getNamedQueries() {
-				return request.getTargetProject().getPullRequestSetting().getNamedQueries(true);
+				return request.getTargetProject().getNamedPullRequestQueries();
 			}
 			
 		}.getWatches().entrySet()) {

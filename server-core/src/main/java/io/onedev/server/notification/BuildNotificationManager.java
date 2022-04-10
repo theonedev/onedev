@@ -87,10 +87,10 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 			for (BuildQueryPersonalization personalization: project.getBuildQueryPersonalizations()) {
 				for (String name: personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
-					String globalName = NamedQuery.getGlobalName(name);
-					if (globalName != null) {
+					String commonName = NamedQuery.getCommonName(name);
+					if (commonName != null) {
 						fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
-								NamedQuery.find(project.getBuildSetting().getNamedQueries(true), globalName));
+								NamedQuery.find(project.getNamedBuildQueries(), commonName));
 					}
 					String personalName = NamedQuery.getPersonalName(name);
 					if (personalName != null) {
@@ -126,7 +126,7 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 			subscribedQueryStrings.clear();
 			for (User user: userManager.query()) {
 				for (String name: user.getBuildQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
-					String globalName = NamedQuery.getGlobalName(name);
+					String globalName = NamedQuery.getCommonName(name);
 					if (globalName != null) {
 						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
 								NamedQuery.find(settingManager.getBuildSetting().getNamedQueries(), globalName));

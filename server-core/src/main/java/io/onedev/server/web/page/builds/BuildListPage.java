@@ -86,12 +86,12 @@ public class BuildListPage extends LayoutPage {
 			}
 
 			@Override
-			protected ArrayList<NamedBuildQuery> getGlobalQueries() {
+			protected ArrayList<NamedBuildQuery> getCommonQueries() {
 				return (ArrayList<NamedBuildQuery>) getBuildSetting().getNamedQueries();
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedBuildQuery> namedQueries) {
+			protected void onSaveCommonQueries(ArrayList<NamedBuildQuery> namedQueries) {
 				getBuildSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(SettingManager.class).saveBuildSetting(getBuildSetting());
 			}

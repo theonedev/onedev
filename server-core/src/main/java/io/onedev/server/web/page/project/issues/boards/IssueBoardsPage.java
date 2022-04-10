@@ -43,6 +43,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -89,7 +90,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	private static final String PARAM_BACKLOG_QUERY = "backlog-query";
 
-	private final List<BoardSpec> boards;
+	private List<BoardSpec> boards;
 	
 	private final int boardIndex;
 	
@@ -174,7 +175,16 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	public IssueBoardsPage(PageParameters params) {
 		super(params);
 		
-		boards = getProject().getIssueSetting().getBoardSpecs(true);
+		Project current = getProject();
+		do {
+			boards = current.getIssueSetting().getBoardSpecs();
+			if (boards != null)
+				break;
+			current = current.getParent();
+		} while (current != null);
+		
+		if (boards == null)
+			boards = OneDev.getInstance(SettingManager.class).getIssueSetting().getBoardSpecs();
 		
 		String boardName = params.get(PARAM_BOARD).toString();
 		if (StringUtils.isNotBlank(boardName)) {
@@ -295,7 +305,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						protected void onConfigure() {
 							super.onConfigure();
 							setVisible(SecurityUtils.canManageIssues(getProject()) 
-									&& getProject().getIssueSetting().getBoardSpecs(false) != null);
+									&& getProject().getIssueSetting().getBoardSpecs() != null);
 						}
 						
 					}.add(new ConfirmClickModifier("This will discard all project specific boards, do you want to continue?")));
@@ -821,7 +831,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				protected void onConfigure() {
 					super.onConfigure();
 					setVisible(SecurityUtils.canManageIssues(getProject()) 
-							&& getProject().getIssueSetting().getBoardSpecs(false) != null);
+							&& getProject().getIssueSetting().getBoardSpecs() != null);
 				}
 
 				@Override

@@ -25,8 +25,8 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
@@ -79,19 +79,22 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			}
 
 			@Override
-			protected ArrayList<NamedIssueQuery> getGlobalQueries() {
-				return (ArrayList<NamedIssueQuery>) getProject().getIssueSetting().getNamedQueries(false);
+			protected ArrayList<NamedIssueQuery> getCommonQueries() {
+				return (ArrayList<NamedIssueQuery>) getProject().getIssueSetting().getNamedQueries();
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedIssueQuery> namedQueries) {
+			protected void onSaveCommonQueries(ArrayList<NamedIssueQuery> namedQueries) {
 				getProject().getIssueSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
 
 			@Override
-			protected ArrayList<NamedIssueQuery> getDefaultQueries() {
-				return (ArrayList<NamedIssueQuery>) getIssueSetting().getNamedQueries();
+			protected ArrayList<NamedIssueQuery> getInheritedCommonQueries() {
+				if (getProject().getParent() != null)
+					return (ArrayList<NamedIssueQuery>) getProject().getParent().getNamedIssueQueries();
+				else
+					return (ArrayList<NamedIssueQuery>) getIssueSetting().getNamedQueries();
 			}
 			
 		});
@@ -170,12 +173,12 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 									@Override
 									protected void onSave(AjaxRequestTarget target, String name) {
 										ProjectIssueSetting setting = getProject().getIssueSetting();
-										if (setting.getNamedQueries(false) == null) 
+										if (setting.getNamedQueries() == null) 
 											setting.setNamedQueries(new ArrayList<>(getIssueSetting().getNamedQueries()));
-										NamedIssueQuery namedQuery = setting.getNamedQuery(name);
+										NamedIssueQuery namedQuery = getProject().getNamedIssueQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);
-											setting.getNamedQueries(false).add(namedQuery);
+											setting.getNamedQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
@@ -233,8 +236,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 		if (project.getIssueQueryPersonalizationOfCurrentUser() != null 
 				&& !project.getIssueQueryPersonalizationOfCurrentUser().getQueries().isEmpty()) {
 			query = project.getIssueQueryPersonalizationOfCurrentUser().getQueries().iterator().next().getQuery();
-		} else if (!project.getIssueSetting().getNamedQueries(true).isEmpty()) {
-			query = project.getIssueSetting().getNamedQueries(true).iterator().next().getQuery();
+		} else if (!project.getNamedIssueQueries().isEmpty()) {
+			query = project.getNamedIssueQueries().iterator().next().getQuery();
 		}
 		return paramsOf(project, query, page);
 	}

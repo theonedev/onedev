@@ -44,8 +44,8 @@ public class DefaultIssueQueryPersonalizationManager extends BaseEntityManager<I
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
-		retainNames.addAll(personalization.getProject().getIssueSetting().getNamedQueries(true).stream()
-				.map(it->NamedQuery.GLOBAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
+		retainNames.addAll(personalization.getProject().getNamedIssueQueries().stream()
+				.map(it->NamedQuery.COMMON_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
 		personalization.getQueryWatchSupport().getQueryWatches().keySet().retainAll(retainNames);
 		
 		if (personalization.getQueryWatchSupport().getQueryWatches().isEmpty() && personalization.getQueries().isEmpty()) {

@@ -29,7 +29,7 @@ public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 	public QueryWatchBuilder() {
 		for (QueryPersonalization<?> personalization: getQueryPersonalizations()) {
 			for (Map.Entry<String, Boolean> entry: personalization.getQueryWatchSupport().getQueryWatches().entrySet()) {
-				String globalName = NamedQuery.getGlobalName(entry.getKey());
+				String globalName = NamedQuery.getCommonName(entry.getKey());
 				if (globalName != null) {
 					if (matches(NamedQuery.find(getNamedQueries(), globalName), personalization.getUser())) {
 						watches.putIfAbsent(personalization.getUser(), entry.getValue());

@@ -80,13 +80,13 @@ public class PullRequestListPage extends LayoutPage {
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedPullRequestQuery> queries) {
+			protected void onSaveCommonQueries(ArrayList<NamedPullRequestQuery> queries) {
 				getPullRequestSetting().setNamedQueries(queries);
 				OneDev.getInstance(SettingManager.class).savePullRequestSetting(getPullRequestSetting());
 			}
 
 			@Override
-			protected ArrayList<NamedPullRequestQuery> getGlobalQueries() {
+			protected ArrayList<NamedPullRequestQuery> getCommonQueries() {
 				return (ArrayList<NamedPullRequestQuery>) getPullRequestSetting().getNamedQueries();
 			}
 

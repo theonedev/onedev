@@ -45,7 +45,7 @@ public class DefaultCommitQueryPersonalizationManager extends BaseEntityManager<
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
 		retainNames.addAll(personalization.getProject().getNamedCommitQueries().stream()
-				.map(it->NamedQuery.GLOBAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
+				.map(it->NamedQuery.COMMON_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
 		personalization.getQuerySubscriptionSupport().getQuerySubscriptions().retainAll(retainNames);
 		
 		if (personalization.getQuerySubscriptionSupport().getQuerySubscriptions().isEmpty() && personalization.getQueries().isEmpty()) {

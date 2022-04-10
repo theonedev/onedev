@@ -85,12 +85,12 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			}
 
 			@Override
-			protected ArrayList<NamedCodeCommentQuery> getGlobalQueries() {
+			protected ArrayList<NamedCodeCommentQuery> getCommonQueries() {
 				return getProject().getNamedCodeCommentQueries();
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedCodeCommentQuery> projectQueries) {
+			protected void onSaveCommonQueries(ArrayList<NamedCodeCommentQuery> projectQueries) {
 				getProject().setNamedCodeCommentQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}

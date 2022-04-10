@@ -90,13 +90,13 @@ public class IssueListPage extends LayoutPage {
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedIssueQuery> queries) {
+			protected void onSaveCommonQueries(ArrayList<NamedIssueQuery> queries) {
 				getIssueSetting().setNamedQueries(queries);
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getIssueSetting());
 			}
 
 			@Override
-			protected ArrayList<NamedIssueQuery> getGlobalQueries() {
+			protected ArrayList<NamedIssueQuery> getCommonQueries() {
 				return (ArrayList<NamedIssueQuery>) getIssueSetting().getNamedQueries();
 			}
 			

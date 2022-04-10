@@ -44,8 +44,8 @@ public class DefaultBuildQueryPersonalizationManager extends BaseEntityManager<B
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
-		retainNames.addAll(personalization.getProject().getBuildSetting().getNamedQueries(true).stream()
-				.map(it->NamedQuery.GLOBAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
+		retainNames.addAll(personalization.getProject().getNamedBuildQueries().stream()
+				.map(it->NamedQuery.COMMON_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
 		personalization.getQuerySubscriptionSupport().getQuerySubscriptions().retainAll(retainNames);
 		
 		if (personalization.getQuerySubscriptionSupport().getQuerySubscriptions().isEmpty() && personalization.getQueries().isEmpty()) {

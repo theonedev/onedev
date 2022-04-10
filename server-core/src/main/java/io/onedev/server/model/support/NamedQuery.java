@@ -10,7 +10,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 @Editable
 public interface NamedQuery extends Serializable {
 
-	public static final String GLOBAL_NAME_PREFIX = "g:";
+	public static final String COMMON_NAME_PREFIX = "g:";
 	
 	public static final String PERSONAL_NAME_PREFIX = "p:";
 	
@@ -28,9 +28,9 @@ public interface NamedQuery extends Serializable {
 	}
 	
 	@Nullable
-	public static String getGlobalName(String name) {
-		if (name.startsWith(GLOBAL_NAME_PREFIX))
-			return name.substring(GLOBAL_NAME_PREFIX.length());
+	public static String getCommonName(String name) {
+		if (name.startsWith(COMMON_NAME_PREFIX))
+			return name.substring(COMMON_NAME_PREFIX.length());
 		else
 			return null;
 	}

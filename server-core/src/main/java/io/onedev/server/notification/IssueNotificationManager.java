@@ -106,7 +106,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 
 			@Override
 			protected Collection<? extends NamedQuery> getNamedQueries() {
-				return issue.getProject().getIssueSetting().getNamedQueries(true);
+				return issue.getProject().getNamedIssueQueries();
 			}
 			
 		}.getWatches().entrySet()) {

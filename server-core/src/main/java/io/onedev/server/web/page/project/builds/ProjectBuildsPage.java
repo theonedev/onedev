@@ -27,8 +27,8 @@ import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -85,19 +85,22 @@ public class ProjectBuildsPage extends ProjectPage {
 			}
 
 			@Override
-			protected ArrayList<NamedBuildQuery> getGlobalQueries() {
-				return (ArrayList<NamedBuildQuery>) getProject().getBuildSetting().getNamedQueries(false);
+			protected ArrayList<NamedBuildQuery> getCommonQueries() {
+				return (ArrayList<NamedBuildQuery>) getProject().getBuildSetting().getNamedQueries();
 			}
 
 			@Override
-			protected void onSaveGlobalQueries(ArrayList<NamedBuildQuery> namedQueries) {
+			protected void onSaveCommonQueries(ArrayList<NamedBuildQuery> namedQueries) {
 				getProject().getBuildSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
 
 			@Override
-			protected ArrayList<NamedBuildQuery> getDefaultQueries() {
-				return (ArrayList<NamedBuildQuery>) getBuildSetting().getNamedQueries();
+			protected ArrayList<NamedBuildQuery> getInheritedCommonQueries() {
+				if (getProject().getParent() != null)
+					return (ArrayList<NamedBuildQuery>) getProject().getParent().getNamedBuildQueries();
+				else
+					return (ArrayList<NamedBuildQuery>) getBuildSetting().getNamedQueries();
 			}
 
 		});
@@ -174,12 +177,12 @@ public class ProjectBuildsPage extends ProjectPage {
 									@Override
 									protected void onSave(AjaxRequestTarget target, String name) {
 										ProjectBuildSetting setting = getProject().getBuildSetting();
-										if (setting.getNamedQueries(false) == null) 
+										if (setting.getNamedQueries() == null) 
 											setting.setNamedQueries(new ArrayList<>(getBuildSetting().getNamedQueries()));
-										NamedBuildQuery namedQuery = getProject().getBuildSetting().getNamedQuery(name);
+										NamedBuildQuery namedQuery = getProject().getNamedBuildQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedBuildQuery(name, query);
-											setting.getNamedQueries(false).add(namedQuery);
+											setting.getNamedQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
@@ -237,8 +240,8 @@ public class ProjectBuildsPage extends ProjectPage {
 		if (project.getBuildQueryPersonalizationOfCurrentUser() != null 
 				&& !project.getBuildQueryPersonalizationOfCurrentUser().getQueries().isEmpty()) {
 			query = project.getBuildQueryPersonalizationOfCurrentUser().getQueries().iterator().next().getQuery();
-		} else if (!project.getBuildSetting().getNamedQueries(true).isEmpty()) {
-			query = project.getBuildSetting().getNamedQueries(true).iterator().next().getQuery();
+		} else if (!project.getNamedBuildQueries().isEmpty()) {
+			query = project.getNamedBuildQueries().iterator().next().getQuery();
 		}
 		return paramsOf(project, query, page);
 	}
