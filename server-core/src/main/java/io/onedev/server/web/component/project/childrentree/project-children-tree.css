@@ -1,0 +1,9 @@
+.floating>.child-projects.tree-theme-human {
+	padding: 1rem 1rem 1rem 0.5rem;
+}
+.child-projects.tree-theme-human .tree-node {
+	padding-top: 6px;
+} 
+.child-projects.tree-theme-human>div>div:first-child>.tree-node {
+	padding-top: 0;
+} 

@@ -7,6 +7,12 @@
 .project-list .project-summary {
 	margin-left: 2px;
 }
+.project-list .toggle-children.expanded .icon {
+	transform: rotate(90deg);
+}
+.project-list .tree-theme-human {
+	margin-left: 40px;
+}
 .project-list .issue-info a:hover {
 	filter: brightness(125%);
 }

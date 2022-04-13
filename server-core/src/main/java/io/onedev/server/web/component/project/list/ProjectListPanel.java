@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -79,6 +80,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectPullRequestStats;
+import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
@@ -92,12 +94,14 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
+import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
@@ -1035,7 +1039,9 @@ public class ProjectListPanel extends Panel {
 				Fragment fragment = new Fragment(componentId, "projectFrag", ProjectListPanel.this);
 				Project project = rowModel.getObject();
 				
-				ActionablePageLink pathLink = new ActionablePageLink("path", 
+				Long projectId = project.getId();
+				
+				ActionablePageLink projectLink = new ActionablePageLink("path", 
 						ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project)) {
 
 					@Override
@@ -1047,12 +1053,12 @@ public class ProjectListPanel extends Panel {
 					
 				};
 				
-				pathLink.add(new ProjectAvatar("avatar", project));
+				projectLink.add(new ProjectAvatar("avatar", projectId));
 				if (getParentProject() != null)
-					pathLink.add(new Label("label", project.getPath().substring(getParentProject().getPath().length()+1)));
+					projectLink.add(new Label("label", project.getPath().substring(getParentProject().getPath().length()+1)));
 				else
-					pathLink.add(new Label("label", project.getPath()));
-				fragment.add(pathLink);
+					projectLink.add(new Label("label", project.getPath()));
+				fragment.add(projectLink);
 				
 				fragment.add(new Label("lastUpdate", "Updated " + DateUtils.formatAge(project.getUpdateDate())));
 				
@@ -1093,7 +1099,7 @@ public class ProjectListPanel extends Panel {
 						protected Integer load() {
 							int totalCount = 0;
 							for (ProjectPullRequestStats stats: pullRequestStatsModel.getObject()) {
-								if (stats.getProjectId().equals(rowModel.getObject().getId())) 
+								if (stats.getProjectId().equals(projectId)) 
 									totalCount += stats.getStatusCount();
 							}
 							return totalCount;
@@ -1130,7 +1136,7 @@ public class ProjectListPanel extends Panel {
 						protected List<ProjectPullRequestStats> load() {
 							List<ProjectPullRequestStats> listOfPullRequestStats = new ArrayList<>();
 							for (ProjectPullRequestStats stats: pullRequestStatsModel.getObject()) {
-								if (stats.getProjectId().equals(rowModel.getObject().getId())) 
+								if (stats.getProjectId().equals(projectId)) 
 									listOfPullRequestStats.add(stats);
 							}
 							return listOfPullRequestStats;
@@ -1179,7 +1185,7 @@ public class ProjectListPanel extends Panel {
 						protected Integer load() {
 							int totalCount = 0;
 							for (ProjectIssueStats stats: issueStatsModel.getObject()) {
-								if (stats.getProjectId().equals(rowModel.getObject().getId())) 
+								if (stats.getProjectId().equals(projectId)) 
 									totalCount += stats.getStateCount();
 							}
 							return totalCount;
@@ -1217,7 +1223,7 @@ public class ProjectListPanel extends Panel {
 						protected List<ProjectIssueStats> load() {
 							List<ProjectIssueStats> listOfIssueStats = new ArrayList<>();
 							for (ProjectIssueStats stats: issueStatsModel.getObject()) {
-								if (stats.getProjectId().equals(rowModel.getObject().getId()) 
+								if (stats.getProjectId().equals(projectId) 
 										&& stats.getStateOrdinal() < issueSetting.getStateSpecs().size()) {
 									listOfIssueStats.add(stats);
 								}
@@ -1254,7 +1260,7 @@ public class ProjectListPanel extends Panel {
 						protected Integer load() {
 							int totalCount = 0;
 							for (ProjectBuildStats stats: buildStatsModel.getObject()) {
-								if (stats.getProjectId().equals(rowModel.getObject().getId())) 
+								if (stats.getProjectId().equals(projectId)) 
 									totalCount += stats.getStatusCount();
 							}
 							return totalCount;
@@ -1291,7 +1297,7 @@ public class ProjectListPanel extends Panel {
 						protected List<ProjectBuildStats> load() {
 							List<ProjectBuildStats> listOfBuildStats = new ArrayList<>();
 							for (ProjectBuildStats stats: buildStatsModel.getObject()) {
-								if (stats.getProjectId().equals(rowModel.getObject().getId())) 
+								if (stats.getProjectId().equals(projectId)) 
 									listOfBuildStats.add(stats);
 							}
 							return listOfBuildStats;
@@ -1330,6 +1336,61 @@ public class ProjectListPanel extends Panel {
 					fragment.add(buildInfoFrag);
 				} else {
 					fragment.add(new WebMarkupContainer("buildInfo").setVisible(false));
+				}
+				
+				List<ProjectFacade> children = getProjectManager().getChildren(projectId);
+				if (!children.isEmpty()) {
+					Fragment childrenFrag = new Fragment("children", "childrenFrag", ProjectListPanel.this);
+					childrenFrag.add(new AjaxLink<Void>("toggle") {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							if (WebSession.get().getExpandedProjectIds().contains(projectId))
+								WebSession.get().getExpandedProjectIds().remove(projectId);
+							else
+								WebSession.get().getExpandedProjectIds().add(projectId);
+							target.add(childrenFrag);
+						}
+						
+					}.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+						@Override
+						protected String load() {
+							return WebSession.get().getExpandedProjectIds().contains(projectId)? "expanded": "collapsed";
+						}
+						
+					})));
+					
+ 					childrenFrag.add(new BookmarkablePageLink<Void>("link", ProjectChildrenPage.class, 
+ 							ProjectChildrenPage.paramsOf(projectId)) {
+
+						@Override
+						protected void onInitialize() {
+							super.onInitialize();
+		 					add(new Label("label", children.size() + " child projects"));
+						}
+ 						
+ 					});
+					
+					childrenFrag.add(new ProjectChildrenTree("tree", projectId) {
+						
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setVisible(WebSession.get().getExpandedProjectIds().contains(projectId));
+						}
+
+						@Override
+						protected Set<Long> getExpandedProjectIds() {
+							return WebSession.get().getExpandedProjectIds();
+						}
+						
+					});
+		
+					childrenFrag.setOutputMarkupId(true);
+					fragment.add(childrenFrag);
+				} else {
+					fragment.add(new WebMarkupContainer("children").setVisible(false));
 				}
 				
 				cellItem.add(fragment);

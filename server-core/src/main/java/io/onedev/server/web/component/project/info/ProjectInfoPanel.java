@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -26,8 +25,8 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.project.path.ProjectPathPanel;
 import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
 @SuppressWarnings("serial")
 public abstract class ProjectInfoPanel extends Panel {
@@ -43,7 +42,15 @@ public abstract class ProjectInfoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ProjectPathPanel("path", projectModel));
+		add(new BookmarkablePageLink<Void>("path", ProjectDashboardPage.class, 
+				ProjectDashboardPage.paramsOf(getProject())) {
+
+			@Override
+			public IModel<?> getBody() {
+				return Model.of(getProject().getPath());
+			}
+			
+		});
 		
 		WebMarkupContainer forkInfo = new WebMarkupContainer("forkInfo");
 		forkInfo.setVisible(getProject().isCodeManagement());
@@ -132,19 +139,17 @@ public abstract class ProjectInfoPanel extends Panel {
 			add(new WebMarkupContainer("description").setVisible(false));
 				
 		if (getProject().getForkedFrom() != null) {
-			add(new ProjectPathPanel("forkedFrom", new AbstractReadOnlyModel<Project>() {
+			add(new BookmarkablePageLink<Void>("forkedFrom", ProjectDashboardPage.class, 
+					ProjectDashboardPage.paramsOf(getProject().getForkedFrom())) {
 
 				@Override
-				public Project getObject() {
-					return getProject().getForkedFrom();
+				public IModel<?> getBody() {
+					return Model.of(getProject().getForkedFrom().getPath());
 				}
 				
-			}));
+			});
 		} else {
-			WebMarkupContainer forkedFromLink = new WebMarkupContainer("forkedFrom");
-			forkedFromLink.add(new Label("label"));
-			forkedFromLink.setVisible(false);
-			add(forkedFromLink);
+			add(new WebMarkupContainer("forkedFrom").setVisible(false));
 		}
 		
 	}

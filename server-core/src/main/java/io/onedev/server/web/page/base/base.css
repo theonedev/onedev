@@ -474,6 +474,10 @@ a.disabled:not(.btn), a[disabled]:not(.btn) {
 	flex-grow: 0;
 	flex-shrink: 0;
 }
+.tree-theme-human .tree-node>.tree-content {
+	flex-grow: 1;
+	flex-shrink: 1;
+}
 .tree-theme-human .tree-junction-collapsed {
 	width: 0 !important; 
 	height: 0 !important;
@@ -519,15 +523,6 @@ a.disabled:not(.btn), a[disabled]:not(.btn) {
 }
 .tree-theme-human span.tree-content a:not(.selectable):hover {
 	color: var(--primary) !important;
-}
-
-.subtree-dropdown-trigger>span {
-	display: block;
-	width: 0; 
-	height: 0; 
-	border-top: 4px solid transparent;
-	border-bottom: 4px solid transparent;
-	border-left: 4px solid var(--gray-dark);
 }
 
 .ps.ps-scroll.overflow-auto {

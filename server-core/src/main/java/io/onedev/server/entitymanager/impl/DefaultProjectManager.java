@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -926,5 +928,28 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 		return null;
     }
+
+	@Override
+	public List<ProjectFacade> getChildren(Long projectId) {
+		cacheLock.readLock().lock();
+		try {
+			List<ProjectFacade> children = new ArrayList<>();
+			for (ProjectFacade facade: cache.values()) {
+				if (projectId.equals(facade.getParentId()))
+					children.add(facade);
+			}
+			Collections.sort(children, new Comparator<ProjectFacade>() {
+
+				@Override
+				public int compare(ProjectFacade o1, ProjectFacade o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+				
+			});
+			return children;
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
     
 }

@@ -26,7 +26,7 @@ public class ProjectAvatarLink extends ViewStateAwarePageLink<Void> {
 
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 		params = ProjectPage.paramsOf(project);
-		url = avatarManager.getAvatarUrl(project);
+		url = avatarManager.getAvatarUrl(project.getId());
 		tooltip = project.getPath();
 	}
 	

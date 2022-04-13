@@ -15,6 +15,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.facade.ProjectFacade;
 
 public interface ProjectManager extends EntityManager<Project> {
 	
@@ -69,6 +70,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> jpaPath, String pathPattern);
 	
 	Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> jpaPath, Project project);
+	
+	List<ProjectFacade> getChildren(Long projectId);
 	
 	void move(Collection<Project> projects, @Nullable Project parent);
 

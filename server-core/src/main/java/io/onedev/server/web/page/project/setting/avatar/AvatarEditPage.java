@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.setting.avatar;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -33,14 +34,14 @@ public class AvatarEditPage extends ProjectSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new ProjectAvatar("avatar", getProject()));
+		add(new ProjectAvatar("avatar", getProject().getId()));
 		
 		add(new Link<Void>("useDefault") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAvatarManager().getUploaded(getProject()).exists());
+				setVisible(getAvatarManager().getUploaded(getProject().getId()).exists());
 			}
 
 			@Override
@@ -84,7 +85,7 @@ public class AvatarEditPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Edit Avatar");
+		return new Label(componentId, "Edit Avatar").add(AttributeAppender.replace("class", "text-truncate"));
 	}
 	
 }

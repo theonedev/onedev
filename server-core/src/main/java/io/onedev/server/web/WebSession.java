@@ -1,6 +1,7 @@
 package io.onedev.server.web;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
@@ -11,6 +12,7 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.apache.wicket.request.Request;
+import org.apache.wicket.util.collections.ConcurrentHashSet;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.web.util.Cursor;
@@ -26,6 +28,8 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	private volatile Cursor pullRequestCursor; 
 	
 	private Map<Class<?>, String> redirectUrlsAfterDelete = new ConcurrentHashMap<>(); 
+	
+	private Set<Long> expandedProjectIds = new ConcurrentHashSet<>();
 	
 	public WebSession(Request request) {
 		super(request);
@@ -86,6 +90,10 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 
 	public void setRedirectUrlAfterDelete(Class<?> clazz, String redirectUrlAfterDelete) {
 		redirectUrlsAfterDelete.put(clazz, redirectUrlAfterDelete);
+	}
+	
+	public Set<Long> getExpandedProjectIds() {
+		return expandedProjectIds;
 	}
 
 	public static WebSession from(HttpSession session) {

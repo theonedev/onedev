@@ -44,6 +44,7 @@ import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
+import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndicatorCssResourceReference;
 import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
 import io.onedev.server.web.component.blob.BlobIcon;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -313,6 +314,7 @@ public class BlobNavigator extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new DropdownTriangleIndicatorCssResourceReference()));
 		response.render(CssHeaderItem.forReference(new BlobNavigatorResourceReference()));
 		
 		if (context.getBlobIdent().isTree()) {

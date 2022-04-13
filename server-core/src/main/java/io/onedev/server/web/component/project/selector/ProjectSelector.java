@@ -154,7 +154,7 @@ public abstract class ProjectSelector extends Panel {
 				};
 				if (project.equals(getCurrent())) 
 					link.add(AttributeAppender.append("class", " current"));
-				link.add(new ProjectAvatar("avatar", project));
+				link.add(new ProjectAvatar("avatar", project.getId()));
 				link.add(new Label("path", project.getPath()));
 				item.add(link);
 				

@@ -22,7 +22,7 @@ public abstract class AbstractProjectChoiceProvider extends ChoiceProvider<Proje
 		writer.key("id").value(choice.getId());
 		writer.key("path");
 		writer.value(HtmlEscape.escapeHtml5(choice.getPath()));
-		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(choice);
+		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(choice.getId());
 		writer.key("avatar").value(avatarUrl);
 	}
 	

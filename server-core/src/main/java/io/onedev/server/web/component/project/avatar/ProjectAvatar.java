@@ -4,7 +4,6 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebComponent;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.model.Project;
 import io.onedev.server.web.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
@@ -12,10 +11,10 @@ public class ProjectAvatar extends WebComponent {
 
 	private String url;
 	
-	public ProjectAvatar(String id, Project project) {
+	public ProjectAvatar(String id, Long projectId) {
 		super(id);
 
-		url = getAvatarManager().getAvatarUrl(project);
+		url = getAvatarManager().getAvatarUrl(projectId);
 	}
 	
 	private AvatarManager getAvatarManager() {

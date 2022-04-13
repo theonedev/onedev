@@ -147,10 +147,10 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 
 	@Override
-	public String getAvatarUrl(Project project) {
-		File avatarFile = getUploaded(project);
+	public String getAvatarUrl(Long projectId) {
+		File avatarFile = getUploaded(projectId);
 		if (avatarFile.exists())  
-			return AVATARS_BASE_URL + "uploaded/projects/" + project.getId() + ".jpg?version=" + avatarFile.lastModified();
+			return AVATARS_BASE_URL + "uploaded/projects/" + projectId + ".jpg?version=" + avatarFile.lastModified();
 		else
 			return AVATARS_BASE_URL + "project.png";
 	}
@@ -160,7 +160,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + project.getId());
 		avatarLock.lock();
 		try {
-			File avatarFile = getUploaded(project);
+			File avatarFile = getUploaded(project.getId());
 			FileUtils.createDir(avatarFile.getParentFile());
 			AvatarUploadField.writeToFile(avatarFile, avatarData);
 		} finally {
@@ -169,8 +169,8 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 
 	@Override
-	public File getUploaded(Project project) {
-		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/projects/" + project.getId() + ".jpg");
+	public File getUploaded(Long projectId) {
+		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/projects/" + projectId + ".jpg");
 	}
 
 	@Override
@@ -178,9 +178,9 @@ public class DefaultAvatarManager implements AvatarManager {
 		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + from.getId());
 		avatarLock.lock();
 		try {
-			File uploaded = getUploaded(from);
+			File uploaded = getUploaded(from.getId());
 			if (uploaded.exists()) {
-				FileUtils.copyFile(uploaded, getUploaded(to));
+				FileUtils.copyFile(uploaded, getUploaded(to.getId()));
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

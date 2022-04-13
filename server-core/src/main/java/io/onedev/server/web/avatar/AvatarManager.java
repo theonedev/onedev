@@ -15,7 +15,7 @@ public interface AvatarManager {
 	
 	String getAvatarUrl(PersonIdent personIdent);
 	
-	String getAvatarUrl(Project project);
+	String getAvatarUrl(Long projectId);
 	
 	void useAvatar(User user, @Nullable String avatarData);
 	
@@ -23,7 +23,7 @@ public interface AvatarManager {
 	
 	File getUploaded(User user);
 	
-	File getUploaded(Project project);
+	File getUploaded(Long projectId);
 	
 	void copyAvatar(Project from, Project to);
 	
