@@ -3955,4 +3955,7 @@ public class DataMigrator {
 		emailAddressesDom.writeToFile(emailAddressesFile, true);
 	}
 			
+	private void migrate83(File dataDir, Stack<Integer> versions) {
+	}
+	
 }

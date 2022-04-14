@@ -21,6 +21,8 @@ public class IssueField extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final int MAX_VALUE_LEN = 2048;
+	
 	public static final String PROP_ISSUE = "issue";
 	
 	public static final String PROP_NAME = "name";
@@ -38,6 +40,7 @@ public class IssueField extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 
+	@Column(length=MAX_VALUE_LEN)
 	private String value;
 
 	@Column(nullable=false)

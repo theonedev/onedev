@@ -24,6 +24,8 @@ import javax.persistence.UniqueConstraint;
 public class BuildParam extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final int MAX_VALUE_LEN = 2048;
 
 	public static final String PROP_BUILD = "build";
 	
@@ -41,6 +43,7 @@ public class BuildParam extends AbstractEntity {
 	@Column(nullable=false)
 	private String type;
 	
+	@Column(length=MAX_VALUE_LEN)
 	private String value;
 
 	public Build getBuild() {
