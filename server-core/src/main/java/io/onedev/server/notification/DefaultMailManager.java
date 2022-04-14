@@ -101,8 +101,8 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.HtmlUtils;
+import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.validation.UserNameValidator;
 
 @Singleton
@@ -815,7 +815,6 @@ public class DefaultMailManager implements MailManager {
 				Session session = Session.getInstance(properties);
 				Store store = null;
 				IMAPFolder inbox = null;
-				Future<?> future = null;
 				try {
 					store = session.getStore("imap");
 					store.connect(receiveMailSetting.getImapUser(), receiveMailSetting.getImapPassword());
@@ -848,31 +847,14 @@ public class DefaultMailManager implements MailManager {
 						logger.trace("Inbox uid validity changed (uid reset to: {})", lastPosition.getUid());
 					}
 
-					IMAPFolder inboxCopy = inbox;
-					future = executorService.submit(new Runnable() {
-
-						@Override
-						public void run() {
-							while (!Thread.interrupted()) { 
-								try {
-									inboxCopy.idle(true);
-									if (inboxCopy.isOpen()) 
-										processMessages(inboxCopy, messageNumber);
-									else 
-										throw new FolderClosedException(inboxCopy, "Inbox closed for unknown reason");
-								} catch (MessagingException e) {
-									throw new RuntimeException(e);
-								} 
-							}
-						}
-						
-					});
-					future.get();
+					while (true) { 
+						Thread.sleep(5000);
+						processMessages(inbox, messageNumber);
+					}
+					
 				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);
 				} finally {
-					if (future != null)
-						future.cancel(true);
 					if (inbox != null && inbox.isOpen()) {
 						try {
 							inbox.close(false);
