@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.inputspec.textinput;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,9 @@ import io.onedev.server.model.support.inputspec.textinput.defaultvalueprovider.D
 
 public class TextInput {
 
+	// MySQL indexable field max length
+	public static final int MAX_LEN = 500;
+	
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
 			@Nullable String pattern, boolean multiline, DefaultValueProvider defaultValueProvider) {
 		if (pattern != null)
@@ -26,6 +30,7 @@ public class TextInput {
 			buffer.append("    @NotEmpty\n");
 		if (multiline)
 			buffer.append("    @Multiline\n");
+		buffer.append(MessageFormat.format("@Size(max={0}, message=\"Text is too long. Max {0} characters\")", MAX_LEN));
 		if (pattern != null)
 			buffer.append("    @Pattern(regexp=\"" + pattern + "\", message=\"Should match regular expression: " + pattern + "\")\n");
 		inputSpec.appendMethods(buffer, index, "String", null, defaultValueProvider);

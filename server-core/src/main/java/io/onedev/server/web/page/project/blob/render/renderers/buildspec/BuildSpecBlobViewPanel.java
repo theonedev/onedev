@@ -279,7 +279,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 								}
 	
 								private void setupJobDetail(@Nullable AjaxRequestTarget target, int jobIndex) {
-									Job job = buildSpec.getJobs().get(jobIndex);
+									Job job = jobs.get(jobIndex);
 									Fragment detailFrag = new Fragment("detail", "elementDetailFrag", BuildSpecBlobViewPanel.this);
 									detailFrag.add(new ElementImportNoticePanel(buildSpec, Job.class, job.getName()) {
 

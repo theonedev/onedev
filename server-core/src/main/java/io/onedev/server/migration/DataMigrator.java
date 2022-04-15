@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +29,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.dom4j.Element;
 import org.dom4j.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -35,7 +38,11 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Pair;
 import oshi.SystemInfo;
@@ -44,6 +51,8 @@ import oshi.hardware.HardwareAbstractionLayer;
 @Singleton
 @SuppressWarnings("unused")
 public class DataMigrator {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DataMigrator.class);
 	
 	private void migrate1(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
@@ -3955,4 +3964,101 @@ public class DataMigrator {
 		emailAddressesDom.writeToFile(emailAddressesFile, true);
 	}
 			
+	private void migrate83(File dataDir, Stack<Integer> versions) {
+		Map<String, String> issueInfos = new HashMap<>();
+		Map<String, String> pullRequestInfos = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String issueInfo = MessageFormat.format(
+							"project id: {0}, issue number: {1}", 
+							element.elementText("project"), element.elementText("number"));
+					issueInfos.put(element.elementTextTrim("id"), issueInfo);
+				}
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String pullRequestInfo = MessageFormat.format(
+							"project id: {0}, pull request number: {1}", 
+							element.elementText("targetProject"), element.elementText("number"));
+					pullRequestInfos.put(element.elementTextTrim("id"), pullRequestInfo);
+				}
+			}
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element descriptionElement = element.element("description");
+					if (descriptionElement != null) {
+						String description = descriptionElement.getText().trim();
+						if (description.length() > Issue.MAX_DESCRIPTION_LEN) {
+							descriptionElement.setText(StringUtils.abbreviate(description, Issue.MAX_DESCRIPTION_LEN));
+							logger.warn("Issue description too long and truncated ({})", 
+									issueInfos.get(element.elementTextTrim("id")));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element descriptionElement = element.element("description");
+					if (descriptionElement != null) {
+						String description = descriptionElement.getText().trim();
+						if (description.length() > PullRequest.MAX_DESCRIPTION_LEN) {
+							descriptionElement.setText(StringUtils.abbreviate(description, PullRequest.MAX_DESCRIPTION_LEN));
+							logger.warn("Pull request description too long and truncated ({})", 
+									pullRequestInfos.get(element.elementTextTrim("id")));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element contentElement = element.element("content");
+					if (contentElement != null) {
+						String content = contentElement.getText().trim();
+						if (content.length() > IssueComment.MAX_CONTENT_LEN) {
+							contentElement.setText(StringUtils.abbreviate(content, IssueComment.MAX_CONTENT_LEN));
+							logger.warn("Issue comment too long and truncated ({})", 
+									issueInfos.get(element.elementText("issue")));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element contentElement = element.element("content");
+					if (contentElement != null) {
+						String content = contentElement.getText().trim();
+						if (content.length() > PullRequestComment.MAX_CONTENT_LEN) {
+							contentElement.setText(StringUtils.abbreviate(content, PullRequestComment.MAX_CONTENT_LEN));
+							logger.warn("Pull request comment too long and truncated ({})", 
+									pullRequestInfos.get(element.elementText("request")));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element receiveMailSettingElement = valueElement.element("receiveMailSetting");
+							if (receiveMailSettingElement != null)
+								receiveMailSettingElement.addElement("pollInterval").setText("60");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

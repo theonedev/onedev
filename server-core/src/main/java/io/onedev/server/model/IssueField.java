@@ -1,5 +1,10 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.IssueField.PROP_NAME;
+import static io.onedev.server.model.IssueField.PROP_ORDINAL;
+import static io.onedev.server.model.IssueField.PROP_TYPE;
+import static io.onedev.server.model.IssueField.PROP_VALUE;
+
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import static io.onedev.server.model.IssueField.*;
+
+import io.onedev.server.model.support.inputspec.textinput.TextInput;
 
 @Entity
 @Table(
@@ -38,6 +44,7 @@ public class IssueField extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 
+	@Column(length=TextInput.MAX_LEN)
 	private String value;
 
 	@Column(nullable=false)

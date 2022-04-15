@@ -2,6 +2,8 @@ package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Min;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
@@ -21,6 +23,8 @@ public class ReceiveMailSetting implements Serializable {
 	private String imapPassword;
 	
 	private boolean enableSSL = true;
+	
+	private int pollInterval = 60;
 	
 	@Editable(order=100, name="IMAP Host")
 	@NotEmpty
@@ -71,6 +75,16 @@ public class ReceiveMailSetting implements Serializable {
 
 	public void setEnableSSL(boolean enableSSL) {
 		this.enableSSL = enableSSL;
+	}
+
+	@Editable(order=800, description="Specify incoming email poll interval in seconds")
+	@Min(value=10, message="This value should not be less than 10")
+	public int getPollInterval() {
+		return pollInterval;
+	}
+
+	public void setPollInterval(int pollInterval) {
+		this.pollInterval = pollInterval;
 	}
 	
 }

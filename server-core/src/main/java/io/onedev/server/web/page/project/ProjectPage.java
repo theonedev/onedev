@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.ValidationException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -111,10 +114,17 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	public ProjectPage(PageParameters params) {
 		super(params);
-		
-		Long projectId = params.get(PARAM_PROJECT).toOptionalLong();
-		if (projectId == null)
+
+		String projectIdString = params.get(PARAM_PROJECT).toOptionalString();
+		if (StringUtils.isBlank(projectIdString))
 			throw new RestartResponseException(ProjectListPage.class);
+
+		Long projectId;
+		try {
+			projectId = Long.valueOf(projectIdString);
+		} catch (NumberFormatException e) {
+			throw new ValidationException("Invalid project id: " + projectIdString);
+		}
 		
 		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 		projectModel = new LoadableDetachableModel<Project>() {

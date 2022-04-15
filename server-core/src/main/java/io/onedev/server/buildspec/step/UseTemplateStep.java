@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.validation.Valid;
 
-import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -23,7 +22,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.interpolative.VariableInterpolator;
-import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -54,13 +52,7 @@ public class UseTemplateStep extends Step {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getTemplateChoices() {
-		List<String> templateNames = new ArrayList<>(BuildSpec.get().getStepTemplateMap().keySet());
-		
-		EditContext editContext = EditContext.get(1);
-		BeanEditor beanEditor = ((Component) editContext).findParent(BeanEditor.class);
-		if (beanEditor.getDescriptor().getBeanClass() == StepTemplate.class)
-			templateNames.remove(editContext.getInputValue("name"));
-		return templateNames;
+		return new ArrayList<>(BuildSpec.get().getStepTemplateMap().keySet());
 	}
 
 	@Editable(name="Step Parameters", order=200)

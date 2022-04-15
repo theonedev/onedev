@@ -3,6 +3,8 @@ package io.onedev.server.web.page.project.issues.detail;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.ValidationException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -76,7 +78,12 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 			@Override
 			protected Issue load() {
-				Long issueNumber = Long.valueOf(issueNumberString);
+				Long issueNumber;
+				try {
+					issueNumber = Long.valueOf(issueNumberString);
+				} catch (NumberFormatException e) {
+					throw new ValidationException("Invalid issue number: " + issueNumberString);
+				}
 				Issue issue = getIssueManager().find(getProject(), issueNumber);
 				OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
 				if (!issue.getProject().equals(getProject())) 

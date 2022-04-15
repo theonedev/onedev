@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import io.onedev.server.model.support.inputspec.textinput.TextInput;
+
 /**
  * @author robin
  *
@@ -24,7 +26,7 @@ import javax.persistence.UniqueConstraint;
 public class BuildParam extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	public static final String PROP_BUILD = "build";
 	
 	public static final String PROP_NAME = "name";
@@ -41,6 +43,7 @@ public class BuildParam extends AbstractEntity {
 	@Column(nullable=false)
 	private String type;
 	
+	@Column(length=TextInput.MAX_LEN)
 	private String value;
 
 	public Build getBuild() {

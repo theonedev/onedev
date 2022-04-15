@@ -51,7 +51,7 @@ public class UserCardPanel extends GenericPanel<User> {
 		else if (getUser().isSystem()) 
 			builder.append("<i>System Account</i>");
 		else 
-			builder.append("<i>@" + HtmlEscape.escapeHtml5(getUser().getDisplayName()) + "</i>");
+			builder.append("<i>@" + HtmlEscape.escapeHtml5(getUser().getName()) + "</i>");
 		container.add(new Label("info", builder.toString()).setEscapeModelStrings(false));
 	}
 

@@ -19,7 +19,7 @@ public class IssueComment extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_CONTENT_LEN = 15000;
+	public static final int MAX_CONTENT_LEN = 15000;
 	
 	public static final String PROP_CONTENT = "content";
 	
