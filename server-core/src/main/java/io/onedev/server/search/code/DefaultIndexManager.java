@@ -46,6 +46,7 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
@@ -136,8 +137,8 @@ public class DefaultIndexManager implements IndexManager {
 			}
 
 			@Override
-			public boolean needsScores() {
-				return false;
+			public ScoreMode scoreMode() {
+				return ScoreMode.COMPLETE_NO_SCORES;
 			}
 
 		});
@@ -198,8 +199,8 @@ public class DefaultIndexManager implements IndexManager {
 							}
 	
 							@Override
-							public boolean needsScores() {
-								return false;
+							public ScoreMode scoreMode() {
+								return ScoreMode.COMPLETE_NO_SCORES;
 							}
 							
 						});
