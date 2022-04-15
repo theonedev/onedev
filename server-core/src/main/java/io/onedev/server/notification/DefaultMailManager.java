@@ -110,6 +110,8 @@ public class DefaultMailManager implements MailManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultMailManager.class);
 	
+	private static final int MAX_INBOX_LIFE = 3600;
+	
 	private final SettingManager settingManager;
 	
 	private final TransactionManager transactionManager;
@@ -847,9 +849,14 @@ public class DefaultMailManager implements MailManager {
 						logger.trace("Inbox uid validity changed (uid reset to: {})", lastPosition.getUid());
 					}
 
+					long time = System.currentTimeMillis();
 					while (true) { 
-						Thread.sleep(5000);
+						Thread.sleep(receiveMailSetting.getPollInterval()*1000);
 						processMessages(inbox, messageNumber);
+						
+						// discard inbox periodically to save memory
+						if (System.currentTimeMillis()-time > MAX_INBOX_LIFE*1000)
+							break;
 					}
 					
 				} catch (Exception e) {

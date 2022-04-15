@@ -3956,6 +3956,22 @@ public class DataMigrator {
 	}
 			
 	private void migrate83(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element receiveMailSettingElement = valueElement.element("receiveMailSetting");
+							if (receiveMailSettingElement != null)
+								receiveMailSettingElement.addElement("pollInterval").setText("60");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
 	}
 	
 }

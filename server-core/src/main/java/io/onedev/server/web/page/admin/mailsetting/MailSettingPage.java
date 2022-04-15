@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
@@ -112,7 +113,8 @@ public class MailSettingPage extends AdministrationPage {
 					public String call() {
 						MailManager mailManager = OneDev.getInstance(MailManager.class);
 						MailSetting mailSetting = mailSettingHolder.getMailSetting();
-						if (mailSetting.getReceiveMailSetting() != null) {
+						ReceiveMailSetting receiveSetting = mailSetting.getReceiveMailSetting();
+						if (receiveSetting != null) {
 							String uuid = UUID.randomUUID().toString();
 							AtomicReference<Future<?>> futureRef = new AtomicReference<>(null);
 							MessageListener listener = new MessageListener() {
@@ -123,9 +125,12 @@ public class MailSettingPage extends AdministrationPage {
 										futureRef.get().cancel(true);
 								}
 								
-							};					
-							futureRef.set(mailManager.monitorInbox(mailSetting.getReceiveMailSetting(), 
-									mailSetting.getTimeout(), listener, new MailPosition()));
+							};				
+
+							receiveSetting = SerializationUtils.clone(receiveSetting);
+							receiveSetting.setPollInterval(5);
+							futureRef.set(mailManager.monitorInbox(receiveSetting, mailSetting.getTimeout(), 
+									listener, new MailPosition()));
 							
 							ParsedEmailAddress emailAddress = ParsedEmailAddress.parse(mailSetting.getEmailAddress());
 							String subAddressed = emailAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);
