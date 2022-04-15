@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -145,7 +146,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected PullRequest load() {
-				Long requestNumber = Long.valueOf(requestNumberString);
+				Long requestNumber;
+				try {
+					requestNumber = Long.valueOf(requestNumberString);
+				} catch (NumberFormatException e) {
+					throw new ValidationException("Invalid pull request number: " + requestNumberString);
+				}				
+				
 				PullRequest request = getPullRequestManager().find(getProject(), requestNumber);
 				if (request == null) {
 					throw new EntityNotFoundException("Unable to find pull request #" 
