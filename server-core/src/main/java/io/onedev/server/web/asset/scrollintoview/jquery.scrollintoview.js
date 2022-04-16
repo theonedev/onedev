@@ -6,9 +6,9 @@
     $.fn.scrollIntoView = function(scrollParent, animation) {
     	var $this = jQuery(this);
 
-		var $scrollParent = scrollParent? $(scrollParent): $(this).scrollParent(true);
-	
 		if ($this.length != 0) {
+			var $scrollParent = scrollParent? $(scrollParent): $(this).scrollParent(true);
+	
 			var scrollParentTop, scrollParentBottom, thisTop, thisBottom;
 			if ($scrollParent[0] == document) {
 				scrollParentTop = 0;

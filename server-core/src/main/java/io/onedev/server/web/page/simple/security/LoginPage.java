@@ -209,10 +209,13 @@ public class LoginPage extends SimplePage {
 	}
 
 	private void afterLogin(User user) {
-		SecurityUtils.getSubject().runAs(user.getPrincipals());
 		RememberMeManager rememberMeManager = OneDev.getInstance(RememberMeManager.class);
-		AuthenticationToken token = new UsernamePasswordToken(userName, password, rememberMe);
-		rememberMeManager.onSuccessfulLogin(SecurityUtils.getSubject(), token, user);
+		if (rememberMe) {
+			AuthenticationToken token = new UsernamePasswordToken(userName, password, rememberMe);
+			rememberMeManager.onSuccessfulLogin(SecurityUtils.getSubject(), token, user);
+		} else {
+			SecurityUtils.getSubject().runAs(user.getPrincipals());
+		}
 		
 		continueToOriginalDestination();
 		throw new RestartResponseException(getApplication().getHomePage());
