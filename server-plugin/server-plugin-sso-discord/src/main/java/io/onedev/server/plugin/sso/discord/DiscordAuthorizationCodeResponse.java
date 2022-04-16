@@ -1,4 +1,4 @@
-package org.server.plugin.sso.discord;
+package io.onedev.server.plugin.sso.discord;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

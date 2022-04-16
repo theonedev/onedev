@@ -1,4 +1,4 @@
-package org.server.plugin.sso.oauth2.discord;
+package io.onedev.server.plugin.sso.discord.oauth2;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -26,5 +26,4 @@ public class UserGuildsResponse extends Response {
 		
 		return null;
 	}
-
 }

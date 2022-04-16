@@ -1,4 +1,4 @@
-package org.server.plugin.sso.discord;
+package io.onedev.server.plugin.sso.discord;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,16 +16,16 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONObject;
-import org.server.plugin.sso.oauth2.discord.AccessTokenResponse;
-import org.server.plugin.sso.oauth2.discord.Request;
-import org.server.plugin.sso.oauth2.discord.UserGuildsResponse;
-import org.server.plugin.sso.oauth2.discord.UserInfoResponse;
 import org.json.JSONException;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.plugin.sso.discord.oauth2.AccessTokenResponse;
+import io.onedev.server.plugin.sso.discord.oauth2.Request;
+import io.onedev.server.plugin.sso.discord.oauth2.UserGuildsResponse;
+import io.onedev.server.plugin.sso.discord.oauth2.UserInfoResponse;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
@@ -195,5 +195,4 @@ public class DiscordConnector extends SsoConnector {
 		
 		return metadata;
 	}
-
 }

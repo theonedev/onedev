@@ -1,4 +1,4 @@
-package org.server.plugin.sso.oauth2.discord;
+package io.onedev.server.plugin.sso.discord.oauth2;
 
 import org.json.JSONException;
 import org.json.JSONObject;

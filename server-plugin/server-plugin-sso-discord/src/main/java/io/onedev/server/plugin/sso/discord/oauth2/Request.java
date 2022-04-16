@@ -1,4 +1,4 @@
-package org.server.plugin.sso.oauth2.discord;
+package io.onedev.server.plugin.sso.discord.oauth2;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

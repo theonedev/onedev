@@ -8,6 +8,6 @@
 		<version>7.0.3</version>
 	</parent>
 	<properties>
-		<moduleClass>org.server.plugin.sso.discord.DiscordModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.sso.discord.DiscordModule</moduleClass>
 	</properties>
 </project>

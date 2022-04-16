@@ -1,4 +1,4 @@
-package org.server.plugin.sso.discord;
+package io.onedev.server.plugin.sso.discord;
 
 import java.util.Collection;
 
@@ -30,8 +30,6 @@ public class DiscordModule extends AbstractPluginModule {
 			public Collection<Class<?>> getImplementations() {
 				return Sets.newHashSet(DiscordConnector.class);
 			}
-			
 		});
 	}
-
 }
