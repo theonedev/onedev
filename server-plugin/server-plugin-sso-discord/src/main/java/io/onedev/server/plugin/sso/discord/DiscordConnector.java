@@ -30,7 +30,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 
-@Editable(name="Discord", order=10100, description="Refer to this <a href='$docRoot/pages/discord-sso.md' target='_blank'>usage scenario</a> for an example setup")
+@Editable(name="Discord", order=10100, description="Single sign on via discord.com")
 public class DiscordConnector extends SsoConnector {
 	
 	private static final long serialVersionUID = 1L;

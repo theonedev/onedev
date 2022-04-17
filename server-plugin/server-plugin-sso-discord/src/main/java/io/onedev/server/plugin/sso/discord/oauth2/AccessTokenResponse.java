@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@SuppressWarnings("unused")
 public class AccessTokenResponse extends Response {
 	public static final String ENDPOINT = "https://discord.com/api/oauth2/token";
 	private static final String VALID_TOKEN_TYPE = "Bearer";
