@@ -52,6 +52,7 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.JobSecretAuthorizationContextAware;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -502,9 +503,9 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 					@Override
-					protected List<Build> query(EntityQuery<Build> query, int offset, int count, Project project) {
+					protected List<Build> query(EntityQuery<Build> query, int offset, int count, ProjectScope projectScope) {
 						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-						return buildManager.query(project, query, offset, count);
+						return buildManager.query(projectScope!=null?projectScope.getProject():null, query, offset, count);
 					}
 
 					@Override

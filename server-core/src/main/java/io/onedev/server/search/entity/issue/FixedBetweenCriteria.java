@@ -106,7 +106,7 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 		Path<Long> attribute = from.get(Issue.PROP_NUMBER);		
 		if (fixedIssueNumbers.size() > IN_CLAUSE_LIMIT) {
 			Collection<Long> allIssueNumbers = OneDev.getInstance(IssueManager.class).getIssueNumbers(project.getId());
-			issuePredicate = inManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
+			issuePredicate = forManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
 		} else if (!fixedIssueNumbers.isEmpty()) {
 			issuePredicate = from.get(Issue.PROP_NUMBER).in(fixedIssueNumbers);
 		} else {

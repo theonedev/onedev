@@ -87,8 +87,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.code.CommitIndexed;
-import io.onedev.server.search.code.IndexManager;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeIndexManager;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
@@ -259,9 +259,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 				if (resolvedRevision != null) {
 					RevCommit commit = getProject().getRevCommit(resolvedRevision, true);
-					IndexManager indexManager = OneDev.getInstance(IndexManager.class);
+					CodeIndexManager indexManager = OneDev.getInstance(CodeIndexManager.class);
 					if (!indexManager.isIndexed(getProject(), commit)) {
-						OneDev.getInstance(IndexManager.class).indexAsync(getProject(), commit);
+						OneDev.getInstance(CodeIndexManager.class).indexAsync(getProject(), commit);
 						setVisible(true);
 					} else {
 						setVisible(false);
@@ -306,7 +306,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					.count(maxQueryEntries)
 					.build();
 			try {
-				SearchManager searchManager = OneDev.getInstance(SearchManager.class);
+				CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
 				queryHits = searchManager.search(projectModel.getObject(), getProject().getRevCommit(resolvedRevision, true), 
 						query);
 			} catch (InterruptedException e) {

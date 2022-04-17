@@ -23,7 +23,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.unittest.UnitTestReport;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
@@ -33,7 +33,7 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 	@Test
 	public void test() {
 		try (InputStream is = Resources.getResource(JUnitReportParserTest.class, "test-result.xml").openStream()) {
-			Mockito.when(AppLoader.getInstance(SearchManager.class)).thenReturn(new SearchManager() {
+			Mockito.when(AppLoader.getInstance(CodeSearchManager.class)).thenReturn(new CodeSearchManager() {
 
 				@Override
 				public List<QueryHit> search(Project project, ObjectId commit, BlobQuery query)

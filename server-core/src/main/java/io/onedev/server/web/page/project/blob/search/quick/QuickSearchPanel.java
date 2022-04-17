@@ -37,7 +37,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.FileQuery;
@@ -73,7 +73,7 @@ public abstract class QuickSearchPanel extends Panel {
 	}
 
 	private List<QueryHit> querySymbols(String searchInput, int count) {
-		SearchManager searchManager = OneDev.getInstance(SearchManager.class);
+		CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
 		ObjectId commit = projectModel.getObject().getRevCommit(revisionModel.getObject(), true);		
 		List<QueryHit> symbolHits = new ArrayList<>();
 		try {

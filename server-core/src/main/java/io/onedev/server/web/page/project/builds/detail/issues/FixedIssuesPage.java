@@ -18,6 +18,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.FixedInBuildCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -93,8 +94,25 @@ public class FixedIssuesPage extends BuildDetailPage {
 				}
 
 				@Override
-				protected Project getProject() {
-					return FixedIssuesPage.this.getProject();
+				protected ProjectScope getProjectScope() {
+					return new ProjectScope() {
+
+						@Override
+						public Project getProject() {
+							return FixedIssuesPage.this.getProject();
+						}
+
+						@Override
+						public boolean isRecursive() {
+							return false;
+						}
+
+						@Override
+						public RecursiveConfigurable getRecursiveConfigurable() {
+							return null;
+						}
+						
+					};
 				}
 				
 			});

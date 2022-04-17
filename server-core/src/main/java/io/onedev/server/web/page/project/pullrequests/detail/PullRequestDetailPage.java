@@ -77,6 +77,7 @@ import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -891,8 +892,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 
 					@Override
-					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count, Project project) {
-						return getPullRequestManager().query(project, query, offset, count, false, false);
+					protected List<PullRequest> query(EntityQuery<PullRequest> query, 
+							int offset, int count, ProjectScope projectScope) {
+						return getPullRequestManager().query(projectScope!=null?projectScope.getProject():null, query, false, offset, count);
 					}
 
 					@Override

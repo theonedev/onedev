@@ -13,6 +13,7 @@ import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.MilestoneAndIssueState;
 import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -38,15 +39,10 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	Long getNextNumber(Project numberScope);
 	
-	List<Issue> query(EntityQuery<Issue> issueQuery, int firstResult, int maxResults, 
-			boolean loadFieldsAndLinks);
+	List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
+			boolean loadFieldsAndLinks, int firstResult, int maxResults);
 	
-	int count(@Nullable Criteria<Issue> issueCriteria);
-	
-	List<Issue> query(Project project, boolean inTree, EntityQuery<Issue> issueQuery, 
-			int firstResult, int maxResults, boolean loadFieldsAndLinks);
-	
-	int count(Project project, boolean inTree, @Nullable Criteria<Issue> issueCriteria);
+	int count(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria);
 	
 	List<Issue> query(@Nullable EntityQuery<Issue> scope, Project project, String term, int count);
 

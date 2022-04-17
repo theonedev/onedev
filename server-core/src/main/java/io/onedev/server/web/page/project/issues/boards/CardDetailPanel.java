@@ -32,6 +32,7 @@ import io.onedev.server.search.entity.build.FixedIssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
@@ -233,9 +234,9 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 					}
 
 					@Override
-					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, Project project) {
+					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, ProjectScope projectScope) {
 						IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-						return issueManager.query(project, true, query, offset, count, false);
+						return issueManager.query(projectScope, query, false, offset, count);
 					}
 
 					@Override

@@ -30,6 +30,8 @@ public interface StorageManager {
     
     File getInfoDir();
     
+    File getIndexDir();
+    
     /**
      * Get directory to store attachments of specified project
      * 

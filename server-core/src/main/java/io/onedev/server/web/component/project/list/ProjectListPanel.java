@@ -50,6 +50,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 
+import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -945,6 +946,13 @@ public class ProjectListPanel extends Panel {
 				target.add(saveQueryLink);
 			}
 			
+			@Override
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				List<String> hints = super.getHints(terminalExpect);
+				hints.add("Free input for fuzzy query on name/path");
+				return hints;
+			}
+			
 		});
 		
 		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
@@ -984,22 +992,23 @@ public class ProjectListPanel extends Panel {
 			@Override
 			public Iterator<? extends Project> iterator(long first, long count) {
 				try {
-					return getProjectManager().query(queryModel.getObject(), (int)first, (int)count).iterator();
+					ProjectQuery query = queryModel.getObject();
+					if (query != null) 
+						return getProjectManager().query(query, (int)first, (int)count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
-					return new ArrayList<Project>().iterator();
 				}
+				return new ArrayList<Project>().iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				ProjectQuery query = queryModel.getObject();
-				if (query != null) {
-					try {
+				try {
+					ProjectQuery query = queryModel.getObject();
+					if (query != null) 
 						return getProjectManager().count(query.getCriteria());
-					} catch (ExplicitException e) {
-						error(e.getMessage());
-					}
+				} catch (ExplicitException e) {
+					error(e.getMessage());
 				}
 				return 0;
 			}
@@ -1203,7 +1212,7 @@ public class ProjectListPanel extends Panel {
 					};
 					issueInfoFrag.setDefaultModel(totalCountModel);
 
-					PageParameters params = ProjectIssueListPage.paramsOf(project, null, 0);
+					PageParameters params = ProjectIssueListPage.paramsOf(project, null, false, 0);
 					Link<Void> issuesLink = new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, params);
 					issuesLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
@@ -1239,7 +1248,7 @@ public class ProjectListPanel extends Panel {
 							ProjectIssueStats stats = item.getModelObject();
 							StateSpec stateSpec = issueSetting.getStateSpecs().get(stats.getStateOrdinal());
 							IssueQuery query = new IssueQuery(new StateCriteria(stateSpec.getName(), IssueQueryLexer.Is));
-							PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), 0);
+							PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), false, 0);
 							Link<Void> stateLink = new BookmarkablePageLink<Void>("link", ProjectIssueListPage.class, params);
 							stateLink.add(new Label("label", stats.getStateCount() + " " + stateSpec.getName()));
 							stateLink.add(AttributeAppender.append("style", "color:" + stateSpec.getColor()));
@@ -1412,7 +1421,7 @@ public class ProjectListPanel extends Panel {
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
-			warn("Not a valid formal query, performing fuzzy query");
+			info("Performing fuzzy query");
 			if (getParentProject() != null)
 				return ProjectQuery.merge(baseQuery, new ProjectQuery(new NameCriteria("*" + queryString + "*")));
 			else

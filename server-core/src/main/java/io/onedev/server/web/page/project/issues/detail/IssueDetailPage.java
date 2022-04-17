@@ -40,6 +40,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -71,8 +72,10 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 		super(params);
 		
 		String issueNumberString = params.get(PARAM_ISSUE).toString();
-		if (StringUtils.isBlank(issueNumberString))
-			throw new RestartResponseException(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), null, 0));
+		if (StringUtils.isBlank(issueNumberString)) {
+			throw new RestartResponseException(ProjectIssueListPage.class, 
+					ProjectIssueListPage.paramsOf(getProject(), null, false, 0));
+		}
 		
 		issueModel = new LoadableDetachableModel<Issue>() {
 
@@ -199,11 +202,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					}
 
 					@Override
-					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, Project project) {
-						if (project != null)
-							return getIssueManager().query(project, true, query, offset, count, false);
-						else
-							return getIssueManager().query(query, offset, count, false);
+					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, ProjectScope projectScope) {
+						return getIssueManager().query(projectScope, query, false, offset, count);
 					}
 
 					@Override

@@ -52,7 +52,7 @@ public abstract class BlobQuery {
 		if (directory != null) {
 			if (!directory.endsWith("/"))
 				directory += "/";
-			luceneQueryBuilder.add(new WildcardQuery(BLOB_PATH.term(directory + "*")), Occur.MUST);
+			luceneQueryBuilder.add(new WildcardQuery(BLOB_PATH.getTerm(directory + "*")), Occur.MUST);
 		}
 		
 		applyConstraints(luceneQueryBuilder);

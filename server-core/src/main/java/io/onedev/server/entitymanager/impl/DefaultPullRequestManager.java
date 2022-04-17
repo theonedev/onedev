@@ -912,10 +912,12 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			predicates.add(builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode()); 
-			if (!projects.isEmpty())
-				predicates.add(root.get(PullRequest.PROP_TARGET_PROJECT).in(projects));
-			else
+			if (!projects.isEmpty()) {
+				predicates.add(projectManager.getProjectsPredicate(builder, 
+						root.get(PullRequest.PROP_TARGET_PROJECT), projects));
+			} else {
 				predicates.add(builder.disjunction());
+			}
 		}
 		
 		if (criteria != null) 
@@ -954,18 +956,16 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	@Sessional
 	@Override
 	public List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
-			int firstResult, int maxResults, boolean loadReviews, boolean loadBuilds) {
+			boolean loadReviewsAndBuilds, int firstResult, int maxResults) {
 		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
 
 		List<PullRequest> requests = query.getResultList();
-		if (!requests.isEmpty()) {
-			if (loadReviews)
-				reviewManager.populateReviews(requests);
-			if (loadBuilds)
-				buildManager.populateBuilds(requests);
+		if (!requests.isEmpty() && loadReviewsAndBuilds) {
+			reviewManager.populateReviews(requests);
+			buildManager.populateBuilds(requests);
 		}
 		
 		return requests;

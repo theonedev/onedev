@@ -53,6 +53,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -111,7 +112,7 @@ public abstract class CommitListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
-				warn("Not a valid formal query, performing fuzzy query");
+				info("Performing fuzzy query");
 				List<CommitCriteria> criterias = new ArrayList<>();
 				ObjectId commitId = getProject().getObjectId(queryString, false);
 				if (commitId != null)
@@ -352,6 +353,13 @@ public abstract class CommitListPanel extends Panel {
 				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
 						.equals(StringUtils.trimToEmpty(inputContent));
 				target.add(saveQueryLink);
+			}
+			
+			@Override
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				List<String> hints = super.getHints(terminalExpect);
+				hints.add("Free input for fuzzy query on revision/message");
+				return hints;
 			}
 			
 		});

@@ -190,7 +190,7 @@ public class PullRequestResource {
 			throw new InvalidParamException("Error parsing query", e);
 		}
     	
-    	return pullRequestManager.query(null, parsedQuery, offset, count, false, false);
+    	return pullRequestManager.query(null, parsedQuery, false, offset, count);
     }
 
 	@Api(order=1200)

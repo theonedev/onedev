@@ -47,6 +47,7 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobManager;
@@ -152,7 +153,7 @@ public abstract class BuildListPanel extends Panel {
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
-			warn("Not a valid formal query, performing fuzzy query");
+			info("Performing fuzzy query");
 			try {
 				EntityQuery.getProjectScopedNumber(getProject(), queryString);
 				return BuildQuery.merge(baseQuery, 
@@ -706,6 +707,13 @@ public abstract class BuildListPanel extends Panel {
 				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
 						.equals(StringUtils.trimToEmpty(inputContent));
 				target.add(saveQueryLink);
+			}
+
+			@Override
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				List<String> hints = super.getHints(terminalExpect);
+				hints.add("Free input for fuzzy query on number/version/job");
+				return hints;
 			}
 			
 		});

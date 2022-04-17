@@ -77,7 +77,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 				sort.setDirection(Direction.DESCENDING);
 				IssueQuery query = new IssueQuery(null, Lists.newArrayList(sort));
 				
-				PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), 0);
+				PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), false, 0);
 				throw new RestartResponseException(ProjectIssueListPage.class, params);
 			}
 			

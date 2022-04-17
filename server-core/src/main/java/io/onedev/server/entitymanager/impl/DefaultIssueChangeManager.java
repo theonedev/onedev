@@ -20,8 +20,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -85,7 +83,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -93,6 +90,7 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.search.entity.issue.UpdateDateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.Matcher;
@@ -189,6 +187,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			change.setUser(SecurityUtils.getUser());
 			change.setData(new IssueTitleChangeData(prevTitle, issue.getTitle()));
 			save(change);
+			dao.persist(issue);
 		}
 	}
 
@@ -327,6 +326,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 												for (TransitionSpec transition: getTransitionSpecs()) {
 													if (transition.getTrigger() instanceof StateTransitionTrigger) {
 														Project project = issue.getProject();
+														ProjectScope projectScope = newProjectScope(project);
 														StateTransitionTrigger trigger = (StateTransitionTrigger) transition.getTrigger();
 														if (trigger.getStates().contains(issue.getState())) {
 															IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
@@ -342,7 +342,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 															query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 															Issue.push(issue);
 															try {
-																for (Issue each: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
+																for (Issue each: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
 																	changeState(each, transition.getToState(), new HashMap<>(), 
 																			transition.getRemoveFields(), "State changed as issue #" + issue.getNumber() + " transited to '" + issue.getState() + "'");
 																}
@@ -396,6 +396,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 											for (TransitionSpec transition: getTransitionSpecs()) {
 												if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 													Project project = build.getProject();
+													ProjectScope projectScope = newProjectScope(project);
 													BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
 													String branches = trigger.getBranches();
 													ObjectId commitId = ObjectId.fromString(build.getCommitHash());
@@ -415,7 +416,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 														Build.push(build);
 														try {
-															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
+															for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
 																changeState(issue, transition.getToState(), new HashMap<>(), 
 																		transition.getRemoveFields(), "State changed as build #" + build.getNumber() + " is successful");
 															}
@@ -463,7 +464,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 											Matcher matcher = new PathMatcher();
 											PullRequest request = pullRequestManager.load(requestId);
 											Project project = request.getTargetProject();
-
+											ProjectScope projectScope = newProjectScope(project);
 											IssueQueryParseOption option = new IssueQueryParseOption().withCurrentPullRequestCriteria(true);
 											for (TransitionSpec transition: getTransitionSpecs()) {
 												if (transition.getTrigger().getClass() == triggerClass) {
@@ -482,7 +483,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 														PullRequest.push(request);
 														try {
-															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
+															for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
 																String statusName = request.getStatus().toString().toLowerCase();
 																changeState(issue, transition.getToState(), new HashMap<>(), 
 																		transition.getRemoveFields(), 
@@ -567,6 +568,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 											try {
 												SecurityUtils.bindAsSystem();
 												Project project = projectManager.load(projectId);
+												ProjectScope projectScope = newProjectScope(project);
 												Set<Long> fixedIssueNumbers = new HashSet<>();
 												try (RevWalk revWalk = new RevWalk(project.getRepository())) {
 													revWalk.markStart(revWalk.lookupCommit(newCommitId));
@@ -620,7 +622,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 																
 															});
 															try {
-																for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
+																for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
 																	changeState(issue, transition.getToState(), new HashMap<>(), 
 																			transition.getRemoveFields(), "State changed as code fixing the issue is committed");
 																}
@@ -671,7 +673,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				
 				query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 				
-				for (Issue issue: issueManager.query(query, 0, Integer.MAX_VALUE, true)) {
+				for (Issue issue: issueManager.query(null, query, true, 0, Integer.MAX_VALUE)) {
 					changeState(issue, transition.getToState(), new HashMap<>(), 
 							transition.getRemoveFields(), null);
 				}
@@ -679,14 +681,31 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		}
 	}
 	
+	private ProjectScope newProjectScope(Project project) {
+		return new ProjectScope() {
+
+			@Override
+			public Project getProject() {
+				return project;
+			}
+
+			@Override
+			public boolean isRecursive() {
+				return false;
+			}
+
+			@Override
+			public RecursiveConfigurable getRecursiveConfigurable() {
+				return null;
+			}
+			
+		};
+	}
+	
 	@Sessional
 	@Override
 	public List<IssueChange> queryAfter(Long afterChangeId, int count) {
-		EntityCriteria<IssueChange> criteria = newCriteria();
-		criteria.addOrder(Order.asc("id"));
-		if (afterChangeId != null) 
-			criteria.add(Restrictions.gt("id", afterChangeId));
-		return query(criteria, 0, count);
+		return dao.queryAfter(IssueChange.class, afterChangeId, count);
 	}
 
 	@Override

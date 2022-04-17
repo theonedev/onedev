@@ -198,7 +198,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			List<SidebarMenuItem> issueMenuItems = new ArrayList<>();
 			
 			issueMenuItems.add(new SidebarMenuItem.Page(null, "List", 
-					ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), 0), 
+					ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), false, 0), 
 					Lists.newArrayList(NewIssuePage.class, IssueDetailPage.class)));
 			issueMenuItems.add(new SidebarMenuItem.Page(null, "Boards", 
 					IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject())));

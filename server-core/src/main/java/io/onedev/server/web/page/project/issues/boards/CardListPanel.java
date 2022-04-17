@@ -22,6 +22,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
@@ -61,7 +62,7 @@ abstract class CardListPanel extends Panel {
 					protected Cursor getCursor() {
 						IssueQuery query = getQuery();
 						if (query != null)
-							return new Cursor(query.toString(), getCardCount(), cardOffset, getProject());
+							return new Cursor(query.toString(), getCardCount(), cardOffset, getProjectScope());
 						else
 							return null;
 					}
@@ -107,7 +108,7 @@ abstract class CardListPanel extends Panel {
 						protected Cursor getCursor() {
 							IssueQuery query = getQuery();
 							if (query != null)
-								return new Cursor(query.toString(), getCardCount(), cardOffset, getProject());
+								return new Cursor(query.toString(), getCardCount(), cardOffset, getProjectScope());
 							else
 								return null;
 						}
@@ -154,13 +155,18 @@ abstract class CardListPanel extends Panel {
 	}
 
 	private List<Issue> queryIssues(int offset, int count) {
-		if (getQuery() != null) 
-			return getIssueManager().query(getProject(), true, getQuery(), offset, count, true);
-		else 
+		if (getQuery() != null) {
+			return getIssueManager().query(getProjectScope(), getQuery(), true, offset, count);
+		} else { 
 			return new ArrayList<>();
+		}
 	}
 	
-	protected abstract Project getProject();
+	private Project getProject() {
+		return getProjectScope().getProject();
+	}
+	
+	protected abstract ProjectScope getProjectScope();
 	
 	@Nullable
 	protected abstract IssueQuery getQuery();

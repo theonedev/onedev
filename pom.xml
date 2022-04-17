@@ -332,7 +332,7 @@
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
-				<version>1.24.1</version>
+				<version>${tika.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -380,23 +380,33 @@
 				<version>${shiro.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-core</artifactId>
-				<groupId>org.apache.lucene</groupId>
 				<version>${lucene.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-queries</artifactId>
-				<groupId>org.apache.lucene</groupId>
 				<version>${lucene.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-queryparser</artifactId>
+				<version>${lucene.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-analyzers-common</artifactId>
-				<groupId>org.apache.lucene</groupId>
 				<version>${lucene.version}</version>
 			</dependency>
 			<dependency>
-				<artifactId>lucene-backward-codecs</artifactId>
 				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analyzers-smartcn</artifactId>			
+				<version>${lucene.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-backward-codecs</artifactId>
 				<version>${lucene.version}</version>
 			</dependency>
 			<dependency>
@@ -601,5 +611,6 @@
 		<servlet.version>3.1.0</servlet.version>
 		<jackson.version>2.13.2</jackson.version>
 		<jacksondatabind.version>2.13.2.1</jacksondatabind.version>
+		<tika.version>1.24.1</tika.version>
 	</properties>
 </project>

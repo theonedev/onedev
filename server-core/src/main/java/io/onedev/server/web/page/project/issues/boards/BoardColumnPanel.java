@@ -63,6 +63,7 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -111,13 +112,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		protected Integer load() {
 			if (getQuery() != null) {
 				try {
-					return getIssueManager().count(getProject(), true, getQuery().getCriteria());
+					return getIssueManager().count(getProjectScope(), getQuery().getCriteria());
 				} catch(ExplicitException e) {
-					return 0;
 				}
-			} else {
-				return 0;
-			}
+			} 
+			return 0;
 		}
 		
 	};
@@ -204,8 +203,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					}
 
 					@Override
-					protected Project getProject() {
-						return BoardColumnPanel.this.getProject();
+					protected ProjectScope getProjectScope() {
+						return BoardColumnPanel.this.getProjectScope();
 					}
 
 					@Override
@@ -275,7 +274,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		}
 		
 		if (getQuery() != null) {
-			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 0);
+			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 
+					getProjectScope().isRecursive(), 0);
 			head.add(new BookmarkablePageLink<Void>("viewAsList", ProjectIssueListPage.class, params));
 		} else {
 			head.add(new WebMarkupContainer("viewAsList").setVisible(false));
@@ -497,7 +497,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		return null;
 	}
 
-	protected abstract Project getProject();
+	private Project getProject() {
+		return getProjectScope().getProject();
+	}
+	
+	protected abstract ProjectScope getProjectScope();
 
 	protected abstract BoardSpec getBoard();
 

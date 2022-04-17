@@ -294,7 +294,7 @@ li.selectable:hover a, a.selectable:hover, li.selectable.active a, a.selectable.
     display: none;
 }
 .clearable-wrapper input.clearable {
-	padding-right: 30px;
+	padding-right: 26px;
 }
 a.input-clear {
 	font-family: sans-serif;
@@ -321,7 +321,7 @@ a.input-clear.input-group-clear {
 	right: 52px;
 }
 a.input-clear.input-group-clear-2 {
-	right: 86px;
+	right: 90px;
 }
 
 img.avatar {
@@ -385,6 +385,9 @@ td.no-elements {
 .icon.icon-hero {
 	width: 100px;
 	height: 100px;
+}
+svg {
+	vertical-align: text-bottom;
 }
 
 label.form-check-inline {

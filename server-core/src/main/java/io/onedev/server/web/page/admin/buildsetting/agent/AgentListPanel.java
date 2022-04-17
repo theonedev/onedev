@@ -37,6 +37,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
@@ -44,6 +45,9 @@ import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.search.entity.agent.NameCriteria;
+import io.onedev.server.search.entity.agent.OsArchCriteria;
+import io.onedev.server.search.entity.agent.OsCriteria;
+import io.onedev.server.search.entity.agent.OsVersionCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.OrCriteria;
@@ -80,9 +84,12 @@ class AgentListPanel extends Panel {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
-				warn("Not a valid formal query, performing fuzzy query");
+				info("Performing fuzzy query");
 				List<Criteria<Agent>> criterias = new ArrayList<>();
 				criterias.add(new NameCriteria("*" + queryString + "*"));
+				criterias.add(new OsCriteria("*" + queryString + "*"));
+				criterias.add(new OsVersionCriteria("*" + queryString + "*"));
+				criterias.add(new OsArchCriteria("*" + queryString + "*"));
 				return new AgentQuery(new OrCriteria<Agent>(criterias));
 			}
 		}
@@ -877,6 +884,13 @@ class AgentListPanel extends Panel {
 				target.add(saveQueryLink);
 			}
 			
+			@Override
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				List<String> hints = super.getHints(terminalExpect);
+				hints.add("Free input for fuzzy query on name/os");
+				return hints;
+			}
+			
 		});
 		
 		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
@@ -915,22 +929,23 @@ class AgentListPanel extends Panel {
 			@Override
 			public Iterator<? extends Agent> iterator(long first, long count) {
 				try {
-					return getAgentManager().query(queryModel.getObject(), (int)first, (int)count).iterator();
+					AgentQuery query = queryModel.getObject();
+					if (query != null)
+						return getAgentManager().query(query, (int)first, (int)count).iterator();
 				} catch (ExplicitException e) {
 					error(e.getMessage());
-					return new ArrayList<Agent>().iterator();
 				}
+				return new ArrayList<Agent>().iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				AgentQuery query = queryModel.getObject();
-				if (query != null) {
-					try {
+				try {
+					AgentQuery query = queryModel.getObject();
+					if (query != null) 
 						return getAgentManager().count(query.getCriteria());
-					} catch (ExplicitException e) {
-						error(e.getMessage());
-					}
+				} catch (ExplicitException e) {
+					error(e.getMessage());
 				}
 				return 0;
 			}

@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
+import static java.util.stream.Collectors.*;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -741,7 +741,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public Collection<Project> getPermittedProjects(Permission permission) {
 		return query().stream()
 				.filter(it->SecurityUtils.getSubject().isPermitted(new ProjectPermission(it, permission)))
-				.collect(Collectors.toList());
+				.collect(toList());
 	}
 
 	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery) {
@@ -771,10 +771,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			From<Project, Project> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
-			Collection<Long> projectIds = getPermittedProjects(new AccessProject())
-					.stream().map(it->it.getId()).collect(Collectors.toSet());
-			if (!projectIds.isEmpty())
-				predicates.add(from.get(Project.PROP_ID).in(projectIds));
+			Collection<Project> projects = getPermittedProjects(new AccessProject());
+			if (!projects.isEmpty())
+				predicates.add(getProjectsPredicate(builder, from, projects));
 			else
 				predicates.add(builder.disjunction());
 		}
@@ -873,26 +872,69 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	@Override
-	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> jpaPath, String pathPattern) {
+	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> path, String pathPattern) {
 		cacheLock.readLock().lock();
 		try {
-			return Criteria.inManyValues(builder, jpaPath.get(Project.PROP_ID), 
+			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
 					getMatchingIds(pathPattern), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
 	}
 	
-	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> jpaPath, Project project) {
+	@Override
+	public org.apache.lucene.search.Query getPathMatchQuery(String fieldName, String pathPattern) {
 		cacheLock.readLock().lock();
 		try {
-			return Criteria.inManyValues(builder, jpaPath.get(Project.PROP_ID), 
+			return Criteria.forManyValues(fieldName, getMatchingIds(pathPattern), cache.keySet());		
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+	
+	@Override
+	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> path, Project project) {
+		cacheLock.readLock().lock();
+		try {
+			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
 					getTreeIds(project.getId()), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
 	}
 
+	@Override
+	public org.apache.lucene.search.Query getTreeQuery(String fieldName, Project project) {
+		cacheLock.readLock().lock();
+		try {
+			return Criteria.forManyValues(fieldName, getTreeIds(project.getId()), cache.keySet());		
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+	
+	@Override
+	public Predicate getProjectsPredicate(CriteriaBuilder builder, Path<Project> path, Collection<Project> projects) {
+		cacheLock.readLock().lock();
+		try {
+			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
+					projects.stream().map(it->it.getId()).collect(toList()), cache.keySet());		
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+
+	@Override
+	public org.apache.lucene.search.Query getProjectsQuery(String fieldName, Collection<Project> projects) {
+		cacheLock.readLock().lock();
+		try {
+			return Criteria.forManyValues(fieldName, projects.stream().map(it->it.getId()).collect(toList()), 
+					cache.keySet());		
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+	
 	@Transactional
 	@Override
 	public void move(Collection<Project> projects, Project parent) {

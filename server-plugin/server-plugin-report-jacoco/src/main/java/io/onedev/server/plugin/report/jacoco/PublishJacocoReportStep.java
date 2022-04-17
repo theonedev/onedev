@@ -29,7 +29,7 @@ import io.onedev.server.plugin.report.coverage.CoverageReport;
 import io.onedev.server.plugin.report.coverage.FileCoverageInfo;
 import io.onedev.server.plugin.report.coverage.PackageCoverageInfo;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.util.XmlUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -70,7 +70,7 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 		CoverageInfo coverageInfo = new CoverageInfo(new Coverage(0, 0), new Coverage(0, 0), 
 				new Coverage(0, 0), new Coverage(0, 0));
 		
-		SearchManager searchManager = OneDev.getInstance(SearchManager.class);
+		CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
 		
 		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);

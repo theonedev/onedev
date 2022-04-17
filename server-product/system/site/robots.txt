@@ -1,9 +1,6 @@
 User-agent: *
 
-Disallow: /*?*ILinkListener*
-Disallow: /*?*IBehaviorListener*
-Allow: /*/onedev-manual/blob
-Allow: /*/onedev-server/builds
+Disallow: /*?*
 Disallow: /*/blob/
 Disallow: /*/commits
 Disallow: /*/archive
@@ -13,7 +10,9 @@ Disallow: /*/compare
 Disallow: /*/stats
 Disallow: /*/branches
 Disallow: /*/tags
-Disallow: /*/pulls/new
+Disallow: /*/children
+Disallow: /*/builds
+Disallow: /*/pulls
 Disallow: /*/issues/new
 Disallow: /*/code-comments
 Disallow: /*/boards

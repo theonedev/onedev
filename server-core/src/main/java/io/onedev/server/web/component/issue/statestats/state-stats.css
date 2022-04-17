@@ -7,6 +7,7 @@
 .state-stats>span {
 	display: inline-block;
 	border: 1px solid var(--light-gray);
+	background: var(--light-gray);
 	border-radius: 0.42rem;
 }
 .dark-mode .state-stats>span {
