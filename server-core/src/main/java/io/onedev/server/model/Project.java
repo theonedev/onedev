@@ -11,6 +11,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import javax.validation.Validator;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.Permission;
 import org.apache.tika.mime.MediaType;
+import org.apache.wicket.util.encoding.UrlEncoder;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
@@ -1722,7 +1724,8 @@ public class Project extends AbstractEntity {
 	}
 	
 	public String getAttachmentUrlPath(String attachmentGroup, String attachmentName) {
-		return String.format("/projects/%s/attachment/%s/%s", getId(), attachmentGroup, attachmentName);
+		return String.format("/projects/%d/attachment/%s/%s", getId(), attachmentGroup, 
+				UrlEncoder.PATH_INSTANCE.encode(attachmentName, StandardCharsets.UTF_8));
 	}
 	
 	public String saveAttachment(String attachmentGroup, String suggestedAttachmentName, InputStream attachmentStream) {
