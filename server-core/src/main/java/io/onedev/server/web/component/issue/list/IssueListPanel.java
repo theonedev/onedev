@@ -33,7 +33,6 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -86,10 +85,8 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
-import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -97,8 +94,8 @@ import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.link.IssueLinkPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -115,14 +112,12 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
@@ -1178,54 +1173,24 @@ public abstract class IssueListPanel extends Panel {
 
 				Issue issue = (Issue) fragment.getDefaultModelObject();
 				
-				String label;
-				if (getProject() == null)
-					label = issue.getProject() + "#" + issue.getNumber();
-				else if (getProject().equals(issue.getProject()))
-					label = "#" + issue.getNumber();
-				else 
-					label = issue.getProject() + "#" + issue.getNumber();
-				
-				ActionablePageLink numberLink;
-				fragment.add(numberLink = new ActionablePageLink("number", 
-						IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
+				fragment.add(new IssueLinkPanel("numberAndTitle") {
 
 					@Override
-					public IModel<?> getBody() {
-						return Model.of(label);
+					protected Issue getIssue() {
+						return (Issue) fragment.getDefaultModelObject();
 					}
 
 					@Override
-					protected void doBeforeNav(AjaxRequestTarget target) {
-						WebSession.get().setIssueCursor(cursor);
-						String redirectUrlAfterDelete = RequestCycle.get().urlFor(
-								getPage().getClass(), getPage().getPageParameters()).toString();
-						WebSession.get().setRedirectUrlAfterDelete(Issue.class, redirectUrlAfterDelete);
+					protected Project getCurrentProject() {
+						return getProject();
+					}
+
+					@Override
+					protected Cursor getCursor() {
+						return cursor;
 					}
 					
 				});
-				
-				String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(issue)).toString();
-
-				String transformed = Emojis.getInstance().apply(new ReferenceTransformer(issue.getProject(), url).apply(issue.getTitle()));
-				fragment.add(new Label("title", transformed) {
-
-					@Override
-					public void renderHead(IHeaderResponse response) {
-						super.renderHead(response);
-						String script = String.format(""
-								+ "$('#%s a:not(.embedded-reference)').click(function(e) {\n"
-								+ "  if (!e.ctrlKey && !e.metaKey) {\n"
-								+ "    $('#%s').click();\n"
-								+ "    return false;\n"
-								+ "  }\n"
-								+ "});", 
-								getMarkupId(), numberLink.getMarkupId());
-						response.render(OnDomReadyHeaderItem.forScript(script));
-					}
-					
-				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 				
 				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.getNumberAndTitle())));
 				

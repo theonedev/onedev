@@ -39,10 +39,10 @@ import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
+import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
-import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
@@ -82,7 +82,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new IssueTitlePanel("title") {
+		add(new IssueEditableTitlePanel("title") {
 
 			@Override
 			protected Issue getIssue() {

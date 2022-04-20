@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.issue.title;
+package io.onedev.server.web.component.issue.editabletitle;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -23,11 +23,11 @@ import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
-public abstract class IssueTitlePanel extends Panel {
+public abstract class IssueEditableTitlePanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
-	public IssueTitlePanel(String id) {
+	public IssueEditableTitlePanel(String id) {
 		super(id);
 	}
 

@@ -44,9 +44,9 @@ import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
+import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
-import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
@@ -105,7 +105,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new IssueTitlePanel("title") {
+		add(new IssueEditableTitlePanel("title") {
 
 			@Override
 			protected Issue getIssue() {

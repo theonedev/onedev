@@ -77,6 +77,9 @@
 	position: relative;
 	padding-right: 20px;
 }
+.issue-boards>.body .board-card .primary .number {
+	margin-right: 0.25rem;
+}
 .issue-boards>.body .board-card .primary .show-detail {
 	position: absolute;
 	right: 0;

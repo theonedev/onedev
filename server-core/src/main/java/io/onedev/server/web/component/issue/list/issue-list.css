@@ -24,6 +24,13 @@
 	margin-top: 4px;
 }
 
+.issue-list .number {
+	margin-right: 0.25rem;
+}
+.issue-list .number, .issue-list .title {
+	font-size: 1.175rem;
+	font-weight: 500;	
+}
 .issue-list .state {
 	border-bottom: 2px dotted transparent;
 	cursor: pointer;
