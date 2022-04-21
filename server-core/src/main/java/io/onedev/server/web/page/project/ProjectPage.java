@@ -20,7 +20,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -44,7 +43,7 @@ import io.onedev.server.web.asset.dropdowntriangleindicator.DropdownTriangleIndi
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.info.ProjectInfoPanel;
 import io.onedev.server.web.editable.EditableUtils;
@@ -61,7 +60,6 @@ import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
@@ -335,13 +333,25 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			}
 			
 		}) {
+			
+			protected WebMarkupContainer newProjectLink(String componentId, Long projectId) {
+				
+				return new ViewStateAwareAjaxLink<Void>(componentId) {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						navToProject(getProjectManager().load(projectId));
+					}
+					
+				};
+				
+			}
 
 			@Override
 			protected void populateItem(ListItem<Project> item) {
 				Project project = item.getModelObject();
 				if (SecurityUtils.canAccess(project)) {
-					Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
-							ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project));
+					WebMarkupContainer link = newProjectLink("link", project.getId());
 					link.add(new Label("label", project.getName()));
 					item.add(link);
 					
@@ -352,7 +362,14 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown) {
-								return new ProjectChildrenTree(id, projectId);
+								return new ProjectChildrenTree(id, projectId) {
+
+									@Override
+									protected WebMarkupContainer newChildLink(String componentId, Long childId) {
+										return newProjectLink(componentId, childId);
+									}
+									
+								};
 							}
 							
 						});
@@ -383,7 +400,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		fragment.add(newProjectTitle("projectTitle"));
 		return fragment;
 	}
-
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -394,6 +411,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	protected String getPageTitle() {
 		return getProject().getPath();
 	}
+	
+	protected abstract void navToProject(Project project);
 	
 	private ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);

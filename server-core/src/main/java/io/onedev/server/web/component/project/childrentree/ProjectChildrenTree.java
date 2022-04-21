@@ -11,12 +11,15 @@ import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
 @SuppressWarnings("serial")
 public class ProjectChildrenTree extends NestedTree<ProjectFacade> {
@@ -83,7 +86,14 @@ public class ProjectChildrenTree extends NestedTree<ProjectFacade> {
 	@Override
 	protected Component newContentComponent(String id, IModel<ProjectFacade> model) {
 		ProjectFacade child = model.getObject();
-		return new ChildLinkPanel(id, child); 
+		return new ChildLinkPanel(id, child) {
+
+			@Override
+			protected WebMarkupContainer newChildLink(String componentId, Long childId) {
+				return ProjectChildrenTree.this.newChildLink(componentId, childId);
+			}
+			
+		}; 
 	}
 	
 	protected Set<Long> getExpandedProjectIds() {
@@ -98,6 +108,11 @@ public class ProjectChildrenTree extends NestedTree<ProjectFacade> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new ProjectChildrenTreeCssResourceReference()));
+	}
+	
+	protected WebMarkupContainer newChildLink(String componentId, Long childId) {
+		return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, 
+				ProjectDashboardPage.paramsOf(childId));		
 	}
 	
 }

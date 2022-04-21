@@ -39,6 +39,7 @@ import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
 @SuppressWarnings("serial")
 public abstract class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAware {
@@ -183,6 +184,14 @@ public abstract class MilestoneDetailPage extends ProjectPage implements ScriptI
 			};
 		}
 		
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isIssueManagement()) 
+			setResponsePage(MilestoneListPage.class, MilestoneListPage.paramsOf(project, false, null));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

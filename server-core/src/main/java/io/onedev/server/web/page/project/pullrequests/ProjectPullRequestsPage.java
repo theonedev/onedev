@@ -33,6 +33,7 @@ import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.NamedPullRequestQueriesBean;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -262,6 +263,14 @@ public class ProjectPullRequestsPage extends ProjectPage {
 	@Override
 	protected String getPageTitle() {
 		return "Pull Requests - " + getProject().getPath();
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
+			setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(project, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

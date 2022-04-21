@@ -83,6 +83,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.util.RevisionDiff;
 
@@ -795,6 +796,14 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		return getCommit().getShortMessage() 
 				+ " - Commit " +  GitUtils.abbreviateSHA(getCommit().getName()) 
 				+ " - " + getProject().getPath();
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
+			setResponsePage(ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(project.getId()));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 	@Nullable

@@ -97,6 +97,8 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
@@ -1013,6 +1015,14 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "<span class='text-nowrap'>Create Pull Request</span>").setEscapeModelStrings(false);
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
+			setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(project, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

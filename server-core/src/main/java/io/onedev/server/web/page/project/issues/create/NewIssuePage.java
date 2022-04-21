@@ -30,7 +30,9 @@ import io.onedev.server.util.script.identity.SiteAdministrator;
 import io.onedev.server.web.component.issue.create.NewIssueEditor;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 
 @SuppressWarnings("serial")
@@ -143,6 +145,14 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "<span class='text-nowrap'>Create Issue</span>").setEscapeModelStrings(false);
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isIssueManagement()) 
+			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, false, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

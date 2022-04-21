@@ -85,6 +85,7 @@ import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardP
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
@@ -155,6 +156,14 @@ public abstract class BuildDetailPage extends ProjectPage
 		return SecurityUtils.canAccess(getBuild());
 	}
 	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isCodeManagement()) 
+			setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(project, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+	}
+
 	private WebSocketObserver newBuildObserver(Long buildId) {
 		return new WebSocketObserver() {
 			

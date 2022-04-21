@@ -18,10 +18,12 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
@@ -95,6 +97,14 @@ public class InvalidBuildPage extends ProjectPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canAccess(getBuild());
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isCodeManagement()) 
+			setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(project, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 	@Override
