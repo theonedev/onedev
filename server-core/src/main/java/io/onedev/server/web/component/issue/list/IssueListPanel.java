@@ -171,7 +171,7 @@ public abstract class IssueListPanel extends Panel {
 	protected abstract ProjectScope getProjectScope();
 	
 	private Project getProject() {
-		return getProjectScope().getProject();
+		return getProjectScope()!=null?getProjectScope().getProject():null;
 	}
 
 	protected IssueQuery getBaseQuery() {
@@ -336,7 +336,7 @@ public abstract class IssueListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				setVisible(getProjectScope().getRecursiveConfigurable() != null 
+				setVisible(getProjectScope()!=null && getProjectScope().getRecursiveConfigurable() != null 
 						&& !projectManager.getChildren(getProject().getId()).isEmpty());
 			}
 			
