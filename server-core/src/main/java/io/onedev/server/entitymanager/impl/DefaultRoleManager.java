@@ -108,24 +108,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	
 	@Transactional
 	public void setupDefaults() {
-		Role childCreator = new Role();
-		childCreator.setName("Child Creator");
-		childCreator.setCreateChildren(true);
-		childCreator.setCodePrivilege(CodePrivilege.READ);
-
 		boolean hasAssigneesField = settingManager.getIssueSetting().getFieldSpec("Assignees") != null;
-		
-		if (hasAssigneesField) {
-			ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-			allfieldsExcept.getExcludeFields().add("Assignees");
-			childCreator.setEditableIssueFields(allfieldsExcept);
-		}
-		
-		JobPrivilege jobPrivilege = new JobPrivilege();
-		jobPrivilege.setJobNames("*");
-		childCreator.getJobPrivileges().add(jobPrivilege);
-		
-		save(childCreator, new ArrayList<>(), null);
 		
 		Role codeWriter = new Role();
 		codeWriter.setName("Code Writer");
@@ -133,7 +116,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		codeWriter.setScheduleIssues(true);
 		codeWriter.setEditableIssueFields(new AllIssueFields());
 		
-		jobPrivilege = new JobPrivilege();
+		JobPrivilege jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
 		jobPrivilege.setRunJob(true);
 		codeWriter.getJobPrivileges().add(jobPrivilege);
