@@ -114,6 +114,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewer
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchDeleteData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchRestoreData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -658,7 +659,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	public void on(PullRequestChanged event) {
 		PullRequestChangeData data = event.getChange().getData();
 		if (data instanceof PullRequestApproveData || data instanceof PullRequestDiscardData  
-				|| data instanceof PullRequestMergeStrategyChangeData) {
+				|| data instanceof PullRequestMergeStrategyChangeData
+				|| data instanceof PullRequestTargetBranchChangeData) {
 			checkAsync(Lists.newArrayList(event.getRequest()));
 		}
 	}

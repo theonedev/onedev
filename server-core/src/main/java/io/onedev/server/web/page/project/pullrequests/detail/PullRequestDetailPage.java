@@ -22,6 +22,7 @@ import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -61,6 +62,8 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entityreference.Referenceable;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
@@ -80,6 +83,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -90,6 +94,8 @@ import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
@@ -691,11 +697,72 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newBody(String componentId) {
-				Fragment fragment = new Fragment(componentId, "moreInfoFrag", PullRequestDetailPage.this);
+				Fragment fragment = new Fragment(componentId, "moreInfoFrag", PullRequestDetailPage.this) {
+
+					@Override
+					protected void onBeforeRender() {
+						replace(new BranchLink("targetBranch", getPullRequest().getTarget()));
+						super.onBeforeRender();
+					}
+					
+				};
 				
 				fragment.add(new UserIdentPanel("submitter", getPullRequest().getSubmitter(), Mode.NAME));
-				
 				fragment.add(new BranchLink("targetBranch", getPullRequest().getTarget()));
+				
+				fragment.add(new MenuLink("changeTargetBranch") {
+
+					@Override
+					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+						List<MenuItem> menuItems = new ArrayList<>();
+						Project project = getProject();
+						for (RefInfo ref: project.getBranchRefInfos()) {
+							String branch = GitUtils.ref2branch(ref.getRef().getName());
+							PullRequest request = getPullRequest();
+							if (!branch.equals(request.getTargetBranch()) &&
+									(!project.equals(request.getSourceProject()) || !branch.equals(request.getSourceBranch()))) {
+								menuItems.add(new MenuItem() {
+
+									@Override
+									public String getLabel() {
+										return branch;
+									}
+
+									@Override
+									public WebMarkupContainer newLink(String id) {
+										return new AjaxLink<Void>(id) {
+
+											@Override
+											protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+												super.updateAjaxAttributes(attributes);
+												attributes.getAjaxCallListeners().add(new ConfirmClickListener(
+														"Do you really want to change target branch to " + branch + "?"));
+											}
+
+											@Override
+											public void onClick(AjaxRequestTarget target) {
+												dropdown.close();
+												OneDev.getInstance(PullRequestChangeManager.class).changeTargetBranch(getPullRequest(), branch);
+											}
+											
+										};
+									}
+									
+								});
+							}
+						}
+						
+						return menuItems;
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getPullRequest().isOpen() && SecurityUtils.canModify(getPullRequest()));
+					}
+					
+				});
+				
 				if (getPullRequest().getSourceProject() != null) {
 					fragment.add(new BranchLink("sourceBranch", getPullRequest().getSource()));
 				} else {

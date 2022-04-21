@@ -5,30 +5,30 @@ import java.util.Map;
 
 import io.onedev.server.notification.ActivityDetail;
 
-public class PullRequestTitleChangeData extends PullRequestChangeData {
+public class PullRequestTargetBranchChangeData extends PullRequestChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String oldTitle;
+	private final String oldBranch;
 	
-	private final String newTitle;
+	private final String newBranch;
 	
-	public PullRequestTitleChangeData(String oldTitle, String newTitle) {
-		this.oldTitle = oldTitle;
-		this.newTitle = newTitle;
+	public PullRequestTargetBranchChangeData(String oldBranch, String newBranch) {
+		this.oldBranch = oldBranch;
+		this.newBranch = newBranch;
 	}
 	
 	@Override
 	public String getActivity() {
-		return "changed title";
+		return "changed target branch";
 	}
 
 	@Override
 	public ActivityDetail getActivityDetail() {
 		Map<String, String> oldProperties = new HashMap<>();
-		oldProperties.put("Title", oldTitle);
+		oldProperties.put("Target Branch", oldBranch);
 		Map<String, String> newProperties = new HashMap<>();
-		newProperties.put("Title", newTitle);
+		newProperties.put("Target Branch", newBranch);
 		
 		return ActivityDetail.compare(oldProperties, newProperties, true);
 	}

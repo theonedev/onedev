@@ -29,7 +29,7 @@ public class PullRequestMergeStrategyChangeData extends PullRequestChangeData {
 		Map<String, String> oldProperties = new HashMap<>();
 		oldProperties.put("Merge Strategy", oldStrategy.name());
 		Map<String, String> newProperties = new HashMap<>();
-		oldProperties.put("Merge Strategy", newStrategy.name());
+		newProperties.put("Merge Strategy", newStrategy.name());
 		
 		return ActivityDetail.compare(oldProperties, newProperties, true);
 	}
