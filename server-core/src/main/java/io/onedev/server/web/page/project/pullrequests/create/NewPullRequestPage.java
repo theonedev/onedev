@@ -661,6 +661,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 					getPullRequest().setTarget(target);
 					for (PullRequestReview review: getPullRequest().getReviews())
 						review.setUser(dao.load(User.class, review.getUser().getId()));
+					for (PullRequestAssignment assignment: getPullRequest().getAssignments())
+						assignment.setUser(dao.load(User.class, assignment.getUser().getId()));
 					
 					OneDev.getInstance(PullRequestManager.class).open(getPullRequest());
 					
