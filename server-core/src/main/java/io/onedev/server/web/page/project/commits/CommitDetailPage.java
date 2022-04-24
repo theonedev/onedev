@@ -92,7 +92,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
 	
-	private static final String PARAM_REVISION = "revision";
+	public static final String PARAM_COMMIT = "commit";
 	
 	// make sure to use a different value from wicket:id according to wicket bug:
 	// https://issues.apache.org/jira/browse/WICKET-6069
@@ -135,7 +135,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		super(params);
 
 		List<String> revisionSegments = new ArrayList<>();
-		String segment = params.get(PARAM_REVISION).toString();
+		String segment = params.get(PARAM_COMMIT).toString();
 		if (segment.length() != 0)
 			revisionSegments.add(segment);
 		for (int i=0; i<params.getIndexedCount(); i++) {
@@ -562,7 +562,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	
 	public static void fillParams(PageParameters params, State state) {
 		if (state.revision != null)
-			params.set(PARAM_REVISION, state.revision);
+			params.set(PARAM_COMMIT, state.revision);
 		if (state.compareWith != null)
 			params.set(PARAM_COMPARE_WITH, state.compareWith);
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)

@@ -262,17 +262,24 @@ li.selectable a, a.selectable {
 	color: var(--dark-mode-light-gray);
 }
 
-li.selectable:hover a, a.selectable:hover, li.selectable.active a, a.selectable.active {
+li.selectable:hover a, a.selectable:hover {
+	background-color: var(--light-warning);
+	border-color: var(--light-warning);
+}
+li.selectable.active a, a.selectable.active {
 	background-color: var(--light-primary);
 	border-color: #BBDFF9;
 }
 .dark-mode li.selectable:hover a, 
-.dark-mode a.selectable:hover, 
+.dark-mode a.selectable:hover {
+	background-color: var(--dark-mode-light-warning);
+	border-color: var(--dark-mode-light-warning);
+}
 .dark-mode li.selectable.active a, 
 .dark-mode a.selectable.active {
 	color: var(--primary);
 	background-color: var(--dark-mode-light-primary);
-	border-color: var(--dark-mode-light-primary);
+	border-color: rgb(48, 68, 107);
 }
 
 .hash {
@@ -739,4 +746,22 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 .autofit-parent {
 	overflow: hidden !important;
 	min-height: inherit !important;
+}
+span.keycap {
+	white-space: nowrap;
+	border: 1px solid #aaa;
+	border-style: outset;
+	border-radius: 4px;
+	padding: 0px 3px 1px 3px;
+	margin: 0px 0px 0px 0px;
+	vertical-align: baseline;
+	line-height: 1.8em;
+	background: #fbfbfb;
+	font-size: 12px;
+	min-width: 24px;
+	text-align: center;
+}
+.dark-mode span.keycap {
+	border-color: var(--gray-dark);
+	background: var(--dark-mode-dark);
 }

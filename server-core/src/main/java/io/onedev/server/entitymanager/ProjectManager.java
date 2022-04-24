@@ -86,4 +86,6 @@ public interface ProjectManager extends EntityManager<Project> {
 
 	void delete(Collection<Project> projects);
 	
+	int findLongestMatch(List<String> pathSegments);
+	
 }

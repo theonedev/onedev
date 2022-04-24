@@ -113,24 +113,7 @@ public class MilestoneIssuesPage extends MilestoneDetailPage {
 	
 			@Override
 			protected ProjectScope getProjectScope() {
-				return new ProjectScope() {
-
-					@Override
-					public Project getProject() {
-						return MilestoneIssuesPage.this.getProject();
-					}
-
-					@Override
-					public boolean isRecursive() {
-						return true;
-					}
-
-					@Override
-					public RecursiveConfigurable getRecursiveConfigurable() {
-						return null;
-					}
-					
-				};
+				return new ProjectScope(getProject(), true, null);
 			}
 			
 		});

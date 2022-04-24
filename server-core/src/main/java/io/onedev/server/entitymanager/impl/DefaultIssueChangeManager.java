@@ -682,24 +682,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	}
 	
 	private ProjectScope newProjectScope(Project project) {
-		return new ProjectScope() {
-
-			@Override
-			public Project getProject() {
-				return project;
-			}
-
-			@Override
-			public boolean isRecursive() {
-				return false;
-			}
-
-			@Override
-			public RecursiveConfigurable getRecursiveConfigurable() {
-				return null;
-			}
-			
-		};
+		return new ProjectScope(project, false, null);
 	}
 	
 	@Sessional

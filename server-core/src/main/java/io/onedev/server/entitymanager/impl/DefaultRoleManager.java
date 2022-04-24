@@ -6,10 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.ReplicationMode;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
@@ -214,6 +217,29 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 				}
 			}
 		}
+	}
+	
+	private EntityCriteria<Role> getCriteria(@Nullable String term) {
+		EntityCriteria<Role> criteria = EntityCriteria.of(Role.class);
+		if (term != null) 
+			criteria.add(Restrictions.ilike("name", term, MatchMode.ANYWHERE));
+		else
+			criteria.setCacheable(true);
+		return criteria;
+	}
+
+	@Sessional
+	@Override
+	public List<Role> query(@Nullable String term, int firstResult, int maxResult) {
+		EntityCriteria<Role> criteria = getCriteria(term);
+		criteria.addOrder(Order.asc("name"));
+		return query(criteria, firstResult, maxResult);
+	}
+	
+	@Sessional
+	@Override
+	public int count(@Nullable String term) {
+		return count(getCriteria(term));
 	}
 	
 }

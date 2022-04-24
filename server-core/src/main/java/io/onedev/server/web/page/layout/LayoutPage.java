@@ -10,6 +10,8 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -38,9 +40,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.commandpalette.CommandPalettePanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
@@ -98,6 +103,8 @@ import io.onedev.server.web.util.WicketUtils;
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
     
+	private AbstractDefaultAjaxBehavior commandPaletteBehavior;
+	
 	public LayoutPage(PageParameters params) {
 		super(params);
 	}
@@ -322,6 +329,26 @@ public abstract class LayoutPage extends BasePage {
 		
 		topbar.add(newTopbarTitle("title"));
 
+		topbar.add(new ModalLink("showCommandPalette") {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new CommandPalettePanel(id) {
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+					
+				};
+			}
+
+			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
+			
+		});
 		topbar.add(new Link<Void>("darkMode") {
 
 			@Override
@@ -444,6 +471,34 @@ public abstract class LayoutPage extends BasePage {
 			userInfo.add(AttributeAppender.append("class", "active"));
 		
 		topbar.add(userInfo);
+		
+		add(commandPaletteBehavior = new AbstractDefaultAjaxBehavior() {
+			
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				new ModalPanel(target) {
+					
+					@Override
+					protected Component newContent(String id) {
+						return new CommandPalettePanel(id) {
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								close();
+							}
+							
+						};
+					}
+					
+					@Override
+					protected String getCssClass() {
+						return "modal-lg";
+					}
+					
+				};
+			}
+			
+		});
 	}
 
 	@Override
@@ -455,7 +510,8 @@ public abstract class LayoutPage extends BasePage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new LayoutResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.layout.onDomReady();"));
+		response.render(OnDomReadyHeaderItem.forScript(String.format("onedev.server.layout.onDomReady(%s);", 
+				commandPaletteBehavior.getCallbackFunction())));
 		response.render(OnLoadHeaderItem.forScript("onedev.server.layout.onLoad();"));
 	}
 	

@@ -971,6 +971,29 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return null;
     }
 
+	private int findLongestMatch(@Nullable Long parentId, List<String> pathSegments) {
+		if (!pathSegments.isEmpty()) {
+			String name = pathSegments.get(0);
+			Long projectId = findProjectId(parentId, name);
+			if (projectId != null)
+				return findLongestMatch(projectId, pathSegments.subList(1, pathSegments.size())) + 1;
+			else
+				return 0;
+		} else {
+			return 0;
+		}
+	}
+	
+	@Override
+	public int findLongestMatch(List<String> pathSegments) {
+		cacheLock.readLock().lock();
+		try {
+			return findLongestMatch(null, pathSegments);
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+	
 	@Override
 	public List<ProjectFacade> getChildren(Long projectId) {
 		cacheLock.readLock().lock();

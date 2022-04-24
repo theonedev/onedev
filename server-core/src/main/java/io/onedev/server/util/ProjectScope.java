@@ -6,14 +6,32 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import io.onedev.server.model.Project;
 
-public interface ProjectScope {
-
-	Project getProject();
+public class ProjectScope {
 	
-	boolean isRecursive();
+	private final Project project;
+	
+	private final boolean recursive;
+	
+	private final RecursiveConfigurable recursiveConfigurable;
+	
+	public ProjectScope(Project project, boolean recursive, RecursiveConfigurable recursiveConfigurable) {
+		this.project = project;
+		this.recursive = recursive;
+		this.recursiveConfigurable = recursiveConfigurable;
+	}
+
+	public Project getProject() {
+		return project;
+	}
+	
+	public boolean isRecursive() {
+		return recursive;
+	}
 	
 	@Nullable
-	RecursiveConfigurable getRecursiveConfigurable();
+	public RecursiveConfigurable getRecursiveConfigurable() {
+		return recursiveConfigurable;
+	}
 
 	public static interface RecursiveConfigurable {
 		

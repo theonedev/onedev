@@ -128,24 +128,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 				String title = titleInput.getInput();
 				if (StringUtils.isNotBlank(title)) {
 					IssueTextManager issueTextManager = OneDev.getInstance(IssueTextManager.class);
-					return issueTextManager.query(new ProjectScope() {
-	
-						@Override
-						public Project getProject() {
-							return NewIssueEditor.this.getProject();
-						}
-	
-						@Override
-						public boolean isRecursive() {
-							return true;
-						}
-	
-						@Override
-						public RecursiveConfigurable getRecursiveConfigurable() {
-							return null;
-						}
-						
-					}, title, false, 0, 10);
+					return issueTextManager.query(new ProjectScope(getProject(), true, null), title, false, 0, 10);
 				} else {
 					return new ArrayList<>();
 				}

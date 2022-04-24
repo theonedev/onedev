@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.ListenerRegistry;
@@ -139,10 +140,6 @@ import io.onedev.server.web.websocket.WebSocketManager;
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
 		ScriptIdentityAware, EditParamsAware, JobSecretAuthorizationContextAware {
 
-	private static final String PARAM_REVISION = "revision";
-	
-	private static final String PARAM_PATH = "path";
-	
 	private static final String PARAM_INITIAL_NEW_PATH = "initial-new-path";
 	
 	private static final String PARAM_REQUEST = "request";
@@ -189,15 +186,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		super(params);
 		
 		List<String> revisionAndPathSegments = new ArrayList<>();
-		String segment = params.get(PARAM_REVISION).toString();
-		if (segment != null && segment.length() != 0)
-			revisionAndPathSegments.add(segment);
-		segment = params.get(PARAM_PATH).toString();
-		if (segment != null && segment.length() != 0)
-			revisionAndPathSegments.add(segment);
-		
 		for (int i=0; i<params.getIndexedCount(); i++) {
-			segment = params.get(i).toString();
+			String segment = params.get(i).toString();
 			if (segment.length() != 0)
 				revisionAndPathSegments.add(segment);
 		}
@@ -1078,10 +1068,19 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 	
 	public static void fillParams(PageParameters params, State state) {
-		if (state.blobIdent.revision != null)
-			params.add(PARAM_REVISION, state.blobIdent.revision);
-		if (state.blobIdent.path != null)
-			params.add(PARAM_PATH, state.blobIdent.path);
+		int index = 0;
+		if (state.blobIdent.revision != null) {
+			for (String segment: Splitter.on("/").split(state.blobIdent.revision)) {
+				params.set(index, segment);
+				index++;
+			}
+		}
+		if (state.blobIdent.path != null) {
+			for (String segment: Splitter.on("/").split(state.blobIdent.path)) {
+				params.set(index, segment);
+				index++;
+			}
+		}
 		if (state.position != null)
 			params.add(PARAM_POSITION, state.position.toString());
 		if (state.requestId != null)

@@ -861,7 +861,7 @@ onedev.server = {
 		onedev.server.perfectScrollbar.setup();
 
 		$(document).keydown(function(e) {
-			if (e.keyCode == 27)
+			if (e.keyCode == 27) // ESC
 				e.preventDefault();
 		});
 	},

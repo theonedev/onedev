@@ -24,6 +24,7 @@ import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.ProjectScope.RecursiveConfigurable;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -214,31 +215,14 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 			@Override
 			protected ProjectScope getProjectScope() {
-				return new ProjectScope() {
-
-					@Override
-					public Project getProject() {
-						return ProjectIssueListPage.this.getProject();
-					}
-
-					@Override
-					public boolean isRecursive() {
-						return recursive;
-					}
-
-					@Override
-					public RecursiveConfigurable getRecursiveConfigurable() {
-						return new RecursiveConfigurable() {
+				return new ProjectScope(getProject(), recursive, new RecursiveConfigurable() {
 							
-							@Override
-							public void setRecursive(AjaxRequestTarget target, boolean recursive) {
-								setResponsePage(ProjectIssueListPage.class, paramsOf(getProject(), query, recursive, 0));
-							}
-							
-						};
+					@Override
+					public void setRecursive(AjaxRequestTarget target, boolean recursive) {
+						setResponsePage(ProjectIssueListPage.class, paramsOf(getProject(), query, recursive, 0));
 					}
-					
-				};
+							
+				});
 			}
 
 		});

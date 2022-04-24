@@ -23,7 +23,7 @@ import io.onedev.server.model.ProblemMetric;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
@@ -129,9 +129,9 @@ public class ProblemReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/problem/${report}", 
+				application.mount(new BasePageMapper("projects/${project}/builds/${build}/problem/${report}", 
 						ProblemReportPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/stats/problem", ProblemStatsPage.class));
+				application.mount(new BasePageMapper("projects/${project}/stats/problem", ProblemStatsPage.class));
 			}
 			
 		});			

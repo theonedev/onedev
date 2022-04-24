@@ -64,6 +64,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.util.usage.InUseException;
 import io.onedev.server.web.component.svg.SpriteImageResolver;
 import io.onedev.server.web.mapper.BaseResourceMapper;
+import io.onedev.server.web.mapper.BaseUrlMapper;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.simple.error.GeneralErrorPage;

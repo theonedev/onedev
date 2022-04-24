@@ -28,7 +28,7 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 @SuppressWarnings("serial")
 public abstract class AgentDetailPage extends AdministrationPage {
 
-	private static final String PARAM_AGENT = "agent";
+	public static final String PARAM_AGENT = "agent";
 	
 	protected final IModel<Agent> agentModel;
 	

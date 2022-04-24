@@ -43,7 +43,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -57,6 +56,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.ProjectScope.RecursiveConfigurable;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -78,7 +78,7 @@ import io.onedev.server.web.util.ConfirmClickModifier;
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {
 
-	private static final String PARAM_BOARD = "board";
+	public static final String PARAM_BOARD = "board";
 	
 	private static final String PARAM_MILESTONE = "milestone";
 	
@@ -172,16 +172,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	public IssueBoardsPage(PageParameters params) {
 		super(params);
 		
-		Project current = getProject();
-		do {
-			boards = current.getIssueSetting().getBoardSpecs();
-			if (boards != null)
-				break;
-			current = current.getParent();
-		} while (current != null);
-		
-		if (boards == null)
-			boards = OneDev.getInstance(SettingManager.class).getIssueSetting().getBoardSpecs();
+		boards = getProject().getHierarchyBoards();
 		
 		String boardName = params.get(PARAM_BOARD).toString();
 		if (StringUtils.isNotBlank(boardName)) {
@@ -879,33 +870,16 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	}
 
 	private ProjectScope getProjectScope() {
-		return new ProjectScope() {
-
-			@Override
-			public Project getProject() {
-				return IssueBoardsPage.this.getProject();
-			}
-
-			@Override
-			public boolean isRecursive() {
-				return recursive;
-			}
-
-			@Override
-			public RecursiveConfigurable getRecursiveConfigurable() {
-				return new RecursiveConfigurable() {
+		return new ProjectScope(getProject(), recursive, new RecursiveConfigurable() {
 					
-					@Override
-					public void setRecursive(AjaxRequestTarget target, boolean recursive) {
-						PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-								getMilestone(), backlog, queryString, backlogQueryString, recursive);
-						setResponsePage(IssueBoardsPage.class, params);
-					}
-					
-				};
+			@Override
+			public void setRecursive(AjaxRequestTarget target, boolean recursive) {
+				PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
+						getMilestone(), backlog, queryString, backlogQueryString, recursive);
+				setResponsePage(IssueBoardsPage.class, params);
 			}
 			
-		};
+		});
 	}
 	
 	@Override

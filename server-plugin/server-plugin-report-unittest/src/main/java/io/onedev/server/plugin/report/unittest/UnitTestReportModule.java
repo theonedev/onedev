@@ -17,7 +17,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.UnitTestMetric;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
@@ -90,9 +90,9 @@ public class UnitTestReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-suites", UnitTestSuitesPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-cases", UnitTestCasesPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/stats/unit-test", UnitTestStatsPage.class));
+				application.mount(new BasePageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-suites", UnitTestSuitesPage.class));
+				application.mount(new BasePageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-cases", UnitTestCasesPage.class));
+				application.mount(new BasePageMapper("projects/${project}/stats/unit-test", UnitTestStatsPage.class));
 			}
 			
 		});		

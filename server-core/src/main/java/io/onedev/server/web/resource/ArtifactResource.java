@@ -20,6 +20,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
@@ -39,8 +40,6 @@ public class ArtifactResource extends AbstractResource {
 
 	private static final String PARAM_BUILD = "build";
 
-	private static final String PARAM_PATH = "path";
-	
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
@@ -65,17 +64,15 @@ public class ArtifactResource extends AbstractResource {
 			throw new UnauthorizedException();
 		
 		List<String> pathSegments = new ArrayList<>();
-		String pathSegment = params.get(PARAM_PATH).toString();
-		if (pathSegment.length() != 0)
-			pathSegments.add(pathSegment);
-		else
-			throw new ExplicitException("Artifact path has to be specified");
 
 		for (int i = 0; i < params.getIndexedCount(); i++) {
-			pathSegment = params.get(i).toString();
+			String pathSegment = params.get(i).toString();
 			if (pathSegment.length() != 0)
 				pathSegments.add(pathSegment);
 		}
+		
+		if (pathSegments.isEmpty())
+			throw new ExplicitException("Artifact path has to be specified");
 		
 		String artifactPath = Joiner.on("/").join(pathSegments);
 		
@@ -130,7 +127,12 @@ public class ArtifactResource extends AbstractResource {
 		PageParameters params = new PageParameters();
 		params.set(PARAM_PROJECT, project.getId());
 		params.set(PARAM_BUILD, buildNumber);
-		params.set(PARAM_PATH, path);
+		
+		int index = 0;
+		for (String segment: Splitter.on("/").split(path)) {
+			params.set(index, segment);
+			index++;
+		}
 		return params;
 	}
 

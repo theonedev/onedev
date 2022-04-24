@@ -1,0 +1,24 @@
+<wicket:panel>
+	<div class="command-palette">
+		<div class="modal-header">
+			<h5 class="modal-title">Command Palette</h5>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+		</div>
+		<div class="modal-body">
+			<div class="clearable-wrapper">
+				<input wicket:id="input" class="form-control" placeholder="Type to filter...">
+			</div>
+			<div wicket:id="suggestions" class="suggestions mt-3 overflow-auto">
+				<a wicket:id="suggestions" class="suggestion d-flex justify-content-between selectable">
+					<span wicket:id="label" class="text-break"></span>
+					<span wicket:id="hint" class="hint ml-3 text-muted"></span>
+				</a>
+			</div>
+			<div wicket:id="noSuggestions" class="no-suggestions alert alert-notice alert-light-warning mt-4 mb-0">No suggestions</div>
+		</div>
+		<div class="modal-footer justify-content-start text-muted">
+			<span class="keycap mr-1">&uarr;</span> <span class="keycap mr-1">&darr;</span> to move 
+			<span class="keycap ml-3 mr-1">esc</span> to close
+		</div>
+	</div>
+</wicket:panel>

@@ -10,6 +10,17 @@
 			$(container).find(".active.selectable").find("a").addBack("a").click();
 		}
 		
+		function onTab() {
+			var completion = $(container).find(".active.selectable").data("completion");
+			if (completion == undefined)
+				completion = $(container).find(".active.selectable").find("a").addBack("a").data("completion");
+			if (completion != undefined) {
+				$input.val(completion);
+				$input.trigger("input");
+			}
+			return false;
+		}
+		
 		function onKeyup(e) {
 			var $container = $(container);
 			e.preventDefault();
@@ -42,7 +53,8 @@
 		
 		$input.bind("keydown", "return", onReturn)
 				.bind("keydown", "up", onKeyup)
-				.bind("keydown", "down", onKeydown);		    	
+				.bind("keydown", "down", onKeydown)
+				.bind("keydown", "tab", onTab);		    	
 		
     	return this;
     };

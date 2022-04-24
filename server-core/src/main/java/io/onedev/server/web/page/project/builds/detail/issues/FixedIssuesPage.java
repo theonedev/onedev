@@ -15,7 +15,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.FixedInBuildCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.ProjectScope;
@@ -95,24 +94,7 @@ public class FixedIssuesPage extends BuildDetailPage {
 
 				@Override
 				protected ProjectScope getProjectScope() {
-					return new ProjectScope() {
-
-						@Override
-						public Project getProject() {
-							return FixedIssuesPage.this.getProject();
-						}
-
-						@Override
-						public boolean isRecursive() {
-							return false;
-						}
-
-						@Override
-						public RecursiveConfigurable getRecursiveConfigurable() {
-							return null;
-						}
-						
-					};
+					return new ProjectScope(getProject(), false, null);
 				}
 				
 			});

@@ -1,5 +1,7 @@
 package io.onedev.server.entitymanager;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.Group;
@@ -22,4 +24,8 @@ public interface GroupManager extends EntityManager<Group> {
 	@Nullable
 	Group find(String name);
 
+	int count(@Nullable String term);
+	
+	List<Group> query(@Nullable String term, int firstResult, int maxResults);
+	
 }

@@ -44,7 +44,7 @@ import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 @SuppressWarnings("serial")
 public abstract class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAware {
 
-	private static final String PARAM_MILESTONE = "milestone";
+	public static final String PARAM_MILESTONE = "milestone";
 	
 	private final IModel<Milestone> milestoneModel;
 	

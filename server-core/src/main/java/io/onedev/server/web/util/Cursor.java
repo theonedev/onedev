@@ -59,28 +59,10 @@ public class Cursor implements Serializable {
 
 	@Nullable
 	public ProjectScope getProjectScope() {
-		if (projectId != null) {
-			return new ProjectScope() {
-
-				@Override
-				public Project getProject() {
-					return OneDev.getInstance(ProjectManager.class).load(projectId);
-				}
-
-				@Override
-				public boolean isRecursive() {
-					return recursive;
-				}
-
-				@Override
-				public RecursiveConfigurable getRecursiveConfigurable() {
-					return null;
-				}
-				
-			};	
-		} else {
+		if (projectId != null) 
+			return new ProjectScope(OneDev.getInstance(ProjectManager.class).load(projectId), recursive, null);
+		else 
 			return null;
-		}
 	}
 	
 	@Nullable

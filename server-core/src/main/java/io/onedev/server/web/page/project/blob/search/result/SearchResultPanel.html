@@ -15,14 +15,16 @@
 		</div>
 		<ul class="body list-unstyled mb-0 px-3 py-2 overflow-auto flex-grow-1">
 			<li wicket:id="blobs" class="blob text-nowrap border-0">
-				<a wicket:id="expandLink" class="expand"><svg wicket:id="icon" class="icon"></svg></a> 
-				<a wicket:id="blobLink" class="blob selectable d-inline-block">
-					<wicket:svg href="file" class="icon"></wicket:svg>
-					<span wicket:id="label"></span>
-				</a> 
+				<div class="d-flex align-items-center flex-nowrap">
+					<a wicket:id="expandLink" class="expand"><svg wicket:id="icon" class="icon"></svg></a> 
+					<a wicket:id="blobLink" class="blob selectable d-inline-block flex-grow-1 flex-shrink-1">
+						<wicket:svg href="file" class="icon"></wicket:svg>
+						<span wicket:id="label"></span>
+					</a> 
+				</div>
 				<ul wicket:id="hits" class="list-unstyled">
 					<li wicket:id="hits" class="hit">
-						<a wicket:id="hitLink" class="hit selectable d-inline-block">
+						<a wicket:id="hitLink" class="hit selectable d-block">
 							<img wicket:id="icon"></img>
 							<span wicket:id="lineNo" class="line-no"></span>
 							<span wicket:id="label"></span>

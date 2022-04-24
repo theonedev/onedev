@@ -320,7 +320,7 @@ import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.exception.PageExpiredExceptionHandler;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
@@ -659,7 +659,7 @@ public class CoreModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(org.apache.wicket.protocol.http.WebApplication application) {
-				application.mount(new DynamicPathPageMapper("/test", TestPage.class));
+				application.mount(new BasePageMapper("/test", TestPage.class));
 			}
 			
 		});

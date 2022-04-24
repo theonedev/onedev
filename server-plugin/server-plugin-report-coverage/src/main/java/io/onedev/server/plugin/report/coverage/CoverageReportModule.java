@@ -25,7 +25,7 @@ import io.onedev.server.model.CoverageMetric;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
@@ -133,8 +133,8 @@ public class CoverageReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/coverage/${report}", CoverageReportPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/stats/coverage", CoverageStatsPage.class));
+				application.mount(new BasePageMapper("projects/${project}/builds/${build}/coverage/${report}", CoverageReportPage.class));
+				application.mount(new BasePageMapper("projects/${project}/stats/coverage", CoverageStatsPage.class));
 			}
 			
 		});		

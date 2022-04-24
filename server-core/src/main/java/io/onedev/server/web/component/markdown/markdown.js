@@ -1,8 +1,8 @@
 onedev.server.markdown = {
 	shortcuts: { // cmd (Mac) or ctrl (non-Mac) plus below keys
 		"b": ".do-bold",
-		"k": ".do-link",
-		".": ".do-image",
+		"shift-k": ".do-link",
+		"shift-i": ".do-image",
 		"i": ".do-italic",
 		"e": ".do-code",
 		"shift-.": ".do-quote",

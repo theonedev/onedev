@@ -41,8 +41,6 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 
 	private static final String PARAM_REPORT = "report";
 	
-	private static final String PARAM_PATH = "path";
-	
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
@@ -72,14 +70,8 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 			throw new UnauthorizedException();
 			
 		List<String> pathSegments = new ArrayList<>();
-		String pathSegment = params.get(PARAM_PATH).toString();
-		if (pathSegment.length() != 0)
-			pathSegments.add(pathSegment);
-		else
-			throw new ExplicitException("Markdown report path has to be specified");
-
 		for (int i = 0; i < params.getIndexedCount(); i++) {
-			pathSegment = params.get(i).toString();
+			String pathSegment = params.get(i).toString();
 			if (pathSegment.length() != 0)
 				pathSegments.add(pathSegment);
 		}
@@ -130,15 +122,6 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		});
 
 		return response;
-	}
-
-	public static PageParameters paramsOf(Project project, Long buildNumber, String reportName, String path) {
-		PageParameters params = new PageParameters();
-		params.set(PARAM_PROJECT, project.getId());
-		params.set(PARAM_BUILD, buildNumber);
-		params.set(PARAM_REPORT, reportName);
-		params.set(PARAM_PATH, path);
-		return params;
 	}
 
 }

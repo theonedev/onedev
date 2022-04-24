@@ -364,6 +364,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		Root<User> root = criteriaQuery.from(User.class);
 		
 		criteriaQuery.where(getPredicates(builder, criteriaQuery, root, term));
+		criteriaQuery.orderBy(builder.asc(root.get(User.PROP_NAME)));
 		
 		Query<User> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);

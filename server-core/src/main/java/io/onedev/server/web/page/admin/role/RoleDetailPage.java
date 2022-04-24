@@ -37,7 +37,7 @@ import io.onedev.server.web.util.ConfirmClickModifier;
 @SuppressWarnings("serial")
 public class RoleDetailPage extends AdministrationPage {
 	
-	private static final String PARAM_ROLE = "role";
+	public static final String PARAM_ROLE = "role";
 	
 	protected final IModel<Role> roleModel;
 	

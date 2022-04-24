@@ -22,6 +22,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Splitter;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.Blob;
@@ -38,10 +40,6 @@ public class RawBlobResource extends AbstractResource {
 
 	private static final String PARAM_PROJECT = "project";
 
-	private static final String PARAM_REVISION = "revision";
-
-	private static final String PARAM_PATH = "path";
-	
 	private static final int BUFFER_SIZE = 8*1024;
 
 	@Override
@@ -52,15 +50,8 @@ public class RawBlobResource extends AbstractResource {
 		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 
 		List<String> revisionAndPathSegments = new ArrayList<>();
-		String segment = params.get(PARAM_REVISION).toString();
-		if (segment.length() != 0)
-			revisionAndPathSegments.add(segment);
-		segment = params.get(PARAM_PATH).toString();
-		if (segment.length() != 0)
-			revisionAndPathSegments.add(segment);
-
 		for (int i = 0; i < params.getIndexedCount(); i++) {
-			segment = params.get(i).toString();
+			String segment = params.get(i).toString();
 			if (segment.length() != 0)
 				revisionAndPathSegments.add(segment);
 		}
@@ -69,8 +60,8 @@ public class RawBlobResource extends AbstractResource {
 
 		String revision = blobIdent.revision;
 		String path = blobIdent.path;
-		if (StringUtils.isBlank(path))
-			throw new IllegalArgumentException("path parameter has to be specified");
+		if (StringUtils.isBlank(revision) || StringUtils.isBlank(path))
+			throw new IllegalArgumentException("Revision and path should be specified");
 
 		if (!SecurityUtils.canReadCode(project))
 			throw new UnauthorizedException();
@@ -173,8 +164,16 @@ public class RawBlobResource extends AbstractResource {
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
 		PageParameters params = new PageParameters();
 		params.set(PARAM_PROJECT, project.getId());
-		params.set(PARAM_REVISION, blobIdent.revision);
-		params.set(PARAM_PATH, blobIdent.path);
+		
+		int index = 0;
+		for (String segment: Splitter.on("/").split(blobIdent.revision)) {
+			params.set(index, segment);
+			index++;
+		}
+		for (String segment: Splitter.on("/").split(blobIdent.path)) {
+			params.set(index, segment);
+			index++;
+		}
 
 		return params;
 	}
