@@ -10,6 +10,8 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 
@@ -24,6 +26,8 @@ import io.onedev.server.web.page.simple.SimplePage;
 public class GeneralErrorPage extends SimplePage {
 
 	private static final int MAX_TITLE_LEN = 240;
+	
+	private static final Logger logger = LoggerFactory.getLogger(GeneralErrorPage.class);
 
 	private String title;
 
@@ -42,6 +46,8 @@ public class GeneralErrorPage extends SimplePage {
 			title = "An unexpected exception occurred";
 			detailMessage = Throwables.getStackTraceAsString(exception);
 			statusCode = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
+			if (!SecurityUtils.isAdministrator()) 
+				logger.error("Error serving request", exception);
 		}
 	}
 
