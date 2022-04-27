@@ -348,8 +348,12 @@ public class GitUtils {
 	}
 
 	public static void fetch(Repository fromRepository, ObjectId fromCommit, Repository toRepository) {
-		new FetchCommand(toRepository.getDirectory(), null).from(fromRepository.getDirectory().getAbsolutePath())
-				.refspec(fromCommit.name()).call();
+		new FetchCommand(toRepository.getDirectory(), null)
+				.from(fromRepository.getDirectory().getAbsolutePath())
+				.refspec(fromCommit.name())
+				.force(true)
+				.quiet(true)
+				.call();
 	}
 
 	public static boolean isMergedInto(Repository repository, @Nullable Map<String, String> gitEnvs, ObjectId base,

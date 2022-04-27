@@ -19,7 +19,9 @@ public class FetchCommand extends GitCommand<Void> {
 	
     private String from;
     
-    private int depth;
+    private boolean force;
+    
+    private boolean quiet;
     
     private String[] refspec = new String[0];
     
@@ -36,9 +38,14 @@ public class FetchCommand extends GitCommand<Void> {
 		this.refspec = refspec;
 		return this;
 	}
-
-	public FetchCommand depth(int depth) {
-		this.depth = depth;
+	
+	public FetchCommand force(boolean force) {
+		this.force = force;
+		return this;
+	}
+	
+	public FetchCommand quiet(boolean quiet) {
+		this.quiet = quiet;
 		return this;
 	}
 	
@@ -48,9 +55,10 @@ public class FetchCommand extends GitCommand<Void> {
 	    
 		Commandline cmd = cmd().addArgs("fetch");
 		cmd.addArgs(from);
-		cmd.addArgs("--force", "--quiet");
-		if (depth != 0)
-			cmd.addArgs("--depth", String.valueOf(depth));
+		if (force)
+			cmd.addArgs("--force");
+		if (quiet)
+			cmd.addArgs("--quiet");
 		
 		for (String each: refspec)
 			cmd.addArgs(each);
@@ -66,7 +74,7 @@ public class FetchCommand extends GitCommand<Void> {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				logger.warn(line);
 			}
 			
 		}).checkReturnCode();
