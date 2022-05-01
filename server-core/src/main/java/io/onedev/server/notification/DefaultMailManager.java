@@ -458,7 +458,7 @@ public class DefaultMailManager implements MailManager {
 									checkPermission(each, issue.getProject(), new AccessProject(), user, authorization);
 									if (user == null) 
 										user = createUser(each, issue.getProject(), authorization.getAuthorizedRole());
-									watch(user, issue);
+									issueWatchManager.watch(issue, user, true);
 								} catch (UnauthorizedException e) {
 									logger.error("Error adding receipient to watch list", e);
 								}
@@ -478,7 +478,7 @@ public class DefaultMailManager implements MailManager {
 									checkPermission(each, pullRequest.getProject(), new ReadCode(), user, authorization);
 									if (user == null) 
 										user = createUser(each, pullRequest.getProject(), authorization.getAuthorizedRole());
-									watch(user, pullRequest);
+									pullRequestWatchManager.watch(pullRequest, user, true);
 								} catch (UnauthorizedException e) {
 									logger.error("Error adding receipient to watch list", e);
 								}
@@ -674,40 +674,6 @@ public class DefaultMailManager implements MailManager {
 		}
 		
 		return user;
-	}
-	
-	private void watch(User user, Issue issue) {
-		boolean found = false;
-		for (IssueWatch watch: user.getIssueWatches()) {
-			if (watch.getIssue().equals(issue)) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			IssueWatch watch = new IssueWatch();
-			watch.setIssue(issue);
-			watch.setUser(user);
-			watch.setWatching(true);
-			issueWatchManager.save(watch);
-		}
-	}
-	
-	private void watch(User user, PullRequest request) {
-		boolean found = false;
-		for (PullRequestWatch watch: user.getPullRequestWatches()) {
-			if (watch.getRequest().equals(request)) {
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			PullRequestWatch watch = new PullRequestWatch();
-			watch.setRequest(request);
-			watch.setUser(user);
-			watch.setWatching(true);
-			pullRequestWatchManager.save(watch);
-		}
 	}
 	
 	@Listen
