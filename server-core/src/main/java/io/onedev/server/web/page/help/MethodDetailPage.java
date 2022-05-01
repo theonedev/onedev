@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.wicket.Component;
@@ -32,6 +33,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.rest.TriggerJobResource;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.ParamCheckFilter;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -89,8 +91,11 @@ public class MethodDetailPage extends ApiHelpPage {
 	@Nullable
 	private Parameter getRequestBodyParam() {
 		for (Parameter param: getResourceMethod().getParameters()) {
-			if (param.getAnnotation(PathParam.class) == null && param.getAnnotation(QueryParam.class) == null) 
+			if (param.getAnnotation(PathParam.class) == null 
+					&& param.getAnnotation(QueryParam.class) == null 
+					&& param.getAnnotation(Context.class) == null) {
 				return param;
+			}
 		}
 		return null;
 	}
@@ -349,9 +354,11 @@ public class MethodDetailPage extends ApiHelpPage {
 			}
 		}
 		
-		StringBuilder curlExample = new StringBuilder();
+		StringBuilder curlExample = new StringBuilder("$ curl ");
 
-		curlExample.append("$ curl -u <login name>:<password or access token> ");
+		if (resourceClass != TriggerJobResource.class)
+			curlExample.append("-u <login name>:<password or access token> ");
+		
 		if (!queryParams.isEmpty())
 			curlExample.append("-G ");
 		

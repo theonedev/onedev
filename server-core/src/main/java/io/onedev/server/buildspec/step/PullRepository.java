@@ -42,7 +42,7 @@ public class PullRepository extends MirrorRepository {
 	private String refs = "refs/heads/* refs/tags/*";
 	
 	@Editable(order=410, description="Specify space separated refs to pull from remote. '*' can be used in ref "
-			+ "name for wildcard match"
+			+ "name for wildcard match<br>"
 			+ "<b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update "
 			+ "branches/tags via this step")
 	@NotEmpty
@@ -60,6 +60,8 @@ public class PullRepository extends MirrorRepository {
 		if (!project.isCommitOnBranches(build.getCommitId(), project.getDefaultBranch())) 
 			throw new ExplicitException("For security reason, this step is only allowed to run from default branch");
 		
+		String remoteUrl = getRemoteUrlWithCredential(build);
+		
 		Commandline git = newGit(project);
 		
 		String defaultBranch = project.getDefaultBranch();
@@ -69,7 +71,7 @@ public class PullRepository extends MirrorRepository {
 		
 		git.addArgs("fetch");
 		
-		git.addArgs(getRemoteUrlWithCredential(build));
+		git.addArgs(remoteUrl);
 		if (isForce())
 			git.addArgs("--force");
 		
@@ -122,7 +124,7 @@ public class PullRepository extends MirrorRepository {
 					
 					for (List<ObjectId> batch: Lists.partition(lfsFetchCommitIds, LFS_FETCH_BATCH)) {
 						git.clearArgs();
-						git.addArgs("lfs", "fetch", getRemoteUrlWithCredential(build));
+						git.addArgs("lfs", "fetch", remoteUrl);
 						for (ObjectId commitId: batch)
 							git.addArgs(commitId.name());
 						git.execute(new LineConsumer() {

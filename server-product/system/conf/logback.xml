@@ -21,6 +21,7 @@
 		</triggeringPolicy>
 	</appender>
 	
+	<logger name="org.glassfish.jersey.servlet.WebComponent" level="ERROR"/>
 	<logger name="org.apache.wicket" level="WARN"/>
 	<logger name="org.apache.wicket.request.cycle.RequestCycle" level="OFF"/>
 	<logger name="RequestCycleExtra" level="OFF"/>

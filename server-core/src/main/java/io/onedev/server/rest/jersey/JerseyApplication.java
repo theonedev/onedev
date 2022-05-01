@@ -34,7 +34,7 @@ public class JerseyApplication extends ResourceConfig {
         // add the default Jackson exception mappers
         register(JacksonFeature.class);
         
-        packages(JerseyApplication.class.getPackage().getName(), "io.swagger.v3.jaxrs2.integration.resources");
+        packages(JerseyApplication.class.getPackage().getName());
         
 	    for (JerseyConfigurator configurator: AppLoader.getExtensions(JerseyConfigurator.class)) {
 	    	configurator.configure(this);
