@@ -24,7 +24,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 @ClassValidating
-public abstract class MirrorRepository extends ServerSideStep implements Validatable {
+public abstract class SyncRepository extends ServerSideStep implements Validatable {
 
 	private static final long serialVersionUID = 1L;
 

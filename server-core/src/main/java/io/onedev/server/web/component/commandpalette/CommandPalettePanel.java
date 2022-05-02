@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -27,8 +26,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.mapper.ICompoundRequestMapper;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -37,6 +36,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.SelectByTypingBehavior;
@@ -50,11 +51,13 @@ public abstract class CommandPalettePanel extends Panel {
 	
 	private static final List<String[]> availableUrls = new ArrayList<>();
 
-	private static final Set<String> excludedUrlPrefixes = Sets.newHashSet("test", "errors", "sso", 
-			"verify-email-address", "reset-password", "signup", "logout", "login", "loading", "init", 
-			"help", "builds", "issues", "pull-requests");
-	
-	private static final Set<String> excludedUrlSuffixes = Sets.newHashSet("invalid", "blob");
+	private static final PatternSet excludedUrlPatterns = PatternSet.parse(""
+			+ "test/** errors/** sso/** verify-email-address/** reset-password/** signup/** "
+			+ "logout/** login/** loading/** init/** help/** builds/** issues/** "
+			+ "pull-requests/** **/invalid **/blob **/${issue}/** -**/${issue} "
+			+ "**/${request}/** -**/${request} **/${build}/** -**/${build} "
+			+ "**/${milestone}/** -**/${milestone} **/${agent}/** -**/${agent} "
+			+ "**/${group}/** -**/${group}");
 	
 	static {
 		for (IRequestMapper mapper: OneDev.getInstance(WebApplication.class).getRequestMappers())
@@ -82,11 +85,11 @@ public abstract class CommandPalettePanel extends Panel {
 				if (Arrays.equals(mountSegments, new String[] {"projects", "${project}", "files"}))
 					mountSegments = new String[] {"projects", "${project}", "files", "#{revision-and-path}"};
 				List<String[]> mountedPaths = new ArrayList<>();
-				if (mountSegments != null && mountSegments.length != 0 
-						&& !excludedUrlPrefixes.contains(mountSegments[0])
-						&& !excludedUrlSuffixes.contains(mountSegments[mountSegments.length-1])) {
-					mountedPaths.add(mountSegments);
-				} 
+				if (mountSegments != null) {
+					String url = Joiner.on("/").join(mountSegments);
+					if (!excludedUrlPatterns.matches(new PathMatcher(), url)) 
+						mountedPaths.add(mountSegments);
+				}
 				return mountedPaths;
 			} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
 				throw new RuntimeException(e);

@@ -16,8 +16,9 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(order=70, name="Push to Remote", group=StepGroup.REPOSITORY_MIRRORING)
-public class PushRepository extends MirrorRepository {
+@Editable(order=70, name="Push to Remote", group=StepGroup.REPOSITORY_SYNC, 
+		description="This step pushes current commit to same ref on remote")
+public class PushRepository extends SyncRepository {
 
 	private static final long serialVersionUID = 1L;
 

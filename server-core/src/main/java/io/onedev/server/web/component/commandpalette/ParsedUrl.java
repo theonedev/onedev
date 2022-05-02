@@ -153,30 +153,6 @@ public abstract class ParsedUrl implements Serializable {
 		}
 	}
 	
-	private boolean isApplicable(Issue issue, String path) {
-		switch (path) {
-		case "commits":
-		case "pull-requests":
-			return SecurityUtils.canReadCode(issue.getProject());
-		default:
-			return true;
-		}
-	}
-	
-	private boolean isApplicable(Build build, String path) {
-		switch (path) {
-		case "changes":
-		case "pipeline":
-			return SecurityUtils.canReadCode(build.getProject());
-		case "log":
-			return SecurityUtils.canAccessLog(build);
-		case "artifacts":
-			return build.getArtifactsDir().exists();
-		default:
-			return true;
-		}
-	}
-	
 	public Map<String, SuggestionContent> suggest(String matchWith, int count) {
 		Map<String, SuggestionContent> suggestions = new LinkedHashMap<>();
 		Map<String, String> paramValues = new HashMap<>();
@@ -210,16 +186,6 @@ public abstract class ParsedUrl implements Serializable {
 						|| index != 0 && parsedSegments.get(index-1) instanceof ProjectParam)
 					&& !isApplicable(getProject(paramValues), path)) { 
 						break;
-				}
-				
-				if (index != 0 && parsedSegments.get(index-1) instanceof IssueParam 
-						&& !isApplicable(getIssue(paramValues), path)) { 
-					break;
-				}
-				
-				if (index != 0 && parsedSegments.get(index-1) instanceof BuildParam 
-						&& !isApplicable(getBuild(paramValues), path)) { 
-					break;
 				}
 				
 				if (matchWith.startsWith(path)) { 

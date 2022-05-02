@@ -31,9 +31,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(order=60, name="Pull from Remote", group=StepGroup.REPOSITORY_MIRRORING, 
-	description="For security reason, this step is only allowed to run from default branch")
-public class PullRepository extends MirrorRepository {
+@Editable(order=60, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
+		+ "This step pulls specified refs from remote. For security reason, it is only allowed "
+		+ "to run from default branch")
+public class PullRepository extends SyncRepository {
 
 	private static final long serialVersionUID = 1L;
 	
