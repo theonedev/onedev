@@ -148,6 +148,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	private static final Map<String, String> PROGRAMMING_LANGUAGES = new HashMap<>();
 	
 	static {
+		PROGRAMMING_LANGUAGES.put("agda", "Agda");
+		
 		PROGRAMMING_LANGUAGES.put("java", "Java");
 		
 		PROGRAMMING_LANGUAGES.put("h", "C");
@@ -176,7 +178,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		
 		PROGRAMMING_LANGUAGES.put("cl", "Common Lisp");
 		PROGRAMMING_LANGUAGES.put("lisp", "Common Lisp");
-		PROGRAMMING_LANGUAGES.put("el", "Common Lisp");
+		PROGRAMMING_LANGUAGES.put("el", "Emacs Lisp");
+		PROGRAMMING_LANGUAGES.put("org", "Emacs Org Mode");
 		
 		PROGRAMMING_LANGUAGES.put("css", "CSS");
 		PROGRAMMING_LANGUAGES.put("d", "D");
@@ -244,6 +247,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		PROGRAMMING_LANGUAGES.put("R", "R");
 		PROGRAMMING_LANGUAGES.put("rb", "Ruby");
 		PROGRAMMING_LANGUAGES.put("rs", "Rust");
+		PROGRAMMING_LANGUAGES.put("rst", "reStructuredText");
 		
 		PROGRAMMING_LANGUAGES.put("sas", "SAS");
 		PROGRAMMING_LANGUAGES.put("sass", "Sass");
