@@ -124,12 +124,31 @@ public class FolderViewPanel extends Panel {
 	};
 	
 	private final IModel<BlobIdent> readmeModel = new LoadableDetachableModel<BlobIdent>() {
-
+		private String[] possibleReadmeNames = {
+				"readme.md",
+				"readme.mkd",
+		};	
+		
+		private boolean isReadme(BlobIdent blobIdent) {
+			if(!blobIdent.isFile()) {
+				return false;
+			}
+			
+			for(String possibleName: possibleReadmeNames) {
+				if(blobIdent.getName().equalsIgnoreCase(possibleName)) {
+					return true;
+				}
+			}
+			
+			return false;
+		}
+		
 		@Override
 		protected BlobIdent load() {
 			for (BlobIdent blobIdent: childrenModel.getObject()) {
-				if (blobIdent.isFile() && blobIdent.getName().equalsIgnoreCase("readme.md"))
+				if(isReadme(blobIdent)) {
 					return blobIdent;
+				}
 			}
 			return null;
 		}
