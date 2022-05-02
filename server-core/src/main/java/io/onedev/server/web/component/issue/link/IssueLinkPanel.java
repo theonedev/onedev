@@ -85,12 +85,15 @@ public abstract class IssueLinkPanel extends Panel {
 				super.renderHead(response);
 				String script = String.format(""
 						+ "$('#%s a:not(.embedded-reference)').click(function(e) {\n"
-						+ "  if (!e.ctrlKey && !e.metaKey) {\n"
-						+ "    $('#%s').click();\n"
+						+ "  if (!e.ctrlKey && !e.metaKey) {"
+						+ "    if (%b)\n"
+						+ "      $('#%s').click();\n"
+						+ "    else\n"
+						+ "      window.location.href=$(this).attr('href');"
 						+ "    return false;\n"
 						+ "  }\n"
 						+ "});", 
-						getMarkupId(), numberLink.getMarkupId());
+						getMarkupId(), getCursor()!=null, numberLink.getMarkupId());
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			

@@ -221,6 +221,8 @@ onedev.server = {
 		
 		Wicket.Event.subscribe('/ajax/call/done', function() {
 			ongoingAjaxRequests--;
+			if (ongoingAjaxRequests < 0)
+				ongoingAjaxRequests = 0;
 			if (ongoingAjaxRequests == 0) {
 				var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
 				if ($ajaxLoadingIndicator[0].timer) {
