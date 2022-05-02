@@ -1,12 +1,12 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Build.PROP_COMMIT;
 import static io.onedev.server.model.Build.PROP_FINISH_DATE;
 import static io.onedev.server.model.Build.PROP_FINISH_DAY;
 import static io.onedev.server.model.Build.PROP_JOB;
-import static io.onedev.server.model.Build.PROP_NUMBER;
-import static io.onedev.server.model.Build.PROP_PIPELINE;
 import static io.onedev.server.model.Build.PROP_PENDING_DATE;
+import static io.onedev.server.model.Build.PROP_PIPELINE;
 import static io.onedev.server.model.Build.PROP_REF_NAME;
 import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
 import static io.onedev.server.model.Build.PROP_STATUS;
@@ -114,12 +114,6 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String PROP_NUMBER_SCOPE = "numberScope";
-	
-	public static final String NAME_NUMBER = "Number";
-	
-	public static final String PROP_NUMBER = "number";
-	
 	public static final String NAME_VERSION = "Version";
 	
 	public static final String PROP_VERSION = "version";

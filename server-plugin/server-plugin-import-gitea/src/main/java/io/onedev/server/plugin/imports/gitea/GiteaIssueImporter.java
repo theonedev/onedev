@@ -34,10 +34,10 @@ public class GiteaIssueImporter extends IssueImporter<ImportServer, IssueImportS
 
 	@Override
 	public String doImport(ImportServer where, IssueImportSource what, IssueImportOption how, 
-			Project project, boolean dryRun, TaskLogger logger) {
+			Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
 		logger.log("Importing issues from repository " + what.getRepository() + "...");
 		Map<String, Optional<User>> users = new HashMap<>();
-		return ImportUtils.importIssues(where, what.getRepository(), project, false, how, users, dryRun, logger)
+		return ImportUtils.importIssues(where, what.getRepository(), project, retainIssueNumbers, how, users, dryRun, logger)
 				.toHtml("Issues imported successfully");
 	}
 

@@ -28,7 +28,7 @@ public class YouTrackIssueImporter extends IssueImporter<ImportServer, IssueImpo
 
 	@Override
 	public String doImport(ImportServer where, IssueImportSource what, ImportOption how, Project project,
-			boolean dryRun, TaskLogger logger) {
+			boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
 		logger.log("Importing issues from '" + what.getProject() + "'...");
 		Client client = where.newClient();
 		try {
@@ -36,7 +36,7 @@ public class YouTrackIssueImporter extends IssueImporter<ImportServer, IssueImpo
 			for (JsonNode projectNode: list(client, apiEndpoint, logger)) {
 				if (what.getProject().equals(projectNode.get("name").asText())) { 
 					ImportResult result = importIssues(where, projectNode.get("id").asText(), 
-							project, false, how, dryRun, logger);
+							project, retainIssueNumbers, how, dryRun, logger);
 					return result.toHtml("Issues imported successfully");
 				}
 			}

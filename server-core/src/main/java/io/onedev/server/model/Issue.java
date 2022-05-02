@@ -1,8 +1,8 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
 import static io.onedev.server.model.Issue.PROP_NO_SPACE_TITLE;
-import static io.onedev.server.model.Issue.PROP_NUMBER;
 import static io.onedev.server.model.Issue.PROP_STATE;
 import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Issue.PROP_TITLE;
@@ -103,12 +103,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static final int MAX_DESCRIPTION_LEN = 14000;
 
-	public static final String PROP_NUMBER_SCOPE = "numberScope";
-	
-	public static final String NAME_NUMBER = "Number";
-	
-	public static final String PROP_NUMBER = "number";
-	
 	public static final String NAME_PROJECT = "Project";
 	
 	public static final String PROP_PROJECT = "project";

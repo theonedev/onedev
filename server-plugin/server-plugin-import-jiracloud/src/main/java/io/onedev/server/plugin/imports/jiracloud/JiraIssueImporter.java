@@ -38,7 +38,7 @@ public class JiraIssueImporter extends IssueImporter<ImportServer, IssueImportSo
 
 	@Override
 	public String doImport(ImportServer where, IssueImportSource what, ImportOption how, 
-			Project project, boolean dryRun, TaskLogger logger) {
+			Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
 		Map<String, JsonNode> projectNodes = ImportUtils.getProjectNodes(where, logger);
 		
 		Client client = where.newClient();
@@ -47,7 +47,7 @@ public class JiraIssueImporter extends IssueImporter<ImportServer, IssueImportSo
 			JsonNode projectNode = projectNodes.get(what.getProject());
 			if (projectNode == null)
 				throw new ExplicitException("Unable to find project: " + what.getProject());
-			ImportResult result = ImportUtils.importIssues(where, projectNode, project, dryRun, 
+			ImportResult result = ImportUtils.importIssues(where, projectNode, project, retainIssueNumbers, 
 					how, users, dryRun, logger);
 			return result.toHtml("Issues imported successfully");
 		} finally {

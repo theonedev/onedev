@@ -465,10 +465,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public void create(Build build) {
 		Preconditions.checkArgument(build.isNew());
 		build.setNumberScope(build.getProject().getForkRoot());
-		Query<?> query = getSession().createQuery(String.format("select max(%s) from Build where %s=:numberScope", 
-				Build.PROP_NUMBER, Build.PROP_NUMBER_SCOPE));
-		query.setParameter("numberScope", build.getNumberScope());
-		build.setNumber(getNextNumber(build.getNumberScope(), query));
+		build.setNumber(getNextNumber(build.getNumberScope()));
 		save(build);
 		for (BuildParam param: build.getParams())
 			buildParamManager.save(param);

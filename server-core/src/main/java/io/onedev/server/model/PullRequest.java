@@ -1,7 +1,7 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.PROP_NO_SPACE_TITLE;
-import static io.onedev.server.model.PullRequest.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.PROP_STATUS;
 import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.PullRequest.PROP_TITLE;
@@ -99,12 +99,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public static final int MAX_TITLE_LEN = 255;
 	
 	public static final int MAX_DESCRIPTION_LEN = 12000;
-	
-	public static final String PROP_NUMBER_SCOPE = "numberScope";
-	
-	public static final String NAME_NUMBER = "Number";
-
-	public static final String PROP_NUMBER = "number";
 	
 	public static final String NAME_STATUS = "Status";
 	

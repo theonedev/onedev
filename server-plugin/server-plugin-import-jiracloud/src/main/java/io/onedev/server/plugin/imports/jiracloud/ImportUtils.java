@@ -235,7 +235,7 @@ public class ImportUtils {
 	}
 	
 	static ImportResult importIssues(ImportServer server, JsonNode jiraProject, Project oneDevProject, 
-			boolean useExistingIssueNumbers, ImportOption importOption, 
+			boolean retainIssueNumbers, ImportOption importOption, 
 			Map<String, Optional<User>> users, boolean dryRun, TaskLogger logger) {
 		Client client = server.newClient();
 		try {
@@ -319,7 +319,7 @@ public class ImportUtils {
 
 						Long oldNumber = Long.valueOf(StringUtils.substringAfterLast(issueNode.get("key").asText(), "-"));
 						Long newNumber;
-						if (dryRun || useExistingIssueNumbers)
+						if (dryRun || retainIssueNumbers)
 							newNumber = oldNumber;
 						else
 							newNumber = OneDev.getInstance(IssueManager.class).getNextNumber(oneDevProject);

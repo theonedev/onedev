@@ -27,6 +27,12 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	
 	public static final String PROP_ID = "id";
 	
+	public static final String PROP_NUMBER_SCOPE = "numberScope";
+	
+	public static final String NAME_NUMBER = "Number";
+	
+	public static final String PROP_NUMBER = "number";
+	
 	private transient Object customData;
 	
 	@Api(order=1)

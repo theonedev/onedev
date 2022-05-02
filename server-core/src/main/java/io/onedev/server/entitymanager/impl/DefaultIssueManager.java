@@ -216,14 +216,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		listenerRegistry.post(event);
 	}
 
-	@Sessional
-	public Long getNextNumber(Project numberScope) {
-		Query<?> query = getSession().createQuery(String.format("select max(%s) from Issue where %s=:numberScope", 
-				Issue.PROP_NUMBER, Issue.PROP_NUMBER_SCOPE));
-		query.setParameter(Issue.PROP_NUMBER_SCOPE, numberScope);
-		return getNextNumber(numberScope, query);
-	}
-	
 	@Transactional
 	@Override
 	public void save(Issue issue) {

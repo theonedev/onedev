@@ -411,10 +411,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		Preconditions.checkArgument(request.isNew());
 		
 		request.setNumberScope(request.getTargetProject().getForkRoot());
-		Query<?> query = getSession().createQuery(String.format("select max(%s) from PullRequest where %s=:numberScope", 
-				PullRequest.PROP_NUMBER, PullRequest.PROP_NUMBER_SCOPE));
-		query.setParameter("numberScope", request.getNumberScope());
-		request.setNumber(getNextNumber(request.getNumberScope(), query));
+		request.setNumber(getNextNumber(request.getNumberScope()));
 		
 		PullRequestOpened event = new PullRequestOpened(request);
 		request.setLastUpdate(event.getLastUpdate());

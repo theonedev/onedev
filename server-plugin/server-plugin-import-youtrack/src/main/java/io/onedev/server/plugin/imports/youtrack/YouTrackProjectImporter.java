@@ -70,8 +70,8 @@ public class YouTrackProjectImporter extends ProjectImporter<ImportServer, Proje
 					projectIds.add(project.getId());
 		       	}
 
-		       	ImportResult currentResult = ImportUtils.importIssues(where, youTrackProjectId, project, true, 
-		       			how, dryRun, logger);
+		       	ImportResult currentResult = ImportUtils.importIssues(where, youTrackProjectId, project, 
+		       			true, how, dryRun, logger);
 		       	result.mismatchedIssueFields.putAll(currentResult.mismatchedIssueFields);
 		       	result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 		       	result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
