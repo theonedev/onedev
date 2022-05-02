@@ -336,7 +336,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private transient Collection<User> participants;
 	
 	public String getState() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpecs().get(stateOrdinal).getName();
+		return state;
 	}
 
 	public void setState(String state) {
