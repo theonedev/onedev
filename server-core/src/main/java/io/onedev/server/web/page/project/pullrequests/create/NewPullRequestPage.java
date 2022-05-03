@@ -248,16 +248,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 
 				OneDev.getInstance(PullRequestManager.class).checkReviews(request, Lists.newArrayList());
 
-				List<User> owners = target.getProject().getUserAuthorizations().stream()
-						.filter(it->it.getRole().isOwner())
-						.map(it->it.getUser())
-						.collect(Collectors.toList());
-				if (owners.size() == 1) {
-					PullRequestAssignment assignment = new PullRequestAssignment();
-					assignment.setRequest(request);
-					assignment.setUser(owners.get(0));
-					request.getAssignments().add(assignment);
-				} else if (SecurityUtils.canWriteCode(target.getProject())) {
+				if (SecurityUtils.canWriteCode(target.getProject())) {
 					PullRequestAssignment assignment = new PullRequestAssignment();
 					assignment.setRequest(request);
 					assignment.setUser(SecurityUtils.getUser());

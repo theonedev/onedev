@@ -17,6 +17,8 @@ public class ImportOption implements Serializable {
 	
 	private List<IssueTagMapping> issueTagMappings = new ArrayList<>();
 	
+	private List<IssueLinkMapping> issueLinkMappings = new ArrayList<>();
+	
 	@Editable(order=200, description="Specify how to map YouTrack issue state to OneDev issue state. "
 			+ "Unmapped states will use the initial state in OneDev.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here")
@@ -53,6 +55,16 @@ public class ImportOption implements Serializable {
 
 	public void setIssueTagMappings(List<IssueTagMapping> issueTagMappings) {
 		this.issueTagMappings = issueTagMappings;
+	}
+
+	@Editable(order=400, description="Specify how to map YouTrack issue links to OneDev issue links.<br>"
+			+ "<b>NOTE: </b> You may customize OneDev issue links in case there is no appropriate option here")
+	public List<IssueLinkMapping> getIssueLinkMappings() {
+		return issueLinkMappings;
+	}
+
+	public void setIssueLinkMappings(List<IssueLinkMapping> issueLinkMappings) {
+		this.issueLinkMappings = issueLinkMappings;
 	}
 
 }

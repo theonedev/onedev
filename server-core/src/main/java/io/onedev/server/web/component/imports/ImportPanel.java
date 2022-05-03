@@ -10,6 +10,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public abstract class ImportPanel<Where extends Serializable, What extends Serializable, How extends Serializable> 
@@ -50,6 +52,8 @@ public abstract class ImportPanel<Where extends Serializable, What extends Seria
 		}
 		
 		Form<?> form = new Form<Void>("form");
+		form.add(new WebMarkupContainer("retainNumbersNote")
+				.setVisible(getPage() instanceof ProjectPage));
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(BeanContext.edit("editor", where));
 		

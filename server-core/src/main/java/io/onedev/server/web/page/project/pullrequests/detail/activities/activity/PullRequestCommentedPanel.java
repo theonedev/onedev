@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -51,6 +53,16 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 			}
 
 		}, getComment().getDate()));
+		
+		add(new WebMarkupContainer("anchor") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.put("href", "#" + getComment().getAnchor());
+			}
+			
+		});
 		
 		add(new ProjectCommentPanel("body") {
 

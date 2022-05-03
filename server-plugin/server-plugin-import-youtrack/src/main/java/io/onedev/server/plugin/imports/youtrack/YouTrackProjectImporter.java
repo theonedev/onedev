@@ -77,6 +77,7 @@ public class YouTrackProjectImporter extends ProjectImporter<ImportServer, Proje
 		       	result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
 		       	result.unmappedIssueFields.addAll(currentResult.unmappedIssueFields);
 		       	result.unmappedIssueStates.addAll(currentResult.unmappedIssueStates);
+		       	result.unmappedIssueLinks.addAll(currentResult.unmappedIssueLinks);
 		       	result.unmappedIssueTags.addAll(currentResult.unmappedIssueTags);
 			}		       	
 

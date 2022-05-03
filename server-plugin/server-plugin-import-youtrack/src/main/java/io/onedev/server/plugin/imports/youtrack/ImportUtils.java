@@ -27,18 +27,23 @@ import org.apache.http.client.utils.URIBuilder;
 import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
+import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.IssueSchedule;
+import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
@@ -114,6 +119,13 @@ public class ImportUtils {
 				importOption.getIssueTagMappings().add(mapping);
 			}
 			
+			apiEndpoint = server.getApiEndpoint("/issueLinkTypes?fields=name");
+			for (JsonNode tagNode: list(client, apiEndpoint, logger)) {
+				IssueLinkMapping mapping = new IssueLinkMapping();
+				mapping.setYouTrackIssueLink(tagNode.get("name").asText());
+				importOption.getIssueLinkMappings().add(mapping);
+			}
+			
 		} finally {
 			client.close();
 		}
@@ -130,8 +142,10 @@ public class ImportUtils {
 			Map<String, String> stateMappings = new HashMap<>();
 			Map<String, Pair<FieldSpec, String>> fieldMappings = new HashMap<>(); 
 			Map<String, Pair<FieldSpec, String>> tagMappings = new HashMap<>();
+			Map<String, LinkSpec> linkMappings = new HashMap<>();
 			
 			Map<Long, Long> issueNumberMappings = new HashMap<>();
+			Map<Long, Issue> issueMappings = new HashMap<>();
 			
 			for (IssueStateMapping mapping: importOption.getIssueStateMappings())
 				stateMappings.put(mapping.getYouTrackIssueState(), mapping.getOneDevIssueState());
@@ -159,10 +173,17 @@ public class ImportUtils {
 					throw new ExplicitException("No field spec found: " + oneDevFieldName);
 				tagMappings.put(mapping.getYouTrackIssueTag(), new Pair<>(fieldSpec, oneDevFieldValue));
 			}
+			for (IssueLinkMapping mapping: importOption.getIssueLinkMappings()) {
+				LinkSpec linkSpec = OneDev.getInstance(LinkSpecManager.class).find(mapping.getOneDevIssueLink());
+				if (linkSpec == null)
+					throw new ExplicitException("No link spec found: " + mapping.getOneDevIssueLink());
+				linkMappings.put(mapping.getYouTrackIssueLink(), linkSpec);
+			}
 
 			Set<String> nonExistentLogins = new LinkedHashSet<>();
 			Set<String> unmappedIssueTags = new LinkedHashSet<>();
 			Set<String> unmappedIssueFields = new LinkedHashSet<>();
+			Set<String> unmappedIssueLinks = new LinkedHashSet<>();
 			Set<String> unmappedIssueStates = new LinkedHashSet<>();
 			Map<String, String> mismatchedIssueFields = new LinkedHashMap<>();
 			Set<String> tooLargeAttachments = new LinkedHashSet<>();
@@ -170,6 +191,8 @@ public class ImportUtils {
 			AtomicInteger numOfImportedIssues = new AtomicInteger(0);
 			
 			List<Issue> issues = new ArrayList<>();
+			Map<Long, Pair<LinkSpec, List<Long>>> issueLinkInfo = new HashMap<>();
+			Map<Long, Set<Set<Long>>> processedSymmetricLinks = new HashMap<>();
 			
 			String fields = ""
 					+ "idReadable,"
@@ -182,7 +205,7 @@ public class ImportUtils {
 					+ "reporter(login,name,email),"
 					+ "tags(name),"
 					+ "customFields(name,value(name,login,email,presentation,text),projectCustomField(field(fieldType(id)))),"
-					+ "links(direction,linkType(sourceToTarget,targetToSource),issues(numberInProject))";  
+					+ "links(direction,linkType(name,sourceToTarget,targetToSource),issues(numberInProject))";  
 			PageDataConsumer pageDataConsumer = new PageDataConsumer() {
 
 				@Nullable
@@ -277,6 +300,7 @@ public class ImportUtils {
 							newNumber = getIssueManager().getNextNumber(oneDevProject);
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
+						issueMappings.put(oldNumber, issue);
 						issue.setTitle(issueNode.get("summary").asText());
 						issue.setDescription(issueNode.get("description").asText(null));
 						issue.setSubmitDate(new Date(issueNode.get("created").asLong(System.currentTimeMillis())));
@@ -666,24 +690,52 @@ public class ImportUtils {
 							issue.setState(initialState.getName());
 						
 						for (JsonNode linkNode: issueNode.get("links")) {
-							List<String> linkedIssueLinks = new ArrayList<>();
+							List<Long> linkedIssueNumbers = new ArrayList<>();
 							for (JsonNode linkedIssueNode: linkNode.get("issues")) 
-								linkedIssueLinks.add(youTrackProjectShortName + "-" + linkedIssueNode.get("numberInProject").asLong());
+								linkedIssueNumbers.add(linkedIssueNode.get("numberInProject").asLong());
 							
-							if (!linkedIssueLinks.isEmpty() && linkNode.hasNonNull("linkType")) {
+							if (!linkedIssueNumbers.isEmpty() && linkNode.hasNonNull("linkType")) {
 								JsonNode linkTypeNode = linkNode.get("linkType");
-								switch (linkNode.get("direction").asText()) {
-								case "BOTH":
-								case "OUTWARD":
-									String linkName = linkTypeNode.get("sourceToTarget").asText(null);
-									if (linkName != null) 
-										extraIssueInfo.put(linkName, joinAsMultilineHtml(linkedIssueLinks));
-									break;
-								case "INWARD":
-									linkName = linkTypeNode.get("targetToSource").asText(null);
-									if (linkName != null) 
-										extraIssueInfo.put(linkName, joinAsMultilineHtml(linkedIssueLinks));
-									break;
+								String direction = linkNode.get("direction").asText();								
+								String linkName = linkTypeNode.get("name").asText(null);
+								if (linkName != null) {
+									LinkSpec linkSpec = linkMappings.get(linkName);
+									if (linkSpec == null) { 
+										List<String> linkedIssueLinks = new ArrayList<>();
+										for (Long issueNumber: linkedIssueNumbers)
+											linkedIssueLinks.add(youTrackProjectShortName + "-" + issueNumber);
+										
+										unmappedIssueLinks.add(linkName);
+										switch (direction) {
+										case "BOTH":
+										case "OUTWARD":
+											linkName = linkTypeNode.get("sourceToTarget").asText(null);
+											if (linkName != null) 
+												extraIssueInfo.put(linkName, joinAsMultilineHtml(linkedIssueLinks));
+											break;
+										case "INWARD":
+											linkName = linkTypeNode.get("targetToSource").asText(null);
+											if (linkName != null) 
+												extraIssueInfo.put(linkName, joinAsMultilineHtml(linkedIssueLinks));
+											break;
+										}
+									} else if ("OUTWARD".equals(direction)) {
+										issueLinkInfo.put(oldNumber, new Pair<>(linkSpec, linkedIssueNumbers));
+									} else if ("BOTH".equals(direction)) {
+										Set<Set<Long>> value = processedSymmetricLinks.get(linkSpec.getId());
+										if (value == null) {
+											value = new HashSet<>();
+											processedSymmetricLinks.put(linkSpec.getId(), value);
+										}
+										List<Long> filteredIssueNumbers = new ArrayList<>();
+										for (Long issueNumber: linkedIssueNumbers) {
+											Set<Long> linkSides = Sets.newHashSet(oldNumber, issueNumber);
+											if (value.add(linkSides))
+												filteredIssueNumbers.add(issueNumber);
+										}
+										if (!filteredIssueNumbers.isEmpty())
+											issueLinkInfo.put(oldNumber, new Pair<>(linkSpec, filteredIssueNumbers));
+									}
 								}
 							}
 						}
@@ -799,6 +851,22 @@ public class ImportUtils {
 						dao.persist(comment);
 					}
 				}
+				
+				for (Map.Entry<Long, Pair<LinkSpec, List<Long>>> entry: issueLinkInfo.entrySet()) {
+					Issue source = issueMappings.get(entry.getKey());
+					if (source != null) {
+						for (Long targetNumber: entry.getValue().getSecond()) {
+							Issue target = issueMappings.get(targetNumber);
+							if (target != null) {
+								IssueLink link = new IssueLink();
+								link.setSource(source);
+								link.setTarget(target);
+								link.setSpec(entry.getValue().getFirst());
+								OneDev.getInstance(IssueLinkManager.class).save(link);
+							}
+						}
+					}
+				}
 			}
 			
 			ImportResult result = new ImportResult();
@@ -807,6 +875,7 @@ public class ImportUtils {
 			result.tooLargeAttachments.addAll(tooLargeAttachments);
 			result.unmappedIssueFields.addAll(unmappedIssueFields);
 			result.unmappedIssueStates.addAll(unmappedIssueStates);
+			result.unmappedIssueLinks.addAll(unmappedIssueLinks);
 			result.unmappedIssueTags.addAll(unmappedIssueTags);
 			
 			return result;

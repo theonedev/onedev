@@ -141,11 +141,6 @@ onedev.server.layout = {
 			$("a.command-palette").attr("title", "ctrl-k to show command palette").html("<span class='keycap'>ctrl</span> <span class='keycap'>k</span>");
 		$(document).keydown(function(e) {
 			if (e.keyCode == 75 && (e.ctrlKey || e.metaKey) && !e.shiftKey && $('div.command-palette').length == 0) { // cmd+k
-				setTimeout(function() {
-					var $floating = $(".floating");
-					if ($floating.length != 0)
-						$floating.data("closeCallback")();
-				}, 100);
 				commandPaletteCallback();
 				e.preventDefault();
 				return false;

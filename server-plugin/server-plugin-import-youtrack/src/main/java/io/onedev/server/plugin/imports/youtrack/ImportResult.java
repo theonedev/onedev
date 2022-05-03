@@ -20,6 +20,8 @@ public class ImportResult {
 	
 	Set<String> unmappedIssueFields = new LinkedHashSet<>();
 	
+	Set<String> unmappedIssueLinks = new LinkedHashSet<>();
+	
 	Set<String> unmappedIssueStates = new LinkedHashSet<>();
 	
 	Map<String, String> mismatchedIssueFields = new LinkedHashMap<>();
@@ -43,6 +45,7 @@ public class ImportResult {
 				|| !unmappedIssueFields.isEmpty() 
 				|| !mismatchedIssueFields.isEmpty() 
 				|| !unmappedIssueTags.isEmpty()
+				|| !unmappedIssueLinks.isEmpty()
 				|| !nonExistentLogins.isEmpty()
 				|| !tooLargeAttachments.isEmpty();
 
@@ -55,6 +58,8 @@ public class ImportResult {
 		}
 		if (!unmappedIssueFields.isEmpty())  
 			feedback.append(getEntryFeedback("Unmapped YouTrack issue fields", unmappedIssueFields));
+		if (!unmappedIssueLinks.isEmpty())  
+			feedback.append(getEntryFeedback("Unmapped YouTrack issue links", unmappedIssueLinks));
 		if (!mismatchedIssueFields.isEmpty()) { 
 			feedback.append("<li> YouTrack issue fields mapped to wrong type of OneDev issue field: ");
 			feedback.append("<ul>");

@@ -50,3 +50,9 @@
 .issue-activities>table>tbody>tr>td.content.no-body>.body {
 	display: none;
 }
+.issue-activities>table>tbody>tr .activity-anchor {
+	display: none;
+}
+.issue-activities>table>tbody>tr:hover .activity-anchor {
+	display: inline;
+}

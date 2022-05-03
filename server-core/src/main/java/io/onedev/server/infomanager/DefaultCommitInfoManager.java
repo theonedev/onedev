@@ -176,7 +176,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		
 		PROGRAMMING_LANGUAGES.put("cl", "Common Lisp");
 		PROGRAMMING_LANGUAGES.put("lisp", "Common Lisp");
-		PROGRAMMING_LANGUAGES.put("el", "Common Lisp");
+		PROGRAMMING_LANGUAGES.put("el", "Emacs Lisp");
 		
 		PROGRAMMING_LANGUAGES.put("css", "CSS");
 		PROGRAMMING_LANGUAGES.put("d", "D");

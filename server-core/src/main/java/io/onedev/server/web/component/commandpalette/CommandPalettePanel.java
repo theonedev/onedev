@@ -15,6 +15,7 @@ import org.apache.wicket.core.request.mapper.MountedMapper;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -85,7 +86,7 @@ public abstract class CommandPalettePanel extends Panel {
 				if (Arrays.equals(mountSegments, new String[] {"projects", "${project}", "files"}))
 					mountSegments = new String[] {"projects", "${project}", "files", "#{revision-and-path}"};
 				List<String[]> mountedPaths = new ArrayList<>();
-				if (mountSegments != null) {
+				if (mountSegments != null && mountSegments.length != 0) {
 					String url = Joiner.on("/").join(mountSegments);
 					if (!excludedUrlPatterns.matches(new PathMatcher(), url)) 
 						mountedPaths.add(mountSegments);
@@ -365,6 +366,11 @@ public abstract class CommandPalettePanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CommandPaletteCssResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript(""
+				+ "var $floating = $('.floating');"
+				+ "if ($floating.length != 0)"
+				+ "  $floating.data('closeCallback')();"
+				+ "$('.dropdown-toggle').dropdown('hide');"));
 	}
 
 }
