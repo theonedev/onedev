@@ -875,6 +875,7 @@ public class ImportUtils {
 			result.tooLargeAttachments.addAll(tooLargeAttachments);
 			result.unmappedIssueFields.addAll(unmappedIssueFields);
 			result.unmappedIssueStates.addAll(unmappedIssueStates);
+			result.unmappedIssueLinks.addAll(unmappedIssueLinks);
 			result.unmappedIssueTags.addAll(unmappedIssueTags);
 			
 			return result;
