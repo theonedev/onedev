@@ -15,7 +15,9 @@ import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 public class MarkdownRenderer implements BlobRendererer {
 
 	private boolean isMarkdown(@Nullable String blobPath) {
-		return blobPath != null && ProgrammingLanguageInfoManager.getLanguageForExtension(FileExtension.getExtension(blobPath)).equals("Markdown");
+		String language = ProgrammingLanguageInfoManager.getLanguageForExtension(FileExtension.getExtension(blobPath));
+		
+		return blobPath != null && language != null && language.equals("Markdown");
 	}
 	
 	@Override

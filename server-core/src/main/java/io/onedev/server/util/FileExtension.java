@@ -17,4 +17,20 @@ public class FileExtension {
 		// No Extension
 		return "";
 	}
+	
+	@Nullable
+	public static String getNameWithoutExtension(@Nullable String filename) {
+		if(filename == null) {
+			return null;
+		}
+		
+		String extension = getExtension(filename);
+		
+		if(extension.length() == 0){
+			return filename;
+		}
+		
+		// Remove extension and '.'
+		return filename.substring(0, filename.length() - extension.length() - 1);
+	}
 }
