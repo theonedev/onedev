@@ -85,7 +85,7 @@ public abstract class CommandPalettePanel extends Panel {
 				if (Arrays.equals(mountSegments, new String[] {"projects", "${project}", "files"}))
 					mountSegments = new String[] {"projects", "${project}", "files", "#{revision-and-path}"};
 				List<String[]> mountedPaths = new ArrayList<>();
-				if (mountSegments != null) {
+				if (mountSegments != null && mountSegments.length != 0) {
 					String url = Joiner.on("/").join(mountSegments);
 					if (!excludedUrlPatterns.matches(new PathMatcher(), url)) 
 						mountedPaths.add(mountSegments);
