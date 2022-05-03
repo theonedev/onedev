@@ -727,7 +727,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		Map<String, Integer> languageLines = new HashMap<>();
 		for (FileChange change: currentCommit.getFileChanges()) {
 			int lines = change.getAdditions() - change.getDeletions();
-			if (lines != 0 && change.getNewExtension() != "") {
+			if (lines != 0 && !change.getNewExtension().equals("")) {
 				String language = ProgrammingLanguageInfoManager.getLanguageForExtension(change.getNewExtension());
 				if (language != null) {
 					Integer accumulatedLines = languageLines.get(language);
