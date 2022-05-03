@@ -21,7 +21,11 @@
 		</triggeringPolicy>
 	</appender>
 	
+	<logger name="org.glassfish.jersey.servlet.WebComponent" level="ERROR"/>
 	<logger name="org.apache.wicket" level="WARN"/>
+	<logger name="org.apache.wicket.request.cycle.RequestCycle" level="OFF"/>
+	<logger name="RequestCycleExtra" level="OFF"/>
+	<logger name="org.apache.wicket.DefaultExceptionMapper" level="OFF"/>
 	<logger name="org.apache.wicket.page.XmlPartialPageUpdate" level="ERROR"/>
 	<logger name="org.eclipse" level="WARN"/>
 	<logger name="org.hibernate" level="WARN"/>

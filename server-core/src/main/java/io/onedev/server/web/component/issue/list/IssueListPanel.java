@@ -33,7 +33,6 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -56,6 +55,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueLinkManager;
@@ -74,23 +74,19 @@ import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.search.entity.issue.NumberCriteria;
-import io.onedev.server.search.entity.issue.TitleCriteria;
+import io.onedev.server.search.entitytext.IssueTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
-import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -98,8 +94,8 @@ import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.link.IssueLinkPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -116,24 +112,22 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
 
 	private final IModel<String> queryStringModel;
 	
-	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<IssueQuery>() {
+	private final IModel<Object> queryModel = new LoadableDetachableModel<Object>() {
 
 		@Override
-		protected IssueQuery load() {
+		protected Object load() {
 			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
 		
@@ -162,6 +156,10 @@ public abstract class IssueListPanel extends Panel {
 		return OneDev.getInstance(IssueManager.class);
 	}
 	
+	private IssueTextManager getIssueTextManager() {
+		return OneDev.getInstance(IssueTextManager.class);
+	}
+	
 	@Override
 	protected void onDetach() {
 		queryStringModel.detach();
@@ -170,28 +168,31 @@ public abstract class IssueListPanel extends Panel {
 	}
 	
 	@Nullable
-	protected abstract Project getProject();
+	protected abstract ProjectScope getProjectScope();
+	
+	private Project getProject() {
+		return getProjectScope()!=null?getProjectScope().getProject():null;
+	}
 
 	protected IssueQuery getBaseQuery() {
 		return new IssueQuery();
 	}
 	
 	@Nullable
-	private IssueQuery parse(@Nullable String queryString, IssueQuery baseQuery) {
+	private Object parse(@Nullable String queryString, IssueQuery baseQuery) {
 		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
 		try {
 			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, option, true));
-		} catch (ExplicitException e) {
-			error(e.getMessage());
-			return null;
 		} catch (Exception e) {
-			warn("Not a valid formal query, performing fuzzy query");
-			try {
-				EntityQuery.getProjectScopedNumber(getProject(), queryString);
-				return IssueQuery.merge(baseQuery, 
-						new IssueQuery(new NumberCriteria(getProject(), queryString, IssueQueryLexer.Is)));
-			} catch (Exception e2) {
-				return IssueQuery.merge(baseQuery, new IssueQuery(new TitleCriteria(queryString)));
+			if (e instanceof ExplicitException) {
+				error(e.getMessage());
+				return null;
+			} else if (getBaseQuery().toString() != null) {
+				error("Malformed issue query");
+				return null;
+			} else {
+				info("Performing fuzzy query");
+				return queryString;
 			}
 		}
 	}
@@ -296,22 +297,22 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						IssueQuery query = parse(queryStringModel.getObject(), new IssueQuery());
+						Object query = parse(queryStringModel.getObject(), new IssueQuery());
 						IssueListPanel.this.getFeedbackMessages().clear();
-						if (query != null) 
-							return query.getSorts();
+						if (query instanceof IssueQuery) 
+							return ((IssueQuery)query).getSorts();
 						else
 							return new ArrayList<>();
 					}
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						IssueQuery query = parse(queryStringModel.getObject(), new IssueQuery());
+						Object query = parse(queryStringModel.getObject(), new IssueQuery());
 						IssueListPanel.this.getFeedbackMessages().clear();
-						if (query == null)
+						if (!(query instanceof IssueQuery))
 							query = new IssueQuery();
-						query.getSorts().clear();
-						query.getSorts().addAll(object);
+						((IssueQuery)query).getSorts().clear();
+						((IssueQuery)query).getSorts().addAll(object);
 						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
@@ -322,6 +323,34 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});	
+		
+		add(new AjaxLink<Void>("recursive") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				boolean recursive = !getProjectScope().isRecursive();
+				getProjectScope().getRecursiveConfigurable().setRecursive(target, recursive);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+				setVisible(getProjectScope()!=null && getProjectScope().getRecursiveConfigurable() != null 
+						&& !projectManager.getChildren(getProject().getId()).isEmpty());
+			}
+			
+		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				if (getProjectScope().isRecursive())
+					return "text-secondary";
+				else
+					return "text-gray";
+			}
+			
+		})));
 		
 		add(new MenuLink("import") {
 
@@ -395,6 +424,14 @@ public abstract class IssueListPanel extends Panel {
 				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
 						.equals(StringUtils.trimToEmpty(inputContent));
 				target.add(saveQueryLink);
+			}
+			
+			@Override
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				List<String> hints = super.getHints(terminalExpect);
+				if (getBaseQuery().toString() == null)
+					hints.add("Free input for fuzzy query on number/title/description");
+				return hints;
 			}
 			
 		});
@@ -611,7 +648,10 @@ public abstract class IssueListPanel extends Panel {
 
 									@Override
 									protected IssueQuery getIssueQuery() {
-										return queryModel.getObject();
+										if (queryModel.getObject() instanceof IssueQuery)
+											return (IssueQuery) queryModel.getObject();
+										else
+											return null;
 									}
 
 								};
@@ -831,7 +871,10 @@ public abstract class IssueListPanel extends Panel {
 
 									@Override
 									protected IssueQuery getIssueQuery() {
-										return queryModel.getObject();
+										if (queryModel.getObject() instanceof IssueQuery)
+											return (IssueQuery) queryModel.getObject();
+										else
+											return null;
 									}
 
 								};
@@ -1038,30 +1081,30 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
 				try {
-					if (getProject() != null) {
-						return getIssueManager().query(getProject(), true, queryModel.getObject(), 
-								(int)first, (int)count, true).iterator();
-					} else {
-						return getIssueManager().query(queryModel.getObject(), (int)first, (int)count, true).iterator();
+					Object query = queryModel.getObject();
+					if (query instanceof IssueQuery) {
+						return getIssueManager().query(getProjectScope(), (IssueQuery)query, 
+								true, (int)first, (int)count).iterator();
+					} else if (query instanceof String) {
+						return getIssueTextManager().query(getProjectScope(), (String)query, 
+								true, (int)first, (int)count).iterator();
 					}
 				} catch (ExplicitException e) {
 					error(e.getMessage());
-					return new ArrayList<Issue>().iterator();
 				}
+				return new ArrayList<Issue>().iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				IssueQuery query = queryModel.getObject();
-				if (query != null) {
-					try {
-						if (getProject() != null) 
-							return getIssueManager().count(getProject(), true, query.getCriteria());
-						else
-							return getIssueManager().count(query.getCriteria());
-					} catch (ExplicitException e) {
-						error(e.getMessage());
-					}
+				try {
+					Object query = queryModel.getObject();
+					if (query instanceof IssueQuery) 
+						return getIssueManager().count(getProjectScope(), ((IssueQuery)query).getCriteria());
+					else if (query instanceof String) 
+						return getIssueTextManager().count(getProjectScope(), (String) query);
+				} catch (ExplicitException e) {
+					error(e.getMessage());
 				}
 				return 0;
 			}
@@ -1112,7 +1155,7 @@ public abstract class IssueListPanel extends Panel {
 					IModel<Issue> rowModel) {
 				Item<?> row = cellItem.findParent(Item.class);
 				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
-						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
+						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProjectScope());
 				cellItem.add(newIssueDetail(componentId, rowModel.getObject().getId(), cursor));
 			}
 			
@@ -1130,54 +1173,24 @@ public abstract class IssueListPanel extends Panel {
 
 				Issue issue = (Issue) fragment.getDefaultModelObject();
 				
-				String label;
-				if (getProject() == null)
-					label = issue.getProject() + "#" + issue.getNumber();
-				else if (getProject().equals(issue.getProject()))
-					label = "#" + issue.getNumber();
-				else 
-					label = issue.getProject() + "#" + issue.getNumber();
-				
-				ActionablePageLink numberLink;
-				fragment.add(numberLink = new ActionablePageLink("number", 
-						IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
+				fragment.add(new IssueLinkPanel("numberAndTitle") {
 
 					@Override
-					public IModel<?> getBody() {
-						return Model.of(label);
+					protected Issue getIssue() {
+						return (Issue) fragment.getDefaultModelObject();
 					}
 
 					@Override
-					protected void doBeforeNav(AjaxRequestTarget target) {
-						WebSession.get().setIssueCursor(cursor);
-						String redirectUrlAfterDelete = RequestCycle.get().urlFor(
-								getPage().getClass(), getPage().getPageParameters()).toString();
-						WebSession.get().setRedirectUrlAfterDelete(Issue.class, redirectUrlAfterDelete);
+					protected Project getCurrentProject() {
+						return getProject();
+					}
+
+					@Override
+					protected Cursor getCursor() {
+						return cursor;
 					}
 					
 				});
-				
-				String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(issue)).toString();
-
-				String transformed = Emojis.getInstance().apply(new ReferenceTransformer(issue.getProject(), url).apply(issue.getTitle()));
-				fragment.add(new Label("title", transformed) {
-
-					@Override
-					public void renderHead(IHeaderResponse response) {
-						super.renderHead(response);
-						String script = String.format(""
-								+ "$('#%s a:not(.embedded-reference)').click(function(e) {\n"
-								+ "  if (!e.ctrlKey && !e.metaKey) {\n"
-								+ "    $('#%s').click();\n"
-								+ "    return false;\n"
-								+ "  }\n"
-								+ "});", 
-								getMarkupId(), numberLink.getMarkupId());
-						response.render(OnDomReadyHeaderItem.forScript(script));
-					}
-					
-				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 				
 				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.getNumberAndTitle())));
 				

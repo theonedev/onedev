@@ -21,11 +21,9 @@ import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.ProblemMetric;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.buildmetric.BuildMetricQuery;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
@@ -49,9 +47,7 @@ public class ProblemReportModule extends AbstractPluginModule {
 			public List<SidebarMenuItem> getMenuItems(Project project) {
 				List<SidebarMenuItem> menuItems = new ArrayList<>();
 				if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, ProblemMetric.class).isEmpty()) {
-					String query = String.format("%s \"last month\"", 
-							BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since));
-					PageParameters params = ProblemStatsPage.paramsOf(project, query);
+					PageParameters params = ProblemStatsPage.paramsOf(project);
 					menuItems.add(new SidebarMenuItem.Page(null, "Checkstyle", ProblemStatsPage.class, params));
 				}
 				return menuItems;
@@ -133,9 +129,9 @@ public class ProblemReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/problem/${report}", 
+				application.mount(new BasePageMapper("projects/${project}/builds/${build}/problem/${report}", 
 						ProblemReportPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/stats/problem", ProblemStatsPage.class));
+				application.mount(new BasePageMapper("projects/${project}/stats/problem", ProblemStatsPage.class));
 			}
 			
 		});			

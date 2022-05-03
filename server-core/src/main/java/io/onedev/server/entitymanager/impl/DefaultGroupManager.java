@@ -2,9 +2,12 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.entitymanager.GroupManager;
@@ -95,6 +98,29 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 	@Override
 	public int count() {
 		return count(true);
+	}
+
+	private EntityCriteria<Group> getCriteria(@Nullable String term) {
+		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
+		if (term != null) 
+			criteria.add(Restrictions.ilike("name", term, MatchMode.ANYWHERE));
+		else
+			criteria.setCacheable(true);
+		return criteria;
+	}
+	
+	@Sessional
+	@Override
+	public List<Group> query(String term, int firstResult, int maxResults) {
+		EntityCriteria<Group> criteria = getCriteria(term);
+		criteria.addOrder(Order.asc("name"));
+		return query(criteria, firstResult, maxResults);
+	}
+
+	@Sessional
+	@Override
+	public int count(String term) {
+		return count(getCriteria(term));
 	}
 
 }

@@ -27,14 +27,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -64,16 +60,7 @@ public class RoleListPage extends AdministrationPage {
 		super(params);
 		query = params.get(PARAM_QUERY).toString();
 	}
-	
-	private EntityCriteria<Role> getCriteria() {
-		EntityCriteria<Role> criteria = EntityCriteria.of(Role.class);
-		if (query != null) 
-			criteria.add(Restrictions.ilike("name", query, MatchMode.ANYWHERE));
-		else
-			criteria.setCacheable(true);
-		return criteria;
-	}
-	
+		
 	@Override
 	protected void onBeforeRender() {
 		typing = false;
@@ -231,14 +218,12 @@ public class RoleListPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends Role> iterator(long first, long count) {
-				EntityCriteria<Role> criteria = getCriteria();
-				criteria.addOrder(Order.asc("name"));
-				return OneDev.getInstance(RoleManager.class).query(criteria, (int)first, (int)count).iterator();
+				return OneDev.getInstance(RoleManager.class).query(query, (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return OneDev.getInstance(RoleManager.class).count(getCriteria());
+				return OneDev.getInstance(RoleManager.class).count(query);
 			}
 
 			@Override

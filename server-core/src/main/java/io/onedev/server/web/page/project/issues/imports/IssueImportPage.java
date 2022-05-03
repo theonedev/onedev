@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.imports.Importer;
 import io.onedev.server.imports.IssueImporter;
@@ -24,6 +25,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.imports.ImportPanel;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 
 @SuppressWarnings("serial")
@@ -64,10 +66,18 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 			}
 
 			@Override
-			protected String doImport(Where where, What what, How how, boolean dryRun,
-					TaskLogger logger) {
+			protected String doImport(Where where, What what, How how, boolean dryRun, TaskLogger logger) {
+				IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 				Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-				return importer.doImport(where, what, how, project, dryRun, logger);
+				Project numberScope = project.getForkRoot();
+				try {
+					issueManager.resetNextNumber(numberScope);
+					Long nextNumber = issueManager.getNextNumber(numberScope);
+					issueManager.resetNextNumber(numberScope);
+					return importer.doImport(where, what, how, project, nextNumber==1L, dryRun, logger);
+				} finally {
+					issueManager.resetNextNumber(numberScope);
+				}
 			}
 
 			@Override
@@ -77,7 +87,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 				sort.setDirection(Direction.DESCENDING);
 				IssueQuery query = new IssueQuery(null, Lists.newArrayList(sort));
 				
-				PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), 0);
+				PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), false, 0);
 				throw new RestartResponseException(ProjectIssueListPage.class, params);
 			}
 			
@@ -99,6 +109,14 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 		PageParameters params = ProjectPage.paramsOf(project);
 		params.add(PARAM_IMPORTER, importer);
 		return params;
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isIssueManagement()) 
+			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, false, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

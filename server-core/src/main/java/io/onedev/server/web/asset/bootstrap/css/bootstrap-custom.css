@@ -137,7 +137,7 @@ a.link-info:hover, a.link-info:focus {
 a.link-secondary:hover, a.link-secondary:focus {
 	color: var(--gray) !important;
 }
-.dark-mode .text-secondary, .dark-mode a.link-secondary {
+.dark-mode .text-secondary, .dark-mode .text-secondary:hover, .dark-mode a.link-secondary {
 	color: var(--light-gray) !important;
 }
 .dark-mode a.link-secondary:hover, .dark-mode a.link-secondary:focus {

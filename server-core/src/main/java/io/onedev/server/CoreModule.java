@@ -248,10 +248,16 @@ import io.onedev.server.rest.exception.UnauthenticatedExceptionHandler;
 import io.onedev.server.rest.jersey.DefaultServletContainer;
 import io.onedev.server.rest.jersey.JerseyConfigurator;
 import io.onedev.server.rest.jersey.ResourceConfigProvider;
-import io.onedev.server.search.code.DefaultIndexManager;
-import io.onedev.server.search.code.DefaultSearchManager;
-import io.onedev.server.search.code.IndexManager;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeIndexManager;
+import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.DefaultCodeIndexManager;
+import io.onedev.server.search.code.DefaultCodeSearchManager;
+import io.onedev.server.search.entitytext.CodeCommentTextManager;
+import io.onedev.server.search.entitytext.DefaultCodeCommentTextManager;
+import io.onedev.server.search.entitytext.DefaultIssueTextManager;
+import io.onedev.server.search.entitytext.DefaultPullRequestTextManager;
+import io.onedev.server.search.entitytext.IssueTextManager;
+import io.onedev.server.search.entitytext.PullRequestTextManager;
 import io.onedev.server.security.BasicAuthenticationFilter;
 import io.onedev.server.security.BearerAuthenticationFilter;
 import io.onedev.server.security.CodePullAuthorizationSource;
@@ -314,7 +320,7 @@ import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.exception.PageExpiredExceptionHandler;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
@@ -440,13 +446,16 @@ public class CoreModule extends AbstractPluginModule {
 		bind(LinkAuthorizationManager.class).to(DefaultLinkAuthorizationManager.class);
 		bind(EmailAddressManager.class).to(DefaultEmailAddressManager.class);
 		bind(GpgKeyManager.class).to(DefaultGpgKeyManager.class);
+		bind(IssueTextManager.class).to(DefaultIssueTextManager.class);
+		bind(PullRequestTextManager.class).to(DefaultPullRequestTextManager.class);
+		bind(CodeCommentTextManager.class).to(DefaultCodeCommentTextManager.class);
 		
 		bind(WebHookManager.class);
 		
 		contribute(CodePullAuthorizationSource.class, DefaultJobManager.class);
         
-		bind(IndexManager.class).to(DefaultIndexManager.class);
-		bind(SearchManager.class).to(DefaultSearchManager.class);
+		bind(CodeIndexManager.class).to(DefaultCodeIndexManager.class);
+		bind(CodeSearchManager.class).to(DefaultCodeSearchManager.class);
 		
 		bind(EntityValidator.class).to(DefaultEntityValidator.class);
 		
@@ -650,7 +659,7 @@ public class CoreModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(org.apache.wicket.protocol.http.WebApplication application) {
-				application.mount(new DynamicPathPageMapper("/test", TestPage.class));
+				application.mount(new BasePageMapper("/test", TestPage.class));
 			}
 			
 		});

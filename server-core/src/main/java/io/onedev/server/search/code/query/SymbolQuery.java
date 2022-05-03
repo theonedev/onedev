@@ -19,7 +19,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.SymbolHit;
 import io.onedev.server.util.match.WildcardUtils;
@@ -62,7 +62,7 @@ public class SymbolQuery extends BlobQuery {
 		String blobPath = treeWalk.getPathString();
 		ObjectId blobId = treeWalk.getObjectId(0);
 		
-		List<Symbol> symbols = OneDev.getInstance(SearchManager.class).getSymbols(searcher, blobId, blobPath);
+		List<Symbol> symbols = OneDev.getInstance(CodeSearchManager.class).getSymbols(searcher, blobId, blobPath);
 		if (symbols != null) {
 			for (Symbol symbol: symbols) {
 				if (hits.size() < getCount()) {

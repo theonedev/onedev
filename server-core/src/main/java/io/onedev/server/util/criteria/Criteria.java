@@ -14,6 +14,11 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.RangeBuilder;
@@ -30,37 +35,74 @@ public abstract class Criteria<T> implements Serializable {
 	
 	private boolean withParens;
 	
-	public static Predicate inManyValues(CriteriaBuilder builder, Path<Long> path, Collection<Long> inValues, 
+	public static Predicate forManyValues(CriteriaBuilder builder, Path<Long> path, Collection<Long> matchValues, 
 			Collection<Long> allValues) {
-		List<Long> listOfInValues = new ArrayList<>(inValues);
+		List<Predicate> predicates = new ArrayList<>();
+		forManyValues(matchValues, allValues, new NumberCriteriaBuilder() {
+
+			@Override
+			public void forRange(long min, long max) {
+				predicates.add(builder.and(
+						builder.greaterThanOrEqualTo(path, min), 
+						builder.lessThanOrEqualTo(path, max)));
+			}
+
+			@Override
+			public void forDiscretes(Collection<Long> numbers) {
+				predicates.add(path.in(numbers));
+			}
+			
+		});
+		
+		return builder.or(predicates.toArray(new Predicate[0]));
+	}
+	
+	public static Query forManyValues(String fieldName, Collection<Long> matchValues, Collection<Long> allValues) {
+		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+		forManyValues(matchValues, allValues, new NumberCriteriaBuilder() {
+
+			@Override
+			public void forRange(long min, long max) {
+				queryBuilder.add(LongPoint.newRangeQuery(fieldName, min, max), Occur.SHOULD);
+			}
+
+			@Override
+			public void forDiscretes(Collection<Long> numbers) {
+				for (Long number: numbers)
+					queryBuilder.add(LongPoint.newExactQuery(fieldName, number), Occur.SHOULD);
+			}
+			
+		});
+		
+		queryBuilder.setMinimumNumberShouldMatch(1);
+		return queryBuilder.build();
+	}
+	
+	public static void forManyValues(Collection<Long> matchValues, Collection<Long> allValues, 
+			NumberCriteriaBuilder builder) {
+		List<Long> listOfInValues = new ArrayList<>(matchValues);
 		Collections.sort(listOfInValues);
 		List<Long> listOfAllValues = new ArrayList<>(allValues);
 		Collections.sort(listOfAllValues);
 		
-		List<Predicate> predicates = new ArrayList<>();
 		List<Long> discreteValues = new ArrayList<>();
 		for (List<Long> range: new RangeBuilder(listOfInValues, listOfAllValues).getRanges()) {
-			if (range.size() <= 2) {
+			if (range.size() <= 2) 
 				discreteValues.addAll(range);
-			} else {
-				predicates.add(builder.and(
-						builder.greaterThanOrEqualTo(path, range.get(0)), 
-						builder.lessThanOrEqualTo(path, range.get(range.size()-1))));
-			}
+			else 
+				builder.forRange(range.get(0), range.get(range.size()-1));
 		}
 
 		Collection<Long> inClause = new ArrayList<>();
 		for (Long value: discreteValues) {
 			inClause.add(value);
 			if (inClause.size() == IN_CLAUSE_LIMIT) {
-				predicates.add(path.in(inClause));
+				builder.forDiscretes(inClause);
 				inClause = new ArrayList<>();
 			}
 		}
 		if (!inClause.isEmpty()) 
-			predicates.add(path.in(inClause));
-		
-		return builder.or(predicates.toArray(new Predicate[0]));
+			builder.forDiscretes(inClause);
 	}
 	
 	public abstract Predicate getPredicate(CriteriaQuery<?> query, From<T, T> from, CriteriaBuilder builder);

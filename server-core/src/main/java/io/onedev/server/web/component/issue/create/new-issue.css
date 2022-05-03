@@ -4,3 +4,12 @@
 .new-issue ul.feedbackPanel {
     margin: 10px 0;
 }
+.new-issue .similar-issues .state {
+	width: 1px;
+}
+.new-issue .similar-issues .number {
+	margin-right: 0.5rem;
+}
+.new-issue .similar-issues .number, .new-issue .similar-issues .title {
+	font-weight: 500;
+}

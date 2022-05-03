@@ -130,6 +130,7 @@ import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
+import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
@@ -2003,6 +2004,22 @@ public class Project extends AbstractEntity {
 		
 		return (ArrayList<NamedPullRequestQuery>) OneDev.getInstance(SettingManager.class)
 				.getPullRequestSetting().getNamedQueries();
+	}
+
+	public List<BoardSpec> getHierarchyBoards() {
+		List<BoardSpec> boards = null;
+		
+		Project current = this;
+		do {
+			boards = current.getIssueSetting().getBoardSpecs();
+			if (boards != null)
+				break;
+			current = current.getParent();
+		} while (current != null);
+		
+		if (boards == null)
+			boards = OneDev.getInstance(SettingManager.class).getIssueSetting().getBoardSpecs();
+		return boards;
 	}
 	
 }

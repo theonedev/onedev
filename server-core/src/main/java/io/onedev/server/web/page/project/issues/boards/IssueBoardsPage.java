@@ -43,7 +43,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -52,14 +51,12 @@ import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.search.entity.issue.NumberCriteria;
-import io.onedev.server.search.entity.issue.TitleCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.ProjectScope.RecursiveConfigurable;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -74,19 +71,22 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {
 
-	private static final String PARAM_BOARD = "board";
+	public static final String PARAM_BOARD = "board";
 	
 	private static final String PARAM_MILESTONE = "milestone";
 	
 	private static final String PARAM_BACKLOG = "backlog";
 	
 	private static final String PARAM_QUERY = "query";
+	
+	private static final String PARAM_RECURSIVE = "recursive";
 	
 	private static final String PARAM_BACKLOG_QUERY = "backlog-query";
 
@@ -99,6 +99,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	private final boolean backlog;
 	
 	private String queryString;
+	
+	private boolean recursive;
 	
 	private String backlogQueryString;
 	
@@ -150,13 +152,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
 			return null;
 		} catch (Exception e) {
-			contentFrag.warn(new QueryParseMessage(backlog, "Not a valid %sformal query, performing fuzzy query"));
-			try {
-				EntityQuery.getProjectScopedNumber(getProject(), queryString);
-				query = new IssueQuery(new NumberCriteria(getProject(), queryString, IssueQueryLexer.Is));
-			} catch (Exception e2) {
-				query = new IssueQuery(new TitleCriteria(queryString));
-			}
+			contentFrag.error(new QueryParseMessage(backlog, "Malformed issue query"));
+			return null;
 		}
 
 		IssueQuery baseQuery;
@@ -175,16 +172,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	public IssueBoardsPage(PageParameters params) {
 		super(params);
 		
-		Project current = getProject();
-		do {
-			boards = current.getIssueSetting().getBoardSpecs();
-			if (boards != null)
-				break;
-			current = current.getParent();
-		} while (current != null);
-		
-		if (boards == null)
-			boards = OneDev.getInstance(SettingManager.class).getIssueSetting().getBoardSpecs();
+		boards = getProject().getHierarchyBoards();
 		
 		String boardName = params.get(PARAM_BOARD).toString();
 		if (StringUtils.isNotBlank(boardName)) {
@@ -225,6 +213,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		backlog = params.get(PARAM_BACKLOG).toBoolean() && getMilestone() != null;
 		queryString = params.get(PARAM_QUERY).toString();
 		backlogQueryString = params.get(PARAM_BACKLOG_QUERY).toString();
+		recursive = params.get(PARAM_RECURSIVE).toBoolean(false);
 	}
 	
 	private MilestoneManager getMilestoneManager() {
@@ -262,7 +251,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		}
 
 		PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-				getMilestone(), backlog, queryString, backlogQueryString);
+				getMilestone(), backlog, queryString, backlogQueryString, recursive);
 			
 		CharSequence url = RequestCycle.get().urlFor(IssueBoardsPage.class, params);
 		pushState(target, url.toString(), queryInput.getModelObject());
@@ -318,7 +307,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							
 							PageParameters params = IssueBoardsPage.paramsOf(
 									getProject(), item.getModelObject(), getMilestone(), 
-									backlog, backlogQueryString, queryString);
+									backlog, backlogQueryString, queryString, recursive);
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 							link.add(new Label("name", item.getModelObject().getName()));
 							item.add(link);
@@ -360,7 +349,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										nextBoard = null;
 									else
 										nextBoard = currentBoard;
-									PageParameters params = IssueBoardsPage.paramsOf(getProject(), nextBoard, getMilestone(), backlog, queryString, backlogQueryString);
+									PageParameters params = IssueBoardsPage.paramsOf(getProject(), nextBoard, getMilestone(), 
+											backlog, queryString, backlogQueryString, recursive);
 									setResponsePage(IssueBoardsPage.class, params);
 								}
 
@@ -406,7 +396,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				}
 				
 			});
-			form.add(new Link<Void>("backlog") {
+			form.add(new AjaxLink<Void>("backlog") {
 
 				@Override
 				protected void onInitialize() {
@@ -416,8 +406,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				}
 
 				@Override
-				public void onClick() {
-					PageParameters params = paramsOf(getProject(), getBoard(), getMilestone(), !backlog, queryString, backlogQueryString);
+				public void onClick(AjaxRequestTarget target) {
+					PageParameters params = paramsOf(getProject(), getBoard(), getMilestone(), 
+							!backlog, queryString, backlogQueryString, recursive);
 					setResponsePage(IssueBoardsPage.class, params);
 				}
 
@@ -425,6 +416,30 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				protected void onConfigure() {
 					super.onConfigure();
 					setVisible(getMilestone() != null);
+				}
+				
+			});
+			form.add(new AjaxLink<Void>("recursive") {
+
+				@Override
+				protected void onInitialize() {
+					super.onInitialize();
+					if (recursive)
+						add(AttributeAppender.append("class", "active"));
+				}
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					PageParameters params = paramsOf(getProject(), getBoard(), getMilestone(), 
+							backlog, queryString, backlogQueryString, !recursive);
+					setResponsePage(IssueBoardsPage.class, params);
+				}
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+					setVisible(!projectManager.getChildren(getProject().getId()).isEmpty());
 				}
 				
 			});
@@ -467,9 +482,15 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 							@Override
 							protected List<Milestone> load() {
-								List<Milestone> milestones = getProject().getSortedHierarchyMilestones().stream().filter(it->!it.isClosed()).collect(Collectors.toList());
+								List<Milestone> milestones = getProject().getSortedHierarchyMilestones()
+										.stream()
+										.filter(it->!it.isClosed())
+										.collect(Collectors.toList());
 								if (getMilestone().isClosed() || showClosed) {
-									List<Milestone> closedMilestones = getProject().getSortedHierarchyMilestones().stream().filter(it->it.isClosed()).collect(Collectors.toList());
+									List<Milestone> closedMilestones = getProject().getSortedHierarchyMilestones()
+											.stream()
+											.filter(it->it.isClosed())
+											.collect(Collectors.toList());
 									milestones.addAll(closedMilestones);
 								}
 								return milestones;
@@ -481,8 +502,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								milestone.setClosed(!milestone.isClosed());
 								if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
 									getMilestoneManager().save(milestone);
-									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-											getProject(), getBoard(), milestone, backlog, queryString, backlogQueryString));
+									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, 
+											backlog, queryString, backlogQueryString, recursive));
 								} else {
 									getMilestoneManager().save(milestone);
 								}
@@ -496,7 +517,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							@Override
 							protected void populateItem(ListItem<Milestone> item) {
 								Milestone milestone = item.getModelObject();
-								PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, backlog, queryString, backlogQueryString);
+								PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, 
+										backlog, queryString, backlogQueryString, recursive);
 								Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 								link.add(new Label("name", milestone.getName()));
 								item.add(link);
@@ -569,8 +591,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 											Milestone milestone = item.getModelObject();
 											if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
 												getMilestoneManager().delete(milestone);
-												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-														getProject(), getBoard(), null, backlog, queryString, backlogQueryString));
+												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), 
+														null, backlog, queryString, backlogQueryString, recursive));
 											} else {
 												getMilestoneManager().delete(milestone);
 											}
@@ -672,9 +694,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			if (backlog)
-				queryInput.add(AttributeAppender.append("placeholder", "Filter backlog issues..."));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter and order backlog issues..."));
 			else
-				queryInput.add(AttributeAppender.append("placeholder", "Filter issues..."));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter and order issues..."));
 				
 			form.add(queryInput);
 
@@ -766,8 +788,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				columnsView.add(new BacklogColumnPanel("backlog") {
 
 					@Override
-					protected Project getProject() {
-						return IssueBoardsPage.this.getProject();
+					protected ProjectScope getProjectScope() {
+						return IssueBoardsPage.this.getProjectScope();
 					}
 
 					@Override
@@ -787,8 +809,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				columnsView.add(new BoardColumnPanel(columnsView.newChildId()) {
 
 					@Override
-					protected Project getProject() {
-						return IssueBoardsPage.this.getProject();
+					protected ProjectScope getProjectScope() {
+						return IssueBoardsPage.this.getProjectScope();
 					}
 
 					@Override
@@ -846,6 +868,19 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		contentFrag.setOutputMarkupId(true);
 		add(contentFrag);
 	}
+
+	private ProjectScope getProjectScope() {
+		return new ProjectScope(getProject(), recursive, new RecursiveConfigurable() {
+					
+			@Override
+			public void setRecursive(AjaxRequestTarget target, boolean recursive) {
+				PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
+						getMilestone(), backlog, queryString, backlogQueryString, recursive);
+				setResponsePage(IssueBoardsPage.class, params);
+			}
+			
+		});
+	}
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {
@@ -868,7 +903,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	public static PageParameters paramsOf(Project project, @Nullable BoardSpec board, 
 			@Nullable Milestone milestone, boolean backlog, @Nullable String query, 
-			@Nullable String backlogQuery) {
+			@Nullable String backlogQuery, boolean recursive) {
 		PageParameters params = paramsOf(project);
 		if (board != null)
 			params.add(PARAM_BOARD, board.getName());
@@ -879,6 +914,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			params.add(PARAM_QUERY, query);
 		if (backlogQuery != null)
 			params.add(PARAM_BACKLOG_QUERY, backlogQuery);
+		if (recursive)
+			params.add(PARAM_RECURSIVE, recursive);
 		return params;
 	}
 	
@@ -900,7 +937,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onBoardCreated(AjaxRequestTarget target, BoardSpec board) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), board, getMilestone(), backlog, queryString, backlogQueryString));
+							getProject(), board, getMilestone(), backlog, queryString, 
+							backlogQueryString, recursive));
 					modal.close();
 				}
 
@@ -932,7 +970,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onMilestoneCreated(AjaxRequestTarget target, Milestone milestone) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), getBoard(), milestone, backlog, queryString, backlogQueryString));
+							getProject(), getBoard(), milestone, backlog, 
+							queryString, backlogQueryString, recursive));
 				}
 
 				@Override
@@ -961,7 +1000,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onMilestoneSaved(AjaxRequestTarget target, Milestone milestone) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), getBoard(), milestone, backlog, queryString, backlogQueryString));
+							getProject(), getBoard(), milestone, backlog, 
+							queryString, backlogQueryString, recursive));
 				}
 
 				@Override
@@ -992,7 +1032,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), board, getMilestone(), backlog, queryString, backlogQueryString));
+							getProject(), board, getMilestone(), backlog, 
+							queryString, backlogQueryString, recursive));
 				}
 
 				@Override
@@ -1030,6 +1071,14 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	@Override
 	protected String getPageTitle() {
 		return "Issue Boards - " + getProject().getPath();
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isIssueManagement()) 
+			setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(project));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

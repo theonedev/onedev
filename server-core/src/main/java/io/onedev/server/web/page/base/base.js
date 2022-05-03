@@ -221,6 +221,8 @@ onedev.server = {
 		
 		Wicket.Event.subscribe('/ajax/call/done', function() {
 			ongoingAjaxRequests--;
+			if (ongoingAjaxRequests < 0)
+				ongoingAjaxRequests = 0;
 			if (ongoingAjaxRequests == 0) {
 				var $ajaxLoadingIndicator = $("#ajax-loading-indicator");
 				if ($ajaxLoadingIndicator[0].timer) {
@@ -861,7 +863,7 @@ onedev.server = {
 		onedev.server.perfectScrollbar.setup();
 
 		$(document).keydown(function(e) {
-			if (e.keyCode == 27)
+			if (e.keyCode == 27) // ESC
 				e.preventDefault();
 		});
 	},

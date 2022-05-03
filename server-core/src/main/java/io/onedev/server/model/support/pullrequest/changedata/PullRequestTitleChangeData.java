@@ -28,7 +28,7 @@ public class PullRequestTitleChangeData extends PullRequestChangeData {
 		Map<String, String> oldProperties = new HashMap<>();
 		oldProperties.put("Title", oldTitle);
 		Map<String, String> newProperties = new HashMap<>();
-		oldProperties.put("Title", newTitle);
+		newProperties.put("Title", newTitle);
 		
 		return ActivityDetail.compare(oldProperties, newProperties, true);
 	}

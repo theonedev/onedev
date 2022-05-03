@@ -24,7 +24,6 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.util.lang.Objects;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -87,6 +86,7 @@ import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.MilestoneAndIssueState;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.IssueFacade;
@@ -216,14 +216,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		listenerRegistry.post(event);
 	}
 
-	@Sessional
-	public Long getNextNumber(Project numberScope) {
-		Query<?> query = getSession().createQuery(String.format("select max(%s) from Issue where %s=:numberScope", 
-				Issue.PROP_NUMBER, Issue.PROP_NUMBER_SCOPE));
-		query.setParameter(Issue.PROP_NUMBER_SCOPE, numberScope);
-		return getNextNumber(numberScope, query);
-	}
-	
 	@Transactional
 	@Override
 	public void save(Issue issue) {
@@ -275,36 +267,13 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public List<Issue> query(EntityQuery<Issue> issueQuery, int firstResult, int maxResults, 
-			boolean loadFieldsAndLinks) {
+	public List<Issue> query(@Nullable ProjectScope projectScope, EntityQuery<Issue> issueQuery, 
+			boolean loadFieldsAndLinks, int firstResult, int maxResults) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		
-		criteriaQuery.where(getPredicates(issueQuery.getCriteria(), criteriaQuery, builder, root));
-		criteriaQuery.orderBy(getOrders(issueQuery.getSorts(), builder, root));
-		
-		Query<Issue> query = getSession().createQuery(criteriaQuery);
-		query.setFirstResult(firstResult);
-		query.setMaxResults(maxResults);
-		List<Issue> issues = query.getResultList();
-		if (loadFieldsAndLinks && !issues.isEmpty()) {
-			fieldManager.populateFields(issues);
-			linkManager.populateLinks(issues);
-		}
-		
-		return issues;
-	}
-	
-	@Sessional
-	@Override
-	public List<Issue> query(Project project, boolean inTree, EntityQuery<Issue> issueQuery, 
-			int firstResult, int maxResults, boolean loadFieldsAndLinks) {
-		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
-		Root<Issue> root = criteriaQuery.from(Issue.class);
-		
-		criteriaQuery.where(getPredicates(project, inTree, issueQuery.getCriteria(), criteriaQuery, builder, root));
+		criteriaQuery.where(getPredicates(projectScope, issueQuery.getCriteria(), criteriaQuery, builder, root));
 		criteriaQuery.orderBy(getOrders(issueQuery.getSorts(), builder, root));
 		
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
@@ -335,52 +304,34 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	@Sessional
 	@Override
-	public int count(Criteria<Issue> issueCriteria) {
-		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
-		Root<Issue> root = criteriaQuery.from(Issue.class);
-		
-		criteriaQuery.where(getPredicates(issueCriteria, criteriaQuery, builder, root));
-		criteriaQuery.select(builder.count(root));
-		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
-	}
-
-	@Sessional
-	@Override
-	public int count(Project project, boolean inTree, Criteria<Issue> issueCriteria) {
+	public int count(@Nullable ProjectScope projectScope, Criteria<Issue> issueCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
-		criteriaQuery.where(getPredicates(project, inTree, issueCriteria, criteriaQuery, builder, root));
+		criteriaQuery.where(getPredicates(projectScope, issueCriteria, criteriaQuery, builder, root));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	
-	private Predicate[] getPredicates(Project project, boolean inTree, @Nullable Criteria<Issue> issueCriteria, 
+	private Predicate[] getPredicates(@Nullable ProjectScope projectScope, @Nullable Criteria<Issue> issueCriteria, 
 			CriteriaQuery<?> query, CriteriaBuilder builder, Root<Issue> root) {
 		List<Predicate> predicates = new ArrayList<>();
-		Path<Project> projectPath = root.get(Issue.PROP_PROJECT);
-		if (inTree)
-			predicates.add(projectManager.getTreePredicate(builder, projectPath, project));
-		else
-			predicates.add(builder.equal(projectPath, project));
-		if (issueCriteria != null)
-			predicates.add(issueCriteria.getPredicate(query, root, builder));
-
-		return predicates.toArray(new Predicate[predicates.size()]);
-	}
-	
-	private Predicate[] getPredicates(@Nullable Criteria<Issue> issueCriteria, 
-			CriteriaQuery<?> query, CriteriaBuilder builder, Root<Issue> root) {
-		List<Predicate> predicates = new ArrayList<>();
-		if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
-			if (!projects.isEmpty())
-				predicates.add(root.get(Issue.PROP_PROJECT).in(projects));
+		if (projectScope != null) {
+			Path<Project> projectPath = root.get(Issue.PROP_PROJECT);
+			if (projectScope.isRecursive())
+				predicates.add(projectManager.getTreePredicate(builder, projectPath, projectScope.getProject()));
 			else
+				predicates.add(builder.equal(projectPath, projectScope.getProject()));
+		} else if (!SecurityUtils.isAdministrator()) {
+			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
+			if (!projects.isEmpty()) { 
+				predicates.add(projectManager.getProjectsPredicate(builder, 
+						root.get(Issue.PROP_PROJECT), projects));
+			} else { 
 				predicates.add(builder.disjunction());
+			}
 		}
 		if (issueCriteria != null)
 			predicates.add(issueCriteria.getPredicate(query, root, builder));
@@ -774,7 +725,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		List<Predicate> predicates = new ArrayList<>();
 		
 		if (scope != null)
-			predicates.addAll(Arrays.asList(getPredicates(scope.getCriteria(), criteriaQuery, builder, root)));		
+			predicates.addAll(Arrays.asList(getPredicates(null, scope.getCriteria(), criteriaQuery, builder, root)));		
 		
 		List<Predicate> projectPredicates = new ArrayList<>();
 		projectPredicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
@@ -1016,11 +967,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Sessional
 	@Override
 	public List<Issue> queryAfter(Long afterIssueId, int count) {
-		EntityCriteria<Issue> criteria = newCriteria();
-		criteria.addOrder(Order.asc("id"));
-		if (afterIssueId != null) 
-			criteria.add(Restrictions.gt("id", afterIssueId));
-		return query(criteria, 0, count);
+		return dao.queryAfter(Issue.class, afterIssueId, count);
 	}
 
 	@Sessional

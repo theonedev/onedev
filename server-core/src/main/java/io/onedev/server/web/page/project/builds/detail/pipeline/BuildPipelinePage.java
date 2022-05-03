@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
 import io.onedev.server.web.component.pipeline.PipelinePanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
@@ -20,6 +21,11 @@ public class BuildPipelinePage extends BuildDetailPage {
 		super(params);
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getBuild().getProject());
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

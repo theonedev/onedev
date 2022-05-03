@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -74,8 +73,6 @@ public class DefaultIssueInfoManager extends AbstractSingleEnvironmentManager
 	
 	private final IssueChangeManager issueChangeManager;
 	
-	private final SessionManager sessionManager;
-	
 	private final TransactionManager transactionManager;
 	
 	@Inject
@@ -86,7 +83,6 @@ public class DefaultIssueInfoManager extends AbstractSingleEnvironmentManager
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
 		this.batchWorkManager = batchWorkManager;
-		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 	}
 	
@@ -95,24 +91,15 @@ public class DefaultIssueInfoManager extends AbstractSingleEnvironmentManager
 
 			@Override
 			public void doWorks(Collection<Prioritized> works) {
-				boolean hasMore;
-				do {
-					// do the work batch by batch to avoid consuming too much memory
-					hasMore = sessionManager.call(new Callable<Boolean>() {
-
-						@Override
-						public Boolean call() throws Exception {
-							return collect();
-						}
-						
-					});
-				} while (hasMore);
+				// do the work batch by batch to avoid consuming too much memory
+				while (collect());
 			}
 			
 		};
 	}
 	
-	private boolean collect() {
+	@Sessional
+	protected boolean collect() {
 		logger.debug("Collecting issue info...");
 		
 		Environment env = getEnv();

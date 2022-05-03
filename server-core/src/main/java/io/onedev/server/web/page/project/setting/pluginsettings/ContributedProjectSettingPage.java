@@ -18,9 +18,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
@@ -160,6 +163,14 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, EditableUtils.getDisplayName(settingClass));
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (SecurityUtils.canManage(project)) 
+			setResponsePage(ContributedProjectSettingPage.class, paramsOf(project, settingClass));
+		else 
+			setResponsePage(ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
 	}
 	
 }

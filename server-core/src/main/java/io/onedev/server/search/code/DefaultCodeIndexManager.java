@@ -46,6 +46,7 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
@@ -88,9 +89,9 @@ import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
 
 @Singleton
-public class DefaultIndexManager implements IndexManager {
+public class DefaultCodeIndexManager implements CodeIndexManager {
 	
-	private static final Logger logger = LoggerFactory.getLogger(DefaultIndexManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultCodeIndexManager.class);
 
 	private static final int UI_INDEXING_PRIORITY = 10;
 	
@@ -109,7 +110,7 @@ public class DefaultIndexManager implements IndexManager {
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultIndexManager(ListenerRegistry listenerRegistry, StorageManager storageManager, 
+	public DefaultCodeIndexManager(ListenerRegistry listenerRegistry, StorageManager storageManager, 
 			BatchWorkManager batchWorkManager, SessionManager sessionManager, ProjectManager projectManager) {
 		this.listenerRegistry = listenerRegistry;
 		this.storageManager = storageManager;
@@ -121,7 +122,7 @@ public class DefaultIndexManager implements IndexManager {
 	private String getCommitIndexVersion(final IndexSearcher searcher, AnyObjectId commitId) throws IOException {
 		final AtomicReference<String> indexVersion = new AtomicReference<>(null);
 		
-		searcher.search(COMMIT_HASH.query(commitId.getName()), new SimpleCollector() {
+		searcher.search(COMMIT_HASH.getTermQuery(commitId.getName()), new SimpleCollector() {
 
 			private int docBase;
 			
@@ -136,8 +137,8 @@ public class DefaultIndexManager implements IndexManager {
 			}
 
 			@Override
-			public boolean needsScores() {
-				return false;
+			public ScoreMode scoreMode() {
+				return ScoreMode.COMPLETE_NO_SCORES;
 			}
 
 		});
@@ -152,7 +153,7 @@ public class DefaultIndexManager implements IndexManager {
 			treeWalk.setRecursive(true);
 			
 			if (searcher != null) {
-				TopDocs topDocs = searcher.search(META.query(LAST_COMMIT.name()), 1);
+				TopDocs topDocs = searcher.search(META.getTermQuery(LAST_COMMIT.name()), 1);
 				if (topDocs.scoreDocs.length != 0) {
 					Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
 					String lastCommitIndexVersion = doc.get(LAST_COMMIT_INDEX_VERSION.name());
@@ -177,8 +178,8 @@ public class DefaultIndexManager implements IndexManager {
 					String blobName = treeWalk.getNameString();
 					
 					BooleanQuery.Builder builder = new BooleanQuery.Builder();
-					builder.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
-					builder.add(BLOB_PATH.query(blobPath), Occur.MUST);
+					builder.add(BLOB_HASH.getTermQuery(blobId.name()), Occur.MUST);
+					builder.add(BLOB_PATH.getTermQuery(blobPath), Occur.MUST);
 					BooleanQuery query = builder.build();
 					
 					final AtomicReference<String> blobIndexVersionRef = new AtomicReference<>(null);
@@ -198,8 +199,8 @@ public class DefaultIndexManager implements IndexManager {
 							}
 	
 							@Override
-							public boolean needsScores() {
-								return false;
+							public ScoreMode scoreMode() {
+								return ScoreMode.COMPLETE_NO_SCORES;
 							}
 							
 						});
@@ -226,14 +227,14 @@ public class DefaultIndexManager implements IndexManager {
 			Document document = new Document();
 			document.add(new StringField(COMMIT_HASH.name(), commitId.getName(), Store.NO));
 			document.add(new StoredField(COMMIT_INDEX_VERSION.name(), getIndexVersion()));
-			writer.updateDocument(COMMIT_HASH.term(commitId.getName()), document);
+			writer.updateDocument(COMMIT_HASH.getTerm(commitId.getName()), document);
 			
 			// record last commit so that we only need to indexing changed files for subsequent commits
 			document = new Document();
 			document.add(new StringField(META.name(), LAST_COMMIT.name(), Store.NO));
 			document.add(new StoredField(LAST_COMMIT_INDEX_VERSION.name(), getIndexVersion()));
 			document.add(new StoredField(LAST_COMMIT_HASH.name(), commitId.getName()));
-			writer.updateDocument(META.term(LAST_COMMIT.name()), document);
+			writer.updateDocument(META.getTerm(LAST_COMMIT.name()), document);
 			
 			return new IndexResult(checked, indexed);
 		}

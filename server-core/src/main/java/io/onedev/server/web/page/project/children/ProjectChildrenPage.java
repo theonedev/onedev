@@ -112,4 +112,9 @@ public class ProjectChildrenPage extends ProjectPage {
 		return "Child Projects - " + getProject().getPath();
 	}
 
+	@Override
+	protected void navToProject(Project project) {
+		setResponsePage(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(project));
+	}
+	
 }

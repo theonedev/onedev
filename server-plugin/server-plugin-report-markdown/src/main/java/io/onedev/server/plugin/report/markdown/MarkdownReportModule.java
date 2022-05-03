@@ -18,7 +18,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestSummaryContribution;
@@ -115,7 +115,9 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/markdown/${report}/#{path}", MarkdownReportPage.class));
+				application.mount(new BasePageMapper(
+						"projects/${project}/builds/${build}/markdown/${report}", 
+						MarkdownReportPage.class));
 			}
 			
 		});	

@@ -7,6 +7,7 @@ import org.apache.wicket.core.request.handler.RenderPageRequestHandler.RedirectP
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -34,4 +35,9 @@ public class ProjectDashboardPage extends ProjectPage {
 		return new Label(componentId, "Dashboard");
 	}
 
+	@Override
+	protected void navToProject(Project project) {
+		setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+	}
+	
 }

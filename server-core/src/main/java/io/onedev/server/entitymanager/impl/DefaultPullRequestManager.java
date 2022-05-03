@@ -114,6 +114,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewer
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchDeleteData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchRestoreData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -410,10 +411,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		Preconditions.checkArgument(request.isNew());
 		
 		request.setNumberScope(request.getTargetProject().getForkRoot());
-		Query<?> query = getSession().createQuery(String.format("select max(%s) from PullRequest where %s=:numberScope", 
-				PullRequest.PROP_NUMBER, PullRequest.PROP_NUMBER_SCOPE));
-		query.setParameter("numberScope", request.getNumberScope());
-		request.setNumber(getNextNumber(request.getNumberScope(), query));
+		request.setNumber(getNextNumber(request.getNumberScope()));
 		
 		PullRequestOpened event = new PullRequestOpened(request);
 		request.setLastUpdate(event.getLastUpdate());
@@ -658,7 +656,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	public void on(PullRequestChanged event) {
 		PullRequestChangeData data = event.getChange().getData();
 		if (data instanceof PullRequestApproveData || data instanceof PullRequestDiscardData  
-				|| data instanceof PullRequestMergeStrategyChangeData) {
+				|| data instanceof PullRequestMergeStrategyChangeData
+				|| data instanceof PullRequestTargetBranchChangeData) {
 			checkAsync(Lists.newArrayList(event.getRequest()));
 		}
 	}
@@ -912,10 +911,12 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			predicates.add(builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode()); 
-			if (!projects.isEmpty())
-				predicates.add(root.get(PullRequest.PROP_TARGET_PROJECT).in(projects));
-			else
+			if (!projects.isEmpty()) {
+				predicates.add(projectManager.getProjectsPredicate(builder, 
+						root.get(PullRequest.PROP_TARGET_PROJECT), projects));
+			} else {
 				predicates.add(builder.disjunction());
+			}
 		}
 		
 		if (criteria != null) 
@@ -954,18 +955,16 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	@Sessional
 	@Override
 	public List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
-			int firstResult, int maxResults, boolean loadReviews, boolean loadBuilds) {
+			boolean loadReviewsAndBuilds, int firstResult, int maxResults) {
 		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
 
 		List<PullRequest> requests = query.getResultList();
-		if (!requests.isEmpty()) {
-			if (loadReviews)
-				reviewManager.populateReviews(requests);
-			if (loadBuilds)
-				buildManager.populateBuilds(requests);
+		if (!requests.isEmpty() && loadReviewsAndBuilds) {
+			reviewManager.populateReviews(requests);
+			buildManager.populateBuilds(requests);
 		}
 		
 		return requests;

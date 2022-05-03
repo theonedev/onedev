@@ -19,10 +19,12 @@ public class DefaultInterpreter extends Interpreter {
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@Size(min=1, message="may not be empty")
+	@Override
 	public List<String> getCommands() {
 		return super.getCommands();
 	}
 
+	@Override
 	public void setCommands(List<String> commands) {
 		super.setCommands(commands);
 	}

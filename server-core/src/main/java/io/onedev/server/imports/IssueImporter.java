@@ -14,6 +14,6 @@ public abstract class IssueImporter<Where extends Serializable,  What extends Se
 	
 	@Nullable
 	public abstract String doImport(Where where, What what, How how, Project project, 
-			boolean dryRun, TaskLogger logger);
+			boolean retainIssueNumbers, boolean dryRun, TaskLogger logger);
 	
 }

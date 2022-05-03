@@ -9,8 +9,19 @@
 	<wicket:fragment wicket:id="topbarTitleFrag">
 		<a wicket:id="projects" class="d-none d-sm-inline">Projects</a>
 		<span class="dot d-none d-sm-inline"></span>
-		<span wicket:id="projectPath" class="text-truncate"></span>
-		<span class="dot"></span>
-		<wicket:container wicket:id="projectTitle"></wicket:container>
+		<span class="project-path d-inline-flex align-items-center text-truncate">
+			<wicket:container wicket:id="pathSegments">
+				<a wicket:id="link" class="text-truncate"><span wicket:id="label"></span></a>
+				<a wicket:id="children" class="dropdown-triangle-indicator mx-1 d-inline-flex flex-shrink-0 align-items-center justify-content-center"><span></span></a>
+				<span wicket:id="dot" class="flex-shrink-0"></span>
+			</wicket:container>
+		</span>
+		<span wicket:id="projectTitle"></span>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="childFrag">
+		<a wicket:id="link">
+			<img wicket:id="avatar">
+			<span wicket:id="name"></span>
+		</a>
 	</wicket:fragment>
 </wicket:extend>

@@ -29,7 +29,7 @@ import io.onedev.server.web.page.admin.group.profile.GroupProfilePage;
 @SuppressWarnings("serial")
 public abstract class GroupPage extends AdministrationPage {
 	
-	private static final String PARAM_GROUP = "group";
+	public static final String PARAM_GROUP = "group";
 	
 	protected final IModel<Group> groupModel;
 	

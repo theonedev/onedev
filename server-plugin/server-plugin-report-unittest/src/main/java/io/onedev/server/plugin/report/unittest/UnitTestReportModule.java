@@ -15,11 +15,9 @@ import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.UnitTestMetric;
-import io.onedev.server.search.buildmetric.BuildMetricQuery;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
@@ -74,11 +72,8 @@ public class UnitTestReportModule extends AbstractPluginModule {
 			public List<SidebarMenuItem> getMenuItems(Project project) {
 				List<SidebarMenuItem> menuItems = new ArrayList<>();
 				if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, UnitTestMetric.class).isEmpty()) {
-					String query = String.format("%s \"last month\"", 
-							BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since));
-					PageParameters params = UnitTestStatsPage.paramsOf(project, query);
-					menuItems.add(new SidebarMenuItem.Page(null, "Unit Test", 
-							UnitTestStatsPage.class, params));
+					PageParameters params = UnitTestStatsPage.paramsOf(project);
+					menuItems.add(new SidebarMenuItem.Page(null, "Unit Test", UnitTestStatsPage.class, params));
 				}
 				return menuItems;
 			}
@@ -95,9 +90,9 @@ public class UnitTestReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-suites", UnitTestSuitesPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-cases", UnitTestCasesPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/stats/unit-test", UnitTestStatsPage.class));
+				application.mount(new BasePageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-suites", UnitTestSuitesPage.class));
+				application.mount(new BasePageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-cases", UnitTestCasesPage.class));
+				application.mount(new BasePageMapper("projects/${project}/stats/unit-test", UnitTestStatsPage.class));
 			}
 			
 		});		

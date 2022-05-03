@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -26,5 +27,9 @@ public interface RoleManager extends EntityManager<Role> {
 	Collection<String> getUndefinedIssueFields();
 	
 	void fixUndefinedIssueFields(Map<String, UndefinedFieldResolution> resolutions);
+	
+	List<Role> query(@Nullable String term, int firstResult, int maxResult);
+	
+	int count(@Nullable String term);
 	
 }

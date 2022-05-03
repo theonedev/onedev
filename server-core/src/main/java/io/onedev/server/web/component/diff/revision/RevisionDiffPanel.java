@@ -78,7 +78,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.code.CommitIndexed;
-import io.onedev.server.search.code.IndexManager;
+import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.PathComparator;
@@ -385,7 +385,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				IndexManager indexManager = OneDev.getInstance(IndexManager.class);
+				CodeIndexManager indexManager = OneDev.getInstance(CodeIndexManager.class);
 				ObjectId oldCommit = getOldCommitId();
 				ObjectId newCommit = getNewCommitId();
 				boolean oldCommitIndexed = oldCommit.equals(ObjectId.zeroId()) 

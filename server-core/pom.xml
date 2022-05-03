@@ -105,16 +105,28 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
-			<groupId>org.apache.lucene</groupId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-queries</artifactId>
-			<groupId>org.apache.lucene</groupId>
 		</dependency>
 		<dependency>
-			<artifactId>lucene-analyzers-common</artifactId>
 			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-queryparser</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-smartcn</artifactId>			
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-backward-codecs</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.shiro</groupId>

@@ -40,12 +40,13 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
+import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
-import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
@@ -54,6 +55,7 @@ import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
@@ -71,8 +73,10 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 		super(params);
 		
 		String issueNumberString = params.get(PARAM_ISSUE).toString();
-		if (StringUtils.isBlank(issueNumberString))
-			throw new RestartResponseException(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), null, 0));
+		if (StringUtils.isBlank(issueNumberString)) {
+			throw new RestartResponseException(ProjectIssueListPage.class, 
+					ProjectIssueListPage.paramsOf(getProject(), null, false, 0));
+		}
 		
 		issueModel = new LoadableDetachableModel<Issue>() {
 
@@ -102,7 +106,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new IssueTitlePanel("title") {
+		add(new IssueEditableTitlePanel("title") {
 
 			@Override
 			protected Issue getIssue() {
@@ -199,11 +203,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					}
 
 					@Override
-					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, Project project) {
-						if (project != null)
-							return getIssueManager().query(project, true, query, offset, count, false);
-						else
-							return getIssueManager().query(query, offset, count, false);
+					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, ProjectScope projectScope) {
+						return getIssueManager().query(projectScope, query, false, offset, count);
 					}
 
 					@Override
@@ -342,6 +343,14 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new IssueDetailCssResourceReference()));
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isIssueManagement()) 
+			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, false, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

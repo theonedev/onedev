@@ -2,6 +2,8 @@ package io.onedev.server.persistence.dao;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
@@ -79,6 +81,8 @@ public interface Dao {
 	
 	<T extends AbstractEntity> List<T> query(Class<T> entityClass, boolean cacheable);
 	
+	<T extends AbstractEntity> List<T> queryAfter(Class<T> entityClass, @Nullable Long afterEntityId, int count);
+
 	<T extends AbstractEntity> int count(Class<T> entityClass);
 	
 	<T extends AbstractEntity> int count(Class<T> entityClass, boolean cacheable);

@@ -13,7 +13,7 @@ import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 
-public interface SearchManager {
+public interface CodeSearchManager {
 
 	/**
 	 * Search specified project with specified revision and query.

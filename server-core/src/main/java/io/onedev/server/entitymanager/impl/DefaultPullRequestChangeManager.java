@@ -13,6 +13,7 @@ import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -79,6 +80,26 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			change.setData(new PullRequestTitleChangeData(prevTitle, title));
 			change.setUser(SecurityUtils.getUser());
 			save(change);
+			
+			dao.persist(request);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void changeTargetBranch(PullRequest request, String targetBranch) {
+		String prevTargetBranch = request.getTargetBranch();
+		if (!targetBranch.equals(prevTargetBranch)) {
+			request.setTargetBranch(targetBranch);
+			
+			PullRequestChange change = new PullRequestChange();
+			change.setDate(new Date());
+			change.setRequest(request);
+			change.setData(new PullRequestTargetBranchChangeData(prevTargetBranch, targetBranch));
+			change.setUser(SecurityUtils.getUser());
+			save(change);
+			
+			dao.persist(request);
 		}
 	}
 

@@ -32,19 +32,23 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 		this.dao = dao;
     }
 	
-	protected long getNextNumber(Project numberScope, Query<?> maxNumberQuery) {
+	@Override
+	public Long getNextNumber(Project numberScope) {
 		AtomicLong nextNumber;
 		synchronized (nextNumbers) {
 			nextNumber = nextNumbers.get(numberScope.getId());
 		}
 		if (nextNumber == null) {
 			long maxNumber;
-			Object result = maxNumberQuery.uniqueResult();
-			if (result != null) {
+			Query<?> query = getSession().createQuery(String.format("select max(%s) from %s where %s=:numberScope", 
+					AbstractEntity.PROP_NUMBER, entityClass.getSimpleName(), AbstractEntity.PROP_NUMBER_SCOPE));
+			query.setParameter(AbstractEntity.PROP_NUMBER_SCOPE, numberScope);
+			
+			Object result = query.uniqueResult();
+			if (result != null) 
 				maxNumber = (Long)result;
-			} else {
+			else 
 				maxNumber = 0;
-			}
 			
 			/*
 			 * do not put the whole method in synchronized block to avoid possible deadlocks
@@ -59,6 +63,13 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 			}
 		} 
 		return nextNumber.getAndIncrement();
+	}
+	
+	@Override
+	public void resetNextNumber(Project numberScope) {
+		synchronized (nextNumbers) {
+			nextNumbers.remove(numberScope.getId());
+		}
 	}
 	
 	@Override

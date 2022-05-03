@@ -52,6 +52,7 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.JobSecretAuthorizationContextAware;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -84,6 +85,7 @@ import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardP
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.builds.detail.pipeline.BuildPipelinePage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
@@ -154,6 +156,14 @@ public abstract class BuildDetailPage extends ProjectPage
 		return SecurityUtils.canAccess(getBuild());
 	}
 	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isCodeManagement()) 
+			setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(project, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+	}
+
 	private WebSocketObserver newBuildObserver(Long buildId) {
 		return new WebSocketObserver() {
 			
@@ -502,9 +512,9 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 					@Override
-					protected List<Build> query(EntityQuery<Build> query, int offset, int count, Project project) {
+					protected List<Build> query(EntityQuery<Build> query, int offset, int count, ProjectScope projectScope) {
 						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-						return buildManager.query(project, query, offset, count);
+						return buildManager.query(projectScope!=null?projectScope.getProject():null, query, offset, count);
 					}
 
 					@Override

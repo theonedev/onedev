@@ -27,6 +27,7 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.store.Directory;
@@ -56,20 +57,20 @@ import io.onedev.server.search.code.query.TooGeneralQueryException;
 import io.onedev.server.storage.StorageManager;
 
 @Singleton
-public class DefaultSearchManager implements SearchManager {
+public class DefaultCodeSearchManager implements CodeSearchManager {
 
 	private static final int MAX_BLOB_PATH_QUERY_COUNT = 5;
 	
-	private static final Logger logger = LoggerFactory.getLogger(DefaultSearchManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultCodeSearchManager.class);
 	
 	private final StorageManager storageManager;
 	
 	private final Map<Long, SearcherManager> searcherManagers = new ConcurrentHashMap<>();
 	
-	private final IndexManager indexManager;
+	private final CodeIndexManager indexManager;
 	
 	@Inject
-	public DefaultSearchManager(StorageManager storageManager, IndexManager indexManager) {
+	public DefaultCodeSearchManager(StorageManager storageManager, CodeIndexManager indexManager) {
 		this.storageManager = storageManager;
 		this.indexManager = indexManager;
 	}
@@ -140,8 +141,8 @@ public class DefaultSearchManager implements SearchManager {
 							}
 
 							@Override
-							public boolean needsScores() {
-								return false;
+							public ScoreMode scoreMode() {
+								return ScoreMode.COMPLETE_NO_SCORES;
 							}
 	
 						});
@@ -185,8 +186,8 @@ public class DefaultSearchManager implements SearchManager {
 	@Override
 	public List<Symbol> getSymbols(IndexSearcher searcher, ObjectId blobId, String blobPath) {
 		BooleanQuery.Builder builder = new BooleanQuery.Builder();
-		builder.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
-		builder.add(BLOB_PATH.query(blobPath), Occur.MUST);
+		builder.add(BLOB_HASH.getTermQuery(blobId.name()), Occur.MUST);
+		builder.add(BLOB_PATH.getTermQuery(blobPath), Occur.MUST);
 		
 		BooleanQuery query = builder.build();
 		
@@ -220,8 +221,8 @@ public class DefaultSearchManager implements SearchManager {
 					}
 
 					@Override
-					public boolean needsScores() {
-						return false;
+					public ScoreMode scoreMode() {
+						return ScoreMode.COMPLETE_NO_SCORES;
 					}
 					
 				});

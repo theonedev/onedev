@@ -77,6 +77,13 @@ public class DefaultStorageManager implements StorageManager {
 	}
 	
 	@Override
+	public File getIndexDir() {
+    	File indexDir = new File(Bootstrap.getSiteDir(), "index");
+    	FileUtils.createDir(indexDir);
+    	return indexDir;
+	}
+	
+	@Override
 	public File getProjectIndexDir(Long projectId) {
         File indexDir = new File(getProjectDir(projectId), "index");
         FileUtils.createDir(indexDir);

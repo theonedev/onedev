@@ -35,9 +35,9 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.help.ValueInfo.Origin;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 

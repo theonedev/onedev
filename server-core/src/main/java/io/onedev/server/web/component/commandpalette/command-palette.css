@@ -1,0 +1,12 @@
+div.command-palette .suggestions {
+	height: 400px;
+}
+div.command-palette .suggestion>.hint {
+	visibility: hidden;
+}
+div.command-palette .active.suggestion>.hint {
+	visibility: visible;
+}
+div.command-palette .active.suggestion>.hint>span+span {
+	margin-left: 1rem;
+}

@@ -23,7 +23,6 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
@@ -40,23 +39,19 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
-import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
-import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.link.IssueLinkPanel;
 import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
-import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
-import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -244,50 +239,24 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 		});
 		
-		ActionablePageLink numberLink;
-		fragment.add(numberLink = new ActionablePageLink("number", 
-				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
+		fragment.add(new IssueLinkPanel("numberAndTitle") {
 
 			@Override
-			public IModel<?> getBody() {
-				Issue issue = issueModel.getObject();
-				if (getProject().equals(issue.getProject()))
-					return Model.of("#" + issue.getNumber());
-				else
-					return Model.of(issue.getProject() + "#" + issue.getNumber());
+			protected Issue getIssue() {
+				return issueModel.getObject();
 			}
 
 			@Override
-			protected void doBeforeNav(AjaxRequestTarget target) {
-				WebSession.get().setIssueCursor(cursor);
-				
-				String redirectUrlAfterDelete = RequestCycle.get().urlFor(
-						getPage().getClass(), getPage().getPageParameters()).toString();
-				WebSession.get().setRedirectUrlAfterDelete(Issue.class, redirectUrlAfterDelete);
+			protected Project getCurrentProject() {
+				return getProject();
+			}
+
+			@Override
+			protected Cursor getCursor() {
+				return cursor;
 			}
 			
 		});
-		
-		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-				IssueActivitiesPage.paramsOf(issue)).toString();
-
-		ReferenceTransformer transformer = new ReferenceTransformer(issue.getProject(), url);
-		
-		fragment.add(new Label("title", Emojis.getInstance().apply(transformer.apply(issue.getTitle()))) {
-
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				String script = String.format(""
-						+ "$('#%s a:not(.embedded-reference)').click(function() {"
-						+ "  $('#%s').click();"
-						+ "  return false;"
-						+ "});", 
-						getMarkupId(), numberLink.getMarkupId());
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-			
-		}.setEscapeModelStrings(false).setOutputMarkupId(true));
 		
 		AtomicReference<String> expandedLinkName = new AtomicReference<>(null);
 		RepeatingView linksView = new RepeatingView("links");

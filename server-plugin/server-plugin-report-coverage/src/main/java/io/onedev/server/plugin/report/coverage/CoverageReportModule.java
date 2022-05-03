@@ -23,11 +23,9 @@ import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CoverageMetric;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.buildmetric.BuildMetricQuery;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
@@ -50,9 +48,7 @@ public class CoverageReportModule extends AbstractPluginModule {
 			public List<SidebarMenuItem> getMenuItems(Project project) {
 				List<SidebarMenuItem> menuItems = new ArrayList<>();
 				if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, CoverageMetric.class).isEmpty()) {
-					String query = String.format("%s \"last month\"", 
-							BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since));
-					PageParameters params = CoverageStatsPage.paramsOf(project, query);
+					PageParameters params = CoverageStatsPage.paramsOf(project);
 					menuItems.add(new SidebarMenuItem.Page(null, "Coverage", CoverageStatsPage.class, params));
 				}
 				return menuItems;
@@ -137,8 +133,8 @@ public class CoverageReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/coverage/${report}", CoverageReportPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/stats/coverage", CoverageStatsPage.class));
+				application.mount(new BasePageMapper("projects/${project}/builds/${build}/coverage/${report}", CoverageReportPage.class));
+				application.mount(new BasePageMapper("projects/${project}/stats/coverage", CoverageStatsPage.class));
 			}
 			
 		});		

@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.issue.create;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -16,9 +17,13 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
@@ -41,11 +46,16 @@ import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.search.entitytext.IssueTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.web.component.issue.IssueStateBadge;
+import io.onedev.server.web.component.issue.link.IssueLinkPanel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.milestone.choice.MilestoneMultiChoice;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
@@ -53,6 +63,7 @@ import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
@@ -106,6 +117,73 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			@Override
 			protected Project getProject() {
 				return NewIssueEditor.this.getProject();
+			}
+			
+		});
+
+		IModel<List<Issue>> similarIssuesModel = new LoadableDetachableModel<List<Issue>>() {
+
+			@Override
+			protected List<Issue> load() {
+				String title = titleInput.getInput();
+				if (StringUtils.isNotBlank(title)) {
+					IssueTextManager issueTextManager = OneDev.getInstance(IssueTextManager.class);
+					return issueTextManager.query(new ProjectScope(getProject(), true, null), title, false, 0, 10);
+				} else {
+					return new ArrayList<>();
+				}
+			}
+			
+		};
+		WebMarkupContainer similarIssuesContainer = new WebMarkupContainer("similarIssues") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!similarIssuesModel.getObject().isEmpty());
+			}
+			
+		};
+		titleInput.add(new OnTypingDoneBehavior() {
+
+			@Override
+			protected void onTypingDone(AjaxRequestTarget target) {
+				target.add(similarIssuesContainer);
+			}
+
+			@Override
+			protected void onError(AjaxRequestTarget target, RuntimeException e) {
+				super.onError(target, e);
+				target.add(similarIssuesContainer);
+			}
+			
+		});
+		
+		similarIssuesContainer.setOutputMarkupPlaceholderTag(true);
+		add(similarIssuesContainer);
+		similarIssuesContainer.add(new ListView<Issue>("similarIssues", similarIssuesModel) {
+
+			@Override
+			protected void populateItem(ListItem<Issue> item) {
+				item.add(new IssueStateBadge("state", item.getModel()));
+				item.add(new IssueLinkPanel("numberAndTitle") {
+
+					@Override
+					protected Issue getIssue() {
+						return item.getModelObject();
+					}
+
+					@Override
+					protected Project getCurrentProject() {
+						return getProject();
+					}
+
+					@Override
+					protected Cursor getCursor() {
+						return null;
+					}
+					
+				});
 			}
 			
 		});

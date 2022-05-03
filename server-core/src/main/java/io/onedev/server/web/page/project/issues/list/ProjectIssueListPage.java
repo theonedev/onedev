@@ -23,12 +23,15 @@ import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.ProjectScope.RecursiveConfigurable;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.NamedIssueQueriesBean;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -41,7 +44,11 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
+	private static final String PARAM_RECURSIVE = "recursive";
+	
 	private String query;
+	
+	private boolean recursive;
 	
 	private SavedQueriesPanel<NamedIssueQuery> savedQueries;
 	
@@ -49,7 +56,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	
 	public ProjectIssueListPage(PageParameters params) {
 		super(params);
-		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
+		query = params.get(PARAM_QUERY).toOptionalString();
+		recursive = params.get(PARAM_RECURSIVE).toBoolean(false);
 	}
 
 	private IssueQueryPersonalizationManager getIssueQueryPersonalizationManager() {
@@ -70,7 +78,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedIssueQuery namedQuery) {
 				return new BookmarkablePageLink<Void>(componentId, ProjectIssueListPage.class, 
-						ProjectIssueListPage.paramsOf(getProject(), namedQuery.getQuery(), 0));
+						ProjectIssueListPage.paramsOf(getProject(), namedQuery.getQuery(), recursive, 0));
 			}
 
 			@Override
@@ -128,9 +136,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 					@Override
 					public PageParameters newPageParameters(int currentPage) {
-						PageParameters params = paramsOf(getProject(), query, 0);
-						params.add(PARAM_PAGE, currentPage+1);
-						return params;
+						return paramsOf(getProject(), query, recursive, currentPage+1);
 					}
 					
 					@Override
@@ -208,8 +214,15 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			}
 
 			@Override
-			protected Project getProject() {
-				return ProjectIssueListPage.this.getProject();
+			protected ProjectScope getProjectScope() {
+				return new ProjectScope(getProject(), recursive, new RecursiveConfigurable() {
+							
+					@Override
+					public void setRecursive(AjaxRequestTarget target, boolean recursive) {
+						setResponsePage(ProjectIssueListPage.class, paramsOf(getProject(), query, recursive, 0));
+					}
+							
+				});
 			}
 
 		});
@@ -222,16 +235,18 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 		target.add(issueList);
 	}
 	
-	public static PageParameters paramsOf(Project project, @Nullable String query, int page) {
+	public static PageParameters paramsOf(Project project, @Nullable String query, boolean recursive, int page) {
 		PageParameters params = paramsOf(project);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
+		if (recursive)
+			params.add(PARAM_RECURSIVE, recursive);
 		if (page != 0)
 			params.add(PARAM_PAGE, page);
 		return params;
 	}
 	
-	public static PageParameters paramsOf(Project project, int page) {
+	public static PageParameters paramsOf(Project project, boolean recursive, int page) {
 		String query = null;
 		if (project.getIssueQueryPersonalizationOfCurrentUser() != null 
 				&& !project.getIssueQueryPersonalizationOfCurrentUser().getQueries().isEmpty()) {
@@ -239,12 +254,20 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 		} else if (!project.getNamedIssueQueries().isEmpty()) {
 			query = project.getNamedIssueQueries().iterator().next().getQuery();
 		}
-		return paramsOf(project, query, page);
+		return paramsOf(project, query, recursive, page);
 	}
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "Issues");
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isIssueManagement()) 
+			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, false, 0));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

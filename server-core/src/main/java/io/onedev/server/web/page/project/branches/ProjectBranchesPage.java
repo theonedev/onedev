@@ -91,6 +91,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
@@ -899,6 +900,14 @@ public class ProjectBranchesPage extends ProjectPage {
 	@Override
 	protected String getPageTitle() {
 		return "Branches - " + getProject().getPath();
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
+			setResponsePage(ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(project));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

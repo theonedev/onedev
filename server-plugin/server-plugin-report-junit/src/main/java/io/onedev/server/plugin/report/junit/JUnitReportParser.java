@@ -12,7 +12,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 
 public class JUnitReportParser {
 
@@ -46,7 +46,7 @@ public class JUnitReportParser {
 		
 		String partialBlobPath = name.replace('.', '/') + ".java";
 
-		String blobPath = OneDev.getInstance(SearchManager.class)
+		String blobPath = OneDev.getInstance(CodeSearchManager.class)
 				.findBlobPath(build.getProject(), build.getCommitId(), fileName, partialBlobPath);
 		
 		TestSuite testSuite = new TestSuite(name, status, duration, null, blobPath);

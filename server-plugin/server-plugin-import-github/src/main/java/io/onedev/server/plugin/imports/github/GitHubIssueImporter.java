@@ -27,10 +27,10 @@ public class GitHubIssueImporter extends IssueImporter<ImportServer, IssueImport
 	
 	@Override
 	public String doImport(ImportServer where, IssueImportSource what, IssueImportOption how, Project project,
-			boolean dryRun, TaskLogger logger) {
+			boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
 		logger.log("Importing issues from repository " + what.getRepository() + "...");
 		Map<String, Optional<User>> users = new HashMap<>();
-		return importIssues(where, what.getRepository(), project, false, how, users, dryRun, logger)
+		return importIssues(where, what.getRepository(), project, retainIssueNumbers, how, users, dryRun, logger)
 				.toHtml("Issues imported successfully");
 	}
 

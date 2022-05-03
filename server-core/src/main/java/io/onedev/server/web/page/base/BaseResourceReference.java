@@ -29,7 +29,8 @@ public class BaseResourceReference extends JavaScriptResourceReference {
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<HeaderItem>();
 		
-	    dependencies.add(JavaScriptHeaderItem.forReference(Application.get().getJavaScriptLibrarySettings().getJQueryReference()));		
+	    dependencies.add(JavaScriptHeaderItem.forReference(Application.get()
+	    		.getJavaScriptLibrarySettings().getJQueryReference()));		
 	    dependencies.add(JavaScriptHeaderItem.forReference(new BootstrapResourceReference()));
 	    dependencies.add(JavaScriptHeaderItem.forReference(new AlignResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AutoSizeResourceReference()));

@@ -41,7 +41,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.FileQuery;
@@ -545,7 +545,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			int maxQueryEntries = getMaxQueryEntries();
 			
-			SearchManager searchManager = OneDev.getInstance(SearchManager.class);
+			CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
 			List<QueryHit> hits;
 			BlobQuery query = new SymbolQuery.Builder()
 					.term(term)
@@ -585,7 +585,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 
 		@Override
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
-			SearchManager searchManager = OneDev.getInstance(SearchManager.class);
+			CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
 			BlobQuery query = new FileQuery.Builder()
 					.fileNames(term)
 					.caseSensitive(caseSensitive) 
@@ -613,7 +613,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 
 		@Override
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
-			SearchManager searchManager = OneDev.getInstance(SearchManager.class);
+			CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
 			BlobQuery query = new TextQuery.Builder()
 					.term(term)
 					.regex(regex)

@@ -13,6 +13,8 @@ public interface PullRequestChangeManager extends EntityManager<PullRequestChang
 	
 	void changeTitle(PullRequest request, String title);
 	
+	void changeTargetBranch(PullRequest request, String targetBranch);
+	
 	void save(PullRequestChange change, @Nullable String note);
 	
 }

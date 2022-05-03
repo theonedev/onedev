@@ -65,6 +65,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -931,6 +932,14 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	@Override
 	protected String getPageTitle() {
 		return "Code Compare - " + getProject().getPath();
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
+			setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(project));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

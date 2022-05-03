@@ -56,7 +56,7 @@ public class FixedIssueCriteria extends Criteria<Build> {
 		Collection<Long> inBuildIds = buildManager.filterIds(project.getId(), descendants);
 		return builder.and(
 				builder.equal(from.get(Build.PROP_PROJECT), issue.getProject()),
-				inManyValues(builder, attribute, inBuildIds, buildManager.getIdsByProject(project.getId())));
+				forManyValues(builder, attribute, inBuildIds, buildManager.getIdsByProject(project.getId())));
 	}
 
 	@Override

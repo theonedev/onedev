@@ -797,7 +797,10 @@ View = (function() {
   View.prototype.bindEvent = function() {
     var $menu;
     $menu = this.$el.find('ul');
-    return $menu.on('mouseenter.atwho-view', 'li', function(e) {
+	// use mousemove insted of mouseenter here as we do not want 
+	// the item at mouse pointer being selected when atwho view 
+	// displays initially
+    return $menu.on('mousemove.atwho-view', 'li', function(e) {
       $menu.find('.cur').removeClass('cur');
       return $(e.currentTarget).addClass('cur');
     }).on('click.atwho-view', 'li', (function(_this) {

@@ -36,6 +36,7 @@ import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.buildmetric.BuildMetricQuery;
+import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.MetricIndicator;
@@ -47,6 +48,7 @@ import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
 @SuppressWarnings("serial")
 public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends ProjectPage {
@@ -281,6 +283,19 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		return params;
+	}
+	
+	public static PageParameters paramsOf(Project project) {
+		String query = String.format("%s \"last month\"", BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since));
+		return paramsOf(project, query);
+	}
+	
+	@Override
+	protected void navToProject(Project project) {
+		if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, metricClass).isEmpty()) 
+			setResponsePage(getPageClass(), paramsOf(project));
+		else 
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

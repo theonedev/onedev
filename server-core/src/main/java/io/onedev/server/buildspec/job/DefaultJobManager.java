@@ -113,7 +113,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.search.code.IndexManager;
+import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
@@ -173,7 +173,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final TaskScheduler taskScheduler;
 	
-	private final IndexManager indexManager;
+	private final CodeIndexManager indexManager;
 	
 	private final Validator validator;
 	
@@ -184,7 +184,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			SettingManager settingManager, TransactionManager transactionManager, JobLogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
 			PullRequestManager pullRequestManager, ProjectManager projectManager, Validator validator, 
-			TaskScheduler taskScheduler, AgentManager agentManager, IndexManager indexManager) {
+			TaskScheduler taskScheduler, AgentManager agentManager, CodeIndexManager indexManager) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;

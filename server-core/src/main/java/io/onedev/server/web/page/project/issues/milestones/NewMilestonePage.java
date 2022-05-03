@@ -16,6 +16,7 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
 @SuppressWarnings("serial")
 public class NewMilestonePage extends ProjectPage {
@@ -71,4 +72,12 @@ public class NewMilestonePage extends ProjectPage {
 		return new Label(componentId, "Create Milestone");
 	}
 
+	@Override
+	protected void navToProject(Project project) {
+		if (project.isIssueManagement()) 
+			setResponsePage(MilestoneListPage.class, MilestoneListPage.paramsOf(project, false, null));
+		else
+			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+	}
+	
 }

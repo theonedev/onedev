@@ -2,8 +2,7 @@
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="contentFrag">
 		<div class="primary font-weight-bold mb-3">
-			<a wicket:id="number" class="mr-2"></a>
-			<span wicket:id="title" class="mr-3"></span>
+			<wicket:container wicket:id="numberAndTitle"></wicket:container>
 			<a wicket:id="links" class="link-info font-weight-normal link d-inline-flex align-items-center mr-2"><span wicket:id="label"></span><wicket:svg href="arrow" class="icon icon-sm"/></a>
 			<a wicket:id="showDetail" title="Click to show issue details" class="show-detail"><wicket:svg href="ellipsis" class="icon"/></a>
 		</div>

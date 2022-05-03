@@ -32,6 +32,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -66,7 +67,7 @@ abstract class BacklogColumnPanel extends Panel {
 		protected Integer load() {
 			if (getQuery() != null) {
 				try {
-					return OneDev.getInstance(IssueManager.class).count(getProject(), true, getQuery().getCriteria());
+					return OneDev.getInstance(IssueManager.class).count(getProjectScope(), getQuery().getCriteria());
 				} catch (ExplicitException e) {
 					return 0;
 				}
@@ -125,7 +126,8 @@ abstract class BacklogColumnPanel extends Panel {
 		});
 		
 		if (getQuery() != null) {
-			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 0);
+			PageParameters params = ProjectIssueListPage.paramsOf(
+					getProject(), getQuery().toString(), getProjectScope().isRecursive(), 0);
 			add(new BookmarkablePageLink<Void>("viewAsList", ProjectIssueListPage.class, params));
 		} else {
 			add(new WebMarkupContainer("viewAsList").setVisible(false));
@@ -195,8 +197,8 @@ abstract class BacklogColumnPanel extends Panel {
 			}
 
 			@Override
-			protected Project getProject() {
-				return BacklogColumnPanel.this.getProject();
+			protected ProjectScope getProjectScope() {
+				return BacklogColumnPanel.this.getProjectScope();
 			}
 
 			@Override
@@ -224,8 +226,12 @@ abstract class BacklogColumnPanel extends Panel {
 		countModel.detach();
 		super.onDetach();
 	}
+	
+	private Project getProject() {
+		return getProjectScope().getProject();
+	}
 
-	protected abstract Project getProject();
+	protected abstract ProjectScope getProjectScope();
 	
 	@Nullable
 	protected abstract IssueQuery getBacklogQuery();

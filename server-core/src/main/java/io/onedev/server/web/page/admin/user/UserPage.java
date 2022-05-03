@@ -37,7 +37,7 @@ import io.onedev.server.web.page.admin.user.twofactorauthentication.UserTwoFacto
 @SuppressWarnings("serial")
 public abstract class UserPage extends AdministrationPage {
 	
-	private static final String PARAM_USER = "user";
+	public static final String PARAM_USER = "user";
 	
 	protected final IModel<User> userModel;
 	

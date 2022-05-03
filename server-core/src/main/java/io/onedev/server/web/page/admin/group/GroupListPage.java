@@ -28,14 +28,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
@@ -66,15 +62,6 @@ public class GroupListPage extends AdministrationPage {
 	public GroupListPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toString();
-	}
-	
-	private EntityCriteria<Group> getCriteria() {
-		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
-		if (query != null) 
-			criteria.add(Restrictions.ilike("name", query, MatchMode.ANYWHERE));
-		else
-			criteria.setCacheable(true);
-		return criteria;
 	}
 	
 	@Override
@@ -244,14 +231,12 @@ public class GroupListPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends Group> iterator(long first, long count) {
-				EntityCriteria<Group> criteria = getCriteria();
-				criteria.addOrder(Order.asc("name"));
-				return OneDev.getInstance(GroupManager.class).query(criteria, (int)first, (int)count).iterator();
+				return OneDev.getInstance(GroupManager.class).query(query, (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				return OneDev.getInstance(GroupManager.class).count(getCriteria());
+				return OneDev.getInstance(GroupManager.class).count(query);
 			}
 
 			@Override

@@ -82,7 +82,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.search.code.SearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -194,7 +194,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		String blobName = context.getBlobIdent().getName();
 		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
 		if (extractor != null) {
-			SearchManager searchManager = OneDev.getInstance(SearchManager.class);
+			CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
 			List<Symbol> cachedSymbols = searchManager.getSymbols(context.getProject(), blob.getBlobId(), 
 					blob.getIdent().path);
 			if (cachedSymbols != null) {

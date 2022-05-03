@@ -48,6 +48,7 @@
 			<div wicket:id="issueInfo" class="issue-info mt-2 d-flex align-items-center flex-wrap mr-3"></div>
 			<div wicket:id="buildInfo" class="build-info mt-2 d-flex align-items-center flex-wrap"></div>
 		</div>
+		<div wicket:id="children" class="project-summary"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="codeInfoFrag">
 		<wicket:svg href="files" class="icon mr-2"></wicket:svg>
@@ -75,5 +76,19 @@
 		<wicket:container wicket:id="statuses">
 			<a wicket:id="link" class="mr-2"><span wicket:id="label"></span></a>
 		</wicket:container>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="childrenFrag">
+		<div class="d-flex flex-nowrap align-items-center mt-2">
+			<wicket:svg href="project" class="icon mr-1"/>
+			<a wicket:id="toggle" class="toggle-children mr-1"><wicket:svg href="arrow" class="icon"/></a>
+			<a wicket:id="link"><span wicket:id="label"></span></a>
+		</div>
+		<div wicket:id="tree" class="child-projects mt-2"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="childFrag">
+		<a wicket:id="link">
+			<img wicket:id="avatar">
+			<span wicket:id="name"></span>
+		</a>
 	</wicket:fragment>
 </wicket:panel>

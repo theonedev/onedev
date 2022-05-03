@@ -31,6 +31,9 @@
 				<a wicket:id="orderBy" class="order-by text-gray mr-4 mb-2 d-inline-block text-nowrap">
 					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
 				</a>
+				<a wicket:id="recursive" class="recursive mr-4 mb-2 d-inline-block text-nowrap" title="Include issues in descendant projects">
+					<wicket:svg href="tree" class="icon"></wicket:svg> Recursive
+				</a>
 			</div>
 			<div wicket:id="body" class="body">
 				<div wicket:id="feedback"></div>
@@ -41,8 +44,7 @@
 	<wicket:fragment wicket:id="contentFrag">
 		<div class="primary d-flex mb-3">
 			<div class="mr-4 flex-grow-1">
-				<a wicket:id="number" class="number h6 mr-2"></a> 
-				<span wicket:id="title" class="title h6 mr-1"></span> 
+				<wicket:container wicket:id="numberAndTitle"></wicket:container> 
 				<a wicket:id="copy" title="Copy issue number and title" class="copy mr-3 btn btn-icon btn-xs btn-light btn-hover-primary">
 					<wicket:svg href="copy" class="icon"></wicket:svg>
 				</a>

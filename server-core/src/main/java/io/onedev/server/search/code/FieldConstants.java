@@ -8,11 +8,11 @@ public enum FieldConstants {
 	BLOB_PRIMARY_SYMBOLS, BLOB_SECONDARY_SYMBOLS, BLOB_TEXT, COMMIT_INDEX_VERSION, COMMIT_HASH, 
 	META, LAST_COMMIT, LAST_COMMIT_HASH, LAST_COMMIT_INDEX_VERSION;
 	
-	public TermQuery query(String value) {
-		return new TermQuery(term(value));
+	public TermQuery getTermQuery(String value) {
+		return new TermQuery(getTerm(value));
 	}
 	
-	public Term term(String value) {
+	public Term getTerm(String value) {
 		return new Term(name(), value);
 	}
 	

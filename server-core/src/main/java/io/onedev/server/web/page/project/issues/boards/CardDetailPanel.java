@@ -32,16 +32,17 @@ import io.onedev.server.search.entity.build.FixedIssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
+import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
-import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
@@ -81,7 +82,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new IssueTitlePanel("title") {
+		add(new IssueEditableTitlePanel("title") {
 
 			@Override
 			protected Issue getIssue() {
@@ -233,9 +234,9 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 					}
 
 					@Override
-					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, Project project) {
+					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, ProjectScope projectScope) {
 						IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-						return issueManager.query(project, true, query, offset, count, false);
+						return issueManager.query(projectScope, query, false, offset, count);
 					}
 
 					@Override

@@ -121,8 +121,7 @@ public class ImportUtils {
 	}
 	
 	static ImportResult importIssues(ImportServer server, String youTrackProjectId, 
-			Project oneDevProject, boolean useExistingIssueNumbers, ImportOption importOption, 
-			boolean dryRun, TaskLogger logger) {
+			Project oneDevProject, boolean retainIssueNumbers, ImportOption importOption, boolean dryRun, TaskLogger logger) {
 		Client client = server.newClient();
 		try {
 			String apiEndpoint = server.getApiEndpoint("/admin/projects/" + youTrackProjectId + "?fields=shortName");
@@ -272,10 +271,10 @@ public class ImportUtils {
 						String readableId = issueNode.get("idReadable").asText();
 						Long oldNumber = issueNode.get("numberInProject").asLong();
 						Long newNumber;
-						if (dryRun || useExistingIssueNumbers)
+						if (dryRun || retainIssueNumbers)
 							newNumber = oldNumber;
 						else
-							newNumber = OneDev.getInstance(IssueManager.class).getNextNumber(oneDevProject);
+							newNumber = getIssueManager().getNextNumber(oneDevProject);
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
 						issue.setTitle(issueNode.get("summary").asText());
@@ -790,7 +789,7 @@ public class ImportUtils {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), youTrackProjectShortName + "-"));
 					
-					OneDev.getInstance(IssueManager.class).save(issue);
+					getIssueManager().save(issue);
 					for (IssueSchedule schedule: issue.getSchedules())
 						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
@@ -814,6 +813,10 @@ public class ImportUtils {
 		} finally {
 			client.close();
 		}
+	}
+	
+	private static IssueManager getIssueManager() {
+		return OneDev.getInstance(IssueManager.class);
 	}
 	
 	static GlobalIssueSetting getIssueSetting() {

@@ -15,6 +15,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Splitter;
+
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Build;
@@ -27,8 +29,6 @@ public class MarkdownReportPage extends BuildDetailPage {
 
 	private static final String PARAM_REPORT = "report";
 	
-	private static final String PARAM_PATH = "path";
-	
 	private final String reportName;
 	
 	private final String filePath;
@@ -39,22 +39,18 @@ public class MarkdownReportPage extends BuildDetailPage {
 		reportName = params.get(PARAM_REPORT).toString();
 		
 		List<String> pathSegments = new ArrayList<>();
-		String segment = params.get(PARAM_PATH).toString();
-		if (segment != null && segment.length() != 0)
-			pathSegments.add(segment);
-		
 		for (int i=0; i<params.getIndexedCount(); i++) {
-			segment = params.get(i).toString();
+			String segment = params.get(i).toString();
 			if (segment.length() != 0)
 				pathSegments.add(segment);
 		}
 		
 		filePath = StringUtils.join(pathSegments, "/");
+		
 		if (!filePath.endsWith(".md")) {
 			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
 					new ResourceReferenceRequestHandler(new MarkdownReportDownloadResourceReference(), getPageParameters()));
 		}
-		
 	}
 
 	@Override
@@ -89,8 +85,13 @@ public class MarkdownReportPage extends BuildDetailPage {
 	public static PageParameters paramsOf(Build build, String reportName, @Nullable String filePath) {
 		PageParameters params = paramsOf(build);
 		params.add(PARAM_REPORT, reportName);
-		if (filePath != null)
-			params.add(PARAM_PATH, filePath);
+		int index = 0;
+		if (filePath != null) {
+			for (String segment: Splitter.on("/").split(filePath)) {
+				params.set(index, segment);
+				index++;
+			}
+		}
 		return params;
 	}
 }
