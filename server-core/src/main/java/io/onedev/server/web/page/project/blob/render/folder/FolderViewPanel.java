@@ -127,6 +127,7 @@ public class FolderViewPanel extends Panel {
 	};
 	
 	private final IModel<BlobIdent> readmeModel = new LoadableDetachableModel<BlobIdent>() {
+
 		@Override
 		protected BlobIdent load() {
 			Predicate<BlobIdent> isReadmeBlob = new Predicate<BlobIdent>() {
@@ -146,7 +147,8 @@ public class FolderViewPanel extends Panel {
 				}
 			}
 			return null;
-		}		
+		}	
+
 	};
 	
 	private AbstractDefaultAjaxBehavior userCardBehavior;
