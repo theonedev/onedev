@@ -101,3 +101,12 @@
 .pull-request-detail>.card-body>.main>.activities .activity.since-changes td {
 	vertical-align: middle;
 }
+
+.pull-request-detail>.card-body>.main>.activities>table>tbody>tr .activity-anchor, 
+.pull-request-detail>.card-body>.main>.activities>table>tbody>tr .since-changes {
+	display: none;
+}
+.pull-request-detail>.card-body>.main>.activities>table>tbody>tr:hover .activity-anchor,
+.pull-request-detail>.card-body>.main>.activities>table>tbody>tr:hover .since-changes {
+	display: inline;
+}

@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.blob.render.folder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -40,11 +39,11 @@ import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.util.FilterIterator;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.FilterIterator;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
