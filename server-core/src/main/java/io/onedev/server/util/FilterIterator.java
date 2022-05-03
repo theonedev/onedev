@@ -26,7 +26,7 @@ public class FilterIterator<T> implements Iterable<T> {
 						return false;
 					}
 					T next = sourceIterator.next();
-					if (predicate.test(next)) {
+					if (next != null && predicate.test(next)) {
 						current = next;
 						hasCurrent = true;
 					}
