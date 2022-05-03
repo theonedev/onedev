@@ -141,7 +141,8 @@ public abstract class JobInfoButton extends Panel {
 		detailLink.setOutputMarkupId(true);
 		add(detailLink);
 		
-		add(new RunJobLink("run", getCommitId(), getJobName(), null) {
+		String refName = getPipelineOf()!=null?getPipelineOf().getRefName():null;
+		add(new RunJobLink("run", getCommitId(), getJobName(), refName) {
 
 			@Override
 			protected Project getProject() {

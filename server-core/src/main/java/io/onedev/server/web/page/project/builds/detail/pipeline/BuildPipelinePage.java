@@ -74,7 +74,7 @@ public class BuildPipelinePage extends BuildDetailPage {
 					protected Build getPipelineOf() {
 						return getBuild();
 					}
-					
+
 				};
 			}
 			
