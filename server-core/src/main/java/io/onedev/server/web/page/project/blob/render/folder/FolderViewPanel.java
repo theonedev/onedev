@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -40,6 +41,7 @@ import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.util.FilterIterator;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -126,10 +128,16 @@ public class FolderViewPanel extends Panel {
 	};
 	
 	private final IModel<BlobIdent> readmeModel = new LoadableDetachableModel<BlobIdent>() {
-	
 		@Override
 		protected BlobIdent load() {
-			for (BlobIdent blobIdent: makeReadmeBlobIterator(childrenModel.getObject().iterator())) {
+			Predicate<BlobIdent> isReadmeBlob = new Predicate<BlobIdent>() {
+				@Override
+				public boolean test(BlobIdent t) {
+					return t.isFile();
+				}
+			};
+			FilterIterator<BlobIdent> readmeBlobIterator = new FilterIterator<BlobIdent>(childrenModel.getObject().iterator(), isReadmeBlob);
+			for (BlobIdent blobIdent: readmeBlobIterator) {
 				switch(blobIdent.getName().toLowerCase()) {
 				case "readme.md":
 				case "readme.mkd":
@@ -139,48 +147,7 @@ public class FolderViewPanel extends Panel {
 				}
 			}
 			return null;
-		}
-
-		private Iterable<BlobIdent> makeReadmeBlobIterator(Iterator<BlobIdent> it) {
-			return new Iterable<BlobIdent>() {
-				@Override
-				public Iterator<BlobIdent> iterator() {
-					return new Iterator<BlobIdent>() {
-						Iterator<BlobIdent> sourceIterator = it;
-						BlobIdent current;
-						boolean hasCurrent;
-
-						@Override
-						public boolean hasNext() {
-							while (!hasCurrent) {
-								if (!sourceIterator.hasNext()) {
-									return false;
-								}
-								BlobIdent next = sourceIterator.next();
-								if (next.isFile() && next.getName().toLowerCase().startsWith("readme.")) {
-									current = next;
-									hasCurrent = true;
-								}
-							}
-							return true;
-						}
-
-						@Override
-						public BlobIdent next() {
-							if (!hasNext()) {
-								return null;
-							}
-							BlobIdent next = current;
-							current = null;
-							hasCurrent = false;
-							return next;
-						}
-					};
-				}
-			};
-
-		}
-
+		}		
 	};
 	
 	private AbstractDefaultAjaxBehavior userCardBehavior;
