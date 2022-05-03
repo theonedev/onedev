@@ -47,7 +47,7 @@
 	.commit-list li.commit:hover, .commit-list li.commit.hover {
 		background: var(--light);
 	}
-	.dark-mode .commit-list li.commit:hover, .commit-list li.commit.hover {
+	.dark-mode .commit-list li.commit:hover, .dark-mode .commit-list li.commit.hover {
 		background: var(--dark-mode-light-dark);
 	}
 }
