@@ -6,6 +6,10 @@ onedev.server.inputassist = {
 		
 		$input.data("prevValue", $input.val());
 		$input.data("prevCaret", -1);
+		$input.on("keydown", function(e) {
+			if (e.keyCode == 75 && (e.ctrlKey || e.metaKey) && !e.shiftKey) // command palette
+				$input.blur();
+		});
 		$input.on("paste click keyup assist", function(e) {
 			var value = $input.val();
 			var caret;
