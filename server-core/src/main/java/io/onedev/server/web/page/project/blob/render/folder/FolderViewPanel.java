@@ -3,7 +3,9 @@ package io.onedev.server.web.page.project.blob.render.folder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -38,6 +40,7 @@ import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.util.FilterIterator;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -127,13 +130,25 @@ public class FolderViewPanel extends Panel {
 
 		@Override
 		protected BlobIdent load() {
-			for (BlobIdent blobIdent: childrenModel.getObject()) {
-				if (blobIdent.isFile() && blobIdent.getName().equalsIgnoreCase("readme.md"))
+			Predicate<BlobIdent> isReadmeBlob = new Predicate<BlobIdent>() {
+				@Override
+				public boolean test(BlobIdent t) {
+					return t.isFile();
+				}
+			};
+			FilterIterator<BlobIdent> readmeBlobIterator = new FilterIterator<BlobIdent>(childrenModel.getObject().iterator(), isReadmeBlob);
+			for (BlobIdent blobIdent: readmeBlobIterator) {
+				switch(blobIdent.getName().toLowerCase()) {
+				case "readme.md":
+				case "readme.mkd":
 					return blobIdent;
+				default: continue;
+						
+				}
 			}
 			return null;
-		}
-		
+		}	
+
 	};
 	
 	private AbstractDefaultAjaxBehavior userCardBehavior;
