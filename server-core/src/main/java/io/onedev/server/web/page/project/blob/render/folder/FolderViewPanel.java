@@ -3,7 +3,9 @@ package io.onedev.server.web.page.project.blob.render.folder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -124,35 +126,61 @@ public class FolderViewPanel extends Panel {
 	};
 	
 	private final IModel<BlobIdent> readmeModel = new LoadableDetachableModel<BlobIdent>() {
-		private String[] possibleReadmeNames = {
-				"readme.md",
-				"readme.mkd",
-		};	
-		
-		private boolean isReadme(BlobIdent blobIdent) {
-			if(!blobIdent.isFile()) {
-				return false;
-			}
-			
-			for(String possibleName: possibleReadmeNames) {
-				if(blobIdent.getName().equalsIgnoreCase(possibleName)) {
-					return true;
-				}
-			}
-			
-			return false;
-		}
-		
+	
 		@Override
 		protected BlobIdent load() {
-			for (BlobIdent blobIdent: childrenModel.getObject()) {
-				if(isReadme(blobIdent)) {
+			for (BlobIdent blobIdent: makeReadmeBlobIterator(childrenModel.getObject().iterator())) {
+				switch(blobIdent.getName().toLowerCase()) {
+				case "readme.md":
+				case "readme.mkd":
 					return blobIdent;
+				default: continue;
+						
 				}
 			}
 			return null;
 		}
-		
+
+		private Iterable<BlobIdent> makeReadmeBlobIterator(Iterator<BlobIdent> it) {
+			return new Iterable<BlobIdent>() {
+				@Override
+				public Iterator<BlobIdent> iterator() {
+					return new Iterator<BlobIdent>() {
+						Iterator<BlobIdent> sourceIterator = it;
+						BlobIdent current;
+						boolean hasCurrent;
+
+						@Override
+						public boolean hasNext() {
+							while (!hasCurrent) {
+								if (!sourceIterator.hasNext()) {
+									return false;
+								}
+								BlobIdent next = sourceIterator.next();
+								if (next.isFile() && next.getName().toLowerCase().startsWith("readme.")) {
+									current = next;
+									hasCurrent = true;
+								}
+							}
+							return true;
+						}
+
+						@Override
+						public BlobIdent next() {
+							if (!hasNext()) {
+								return null;
+							}
+							BlobIdent next = current;
+							current = null;
+							hasCurrent = false;
+							return next;
+						}
+					};
+				}
+			};
+
+		}
+
 	};
 	
 	private AbstractDefaultAjaxBehavior userCardBehavior;
