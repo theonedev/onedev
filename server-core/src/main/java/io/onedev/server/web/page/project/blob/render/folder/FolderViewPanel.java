@@ -42,7 +42,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.infomanager.ProgrammingLanguageInfoManager;
+import io.onedev.server.util.ProgrammingLanguageDetector;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.FilterIterator;
@@ -141,7 +141,7 @@ public class FolderViewPanel extends Panel {
 			
 			FilterIterator<BlobIdent> readmeBlobIterator = new FilterIterator<BlobIdent>(childrenModel.getObject().iterator(), isReadmeBlob);
 			for (BlobIdent blobIdent: readmeBlobIterator) {
-				String language = ProgrammingLanguageInfoManager.getLanguageForExtension(FileExtension.getExtension(blobIdent.getName()));
+				String language = ProgrammingLanguageDetector.getLanguageForExtension(FileExtension.getExtension(blobIdent.getName()));
 				if(language != null && language.equals("Markdown")) {
 					return blobIdent;
 				}

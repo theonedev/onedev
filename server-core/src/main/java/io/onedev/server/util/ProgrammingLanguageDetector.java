@@ -1,12 +1,11 @@
-package io.onedev.server.infomanager;
+package io.onedev.server.util;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 
-public class ProgrammingLanguageInfoManager {
+public class ProgrammingLanguageDetector {
 	private static final Map<String, String> PROGRAMMING_LANGUAGES = new HashMap<>();
 
 	static {
@@ -89,7 +88,6 @@ public class ProgrammingLanguageInfoManager {
 		PROGRAMMING_LANGUAGES.put("sql", "SQL");
 		PROGRAMMING_LANGUAGES.put("ps1", "PowerShell");
 		PROGRAMMING_LANGUAGES.put("psd1", "PowerShell");
-		PROGRAMMING_LANGUAGES.put("psm1", "PowerShell");
 		PROGRAMMING_LANGUAGES.put("psm1", "PowerShell");
 		
 		PROGRAMMING_LANGUAGES.put("properties", "Properties");

@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.server.util.*;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -66,10 +67,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.Day;
-import io.onedev.server.util.ElementPumper;
-import io.onedev.server.util.NameAndEmail;
-import io.onedev.server.util.Pair;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -728,7 +725,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		for (FileChange change: currentCommit.getFileChanges()) {
 			int lines = change.getAdditions() - change.getDeletions();
 			if (lines != 0 && !change.getNewExtension().equals("")) {
-				String language = ProgrammingLanguageInfoManager.getLanguageForExtension(change.getNewExtension());
+				String language = ProgrammingLanguageDetector.getLanguageForExtension(change.getNewExtension());
 				if (language != null) {
 					Integer accumulatedLines = languageLines.get(language);
 					if (accumulatedLines != null) 

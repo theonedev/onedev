@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.infomanager.ProgrammingLanguageInfoManager;
+import io.onedev.server.util.ProgrammingLanguageDetector;
 import io.onedev.server.util.FileExtension;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -15,7 +15,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 public class MarkdownRenderer implements BlobRendererer {
 
 	private boolean isMarkdown(@Nullable String blobPath) {
-		String language = ProgrammingLanguageInfoManager.getLanguageForExtension(FileExtension.getExtension(blobPath));
+		String language = ProgrammingLanguageDetector.getLanguageForExtension(FileExtension.getExtension(blobPath));
 		
 		return blobPath != null && language != null && language.equals("Markdown");
 	}
