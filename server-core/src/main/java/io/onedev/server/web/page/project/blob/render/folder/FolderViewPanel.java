@@ -42,7 +42,9 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.util.ProgrammingLanguageDetector;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.FilterIterator;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -132,17 +134,16 @@ public class FolderViewPanel extends Panel {
 			Predicate<BlobIdent> isReadmeBlob = new Predicate<BlobIdent>() {
 				@Override
 				public boolean test(BlobIdent t) {
-					return t.isFile();
+					String nameNoExt = FileExtension.getNameWithoutExtension(t.getName());
+					return t.isFile() && nameNoExt != null && nameNoExt.equalsIgnoreCase("readme");
 				}
 			};
+			
 			FilterIterator<BlobIdent> readmeBlobIterator = new FilterIterator<BlobIdent>(childrenModel.getObject().iterator(), isReadmeBlob);
 			for (BlobIdent blobIdent: readmeBlobIterator) {
-				switch(blobIdent.getName().toLowerCase()) {
-				case "readme.md":
-				case "readme.mkd":
+				String language = ProgrammingLanguageDetector.getLanguageForExtension(FileExtension.getExtension(blobIdent.getName()));
+				if(language != null && language.equals("Markdown")) {
 					return blobIdent;
-				default: continue;
-						
 				}
 			}
 			return null;

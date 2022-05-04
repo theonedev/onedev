@@ -7,6 +7,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.FileExtension;
+
 @SuppressWarnings("serial")
 public class FileChange implements Serializable {
 	
@@ -34,7 +36,17 @@ public class FileChange implements Serializable {
 	public String getNewPath() {
 		return newPath;
 	}
-
+	
+	@Nullable
+	public String getOldExtension() {
+		return FileExtension.getExtension(this.getOldPath());
+	}
+	
+	@Nullable
+	public String getNewExtension() {
+		return FileExtension.getExtension(this.getNewPath());
+	}
+	
 	public int getAdditions() {
 		return additions;
 	}
