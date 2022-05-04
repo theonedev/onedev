@@ -119,7 +119,7 @@ public abstract class CommitStatusLink extends DropdownLink {
 			
 		}));
 		
-		add(AttributeAppender.append("class", "commit-status"));
+		add(AttributeAppender.append("class", "commit-status text-nowrap"));
 	}
 	
 	protected Collection<String> getWebSocketObservables() {
