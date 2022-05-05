@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
-import io.onedev.server.web.opengraph.OpenGraphComponentType;
+import io.onedev.server.web.opengraph.OpenGraphHeaderMetaType;
 import io.onedev.server.web.opengraph.OpenGraphHeaderMeta;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -415,11 +415,11 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		String urlOfProjectImage = getSettingManager().getSystemSetting().getServerUrl() +
 				OneDev.getInstance(AvatarManager.class).getAvatarUrl(getProject().getId());
 		
-		new OpenGraphHeaderMeta(OpenGraphComponentType.Title, getProject().getName()).render(response);
-		new OpenGraphHeaderMeta(OpenGraphComponentType.Description, description).render(response);
-		new OpenGraphHeaderMeta(OpenGraphComponentType.Image, 
+		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Title, getProject().getName()).render(response);
+		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Description, description).render(response);
+		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Image, 
 				urlOfProjectImage).render(response);
-		new OpenGraphHeaderMeta(OpenGraphComponentType.Url, getProject().getUrl()).render(response);
+		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Url, getProject().getUrl()).render(response);
 		
 		response.render(CssHeaderItem.forReference(new DropdownTriangleIndicatorCssResourceReference()));
 	}
