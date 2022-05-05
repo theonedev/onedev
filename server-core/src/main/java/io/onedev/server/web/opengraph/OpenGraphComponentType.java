@@ -1,6 +1,6 @@
 package io.onedev.server.web.opengraph;
 
-public enum OpenGraphComponentType {
+public enum OpenGraphHeaderMetaType {
 	Image,
 	Title,
 	Description,
