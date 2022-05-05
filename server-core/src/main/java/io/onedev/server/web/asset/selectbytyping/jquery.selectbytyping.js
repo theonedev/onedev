@@ -11,12 +11,24 @@
 		}
 		
 		function onTab() {
-			var completion = $(container).find(".active.selectable").data("completion");
-			if (completion == undefined)
-				completion = $(container).find(".active.selectable").find("a").addBack("a").data("completion");
-			if (completion != undefined) {
-				$input.val(completion);
-				$input.trigger("input");
+			var $container = $(container);
+			function complete() {
+				var completion = $container.find(".active.selectable").data("completion");
+				if (completion == undefined)
+					completion = $container.find(".active.selectable").find("a").addBack("a").data("completion");
+				if (completion != undefined) {
+					$input.val(completion);
+					$input.trigger("input");
+				}
+			}
+			var processedInput = $container.data("input");
+			if (processedInput != undefined) { 
+				if (processedInput != $input.val()) 
+					setTimeout(onTab, 100);				
+				else 
+					complete();
+			} else {
+				complete();				
 			}
 			return false;
 		}

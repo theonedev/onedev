@@ -26,6 +26,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.mapper.ICompoundRequestMapper;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -219,7 +220,7 @@ public abstract class CommandPalettePanel extends Panel {
 		});
 		
 		input = new TextField<String>("input", Model.of(""));
-		input.add(new OnTypingDoneBehavior() {
+		input.add(new OnTypingDoneBehavior(100) {
 			
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
@@ -228,6 +229,18 @@ public abstract class CommandPalettePanel extends Panel {
 				target.add(suggestions);
 				
 				target.add(get("noSuggestions"));
+				
+				String script;
+				String processedInput = input.getModelObject();
+				if (processedInput != null) {
+					script = String.format("$('#%s').data('input', '%s');", 
+						CommandPalettePanel.this.getMarkupId(), 
+						JavaScriptEscape.escapeJavaScript(processedInput));
+				} else {
+					script = String.format("$('#%s').data('input', '');", 
+							CommandPalettePanel.this.getMarkupId());
+				}
+				target.appendJavaScript(script);
 			}
 			
 		});
@@ -246,6 +259,7 @@ public abstract class CommandPalettePanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
+		add(AttributeAppender.append("data-input", ""));
 	}
 	
 	private WebMarkupContainer newSuggestions() {

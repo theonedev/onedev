@@ -752,8 +752,7 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
 }
 span.keycap {
 	white-space: nowrap;
-	border: 1px solid #aaa;
-	border-style: outset;
+	border: 1px outset var(--muted);
 	border-radius: 4px;
 	padding: 0px 3px 1px 3px;
 	margin: 0px 0px 0px 0px;
