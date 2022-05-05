@@ -4,10 +4,10 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.MetaDataHeaderItem;
 
 public class OpenGraphHeaderMeta {
-	private OpenGraphComponentType type;
+	private OpenGraphHeaderMetaType type;
 	private String content;
 	
-	public OpenGraphHeaderMeta(OpenGraphComponentType type, String content) {
+	public OpenGraphHeaderMeta(OpenGraphHeaderMetaType type, String content) {
 		this.type = type;
 		this.content = content;
 	}
