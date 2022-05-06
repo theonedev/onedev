@@ -415,7 +415,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		String urlOfProjectImage = getSettingManager().getSystemSetting().getServerUrl() +
 				OneDev.getInstance(AvatarManager.class).getAvatarUrl(getProject().getId());
 		
-		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Title, getProject().getName()).render(response);
+		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Title, getProject().getPath()).render(response);
 		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Description, description).render(response);
 		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Image, 
 				urlOfProjectImage).render(response);
