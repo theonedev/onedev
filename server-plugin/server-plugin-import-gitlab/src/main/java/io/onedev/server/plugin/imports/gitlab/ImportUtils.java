@@ -161,7 +161,8 @@ public class ImportUtils {
 								try (InputStream is = response.readEntity(InputStream.class)) {
 									String oneDevAttachmentName = oneDevProject.saveAttachment(issueUUID, attachmentName, is);
 									String oneDevAttachmentUrl = oneDevProject.getAttachmentUrlPath(issueUUID, oneDevAttachmentName);
-							    	matcher.appendReplacement(buffer, "[" + matcher.group(1) + "](" + oneDevAttachmentUrl + ")");  
+							    	matcher.appendReplacement(buffer, 
+							    			Matcher.quoteReplacement("[" + matcher.group(1) + "](" + oneDevAttachmentUrl + ")"));  
 								} catch (AttachmentTooLargeException ex) {
 									tooLargeAttachments.add(issueFQN + ":" + matcher.group(2));
 								} catch (IOException e) {

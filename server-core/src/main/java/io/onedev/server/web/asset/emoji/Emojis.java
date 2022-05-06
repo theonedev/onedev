@@ -77,9 +77,9 @@ public class Emojis {
 	    	String alias = matcher.group(1);
 	    	String unicode = getUnicode(alias);
 	    	if (unicode != null)
-	    		matcher.appendReplacement(buffer, unicode);
+	    		matcher.appendReplacement(buffer, Matcher.quoteReplacement(unicode));
 	    	else
-	    		matcher.appendReplacement(buffer, matcher.group());
+	    		matcher.appendReplacement(buffer, Matcher.quoteReplacement(matcher.group()));
 	    }
 	    matcher.appendTail(buffer);
 	    
