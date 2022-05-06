@@ -3138,7 +3138,7 @@ public class DataMigrator {
 				if (projectId != null) 
 					matcher.appendReplacement(buffer, "/projects/" + projectId + "/attachment/");
 				else
-					matcher.appendReplacement(buffer, matcher.group());
+					matcher.appendReplacement(buffer, Matcher.quoteReplacement(matcher.group()));
 			}
 			
 			matcher.appendTail(buffer);

@@ -1,6 +1,7 @@
 User-agent: *
 
 Disallow: /*?*
+Disallow: /*/files/
 Disallow: /*/blob/
 Disallow: /*/commits
 Disallow: /*/archive
