@@ -90,6 +90,12 @@ Each discussion is threaded so that you can easily know discussions with new com
 
 ![thread-comments](doc/images/threaded-comments.png)
 
+## Command Palette to Access Features Quickly
+
+Press cmd/ctrl-k to bring up command palette from anywhere. Search projects, files, issues, pull requests, builds, and various settings and jump to them without leaving your keyboard
+
+![command-palette.gif](doc/images/command-palette.gif)
+
 ## Write Markdown Pleasantly With a Smart Editor
 
 When embedding an image in a markdown file in GitHub/GitLab, you need to upload the image in a separate page, and then figure out the relative path to reference that image. With OneDev, you simply upload the image to desired folder in same editor, and the link will be generated automatically. 
