@@ -128,7 +128,10 @@ public class EditableUtils {
 				clazz = ((Method) element).getDeclaringClass();
 			else 
 				throw new RuntimeException("Unexpected element type: " + element);
-			return (String) ReflectionUtils.invokeStaticMethod(clazz, editable.descriptionProvider());
+			description = (String) ReflectionUtils.invokeStaticMethod(clazz, editable.descriptionProvider());
+			if (description == null)
+				description = "";
+			return description;
 		} else {
 			return "";
 		}
