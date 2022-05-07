@@ -23,8 +23,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -34,8 +32,8 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.code.IndexConstants;
 import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.IndexConstants;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.SymbolHit;
 import io.onedev.server.search.code.query.BlobQuery;
@@ -44,7 +42,6 @@ import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 
@@ -275,15 +272,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 				
 				response.render(JavaScriptHeaderItem.forReference(new SymbolTooltipResourceReference()));
 				
-				ResourceReference ajaxIndicator;
-				if (((BasePage)getPage()).isDarkMode()) 
-					ajaxIndicator =  new PackageResourceReference(SymbolTooltipPanel.class, "dark-ajax-indicator.gif");
-				else
-					ajaxIndicator =  new PackageResourceReference(SymbolTooltipPanel.class, "ajax-indicator.gif");
-					
-				String script = String.format("onedev.server.symboltooltip.init('%s', %s, '%s');", 
-						getMarkupId(), getCallbackFunction(explicit("revision"), explicit("symbol")), 
-						RequestCycle.get().urlFor(ajaxIndicator, new PageParameters()));
+				String script = String.format("onedev.server.symboltooltip.init('%s', %s);", 
+						getMarkupId(), getCallbackFunction(explicit("revision"), explicit("symbol")));
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 

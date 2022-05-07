@@ -1,5 +1,5 @@
 onedev.server.symboltooltip = {
-	init: function(containerId, queryCallback, ajaxIndicatorUrl) {
+	init: function(containerId, queryCallback) {
 		var container = document.getElementById(containerId);
 		
 		var showTimer;
@@ -53,8 +53,7 @@ onedev.server.symboltooltip = {
 						onedev.server.symboltooltip.removeTooltip(container);
 				}
 
-				var $tooltip = $("<div class='symbol-tooltip overflow-auto' id='" + containerId 
-						+ "-symbol-tooltip'><div class='d-flex align-items-center justify-content-center'><img width='24' height='24' src=" + ajaxIndicatorUrl + "></img></div></div>");
+				var $tooltip = $("<div class='symbol-tooltip d-none overflow-auto' id='" + containerId + "-symbol-tooltip'></div>");
 				container.tooltip = $tooltip[0];
 				container.tooltip.symbolEl = symbolEl;
 				document.body.appendChild(container.tooltip);
@@ -82,6 +81,7 @@ onedev.server.symboltooltip = {
 		var $content = $("#" + contentId);
 		var $container = $content.parent();
 		var $tooltip = $("#" + $container.attr("id") + "-symbol-tooltip");
+		$tooltip.removeClass("d-none");
 		if ($tooltip.length != 0) 
 			$tooltip.html($content.children()).align($tooltip.data("alignment"));
 	},
