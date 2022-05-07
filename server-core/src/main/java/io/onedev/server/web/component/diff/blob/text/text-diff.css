@@ -225,12 +225,6 @@
 	font-weight: bold;
 	padding: 0 0.3rem 0 0.3rem;
 }
-.text-diff>tbody>tr:hover:not(.expander)>td {
-	background: var(--light-primary) !important;
-}
-.dark-mode .text-diff>tbody>tr:hover:not(.expander)>td {
-	background: var(--gray-dark) !important;
-}
 .text-diff>tbody>tr.code {
 	background: inherit;
 	border: inherit;

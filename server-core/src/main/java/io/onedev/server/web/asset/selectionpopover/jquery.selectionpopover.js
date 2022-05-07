@@ -1,6 +1,5 @@
 (function ( $ ) {
     $.fn.selectionPopover = function(action, options) {
-
     	var $container = jQuery(this);
     	function popover(options) {
 			var $popover = $container.children(".selection-popover");

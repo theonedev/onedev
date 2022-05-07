@@ -627,6 +627,10 @@ onedev.server = {
 					self.clientX = e.clientX;
 					self.clientY = e.clientY;
 				}
+				onedev.server.mouseState.position = {
+					left: e.clientX,
+					top: e.clientY
+				}
 			});
 			$(document).scroll(function() {
 				onedev.server.mouseState.moved = false;

@@ -42,20 +42,22 @@ onedev.server.textDiff = {
 		onedev.server.textDiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
 		
 		$container.selectionPopover("init", function(e) {
-	    	if ($(e.target).closest("td.content").length == 0 
-					|| $(e.target).closest(".selection-popover").length != 0) {
+	    	if ($(e.target).closest(".selection-popover").length != 0) {
 	    		return;
 			}
 			
 	    	var selection = window.getSelection();
-	    	if (!selection.rangeCount) {
+
+	    	if (!selection.rangeCount || !onedev.server.mouseState.position) {
 	    		return "close";
 	    	}
+
     		var firstRange = selection.getRangeAt(0).cloneRange();
     		var lastRange = selection.getRangeAt(selection.rangeCount-1).cloneRange();
+
     		var $start = $(firstRange.startContainer);
     		var $end = $(lastRange.endContainer);
-    		
+
     		/* 
     		 * offset represents offset within $start or $end node, for instance for below selection
     		 * <span>hello</span><span>world</span>
@@ -67,17 +69,21 @@ onedev.server.textDiff = {
     		var endOffset = lastRange.endOffset;
     		
 			var $startDiff;
-			if (!$start.hasClass("text-diff"))
-				$startDiff = $start.closest(".text-diff");
-			else
+			if ($start.hasClass("text-diff"))
 				$startDiff = $start;
+			else if ($start.children(".text-diff").length != 0)
+				$startDiff = $start.children(".text-diff");
+			else
+				$startDiff = $start.closest(".text-diff");
 			
 			var $endDiff;
-			if (!$end.hasClass("text-diff"))
-				$endDiff = $end.closest(".text-diff");
-			else
+			if ($end.hasClass("text-diff"))
 				$endDiff = $end;
-			
+			else if ($end.children(".text-diff").length != 0)
+				$endDiff = $end.children(".text-diff");
+			else
+				$endDiff = $end.closest(".text-diff");
+				
 			// selection must be within same file
 			if ($startDiff.length == 0 || $endDiff.length == 0 || !$startDiff.is($endDiff)) { 
 	    		return "close";
@@ -315,21 +321,8 @@ onedev.server.textDiff = {
 					|| !hasOldOrNewData($start) || !hasOldOrNewData($end)) {
 	    		return "close";
 			}
-			
-			firstRange.collapse(true);
-			var startRect = firstRange.getClientRects()[0];
-			lastRange.collapse(false);
-			var endRect = lastRange.getClientRects()[0];
-			if (!startRect || !endRect) {
-				startRect = selection.getRangeAt(0).getClientRects()[0];
-				endRect = startRect;
-			}
-			var position = {
-				left: (startRect.left + endRect.right)/2,
-				top: startRect.top
-			};
-			position.left += $(window).scrollLeft();
-			position.top += $(window).scrollTop();
+
+			position = onedev.server.mouseState.position;			
 
 			function showInvalidSelection() {
 				var $content = $("<div></div>");

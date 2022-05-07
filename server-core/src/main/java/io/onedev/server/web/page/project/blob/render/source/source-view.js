@@ -51,9 +51,8 @@ onedev.server.sourceView = {
 		onedev.server.codemirror.bindShortcuts(cm);
 		onedev.server.sourceView.checkShortcutsBinding();
 	    
-	    $code.selectionPopover("init", function(e) {
-	    	if ($(e.target).closest(".CodeMirror-line").length == 0 
-					|| $(e.target).closest(".selection-popover").length != 0) {
+	    $(".blob-view").selectionPopover("init", function(e) {
+	    	if ($(e.target).closest(".selection-popover").length != 0) {
 	    		return;
 			}
 	    	var from = cm.getCursor("from");
@@ -385,8 +384,7 @@ onedev.server.sourceView = {
 	},
 	openSelectionPopover: function(selectionRange, selectionUrl, loggedIn) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
-		var ch = (selectionRange.fromColumn + selectionRange.toColumn)/2;
-		var position = cm.charCoords({line:selectionRange.fromRow, ch:ch});
+		var position = cm.charCoords(cm.getCursor());
 		
 		var $content;
 		let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg>`;
@@ -421,7 +419,7 @@ onedev.server.sourceView = {
 			$content.append(`<a href='${loginHref}' class='comment'>${svg} Login to comment on selection</a>`);
 		}			
 		
-		$(".source-view>.code").selectionPopover("open", {
+		$(".blob-view").selectionPopover("open", {
 			position: position,
 			content: $content
 		});
@@ -480,7 +478,7 @@ onedev.server.sourceView = {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		$sourceView.data("markRange", commentRange);
-		$(".source-view>.code").selectionPopover("close");
+		$(".blob-view").selectionPopover("close");
 
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		onedev.server.codemirror.clearSelection(cm);
