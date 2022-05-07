@@ -74,6 +74,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Optional;
@@ -176,6 +178,8 @@ import io.onedev.server.web.util.WicketUtils;
 public class Project extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(Project.class);
 	
 	public static final int MAX_DESCRIPTION_LEN = 15000;
 	
@@ -721,10 +725,9 @@ public class Project extends AbstractEntity {
 							if (blobIdent.isGitLink()) {
 								String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
 								if (url == null) {
-									if (mustExist)
-										throw new ObjectNotFoundException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
-									else
-										blob = Optional.absent();
+									logger.error("Unable to find submodule (project: {}, revision: {}, path: {})", 
+											getPath(), blobIdent.revision, blobIdent.path);
+									blob = Optional.of(new Blob(blobIdent, blobId, treeWalk.getObjectReader()));
 								} else {
 									String hash = blobId.name();
 									blob = Optional.of(new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes()));
@@ -1054,26 +1057,28 @@ public class Project extends AbstractEntity {
 	public Map<String, String> getSubmodules(String revision) {
 		Map<String, String> submodules = new HashMap<>();
 		
-		Blob blob = getBlob(new BlobIdent(revision, ".gitmodules", FileMode.REGULAR_FILE.getBits()), true);
-		String content = new String(blob.getBytes());
-		
-		String path = null;
-		String url = null;
-		
-		for (String line: StringUtils.splitAndTrim(content, "\r\n")) {
-			if (line.startsWith("[") && line.endsWith("]")) {
-				if (path != null && url != null)
-					submodules.put(path, url);
-				
-				path = url = null;
-			} else if (line.startsWith("path")) {
-				path = StringUtils.substringAfter(line, "=").trim();
-			} else if (line.startsWith("url")) {
-				url = StringUtils.substringAfter(line, "=").trim();
+		Blob blob = getBlob(new BlobIdent(revision, ".gitmodules", FileMode.REGULAR_FILE.getBits()), false);
+		if (blob != null) {
+			String content = new String(blob.getBytes());
+			
+			String path = null;
+			String url = null;
+			
+			for (String line: StringUtils.splitAndTrim(content, "\r\n")) {
+				if (line.startsWith("[") && line.endsWith("]")) {
+					if (path != null && url != null)
+						submodules.put(path, url);
+					
+					path = url = null;
+				} else if (line.startsWith("path")) {
+					path = StringUtils.substringAfter(line, "=").trim();
+				} else if (line.startsWith("url")) {
+					url = StringUtils.substringAfter(line, "=").trim();
+				}
 			}
+			if (path != null && url != null)
+				submodules.put(path, url);
 		}
-		if (path != null && url != null)
-			submodules.put(path, url);
 		
 		return submodules;
 	}
