@@ -40,13 +40,22 @@
 							placement: alignment,
 							target: {element: trigger}
 						});
+						
+						$popover.data("keydown", function(e) {
+							if (e.keyCode == 27)
+								hide();
+						});
+						
+						jQuery(document).on("keydown", $popover.data("keydown"));
 					}
 				}
 			}
 
 			function hide() {
 				if (popover) {
-					jQuery(popover).remove();
+					var $popover = jQuery(popover);
+					jQuery(document).off("keydown", $popover.data("keydown"));
+					$popover.remove();
 					popover = undefined;
 				}
 				cancelShow();
@@ -89,3 +98,4 @@
     };
  
 }( jQuery ));
+

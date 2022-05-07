@@ -96,9 +96,16 @@ onedev.server.symboltooltip = {
 };
 
 $(function() {
-	$(window).scroll(function() {
+	function closeAll() {
 		$(".symbol-tooltip-container").each(function() {
 			onedev.server.symboltooltip.removeTooltip(this);
 		});
+	}
+	
+	$(window).scroll(closeAll);
+	
+	$(window).keydown(function(e) {
+		if (e.keyCode == 27) 
+			closeAll();
 	});
 });
