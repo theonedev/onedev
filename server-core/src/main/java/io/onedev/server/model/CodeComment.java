@@ -215,8 +215,10 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	public boolean isValid() {
 		try {
 			return project.getRepository().getObjectDatabase().has(ObjectId.fromString(mark.getCommitHash()))
-					&& project.getRepository().getObjectDatabase().has(ObjectId.fromString(compareContext.getOldCommitHash()))
-					&& project.getRepository().getObjectDatabase().has(ObjectId.fromString(compareContext.getNewCommitHash()));
+					&& (compareContext.getOldCommitHash().equals(ObjectId.zeroId().name()) 
+							|| project.getRepository().getObjectDatabase().has(ObjectId.fromString(compareContext.getOldCommitHash())))
+					&& (compareContext.getNewCommitHash().equals(ObjectId.zeroId().name())
+							|| project.getRepository().getObjectDatabase().has(ObjectId.fromString(compareContext.getNewCommitHash())));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

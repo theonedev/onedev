@@ -52,8 +52,8 @@ public class TriggerJobResource {
 	
 	private static final String PARAM_ACCESS_TOKEN = "access-token";
 	
-	private static final String DESCRIPTION = "Trigger specified job. Query parameters other than below will be "
-			+ "interpreted as job params";
+	private static final String DESCRIPTION = "Trigger specified job. Query parameters other than listed below "
+			+ "will be interpreted as job params";
 	
 	private static final String REF_DESCRIPTION = "Either branch or tag should be specified, but not both";
 	

@@ -73,9 +73,13 @@ public class DefaultUrlManager implements UrlManager {
 			return urlFor(request) + "/changes" + paramsEncoder.encodePageParameters(params);
 		} else {
 			if (!compareContext.getOldCommitHash().equals(compareContext.getNewCommitHash())) {
-				RevCommit oldCommit = project.getRevCommit(compareContext.getOldCommitHash(), true);
+				RevCommit oldCommit;
+				if (compareContext.getOldCommitHash().equals(ObjectId.zeroId().name()))
+					oldCommit = null;
+				else
+					oldCommit = project.getRevCommit(compareContext.getOldCommitHash(), true);
 				RevCommit newCommit = project.getRevCommit(compareContext.getNewCommitHash(), true);
-				if (isParent(oldCommit, newCommit)) {
+				if (oldCommit == null || isParent(oldCommit, newCommit)) {
 					String url = urlFor(comment.getProject());
 					PageParameters params = new PageParameters();
 					CommitDetailPage.State state = CommitDetailPage.getState(comment, compareContext);

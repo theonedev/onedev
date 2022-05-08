@@ -370,7 +370,11 @@ public class MethodDetailPage extends ApiHelpPage {
 			curlExample.append("-X PUT -d@request-body.json -H \"Content-Type: application/json\" ");
 			break;
 		case "POST":
-			curlExample.append("-d@request-body.json -H \"Content-Type: application/json\" ");
+			if (resourceClass != TriggerJobResource.class)
+				curlExample.append("-d@request-body.json -H \"Content-Type: application/json\" ");
+			else
+				curlExample.append("-X POST -H \"Content-Type: application/json\" ");
+				
 			break;
 		}
 		

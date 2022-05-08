@@ -136,6 +136,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 	
 	private String pathFilter;
 	
+	private String currentFile;
+	
 	private String blameFile;
 	
 	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
@@ -507,6 +509,23 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			}
 			
 		};
+		IModel<String> currentFileModel = new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return currentFile;
+			}
+
+			@Override
+			public void setObject(String object) {
+				currentFile = object;
+			}
+			
+		};
 		IModel<WhitespaceOption> whitespaceOptionModel = new IModel<WhitespaceOption>() {
 
 			@Override
@@ -532,7 +551,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 		 * it above when loading the project  
 		 */
 		RevisionDiffPanel diffPanel = new RevisionDiffPanel(TAB_PANEL_ID, request.getBaseCommitHash(), 
-				source.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this) {
+				source.getRevision(), pathFilterModel, currentFileModel, whitespaceOptionModel, 
+				blameModel, this) {
 
 			@Override
 			protected Project getProject() {
@@ -876,6 +896,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
+		state.currentFile = currentFile;
 		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = whitespaceOption;
 		state.compareWithMergeBase = false;

@@ -106,6 +106,8 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
+	private static final String PARAM_CURRENT_FILE = "current-file";
+	
 	private static final String PARAM_COMMENT = "comment";
 	
 	private static final String PARAM_MARK = "mark";
@@ -155,6 +157,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.DEFAULT.name()));
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
+		state.currentFile = params.get(PARAM_CURRENT_FILE).toString();
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
 		state.requestId = params.get(PARAM_PULL_REQUEST).toOptionalLong();
@@ -369,6 +372,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 			newState.revision = parent.name();
 			newState.whitespaceOption = state.whitespaceOption;
 			newState.pathFilter = state.pathFilter;
+			newState.currentFile = state.currentFile;
 			Link<Void> link = new ViewStateAwarePageLink<Void>("parent", CommitDetailPage.class, 
 					paramsOf(projectModel.getObject(), newState));
 			link.add(new Label("label", GitUtils.abbreviateSHA(parent.name())));
@@ -395,6 +399,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 					newState.revision = parent.name();
 					newState.whitespaceOption = state.whitespaceOption;
 					newState.pathFilter = state.pathFilter;
+					newState.currentFile = state.currentFile;
 					
 					Link<Void> link = new ViewStateAwarePageLink<Void>("link", CommitDetailPage.class, 
 							paramsOf(projectModel.getObject(), newState));
@@ -505,8 +510,27 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 			}
 			
 		};
+		IModel<String> currentFileModel = new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return state.currentFile;
+			}
+
+			@Override
+			public void setObject(String object) {
+				state.currentFile = object;
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+			}
+			
+		};
 		revisionDiff = new RevisionDiffPanel("revisionDiff", getCompareWith().name(), 
-				state.revision, pathFilterModel, whitespaceOptionModel, blameModel, this) {
+				state.revision, pathFilterModel, currentFileModel, whitespaceOptionModel, 
+				blameModel, this) {
 			
 			@Override
 			protected Project getProject() {
@@ -548,9 +572,11 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		state.commentId = comment.getId();
 		state.mark = comment.getMark();
 		state.revision = compareContext.getNewCommitHash();
-		state.compareWith = compareContext.getOldCommitHash();
+		if (!compareContext.getOldCommitHash().equals(ObjectId.zeroId().name()))
+			state.compareWith = compareContext.getOldCommitHash();
 		state.whitespaceOption = compareContext.getWhitespaceOption();
 		state.pathFilter = compareContext.getPathFilter();
+		state.currentFile = compareContext.getCurrentFile();
 		return state;
 	}
 	
@@ -569,6 +595,8 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.set(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.currentFile != null)
+			params.set(PARAM_CURRENT_FILE, state.currentFile);
 		if (state.blameFile != null)
 			params.set(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
@@ -616,6 +644,9 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		public String pathFilter;
 		
 		@Nullable
+		public String currentFile;
+		
+		@Nullable
 		public String blameFile;
 		
 		@Nullable
@@ -637,6 +668,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		markState.whitespaceOption = state.whitespaceOption;
 		markState.compareWith = state.compareWith;
 		markState.pathFilter = state.pathFilter;
+		markState.currentFile = state.currentFile;
 		markState.revision = resolvedRevision.name();
 		return urlFor(CommitDetailPage.class, paramsOf(getProject(), markState)).toString();
 	}

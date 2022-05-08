@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +16,6 @@ import java.util.concurrent.Future;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -27,6 +25,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -53,7 +52,6 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -66,7 +64,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
-import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -77,12 +74,11 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.code.CodeIndexManager;
+import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.PathComparator;
-import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -93,12 +89,10 @@ import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
-import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.project.comment.CommentInput;
-import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
@@ -126,7 +120,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final String newRev;
 
-	private final IModel<String> blameModel;
+	private final IModel<String> blameFileModel;
 	
 	private final RevisionDiff.AnnotationSupport annotationSupport;
 	
@@ -136,7 +130,9 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private DiffViewMode diffMode;
 	
-	private IModel<List<DiffEntry>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntry>>() {
+	private final IModel<String> currentFileModel;
+	
+	private final IModel<List<DiffEntry>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntry>>() {
 
 		@Override
 		protected List<DiffEntry> load() {
@@ -147,10 +143,10 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 	};
 	
-	private IModel<RevisionDiff> revsionDiffModel = new LoadableDetachableModel<RevisionDiff>() {
+	private IModel<List<BlobChange>> totalChangesModel = new LoadableDetachableModel<List<BlobChange>>() {
 
 		@Override
-		protected RevisionDiff load() {
+		protected List<BlobChange> load() {
 			List<DiffEntry> diffEntries = diffEntriesModel.getObject();
 			
 			List<BlobChange> changes = new ArrayList<>();
@@ -224,11 +220,26 @@ public abstract class RevisionDiffPanel extends Panel {
 	    	PathComparator comparator = new PathComparator();
 	    	normalizedChanges.sort((change1, change2)->comparator.compare(change1.getPath(), change2.getPath()));
 	    	
+	    	return normalizedChanges;
+	    }
+		
+	};
+	
+	private final IModel<List<BlobChange>> displayChangesModel = new LoadableDetachableModel<List<BlobChange>>() {
+
+		@Override
+		protected List<BlobChange> load() {
 			List<BlobChange> diffChanges = new ArrayList<>();
-			if (normalizedChanges.size() > WebConstants.MAX_DIFF_FILES)
-				diffChanges = normalizedChanges.subList(0, WebConstants.MAX_DIFF_FILES);
-			else
-				diffChanges = normalizedChanges;
+			if (getCurrentFile() != null) {
+				for (BlobChange change: getTotalChanges()) {
+					if (change.getPaths().contains(getCurrentFile()))
+						diffChanges.add(change);
+				}
+			} else if (getTotalChanges().size() > WebConstants.MAX_DIFF_FILES) {
+				diffChanges = getTotalChanges().subList(0, WebConstants.MAX_DIFF_FILES);
+			} else {
+				diffChanges = getTotalChanges();
+			}
 			
 	    	// Diff calculation can be slow, so we pre-load diffs of each change 
 	    	// concurrently
@@ -252,26 +263,6 @@ public abstract class RevisionDiffPanel extends Panel {
 					throw new RuntimeException(e);
 				}
 	    	}
-	    	
-	    	int totalChangeCount = normalizedChanges.size();
-	    	
-	    	if (diffChanges.size() == totalChangeCount) { 
-		    	// some changes should be removed if content is the same after line processing 
-		    	for (Iterator<BlobChange> it = diffChanges.iterator(); it.hasNext();) {
-		    		BlobChange change = it.next();
-		    		if (change.getType() == ChangeType.MODIFY 
-		    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
-		    				&& change.getAdditions() + change.getDeletions() == 0) {
-		    			Blob.Text oldText = change.getOldText();
-		    			Blob.Text newText = change.getNewText();
-		    			if (oldText != null && newText != null 
-		    					&& (oldText.getLines().size() + newText.getLines().size()) <= DiffUtils.MAX_DIFF_SIZE) {
-			    			it.remove();
-		    			}
-		    		}
-		    	}
-		    	totalChangeCount = diffChanges.size();
-	    	} 
 	    	
 	    	List<BlobChange> displayChanges = new ArrayList<>();
 	    	int totalChangedLines = 0;
@@ -297,8 +288,9 @@ public abstract class RevisionDiffPanel extends Panel {
 	    			displayChanges.add(change);
 	    		}
 	    	}
-	    	return new RevisionDiff(displayChanges, totalChangeCount);
-		}
+	    	return displayChanges;	
+	    }
+		
 	};
 	
 	private WebMarkupContainer commentContainer;
@@ -308,14 +300,14 @@ public abstract class RevisionDiffPanel extends Panel {
 	private WebMarkupContainer body;
 	
 	public RevisionDiffPanel(String id, String oldRev, String newRev, IModel<String> pathFilterModel, 
-			IModel<WhitespaceOption> whitespaceOptionModel, @Nullable IModel<String> blameModel, 
-			@Nullable RevisionDiff.AnnotationSupport annotationSupport) {
+			IModel<String> currentFileModel, IModel<WhitespaceOption> whitespaceOptionModel, 
+			@Nullable IModel<String> blameModel, @Nullable RevisionDiff.AnnotationSupport annotationSupport) {
 		super(id);
 		
 		this.oldRev = oldRev;
 		this.newRev = newRev;
 		this.pathFilterModel = pathFilterModel;
-		this.blameModel = new IModel<String>() {
+		this.blameFileModel = new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -348,11 +340,23 @@ public abstract class RevisionDiffPanel extends Panel {
 			diffMode = DiffViewMode.UNIFIED;
 		else
 			diffMode = DiffViewMode.valueOf(cookie.getValue());
+		
+		this.currentFileModel = currentFileModel;
 	}
 
 	private void doFilter(AjaxRequestTarget target) {
 		body.replace(commentContainer = newCommentContainer());
 		target.add(body);
+	}
+	
+	@Nullable
+	private String getCurrentFile() {
+		return currentFileModel.getObject();
+	}
+	
+	private void setCurrentFile(@Nullable String currentFile) {
+		currentFileModel.setObject(currentFile);
+		body.replace(commentContainer = newCommentContainer());
 	}
 	
 	@Override
@@ -422,7 +426,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					cookie.setMaxAge(Integer.MAX_VALUE);
 					cookie.setPath("/");
 					response.addCookie(cookie);
-					target.add(RevisionDiffPanel.this);
+					target.add(body);
 					((BasePage)getPage()).resizeWindow(target);
 				}
 				
@@ -574,121 +578,173 @@ public abstract class RevisionDiffPanel extends Panel {
 
 		body.add(new FencedFeedbackPanel("feedback", this));
 		body.add(commentContainer = newCommentContainer());
-		
-		Component totalFilesLink;
-		body.add(totalFilesLink = new Label("totalFiles", new AbstractReadOnlyModel<String>() {
+
+		body.add(new WebMarkupContainer("showAllFiles") {
 
 			@Override
-			public String getObject() {
-				String icon = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
-						SpriteImage.getVersionedHref("arrow"));
-				return "Total " + revsionDiffModel.getObject().getDisplayChanges().size() + " files " + icon;
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("totalFiles", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return "Total " + getTotalChanges().size() + " files";
+					}
+					
+				}));
+				add(new AjaxLink<Void>("showSingleFile") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						setCurrentFile(getTotalChanges().iterator().next().getPath());
+						target.add(body);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getTotalChanges().size() > 1);
+					}
+					
+				});
 			}
-			
-		}).setEscapeModelStrings(false));
-		
-		body.add(new WebMarkupContainer("tooManyFiles") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				RevisionDiff changesAndCount = revsionDiffModel.getObject();
-				setVisible(changesAndCount.getDisplayChanges().size() < changesAndCount.getTotalChangeCount());
+				setVisible(getCurrentFile() == null);
 			}
 			
 		});
 		
-		WebMarkupContainer diffStats = new WebMarkupContainer("diffStats");
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie("revisionDiff.showDiffStats");
-		if (cookie == null || !"yes".equals(cookie.getValue())) {
-			diffStats.add(AttributeAppender.append("style", "display:none;"));
-		} else {
-			totalFilesLink.add(AttributeAppender.append("class", "expanded"));			
-		}
-		body.add(diffStats);
-		diffStats.add(new ListView<BlobChange>("diffStats", new AbstractReadOnlyModel<List<BlobChange>>() {
+		body.add(new WebMarkupContainer("showSingleFile") {
+
+			private int getIndex() {
+				int index = 0;
+				for (BlobChange change: getTotalChanges()) {
+					if (change.getPaths().contains(getCurrentFile()))
+						return index;
+					index++;
+				}
+				return -1;
+			}
+			
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new AjaxLink<Void>("prev") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						int index = getIndex() - 1;
+						if (index >=0 && index < getTotalChanges().size()) {
+							setCurrentFile(getTotalChanges().get(index).getPath());
+							target.add(body);
+						}
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						if (!isEnabled())
+							tag.put("disabled", "disabled");
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						int index = getIndex();
+						setEnabled(index > 0);
+						setVisible(index != -1);
+					}
+					
+				});
+				
+				add(new Label("message", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						int index = getIndex();
+						if (index != -1)
+							return "File " + (index +1) + " of " + getTotalChanges().size();
+						else
+							return getCurrentFile();
+					}
+					
+				}));
+				
+				add(new AjaxLink<Void>("next") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						int index = getIndex() + 1;
+						if (index >=0 && index < getTotalChanges().size()) {
+							setCurrentFile(getTotalChanges().get(index).getPath());
+							target.add(body);
+						}
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						if (!isEnabled())
+							tag.put("disabled", "disabled");
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						int index = getIndex();
+						setEnabled(index < getTotalChanges().size()-1);
+						setVisible(index != -1);
+					}
+					
+				});
+				
+				add(new AjaxLink<Void>("showAllFiles") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						setCurrentFile(null);
+						target.add(body);
+					}
+
+				});
+			}
 
 			@Override
-			public List<BlobChange> getObject() {
-				return revsionDiffModel.getObject().getDisplayChanges();
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getCurrentFile() != null);
+			}
+			
+		});
+		
+		body.add(new Label("tooManyFiles", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return "Showing first " + getDisplayChanges().size() + " files as there are too many";
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<BlobChange> item) {
-				BlobChange change = item.getModelObject();
-				String icon;
-				if (change.getType() == null) {
-					icon = "square";
-				} else if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
-					icon = "plus-square";
-				else if (change.getType() == ChangeType.DELETE)
-					icon = "minus-square";
-				else if (change.getType() == ChangeType.MODIFY)
-					icon = "dot-square";
-				else
-					icon = "arrow-square";
-				
-				item.add(new SpriteImage("icon", icon).add(AttributeAppender.append("class", icon)));
-
-				boolean hasComments = false;
-				if (annotationSupport != null) {
-					String blobPath = change.getOldBlobIdent().path;
-					if (blobPath != null) {
-						for (Map.Entry<CodeComment, PlanarRange> entry: annotationSupport.getOldComments(blobPath).entrySet()) {
-							if (change.isVisible(new DiffPlanarRange(true, entry.getValue()))) {
-								hasComments = true;
-								break;
-							}
-						}
-					}
-					if (!hasComments) {
-						blobPath = change.getNewBlobIdent().path;
-						if (blobPath != null) {
-							for (Map.Entry<CodeComment, PlanarRange> entry: annotationSupport.getNewComments(blobPath).entrySet()) {
-								if (change.isVisible(new DiffPlanarRange(false, entry.getValue()))) {
-									hasComments = true;
-									break;
-								}
-							}
-						}
-					}
-				}
-				item.add(new WebMarkupContainer("hasComments").setVisible(hasComments));
-				
-				WebMarkupContainer fileLink = new WebMarkupContainer("file");
-				fileLink.add(new Label("name", change.getPath()));
-				fileLink.add(AttributeModifier.replace("href", "#diff-" + encodePath(change.getPath())));
-				item.add(fileLink);
-
-				item.add(new Label("additions", "+" + change.getAdditions()));
-				item.add(new Label("deletions", "-" + change.getDeletions()));
-				
-				boolean barVisible;
-				if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY) {
-					Blob.Text text = change.getNewText();
-					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_SIZE);
-				} else if (change.getType() == ChangeType.DELETE) {
-					Blob.Text text = change.getOldText();
-					barVisible = (text != null && text.getLines().size() <= DiffUtils.MAX_DIFF_SIZE);
-				} else {
-					Blob.Text oldText = change.getOldText();
-					Blob.Text newText = change.getNewText();
-					barVisible = (oldText != null && newText != null 
-							&& oldText.getLines().size()+newText.getLines().size() <= DiffUtils.MAX_DIFF_SIZE);
-				}
-				item.add(new DiffStatBar("bar", change.getAdditions(), change.getDeletions(), false).setVisible(barVisible));
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getCurrentFile() == null && getDisplayChanges().size() < getTotalChanges().size());
 			}
 			
-		});
+		});		
 		
 		body.add(diffsView = new ListView<BlobChange>("diffs", new AbstractReadOnlyModel<List<BlobChange>>() {
 
 			@Override
 			public List<BlobChange> getObject() {
-				return revsionDiffModel.getObject().getDisplayChanges();
+				return getDisplayChanges();
 			}
 			
 		}) {
@@ -719,6 +775,14 @@ public abstract class RevisionDiffPanel extends Panel {
 		}));
 		
 		setOutputMarkupId(true);
+	}
+	
+	private List<BlobChange> getTotalChanges() {
+		return totalChangesModel.getObject();
+	}
+	
+	private List<BlobChange> getDisplayChanges() {
+		return displayChangesModel.getObject();
 	}
 	
 	private BlobChange newBlobChange(ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent, 
@@ -1078,6 +1142,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		compareContext.setOldCommitHash(getOldCommitId().name());
 		compareContext.setNewCommitHash(getNewCommitId().name());
 		compareContext.setPathFilter(pathFilterModel.getObject());
+		compareContext.setCurrentFile(currentFileModel.getObject());
 		compareContext.setWhitespaceOption(whitespaceOptionModel.getObject());
 		return compareContext;
 	}
@@ -1147,7 +1212,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	}
 	
 	private @Nullable IModel<Boolean> getBlobBlameModel(BlobChange change) {
-		if (blameModel != null) {
+		if (blameFileModel != null) {
 			return new IModel<Boolean>() {
 
 				@Override
@@ -1156,15 +1221,15 @@ public abstract class RevisionDiffPanel extends Panel {
 
 				@Override
 				public Boolean getObject() {
-					return change.getPath().equals(blameModel.getObject());
+					return change.getPath().equals(blameFileModel.getObject());
 				}
 
 				@Override
 				public void setObject(Boolean object) {
 					if (object)
-						blameModel.setObject(change.getPath());
+						blameFileModel.setObject(change.getPath());
 					else
-						blameModel.setObject(null);
+						blameFileModel.setObject(null);
 				}
 				
 			};
@@ -1345,7 +1410,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	@Nullable
 	private BlobChange getBlobChange(String blobPath) {
-		for (BlobChange change: revsionDiffModel.getObject().getDisplayChanges()) {
+		for (BlobChange change: getDisplayChanges()) {
 			if (change.getPaths().contains(blobPath))
 				return change;
 		}
@@ -1370,11 +1435,12 @@ public abstract class RevisionDiffPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		diffEntriesModel.detach();
-		revsionDiffModel.detach();
-		if (blameModel != null)
-			blameModel.detach();
+		totalChangesModel.detach();
+		if (blameFileModel != null)
+			blameFileModel.detach();
 		pathFilterModel.detach();
 		whitespaceOptionModel.detach();
+		currentFileModel.detach();
 		
 		super.onDetach();
 	}

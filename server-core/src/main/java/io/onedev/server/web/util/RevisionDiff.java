@@ -21,11 +21,11 @@ public class RevisionDiff {
 	
 	private final List<BlobChange> displayChanges;
 	
-	private final int totalChangeCount;
+	private final List<BlobChange> totalChanges;
 	
-	public RevisionDiff(List<BlobChange> displayChanges, int totalChangeCount) {
+	public RevisionDiff(List<BlobChange> displayChanges, List<BlobChange> totalChanges) {
 		this.displayChanges = displayChanges;
-		this.totalChangeCount = totalChangeCount;
+		this.totalChanges = totalChanges;
 	}
 	
 	/**
@@ -46,8 +46,8 @@ public class RevisionDiff {
 	 * @return
 	 * 			total number of changes detected
 	 */
-	public int getTotalChangeCount() {
-		return totalChangeCount;
+	public List<BlobChange> getTotalChanges() {
+		return totalChanges;
 	}
 	
 	public static interface AnnotationSupport extends Serializable {
