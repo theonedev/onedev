@@ -27,13 +27,12 @@ public class IssuePullRequestsPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected Project getProject() {
-				return getIssue().getProject();
+				return null;
 			}
 
 			@Override
 			protected PullRequestQuery getBaseQuery() {
-				String value = String.valueOf(getIssue().getNumber());
-				return new PullRequestQuery(new IncludesIssueCriteria(getProject(), value));
+				return new PullRequestQuery(new IncludesIssueCriteria(getIssue()));
 			}
 			
 		});

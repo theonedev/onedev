@@ -20,7 +20,6 @@ import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
@@ -183,16 +182,6 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		if (event.isNew()) {
 			if (event.getEntity() instanceof PullRequestUpdate) {
 				Long projectId = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject().getId();
-				transactionManager.runAfterCommit(new Runnable() {
-
-					@Override
-					public void run() {
-						batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
-					}
-					
-				});
-			} else if (event.getEntity() instanceof CodeComment) {
-				Long projectId = ((CodeComment)event.getEntity()).getProject().getId();
 				transactionManager.runAfterCommit(new Runnable() {
 
 					@Override

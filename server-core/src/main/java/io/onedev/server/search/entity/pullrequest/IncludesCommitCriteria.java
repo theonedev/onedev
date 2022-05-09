@@ -38,13 +38,10 @@ public class IncludesCommitCriteria extends Criteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Collection<Long> pullRequestIds = getPullRequestIds();
-		if (!pullRequestIds.isEmpty()) {
-			return builder.and(
-					builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), project),
-					from.get(PullRequest.PROP_ID).in(pullRequestIds));
-		} else {
+		if (!pullRequestIds.isEmpty()) 
+			return from.get(PullRequest.PROP_ID).in(pullRequestIds);
+		else 
 			return builder.disjunction();
-		}
 	}
 	
 	private Collection<Long> getPullRequestIds() {
@@ -53,7 +50,7 @@ public class IncludesCommitCriteria extends Criteria<PullRequest> {
 	
 	@Override
 	public boolean matches(PullRequest request) {
-		return request.getTargetProject().equals(project) && getPullRequestIds().contains(request.getId());
+		return getPullRequestIds().contains(request.getId());
 	}
 
 	@Override

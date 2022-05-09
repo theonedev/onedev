@@ -76,9 +76,10 @@ public class DefaultIssueInfoManager extends AbstractSingleEnvironmentManager
 	private final TransactionManager transactionManager;
 	
 	@Inject
-	public DefaultIssueInfoManager(TransactionManager transactionManager, StorageManager storageManager, 
-			IssueManager issueManager, IssueChangeManager issueChangeManager, 
-			BatchWorkManager batchWorkManager, SessionManager sessionManager) {
+	public DefaultIssueInfoManager(TransactionManager transactionManager, 
+			StorageManager storageManager, IssueManager issueManager, 
+			IssueChangeManager issueChangeManager, BatchWorkManager batchWorkManager, 
+			SessionManager sessionManager) {
 		this.storageManager = storageManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
@@ -270,5 +271,5 @@ public class DefaultIssueInfoManager extends AbstractSingleEnvironmentManager
 	public Map<String, Integer> getStateStats(Long projectId) {
 		return null;
 	}
-
+	
 }

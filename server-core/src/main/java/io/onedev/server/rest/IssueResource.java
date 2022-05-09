@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -166,11 +165,19 @@ public class IssueResource {
 	@Api(order=800)
 	@Path("/{issueId}/commits")
     @GET
-    public Collection<String> getCommits(@PathParam("issueId") Long issueId) {
+    public List<FixCommit> getCommits(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canReadCode(issue.getProject())) 
 			throw new UnauthorizedException();
-    	return issue.getCommits().stream().map(it->it.name()).collect(Collectors.toList());
+    	
+    	List<FixCommit> issueCommits = new ArrayList<>();
+    	for (Issue.FixCommit commit: issue.getCommits()) {
+    		FixCommit issueCommit = new FixCommit();
+    		issueCommit.setProjectId(commit.getProject().getId());
+    		issueCommit.setCommitHash(commit.getCommit().name());
+    		issueCommits.add(issueCommit);
+    	}
+    	return issueCommits;
     }
 	
 	@Api(order=900)
@@ -461,6 +468,32 @@ public class IssueResource {
 
 		public void setComment(String comment) {
 			this.comment = comment;
+		}
+		
+	}
+	
+	public static class FixCommit implements Serializable {
+		
+		private static final long serialVersionUID = 1L;
+
+		private Long projectId;
+		
+		private String commitHash;
+
+		public Long getProjectId() {
+			return projectId;
+		}
+
+		public void setProjectId(Long projectId) {
+			this.projectId = projectId;
+		}
+
+		public String getCommitHash() {
+			return commitHash;
+		}
+
+		public void setCommitHash(String commitHash) {
+			this.commitHash = commitHash;
 		}
 		
 	}

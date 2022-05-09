@@ -6,16 +6,23 @@ public class BuildFacade extends EntityFacade {
 	
 	private final Long projectId;
 	
+	private final Long number;
+	
 	private final String commitHash;
 	
-	public BuildFacade(Long id, Long projectId, String commitHash) {
+	public BuildFacade(Long id, Long projectId, Long number, String commitHash) {
 		super(id);
 		this.projectId = projectId;
+		this.number = number;
 		this.commitHash = commitHash;
 	}
 
 	public Long getProjectId() {
 		return projectId;
+	}
+
+	public Long getNumber() {
+		return number;
 	}
 
 	public String getCommitHash() {	

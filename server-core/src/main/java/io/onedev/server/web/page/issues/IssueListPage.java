@@ -17,13 +17,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -209,7 +209,7 @@ public class IssueListPage extends LayoutPage {
 			}
 
 			@Override
-			protected ProjectScope getProjectScope() {
+			protected Project getProject() {
 				return null;
 			}
 

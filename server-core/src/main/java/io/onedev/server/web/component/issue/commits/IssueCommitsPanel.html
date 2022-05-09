@@ -1,12 +1,15 @@
 <wicket:panel>
 	<div class="issue-commits">
-		<div wicket:id="commits" class="commit d-flex py-3">
+		<div wicket:id="commits" class="commit d-flex align-items-start py-3">
 			<div class="avatar flex-shrink-0 mr-2">
 				<span wicket:id="avatar"></span>
 			</div>
 			<div class="detail flex-grow-1 mr-3">
 				<div wicket:id="message" class="message"></div>
-				<div wicket:id="contribution"></div>
+				<div class="contribution">
+					<div wicket:id="contribution"></div>
+					<wicket:enclosure><div class="text-muted"> in <a wicket:id="project"></a></div></wicket:enclosure>
+				</div>
 			</div>
 			<div class="d-none d-lg-block flex-shrink-0">
 				<span class="btn-group mr-2">

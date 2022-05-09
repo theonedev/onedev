@@ -1212,7 +1212,7 @@ public class ProjectListPanel extends Panel {
 					};
 					issueInfoFrag.setDefaultModel(totalCountModel);
 
-					PageParameters params = ProjectIssueListPage.paramsOf(project, null, false, 0);
+					PageParameters params = ProjectIssueListPage.paramsOf(project, null, 0);
 					Link<Void> issuesLink = new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, params);
 					issuesLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
@@ -1248,7 +1248,7 @@ public class ProjectListPanel extends Panel {
 							ProjectIssueStats stats = item.getModelObject();
 							StateSpec stateSpec = issueSetting.getStateSpecs().get(stats.getStateOrdinal());
 							IssueQuery query = new IssueQuery(new StateCriteria(stateSpec.getName(), IssueQueryLexer.Is));
-							PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), false, 0);
+							PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), 0);
 							Link<Void> stateLink = new BookmarkablePageLink<Void>("link", ProjectIssueListPage.class, params);
 							stateLink.add(new Label("label", stats.getStateCount() + " " + stateSpec.getName()));
 							stateLink.add(AttributeAppender.append("style", "color:" + stateSpec.getColor()));

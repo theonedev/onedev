@@ -22,19 +22,14 @@ public class Cursor implements Serializable {
 	
 	private final Long projectId;
 	
-	private final boolean recursive;
-	
 	public Cursor(String query, int count, int offset, @Nullable ProjectScope projectScope) {
 		this.query = query;
 		this.count = count;
 		this.offset = offset;
-		if (projectScope != null) {
+		if (projectScope != null) 
 			projectId = projectScope.getProject().getId();
-			recursive = projectScope.isRecursive();
-		} else {
+		else 
 			projectId = null;
-			recursive = false;
-		}
 	}
 	
 	public Cursor(String query, int count, int offset, @Nullable Project project) {
@@ -42,7 +37,6 @@ public class Cursor implements Serializable {
 		this.count = count;
 		this.offset = offset;
 		projectId = Project.idOf(project);
-		recursive = false;
 	}
 	
 	public String getQuery() {
@@ -60,7 +54,7 @@ public class Cursor implements Serializable {
 	@Nullable
 	public ProjectScope getProjectScope() {
 		if (projectId != null) 
-			return new ProjectScope(OneDev.getInstance(ProjectManager.class).load(projectId), recursive, null);
+			return new ProjectScope(OneDev.getInstance(ProjectManager.class).load(projectId), true, true);
 		else 
 			return null;
 	}

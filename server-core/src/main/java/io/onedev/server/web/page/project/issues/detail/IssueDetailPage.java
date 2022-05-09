@@ -75,7 +75,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 		String issueNumberString = params.get(PARAM_ISSUE).toString();
 		if (StringUtils.isBlank(issueNumberString)) {
 			throw new RestartResponseException(ProjectIssueListPage.class, 
-					ProjectIssueListPage.paramsOf(getProject(), null, false, 0));
+					ProjectIssueListPage.paramsOf(getProject(), null, 0));
 		}
 		
 		issueModel = new LoadableDetachableModel<Issue>() {
@@ -348,7 +348,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	@Override
 	protected void navToProject(Project project) {
 		if (project.isIssueManagement()) 
-			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, false, 0));
+			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, 0));
 		else
 			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}

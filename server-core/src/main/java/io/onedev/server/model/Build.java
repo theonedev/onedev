@@ -329,7 +329,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private PullRequest request;
 	
-	private transient Collection<Long> fixedIssueNumbers;
+	private transient Collection<Long> fixedIssueIds;
 	
 	private transient Map<Build.Status, Collection<RevCommit>> commitsCache;
 	
@@ -642,9 +642,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	 * Get fixed issue numbers
 	 * 
 	 */
-	public Collection<Long> getFixedIssueNumbers() {
-		if (fixedIssueNumbers == null) {
-			fixedIssueNumbers = new HashSet<>();
+	public Collection<Long> getFixedIssueIds() {
+		if (fixedIssueIds == null) {
+			fixedIssueIds = new HashSet<>();
 			Build prevBuild = getStreamPrevious(null);
 			if (prevBuild != null) {
 				Repository repository = project.getRepository();
@@ -654,13 +654,13 @@ public class Build extends AbstractEntity implements Referenceable {
 
 					RevCommit commit;
 					while ((commit = revWalk.next()) != null) 
-						fixedIssueNumbers.addAll(Issue.parseFixedIssueNumbers(getProject(), commit.getFullMessage()));
+						fixedIssueIds.addAll(getProject().parseFixedIssueIds(commit.getFullMessage()));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			} 
 		}
-		return fixedIssueNumbers;
+		return fixedIssueIds;
 	}
 	
 	public Collection<RevCommit> getCommits(@Nullable Build.Status sincePrevStatus) {
@@ -688,7 +688,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public BuildFacade getFacade() {
-		return new BuildFacade(getId(), getProject().getId(), getCommitHash());
+		return new BuildFacade(getId(), getProject().getId(), getNumber(), getCommitHash());
 	}
 	
 	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {

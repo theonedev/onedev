@@ -87,7 +87,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 				sort.setDirection(Direction.DESCENDING);
 				IssueQuery query = new IssueQuery(null, Lists.newArrayList(sort));
 				
-				PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), false, 0);
+				PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), 0);
 				throw new RestartResponseException(ProjectIssueListPage.class, params);
 			}
 			
@@ -114,7 +114,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 	@Override
 	protected void navToProject(Project project) {
 		if (project.isIssueManagement()) 
-			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, false, 0));
+			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, 0));
 		else
 			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}

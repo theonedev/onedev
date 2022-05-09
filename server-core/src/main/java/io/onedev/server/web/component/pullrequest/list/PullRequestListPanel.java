@@ -85,6 +85,7 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
@@ -697,8 +698,11 @@ public abstract class PullRequestListPanel extends Panel {
 						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
 
 				String label;
-				if (getProject() == null)
-					label = request.getTargetProject().getPath() + "#" + request.getNumber();
+				Project currentProject = null;
+				if (getPage() instanceof ProjectPage)
+					currentProject = ((ProjectPage) getPage()).getProject();
+				if (currentProject == null || !currentProject.equals(request.getProject()))
+					label = request.getProject().getPath() + "#" + request.getNumber();
 				else
 					label = "#" + request.getNumber();
 					

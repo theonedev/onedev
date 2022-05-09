@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -30,7 +29,7 @@ public class ProjectScopedCommit implements Serializable {
 	
 	private final ObjectId commitId;
 	
-	private transient Collection<Long> fixedIssueNumbers;
+	private transient Collection<Long> fixedIssueIds;
 	
 	public ProjectScopedCommit(Project project, ObjectId commitId) {
 		this.project = project;
@@ -45,12 +44,12 @@ public class ProjectScopedCommit implements Serializable {
 		return commitId;
 	}
 
-	public Collection<Long> getFixedIssueNumbers() {
-		if (fixedIssueNumbers == null) {
+	public Collection<Long> getFixedIssueIds() {
+		if (fixedIssueIds == null) {
 			RevCommit revCommit = project.getRevCommit(commitId, true);
-			fixedIssueNumbers = Issue.parseFixedIssueNumbers(project, revCommit.getFullMessage());
+			fixedIssueIds = project.parseFixedIssueIds(revCommit.getFullMessage());
 		}
-		return fixedIssueNumbers;
+		return fixedIssueIds;
 	}
 	
 	@Nullable

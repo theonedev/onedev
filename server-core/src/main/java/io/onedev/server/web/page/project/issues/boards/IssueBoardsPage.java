@@ -56,7 +56,6 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.ProjectScope.RecursiveConfigurable;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -86,8 +85,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private static final String PARAM_RECURSIVE = "recursive";
-	
 	private static final String PARAM_BACKLOG_QUERY = "backlog-query";
 
 	private List<BoardSpec> boards;
@@ -99,9 +96,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	private final boolean backlog;
 	
 	private String queryString;
-	
-	private boolean recursive;
-	
+
 	private String backlogQueryString;
 	
 	private Fragment contentFrag;
@@ -213,7 +208,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		backlog = params.get(PARAM_BACKLOG).toBoolean() && getMilestone() != null;
 		queryString = params.get(PARAM_QUERY).toString();
 		backlogQueryString = params.get(PARAM_BACKLOG_QUERY).toString();
-		recursive = params.get(PARAM_RECURSIVE).toBoolean(false);
 	}
 	
 	private MilestoneManager getMilestoneManager() {
@@ -251,7 +245,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		}
 
 		PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-				getMilestone(), backlog, queryString, backlogQueryString, recursive);
+				getMilestone(), backlog, queryString, backlogQueryString);
 			
 		CharSequence url = RequestCycle.get().urlFor(IssueBoardsPage.class, params);
 		pushState(target, url.toString(), queryInput.getModelObject());
@@ -306,8 +300,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							item.add(new WebMarkupContainer("dragIndicator").setVisible(SecurityUtils.canManageIssues(getProject())));
 							
 							PageParameters params = IssueBoardsPage.paramsOf(
-									getProject(), item.getModelObject(), getMilestone(), 
-									backlog, backlogQueryString, queryString, recursive);
+									getProject(), item.getModelObject(), getMilestone(), backlog, 
+									backlogQueryString, queryString);
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 							link.add(new Label("name", item.getModelObject().getName()));
 							item.add(link);
@@ -349,8 +343,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										nextBoard = null;
 									else
 										nextBoard = currentBoard;
-									PageParameters params = IssueBoardsPage.paramsOf(getProject(), nextBoard, getMilestone(), 
-											backlog, queryString, backlogQueryString, recursive);
+									PageParameters params = IssueBoardsPage.paramsOf(getProject(), 
+											nextBoard, getMilestone(), backlog, queryString, 
+											backlogQueryString);
 									setResponsePage(IssueBoardsPage.class, params);
 								}
 
@@ -408,7 +403,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					PageParameters params = paramsOf(getProject(), getBoard(), getMilestone(), 
-							!backlog, queryString, backlogQueryString, recursive);
+							!backlog, queryString, backlogQueryString);
 					setResponsePage(IssueBoardsPage.class, params);
 				}
 
@@ -416,30 +411,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				protected void onConfigure() {
 					super.onConfigure();
 					setVisible(getMilestone() != null);
-				}
-				
-			});
-			form.add(new AjaxLink<Void>("recursive") {
-
-				@Override
-				protected void onInitialize() {
-					super.onInitialize();
-					if (recursive)
-						add(AttributeAppender.append("class", "active"));
-				}
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					PageParameters params = paramsOf(getProject(), getBoard(), getMilestone(), 
-							backlog, queryString, backlogQueryString, !recursive);
-					setResponsePage(IssueBoardsPage.class, params);
-				}
-
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-					setVisible(!projectManager.getChildren(getProject().getId()).isEmpty());
 				}
 				
 			});
@@ -502,8 +473,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								milestone.setClosed(!milestone.isClosed());
 								if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
 									getMilestoneManager().save(milestone);
-									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, 
-											backlog, queryString, backlogQueryString, recursive));
+									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), 
+											milestone, backlog, queryString, backlogQueryString));
 								} else {
 									getMilestoneManager().save(milestone);
 								}
@@ -518,7 +489,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							protected void populateItem(ListItem<Milestone> item) {
 								Milestone milestone = item.getModelObject();
 								PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, 
-										backlog, queryString, backlogQueryString, recursive);
+										backlog, queryString, backlogQueryString);
 								Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 								link.add(new Label("name", milestone.getName()));
 								item.add(link);
@@ -591,8 +562,10 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 											Milestone milestone = item.getModelObject();
 											if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
 												getMilestoneManager().delete(milestone);
-												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-														null, backlog, queryString, backlogQueryString, recursive));
+												PageParameters params = IssueBoardsPage.paramsOf(
+														getProject(), getBoard(), null, backlog, queryString, 
+														backlogQueryString);
+												setResponsePage(IssueBoardsPage.class, params);
 											} else {
 												getMilestoneManager().delete(milestone);
 											}
@@ -870,16 +843,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	}
 
 	private ProjectScope getProjectScope() {
-		return new ProjectScope(getProject(), recursive, new RecursiveConfigurable() {
-					
-			@Override
-			public void setRecursive(AjaxRequestTarget target, boolean recursive) {
-				PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-						getMilestone(), backlog, queryString, backlogQueryString, recursive);
-				setResponsePage(IssueBoardsPage.class, params);
-			}
-			
-		});
+		return new ProjectScope(getProject(), true, true);
 	}
 	
 	@Override
@@ -903,7 +867,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	public static PageParameters paramsOf(Project project, @Nullable BoardSpec board, 
 			@Nullable Milestone milestone, boolean backlog, @Nullable String query, 
-			@Nullable String backlogQuery, boolean recursive) {
+			@Nullable String backlogQuery) {
 		PageParameters params = paramsOf(project);
 		if (board != null)
 			params.add(PARAM_BOARD, board.getName());
@@ -914,8 +878,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			params.add(PARAM_QUERY, query);
 		if (backlogQuery != null)
 			params.add(PARAM_BACKLOG_QUERY, backlogQuery);
-		if (recursive)
-			params.add(PARAM_RECURSIVE, recursive);
 		return params;
 	}
 	
@@ -938,7 +900,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				protected void onBoardCreated(AjaxRequestTarget target, BoardSpec board) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 							getProject(), board, getMilestone(), backlog, queryString, 
-							backlogQueryString, recursive));
+							backlogQueryString));
 					modal.close();
 				}
 
@@ -970,8 +932,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onMilestoneCreated(AjaxRequestTarget target, Milestone milestone) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), getBoard(), milestone, backlog, 
-							queryString, backlogQueryString, recursive));
+							getProject(), getBoard(), milestone, backlog, queryString, 
+							backlogQueryString));
 				}
 
 				@Override
@@ -1000,8 +962,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onMilestoneSaved(AjaxRequestTarget target, Milestone milestone) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), getBoard(), milestone, backlog, 
-							queryString, backlogQueryString, recursive));
+							getProject(), getBoard(), milestone, backlog, queryString, 
+							backlogQueryString));
 				}
 
 				@Override
@@ -1032,8 +994,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), board, getMilestone(), backlog, 
-							queryString, backlogQueryString, recursive));
+							getProject(), board, getMilestone(), backlog, queryString, 
+							backlogQueryString));
 				}
 
 				@Override

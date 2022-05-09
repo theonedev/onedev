@@ -323,7 +323,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	private transient Boolean valid;
 	
-	private transient Collection<Long> fixedIssueNumbers;
+	private transient Collection<Long> fixedIssueIds;
 	
 	private transient Collection<User> participants;
 	
@@ -903,15 +903,15 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return PullRequest.class.getName() + ":" + requestId;
 	}
 	
-	public Collection<Long> getFixedIssueNumbers() {
-		if (fixedIssueNumbers == null) {
-			fixedIssueNumbers = new HashSet<>();
+	public Collection<Long> getFixedIssueIds() {
+		if (fixedIssueIds == null) {
+			fixedIssueIds = new HashSet<>();
 			for (PullRequestUpdate update: getUpdates()) {
 				for (RevCommit commit: update.getCommits())
-					fixedIssueNumbers.addAll(Issue.parseFixedIssueNumbers(update.getRequest().getProject(), commit.getFullMessage()));
+					fixedIssueIds.addAll(getProject().parseFixedIssueIds(commit.getFullMessage()));
 			}
 		}
-		return fixedIssueNumbers;
+		return fixedIssueIds;
 	}
 	
 	public boolean isAllReviewsApproved() {

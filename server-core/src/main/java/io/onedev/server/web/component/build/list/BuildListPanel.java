@@ -96,6 +96,7 @@ import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -838,7 +839,11 @@ public abstract class BuildListPanel extends Panel {
 					public String getObject() {
 						Build build = rowModel.getObject();
 						StringBuilder builder = new StringBuilder();
-						if (getProject() == null)
+						
+						Project currentProject = null;
+						if (getPage() instanceof ProjectPage)
+							currentProject = ((ProjectPage) getPage()).getProject();
+						if (currentProject == null || !currentProject.equals(build.getProject()))
 							builder.append(build.getProject().getPath());
 						builder.append("#" + build.getNumber());
 						if (build.getVersion() != null)

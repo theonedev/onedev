@@ -1,5 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import static java.util.stream.Collectors.*;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -362,7 +363,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
     }
     
-    @Sessional
     @Override
     public Project findByPath(String path) {
 		cacheLock.readLock().lock();
@@ -376,7 +376,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			cacheLock.readLock().unlock();
 		}
     }
-
+    
     @Nullable
     private Long findProjectId(String path) {
     	Long projectId = null;
@@ -862,11 +862,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return ids;
 	}
 
-	private Collection<Long> getTreeIds(Long projectId) {
+	private Collection<Long> getSubtreeIds(Long projectId) {
 		Collection<Long> treeIds = Sets.newHashSet(projectId);
 		for (ProjectFacade facade: cache.values()) {
 			if (projectId.equals(facade.getParentId()))
-				treeIds.addAll(getTreeIds(facade.getId()));
+				treeIds.addAll(getSubtreeIds(facade.getId()));
 		}
 		return treeIds;
 	}
@@ -893,21 +893,21 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	@Override
-	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> path, Project project) {
+	public Predicate getSubtreePredicate(CriteriaBuilder builder, Path<Project> path, Project project) {
 		cacheLock.readLock().lock();
 		try {
 			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
-					getTreeIds(project.getId()), cache.keySet());		
+					getSubtreeIds(project.getId()), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
 	}
 
 	@Override
-	public org.apache.lucene.search.Query getTreeQuery(String fieldName, Project project) {
+	public org.apache.lucene.search.Query getSubtreeQuery(String fieldName, Project project) {
 		cacheLock.readLock().lock();
 		try {
-			return Criteria.forManyValues(fieldName, getTreeIds(project.getId()), cache.keySet());		
+			return Criteria.forManyValues(fieldName, getSubtreeIds(project.getId()), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}

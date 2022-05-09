@@ -109,10 +109,19 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 	private Query buildQuery(@Nullable ProjectScope projectScope, String queryString) {
 		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 		if (projectScope != null) {
+			BooleanQuery.Builder projectQueryBuilder = new BooleanQuery.Builder();
 			if (projectScope.isRecursive())
-				queryBuilder.add(projectManager.getTreeQuery(FIELD_PROJECT_ID, projectScope.getProject()), Occur.MUST);
+				projectQueryBuilder.add(projectManager.getSubtreeQuery(FIELD_PROJECT_ID, projectScope.getProject()), Occur.SHOULD);
 			else
-				queryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectScope.getProject().getId()), Occur.MUST);
+				projectQueryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectScope.getProject().getId()), Occur.SHOULD);
+			if (projectScope.isInherited()) {
+				for (Project ancestor: projectScope.getProject().getAncestors()) {
+					if (SecurityUtils.canAccess(ancestor))
+						projectQueryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, ancestor.getId()), Occur.SHOULD);
+				}
+			}
+			projectQueryBuilder.setMinimumNumberShouldMatch(1);
+			queryBuilder.add(projectQueryBuilder.build(), Occur.MUST);
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject());
 			if (!projects.isEmpty()) 

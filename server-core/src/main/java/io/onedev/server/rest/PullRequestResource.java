@@ -164,13 +164,13 @@ public class PullRequestResource {
     }
 	
 	@Api(order=1000)
-	@Path("/{requestId}/fixed-issue-numbers")
+	@Path("/{requestId}/fixed-issue-ids")
     @GET
-    public Collection<Long> getFixedIssueNumbers(@PathParam("requestId") Long requestId) {
+    public Collection<Long> getFixedIssueIds(@PathParam("requestId") Long requestId) {
 		PullRequest pullRequest = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
-    	return pullRequest.getFixedIssueNumbers();
+    	return pullRequest.getFixedIssueIds();
     }
 	
 	@Api(order=1100)

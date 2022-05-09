@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -46,7 +44,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
-import org.unbescape.java.JavaEscape;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
@@ -73,8 +70,6 @@ import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.facade.IssueFacade;
-import io.onedev.server.util.validation.ProjectPathValidator;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -174,80 +169,64 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	public static final Map<String, SortField<Issue>> ORDER_FIELDS = new LinkedHashMap<>();
 	
 	static {
-			ORDER_FIELDS.put(NAME_VOTE_COUNT, new SortField<Issue>(PROP_VOTE_COUNT, new Comparator<Issue>() {
+		ORDER_FIELDS.put(NAME_VOTE_COUNT, new SortField<Issue>(PROP_VOTE_COUNT, new Comparator<Issue>() {
 
-				@Override
-				public int compare(Issue o1, Issue o2) {
-					return o1.getVoteCount() - o1.getVoteCount();
-				}
-				
-			}));
-			ORDER_FIELDS.put(NAME_COMMENT_COUNT, new SortField<Issue>(PROP_COMMENT_COUNT, new Comparator<Issue>() {
+			@Override
+			public int compare(Issue o1, Issue o2) {
+				return o1.getVoteCount() - o1.getVoteCount();
+			}
+			
+		}));
+		ORDER_FIELDS.put(NAME_COMMENT_COUNT, new SortField<Issue>(PROP_COMMENT_COUNT, new Comparator<Issue>() {
 
-				@Override
-				public int compare(Issue o1, Issue o2) {
-					return o1.getCommentCount() - o2.getCommentCount();
-				}
-				
-			}));
-			ORDER_FIELDS.put(NAME_NUMBER, new SortField<Issue>(PROP_NUMBER, new Comparator<Issue>() {
+			@Override
+			public int compare(Issue o1, Issue o2) {
+				return o1.getCommentCount() - o2.getCommentCount();
+			}
+			
+		}));
+		ORDER_FIELDS.put(NAME_NUMBER, new SortField<Issue>(PROP_NUMBER, new Comparator<Issue>() {
 
-				@Override
-				public int compare(Issue o1, Issue o2) {
-					return (int)(o1.getNumber() - o2.getNumber());
-				}
-				
-			}));
-			ORDER_FIELDS.put(NAME_STATE, new SortField<Issue>(PROP_STATE_ORDINAL, new Comparator<Issue>() {
+			@Override
+			public int compare(Issue o1, Issue o2) {
+				return (int)(o1.getNumber() - o2.getNumber());
+			}
+			
+		}));
+		ORDER_FIELDS.put(NAME_STATE, new SortField<Issue>(PROP_STATE_ORDINAL, new Comparator<Issue>() {
 
-				@Override
-				public int compare(Issue o1, Issue o2) {
-					return o1.getStateOrdinal() - o2.getStateOrdinal();
-				}
-				
-			}));
-			ORDER_FIELDS.put(NAME_SUBMIT_DATE, new SortField<Issue>(PROP_SUBMIT_DATE, new Comparator<Issue>() {
+			@Override
+			public int compare(Issue o1, Issue o2) {
+				return o1.getStateOrdinal() - o2.getStateOrdinal();
+			}
+			
+		}));
+		ORDER_FIELDS.put(NAME_SUBMIT_DATE, new SortField<Issue>(PROP_SUBMIT_DATE, new Comparator<Issue>() {
 
-				@Override
-				public int compare(Issue o1, Issue o2) {
-					return o1.getSubmitDate().compareTo(o2.getSubmitDate());
-				}
-				
-			}));
-			ORDER_FIELDS.put(NAME_PROJECT, new SortField<Issue>(PROP_PROJECT, new Comparator<Issue>() {
+			@Override
+			public int compare(Issue o1, Issue o2) {
+				return o1.getSubmitDate().compareTo(o2.getSubmitDate());
+			}
+			
+		}));
+		ORDER_FIELDS.put(NAME_PROJECT, new SortField<Issue>(PROP_PROJECT, new Comparator<Issue>() {
 
-				@Override
-				public int compare(Issue o1, Issue o2) {
-					return o1.getProject().getId().compareTo(o2.getProject().getId());
-				}
-				
-			}));
-			ORDER_FIELDS.put(NAME_UPDATE_DATE, new SortField<Issue>(PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE, new Comparator<Issue>() {
+			@Override
+			public int compare(Issue o1, Issue o2) {
+				return o1.getProject().getId().compareTo(o2.getProject().getId());
+			}
+			
+		}));
+		ORDER_FIELDS.put(NAME_UPDATE_DATE, new SortField<Issue>(PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE, new Comparator<Issue>() {
 
-				@Override
-				public int compare(Issue o1, Issue o2) {
-					return o1.getLastUpdate().getDate().compareTo(o2.getLastUpdate().getDate());
-				}
-				
-			}));	
+			@Override
+			public int compare(Issue o1, Issue o2) {
+				return o1.getLastUpdate().getDate().compareTo(o2.getLastUpdate().getDate());
+			}
+			
+		}));	
 	}
 	
-	private static final List<String> ISSUE_FIX_WORDS = Lists.newArrayList(
-			"fix", "fixed", "fixes", "fixing", 
-			"resolve", "resolved", "resolves", "resolving", 
-			"close", "closed", "closes", "closing");
-	
-    private static final Pattern ISSUE_FIX_PATTERN;
-    
-    static {
-    	StringBuilder builder = new StringBuilder("(^|[\\W|/]+)(");
-    	builder.append(StringUtils.join(ISSUE_FIX_WORDS, "|"));
-    	builder.append(")\\s+issue\\s+(");
-    	builder.append(JavaEscape.unescapeJava(ProjectPathValidator.PATTERN.pattern()));
-    	builder.append(")?#(\\d+)(?=$|[\\W|/]+)");
-    	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
-    }
-    
 	private static ThreadLocal<Stack<Issue>> stack =  new ThreadLocal<Stack<Issue>>() {
 
 		@Override
@@ -327,7 +306,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	@OneToMany(mappedBy=IssueLink.PROP_SOURCE, cascade=CascadeType.REMOVE)
 	private Collection<IssueLink> targetLinks = new ArrayList<>();
 	
-	private transient List<RevCommit> commits;
+	private transient List<FixCommit> commits;
 	
 	private transient List<PullRequest> pullRequests;
 	
@@ -767,18 +746,14 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		}
 	}
 	
-	public IssueFacade getFacade() {
-		return new IssueFacade(getId(), getProject().getId(), getNumber());
-	}
-	
 	public List<PullRequest> getPullRequests() {
 		if (pullRequests == null) {
 			pullRequests = new ArrayList<>();
 
 			PullRequestInfoManager infoManager = OneDev.getInstance(PullRequestInfoManager.class); 
 			Collection<Long> pullRequestIds = new HashSet<>();
-			for (ObjectId commit: getCommits()) 
-				pullRequestIds.addAll(infoManager.getPullRequestIds(getProject(), commit));		
+			for (FixCommit commit: getCommits()) 
+				pullRequestIds.addAll(infoManager.getPullRequestIds(commit.getProject(), commit.getCommit()));		
 			
 			for (Long requestId: pullRequestIds) {
 				PullRequest request = OneDev.getInstance(PullRequestManager.class).get(requestId);
@@ -797,20 +772,24 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		return pullRequests;
 	}
 	
-	public List<RevCommit> getCommits() {
+	public List<FixCommit> getCommits() {
 		if (commits == null) {
 			commits = new ArrayList<>();
 			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
-			for (ObjectId commitId: commitInfoManager.getFixCommits(getProject(), getNumber())) {
-				RevCommit commit = getProject().getRevCommit(commitId, false);
-				if (commit != null)
-					commits.add(commit);
-			}
-			Collections.sort(commits, new Comparator<RevCommit>() {
+			
+			getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {
+				for (ObjectId commitId: commitInfoManager.getFixCommits(it, getId())) {
+					RevCommit commit = it.getRevCommit(commitId, false);
+					if (commit != null)
+						commits.add(new FixCommit(it, commit));
+				}
+			});
+			
+			Collections.sort(commits, new Comparator<FixCommit>() {
 	
 				@Override
-				public int compare(RevCommit o1, RevCommit o2) {
-					return o2.getCommitTime() - o1.getCommitTime();
+				public int compare(FixCommit o1, FixCommit o2) {
+					return o2.getCommit().getCommitTime() - o1.getCommit().getCommitTime();
 				}
 				
 			});
@@ -858,34 +837,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			}
 		}
 		return null;
-	}
-	
-	public static Collection<Long> parseFixedIssueNumbers(Project project, String commitMessage) {
-		Collection<Long> issueNumbers = new HashSet<>();
-
-		// Skip unmatched commit message quickly 
-		boolean fixWordsFound = false;
-		String lowerCaseCommitMessage = commitMessage.toLowerCase();
-		for (String word: ISSUE_FIX_WORDS) {
-			if (lowerCaseCommitMessage.indexOf(word) != -1) {
-				fixWordsFound = true;
-				break;
-			}
-		}
-		
-		if (fixWordsFound 
-				&& lowerCaseCommitMessage.contains("#") 
-				&& lowerCaseCommitMessage.contains("issue")) {
-			Matcher matcher = ISSUE_FIX_PATTERN.matcher(lowerCaseCommitMessage);
-			
-			while (matcher.find()) {
-				String projectPath = matcher.group(3);
-				if (projectPath == null || projectPath.equals(project.getPath()))
-					issueNumbers.add(Long.parseLong(matcher.group(matcher.groupCount())));
-			}
-		}
-		
-		return issueNumbers;
 	}
 	
 	@Nullable
@@ -961,6 +912,27 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public static void pop() {
 		stack.get().pop();
+	}
+	
+	public static class FixCommit {
+		
+		private final Project project;
+		
+		private final RevCommit commit;
+		
+		public FixCommit(Project project, RevCommit commit) {
+			this.project = project;
+			this.commit = commit;
+		}
+
+		public Project getProject() {
+			return project;
+		}
+
+		public RevCommit getCommit() {
+			return commit;
+		}
+		
 	}
 	
 }

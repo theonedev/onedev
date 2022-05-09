@@ -33,29 +33,34 @@ public class IncludesIssueCriteria extends Criteria<PullRequest> {
 		this.value = value;
 	}
 	
+	public IncludesIssueCriteria(Issue issue) {
+		this.issue = issue;
+		value = String.valueOf(issue.getNumber());
+	}
+	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		Collection<Long> pullRequestIds = getPullRequestIds(issue.getProject());
-		if (!pullRequestIds.isEmpty()) {
-			return builder.and(
-					builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), issue.getProject()),
-					from.get(PullRequest.PROP_ID).in(pullRequestIds));
-		} else {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, 
+			CriteriaBuilder builder) {
+		Collection<Long> pullRequestIds = new HashSet<>();
+		issue.getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {
+			pullRequestIds.addAll(getPullRequestIds(it));
+		});
+		if (!pullRequestIds.isEmpty()) 
+			return from.get(PullRequest.PROP_ID).in(pullRequestIds);
+		else 
 			return builder.disjunction();
-		}
 	}
 	
 	private Collection<Long> getPullRequestIds(Project project) {
 		Collection<Long> pullRequestIds = new HashSet<>();
-		for (ObjectId commit: OneDev.getInstance(CommitInfoManager.class).getFixCommits(project, issue.getNumber()))
+		for (ObjectId commit: OneDev.getInstance(CommitInfoManager.class).getFixCommits(project, issue.getId()))
 			pullRequestIds.addAll(OneDev.getInstance(PullRequestInfoManager.class).getPullRequestIds(project, commit));
 		return pullRequestIds;
 	}
 	
 	@Override
 	public boolean matches(PullRequest request) {
-		return request.getTargetProject().equals(issue.getProject()) 
-				&& getPullRequestIds(request.getTargetProject()).contains(request.getId());
+		return getPullRequestIds(request.getProject()).contains(request.getId());
 	}
 
 	@Override

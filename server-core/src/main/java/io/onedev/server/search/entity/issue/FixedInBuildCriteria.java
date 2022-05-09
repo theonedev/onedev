@@ -43,20 +43,16 @@ public class FixedInBuildCriteria extends Criteria<Issue> {
 	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		Collection<Long> fixedIssueNumbers = getBuild().getFixedIssueNumbers();
-		if (!fixedIssueNumbers.isEmpty()) {
-			return builder.and(
-					builder.equal(from.get(Issue.PROP_PROJECT), getBuild().getProject()),
-					from.get(Issue.PROP_NUMBER).in(fixedIssueNumbers));
-		} else {
+		Collection<Long> fixedIssueIds = getBuild().getFixedIssueIds();
+		if (!fixedIssueIds.isEmpty()) 
+			return from.get(Issue.PROP_ID).in(fixedIssueIds);
+		else 
 			return builder.disjunction();
-		}
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		return issue.getProject().equals(getBuild().getProject()) 
-				&& getBuild().getFixedIssueNumbers().contains(issue.getNumber());
+		return getBuild().getFixedIssueIds().contains(issue.getId());
 	}
 
 	@Override

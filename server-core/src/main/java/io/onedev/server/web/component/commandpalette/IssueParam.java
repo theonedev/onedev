@@ -25,7 +25,7 @@ public class IssueParam extends ParamSegment {
 			Map<String, String> paramValues, int count) {
 		Map<String, String> suggestions = new LinkedHashMap<>();
 		List<Issue> issues;
-		ProjectScope projectScope = new ProjectScope(ParsedUrl.getProject(paramValues), false, null);
+		ProjectScope projectScope = new ProjectScope(ParsedUrl.getProject(paramValues), false, false);
 		if (matchWith.length() == 0) {
 			IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 			issues = issueManager.query(projectScope, new IssueQuery(), false, 0, count);

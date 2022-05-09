@@ -27,7 +27,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.server.util.*;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -61,12 +60,16 @@ import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.command.RevListCommand.Order;
 import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.Day;
+import io.onedev.server.util.ElementPumper;
+import io.onedev.server.util.NameAndEmail;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.ProgrammingLanguageDetector;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -86,7 +89,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final int INFO_VERSION = 11;
+	private static final int INFO_VERSION = 12;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
 	
@@ -309,8 +312,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 										if (currentCommit.getBody() != null)
 											commitMessage += "\n\n" + currentCommit.getBody();
 										
-										for (Long issueNumber: Issue.parseFixedIssueNumbers(project, commitMessage)) {
-											ByteIterable issueKey = new LongByteIterable(issueNumber);
+										for (Long issueId: project.parseFixedIssueIds(commitMessage)) {
+											ByteIterable issueKey = new LongByteIterable(issueId);
 											Collection<ObjectId> fixingCommits = readCommits(fixCommitsStore, txn, issueKey);
 											
 											boolean addNextCommit = true;
@@ -1358,7 +1361,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	}
 
 	@Override
-	public Collection<ObjectId> getFixCommits(Project project, Long issueNumber) {
+	public Collection<ObjectId> getFixCommits(Project project, Long issueId) {
 		Environment env = getEnv(project.getId().toString());
 		Store store = getStore(env, FIX_COMMITS_STORE);
 		
@@ -1366,7 +1369,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 			
 			@Override
 			public Collection<ObjectId> compute(Transaction txn) {
-				return readCommits(store, txn, new LongByteIterable(issueNumber));
+				return readCommits(store, txn, new LongByteIterable(issueId));
 			}
 			
 		});

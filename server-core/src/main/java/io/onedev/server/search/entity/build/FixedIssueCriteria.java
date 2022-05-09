@@ -1,7 +1,9 @@
 package io.onedev.server.search.entity.build;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -46,28 +48,32 @@ public class FixedIssueCriteria extends Criteria<Build> {
 	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
-		Path<Long> attribute = from.get(Build.PROP_ID);
-		Project project = issue.getProject();
-		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, issue.getNumber());
-		Collection<String> descendants = new HashSet<>();
-		for (ObjectId each: getCommitInfoManager().getDescendants(project, fixCommits))
-			descendants.add(each.name());
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-		Collection<Long> inBuildIds = buildManager.filterIds(project.getId(), descendants);
-		return builder.and(
-				builder.equal(from.get(Build.PROP_PROJECT), issue.getProject()),
-				forManyValues(builder, attribute, inBuildIds, buildManager.getIdsByProject(project.getId())));
+		Path<Long> attribute = from.get(Build.PROP_NUMBER);
+		List<Predicate> predicates = new ArrayList<>();
+		issue.getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {
+			Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(it, issue.getId());
+			Collection<String> descendants = new HashSet<>();
+			for (ObjectId each: getCommitInfoManager().getDescendants(it, fixCommits))
+				descendants.add(each.name());
+			Collection<Long> inBuildNumbers = buildManager.filterNumbers(it.getId(), descendants);
+			predicates.add(builder.and(
+					builder.equal(from.get(Build.PROP_PROJECT), it),
+					forManyValues(builder, attribute, inBuildNumbers, buildManager.getNumbersByProject(it.getId()))));
+		});
+		if (!predicates.isEmpty())
+			return builder.or(predicates.toArray(new Predicate[0]));
+		else
+			return builder.disjunction();
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		if (build.getProject().equals(issue.getProject())) {
-			Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(build.getProject(), issue.getNumber()); 
-			for (ObjectId commit: fixCommits) {
-				ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());
-				if (GitUtils.isMergedInto(build.getProject().getRepository(), null, commit, buildCommit))
-					return true;
-			}
+		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(build.getProject(), issue.getId()); 
+		for (ObjectId commit: fixCommits) {
+			ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());
+			if (GitUtils.isMergedInto(build.getProject().getRepository(), null, commit, buildCommit))
+				return true;
 		}
 		return false;
 	}

@@ -15,9 +15,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.FixedInBuildCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -93,8 +93,8 @@ public class FixedIssuesPage extends BuildDetailPage {
 				}
 
 				@Override
-				protected ProjectScope getProjectScope() {
-					return new ProjectScope(getProject(), false, null);
+				protected Project getProject() {
+					return FixedIssuesPage.this.getProject();
 				}
 				
 			});

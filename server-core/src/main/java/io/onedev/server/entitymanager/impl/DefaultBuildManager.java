@@ -53,7 +53,6 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -742,12 +741,13 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public void on(SystemStarted event) {
 		logger.info("Caching build info...");
 		
-		Query<?> query = dao.getSession().createQuery("select id, project.id, commitHash, jobName from Build");
+		Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long buildId = (Long) fields[0];
 			Long projectId = (Long)fields[1];
-			builds.put(buildId, new BuildFacade(buildId, projectId, (String)fields[2]));
-			populateJobNames(projectId, (String)fields[3]);
+			Long buildNumber = (Long) fields[2];
+			builds.put(buildId, new BuildFacade(buildId, projectId, buildNumber, (String)fields[3]));
+			populateJobNames(projectId, (String)fields[4]);
 		}
 		taskId = taskScheduler.schedule(this);
 	}
@@ -755,29 +755,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Listen
 	public void on(SystemStopping event) {
 		taskScheduler.unschedule(taskId);
-	}
-
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof Build) {
-			Build build = (Build) event.getEntity();
-			Long projectId = build.getProject().getId();
-			String jobName = build.getJobName();
-			transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					jobNamesLock.writeLock().lock();
-					try {
-						populateJobNames(projectId, jobName);
-					} finally {
-						jobNamesLock.writeLock().unlock();
-					}
-				}
-				
-			});
-		}
 	}
 	
 	private CriteriaQuery<Object[]> buildStreamPreviousQuery(Build build, Status status, String...fields) {
@@ -854,32 +831,32 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	}
 	
 	@Override
-	public Collection<Long> getIdsByProject(Long projectId) {
+	public Collection<Long> getNumbersByProject(Long projectId) {
 		buildsLock.readLock().lock();
 		try {
-			Collection<Long> buildIds = new HashSet<>();
+			Collection<Long> buildNumbers = new HashSet<>();
 			for (BuildFacade build: builds.values()) {
 				if (build.getProjectId().equals(projectId))
-					buildIds.add(build.getId());
+					buildNumbers.add(build.getNumber());
 			}
-			return buildIds;
+			return buildNumbers;
 		} finally {
 			buildsLock.readLock().unlock();
 		}
 	}
 
 	@Override
-	public Collection<Long> filterIds(Long projectId, Collection<String> commitHashes) {
+	public Collection<Long> filterNumbers(Long projectId, Collection<String> commitHashes) {
 		buildsLock.readLock().lock();
 		try {
-			Collection<Long> buildIds = new HashSet<>();
+			Collection<Long> buildNumbers = new HashSet<>();
 			for (BuildFacade build: builds.values()) {
 				if (build.getProjectId().equals(projectId) 
 						&& commitHashes.contains(build.getCommitHash())) {
-					buildIds.add(build.getId());
+					buildNumbers.add(build.getNumber());
 				}
 			}
-			return buildIds;
+			return buildNumbers;
 		} finally {
 			buildsLock.readLock().unlock();
 		}

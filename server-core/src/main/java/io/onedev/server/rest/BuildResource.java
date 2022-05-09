@@ -84,13 +84,13 @@ public class BuildResource {
     }
 	
 	@Api(order=500)
-	@Path("/{buildId}/fixed-issue-numbers")
+	@Path("/{buildId}/fixed-issue-ids")
     @GET
-    public Collection<Long> getFixedIssueNumbers(@PathParam("buildId") Long buildId) {
+    public Collection<Long> getFixedIssueIds(@PathParam("buildId") Long buildId) {
 		Build build = buildManager.load(buildId);
     	if (!SecurityUtils.canAccess(build)) 
 			throw new UnauthorizedException();
-    	return build.getFixedIssueNumbers();
+    	return build.getFixedIssueIds();
     }
 	
 	@Api(order=600)

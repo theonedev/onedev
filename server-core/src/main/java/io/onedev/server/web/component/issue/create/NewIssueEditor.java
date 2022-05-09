@@ -128,7 +128,9 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 				String title = titleInput.getInput();
 				if (StringUtils.isNotBlank(title)) {
 					IssueTextManager issueTextManager = OneDev.getInstance(IssueTextManager.class);
-					return issueTextManager.query(new ProjectScope(getProject(), true, null), title, false, 0, 5);
+					return issueTextManager.query(
+							new ProjectScope(getProject(), true, true), 
+							title, false, 0, 5);
 				} else {
 					return new ArrayList<>();
 				}

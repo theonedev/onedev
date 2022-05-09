@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -28,8 +30,10 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.Listen;
@@ -89,7 +93,7 @@ import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.facade.IssueFacade;
+import io.onedev.server.util.validation.ProjectPathValidator;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
@@ -100,6 +104,22 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueManager.class);
 	
+	private static final List<String> ISSUE_FIX_WORDS = Lists.newArrayList(
+			"fix", "fixed", "fixes", "fixing", 
+			"resolve", "resolved", "resolves", "resolving", 
+			"close", "closed", "closes", "closing");
+	
+    private static final Pattern ISSUE_FIX_PATTERN;
+    
+    static {
+    	StringBuilder builder = new StringBuilder("(^|[\\W|/]+)(");
+    	builder.append(StringUtils.join(ISSUE_FIX_WORDS, "|"));
+    	builder.append(")\\s+issue\\s+(");
+    	builder.append(JavaEscape.unescapeJava(ProjectPathValidator.PATTERN.pattern()));
+    	builder.append(")?#(\\d+)(?=$|[\\W|/]+)");
+    	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
+    }
+    
 	private final IssueFieldManager fieldManager;
 	
 	private final ListenerRegistry listenerRegistry;
@@ -126,9 +146,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final IssueLinkManager linkManager;
 	
-	private final Map<Long, IssueFacade> cache = new HashMap<>();
+	private final Map<Long, Map<Long, Long>> idCache = new HashMap<>();
 	
-	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
+	private final ReadWriteLock idCacheLock = new ReentrantReadWriteLock();
 	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldManager fieldManager, 
@@ -163,8 +183,19 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		Query<?> query = dao.getSession().createQuery("select id, project.id, number from Issue");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long issueId = (Long) fields[0];
-			cache.put(issueId, new IssueFacade(issueId, (Long)fields[1], (Long)fields[2]));
+			Long projectId = (Long) fields[1];
+			Long issueNumber = (Long) fields[2];
+			getIdCacheInProject(projectId).put(issueNumber, issueId);
 		}
+	}
+	
+	private Map<Long, Long> getIdCacheInProject(Long projectId) {
+		Map<Long, Long> idCacheOfProject = idCache.get(projectId);
+		if (idCacheOfProject == null) {
+			idCacheOfProject = new HashMap<>();
+			idCache.put(projectId, idCacheOfProject);
+		}
+		return idCacheOfProject;
 	}
 	
 	@Sessional
@@ -221,16 +252,19 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public void save(Issue issue) {
 		super.save(issue);
 		
-		IssueFacade facade = issue.getFacade();
+		Long projectId = issue.getProject().getId();
+		Long issueId = issue.getId();
+		Long issueNumber = issue.getNumber();
+		
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				cacheLock.writeLock().lock();
+				idCacheLock.writeLock().lock();
 				try {
-					cache.put(facade.getId(), facade);
+					getIdCacheInProject(projectId).put(issueNumber, issueId);
 				} finally {
-					cacheLock.writeLock().unlock();
+					idCacheLock.writeLock().unlock();
 				}
 			}
 			
@@ -320,10 +354,18 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		List<Predicate> predicates = new ArrayList<>();
 		if (projectScope != null) {
 			Path<Project> projectPath = root.get(Issue.PROP_PROJECT);
+			List<Predicate> projectPredicates = new ArrayList<>();
 			if (projectScope.isRecursive())
-				predicates.add(projectManager.getTreePredicate(builder, projectPath, projectScope.getProject()));
+				projectPredicates.add(projectManager.getSubtreePredicate(builder, projectPath, projectScope.getProject()));
 			else
-				predicates.add(builder.equal(projectPath, projectScope.getProject()));
+				projectPredicates.add(builder.equal(projectPath, projectScope.getProject()));
+			if (projectScope.isInherited()) {
+				for (Project ancestor: projectScope.getProject().getAncestors()) {
+					if (SecurityUtils.canAccess(ancestor)) 
+						projectPredicates.add(builder.equal(projectPath, ancestor));
+				}
+			}
+			predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
 			if (!projects.isEmpty()) { 
@@ -769,16 +811,17 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public void delete(Issue issue) {
 		super.delete(issue);
 		
-		Long issueId = issue.getId();
+		Long projectId = issue.getProject().getId();
+		Long issueNumber = issue.getNumber();
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				cacheLock.writeLock().lock();
+				idCacheLock.writeLock().lock();
 				try {
-					cache.remove(issueId);
+					getIdCacheInProject(projectId).remove(issueNumber);
 				} finally {
-					cacheLock.writeLock().unlock();
+					idCacheLock.writeLock().unlock();
 				}
 			}
 		});
@@ -794,15 +837,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 				@Override
 				public void run() {
-					cacheLock.writeLock().lock();
+					idCacheLock.writeLock().lock();
 					try {
-						for (Iterator<Map.Entry<Long, IssueFacade>> it = cache.entrySet().iterator(); it.hasNext();) {
-							IssueFacade issue = it.next().getValue();
-							if (issue.getProjectId().equals(projectId))
-								it.remove();
-						}
+						idCache.remove(projectId);
 					} finally {
-						cacheLock.writeLock().unlock();
+						idCacheLock.writeLock().unlock();
 					}
 				}
 			});
@@ -810,20 +849,15 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	}
 
 	@Override
-	public Collection<Long> getIssueNumbers(Long projectId) {
-		cacheLock.readLock().lock();
+	public Long getIssueId(Long projectId, Long issueNumber) {
+		idCacheLock.readLock().lock();
 		try {
-			Collection<Long> issueNumbers = new HashSet<>();
-			for (IssueFacade issue: cache.values()) {
-				if (projectId.equals(issue.getProjectId()))
-					issueNumbers.add(issue.getNumber());
-			}
-			return issueNumbers;
+			return getIdCacheInProject(projectId).get(issueNumber);
 		} finally {
-			cacheLock.readLock().unlock();
+			idCacheLock.readLock().unlock();
 		}
 	}
-
+	
 	@Sessional
 	@Override
 	public Collection<MilestoneAndIssueState> queryMilestoneAndIssueStates(Project project, Collection<Milestone> milestones) {
@@ -840,7 +874,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			milestonePredicates.add(builder.equal(root.get(IssueSchedule.PROP_MILESTONE), milestone));
 		
 		criteriaQuery.where(builder.and(
-				projectManager.getTreePredicate(builder, issueJoin.get(Issue.PROP_PROJECT), project),
+				projectManager.getSubtreePredicate(builder, issueJoin.get(Issue.PROP_PROJECT), project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
@@ -857,7 +891,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		Path<Project> projectPath = root
 				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
 				.get(Issue.PROP_PROJECT);
-		criteriaQuery.where(projectManager.getTreePredicate(builder, projectPath, project));
+		criteriaQuery.where(projectManager.getSubtreePredicate(builder, projectPath, project));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
 	}
@@ -957,7 +991,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				.join(IssueSchedule.PROP_ISSUE, JoinType.INNER)
 				.get(Issue.PROP_PROJECT);
 		criteriaQuery.where(builder.and(
-				projectManager.getTreePredicate(builder, projectPath, project),
+				projectManager.getSubtreePredicate(builder, projectPath, project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		for (IssueSchedule schedule: getSession().createQuery(criteriaQuery).getResultList()) 
@@ -990,6 +1024,45 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			
 			return getSession().createQuery(criteriaQuery).getResultList();
 		}
+	}
+
+	@Override
+	public Collection<Long> parseFixedIssueIds(Project project, String commitMessage) {
+		Collection<Long> issueIds = new HashSet<>();
+
+		// Skip unmatched commit message quickly 
+		boolean fixWordsFound = false;
+		String lowerCaseCommitMessage = commitMessage.toLowerCase();
+		for (String word: ISSUE_FIX_WORDS) {
+			if (lowerCaseCommitMessage.indexOf(word) != -1) {
+				fixWordsFound = true;
+				break;
+			}
+		}
+		
+		if (fixWordsFound 
+				&& lowerCaseCommitMessage.contains("#") 
+				&& lowerCaseCommitMessage.contains("issue")) {
+			Matcher matcher = ISSUE_FIX_PATTERN.matcher(lowerCaseCommitMessage);
+		
+			while (matcher.find()) {
+				String projectPath = matcher.group(3);
+				Project projectOfIssue;
+				if (projectPath == null) 
+					projectOfIssue = project;
+				else 
+					projectOfIssue = projectManager.findByPath(projectPath);
+				if (projectOfIssue != null 
+						&& (projectOfIssue.isSelfOrAncestorOf(project) || project.isSelfOrAncestorOf(projectOfIssue))) {
+					Long issueNumber = Long.parseLong(matcher.group(matcher.groupCount()));
+					Long issueId = getIssueId(projectOfIssue.getId(), issueNumber);
+					if (issueId != null)
+						issueIds.add(issueId);
+				}
+			}
+		}
+		
+		return issueIds;
 	}
 
 }

@@ -65,9 +65,9 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<Long> queryIds(Project project, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 
-	Collection<Long> getIdsByProject(Long projectId);
+	Collection<Long> getNumbersByProject(Long projectId);
 
-	Collection<Long> filterIds(Long projectId, Collection<String> commitHashes);
+	Collection<Long> filterNumbers(Long projectId, Collection<String> commitHashes);
 
 	Collection<String> getJobNames(@Nullable Project project);
 

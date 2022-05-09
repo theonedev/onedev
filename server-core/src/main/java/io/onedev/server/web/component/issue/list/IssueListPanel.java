@@ -168,12 +168,8 @@ public abstract class IssueListPanel extends Panel {
 	}
 	
 	@Nullable
-	protected abstract ProjectScope getProjectScope();
+	protected abstract Project getProject();
 	
-	private Project getProject() {
-		return getProjectScope()!=null?getProjectScope().getProject():null;
-	}
-
 	protected IssueQuery getBaseQuery() {
 		return new IssueQuery();
 	}
@@ -323,34 +319,6 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});	
-		
-		add(new AjaxLink<Void>("recursive") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				boolean recursive = !getProjectScope().isRecursive();
-				getProjectScope().getRecursiveConfigurable().setRecursive(target, recursive);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				setVisible(getProjectScope()!=null && getProjectScope().getRecursiveConfigurable() != null 
-						&& !projectManager.getChildren(getProject().getId()).isEmpty());
-			}
-			
-		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (getProjectScope().isRecursive())
-					return "text-secondary";
-				else
-					return "text-gray";
-			}
-			
-		})));
 		
 		add(new MenuLink("import") {
 
@@ -1192,7 +1160,10 @@ public abstract class IssueListPanel extends Panel {
 					
 				});
 				
-				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.getNumberAndTitle())));
+				String copyContent = issue.getNumberAndTitle();
+				if (!issue.getProject().equals(getProject()))
+					copyContent = issue.getProject().getPath() + copyContent;
+				fragment.add(new CopyToClipboardLink("copy", Model.of(copyContent)));
 				
 				AtomicReference<String> expandedLinkName = new AtomicReference<>(null);
 				
@@ -1377,6 +1348,14 @@ public abstract class IssueListPanel extends Panel {
 		issuesTable.add(new NoRecordsBehavior());
 
 		setOutputMarkupId(true);
+	}
+	
+	@Nullable
+	private ProjectScope getProjectScope() {
+		if (getProject() != null)
+			return new ProjectScope(getProject(), true, true);
+		else
+			return null;
 	}
 	
 	private List<String> getListFields() {

@@ -78,7 +78,7 @@ public interface CommitInfoManager {
 	 */
 	Map<Day, Map<String, Integer>> getLineIncrements(Project project);
 
-	Collection<ObjectId> getFixCommits(Project project, Long issueNumber);
+	Collection<ObjectId> getFixCommits(Project project, Long issueId);
 	
 	void sortUsersByContribution(List<User> users, Project project, Collection<String> files);
 	

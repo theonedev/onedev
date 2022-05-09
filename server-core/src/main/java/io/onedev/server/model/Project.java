@@ -98,6 +98,7 @@ import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
@@ -540,6 +541,10 @@ public class Project extends AbstractEntity {
 		return children;
 	}
 	
+	public void setChildren(Collection<Project> children) {
+		this.children = children;
+	}
+
 	public Collection<Project> getDescendants() {
 		Collection<Project> descendants = new ArrayList<>(getChildren());
 		for (Project child: getChildren())
@@ -547,10 +552,15 @@ public class Project extends AbstractEntity {
 		return descendants;
 	}
 
-	public void setChildren(Collection<Project> children) {
-		this.children = children;
+	public Collection<Project> getAncestors() {
+		List<Project> ancestors = new ArrayList<>();
+		if (getParent() != null) {
+			ancestors.add(getParent());
+			ancestors.addAll(getParent().getAncestors());
+		} 
+		return ancestors;
 	}
-
+	
 	public Collection<Project> getForks() {
 		return forks;
 	}
@@ -2025,6 +2035,17 @@ public class Project extends AbstractEntity {
 		if (boards == null)
 			boards = OneDev.getInstance(SettingManager.class).getIssueSetting().getBoardSpecs();
 		return boards;
+	}
+	
+	public Collection<Long> parseFixedIssueIds(String commitMessage) {
+		return OneDev.getInstance(IssueManager.class).parseFixedIssueIds(this, commitMessage);
+	}
+	
+	public Collection<Project> getTree() {
+		List<Project> projects = Lists.newArrayList(this);
+		projects.addAll(getDescendants());
+		projects.addAll(getAncestors());
+		return projects;
 	}
 	
 }

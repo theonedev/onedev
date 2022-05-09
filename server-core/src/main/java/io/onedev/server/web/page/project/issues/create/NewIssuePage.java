@@ -150,7 +150,7 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 	@Override
 	protected void navToProject(Project project) {
 		if (project.isIssueManagement()) 
-			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, false, 0));
+			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, 0));
 		else
 			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}

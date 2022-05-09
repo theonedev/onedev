@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.issues.detail;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
@@ -62,7 +61,7 @@ public class IssueBuildsPage extends IssueDetailPage {
 
 			@Override
 			protected BuildQuery getBaseQuery() {
-				return new BuildQuery(new FixedIssueCriteria(getIssue()), new ArrayList<>());
+				return new BuildQuery(new FixedIssueCriteria(getIssue()));
 			}
 
 			@Override
@@ -86,7 +85,7 @@ public class IssueBuildsPage extends IssueDetailPage {
 
 			@Override
 			protected Project getProject() {
-				return getIssue().getProject();
+				return null;
 			}
 
 		});

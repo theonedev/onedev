@@ -126,8 +126,7 @@ abstract class BacklogColumnPanel extends Panel {
 		});
 		
 		if (getQuery() != null) {
-			PageParameters params = ProjectIssueListPage.paramsOf(
-					getProject(), getQuery().toString(), getProjectScope().isRecursive(), 0);
+			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 0);
 			add(new BookmarkablePageLink<Void>("viewAsList", ProjectIssueListPage.class, params));
 		} else {
 			add(new WebMarkupContainer("viewAsList").setVisible(false));

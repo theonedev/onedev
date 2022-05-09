@@ -19,7 +19,6 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
-import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -112,8 +111,8 @@ public class MilestoneIssuesPage extends MilestoneDetailPage {
 			}
 	
 			@Override
-			protected ProjectScope getProjectScope() {
-				return new ProjectScope(getProject(), true, null);
+			protected Project getProject() {
+				return MilestoneIssuesPage.this.getProject();
 			}
 			
 		});

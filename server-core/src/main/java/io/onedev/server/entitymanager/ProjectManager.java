@@ -72,9 +72,9 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Query getPathMatchQuery(String fieldName, String pathPattern);
 	
-	Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> path, Project project);
+	Predicate getSubtreePredicate(CriteriaBuilder builder, Path<Project> path, Project project);
 	
-	Query getTreeQuery(String fieldName, Project project);
+	Query getSubtreeQuery(String fieldName, Project project);
 	
 	Predicate getProjectsPredicate(CriteriaBuilder builder, Path<Project> path, Collection<Project> projects);
 	

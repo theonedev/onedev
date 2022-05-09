@@ -1,42 +1,31 @@
 package io.onedev.server.util;
 
-import javax.annotation.Nullable;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-
 import io.onedev.server.model.Project;
 
 public class ProjectScope {
-	
+
 	private final Project project;
+
+	private final boolean inherited;
 	
 	private final boolean recursive;
 	
-	private final RecursiveConfigurable recursiveConfigurable;
-	
-	public ProjectScope(Project project, boolean recursive, RecursiveConfigurable recursiveConfigurable) {
+	public ProjectScope(Project project, boolean inherited, boolean recursive) {
 		this.project = project;
+		this.inherited = inherited;
 		this.recursive = recursive;
-		this.recursiveConfigurable = recursiveConfigurable;
 	}
 
 	public Project getProject() {
 		return project;
 	}
 	
-	public boolean isRecursive() {
-		return recursive;
-	}
-	
-	@Nullable
-	public RecursiveConfigurable getRecursiveConfigurable() {
-		return recursiveConfigurable;
+	public boolean isInherited() {
+		return inherited;
 	}
 
-	public static interface RecursiveConfigurable {
-		
-		public void setRecursive(AjaxRequestTarget target, boolean recursive);
-		
+	public boolean isRecursive() {
+		return recursive;
 	}
 	
 }

@@ -3,7 +3,6 @@ package io.onedev.server.search.entity.issue;
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +10,6 @@ import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -20,8 +18,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -81,7 +77,7 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		Set<Long> fixedIssueNumbers = new HashSet<>();
+		Set<Long> fixedIssueIds = new HashSet<>();
 		
 		Project project = getProjectAndCommitIds().project;
 		ObjectId firstCommitId = getProjectAndCommitIds().firstCommitId;
@@ -96,22 +92,17 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 
 				RevCommit commit;
 				while ((commit = revWalk.next()) != null) 
-					fixedIssueNumbers.addAll(Issue.parseFixedIssueNumbers(project, commit.getFullMessage()));
+					fixedIssueIds.addAll(project.parseFixedIssueIds(commit.getFullMessage()));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
 
 		Predicate issuePredicate;
-		Path<Long> attribute = from.get(Issue.PROP_NUMBER);		
-		if (fixedIssueNumbers.size() > IN_CLAUSE_LIMIT) {
-			Collection<Long> allIssueNumbers = OneDev.getInstance(IssueManager.class).getIssueNumbers(project.getId());
-			issuePredicate = forManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
-		} else if (!fixedIssueNumbers.isEmpty()) {
-			issuePredicate = from.get(Issue.PROP_NUMBER).in(fixedIssueNumbers);
-		} else {
+		if (!fixedIssueIds.isEmpty()) 
+			issuePredicate = from.get(Issue.PROP_ID).in(fixedIssueIds);
+		else 
 			issuePredicate = builder.disjunction();
-		}
 		return builder.and(
 				builder.equal(from.get(Issue.PROP_PROJECT), project), 
 				issuePredicate);
@@ -133,7 +124,7 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 
 					RevCommit commit;
 					while ((commit = revWalk.next()) != null) { 
-						if (Issue.parseFixedIssueNumbers(issue.getProject(), commit.getFullMessage()).contains(issue.getNumber()))
+						if (issue.getProject().parseFixedIssueIds(commit.getFullMessage()).contains(issue.getId()))
 							return true;
 					}
 					return false;

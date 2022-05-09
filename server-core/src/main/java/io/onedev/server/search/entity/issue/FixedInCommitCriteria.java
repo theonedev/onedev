@@ -41,19 +41,15 @@ public class FixedInCommitCriteria extends Criteria<Issue> {
 	
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
-		if (!getCommit().getFixedIssueNumbers().isEmpty()) {
-			return builder.and(
-					builder.equal(from.get(Issue.PROP_PROJECT), getCommit().getProject()),
-					from.get(Issue.PROP_NUMBER).in(getCommit().getFixedIssueNumbers()));
-		} else {
+		if (!getCommit().getFixedIssueIds().isEmpty()) 
+			return from.get(Issue.PROP_ID).in(getCommit().getFixedIssueIds());
+		else 
 			return builder.disjunction();
-		}
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		return issue.getProject().equals(getCommit().getProject()) 
-				&& getCommit().getFixedIssueNumbers().contains(issue.getNumber());
+		return getCommit().getFixedIssueIds().contains(issue.getId());
 	}
 
 	@Override
