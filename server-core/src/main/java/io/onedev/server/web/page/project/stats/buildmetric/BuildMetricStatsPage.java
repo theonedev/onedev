@@ -279,7 +279,7 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 	}
 
 	public static PageParameters paramsOf(Project project, @Nullable String query) {
-		PageParameters params = paramsOf(project);
+		PageParameters params = ProjectPage.paramsOf(project);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		return params;
