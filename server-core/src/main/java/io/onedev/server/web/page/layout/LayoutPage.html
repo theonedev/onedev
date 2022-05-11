@@ -2,8 +2,8 @@
 	<div wicket:id="sidebar" class="sidebar">
 		<div class="sidebar-header">
 			<a wicket:id="brandLink" class="sidebar-brand">
-				<wicket:svg href="logo" class="icon"></wicket:svg>
-				ONEDEV			
+				<span wicket:id="brandLogo"></span>
+				<span wicket:id="brandName"></span>			
 			</a>
 			<a href="javascript:void(0);" class="sidebar-mini-toggle d-none d-lg-inline"><wicket:svg href="expand3" class="icon"></wicket:svg></a>
 			<a href="javascript:void(0);" class="sidebar-close d-lg-none"><wicket:svg href="times" class="icon"></wicket:svg></a>
@@ -15,7 +15,7 @@
 			</div>
 		</div>
 		<div class="sidebar-footer">
-			<div wicket:id="productVersion" class="sidebar-version"></div>
+			<a wicket:id="productVersion" class="sidebar-version"></a>
 			<div class="dropdown sidebar-help">
 				<a href="#" class="dropdown-toggle no-dropdown-caret" data-toggle="dropdown">
 					<wicket:svg href="question-o" class="icon"></wicket:svg>
@@ -32,7 +32,7 @@
 	<div wicket:id="topbar" class="topbar">
 		<div class="topbar-left">
 			<a wicket:id="brandLink" class="topbar-brand">
-				<wicket:svg href="logo" class="icon"></wicket:svg>
+				<span wicket:id="brandLogo"></span>
 			</a>
 			<a class="sidebar-toggle topbar-link d-lg-none">
 				<wicket:svg href="menu" class="icon"></wicket:svg>

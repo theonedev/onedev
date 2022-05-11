@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -19,6 +20,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.simple.SimplePage;
 
@@ -102,8 +104,8 @@ public class GeneralErrorPage extends SimplePage {
 	}
 
 	@Override
-	protected String getLogoHref() {
-		return "sad-panda";
+	protected WebComponent newPageLogo(String componentId) {
+		return new SpriteImage(componentId, "sad-panda");
 	}
 
 }

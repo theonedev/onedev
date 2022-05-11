@@ -43,6 +43,7 @@ import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.BackupSetting;
+import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
@@ -360,6 +361,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
+		
+		setting = settingManager.getSetting(Key.BRANDING);
+		if (setting == null) 
+			settingManager.saveBrandingSetting(new BrandingSetting());
 		
 		if (roleManager.get(Role.OWNER_ID) == null) {
 			Role owner = new Role();

@@ -9,6 +9,7 @@ import org.apache.wicket.request.mapper.CompoundRequestMapper;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
+import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentBuildsPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
@@ -143,7 +144,7 @@ import io.onedev.server.web.resource.AttachmentResourceReference;
 import io.onedev.server.web.resource.BuildLogResourceReference;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.resource.ServerLogResourceReference;
-import io.onedev.server.web.resource.SvgSpriteResourceReference;
+import io.onedev.server.web.resource.SpriteResourceReference;
 
 public class BaseUrlMapper extends CompoundRequestMapper {
 
@@ -204,8 +205,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		
 		add(new BaseResourceMapper("downloads/projects/${project}/builds/${build}/artifacts", 
 				new ArtifactResourceReference()));
-		add(new BaseResourceMapper(SvgSpriteResourceReference.DEFAULT_MOUNT_PATH, 
-				new SvgSpriteResourceReference(IconScope.class)));
+		add(new BaseResourceMapper(SpriteResourceReference.DEFAULT_MOUNT_PATH, 
+				new SpriteResourceReference(IconScope.class)));
 	}
 	
 	private void addErrorPages() {
@@ -277,6 +278,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
 		add(new BasePageMapper("administration/settings/issue-links", LinkSpecListPage.class));
 		add(new BasePageMapper("administration/settings/issue-templates", IssueTemplateListPage.class));
+		
+		add(new BasePageMapper("administration/settings/branding", BrandingSettingPage.class));
 		
 		add(new BasePageMapper("administration/settings/${setting}", ContributedAdministrationSettingPage.class));
 		

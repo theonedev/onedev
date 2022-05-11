@@ -33,7 +33,7 @@ import org.dom4j.io.XMLWriter;
 
 import io.onedev.commons.utils.StringUtils;
 
-public class SvgSpriteResourceStream implements IResourceStream {
+public class SpriteResourceStream implements IResourceStream {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -43,7 +43,7 @@ public class SvgSpriteResourceStream implements IResourceStream {
 	
 	private static final Map<Class<?>, byte[]> contentCache = new ConcurrentHashMap<>();
 	
-	public SvgSpriteResourceStream(Class<?> scope) {
+	public SpriteResourceStream(Class<?> scope) {
 		this.scope = scope;
 	}
 	
@@ -84,16 +84,6 @@ public class SvgSpriteResourceStream implements IResourceStream {
 		
 	}
 
-	@Override
-	public String getContentType() {
-		return "image/svg+xml";
-	}
-
-	@Override
-	public Bytes length() {
-		return Bytes.bytes(getContent().length);
-	}
-	
 	private byte[] getContent() {
 		byte[] content = contentCache.get(scope);
 		if (content == null) {
@@ -181,6 +171,16 @@ public class SvgSpriteResourceStream implements IResourceStream {
 	}
 
 	@Override
+	public String getContentType() {
+		return "image/svg+xml";
+	}
+
+	@Override
+	public Bytes length() {
+		return Bytes.bytes(getContent().length);
+	}
+	
+	@Override
 	public InputStream getInputStream() throws ResourceStreamNotFoundException {
 		return new ByteArrayInputStream(getContent());		
 	}
@@ -215,5 +215,5 @@ public class SvgSpriteResourceStream implements IResourceStream {
 	@Override
 	public void setVariation(String variation) {
 	}
-
+	
 }

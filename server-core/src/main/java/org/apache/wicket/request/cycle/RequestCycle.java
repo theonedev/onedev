@@ -75,20 +75,6 @@ public class RequestCycle implements IRequestCycle, IEventSink
 {
 	private static final Logger log = LoggerFactory.getLogger(RequestCycle.class);
 	
-	private static MetaDataKey<ConcurrentHashMap<ResourceUrlCacheKey, CharSequence>> resourceUrlCacheKey = 
-			new MetaDataKey<ConcurrentHashMap<ResourceUrlCacheKey, CharSequence>>(){
-
-		private static final long serialVersionUID = 1L;
-		
-	};
-
-	private static MetaDataKey<ConcurrentHashMap<PageUrlCacheKey, CharSequence>> pageUrlCacheKey = 
-			new MetaDataKey<ConcurrentHashMap<PageUrlCacheKey, CharSequence>>(){
-
-		private static final long serialVersionUID = 1L;
-		
-	};
-	
 	private ConcurrentHashMap<ResourceUrlCacheKey, CharSequence> resourceUrlCache = new ConcurrentHashMap<>();
 	
 	private ConcurrentHashMap<PageUrlCacheKey, CharSequence> pageUrlCache = new ConcurrentHashMap<>();
@@ -515,18 +501,6 @@ public class RequestCycle implements IRequestCycle, IEventSink
 	 */
 	public final CharSequence urlFor(ResourceReference reference, PageParameters params)
 	{
-		ConcurrentHashMap<ResourceUrlCacheKey, CharSequence> resourceUrlCache;
-		Session session = ThreadContext.getSession();
-		if (session != null) {
-			resourceUrlCache = session.getMetaData(resourceUrlCacheKey);
-			if (resourceUrlCache == null) {
-				resourceUrlCache = new ConcurrentHashMap<>();
-				session.setMetaData(resourceUrlCacheKey, resourceUrlCache);
-			}
-		} else {
-			resourceUrlCache = this.resourceUrlCache;
-		}
-		
 		ResourceUrlCacheKey key = new ResourceUrlCacheKey(reference, params);
 		CharSequence url = resourceUrlCache.get(key);
 		if (url == null) {
@@ -554,18 +528,6 @@ public class RequestCycle implements IRequestCycle, IEventSink
 	public final <C extends Page> CharSequence urlFor(final Class<C> pageClass,
 		final PageParameters parameters)
 	{
-		ConcurrentHashMap<PageUrlCacheKey, CharSequence> pageUrlCache;
-		Session session = ThreadContext.getSession();
-		if (session != null) {
-			pageUrlCache = session.getMetaData(pageUrlCacheKey);
-			if (pageUrlCache == null) {
-				pageUrlCache = new ConcurrentHashMap<>();
-				session.setMetaData(pageUrlCacheKey, pageUrlCache);
-			}
-		} else {
-			pageUrlCache = this.pageUrlCache;
-		}
-		
 		PageUrlCacheKey key = new PageUrlCacheKey(pageClass, parameters);
 		CharSequence url = pageUrlCache.get(key);
 		if (url == null) {

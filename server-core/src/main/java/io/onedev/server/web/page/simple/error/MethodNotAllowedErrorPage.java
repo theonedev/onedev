@@ -2,10 +2,12 @@ package io.onedev.server.web.page.simple.error;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.simple.SimplePage;
 
 @SuppressWarnings("serial")
@@ -22,8 +24,8 @@ public class MethodNotAllowedErrorPage extends SimplePage {
 	}
 
 	@Override
-	protected String getLogoHref() {
-		return "sad-panda";
+	protected WebComponent newPageLogo(String componentId) {
+		return new SpriteImage(componentId, "sad-panda");
 	}
 
 	@Override

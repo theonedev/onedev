@@ -487,6 +487,7 @@ public class Upgrade extends DefaultPersistManager {
 			FileUtils.deleteFile(new File(upgradeDir, "boot/system.classpath"));
 		
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
+		
 		for (File file: new File(Bootstrap.getSiteDir(), "avatars").listFiles()) {
 			if (file.isFile()) {
 				try {

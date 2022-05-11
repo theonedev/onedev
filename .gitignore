@@ -9,6 +9,7 @@ server-product/docker/onedev-*/
 **/.idea
 release.properties
 pom.xml.releaseBackup
+pom.xml.versionsBackup
 
 .loadpath
 *~

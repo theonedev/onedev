@@ -40,6 +40,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
 import io.onedev.server.web.component.commandpalette.CommandPalettePanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -50,6 +51,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
+import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
@@ -123,7 +125,23 @@ public abstract class LayoutPage extends BasePage {
 		
 		MainMenuCustomization customization = OneDev.getInstance(MainMenuCustomization.class);
 		
-		sidebar.add(new BookmarkablePageLink<Void>("brandLink", customization.getHomePage()));
+		sidebar.add(new BookmarkablePageLink<Void>("brandLink", customization.getHomePage()) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new BrandLogoPanel("brandLogo"));
+				add(new Label("brandName", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						return OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
+					}
+					
+				}));
+			}
+			
+		});
 
 		sidebar.add(new ListView<SidebarMenu>("menus", new LoadableDetachableModel<List<SidebarMenu>>() {
 
@@ -215,6 +233,9 @@ public abstract class LayoutPage extends BasePage {
 						}
 					}
 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Branding", 
+							BrandingSettingPage.class, new PageParameters()));
+					
 					List<SidebarMenuItem> maintenanceMenuItems = new ArrayList<>();
 					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Database Backup", 
 							DatabaseBackupPage.class, new PageParameters()));
@@ -320,7 +341,8 @@ public abstract class LayoutPage extends BasePage {
 		});
 		
 		Plugin product = AppLoader.getProduct();
-		sidebar.add(new Label("productVersion", "Ver. " + product.getVersion()));
+		sidebar.add(new ExternalLink("productVersion", "https://code.onedev.io/projects/160")
+				.setBody(Model.of("OneDev " + product.getVersion())));
 		sidebar.add(new ExternalLink("docLink", OneDev.getInstance().getDocRoot() + "/"));
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
 		
@@ -386,7 +408,15 @@ public abstract class LayoutPage extends BasePage {
 			
 		}.setVisible(loginUser == null));
 		
-		topbar.add(new BookmarkablePageLink<Void>("brandLink", customization.getHomePage()));
+		topbar.add(new BookmarkablePageLink<Void>("brandLink", customization.getHomePage()) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new BrandLogoPanel("brandLogo"));
+			}
+			
+		});
 		
 		WebMarkupContainer userInfo = new WebMarkupContainer("userInfo");
 		if (loginUser != null) {

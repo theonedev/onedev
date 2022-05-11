@@ -22,6 +22,7 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.BackupSetting;
+import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
@@ -91,6 +92,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     private volatile Long contributedSettingsId;
 	
     private volatile Long performanceSettingId;
+    
+    private volatile Long brandingSettingId;
     
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -187,6 +190,32 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		dataManager.scheduleBackup(backupSetting);
 	}
 
+	@Sessional
+	@Override
+	public BrandingSetting getBrandingSetting() {
+        Setting setting;
+        if (brandingSettingId == null) {
+    		setting = getSetting(Key.BRANDING);
+    		Preconditions.checkNotNull(setting);
+    		brandingSettingId = setting.getId();
+        } else {
+            setting = load(brandingSettingId);
+        }
+        return (BrandingSetting) setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveBrandingSetting(BrandingSetting brandingSetting) {
+		Setting setting = getSetting(Key.BRANDING);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.BRANDING);
+		}
+		setting.setValue(brandingSetting);
+		dao.persist(setting);
+	}
+	
 	@Sessional
 	@Override
 	public SecuritySetting getSecuritySetting() {

@@ -22,7 +22,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.mapper.BaseResourceMapper;
-import io.onedev.server.web.resource.SvgSpriteResourceReference;
+import io.onedev.server.web.resource.SpriteResourceReference;
 
 @SuppressWarnings("serial")
 public class SpriteImage extends WebComponent {
@@ -59,7 +59,7 @@ public class SpriteImage extends WebComponent {
 	public static String getVersionedHref(@Nullable Class<?> scope, @Nullable String name) {
 		if (scope == null)
 			scope = IconScope.class;
-		String baseUrl = RequestCycle.get().urlFor(new SvgSpriteResourceReference(scope), new PageParameters()).toString();
+		String baseUrl = RequestCycle.get().urlFor(new SpriteResourceReference(scope), new PageParameters()).toString();
 		if (name != null)
 			return baseUrl + "#" + name;
 		else
@@ -87,8 +87,8 @@ public class SpriteImage extends WebComponent {
 					for (BaseResourceMapper mapper: resourceMappers) {
 						BaseResourceMapper baseMapper = (BaseResourceMapper) mapper;
 						if (StringUtils.strip(baseMapper.getPath(), "/").equalsIgnoreCase(mountPath)) {
-							if (baseMapper.getResourceReference() instanceof SvgSpriteResourceReference) {
-								scope = ((SvgSpriteResourceReference) baseMapper.getResourceReference()).getScope();
+							if (baseMapper.getResourceReference() instanceof SpriteResourceReference) {
+								scope = ((SpriteResourceReference) baseMapper.getResourceReference()).getScope();
 							} else {
 								throw new ExplicitException("Path '" + mountPath 
 										+ "' should be mounted to a svg sprite resource reference");
@@ -109,7 +109,7 @@ public class SpriteImage extends WebComponent {
 			symbol = StringUtils.strip(href, "/");
 		}
 		
-		String spriteUrl = urlFor(new SvgSpriteResourceReference(scope), new PageParameters()).toString();
+		String spriteUrl = urlFor(new SpriteResourceReference(scope), new PageParameters()).toString();
 		
 		replaceComponentTagBody(markupStream, openTag, 
 				"<use xlink:href='" + spriteUrl + "#" + symbol + "'></use>");

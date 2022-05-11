@@ -7,6 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.web.asset.cropper.CropperResourceReference;
+import io.onedev.server.web.asset.fileupload.FileUploadCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -22,6 +23,7 @@ public class AvatarUploadResourceReference extends BaseDependentResourceReferenc
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CropperResourceReference()));
+		dependencies.add(CssHeaderItem.forReference(new FileUploadCssResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
 				AvatarUploadResourceReference.class, "avatar-upload.css")));
 		return dependencies;

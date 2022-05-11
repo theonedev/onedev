@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.BackupSetting;
+import io.onedev.server.model.support.administration.BrandingSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
@@ -105,6 +106,11 @@ public interface SettingManager extends EntityManager<Setting> {
 	 * 			setting record will still be remained in database)
 	 */
 	void saveBackupSetting(@Nullable BackupSetting backupSetting);
+	
+	@Nullable
+	BrandingSetting getBrandingSetting();
+	
+	void saveBrandingSetting(@Nullable BrandingSetting brandingSetting);
 
 	SecuritySetting getSecuritySetting();
 	
@@ -155,7 +161,7 @@ public interface SettingManager extends EntityManager<Setting> {
     SshSetting getSshSetting();
     
     GpgSetting getGpgSetting();
-
+    
     void savePerformanceSetting(PerformanceSetting performanceSetting);
 
     PerformanceSetting getPerformanceSetting();

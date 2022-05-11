@@ -5,12 +5,14 @@ import java.io.Serializable;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.util.usage.InUseException;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.simple.SimplePage;
 
 @SuppressWarnings("serial")
@@ -57,8 +59,8 @@ public class InUseErrorPage extends SimplePage {
 	}
 	
 	@Override
-	protected String getLogoHref() {
-		return "sad-panda";
+	protected WebComponent newPageLogo(String componentId) {
+		return new SpriteImage(componentId, "sad-panda");
 	}
 
 }

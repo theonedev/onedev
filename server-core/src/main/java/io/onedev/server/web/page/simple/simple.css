@@ -27,9 +27,11 @@
 .force-ordinary-style .bean-editor {
 	text-align: left !important;
 }
-.SimplePage .main .logo.icon {
+.SimplePage .main .brand-logo {
 	color: var(--primary);
 	margin-bottom: 3rem;
+	width: 100px;
+	height: 100px;
 }
 .SimplePage .main .title {
 	margin-bottom: 5rem;

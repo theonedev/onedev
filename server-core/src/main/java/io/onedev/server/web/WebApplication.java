@@ -56,8 +56,8 @@ import org.apache.wicket.util.file.IResourceFinder;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.time.Duration;
 
-import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -69,8 +69,8 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.simple.error.GeneralErrorPage;
 import io.onedev.server.web.page.simple.error.InUseErrorPage;
-import io.onedev.server.web.resource.SvgSpriteResourceReference;
-import io.onedev.server.web.resource.SvgSpriteResourceStream;
+import io.onedev.server.web.resource.SpriteResourceReference;
+import io.onedev.server.web.resource.SpriteResourceStream;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
 import io.onedev.server.web.websocket.WebSocketManager;
@@ -111,8 +111,8 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 
 			@Override
 			public IResourceStream find(Class<?> clazz, String pathname) {
-				if (pathname.contains(SvgSpriteResourceReference.RESOURCE_NAME)) 
-					return new SvgSpriteResourceStream(clazz);
+				if (pathname.contains(SpriteResourceReference.RESOURCE_NAME)) 
+					return new SpriteResourceStream(clazz);
 				else 
 					return null;
 			}
