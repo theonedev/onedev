@@ -505,6 +505,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 
 			@Override
 			public void setObject(String object) {
+				currentFile = null;
 				pathFilter = object;
 			}
 			

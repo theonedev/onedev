@@ -486,6 +486,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 			@Override
 			public void setObject(String object) {
 				state.pathFilter = object;
+				state.currentFile = null;
 				pushState(RequestCycle.get().find(AjaxRequestTarget.class));
 			}
 			

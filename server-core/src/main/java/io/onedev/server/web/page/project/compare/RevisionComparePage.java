@@ -603,6 +603,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 				@Override
 				public void setObject(String object) {
 					state.pathFilter = object;
+					state.currentFile = null;
 					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
 				}
 				

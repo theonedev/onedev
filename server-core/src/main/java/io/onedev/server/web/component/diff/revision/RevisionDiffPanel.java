@@ -427,6 +427,10 @@ public abstract class RevisionDiffPanel extends Panel {
 					cookie.setPath("/");
 					response.addCookie(cookie);
 					target.add(body);
+					
+					for (DiffViewMode each: DiffViewMode.values()) 
+						target.add(getParent().get(each.name().toLowerCase()));
+					
 					((BasePage)getPage()).resizeWindow(target);
 				}
 				
@@ -670,7 +674,7 @@ public abstract class RevisionDiffPanel extends Panel {
 						if (index != -1)
 							return "File " + (index +1) + " of " + getTotalChanges().size();
 						else
-							return getCurrentFile();
+							return "File '" + getCurrentFile() + "' not found in change set";
 					}
 					
 				}));
@@ -1311,7 +1315,6 @@ public abstract class RevisionDiffPanel extends Panel {
 					if (blobDiffPanel != null) 
 						blobDiffPanel.onCommentClosed(target);
 					annotationSupport.onCommentClosed(target);
-					target.prependJavaScript("$('body').removeClass('hide-side-info');");
 				} else {
 					Mark mark = annotationSupport.getMark();
 					if (mark != null) {
@@ -1321,6 +1324,7 @@ public abstract class RevisionDiffPanel extends Panel {
 						annotationSupport.onUnmark(target);
 					}
 				}
+				target.prependJavaScript("$('body').removeClass('hide-side-info');");
 			}
 			
 		});
