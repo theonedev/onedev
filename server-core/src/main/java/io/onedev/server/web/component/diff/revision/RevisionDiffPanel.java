@@ -1306,11 +1306,21 @@ public abstract class RevisionDiffPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				CodeComment comment = annotationSupport.getOpenComment();
 				clearComment(target);
-				BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
-				if (blobDiffPanel != null) 
-					blobDiffPanel.onCommentClosed(target);
-				annotationSupport.onCommentClosed(target);
-				target.prependJavaScript("$('body').removeClass('hide-side-info');");
+				if (comment != null) {
+					BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
+					if (blobDiffPanel != null) 
+						blobDiffPanel.onCommentClosed(target);
+					annotationSupport.onCommentClosed(target);
+					target.prependJavaScript("$('body').removeClass('hide-side-info');");
+				} else {
+					Mark mark = annotationSupport.getMark();
+					if (mark != null) {
+						BlobDiffPanel blobDiffPanel = getBlobDiffPanel(mark.getPath());
+						if (blobDiffPanel != null) 
+							blobDiffPanel.unmark(target);
+						annotationSupport.onUnmark(target);
+					}
+				}
 			}
 			
 		});
