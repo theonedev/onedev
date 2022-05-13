@@ -83,7 +83,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	private static final long serialVersionUID = 1L;
 	
-	static final int ORDER=200;
+	static final int ORDER=50;
 
 	private static final Object cacheHomeCreationLock = new Object();
 	

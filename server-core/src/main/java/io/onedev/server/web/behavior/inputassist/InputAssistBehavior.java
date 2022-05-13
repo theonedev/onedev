@@ -138,12 +138,9 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 				ComponentContext.push(new ComponentContext(getComponent()));
 				try {
 					for (InputCompletion suggestion: getSuggestions(new InputStatus(inputContent, inputCaret))) {
-						if (!suggestion.getContent().equals(inputStatus.getContent()) 
-								|| suggestion.getCaret() != inputStatus.getCaret()) {
-							suggestions.add(suggestion);
-							if (suggestions.size() >= MAX_SUGGESTIONS)
-								break;
-						}
+						suggestions.add(suggestion);
+						if (suggestions.size() >= MAX_SUGGESTIONS)
+							break;
 					}
 				} finally {
 					ComponentContext.pop();
