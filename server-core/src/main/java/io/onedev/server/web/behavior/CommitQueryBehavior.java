@@ -81,7 +81,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 								else
 									content = user.getName() + " <>";
 								content = content.trim();
-								PatternApplied applied = WildcardUtils.applyPattern(matchWith, content, false);
+								PatternApplied applied = WildcardUtils.applyStringPattern(matchWith, content, false);
 								if (applied != null)
 									suggestedInputs.put(applied.getText(), applied.getMatch());
 							}

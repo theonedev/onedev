@@ -459,7 +459,7 @@ public class SuggestionUtils {
 		
 		List<PatternApplied> allApplied = new ArrayList<>();
 		for (String path: paths) {
-			PatternApplied applied = WildcardUtils.applyPattern(matchWith, path, false);
+			PatternApplied applied = WildcardUtils.applyPathPattern(matchWith, path, false);
 			if (applied != null) 
 				allApplied.add(applied);
 		}

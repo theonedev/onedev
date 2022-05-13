@@ -43,13 +43,35 @@ public class WildcardUtilsTest {
 	}
 	
 	@Test
-	public void shouldApplyPattern() {
-		assertEquals("he*?lo:1-5", applyPattern("E*?l", "hello", false).toString());
-		assertEquals(null, applyPattern("*he ?d", "hello world", false));
-		assertEquals("*he*ld 2:0-6", applyPattern("*hE*ld", "hello world 2", false).toString());
-		assertEquals("hello:0-0", applyPattern("", "hello", false).toString());
-		assertEquals("*:0-1", applyPattern("*", "hello", false).toString());
-		assertEquals("**:0-2", applyPattern("**", "hello", false).toString());
+	public void shouldApplyStringPattern() {
+		assertEquals("he*?lo:1-5", applyStringPattern("E*?l", "hello", false).toString());
+		assertEquals(null, applyStringPattern("*he ?d", "hello world", false));
+		assertEquals("*he*ld 2:0-6", applyStringPattern("*hE*ld", "hello world 2", false).toString());
+		assertEquals("hello:0-0", applyStringPattern("", "hello", false).toString());
+		assertEquals("*:0-1", applyStringPattern("*", "hello", false).toString());
+		assertEquals("**:0-2", applyStringPattern("**", "hello", false).toString());
+	}
+	
+	@Test
+	public void shouldApplyPathPattern() {
+		assertEquals(null, applyPathPattern("ir/**/c/*.java", "dir/a/b/file.java", false));
+		assertEquals("dir/file:4-7", applyPathPattern("fil", "dir/file", false).toString());
+		assertEquals("dir/file:3-4", applyPathPattern("/", "dir/file", false).toString());
+		assertEquals("dir/**/c*/*.java:1-16", applyPathPattern("ir/**/c*/*.java", "dir/a/b/c5/file.java", false).toString());
+		assertEquals("dir/**/*.java:1-13", applyPathPattern("ir/**/*.java", "dir/a/b/file.java", false).toString());
+		assertEquals("dir/**/file:0-11", applyPathPattern("dir/**/file", "dir/file", false).toString());
+		assertEquals("dir/**/file:0-11", applyPathPattern("dir/**/file", "dir/a/b/file", false).toString());
+		assertEquals("**/file:0-7", applyPathPattern("**/file", "dir/a/b/file", false).toString());
+		assertEquals("**/file:0-7", applyPathPattern("**/file", "file", false).toString());
+		assertEquals("dir/**:0-6", applyPathPattern("dir/**", "dir/subdir/file", false).toString());
+		assertEquals("dir/**:0-6", applyPathPattern("dir/**", "dir/", false).toString());
+		assertEquals("dir/**:0-6", applyPathPattern("dir/**", "dir", false).toString());
+		assertEquals("di*/file:1-4", applyPathPattern("i*/", "dir/file", false).toString());
+		assertEquals("dir/file:1-4", applyPathPattern("ir/", "dir/file", false).toString());
+		assertEquals(null, applyPathPattern("**", "/file", false));
+		assertEquals("*:0-1", applyPathPattern("*", "dir", false).toString());
+		assertEquals("*/file:0-1", applyPathPattern("*", "dir/file", false).toString());
+		assertEquals("**:0-2", applyPathPattern("**", "dir/file", false).toString());
 	}
 	
 }
