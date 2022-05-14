@@ -36,6 +36,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.TextHit;
+import io.onedev.server.web.behavior.CtrlClickBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -443,7 +444,8 @@ public abstract class SearchResultPanel extends Panel {
 					
 				});
 				
-				blobItem.add(new ViewStateAwareAjaxLink<Void>("blobLink") {
+				Component delegateBlobLink;
+				blobItem.add(delegateBlobLink = new ViewStateAwareAjaxLink<Void>("delegateBlobLink") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -452,6 +454,17 @@ public abstract class SearchResultPanel extends Panel {
 						attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener());
 					}
 					
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						activeBlobIndex = blobItem.getIndex();
+						activeHitIndex = -1;
+						onActiveIndexChange(target);
+					}
+					
+				});
+				
+				blobItem.add(new WebMarkupContainer("blobLink") {
+
 					@Override
 					protected void onInitialize() {
 						super.onInitialize();
@@ -470,15 +483,10 @@ public abstract class SearchResultPanel extends Panel {
 						add(AttributeAppender.replace("href", url.toString()));
 						
 						setMarkupId(SearchResultPanel.this.getMarkupId() + "-" + blobItem.getIndex());
+						
+						add(new CtrlClickBehavior(delegateBlobLink));
 					}
 
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						activeBlobIndex = blobItem.getIndex();
-						activeHitIndex = -1;
-						onActiveIndexChange(target);
-					}
-					
 				});
 				
 				ExpandStatus expandStatus = RequestCycle.get().getMetaData(ExpandStatusKey.INSTANCE);
@@ -498,8 +506,27 @@ public abstract class SearchResultPanel extends Panel {
 					@Override
 					protected void populateItem(final ListItem<QueryHit> hitItem) {
 						final QueryHit hit = hitItem.getModelObject();
-						hitItem.add(new ViewStateAwareAjaxLink<Void>("hitLink") {
+						Component delegateHitLink; 
+						hitItem.add(delegateHitLink = new ViewStateAwareAjaxLink<Void>("delegateHitLink") {
 
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
+								attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener());
+							}
+							
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								activeBlobIndex = blobItem.getIndex();
+								activeHitIndex = hitItem.getIndex();
+								onActiveIndexChange(target);
+							}
+							
+						});
+						
+						hitItem.add(new WebMarkupContainer("hitLink") {
+							
 							@Override
 							protected void onInitialize() {
 								super.onInitialize();
@@ -526,22 +553,10 @@ public abstract class SearchResultPanel extends Panel {
 								
 								setMarkupId(SearchResultPanel.this.getMarkupId() 
 										+ "-" + blobItem.getIndex() + "-" + hitItem.getIndex());
+								
+								add(new CtrlClickBehavior(delegateHitLink));
 							}
 
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.setChannel(new AjaxChannel(NAV_CHANNEL, AjaxChannel.Type.DROP));
-								attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener());
-							}
-							
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								activeBlobIndex = blobItem.getIndex();
-								activeHitIndex = hitItem.getIndex();
-								onActiveIndexChange(target);
-							}
-							
 						});
 					}
 					

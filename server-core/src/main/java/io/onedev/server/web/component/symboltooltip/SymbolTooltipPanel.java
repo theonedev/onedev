@@ -40,6 +40,7 @@ import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.SymbolQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.CtrlClickBehavior;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -83,7 +84,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 			protected void populateItem(ListItem<QueryHit> item) {
 				final QueryHit hit = item.getModelObject();
 				item.add(hit.renderIcon("icon"));
-				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
+				
+				AjaxLink<Void> delegateLink = new ViewStateAwareAjaxLink<Void>("delegateLink") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -94,7 +96,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 					}
 					
 				};
-
+				item.add(delegateLink);
+				
+				WebMarkupContainer link = new WebMarkupContainer("link");
+				link.add(new CtrlClickBehavior(delegateLink));
+				
 				CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, getQueryHitParams(hit));
 				link.add(AttributeAppender.replace("href", url.toString()));
 				link.add(hit.render("label"));

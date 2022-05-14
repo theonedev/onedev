@@ -17,6 +17,7 @@
 			<li wicket:id="blobs" class="blob text-nowrap border-0">
 				<div class="d-flex align-items-center flex-nowrap">
 					<a wicket:id="expandLink" class="expand"><svg wicket:id="icon" class="icon"></svg></a> 
+					<a wicket:id="delegateBlobLink"></a>
 					<a wicket:id="blobLink" class="blob selectable d-inline-block flex-grow-1 flex-shrink-1">
 						<wicket:svg href="file" class="icon"></wicket:svg>
 						<span wicket:id="label"></span>
@@ -24,6 +25,7 @@
 				</div>
 				<ul wicket:id="hits" class="list-unstyled">
 					<li wicket:id="hits" class="hit">
+						<a wicket:id="delegateHitLink"></a>
 						<a wicket:id="hitLink" class="hit selectable d-block">
 							<img wicket:id="icon"></img>
 							<span wicket:id="lineNo" class="line-no"></span>
