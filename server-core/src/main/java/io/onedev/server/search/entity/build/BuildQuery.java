@@ -1,15 +1,15 @@
 package io.onedev.server.search.entity.build;
 
+import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
 import static io.onedev.server.model.Build.NAME_BRANCH;
-import static io.onedev.server.model.Build.NAME_STATUS;
 import static io.onedev.server.model.Build.NAME_COMMIT;
 import static io.onedev.server.model.Build.NAME_FINISH_DATE;
 import static io.onedev.server.model.Build.NAME_JOB;
-import static io.onedev.server.model.Build.NAME_NUMBER;
 import static io.onedev.server.model.Build.NAME_PENDING_DATE;
 import static io.onedev.server.model.Build.NAME_PROJECT;
 import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
 import static io.onedev.server.model.Build.NAME_RUNNING_DATE;
+import static io.onedev.server.model.Build.NAME_STATUS;
 import static io.onedev.server.model.Build.NAME_SUBMIT_DATE;
 import static io.onedev.server.model.Build.NAME_TAG;
 import static io.onedev.server.model.Build.NAME_VERSION;
@@ -206,11 +206,11 @@ public class BuildQuery extends EntityQuery<Build> {
 							case NAME_PROJECT:
 								return new ProjectCriteria(value);
 							case NAME_STATUS:
-								try {
-									return new StatusCriteria(Build.Status.valueOf(value.toUpperCase()));
-								} catch (IllegalArgumentException e) {
+								Build.Status status = Build.Status.of(value);
+								if (status != null)
+									return new StatusCriteria(status);
+								else
 									throw new ExplicitException("Invalid status: " + value);
-								}
 							case NAME_COMMIT:
 								ProjectScopedCommit commitId = getCommitId(project, value); 
 								return new CommitCriteria(commitId.getProject(), commitId.getCommitId());

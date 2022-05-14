@@ -234,6 +234,15 @@ public class Build extends AbstractEntity implements Referenceable {
 		}
 		
 		@Nullable
+		public static Status of(String statusName) {
+			for (Status status: Status.values()) {
+				if (status.toString().toLowerCase().equals(statusName.toLowerCase()))
+					return status;
+			}
+			return null;
+		}
+		
+		@Nullable
 		public static Status getOverallStatus(Collection<Status> statuses) {
 			for (Status status: Status.values()) {
 				if (statuses.contains(status))
