@@ -238,8 +238,10 @@ public class IssueStateListPage extends IssueSettingPage {
 						Collections.swap(getSetting().getStateSpecs(), fromIndex-i, fromIndex-i-1);
 				}
 				
+				getSetting().setReconciled(false);
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 				target.add(statesTable);
+				send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 			}
 			
 		}.sortable("tbody"));
