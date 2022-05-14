@@ -1,6 +1,5 @@
 package io.onedev.server.web.util;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -17,13 +15,10 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobVariable;
@@ -418,24 +413,6 @@ public class SuggestionUtils {
 				.sorted()
 				.collect(Collectors.toList());
 		return suggest(milestoneNames, matchWith);
-	}
-	
-	public static List<InputSuggestion> suggestArtifacts(Build build, String matchWith) {
-		return LockUtils.read(build.getArtifactsLockKey(), new Callable<List<InputSuggestion>>() {
-
-			@Override
-			public List<InputSuggestion> call() throws Exception {
-				List<String> paths = new ArrayList<>();
-				File artifactsDir = build.getArtifactsDir();
-				if (artifactsDir.exists()) {
-					int baseLen = artifactsDir.getAbsolutePath().length()+1;
-					for (File file: FileUtils.listFiles(artifactsDir, Lists.newArrayList("**"), new ArrayList<>())) 
-						paths.add(file.getAbsolutePath().substring(baseLen));
-				}
-				return suggestPaths(paths, matchWith);
-			}
-			
-		});
 	}
 	
 	private static Set<String> getChildren(List<PatternApplied> allApplied, String path) {

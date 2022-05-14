@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -35,11 +36,11 @@ import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
-public abstract class ProjectCommentPanel extends Panel {
+public abstract class CommentPanel extends Panel {
 
 	private static final String COMMENT_ID = "comment";
 	
-	public ProjectCommentPanel(String id) {
+	public CommentPanel(String id) {
 		super(id);
 	}
 	
@@ -53,27 +54,48 @@ public abstract class ProjectCommentPanel extends Panel {
 	private Component newViewer() {
 		Fragment viewer = new Fragment(COMMENT_ID, "viewFrag", this);
 		
-		if (StringUtils.isNotBlank(getComment())) {
-			viewer.add(new MarkdownViewer("content", new IModel<String>() {
+		viewer.add(new MarkdownViewer("content", new IModel<String>() {
 
-				@Override
-				public String getObject() {
-					return getComment();
-				}
+			@Override
+			public String getObject() {
+				return getComment();
+			}
 
-				@Override
-				public void detach() {
-				}
+			@Override
+			public void detach() {
+			}
 
-				@Override
-				public void setObject(String object) {
-					onSaveComment(RequestCycle.get().find(AjaxRequestTarget.class), object);
-				}
+			@Override
+			public void setObject(String object) {
+				onSaveComment(RequestCycle.get().find(AjaxRequestTarget.class), object);
+			}
 
-			}, getContentVersionSupport()));
-		} else {
-			viewer.add(new Label("content", "<i class='text-muted'>No comment</i>").setEscapeModelStrings(false));
-		}
+		}, getContentVersionSupport()) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(StringUtils.isNotBlank(getComment()));
+			}
+			
+		});
+			
+		viewer.add(new Label("noContent", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getEmptyDescription();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(StringUtils.isBlank(getComment()));
+			}
+			
+		});
 		
 		WebMarkupContainer actions = new WebMarkupContainer("actions");
 		actions.setVisible(canModifyOrDeleteComment());
@@ -81,7 +103,7 @@ public abstract class ProjectCommentPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment editor = new Fragment(COMMENT_ID, "editFrag", ProjectCommentPanel.this);
+				Fragment editor = new Fragment(COMMENT_ID, "editFrag", CommentPanel.this);
 				
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
@@ -96,17 +118,17 @@ public abstract class ProjectCommentPanel extends Panel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return ProjectCommentPanel.this.getAttachmentSupport();
+						return CommentPanel.this.getAttachmentSupport();
 					}
 
 					@Override
 					protected Project getProject() {
-						return ProjectCommentPanel.this.getProject();
+						return CommentPanel.this.getProject();
 					}
 
 					@Override
 					protected List<User> getMentionables() {
-						return ProjectCommentPanel.this.getMentionables();
+						return CommentPanel.this.getMentionables();
 					}
 					
 				};
@@ -194,6 +216,10 @@ public abstract class ProjectCommentPanel extends Panel {
 		super.onInitialize();
 		
 		add(newViewer());
+	}
+	
+	protected String getEmptyDescription() {
+		return "No comment";
 	}
 
 	@Nullable

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.model.PropertyModel;
 
 import com.google.common.collect.Lists;
@@ -52,7 +53,7 @@ public abstract class CommentableOperationConfirmPanel extends OperationConfirmP
 			}
 			
 			@Override
-			protected List<AttributeModifier> getInputModifiers() {
+			protected List<Behavior> getInputBehaviors() {
 				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a note"));
 			}
 			

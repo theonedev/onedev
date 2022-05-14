@@ -8,6 +8,9 @@
 .build-detail>.card-body>.main>.error-message {
 	max-height: 100px;
 }
+.build-detail>.card-body>.main>.description {
+	border-width: 2px !important;
+}
 
 .build-pipeline .pipeline-column {
 	flex-grow: 0 !important;

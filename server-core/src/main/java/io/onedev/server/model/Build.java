@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -43,6 +44,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -78,6 +80,7 @@ import io.onedev.server.model.support.build.actionauthorization.ActionAuthorizat
 import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
 import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
 import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
@@ -94,6 +97,8 @@ import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -110,10 +115,12 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
-public class Build extends AbstractEntity implements Referenceable {
+public class Build extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final int MAX_DESCRIPTION_LEN = 14000;
+	
 	public static final String NAME_VERSION = "Version";
 	
 	public static final String PROP_VERSION = "version";
@@ -289,6 +296,12 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private String version;
 	
+	@Column(length=MAX_DESCRIPTION_LEN)
+	private String description;
+	
+	@Column(nullable=false)
+	private String uuid = UUID.randomUUID().toString();
+	
 	private long number;
 	
 	@Column(nullable=false)
@@ -428,6 +441,16 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.version = version;
 	}
 
+	@Editable
+	@Markdown
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(@Nullable String description) {
+		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
+	}
+
 	@Override
 	public long getNumber() {
 		return number;
@@ -435,6 +458,14 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setNumber(long number) {
 		this.number = number;
+	}
+
+	public String getUUID() {
+		return uuid;
+	}
+
+	public void setUUUID(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public String getCommitHash() {
@@ -944,4 +975,15 @@ public class Build extends AbstractEntity implements Referenceable {
 		
 		return matches.get();
 	}
+
+	@Override
+	public Project getAttachmentProject() {
+		return getProject();
+	}
+
+	@Override
+	public String getAttachmentGroup() {
+		return uuid;
+	}
+	
 }

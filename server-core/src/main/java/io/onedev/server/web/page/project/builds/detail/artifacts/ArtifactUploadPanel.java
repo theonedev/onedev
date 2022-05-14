@@ -1,44 +1,43 @@
-package io.onedev.server.web.page.project.blob;
+package io.onedev.server.web.page.project.builds.detail.artifacts;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.RefUpdated;
-import io.onedev.server.model.Project;
-import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.FileUpload;
 
 @SuppressWarnings("serial")
-public abstract class BlobUploadPanel extends Panel {
+public abstract class ArtifactUploadPanel extends Panel {
 
-	private final BlobRenderContext context;
-	
 	private String directory;
-	
-	private String commitMessage;
 	
 	private final Collection<FileUpload> uploads = new ArrayList<>();
 	
-	public BlobUploadPanel(String id, BlobRenderContext context) {
+	public ArtifactUploadPanel(String id) {
 		super(id);
-		this.context = context;
 	}
 
 	@Override
@@ -78,20 +77,31 @@ public abstract class BlobUploadPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				
+				LockUtils.write(getBuild().getArtifactsLockKey(), new Callable<Void>() {
 
-				String commitMessage = BlobUploadPanel.this.commitMessage;
-				if (StringUtils.isBlank(commitMessage))
-					commitMessage = "Add files via upload";
+					@Override
+					public Void call() throws Exception {
+						File artifactsDir = getBuild().getArtifactsDir();
+						for (FileUpload upload: uploads) {
+							String filePath = FilenameUtils.sanitizeFilename(upload.getFileName());
+							if (directory != null)
+								filePath = directory + "/" + filePath;
+							File file = new File(artifactsDir, filePath);
+							FileUtils.createDir(file.getParentFile());
+							try (	InputStream is = upload.getInputStream();
+									OutputStream os = new FileOutputStream(file)) {
+								IOUtils.copy(is, os);
+							} finally {
+								upload.release();
+							}
+						}
+						return null;
+					}
+					
+				});
 				
-				RefUpdated refUpdated;
-				try {
-					refUpdated = context.uploadFiles(uploads, directory, commitMessage);
-				} finally {
-					for (FileUpload upload: uploads)
-						upload.release();
-				}
-				
-				onCommitted(target, refUpdated);
+				onUploaded(target);
 			}
 
 			@Override
@@ -104,31 +114,20 @@ public abstract class BlobUploadPanel extends Panel {
 		
 		form.add(new TextField<String>("directory", new PropertyModel<String>(this, "directory")));
 		
-		ReferenceInputBehavior behavior = new ReferenceInputBehavior(true) {
-			
-			@Override
-			protected Project getProject() {
-				return context.getProject();
-			}
-			
-		};
-		form.add(new TextArea<String>("commitMessage", 
-				new PropertyModel<String>(this, "commitMessage")).add(behavior));
-		
 		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				for (FileUpload upload: uploads)
-					upload.release();
 				onCancel(target);
 			}
 			
 		});
 	}
 
-	public abstract void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated);
+	public abstract void onUploaded(AjaxRequestTarget target);
 	
 	public abstract void onCancel(AjaxRequestTarget target);
+	
+	protected abstract Build getBuild();
 	
 }

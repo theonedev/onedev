@@ -2,7 +2,8 @@
 	<div wicket:id="comment" class="project-comment"></div>
 	<wicket:fragment wicket:id="viewFrag">
 		<div wicket:id="content"></div>
-		<div wicket:id="actions" class="mt-3 d-flex align-items-center">
+		<i wicket:id="noContent" class="text-muted"></i>
+		<div wicket:id="actions" class="mt-3 d-flex align-items-center font-size-sm">
 			<a wicket:id="edit" class="text-muted text-hover-primary mr-2">Edit</a>
 			<wicket:enclosure child="delete">
 			<span class="dot mr-2"></span>

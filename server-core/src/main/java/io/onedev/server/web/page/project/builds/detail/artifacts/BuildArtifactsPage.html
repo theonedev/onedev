@@ -1,9 +1,14 @@
 <wicket:extend>
+	<a wicket:id="upload" class="btn btn-light btn-hover-primary btn-block mb-4"><wicket:svg href="upload" class="icon mr-2"></wicket:svg> Upload</a>
     <div wicket:id="artifacts" class="build-artifacts"></div>
-    <wicket:fragment wicket:id="contentFrag">
+	<div wicket:id="noArtifacts" class="alert alert-light-warning alert-notice">No artifacts published</div>
+    <wicket:fragment wicket:id="artifactFrag">
         <a wicket:id="link">
 			<svg wicket:id="icon" class="icon"/>
 			<span wicket:id="label"></span>
 		</a>
     </wicket:fragment>
+	<wicket:fragment wicket:id="deleteFrag">
+		<a wicket:id="link" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>	
+	</wicket:fragment>
 </wicket:extend>

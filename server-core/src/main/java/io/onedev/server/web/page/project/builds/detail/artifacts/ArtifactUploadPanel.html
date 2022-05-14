@@ -1,0 +1,23 @@
+<wicket:panel>
+	<form wicket:id="form" class="upload-blobs">
+		<div class="modal-header">
+			<h5 class="modal-title">Upload Files</h5>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+		</div>
+		<div class="modal-body">
+			<div wicket:id="feedback"></div>
+			<div class="form-group">
+				<div wicket:id="files" class="files"></div>
+			</div>
+			<div class="form-group">
+  				<label>Directory</label>
+				<input wicket:id="directory" class="form-control"></input>
+				<p class="form-text text-muted">Optionally specify relative directory to put uploaded files</p>
+			</div>			
+		</div>
+		<div class="modal-footer">
+			<button wicket:id="upload" class="btn btn-primary">Upload</button>
+			<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+		</div>
+	</form>
+</wicket:panel>

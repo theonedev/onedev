@@ -4064,4 +4064,15 @@ public class DataMigrator {
 	private void migrate84(File dataDir, Stack<Integer> versions) {
 	}
 	
+	private void migrate85(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.addElement("uuid").setText(UUID.randomUUID().toString());
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

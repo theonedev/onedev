@@ -20,12 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -87,7 +87,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	private WebMarkupContainer container;
 	
 	private TextArea<String> input;
-
+	
 	private AbstractPostAjaxBehavior actionBehavior;
 	
 	private AbstractPostAjaxBehavior attachmentUploadBehavior;
@@ -233,8 +233,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			}
 			
 		});
-		for (AttributeModifier modifier: getInputModifiers()) 
-			input.add(modifier);
+		for (Behavior behavior: getInputBehaviors()) 
+			input.add(behavior);
 
 		if (initialSplit) {
 			container.add(AttributeAppender.append("class", "split-mode"));
@@ -557,7 +557,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		return null;
 	}
 	
-	protected List<AttributeModifier> getInputModifiers() {
+	protected List<Behavior> getInputBehaviors() {
 		return new ArrayList<>();
 	}
 	

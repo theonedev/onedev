@@ -225,7 +225,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			}
 
 			@Override
-			protected List<AttributeModifier> getInputModifiers() {
+			protected List<Behavior> getInputBehaviors() {
 				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
 			}
 			

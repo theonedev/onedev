@@ -3,14 +3,20 @@ package io.onedev.server.web.editable;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.InterpolativeAssistBehavior;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.web.editable.annotation.Markdown;
+import io.onedev.server.web.editable.markdown.MarkdownPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
 
@@ -27,13 +33,23 @@ public class InterpolativeEditSupport implements EditSupport {
 
     				@Override
     				public PropertyViewer renderForView(String componentId, IModel<String> model) {
-    					return new StringPropertyViewer(componentId, descriptor, model.getObject());
+    					if (descriptor.getPropertyGetter().getAnnotation(Markdown.class) != null) {
+    						return new PropertyViewer(componentId, descriptor) {
+
+    							@Override
+    							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+    								return new MarkdownViewer(id, Model.of(model.getObject()), null);
+    							}
+    							
+    						};
+    					} else {
+    						return new StringPropertyViewer(componentId, descriptor, model.getObject());
+    					}
     				}
 
     				@Override
     				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-    		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
-    		        			new InterpolativeAssistBehavior() {
+    					InterpolativeAssistBehavior inputAssist = new InterpolativeAssistBehavior() {
 
 							@SuppressWarnings("unchecked")
 							@Override
@@ -59,7 +75,19 @@ public class InterpolativeEditSupport implements EditSupport {
 								}
 							}
 							
-						});
+						};
+    					if (descriptor.getPropertyGetter().getAnnotation(Markdown.class) != null) {
+    						return new MarkdownPropertyEditor(componentId, descriptor, model) {
+
+								@Override
+								protected List<Behavior> getInputBehaviors() {
+									return Lists.newArrayList(inputAssist);
+								}
+    							
+    						};
+    					} else {
+    						return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(inputAssist);
+    					}
     				}
         			
         		};

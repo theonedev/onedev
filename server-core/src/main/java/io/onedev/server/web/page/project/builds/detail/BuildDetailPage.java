@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -34,7 +33,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
@@ -69,6 +67,9 @@ import io.onedev.server.web.component.job.joblist.JobListPanel;
 import io.onedev.server.web.component.link.BuildSpecLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.markdown.AttachmentSupport;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.component.project.comment.CommentPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTabHead;
@@ -90,6 +91,8 @@ import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.util.DeleteCallback;
+import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
 public abstract class BuildDetailPage extends ProjectPage 
@@ -390,6 +393,64 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		add(jobNotFoundContainer);
 		
+		add(new CommentPanel("description") {
+
+			@Override
+			protected String getComment() {
+				return getBuild().getDescription();
+			}
+
+			@Override
+			protected void onSaveComment(AjaxRequestTarget target, String comment) {
+				getBuild().setDescription(comment);
+				OneDev.getInstance(BuildManager.class).save(getBuild());
+			}
+
+			@Override
+			protected Project getProject() {
+				return getBuild().getProject();
+			}
+
+			@Override
+			protected AttachmentSupport getAttachmentSupport() {
+				return new ProjectAttachmentSupport(getProject(), getBuild().getUUID(), 
+						SecurityUtils.canManage(getBuild()));
+			}
+
+			@Override
+			protected boolean canModifyOrDeleteComment() {
+				return SecurityUtils.canManage(getBuild());
+			}
+
+			@Override
+			protected String getRequiredLabel() {
+				return null;
+			}
+
+			@Override
+			protected String getEmptyDescription() {
+				return "No description";
+			}
+			
+			@Override
+			protected ContentVersionSupport getContentVersionSupport() {
+				return new ContentVersionSupport() {
+
+					@Override
+					public long getVersion() {
+						return 0;
+					}
+					
+				};
+			}
+
+			@Override
+			protected DeleteCallback getDeleteCallback() {
+				return null;
+			}
+			
+		}.setOutputMarkupId(true).add(newBuildObserver(getBuild().getId())));
+		
 		add(new Tabbable("buildTabs", new LoadableDetachableModel<List<? extends Tab>>() {
 
 			@Override
@@ -411,16 +472,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				if (SecurityUtils.canReadCode(getProject())) 
 					tabs.add(new BuildTab("Pipeline", BuildPipelinePage.class));
 				
-				LockUtils.read(getBuild().getArtifactsLockKey(), new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						if (getBuild().getArtifactsDir().exists()) 
-							tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
-						return null;
-					}
-					
-				});
+				tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
 				
 				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class) {
 

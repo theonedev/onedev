@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -84,7 +85,7 @@ public abstract class TransitionOptionPanel extends Panel {
 			}
 			
 			@Override
-			protected List<AttributeModifier> getInputModifiers() {
+			protected List<Behavior> getInputBehaviors() {
 				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
 			}
 			

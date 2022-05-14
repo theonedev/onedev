@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
@@ -287,7 +288,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				}
 				
 				@Override
-				protected List<AttributeModifier> getInputModifiers() {
+				protected List<Behavior> getInputBehaviors() {
 					return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
 				}
 				

@@ -18,7 +18,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
-import io.onedev.server.web.component.project.comment.ProjectCommentPanel;
+import io.onedev.server.web.component.project.comment.CommentPanel;
 import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 
@@ -38,7 +38,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 		add(new Label("age", DateUtils.formatAge(issue.getSubmitDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
 		
-		add(new ProjectCommentPanel("body") {
+		add(new CommentPanel("body") {
 
 			@Override
 			protected String getComment() {
@@ -74,6 +74,11 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 			@Override
 			protected String getRequiredLabel() {
 				return null;
+			}
+
+			@Override
+			protected String getEmptyDescription() {
+				return "No description";
 			}
 
 			@Override
