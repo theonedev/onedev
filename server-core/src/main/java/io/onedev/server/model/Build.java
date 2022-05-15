@@ -119,7 +119,7 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 
 	private static final long serialVersionUID = 1L;
 
-	public static final int MAX_DESCRIPTION_LEN = 14000;
+	public static final int MAX_DESCRIPTION_LEN = 12000;
 	
 	public static final String NAME_VERSION = "Version";
 	
