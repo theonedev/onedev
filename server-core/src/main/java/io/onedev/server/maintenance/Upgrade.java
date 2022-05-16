@@ -161,7 +161,7 @@ public class Upgrade extends DefaultPersistManager {
 		
 		boolean isEmpty = true;
 		for (File file: upgradeDir.listFiles()) {
-			if (!file.getName().equals("lost+found")) {
+			if (!file.getName().equals("lost+found") && !file.getName().equals("site")) {
 				isEmpty = false;
 				break;
 			}

@@ -206,7 +206,6 @@ public class TreeRevFilter extends RevFilter {
 			}
 
 			// Comment out below as this assumption is incorrect
-			/*
 			if (chgs[i] == adds[i]) {
 				// All of the differences from this parent were because we
 				// added files that they did not have. This parent is our
@@ -215,7 +214,6 @@ public class TreeRevFilter extends RevFilter {
 				//
 				pList[i].parents = RevCommit.NO_PARENTS;
 			}
-			*/
 			
 			// We have an interesting difference relative to this parent.
 			//
