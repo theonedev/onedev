@@ -986,4 +986,8 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 		return uuid;
 	}
 	
+	public boolean hasArtifacts() {
+		return getArtifactsDir().exists() && getArtifactsDir().listFiles().length != 0;
+	}
+	
 }

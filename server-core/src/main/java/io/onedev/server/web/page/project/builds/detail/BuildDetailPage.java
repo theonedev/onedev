@@ -472,7 +472,8 @@ public abstract class BuildDetailPage extends ProjectPage
 				if (SecurityUtils.canReadCode(getProject())) 
 					tabs.add(new BuildTab("Pipeline", BuildPipelinePage.class));
 				
-				tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
+				if (SecurityUtils.canManage(getBuild()) || getBuild().hasArtifacts())
+					tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
 				
 				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class) {
 

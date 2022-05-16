@@ -226,7 +226,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(hasArtifacts());
+				setVisible(getBuild().hasArtifacts());
 			}
 
 			@Override
@@ -239,7 +239,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 				super.expand(file);
 				
 				File[] children = file.listFiles();
-				if (children.length == 1 && children[0].isDirectory())
+				if (children != null && children.length == 1 && children[0].isDirectory())
 					expand(children[0]);
 			}
 
@@ -282,7 +282,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!hasArtifacts());
+				setVisible(!getBuild().hasArtifacts());
 			}
 			
 		}.setOutputMarkupPlaceholderTag(true));
@@ -291,11 +291,6 @@ public class BuildArtifactsPage extends BuildDetailPage {
 	private void updateArtifacts(AjaxRequestTarget target) {
 		target.add(get("artifacts"));
 		target.add(get("noArtifacts"));
-	}
-	
-	protected boolean hasArtifacts() {
-		return getBuild().getArtifactsDir().exists() 
-				&& getBuild().getArtifactsDir().listFiles().length != 0;
 	}
 	
 	@Override
