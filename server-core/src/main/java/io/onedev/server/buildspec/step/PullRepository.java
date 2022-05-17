@@ -18,18 +18,21 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable(order=60, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
 		+ "This step pulls specified refs from remote. For security reason, it is only allowed "
@@ -46,6 +49,7 @@ public class PullRepository extends SyncRepository {
 			+ "name for wildcard match<br>"
 			+ "<b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update "
 			+ "branches/tags via this step")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getRefs() {
 		return refs;
@@ -55,6 +59,10 @@ public class PullRepository extends SyncRepository {
 		this.refs = refs;
 	}
 
+	static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, false, false);
+	}
+	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		Project project = build.getProject();

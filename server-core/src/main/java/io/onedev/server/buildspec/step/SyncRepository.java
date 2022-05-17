@@ -10,10 +10,12 @@ import org.apache.commons.lang3.SystemUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -21,6 +23,7 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable
 @ClassValidating
@@ -40,6 +43,7 @@ public abstract class SyncRepository extends ServerSideStep implements Validatab
 
 	@Editable(order=100, name="Remote URL", description="Specify URL of remote git repository. "
 			+ "Only http/https protocol is supported")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getRemoteUrl() {
 		return remoteUrl;
@@ -50,6 +54,10 @@ public abstract class SyncRepository extends ServerSideStep implements Validatab
 		this.remoteUrl = remoteUrl;
 	}
 
+	static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, false, false);
+	}
+	
 	@Editable(order=300, description="Optionally specify user name to access above repository")
 	public String getUserName() {
 		return userName;
