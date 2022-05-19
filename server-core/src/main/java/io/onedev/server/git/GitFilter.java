@@ -180,6 +180,8 @@ public class GitFilter implements Filter {
 			
 		};
 		
+		String protocol = request.getHeader("Git-Protocol");		
+		
 		if (upload) {
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
@@ -204,7 +206,7 @@ public class GitFilter implements Filter {
 
 					ExecutionResult result;
 					UploadPackCommand upload = new UploadPackCommand(gitDir, environments);
-					upload.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
+					upload.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true).protocol(protocol);
 					result = upload.call();
 					result.setStderr(stderr.getMessage());
 					
@@ -229,7 +231,7 @@ public class GitFilter implements Filter {
 					};
 					
 					ReceivePackCommand receive = new ReceivePackCommand(gitDir, environments);
-					receive.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
+					receive.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true).protocol(protocol);
 					ExecutionResult result = receive.call();
 					result.setStderr(stderr.getMessage());
 					result.checkReturnCode();
@@ -266,7 +268,7 @@ public class GitFilter implements Filter {
 	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		File gitDir;
 		boolean upload;
-		
+
 		sessionManager.openSession();
 		try {
 			String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
@@ -299,10 +301,13 @@ public class GitFilter implements Filter {
 			}
 			
 		};
+		
+		String protocolVersion = request.getHeader("Git-Protocol");		
+		
 		if (upload) 
-			new AdvertiseUploadRefsCommand(gitDir).output(os).call();
+			new AdvertiseUploadRefsCommand(gitDir).protocol(protocolVersion).output(os).call();
 		else 
-			new AdvertiseReceiveRefsCommand(gitDir).output(os).call();
+			new AdvertiseReceiveRefsCommand(gitDir).protocol(protocolVersion).output(os).call();
 	}
 
 	@Override

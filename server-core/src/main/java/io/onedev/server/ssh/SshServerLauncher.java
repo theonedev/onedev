@@ -53,7 +53,7 @@ public class SshServerLauncher {
         
         server.setCommandFactory((channel, command) -> {
         	for (SshCommandCreator creator: commandCreators) {
-        		Command sshCommand = creator.createCommand(command);
+        		Command sshCommand = creator.createCommand(command, channel.getEnvironment().getEnv());
         		if (sshCommand != null)
         			return sshCommand;
         	}

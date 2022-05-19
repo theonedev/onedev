@@ -3,6 +3,8 @@ package io.onedev.server.git.command;
 import java.io.File;
 import java.io.OutputStream;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,8 @@ public class AdvertiseReceiveRefsCommand extends GitCommand<Void> {
 	
 	private OutputStream output;
 	
+	private String protocol;
+	
 	public AdvertiseReceiveRefsCommand(File gitDir) {
 		super(gitDir);
 	}
@@ -26,11 +30,20 @@ public class AdvertiseReceiveRefsCommand extends GitCommand<Void> {
 		return this;
 	}
 	
+	public AdvertiseReceiveRefsCommand protocol(@Nullable String protocol) {
+		this.protocol = protocol;
+		return this;
+	}
+	
 	@Override
 	public Void call() {
 		Preconditions.checkNotNull(output);
 		
 		Commandline cmd = cmd();
+		
+		if (protocol != null)
+			cmd.environments().put("GIT_PROTOCOL", protocol);
+		
 		cmd.addArgs("receive-pack", "--stateless-rpc", "--advertise-refs", ".");
 		cmd.execute(output, new LineConsumer() {
 

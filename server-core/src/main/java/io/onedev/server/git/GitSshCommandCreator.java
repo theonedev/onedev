@@ -23,7 +23,8 @@ public class GitSshCommandCreator implements SshCommandCreator {
 	static final Logger logger = LoggerFactory.getLogger(GitSshCommandCreator.class);
 	
 	@Override
-	public Command createCommand(String command) {
+	public Command createCommand(String command, Map<String, String> env) {
+		String protocol = env.get("GIT_PROTOCOL");
 		if (command.startsWith(RemoteConfig.DEFAULT_UPLOAD_PACK)) {
 			return new GitSshCommand(command) {
 
@@ -33,6 +34,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 		            		.stdin(in)
 		            		.stdout(out)
 		            		.stderr(err)
+		            		.protocol(protocol)
 		            		.call();
 		        }
 
@@ -54,6 +56,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 		            		.stdin(in)
 		            		.stdout(out)
 		            		.stderr(err)
+		            		.protocol(protocol)
 		            		.call();
 				}
 

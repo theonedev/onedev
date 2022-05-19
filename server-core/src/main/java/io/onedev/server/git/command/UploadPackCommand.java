@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.command.Commandline;
@@ -19,6 +21,8 @@ public class UploadPackCommand extends GitCommand<ExecutionResult> {
 	private OutputStream stderr;
 	
 	private boolean statelessRpc;
+	
+	private String protocol;
 	
 	public UploadPackCommand(File gitDir, Map<String, String> environments) {
 		super(gitDir, environments);
@@ -44,6 +48,11 @@ public class UploadPackCommand extends GitCommand<ExecutionResult> {
 		return this;
 	}
 	
+	public UploadPackCommand protocol(@Nullable String protocol) {
+		this.protocol = protocol;
+		return this;
+	}
+	
 	@Override
 	public ExecutionResult call() {
 		Preconditions.checkNotNull(stdin);
@@ -51,6 +60,10 @@ public class UploadPackCommand extends GitCommand<ExecutionResult> {
 		Preconditions.checkNotNull(stderr);
 		
 		Commandline cmd = cmd();
+		
+		if (protocol != null)
+			cmd.environments().put("GIT_PROTOCOL", protocol);
+		
 		cmd.addArgs("upload-pack");
 		if (statelessRpc)
 			cmd.addArgs("--stateless-rpc");

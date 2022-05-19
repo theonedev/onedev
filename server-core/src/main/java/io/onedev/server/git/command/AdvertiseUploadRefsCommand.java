@@ -17,6 +17,8 @@ public class AdvertiseUploadRefsCommand extends GitCommand<Void> {
 	
 	private OutputStream output;
 	
+	private String protocol;
+	
 	public AdvertiseUploadRefsCommand(File gitDir) {
 		super(gitDir);
 	}
@@ -25,12 +27,21 @@ public class AdvertiseUploadRefsCommand extends GitCommand<Void> {
 		this.output = output;
 		return this;
 	}
+
+	public AdvertiseUploadRefsCommand protocol(String protocol) {
+		this.protocol = protocol;
+		return this;
+	}
 	
 	@Override
 	public Void call() {
 		Preconditions.checkNotNull(output);
 		
 		Commandline cmd = cmd();
+		
+		if (protocol != null)
+			cmd.environments().put("GIT_PROTOCOL", protocol);
+		
 		cmd.addArgs("upload-pack", "--stateless-rpc", "--advertise-refs", ".");
 		cmd.execute(output, new LineConsumer() {
 
