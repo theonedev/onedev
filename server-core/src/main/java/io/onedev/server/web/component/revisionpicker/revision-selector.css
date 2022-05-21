@@ -4,6 +4,9 @@
 .revision-selector input+.icon {
 	margin-left: -1.8rem;
 }
+.revision-selector input {
+	padding-right: 2rem;
+}
 .revision-selector .items {
 	margin-bottom: 0;
 	/* 

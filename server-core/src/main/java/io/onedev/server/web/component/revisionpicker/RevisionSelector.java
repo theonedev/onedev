@@ -278,11 +278,11 @@ public abstract class RevisionSelector extends Panel {
 				Project project = projectModel.getObject();
 				try {
 					User user = SecurityUtils.getUser();
-					RevCommit commit = project.getRevCommit(revision, true);
 					if (project.getRepository().resolve(revInput) != null) {
 						itemValues.add(COMMIT_FLAG + revInput);
 					} else if (branchesActive) {
 						if (canCreateBranch) {
+							RevCommit commit = project.getRevCommit(revision, true);
 							if (SecurityUtils.canCreateBranch(project, revInput)
 									&& project.isCommitSignatureRequirementSatisfied(user, revInput, commit)) {
 								itemValues.add(ADD_FLAG + revInput);
