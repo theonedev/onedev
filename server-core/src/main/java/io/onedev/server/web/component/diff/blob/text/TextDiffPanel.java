@@ -38,9 +38,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.jsyntax.TextToken;
-import io.onedev.commons.jsyntax.TokenUtils;
-import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -473,17 +470,17 @@ public class TextDiffPanel extends Panel {
 	}
 	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
-		DiffBlock<Tokenized> block = change.getDiffBlocks().get(index);
+		DiffBlock<String> block = change.getDiffBlocks().get(index);
 		if (index == 0) {
-			int start = block.getUnits().size()-contextSize;
+			int start = block.getElements().size()-contextSize;
 			if (start < 0)
 				start=0;
 			else if (start > 0)
 				appendExpander(builder, index, start);
-			for (int j=start; j<block.getUnits().size()-lastContextSize; j++) 
+			for (int j=start; j<block.getElements().size()-lastContextSize; j++) 
 				appendEqual(builder, block, j, lastContextSize);
 		} else if (index == change.getDiffBlocks().size()-1) {
-			int end = block.getUnits().size();
+			int end = block.getElements().size();
 			int skipped = 0;
 			if (end > contextSize) {
 				skipped = end-contextSize;
@@ -493,14 +490,14 @@ public class TextDiffPanel extends Panel {
 				appendEqual(builder, block, j, lastContextSize);
 			if (skipped != 0)
 				appendExpander(builder, index, skipped);
-		} else if (2*contextSize < block.getUnits().size()) {
+		} else if (2*contextSize < block.getElements().size()) {
 			for (int j=lastContextSize; j<contextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
-			appendExpander(builder, index, block.getUnits().size() - 2*contextSize);
-			for (int j=block.getUnits().size()-contextSize; j<block.getUnits().size()-lastContextSize; j++)
+			appendExpander(builder, index, block.getElements().size() - 2*contextSize);
+			for (int j=block.getElements().size()-contextSize; j<block.getElements().size()-lastContextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
 		} else {
-			for (int j=lastContextSize; j<block.getUnits().size()-lastContextSize; j++)
+			for (int j=lastContextSize; j<block.getElements().size()-lastContextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
 		}
 	}
@@ -543,11 +540,13 @@ public class TextDiffPanel extends Panel {
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 
-		if (markRange != null && RequestCycle.get().find(AjaxRequestTarget.class) == null) {
-			script = String.format("onedev.server.textDiff.onWindowLoad('%s', %s);", 
-					getMarkupId(), convertToJson(markRange));
-			response.render(OnLoadHeaderItem.forScript(script));
-		}
+		String jsonOfMarkRange;
+		if (RequestCycle.get().find(AjaxRequestTarget.class) == null && markRange != null)
+			jsonOfMarkRange = convertToJson(markRange);
+		else
+			jsonOfMarkRange = "undefined";
+		script = String.format("onedev.server.textDiff.onWindowLoad('%s', %s);", getMarkupId(), jsonOfMarkRange);
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 	
 	private String renderDiffs() {
@@ -606,7 +605,7 @@ public class TextDiffPanel extends Panel {
 					baseLineNumColumnWidth+newProblemsWidth, operationColumnWidth));
 		}
 		for (int i=0; i<change.getDiffBlocks().size(); i++) {
-			DiffBlock<Tokenized> block = change.getDiffBlocks().get(i);
+			DiffBlock<String> block = change.getDiffBlocks().get(i);
 			if (block.getOperation() == Operation.EQUAL) {
 				Integer lastContextSize = contextSizes.get(i);
 				if (lastContextSize == null)
@@ -614,15 +613,15 @@ public class TextDiffPanel extends Panel {
 				appendEquals(builder, i, 0, lastContextSize);
 			} else if (block.getOperation() == Operation.DELETE) {
 				if (i+1<change.getDiffBlocks().size()) {
-					DiffBlock<Tokenized> nextBlock = change.getDiffBlocks().get(i+1);
+					DiffBlock<String> nextBlock = change.getDiffBlocks().get(i+1);
 					if (nextBlock.getOperation() == Operation.INSERT) {
 						LinkedHashMap<Integer, LineDiff> lineChanges = 
-								DiffUtils.align(block.getUnits(), nextBlock.getUnits(), false);
+								DiffUtils.align(block.getElements(), nextBlock.getElements());
 						if (blameInfo != null && diffMode == DiffViewMode.UNIFIED) {
-							for (int j=0; j<block.getUnits().size(); j++) { 
+							for (int j=0; j<block.getElements().size(); j++) { 
 								LineDiff lineDiff = lineChanges.get(j);
 								if (lineDiff != null) {
-									appendDelete(builder, block, j, lineDiff.getTokenDiffs());
+									appendDelete(builder, block, j, lineDiff.getDiffBlocks());
 								} else {
 									appendDelete(builder, block, j, null);
 								}
@@ -631,10 +630,10 @@ public class TextDiffPanel extends Panel {
 							for (LineDiff diff: lineChanges.values()) {
 								lineChangesByInsert.put(diff.getCompareLine(), diff);
 							}
-							for (int j=0; j<nextBlock.getUnits().size(); j++) {
+							for (int j=0; j<nextBlock.getElements().size(); j++) {
 								LineDiff lineDiff = lineChangesByInsert.get(j);
 								if (lineDiff != null) {
-									appendInsert(builder, nextBlock, j, lineDiff.getTokenDiffs());
+									appendInsert(builder, nextBlock, j, lineDiff.getDiffBlocks());
 								} else {
 									appendInsert(builder, nextBlock, j, null);
 								}
@@ -651,34 +650,34 @@ public class TextDiffPanel extends Panel {
 										prevInsertLineIndex, insertLineIndex);
 								
 								appendModification(builder, block, nextBlock, deleteLineIndex, insertLineIndex, 
-										lineChange.getTokenDiffs()); 
+										lineChange.getDiffBlocks()); 
 								
 								prevDeleteLineIndex = deleteLineIndex+1;
 								prevInsertLineIndex = insertLineIndex+1;
 							}
 							appendDeletesAndInserts(builder, block, nextBlock, 
-									prevDeleteLineIndex, block.getUnits().size(), 
-									prevInsertLineIndex, nextBlock.getUnits().size());
+									prevDeleteLineIndex, block.getElements().size(), 
+									prevInsertLineIndex, nextBlock.getElements().size());
 						}
 						i++;
 					} else {
-						for (int j=0; j<block.getUnits().size(); j++) 
+						for (int j=0; j<block.getElements().size(); j++) 
 							appendDelete(builder, block, j, null);
 					}
 				} else {
-					for (int j=0; j<block.getUnits().size(); j++) 
+					for (int j=0; j<block.getElements().size(); j++) 
 						appendDelete(builder, block, j, null);
 				}
 			} else {
-				for (int j=0; j<block.getUnits().size(); j++) 
+				for (int j=0; j<block.getElements().size(); j++) 
 					appendInsert(builder, block, j, null);
 			}
 		}
 		return builder.toString();
 	}
 
-	private void appendDeletesAndInserts(StringBuilder builder, DiffBlock<Tokenized> deleteBlock, 
-			DiffBlock<Tokenized> insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
+	private void appendDeletesAndInserts(StringBuilder builder, DiffBlock<String> deleteBlock, 
+			DiffBlock<String> insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
 			int fromInsertLineIndex, int toInsertLineIndex) {
 		if (diffMode == DiffViewMode.UNIFIED) {
 			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
@@ -748,17 +747,14 @@ public class TextDiffPanel extends Panel {
 			return null;
 	}
 	
-	private void appendTokenized(StringBuilder builder, Tokenized tokenized) {
-		if (tokenized.getTokens().length == 0) {
+	private void appendLine(StringBuilder builder, String line) {
+		if (line.length() == 0) 
 			builder.append("&nbsp;");
-		} else {
-			for (long token: tokenized.getTokens()) {
-				builder.append(TokenUtils.toHtml(tokenized.getText(), token, null, null));
-			}
-		}
+		else 
+			builder.append(toHtml(line, null));
 	}
 	
-	private void appendEqual(StringBuilder builder, DiffBlock<Tokenized> block, int lineIndex, int lastContextSize) {
+	private void appendEqual(StringBuilder builder, DiffBlock<String> block, int lineIndex, int lastContextSize) {
 		if (lastContextSize != 0)
 			builder.append("<tr class='code expanded'>");
 		else
@@ -774,8 +770,8 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
-			builder.append("<td class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			appendTokenized(builder, block.getUnits().get(lineIndex));
+			builder.append("<td class='content equal' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
+			appendLine(builder, block.getElements().get(lineIndex));
 			builder.append("</td>");
 		} else {
 			if (blameInfo != null) {
@@ -783,23 +779,23 @@ public class TextDiffPanel extends Panel {
 			}
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
-			builder.append("<td class='content left' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			appendTokenized(builder, block.getUnits().get(lineIndex));
+			builder.append("<td class='content equal left' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
+			appendLine(builder, block.getElements().get(lineIndex));
 			builder.append("</td>");
 			if (blameInfo != null) {
 				appendBlame(builder, -1, newLineNo);
 			}
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
-			builder.append("<td class='content right' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			appendTokenized(builder, block.getUnits().get(lineIndex));
+			builder.append("<td class='content equal right' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
+			appendLine(builder, block.getElements().get(lineIndex));
 			builder.append("</td>");
 		}
 		builder.append("</tr>");
 	}
 	
-	private void appendInsert(StringBuilder builder, DiffBlock<Tokenized> block, int lineIndex, 
-			@Nullable List<DiffBlock<TextToken>> tokenDiffs) {
+	private void appendInsert(StringBuilder builder, DiffBlock<String> block, int lineIndex, 
+			@Nullable List<DiffBlock<String>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
@@ -815,15 +811,15 @@ public class TextDiffPanel extends Panel {
 				if (tokenDiffs.isEmpty()) {
 					builder.append("&nbsp;");
 				} else {
-					for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
-						for (TextToken token: tokenBlock.getUnits()) {
+					for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+						for (String token: tokenBlock.getElements()) {
 							if (tokenBlock.getOperation() != Operation.DELETE) 
-								builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
+								builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
 						}
 					}
 				}			
 			} else {
-				appendTokenized(builder, block.getUnits().get(lineIndex));
+				appendLine(builder, block.getElements().get(lineIndex));
 			}
 			builder.append("</td>");
 		} else {
@@ -832,21 +828,45 @@ public class TextDiffPanel extends Panel {
 			}
 			builder.append("<td class='number noselect'><a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'></td>");
-			builder.append("<td class='content left'>&nbsp;</td>");
+			builder.append("<td class='content left none'>&nbsp;</td>");
 			if (blameInfo != null) {
 				appendBlame(builder, -1, newLineNo);
 			}
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-			appendTokenized(builder, block.getUnits().get(lineIndex));
+			appendLine(builder, block.getElements().get(lineIndex));
 			builder.append("</td>");
 		}
 		builder.append("</tr>");
 	}
 	
-	private void appendDelete(StringBuilder builder, DiffBlock<Tokenized> block, int lineIndex, 
-			@Nullable List<DiffBlock<TextToken>> tokenDiffs) {
+	private static String toHtml(String text, @Nullable String cssClasses) {
+		String escapedText;
+		if (text.equals("\r")) {
+			escapedText = " ";
+		} else {
+			escapedText = "";
+			for (int i=0; i<text.length(); i++) {
+				char ch = text.charAt(i);
+				if (ch == ' ' || ch == '\t' || !Character.isWhitespace(ch))
+					escapedText += ch;
+			}
+			escapedText = HtmlEscape.escapeHtml5(escapedText);
+		}
+
+		if (cssClasses != null) {
+			StringBuilder htmlBuilder = new StringBuilder("<span ");
+			htmlBuilder.append("class='").append(cssClasses).append("'");
+			htmlBuilder.append(">").append(escapedText).append("</span>");
+			return htmlBuilder.toString();
+		} else {
+			return escapedText;
+		}
+	}
+	
+	private void appendDelete(StringBuilder builder, DiffBlock<String> block, int lineIndex, 
+			@Nullable List<DiffBlock<String>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
@@ -862,15 +882,15 @@ public class TextDiffPanel extends Panel {
 				if (tokenDiffs.isEmpty()) {
 					builder.append("&nbsp;");
 				} else {
-					for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
-						for (TextToken token: tokenBlock.getUnits()) {
+					for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+						for (String token: tokenBlock.getElements()) {
 							if (tokenBlock.getOperation() != Operation.INSERT) 
-								builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
+								builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
 						}
 					}
 				}
 			} else {
-				appendTokenized(builder, block.getUnits().get(lineIndex));
+				appendLine(builder, block.getElements().get(lineIndex));
 			}
 			builder.append("</td>");
 		} else {
@@ -880,20 +900,20 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-			appendTokenized(builder, block.getUnits().get(lineIndex));
+			appendLine(builder, block.getElements().get(lineIndex));
 			builder.append("</td>");
 			if (blameInfo != null) {
 				builder.append("<td class='blame noselect'>&nbsp;</td>");
 			}
 			builder.append("<td class='number noselect'><a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
-			builder.append("<td class='content right'>&nbsp;</td>");
+			builder.append("<td class='content right none'>&nbsp;</td>");
 		}
 		builder.append("</tr>");
 	}
 	
-	private void appendSideBySide(StringBuilder builder, DiffBlock<Tokenized> deleteBlock, 
-			DiffBlock<Tokenized> insertBlock, int deleteLineIndex, int insertLineIndex) {
+	private void appendSideBySide(StringBuilder builder, DiffBlock<String> deleteBlock, 
+			DiffBlock<String> insertBlock, int deleteLineIndex, int insertLineIndex) {
 		builder.append("<tr class='code original'>");
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
@@ -903,7 +923,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 		builder.append("<td class='operation noselect old'>-</td>");
 		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-		appendTokenized(builder, deleteBlock.getUnits().get(deleteLineIndex));
+		appendLine(builder, deleteBlock.getElements().get(deleteLineIndex));
 		builder.append("</td>");
 		
 		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
@@ -913,15 +933,15 @@ public class TextDiffPanel extends Panel {
 		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 		builder.append("<td class='operation noselect new'>+</td>");
 		builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-		appendTokenized(builder, insertBlock.getUnits().get(insertLineIndex));
+		appendLine(builder, insertBlock.getElements().get(insertLineIndex));
 		builder.append("</td>");
 		
 		builder.append("</tr>");
 	}
 
-	private void appendModification(StringBuilder builder, DiffBlock<Tokenized> deleteBlock, 
-			DiffBlock<Tokenized> insertBlock, int deleteLineIndex, int insertLineIndex, 
-			List<DiffBlock<TextToken>> tokenDiffs) {
+	private void appendModification(StringBuilder builder, DiffBlock<String> deleteBlock, 
+			DiffBlock<String> insertBlock, int deleteLineIndex, int insertLineIndex, 
+			List<DiffBlock<String>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
@@ -937,9 +957,9 @@ public class TextDiffPanel extends Panel {
 			if (tokenDiffs.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
-				for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
-					for (TextToken token: tokenBlock.getUnits()) 
-						builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
+				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+					for (String token: tokenBlock.getElements()) 
+						builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
 				}
 			}
 			builder.append("</td>");
@@ -953,10 +973,10 @@ public class TextDiffPanel extends Panel {
 			if (tokenDiffs.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
-				for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
-					for (TextToken token: tokenBlock.getUnits()) {
+				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+					for (String token: tokenBlock.getElements()) {
 						if (tokenBlock.getOperation() != Operation.INSERT) 
-							builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
+							builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
 					}
 				}
 			}
@@ -971,10 +991,10 @@ public class TextDiffPanel extends Panel {
 			if (tokenDiffs.isEmpty()) {
 				builder.append("&nbsp;");
 			} else {
-				for (DiffBlock<TextToken> tokenBlock: tokenDiffs) { 
-					for (TextToken token: tokenBlock.getUnits()) {
+				for (DiffBlock<String> tokenBlock: tokenDiffs) { 
+					for (String token: tokenBlock.getElements()) {
 						if (tokenBlock.getOperation() != Operation.DELETE) 
-							builder.append(TokenUtils.toHtml(token, getOperationClass(tokenBlock.getOperation()), null));
+							builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
 					}
 				}
 			}			

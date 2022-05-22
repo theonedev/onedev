@@ -206,15 +206,6 @@ onedev.server.sourceView = {
 		$body.find(".tree-content").removeClass("active");
 		$symbol.addClass("active");
 	},
-	restoreMark: function() {
-		var $sourceView = $(".source-view");
-		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var markRange = $sourceView.data("markRange");
-		if (markRange) 
-			onedev.server.codemirror.mark(cm, markRange);
-		else 
-			onedev.server.codemirror.clearMark(cm);
-	},
 	addCoverageGutter: function(line, coverageStatus) {
 		console.log(coverageStatus);
 		let tooltip;
@@ -252,7 +243,7 @@ onedev.server.sourceView = {
 		$trigger.mouseover(function() {
 			onedev.server.codemirror.mark(cm, markRanges);
 		}).mouseout(function() {
-			onedev.server.sourceView.restoreMark();
+			onedev.server.sourceView.clearMark();
 		});
 
 		$trigger.mousedown(function() {
@@ -274,7 +265,7 @@ onedev.server.sourceView = {
 					$currentPopover.find(".problem-content").mouseover(function() {
 						onedev.server.codemirror.mark(cm, problems[$(this).index()].range);
 					}).mouseout(function() {
-						onedev.server.sourceView.restoreMark();
+						onedev.server.sourceView.clearMark();
 					}).each(function() {
 						var problem = problems[$(this).index()];
 						$(this).children(".add-comment").click(function() {
@@ -346,7 +337,7 @@ onedev.server.sourceView = {
 						onedev.server.codemirror.mark(cm, comment.range);
 					});
 					$(this).mouseout(function() {
-						onedev.server.sourceView.restoreMark();
+						onedev.server.sourceView.clearMark();
 					});
 					$(this).click(function() {
 						if (!$(this).hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) { 
@@ -370,7 +361,7 @@ onedev.server.sourceView = {
 			$indicator.mouseover(function() {
 				onedev.server.codemirror.mark(cm, comment.range);
 			}).mouseout(function() {
-				onedev.server.sourceView.restoreMark();
+				onedev.server.sourceView.clearMark();
 			});
 			$indicator.click(function() {
 				if (!$indicator.hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) { 

@@ -298,7 +298,7 @@ public abstract class LayoutPage extends BasePage {
 								WebMarkupContainer menuLink;
 								if (menuItem instanceof SidebarMenuItem.Page) {
 									SidebarMenuItem.Page page = (SidebarMenuItem.Page) menuItem;
-									menuLink = new BookmarkablePageLink<Void>("link", page.getPageClass(), page.getPageParams());
+									menuLink = new ViewStateAwarePageLink<Void>("link", page.getPageClass(), page.getPageParams());
 									menuLink.add(new WebMarkupContainer("arrow").setVisible(false));
 									item.add(new WebMarkupContainer("subMenu").setVisible(false));
 								} else {

@@ -28,6 +28,36 @@ onedev.server.codemirror = {
 		var top = cm.charCoords({line: range.fromRow, ch: 0}, "local").top;
 		cm.scrollTo(null, top - 50); 			
 	},
+	highlightSyntax: function(text, modeInfo, highlighted, startCallback, stopCallback) {
+		var modeMime = onedev.server.codemirror.getModeMime(modeInfo);
+		if (!CodeMirror.modes.hasOwnProperty(modeInfo.mode)) {
+			CodeMirror.requireMode(modeInfo.mode, function() {
+				if (startCallback)
+					startCallback();
+		    	CodeMirror.runMode(text, modeMime, highlighted);
+				if (stopCallback)
+					stopCallback();
+			});
+		} else {
+			if (startCallback)
+				startCallback();
+			CodeMirror.runMode(text, modeMime, highlighted);
+			if (stopCallback)
+				stopCallback();
+		}		
+	},
+	findModeByFileName: function(fileName) {
+		if (fileName.endsWith(".cbl") || fileName.endsWith(".pco")) 
+			return CodeMirror.findModeByName("cobol");
+		else if (fileName.endsWith(".js")) 
+			return CodeMirror.findModeByName(cm, "jsx");
+		else if (fileName.endsWith(".ld") || fileName.endsWith(".asm")) 
+			return CodeMirror.findModeByName(cm, "gas");			
+		else if (fileName == ".onedev-buildspec") 
+			return CodeMirror.findModeByName(cm, "xml");			
+		else 
+		    return CodeMirror.findModeByFileName(fileName);
+	},
 	scrollIntoView: function(cm, range) {
 		cm.scrollIntoView({line: range.fromRow, ch: 0}, 8);
 	},
@@ -37,27 +67,25 @@ onedev.server.codemirror = {
             onedev.server.codemirror.setMode(cm, modeInfo);
 	},
 	setModeByFileName: function(cm, fileName) {
-		if (fileName.endsWith(".cbl") || fileName.endsWith(".pco")) {
-			onedev.server.codemirror.setModeByName(cm, "cobol");
-		} else if (fileName.endsWith(".js")) {
-			onedev.server.codemirror.setModeByName(cm, "jsx");
-		} else if (fileName.endsWith(".ld") || fileName.endsWith(".asm")) {
-			onedev.server.codemirror.setModeByName(cm, "gas");			
-		} else if (fileName == ".onedev-buildspec") {
-			onedev.server.codemirror.setModeByName(cm, "xml");
-		} else {
-		    var modeInfo = CodeMirror.findModeByFileName(fileName);
-	        if (modeInfo) 
-	            onedev.server.codemirror.setMode(cm, modeInfo);
-		}
+		var modeInfo = onedev.server.codemirror.findModeByFileName(fileName);
+		if (modeInfo)
+			onedev.server.codemirror.setMode(cm, modeInfo);
+	},
+	getModeMime: function(modeInfo) {
+        if (modeInfo.mode === "gfm")
+            return "gfm";
+		else		
+            return modeInfo.mime;
 	},
 	setMode: function(cm, modeInfo) {
-        // specify mode via mime does not work for gfm (github flavored markdown)
-        if (modeInfo.mode === "gfm")
-            cm.setOption("mode", "gfm");
-		else		
-            cm.setOption("mode", modeInfo.mime);
-        CodeMirror.autoLoadMode(cm, modeInfo.mode);
+		var modeMime = onedev.server.codemirror.getModeMime(modeInfo);
+		if (!CodeMirror.modes.hasOwnProperty(modeInfo.mode)) {
+			CodeMirror.requireMode(modeInfo.mode, function() {
+		    	cm.setOption("mode", modeMime);
+			});
+		} else {
+		    cm.setOption("mode", modeMime);
+		}
 	},
 	getViewState: function(cm) {
 		var cursor = cm.getCursor();

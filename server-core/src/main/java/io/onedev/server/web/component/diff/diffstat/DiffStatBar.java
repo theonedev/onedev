@@ -10,7 +10,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 @SuppressWarnings("serial")
 public class DiffStatBar extends Panel {
 
-	private static final int MAX_BLOCKS = 5;
+	private static final int MAX_BLOCKS = 6;
 	
 	private final int additions;
 	
@@ -72,23 +72,31 @@ public class DiffStatBar extends Panel {
 	private int getAdditionBlocks() {
 		int totals = additions + deletions;
 		
-		if (totals == 0)
+		if (totals == 0) {
 			return 0;
-		else if (totals <= MAX_BLOCKS)
+		} else if (totals <= MAX_BLOCKS) {
 			return additions;
-		else 
-			return Math.round(Float.valueOf(additions) / totals * MAX_BLOCKS);
+		} else { 
+			int additionBlocks = Math.round(Float.valueOf(additions) / totals * MAX_BLOCKS);
+			if (additionBlocks <= 0 && additions != 0)
+				additionBlocks = 1;
+			return additionBlocks;
+		}
 	}
 	
 	private int getDeletionBlocks() {
 		int totals = additions + deletions;
 		
-		if (totals == 0) 
+		if (totals == 0) { 
 			return 0;
-		else if (totals <= MAX_BLOCKS)
+		} else if (totals <= MAX_BLOCKS) {
 			return deletions;
-		else
-			return MAX_BLOCKS - getAdditionBlocks();
+		} else {
+			int deletionBlocks = MAX_BLOCKS - getAdditionBlocks();
+			if (deletionBlocks <= 0 && deletions != 0)
+				deletionBlocks = 1;
+			return deletionBlocks;
+		}
 	}
 
 	@Override

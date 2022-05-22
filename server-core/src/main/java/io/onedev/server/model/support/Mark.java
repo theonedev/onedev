@@ -117,7 +117,7 @@ public class Mark implements Serializable {
 			if (newBlob.getText() == null)
 				return null;
 			for (String line: newBlob.getText().getLines())
-				newLines.add(WhitespaceOption.DEFAULT.process(line));
+				newLines.add(WhitespaceOption.DEFAULT.apply(line));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -128,7 +128,7 @@ public class Mark implements Serializable {
 			BlobIdent oldBlobIdent = new BlobIdent(commitHash, path, treeWalk.getFileMode(0).getBits());
 			Blob oldBlob = new Blob(oldBlobIdent, treeWalk.getObjectId(0), treeWalk.getObjectReader());
 			for (String line: oldBlob.getText().getLines())
-				oldLines.add(WhitespaceOption.DEFAULT.process(line));
+				oldLines.add(WhitespaceOption.DEFAULT.apply(line));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -1723,7 +1723,7 @@ public class Project extends AbstractEntity {
 			if (text != null) {
 				List<String> normalizedLines = new ArrayList<>();
 				for (String line: text.getLines()) 
-					normalizedLines.add(whitespaceOption.process(line));
+					normalizedLines.add(whitespaceOption.apply(line));
 				return normalizedLines;
 			}
 		}

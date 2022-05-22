@@ -35,8 +35,6 @@ onedev.server.textDiff = {
 				}
 			}
 		});
-		var $symbols = $container.find(onedev.server.textDiff.symbolClasses); 
-		$symbols.mouseover($container.data("symbolHover"));
 		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
 
 		onedev.server.textDiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
@@ -477,8 +475,274 @@ onedev.server.textDiff = {
 	},
 	onWindowLoad: function(containerId, markRange) {
 		var $container = $("#" + containerId);
-		if (onedev.server.viewState.getFromHistory() === undefined)
+		if (markRange && onedev.server.viewState.getFromHistory() === undefined)
 			onedev.server.textDiff.scrollTo($container, markRange);
+		
+		var $scrollParent = $container.scrollParent();
+		if (!$scrollParent.data("onTextDiffScrollInstalled"))	{
+			$scrollParent.data("onTextDiffScrollInstalled", true);
+			$scrollParent.doneEvents("scroll", function() {
+				$(".text-diff").each(function() {
+					onedev.server.textDiff.highlightSyntax($(this).parent());
+				}, 100);
+			});
+		}		
+		
+		onedev.server.textDiff.highlightSyntax($container);
+	},
+	highlightSyntax($container) {
+		var oldBlobPath = $container.find(".diff-title>span:first-child").text();
+		var newBlobPath = $container.find(".diff-title>span:last-child").text();
+		
+		$container.find("tbody, tr.expander").each(function() {
+			var $this = $(this);
+			var $firstCodeTr;
+			if ($this.is("tbody")) {
+				if ($this.children().first().hasClass("code"))
+					$firstCodeTr = $this.children().first();
+				else
+					return;
+			} else if ($this.next().length != 0){
+				$firstCodeTr = $this.next();
+			} else {
+				return;
+			}
+			var $lastCodeTr;
+			var $nextExpanderTr = $firstCodeTr.nextAll(".expander").first();
+			if ($nextExpanderTr.length != 0)
+				$lastCodeTr = $nextExpanderTr.prev();
+			else
+				$lastCodeTr = $container.find("tbody>tr:last-child");
+
+			var $codeTrs = $firstCodeTr.nextUntil($lastCodeTr).add($firstCodeTr).add($lastCodeTr);
+			if ($codeTrs.not(".syntaxHighlighted").length == 0)
+				return;
+			
+			var $scrollParent = $container.scrollParent();
+			if ($firstCodeTr.offset().top - $scrollParent.offset().top > $scrollParent.height()
+					|| $lastCodeTr.offset().top + $lastCodeTr.outerHeight() - $scrollParent.offset().top < 0) {
+				return;	
+			}
+
+			var oldLines = [], newLines = [];
+			
+			$codeTrs.each(function() {
+				var $codeTr = $(this);
+				var $content = $codeTr.children(".content");
+				if ($content.length == 2) {
+					var $old = $content.first();
+					if (!$old.hasClass("none"))
+						oldLines.push($old.text());
+					
+					var $new = $content.last();
+					if (!$new.hasClass("none"))
+						newLines.push($new.text());
+				} else if ($content.hasClass("old") && $content.hasClass("new")) {
+					var oldPartials = [];
+					var newPartials = [];
+					
+					$content.contents().each(function() {
+						var $this = $(this);
+						var text = $this.text();
+						if ($this.hasClass("delete")) {
+							oldPartials.push(text);
+						} else if ($this.hasClass("insert")) {
+							newPartials.push(text);			
+						} else {
+							oldPartials.push(text);
+							newPartials.push(text);					
+						}
+					});
+					oldLines.push(oldPartials.join(""));
+					newLines.push(newPartials.join(""));
+				} else if ($content.hasClass("old")) {
+					oldLines.push($content.text());
+				} else if ($content.hasClass("new")) {
+					newLines.push($content.text());
+				} else {
+					oldLines.push($content.text());
+					newLines.push($content.text());
+				}
+			});
+			
+			function saveSyntaxes(syntaxes, text, style, lineIndex, beginPos) {
+				if (lineIndex != undefined && beginPos != undefined && style != null) {
+			        var classNames = "cm-" + style.replace(/ +/g, " cm-");
+					var lineSyntaxes = syntaxes[lineIndex];
+					if (lineSyntaxes == undefined) {
+						lineSyntaxes = [];
+						syntaxes[lineIndex] = lineSyntaxes;
+					}
+					for (var i=0; i<text.length; i++)
+						lineSyntaxes[i+beginPos] = classNames;
+				}
+			}
+			
+			var oldSyntaxes = [];
+			var oldProcessed = false;
+			var newSyntaxes = [];
+			var newProcessed = false;
+
+			function doneHighlight() {
+				if (oldProcessed && newProcessed) {
+					var $codeTr = $firstCodeTr;
+					var oldLineIndex = 0;
+					var newLineIndex = 0;
+					while (true) {
+						var oldLineSyntaxes = oldSyntaxes[oldLineIndex];
+						var newLineSyntaxes = newSyntaxes[newLineIndex];
+						$codeTr.children("td.content:not(.none)").each(function() {
+							var $td = $(this);
+							
+							var $highlighted = $("<div></div>");
+							
+							var partial = [];
+							var classNames = "";
+							function appendPartial() {
+								if (partial.length != 0) {
+									var $span = $("<span></span>");
+									$span.text(partial.join(""));
+									$span.attr("class", classNames);
+									$highlighted.append($span);
+								}
+							}
+							
+							var oldPos = newPos = 0;
+							$td.contents().each(function() {
+								var $content = $(this);
+								var text = $content.text();
+								var lineSyntaxes;
+								var pos;
+								if ($td.hasClass("old") && $td.hasClass("new")) {
+									if ($content.hasClass("insert")) { 
+										lineSyntaxes = newLineSyntaxes;
+										pos = newPos;
+										newPos += text.length;
+									} else if ($content.hasClass("delete")) {
+										lineSyntaxes = oldLineSyntaxes;
+										pos = oldPos;
+										oldPos += text.length;
+									} else { 
+										lineSyntaxes = oldLineSyntaxes;
+										pos = oldPos;
+										oldPos += text.length;
+										newPos += text.length;
+									}
+								} else if ($td.hasClass("new")) {
+									lineSyntaxes = newLineSyntaxes;
+									pos = newPos;
+									newPos += text.length;
+								} else if ($td.hasClass("old")) {
+									lineSyntaxes = oldLineSyntaxes;
+									pos = oldPos;
+									oldPos += text.length;
+								} else if ($td.hasClass("right")) {
+									lineSyntaxes = newLineSyntaxes;
+									pos = newPos;
+									oldPos += text.length;
+									newPos += text.length;
+								} else {
+									lineSyntaxes = oldLineSyntaxes;
+									pos = oldPos;
+									oldPos += text.length;
+									newPos += text.length;
+								}
+								
+								for (var i=0; i<text.length; i++) {
+									var currentClassNames = "";
+									function appendCurrentClassName(className) {
+										if (currentClassNames.length != 0)
+											currentClassNames += " ";
+										currentClassNames += className;	
+									}
+									
+									if ($content.hasClass("insert"))
+										appendCurrentClassName("insert");
+									if ($content.hasClass("delete"))
+										appendCurrentClassName("delete");
+									if ($content.hasClass("content-mark"))
+										appendCurrentClassName("content-mark");
+										
+									if (lineSyntaxes) {
+										var syntaxClassNames = lineSyntaxes[pos+i];
+										if (syntaxClassNames != undefined && syntaxClassNames.length != 0)
+											appendCurrentClassName(syntaxClassNames);
+									}
+									if (currentClassNames != classNames) {
+										appendPartial();
+										partial = [];
+										classNames = currentClassNames;
+									}
+									partial.push(text.charAt(i));
+								}
+							})
+							appendPartial();
+							$td.html($highlighted.html());
+						});
+						
+						var $contents = $codeTr.children("td.content");
+						if ($contents.length == 2) {
+							if (!$contents.first().hasClass("none"))
+								oldLineIndex++;
+							if (!$contents.last().hasClass("none"))
+								newLineIndex++;
+						} else {
+							if ($contents.hasClass("old") || $contents.hasClass("equal"))
+								oldLineIndex++;
+							if ($contents.hasClass("new") || $contents.hasClass("equal"))
+								newLineIndex++;
+						}
+						
+						$codeTr.find(onedev.server.textDiff.symbolClasses).mouseover($container.data("symbolHover"));
+						if ($codeTr.is($lastCodeTr))
+							break;
+						$codeTr = $codeTr.next();
+					}
+					
+					$codeTrs.addClass("syntaxHighlighted");	
+				}
+			}	
+					
+			var oldModeInfo = onedev.server.codemirror.findModeByFileName(oldBlobPath);
+			if (oldModeInfo) {
+				onedev.server.codemirror.highlightSyntax(
+					oldLines.join("\n"), 
+					oldModeInfo, 
+					function(text, style, lineIndex, beginPos) {
+						saveSyntaxes(oldSyntaxes, text, style, lineIndex, beginPos);
+					}, 
+					undefined, 
+					function() {
+						oldProcessed = true;
+						doneHighlight();							
+					}
+				);				
+			} else {
+				oldProcessed = true;
+				doneHighlight();
+			}
+			
+			var newModeInfo = onedev.server.codemirror.findModeByFileName(newBlobPath);
+			if (newModeInfo) {
+				onedev.server.codemirror.highlightSyntax(
+					newLines.join("\n"), 
+					newModeInfo, 
+					function(text, style, lineIndex, beginPos) {
+						saveSyntaxes(newSyntaxes, text, style, lineIndex, beginPos);
+					}, 
+					undefined,
+					function() {
+						newProcessed = true;
+						doneHighlight();							
+					}
+				);				
+			} else {
+				newProcessed = true;
+				doneHighlight();
+			}
+		});
+		
+		
 	},
 	initBlameTooltip: function(containerId, $hashLink) {
 		var $container = $("#" + containerId);
@@ -558,8 +822,6 @@ onedev.server.textDiff = {
 		} else {
 			$expandedTrs = $nextTr.prevAll();
 		}
-		var $symbols = $expandedTrs.find(onedev.server.textDiff.symbolClasses); 
-		$symbols.mouseover($container.data("symbolHover"));
 		$expandedTrs.find("td.content").mouseover($container.data("onMouseOverContent"));
 		var $firstExpandedTr = $expandedTrs.first();
 		
@@ -603,6 +865,7 @@ onedev.server.textDiff = {
 		}
 		
 		onedev.server.textDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
+		onedev.server.textDiff.highlightSyntax($container);
 	},
 	getMarkInfo: function($container, markRange) {
 		var oldOrNew = markRange.leftSide?"old":"new";
@@ -679,7 +942,6 @@ onedev.server.textDiff = {
 					var ch = 0;
 					if (!$td.hasClass("content-mark")) {
 						$td.addClass("content-mark");
-						$td.data("beforemark", $td.html());
 					}
 					$td.contents().each(function() {
 						var $this = $(this);
@@ -785,11 +1047,8 @@ onedev.server.textDiff = {
 	clearMark: function($container) {
 		$container.find("td.content.content-mark").each(function() {
 			var $this = $(this);
-			$this.html($this.data("beforemark"));
 			$this.removeClass("content-mark");
-			$this.removeData("beforemark");
-			$container = $this.closest(".text-diff").parent();
-			$this.find(onedev.server.textDiff.symbolClasses).mouseover($container.data("symbolHover"));
+			$this.find("span").removeClass("content-mark");
 		});
 	},
 	restoreMark: function($container) {

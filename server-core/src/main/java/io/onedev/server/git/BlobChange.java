@@ -16,7 +16,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
@@ -42,7 +41,7 @@ public abstract class BlobChange implements Serializable {
 	
 	protected final BlobIdent newBlobIdent;
 	
-	private transient List<DiffBlock<Tokenized>> diffBlocks;
+	private transient List<DiffBlock<String>> diffBlocks;
 	
 	public BlobChange(ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent, 
 			WhitespaceOption whitespaceOption) {
@@ -72,7 +71,7 @@ public abstract class BlobChange implements Serializable {
 		return newBlobIdent.path != null? newBlobIdent.path: oldBlobIdent.path;
 	}
 	
-	public List<DiffBlock<Tokenized>> getDiffBlocks() {
+	public List<DiffBlock<String>> getDiffBlocks() {
 		if (diffBlocks == null) {
 			try {
 				if (type == ChangeType.ADD || type == ChangeType.COPY) {
@@ -80,10 +79,7 @@ public abstract class BlobChange implements Serializable {
 						List<String> newLines = getNewText().getLines();
 						if (newLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> oldLines = new ArrayList<>();
-							diffBlocks = DiffUtils.diff(
-									oldLines, "a.txt", 
-									newLines, newBlobIdent.isFile()?newBlobIdent.path:"b.txt", 
-									WhitespaceOption.DEFAULT);
+							diffBlocks = DiffUtils.diff(oldLines, newLines, WhitespaceOption.DEFAULT);
 						} else {
 							diffBlocks = new ArrayList<>();
 						}
@@ -95,10 +91,7 @@ public abstract class BlobChange implements Serializable {
 						List<String> oldLines = getOldText().getLines();
 						if (oldLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
 							List<String> newLines = new ArrayList<>();
-							diffBlocks = DiffUtils.diff(
-									oldLines, oldBlobIdent.isFile()?oldBlobIdent.path:"a.txt", 
-									newLines, "b.txt", 
-									WhitespaceOption.DEFAULT);
+							diffBlocks = DiffUtils.diff(oldLines, newLines, WhitespaceOption.DEFAULT);
 						} else {
 							diffBlocks = new ArrayList<>();
 						}
@@ -109,14 +102,10 @@ public abstract class BlobChange implements Serializable {
 					if (getOldText() != null && getNewText() != null) {
 						List<String> oldLines = getOldText().getLines();
 						List<String> newLines = getNewText().getLines();
-						if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE) {
-							diffBlocks = DiffUtils.diff(
-									oldLines, oldBlobIdent.isFile()?newBlobIdent.path:"a.txt", 
-									newLines, newBlobIdent.isFile()?newBlobIdent.path:"b.txt", 
-									whitespaceOption);
-						} else { 
+						if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE) 
+							diffBlocks = DiffUtils.diff(oldLines, newLines, whitespaceOption);
+						else 
 							diffBlocks = new ArrayList<>();
-						}
 					} else {
 						diffBlocks = new ArrayList<>();
 					}
@@ -130,18 +119,18 @@ public abstract class BlobChange implements Serializable {
 	
 	public int getAdditions() {
 		int additions = 0;
-		for (DiffBlock<Tokenized> diff: getDiffBlocks()) {
+		for (DiffBlock<String> diff: getDiffBlocks()) {
 			if (diff.getOperation() == Operation.INSERT)
-				additions += diff.getUnits().size();
+				additions += diff.getElements().size();
 		}
 		return additions;
 	}
 
 	public int getDeletions() {
 		int deletions = 0;
-		for (DiffBlock<Tokenized> diff: getDiffBlocks()) {
+		for (DiffBlock<String> diff: getDiffBlocks()) {
 			if (diff.getOperation() == Operation.DELETE)
-				deletions += diff.getUnits().size();
+				deletions += diff.getElements().size();
 		}
 		return deletions;
 	}

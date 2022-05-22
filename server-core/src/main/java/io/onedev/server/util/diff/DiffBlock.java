@@ -11,14 +11,14 @@ public class DiffBlock<T> implements Serializable {
 
 	private final DiffMatchPatch.Operation operation;
 	
-	private final List<T> units;
+	private final List<T> elements;
 	
 	private final int oldStart, newStart;
 	
-	public DiffBlock(DiffMatchPatch.Operation operation, List<T> units, 
+	public DiffBlock(DiffMatchPatch.Operation operation, List<T> elements, 
 			int oldStart, int newStart) {
 		this.operation = operation;
-		this.units = units;
+		this.elements = elements;
 		this.oldStart = oldStart;
 		this.newStart = newStart;
 	}
@@ -27,8 +27,8 @@ public class DiffBlock<T> implements Serializable {
 		return operation;
 	}
 
-	public List<T> getUnits() {
-		return units;
+	public List<T> getElements() {
+		return elements;
 	}
 
 	public int getOldStart() {
@@ -43,14 +43,14 @@ public class DiffBlock<T> implements Serializable {
 		if (operation == Operation.INSERT)
 			return oldStart;
 		else
-			return oldStart + units.size();
+			return oldStart + elements.size();
 	}
 	
 	public int getNewEnd() {
 		if (operation == Operation.DELETE)
 			return newStart;
 		else
-			return newStart + units.size();
+			return newStart + elements.size();
 	}
 	
 }

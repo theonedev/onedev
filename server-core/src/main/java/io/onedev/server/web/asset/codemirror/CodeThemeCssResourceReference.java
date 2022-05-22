@@ -18,6 +18,8 @@ public class CodeThemeCssResourceReference extends CssResourceReference {
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
+				CodeMirrorResourceReference.class, "lib/codemirror.css")));
+		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
 				CodeThemeCssResourceReference.class, "theme/eclipse.css")));
 		return dependencies;
 	}
