@@ -84,7 +84,10 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 
 		String cacheKey = commitHash + ":" + file + ":" + (range!=null?range.toString():"");
 		
-		Collection<BlameBlock> cached = cache.get(cacheKey);
+		Collection<BlameBlock> cached;
+		synchronized (cache) {
+			cached = cache.get(cacheKey);
+		}
 		if (cached != null)
 			return cached;
 		
@@ -181,8 +184,9 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 			block.getRanges().add(new LinearRange(beginLine.get(), endLine.get()-1));
 		}
 		
-		if (System.currentTimeMillis()-time > CACHE_THRESHOLD)
+		if (System.currentTimeMillis()-time > CACHE_THRESHOLD) synchronized (cache) {
 			cache.put(cacheKey, blocks.values());
+		}
 		
 		return blocks.values();
 	}

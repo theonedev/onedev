@@ -45,6 +45,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Validator;
 
+import org.apache.commons.collections4.map.ReferenceMap;
+import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.Permission;
 import org.apache.tika.mime.MediaType;
@@ -246,7 +248,10 @@ public class Project extends AbstractEntity {
 	public static void pop() {
 		stack.get().pop();
 	}
-
+	
+	private static final ReferenceMap<ObjectId, Optional<BuildSpec>> buildSpecCache = 
+			new ReferenceMap<>(ReferenceStrength.HARD, ReferenceStrength.SOFT);
+    
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	@Api(description="Represents the project from which this project is forked. Remove this property if "
@@ -386,8 +391,6 @@ public class Project extends AbstractEntity {
     private transient Map<BlobIdent, Optional<Blob>> blobCache;
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
-    
-    private transient Map<ObjectId, Optional<BuildSpec>> buildSpecCache;
     
     private transient Map<ObjectId, Map<String, Collection<StatusInfo>>> commitStatusCache;
     
@@ -858,9 +861,10 @@ public class Project extends AbstractEntity {
 	 */
 	@Nullable
 	public BuildSpec getBuildSpec(ObjectId commitId) {
-		if (buildSpecCache == null)
-			buildSpecCache = new HashMap<>();
-		Optional<BuildSpec> buildSpec = buildSpecCache.get(commitId);
+		Optional<BuildSpec> buildSpec;
+		synchronized (buildSpecCache) {
+			buildSpec = buildSpecCache.get(commitId);
+		}
 		if (buildSpec == null) {
 			Blob blob = getBlob(new BlobIdent(commitId.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
 			if (blob != null) {  
@@ -872,7 +876,9 @@ public class Project extends AbstractEntity {
 				else
 					buildSpec = Optional.absent();
 			}
-			buildSpecCache.put(commitId, buildSpec);
+			synchronized (buildSpecCache) {
+				buildSpecCache.put(commitId, buildSpec);
+			}
 		}
 		return buildSpec.orNull();
 	}
