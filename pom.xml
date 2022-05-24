@@ -130,11 +130,6 @@
 				<version>${commons.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>io.onedev</groupId>
-				<artifactId>commons-jsyntax</artifactId>
-				<version>${commons.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>

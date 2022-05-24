@@ -50,11 +50,11 @@ onedev.server.codemirror = {
 		if (fileName.endsWith(".cbl") || fileName.endsWith(".pco")) 
 			return CodeMirror.findModeByName("cobol");
 		else if (fileName.endsWith(".js")) 
-			return CodeMirror.findModeByName(cm, "jsx");
+			return CodeMirror.findModeByName("jsx");
 		else if (fileName.endsWith(".ld") || fileName.endsWith(".asm")) 
-			return CodeMirror.findModeByName(cm, "gas");			
+			return CodeMirror.findModeByName("gas");			
 		else if (fileName == ".onedev-buildspec") 
-			return CodeMirror.findModeByName(cm, "xml");			
+			return CodeMirror.findModeByName("xml");			
 		else 
 		    return CodeMirror.findModeByFileName(fileName);
 	},

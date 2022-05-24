@@ -8,8 +8,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.web.asset.atwho.AtWhoResourceReference;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
-import io.onedev.server.web.asset.codemirror.CodeMirrorResourceReference;
-import io.onedev.server.web.asset.codemirror.CodeThemeCssResourceReference;
+import io.onedev.server.web.asset.codemirror.SyntaxHighlightResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
@@ -32,18 +31,18 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CaretResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AtWhoResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new SyntaxHighlightResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new TextareaCaretPositionResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
+		
 		dependencies.add(CssHeaderItem.forReference(new CommitStatusCssResourceReference()));
 
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(MarkdownResourceReference.class, "markdown.css")));
-		dependencies.add(CssHeaderItem.forReference(new CodeThemeCssResourceReference()));
 		return dependencies;
 	}
 	

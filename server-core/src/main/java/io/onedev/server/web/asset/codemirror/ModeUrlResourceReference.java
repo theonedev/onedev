@@ -15,7 +15,9 @@ public class ModeUrlResourceReference extends JavaScriptResourceReference {
 	private static final long serialVersionUID = 1L;
 
 	public ModeUrlResourceReference() {
-		super(ModeUrlResourceReference.class, "blank.js");
+		// must use CodeMirrorResourceReference.class as resource scope to 
+		// make sure it is only loaded once
+		super(CodeMirrorResourceReference.class, "blank.js");
 	}
 
 	/*
@@ -30,8 +32,11 @@ public class ModeUrlResourceReference extends JavaScriptResourceReference {
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
+		
+		// must use CodeMirrorResourceReference.class as resource scope to 
+		// make sure it is only loaded once
 		JavaScriptResourceReference metaReference = new JavaScriptResourceReference(
-				ModeUrlResourceReference.class, "mode/meta.js");
+				CodeMirrorResourceReference.class, "mode/meta.js");
 		String modeBase = StringUtils.substringBeforeLast(RequestCycle.get()
 				.urlFor(metaReference, new PageParameters()).toString(), "/");
 		dependencies.add(OnDomReadyHeaderItem.forScript("CodeMirror.modeURL = '" + modeBase + "/%N/%N.js';"));		

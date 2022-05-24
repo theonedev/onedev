@@ -902,10 +902,14 @@ onedev.server.markdown = {
 			}
 		});
 		
-		$(window).resize(function() {
-			$rendered.find(".CodeMirror").each(function() {
-				$(this)[0].CodeMirror.refresh();
-			});
+		$rendered.find("pre>code").each(function() {
+			var $this = $(this);
+			var modeName = $this.data("language");
+			if (modeName) {
+			    var modeInfo = CodeMirror.findModeByName(modeName);
+		        if (modeInfo) 
+					onedev.server.codemirror.highlightSyntax($this.text(), modeInfo, this);
+			}
 		});
 	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback) {

@@ -267,17 +267,17 @@
 .markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
 	font-weight: bold;
 }
-.markdown-rendered pre.highlight {
+.markdown-rendered pre.highlighted {
 	padding: 0.6rem;
 	border: 1px dashed var(--secondary);
 	position: relative;
 	word-break: normal;
 	border-radius: 0.42rem;
 }
-.dark-mode .markdown-rendered pre.highlight {
+.dark-mode .markdown-rendered pre.highlighted {
 	border-color: var(--dark-mode-lighter-dark);
 }
-.markdown-rendered pre.highlight>code {
+.markdown-rendered pre.highlighted>code {
 	background: none;
 }
 .markdown-rendered blockquote {

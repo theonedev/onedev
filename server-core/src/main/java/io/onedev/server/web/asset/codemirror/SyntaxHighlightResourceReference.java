@@ -16,26 +16,31 @@ public class SyntaxHighlightResourceReference extends BaseDependentResourceRefer
 	private static final long serialVersionUID = 1L;
 
 	public SyntaxHighlightResourceReference() {
-		super(SyntaxHighlightResourceReference.class, "codemirror-integration.js");
+		// must use CodeMirrorResourceReference.class as resource scope to 
+		// make sure it is only loaded once
+		super(CodeMirrorResourceReference.class, "codemirror-integration.js");
 	}
 
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
+		
+		// must use CodeMirrorResourceReference.class as resource scope to 
+		// make sure it is only loaded once
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				SyntaxHighlightResourceReference.class, "lib/codemirror.js")));
+				CodeMirrorResourceReference.class, "lib/codemirror.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				SyntaxHighlightResourceReference.class, "addon/runmode/runmode.js"))); 
+				CodeMirrorResourceReference.class, "addon/runmode/runmode.js"))); 
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				SyntaxHighlightResourceReference.class, "addon/mode/loadmode.js"))); 
+				CodeMirrorResourceReference.class, "addon/mode/loadmode.js"))); 
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				SyntaxHighlightResourceReference.class, "mode/meta.js")));
+				CodeMirrorResourceReference.class, "mode/meta.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				SyntaxHighlightResourceReference.class, "addon/mode/simple.js")));
+				CodeMirrorResourceReference.class, "addon/mode/simple.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				SyntaxHighlightResourceReference.class, "addon/mode/overlay.js")));
+				CodeMirrorResourceReference.class, "addon/mode/overlay.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				SyntaxHighlightResourceReference.class, "addon/mode/multiplex.js")));
+				CodeMirrorResourceReference.class, "addon/mode/multiplex.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ModeUrlResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new CodeThemeCssResourceReference()));
 
