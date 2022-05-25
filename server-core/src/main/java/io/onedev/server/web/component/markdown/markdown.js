@@ -29,7 +29,7 @@ onedev.server.markdown = {
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
 			projectPathPattern) {
 		var $container = $("#" + containerId);
-		$container.data("callback", callback);		
+		$container.data("callback", callback);
 		
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
@@ -910,6 +910,12 @@ onedev.server.markdown = {
 		        if (modeInfo) 
 					onedev.server.codemirror.highlightSyntax($this.text(), modeInfo, this);
 			}
+			var $copyWrapper = $("<div class='copy'></div>");
+			$this.parent().append($copyWrapper);
+			var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg>";
+			var $copyButton = $("<a class='pressable' title='Copy to clipboard'>" + icon + "</a>");
+			$copyWrapper.append($copyButton);
+			new Clipboard($copyButton[0], {text: function() {return $this.text();}});			
 		});
 	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback) {

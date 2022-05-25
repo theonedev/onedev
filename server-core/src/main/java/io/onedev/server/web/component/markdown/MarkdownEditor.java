@@ -282,8 +282,10 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				case "render":
 					String markdown = params.getParameterValue("param1").toString();
 					String rendered = renderInput(markdown);
-					String script = String.format("onedev.server.markdown.onRendered('%s', '%s');", 
-							container.getMarkupId(), JavaScriptEscape.escapeJavaScript(rendered));
+					String script = String.format(
+							"onedev.server.markdown.onRendered('%s', '%s');", 
+							container.getMarkupId(), 
+							JavaScriptEscape.escapeJavaScript(rendered));
 					target.appendJavaScript(script);
 					break;
 				case "emojiQuery":

@@ -277,6 +277,15 @@
 .dark-mode .markdown-rendered pre.highlighted {
 	border-color: var(--dark-mode-lighter-dark);
 }
+.markdown-rendered pre.highlighted>.copy {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	display: none;
+}
+.markdown-rendered pre.highlighted:hover>.copy {
+	display: block;
+}
 .markdown-rendered pre.highlighted>code {
 	background: none;
 }

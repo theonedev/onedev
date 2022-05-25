@@ -8,6 +8,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.web.asset.atwho.AtWhoResourceReference;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
+import io.onedev.server.web.asset.clipboard.ClipboardResourceReference;
 import io.onedev.server.web.asset.codemirror.SyntaxHighlightResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
@@ -38,6 +39,7 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));
 		
 		dependencies.add(CssHeaderItem.forReference(new CommitStatusCssResourceReference()));
 

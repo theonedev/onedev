@@ -22,7 +22,8 @@ public class CodeSupportResourceReference extends BaseDependentResourceReference
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(CodeSupportResourceReference.class, "code-support.css")));
+		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
+				CodeSupportResourceReference.class, "code-support.css")));
 		return dependencies;
 	}
 

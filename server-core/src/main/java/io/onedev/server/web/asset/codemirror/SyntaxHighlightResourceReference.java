@@ -16,31 +16,31 @@ public class SyntaxHighlightResourceReference extends BaseDependentResourceRefer
 	private static final long serialVersionUID = 1L;
 
 	public SyntaxHighlightResourceReference() {
-		// must use CodeMirrorResourceReference.class as resource scope to 
+		// must use CodeMirrorResourceLocator.class as resource scope to 
 		// make sure it is only loaded once
-		super(CodeMirrorResourceReference.class, "codemirror-integration.js");
+		super(CodeMirrorResourceLocator.class, "codemirror-integration.js");
 	}
 
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		
-		// must use CodeMirrorResourceReference.class as resource scope to 
+		// must use CodeMirrorResourceLocator.class as resource scope to 
 		// make sure it is only loaded once
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceReference.class, "lib/codemirror.js")));
+				CodeMirrorResourceLocator.class, "lib/codemirror.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				CodeMirrorResourceReference.class, "addon/runmode/runmode.js"))); 
+				CodeMirrorResourceLocator.class, "addon/runmode/runmode.js"))); 
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				CodeMirrorResourceReference.class, "addon/mode/loadmode.js"))); 
+				CodeMirrorResourceLocator.class, "addon/mode/loadmode.js"))); 
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceReference.class, "mode/meta.js")));
+				CodeMirrorResourceLocator.class, "mode/meta.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceReference.class, "addon/mode/simple.js")));
+				CodeMirrorResourceLocator.class, "addon/mode/simple.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceReference.class, "addon/mode/overlay.js")));
+				CodeMirrorResourceLocator.class, "addon/mode/overlay.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceReference.class, "addon/mode/multiplex.js")));
+				CodeMirrorResourceLocator.class, "addon/mode/multiplex.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ModeUrlResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new CodeThemeCssResourceReference()));
 
