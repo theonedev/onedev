@@ -8,7 +8,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import io.onedev.server.web.asset.clipboard.ClipboardResourceReference;
-import io.onedev.server.web.asset.codemirror.SyntaxHighlightResourceReference;
+import io.onedev.server.web.asset.codemirror.CodeMirrorResourceReference;
 import io.onedev.server.web.asset.codeproblem.CodeProblemResourceReference;
 import io.onedev.server.web.asset.commentindicator.CommentIndicatorCssResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
@@ -28,7 +28,7 @@ public class TextDiffResourceReference extends BaseDependentResourceReference {
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
-		dependencies.add(JavaScriptHeaderItem.forReference(new SyntaxHighlightResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));

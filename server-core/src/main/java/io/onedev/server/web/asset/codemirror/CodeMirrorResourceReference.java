@@ -19,88 +19,89 @@ public class CodeMirrorResourceReference extends BaseDependentResourceReference 
 	private static final long serialVersionUID = 1L;
 
 	public CodeMirrorResourceReference() {
-		super(CodeMirrorResourceLocator.class, "codemirror-integration.js");
+		super(CodeMirrorResourceReference.class, "codemirror-integration.js");
 	}
 
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "lib/codemirror.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/mode/overlay.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/mode/simple.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/mode/multiplex.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/edit/matchbrackets.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/dialog/dialog.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/fold/foldcode.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/fold/foldgutter.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/fold/brace-fold.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/fold/xml-fold.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/fold/markdown-fold.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/fold/comment-fold.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/search/searchcursor.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/search/search.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/search/matchesonscrollbar.js")));
+				CodeMirrorResourceReference.class, "lib/codemirror.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				CodeMirrorResourceLocator.class, "matchesonscrollbar2.js")));
+				CodeMirrorResourceReference.class, "addon/runmode/runmode.js"))); 
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/selection/active-line.js")));
+				CodeMirrorResourceReference.class, "addon/mode/overlay.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/scroll/annotatescrollbar.js")));
+				CodeMirrorResourceReference.class, "addon/mode/simple.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/display/fullscreen.js")));
+				CodeMirrorResourceReference.class, "addon/mode/multiplex.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/selection/mark-selection.js")));
+				CodeMirrorResourceReference.class, "addon/edit/matchbrackets.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "addon/hint/show-hint.js")));
+				CodeMirrorResourceReference.class, "addon/dialog/dialog.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/fold/foldcode.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/fold/foldgutter.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/fold/brace-fold.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/fold/xml-fold.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/fold/markdown-fold.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/fold/comment-fold.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/search/searchcursor.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/search/search.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/search/matchesonscrollbar.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				CodeMirrorResourceLocator.class, "annotatescrollbar2.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				CodeMirrorResourceLocator.class, "simplescrollbars.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				CodeMirrorResourceLocator.class, "gotoline.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				CodeMirrorResourceLocator.class, "identifier-highlighter.js"))); 
-		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
-				CodeMirrorResourceLocator.class, "addon/mode/loadmode.js"))); 
+				CodeMirrorResourceReference.class, "matchesonscrollbar2.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
-				CodeMirrorResourceLocator.class, "mode/meta.js")));
-		dependencies.add(JavaScriptHeaderItem.forReference(new ModeUrlResourceReference()));
-		
+				CodeMirrorResourceReference.class, "addon/selection/active-line.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/scroll/annotatescrollbar.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/display/fullscreen.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/selection/mark-selection.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "addon/hint/show-hint.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
+				CodeMirrorResourceReference.class, "annotatescrollbar2.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
+				CodeMirrorResourceReference.class, "simplescrollbars.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
+				CodeMirrorResourceReference.class, "gotoline.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
+				CodeMirrorResourceReference.class, "identifier-highlighter.js"))); 
+		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(
+				CodeMirrorResourceReference.class, "addon/mode/loadmode.js"))); 
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				CodeMirrorResourceReference.class, "mode/meta.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CodeMirrorResourceLocator.class, "lib/codemirror.css")));
-		dependencies.add(CssHeaderItem.forReference(new CodeThemeCssResourceReference()));
+				CodeMirrorResourceReference.class, "lib/codemirror.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CodeMirrorResourceLocator.class, "addon/dialog/dialog.css")));
+				CodeMirrorResourceReference.class, "addon/dialog/dialog.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CodeMirrorResourceLocator.class, "addon/fold/foldgutter.css")));
+				CodeMirrorResourceReference.class, "addon/fold/foldgutter.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CodeMirrorResourceLocator.class, "addon/scroll/simplescrollbars.css")));
+				CodeMirrorResourceReference.class, "addon/scroll/simplescrollbars.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CodeMirrorResourceLocator.class, "addon/search/matchesonscrollbar.css")));
+				CodeMirrorResourceReference.class, "addon/search/matchesonscrollbar.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CodeMirrorResourceLocator.class, "addon/display/fullscreen.css")));
+				CodeMirrorResourceReference.class, "addon/display/fullscreen.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
-				CodeMirrorResourceLocator.class, "addon/hint/show-hint.css")));
+				CodeMirrorResourceReference.class, "addon/hint/show-hint.css")));
+		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
+				CodeMirrorResourceReference.class, "theme/eclipse.css")));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
-				CodeMirrorResourceLocator.class, "codemirror-custom.css")));
-
+				CodeMirrorResourceReference.class, "codemirror-custom.css")));
+		
 		return dependencies;
 	}
 }

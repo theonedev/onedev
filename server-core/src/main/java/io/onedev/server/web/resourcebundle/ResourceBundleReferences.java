@@ -177,20 +177,15 @@ public class ResourceBundleReferences {
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new RuntimeException(e);
 				}
-				if (resource.canBeRegistered()) {
-					dependencyMap.put(resource, getDependencyAware(resource));
-				}
+				dependencyMap.put(resource, getDependencyAware(resource));
 			}
 		}
 		
 		while (true) {
 			Map<ResourceReference, DependencyAware<ResourceReference>> newDependencyMap = new LinkedHashMap<>(dependencyMap);
 			for (DependencyAware<ResourceReference> dependent: dependencyMap.values()) {
-				for (ResourceReference dependency: dependent.getDependencies()) {
-					if (dependency.canBeRegistered()) {
-						newDependencyMap.put(dependency, getDependencyAware(dependency));
-					}
-				}
+				for (ResourceReference dependency: dependent.getDependencies()) 
+					newDependencyMap.put(dependency, getDependencyAware(dependency));
 			}
 			if (!dependencyMap.equals(newDependencyMap)) {
 				dependencyMap = newDependencyMap;
@@ -225,12 +220,8 @@ public class ResourceBundleReferences {
 			public Set<ResourceReference> getDependencies() {
 				Set<ResourceReference> dependencies = new LinkedHashSet<>();
 				for (HeaderItem item: resource.getDependencies()) {
-					if (item instanceof IReferenceHeaderItem) {
-						ResourceReference reference = ((IReferenceHeaderItem) item).getReference();
-						if (reference.canBeRegistered()) {
-							dependencies.add(reference);
-						}
-					}
+					if (item instanceof IReferenceHeaderItem) 
+						dependencies.add(((IReferenceHeaderItem) item).getReference());
 				}
 				return dependencies;
 			}

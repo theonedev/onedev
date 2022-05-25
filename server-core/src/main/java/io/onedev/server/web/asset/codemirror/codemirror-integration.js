@@ -221,3 +221,5 @@ $(document).on("beforeElementReplace", function(event, componentId) {
 		this.submit = undefined;
 	});
 });
+
+CodeMirror.modeURL = '/wicket/resource/io.onedev.server.web.asset.codemirror.codemirrorresourcereference/mode/%N/%N.js';
