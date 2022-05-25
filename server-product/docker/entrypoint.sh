@@ -11,8 +11,8 @@ _sigterm() {
 trap _sigterm SIGTERM
 trap _sigterm SIGINT
 
-JVM_OPTIONS=--XX:MaxRAMPercentage=50.0
-if [[ $JAVA_TOOL_OPTIONS == *"--XX:MaxRAMPercentage"* ]] || [[ $JAVA_TOOL_OPTIONS == *"-Xmx"* ]]; then
+JVM_OPTIONS=-XX:MaxRAMPercentage=50.0
+if [[ $JAVA_TOOL_OPTIONS == *"-XX:MaxRAMPercentage"* ]] || [[ $JAVA_TOOL_OPTIONS == *"-Xmx"* ]]; then
   unset JVM_OPTIONS
 fi
 
