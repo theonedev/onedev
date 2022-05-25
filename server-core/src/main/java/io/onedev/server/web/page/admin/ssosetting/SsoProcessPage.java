@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.admin.ssosetting;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
@@ -7,6 +10,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.StringUtils;
@@ -23,6 +27,8 @@ import io.onedev.server.web.page.simple.security.LoginPage;
 public class SsoProcessPage extends BasePage {
 
 	public static final String MOUNT_PATH = "sso";
+	
+	public static final String COOKIE_CONNECTOR = "ssoConnector";
 	
 	public static final String STAGE_INITIATE = "initiate";
 	
@@ -72,6 +78,13 @@ public class SsoProcessPage extends BasePage {
 					throw new AuthenticationException("unsolicited OIDC authentication response");
 				
 				WebSession.get().login(authenticated);
+
+				// Use servlet api to set cookie which will work even if page is redirected
+				HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
+				Cookie cookie = new Cookie(SsoProcessPage.COOKIE_CONNECTOR, connectorName);
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				cookie.setPath("/");
+				response.addCookie(cookie);
 				
 				throw new RedirectToUrlException(redirectUrlAfterLogin);
 			}
@@ -80,9 +93,15 @@ public class SsoProcessPage extends BasePage {
 		}
 	}
 	
-	public static void addParams(PageParameters params, String stage, String connector) {
+	public static Cookie getConnectorCookie() {
+		return ((WebRequest) RequestCycle.get().getRequest()).getCookie(COOKIE_CONNECTOR);
+	}
+		
+	public static PageParameters paramsOf(String stage, String connector) {
+		PageParameters params = new PageParameters();
 		params.add(PARAM_STAGE, stage);
 		params.add(PARAM_CONNECTOR, connector);
+		return params;
 	}
 	
 }

@@ -72,8 +72,6 @@ public class LoginPage extends SimplePage {
 		this.errorMessage = errorMessage;
 	}
 	
-	
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

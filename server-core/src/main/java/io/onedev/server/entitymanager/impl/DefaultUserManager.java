@@ -319,7 +319,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Override
 	public void onRenameSsoConnector(String oldName, String newName) {
     	Query<?> query = getSession().createQuery(String.format("update User set %s=:newName "
-    			+ "where %s=:oldName", oldName, newName));
+    			+ "where %s=:oldName", PROP_SSO_CONNECTOR, PROP_SSO_CONNECTOR));
     	query.setParameter("oldName", oldName);
     	query.setParameter("newName", newName);
     	query.executeUpdate();

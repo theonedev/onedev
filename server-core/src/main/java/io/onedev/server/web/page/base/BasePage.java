@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.base;
 
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.MOUNT_PATH;
+import static io.onedev.server.web.page.admin.ssosetting.SsoProcessPage.STAGE_INITIATE;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.File;
@@ -38,6 +40,7 @@ import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.protocol.ws.api.message.TextMessage;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -52,6 +55,7 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.maintenance.Upgrade;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -62,6 +66,7 @@ import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
@@ -329,10 +334,24 @@ public abstract class BasePage extends WebPage {
 	}
 	
 	public void unauthorized() {
-		if (getLoginUser() != null) 
+		if (getLoginUser() != null) {
 			throw new UnauthorizedException("You are not allowed to perform this operation");
-		else 
-			throw new RestartResponseAtInterceptPageException(LoginPage.class);
+		} else { 
+			Cookie cookie = SsoProcessPage.getConnectorCookie();
+			
+			// Instantiate here to record current page url even if we are redirecting to 
+			// sso initiating url
+			RestartResponseAtInterceptPageException redirectToLoginException = 
+					new RestartResponseAtInterceptPageException(LoginPage.class);
+			if (cookie != null) {
+				String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+				
+				String redirectUrl = serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + cookie.getValue();
+				throw new RedirectToUrlException(redirectUrl);
+			} else {
+				throw redirectToLoginException;
+			}
+		}
 	}
 	
 	protected String getPageTitle() {
