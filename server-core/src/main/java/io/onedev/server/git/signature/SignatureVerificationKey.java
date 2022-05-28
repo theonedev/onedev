@@ -8,4 +8,6 @@ public interface SignatureVerificationKey {
 	
 	PGPPublicKey getPublicKey();
 	
+	String getEmailAddress();
+	
 }

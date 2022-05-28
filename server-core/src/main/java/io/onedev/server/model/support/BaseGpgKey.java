@@ -1,5 +1,8 @@
 package io.onedev.server.model.support;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.ConstraintValidatorContext;
@@ -27,7 +30,7 @@ public class BaseGpgKey extends AbstractEntity implements Validatable {
     @Column(nullable=false, length=5000)
     private String content;
     
-    private transient PGPPublicKey publicKey;
+    private transient List<PGPPublicKey> publicKeys;
 
     @Editable(name="GPG Public Key", placeholder="GPG public key begins with '-----BEGIN PGP PUBLIC KEY BLOCK-----'")
     @NotEmpty
@@ -41,10 +44,14 @@ public class BaseGpgKey extends AbstractEntity implements Validatable {
         this.content = content;
     }
 
-	public PGPPublicKey getPublicKey() {
-		if (publicKey == null)
-			publicKey = GpgUtils.parse(content);
-		return publicKey;
+	public List<PGPPublicKey> getPublicKeys() {
+		if (publicKeys == null)
+			publicKeys = GpgUtils.parse(content);
+		return publicKeys;
+	}
+	
+	public List<Long> getKeyIds() {
+		return getPublicKeys().stream().map(it->it.getKeyID()).collect(Collectors.toList());
 	}
 	
 	@Override

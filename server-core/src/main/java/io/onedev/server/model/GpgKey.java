@@ -10,13 +10,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.bouncycastle.openpgp.PGPPublicKey;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.onedev.server.git.signature.SignatureVerificationKey;
 import io.onedev.server.model.support.BaseGpgKey;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -66,19 +64,4 @@ public class GpgKey extends BaseGpgKey {
         this.createdAt = createdAt;
     }
     
-    public SignatureVerificationKey getSignatureVerificationKey() {
-    	return new SignatureVerificationKey() {
-			
-			@Override
-			public boolean shouldVerifyDataWriter() {
-				return true;
-			}
-			
-			@Override
-			public PGPPublicKey getPublicKey() {
-				return GpgKey.this.getPublicKey();
-			}
-			
-		};
-    }
 }

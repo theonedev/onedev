@@ -56,13 +56,13 @@ public abstract class InsertGpgKeyPanel extends Panel {
                 
                 GpgKeyManager gpgKeyManager = OneDev.getInstance(GpgKeyManager.class);
                 GpgKey gpgKey = (GpgKey) editor.getModelObject();
-                gpgKey.setKeyId(gpgKey.getPublicKey().getKeyID());
+                gpgKey.setKeyId(gpgKey.getKeyIds().get(0));
                 
-                if (gpgKeyManager.findByKeyId(gpgKey.getKeyId()) != null) {
-					editor.error(new Path(new PathNode.Named("content")), "This key is already in use");
+                if (gpgKey.getKeyIds().stream().anyMatch(it->gpgKeyManager.findSignatureVerificationKey(it)!=null)) { 
+					editor.error(new Path(new PathNode.Named("content")), "This key or one of its subkey is already in use");
 					target.add(form);
                 } else {
-                	String emailAddressValue = GpgUtils.getEmailAddress(gpgKey.getPublicKey());
+                	String emailAddressValue = GpgUtils.getEmailAddress(gpgKey.getPublicKeys().get(0));
                 	EmailAddress emailAddress = OneDev.getInstance(EmailAddressManager.class).findByValue(emailAddressValue);
                 	if (emailAddress != null && emailAddress.isVerified() && emailAddress.getOwner().equals(getUser())) {
                 		gpgKey.setEmailAddress(emailAddress);

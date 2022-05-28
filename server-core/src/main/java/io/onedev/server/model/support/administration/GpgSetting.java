@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -26,7 +27,9 @@ public class GpgSetting implements Serializable {
 	
 	private Map<Long, String> encodedTrustedKeys = new LinkedHashMap<>();
 	
-	private transient Map<Long, PGPPublicKey> trustedKeys;
+	private transient Map<Long, SignatureVerificationKey> trustedSignatureVerificationKeys;
+	
+	private transient Map<Long, List<PGPPublicKey>> trustedKeys;
 	
 	public GpgSetting() {
 		// Add GitHub public GPG key
@@ -74,20 +77,53 @@ public class GpgSetting implements Serializable {
 	public Map<Long, String> getEncodedTrustedKeys() {
 		return encodedTrustedKeys;
 	}
+	
+	public void encodedTrustedKeysUpdated() {
+		trustedKeys = null;
+		trustedSignatureVerificationKeys = null;
+	}
+	
+	public Map<Long, List<PGPPublicKey>> getTrustedKeys() {
+		if (trustedKeys == null) {
+			trustedKeys = new HashMap<>();
+			for (Map.Entry<Long, String> entry: encodedTrustedKeys.entrySet()) 
+				trustedKeys.put(entry.getKey(), GpgUtils.parse(entry.getValue()));
+		}
+		return trustedKeys;
+	}
 
 	@Nullable
-	public PGPPublicKey getTrustedKey(long keyId) {
-		if (trustedKeys == null)
-			trustedKeys = new HashMap<>();
-		PGPPublicKey trustedKey = trustedKeys.get(keyId);
-		if (trustedKey == null) {
-			String encodedTrustedKey = encodedTrustedKeys.get(keyId);
-			if (encodedTrustedKey != null) {
-				trustedKey = GpgUtils.parse(encodedTrustedKey);
-				trustedKeys.put(keyId, trustedKey);
+	public SignatureVerificationKey getTrustedSignatureVerificationKey(long keyId) {
+		return getTrustedSignatureVerificationKeys().get(keyId);
+	}
+	
+	private Map<Long, SignatureVerificationKey> getTrustedSignatureVerificationKeys() {
+		if (trustedSignatureVerificationKeys == null) {
+			trustedSignatureVerificationKeys = new HashMap<>();
+			for (List<PGPPublicKey> publicKeys: getTrustedKeys().values()) {
+				for (PGPPublicKey publicKey: publicKeys) {
+					trustedSignatureVerificationKeys.put(publicKey.getKeyID(), new SignatureVerificationKey() {
+						
+						@Override
+						public boolean shouldVerifyDataWriter() {
+							return false;
+						}
+						
+						@Override
+						public PGPPublicKey getPublicKey() {
+							return publicKey;
+						}
+						
+						@Override
+						public String getEmailAddress() {
+							return GpgUtils.getEmailAddress(publicKeys.get(0));
+						}
+						
+					});
+				}
 			}
 		}
-		return trustedKey;
+		return trustedSignatureVerificationKeys;
 	}
 	
 	@Nullable
@@ -104,27 +140,15 @@ public class GpgSetting implements Serializable {
 				public PGPPublicKey getPublicKey() {
 					return getSigningKey().getPublicKey();
 				}
+
+				@Override
+				public String getEmailAddress() {
+					return GpgUtils.getEmailAddress(getPublicKey());
+				}
 				
 			};
 		} else {
-			PGPPublicKey trustedKey = getTrustedKey(keyId);
-			if (trustedKey != null) {
-				return new SignatureVerificationKey() {
-					
-					@Override
-					public boolean shouldVerifyDataWriter() {
-						return false;
-					}
-					
-					@Override
-					public PGPPublicKey getPublicKey() {
-						return trustedKey;
-					}
-					
-				};
-			} else {
-				return null;
-			}
+			return getTrustedSignatureVerificationKey(keyId);
 		}
 	}
 	

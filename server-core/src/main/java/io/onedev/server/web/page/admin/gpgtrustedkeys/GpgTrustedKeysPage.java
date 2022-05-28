@@ -3,6 +3,7 @@ package io.onedev.server.web.page.admin.gpgtrustedkeys;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -89,10 +90,14 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 		                BaseGpgKey bean = (BaseGpgKey) editor.getModelObject();
 		                
 		                GpgSetting setting = getSettingManager().getGpgSetting();
-		                if (setting.getEncodedTrustedKeys().put(bean.getPublicKey().getKeyID(), bean.getContent()) != null) {
-							editor.error(new Path(new PathNode.Named(BaseGpgKey.PROP_CONTENT)), "This key is already added");
+		                if (bean.getKeyIds().stream().anyMatch(it-> setting.getTrustedSignatureVerificationKey(it) != null)) {
+							editor.error(
+									new Path(new PathNode.Named(BaseGpgKey.PROP_CONTENT)), 
+									"This key or one of its sub key is already added");
 							target.add(form);
 		                } else {
+			                setting.getEncodedTrustedKeys().put(bean.getKeyIds().get(0), bean.getContent());
+							setting.encodedTrustedKeysUpdated();
 		                	getSettingManager().saveGpgSetting(setting);
 		                	target.add(trustedKeysTable);
 		                	modal.close();
@@ -130,8 +135,8 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Long>> cellItem, String componentId,
 					IModel<Long> rowModel) {
-				cellItem.add(new Label(componentId, 
-						GpgUtils.getEmailAddress(getPublicKey(rowModel.getObject()))));
+				List<PGPPublicKey> trustedKey = getTrustedKey(rowModel.getObject());
+				cellItem.add(new Label(componentId, GpgUtils.getEmailAddress(trustedKey.get(0))));
 			}
 			
 		});
@@ -141,8 +146,33 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Long>> cellItem, String componentId,
 					IModel<Long> rowModel) {
-				cellItem.add(new Label(componentId, 
-						GpgUtils.getKeyIDString(getPublicKey(rowModel.getObject()).getKeyID())));
+				List<PGPPublicKey> trustedKey = getTrustedKey(rowModel.getObject());
+				cellItem.add(new Label(componentId, GpgUtils.getKeyIDString(trustedKey.get(0).getKeyID())));
+			}
+			
+		});
+		
+		columns.add(new AbstractColumn<Long, Void>(Model.of("Sub Keys")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Long>> cellItem, String componentId,
+					IModel<Long> rowModel) {
+				List<PGPPublicKey> trustedKey = getTrustedKey(rowModel.getObject());
+				long keyId = trustedKey.get(0).getKeyID();
+				String subKeyIds = trustedKey.stream()
+						.map(it->it.getKeyID())
+						.filter(it->it!=keyId)
+						.map(it->GpgUtils.getKeyIDString(it))
+						.collect(Collectors.joining(", "));
+				if (subKeyIds.length() != 0)
+					cellItem.add(new Label(componentId, subKeyIds));
+				else
+					cellItem.add(new Label(componentId, "<i>None</i>").setEscapeModelStrings(false));
+			}
+
+			@Override
+			public String getCssClass() {
+				return "expanded";
 			}
 			
 		});
@@ -160,6 +190,7 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 					public void onClick(AjaxRequestTarget target) {
 						GpgSetting setting = getSettingManager().getGpgSetting();
 						setting.getEncodedTrustedKeys().remove(rowModel.getObject());
+						setting.encodedTrustedKeysUpdated();
 						getSettingManager().saveGpgSetting(setting);
 						Session.get().success("GPG key deleted");
 						target.add(trustedKeysTable);
@@ -206,8 +237,8 @@ public class GpgTrustedKeysPage extends AdministrationPage {
 				Integer.MAX_VALUE, null));
 	}
     
-    private PGPPublicKey getPublicKey(long keyId) {
-    	return getSettingManager().getGpgSetting().getTrustedKey(keyId);
+    private List<PGPPublicKey> getTrustedKey(long keyId) {
+    	return getSettingManager().getGpgSetting().getTrustedKeys().get(keyId);
     }
     
     private SettingManager getSettingManager() {

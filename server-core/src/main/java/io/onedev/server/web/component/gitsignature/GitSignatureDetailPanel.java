@@ -35,7 +35,7 @@ abstract class GitSignatureDetailPanel extends Panel {
 					message = "Signature verified successfully with committer's GPG key";
 				else
 					message = "Signature verified successfully with tagger's GPG key";
-			} else if (getGpgSetting().getTrustedKey(key.getPublicKey().getKeyID()) != null) {
+			} else if (getGpgSetting().getTrustedSignatureVerificationKey(key.getPublicKey().getKeyID()) != null) {
 				message = "Signature verified successfully with trusted GPG key"; 
 			} else {
 				message = "Signature verified successfully with OneDev GPG key";
@@ -54,7 +54,7 @@ abstract class GitSignatureDetailPanel extends Panel {
 
 		if (key != null) {
 			add(new Label("keyId", GpgUtils.getKeyIDString(key.getPublicKey().getKeyID())));
-			add(new Label("emailAddress", GpgUtils.getEmailAddress(key.getPublicKey())));
+			add(new Label("emailAddress", key.getEmailAddress()));
 		} else {
 			add(new WebMarkupContainer("keyId").setVisible(false));
 			add(new WebMarkupContainer("emailAddress").setVisible(false));

@@ -3,6 +3,7 @@ package io.onedev.server.web.component.user.gpgkey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -26,7 +27,6 @@ import org.apache.wicket.model.Model;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.model.GpgKey;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.GpgUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -67,12 +67,12 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 			public void populateItem(Item<ICellPopulator<GpgKey>> cellItem, String componentId,
 					IModel<GpgKey> rowModel) {
 				cellItem.add(new Label(componentId, 
-						GpgUtils.getKeyIDString(rowModel.getObject().getPublicKey().getKeyID())));
+						GpgUtils.getKeyIDString(rowModel.getObject().getKeyId())));
 			}
 			
 		});
 		
-		columns.add(new AbstractColumn<GpgKey, Void>(Model.of("Created At")) {
+		columns.add(new AbstractColumn<GpgKey, Void>(Model.of("Sub Keys")) {
 
 			@Override
 			public String getCssClass() {
@@ -82,7 +82,15 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 			@Override
 			public void populateItem(Item<ICellPopulator<GpgKey>> cellItem, String componentId,
 					IModel<GpgKey> rowModel) {
-				cellItem.add(new Label(componentId, DateUtils.formatDateTime(rowModel.getObject().getCreatedAt())));
+				GpgKey key = rowModel.getObject();
+				String subKeyIds = key.getKeyIds().stream()
+						.filter(it->it!=key.getKeyId())
+						.map(it->GpgUtils.getKeyIDString(it))
+						.collect(Collectors.joining(", "));
+				if (subKeyIds.length() != 0)
+					cellItem.add(new Label(componentId, subKeyIds));
+				else
+					cellItem.add(new Label(componentId, "<i>None</i>").setEscapeModelStrings(false));
 			}
 			
 		});

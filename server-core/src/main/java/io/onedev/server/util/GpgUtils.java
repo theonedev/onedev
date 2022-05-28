@@ -6,8 +6,10 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
@@ -37,18 +39,20 @@ import io.onedev.commons.utils.StringUtils;
 
 public class GpgUtils {
 
-	public static PGPPublicKey parse(String publicKeyString) {
+	public static List<PGPPublicKey> parse(String publicKeyString) {
 		try (InputStream in = PGPUtil
 				.getDecoderStream(new ByteArrayInputStream(publicKeyString.getBytes(StandardCharsets.UTF_8)))) {
+			List<PGPPublicKey> publicKeys = new ArrayList<>();
 			JcaPGPPublicKeyRingCollection ringCollection = new JcaPGPPublicKeyRingCollection(in);
 			Iterator<PGPPublicKeyRing> itRing = ringCollection.getKeyRings();
-			if (!itRing.hasNext())
-				throw new ExplicitException("No key ring found");
-			PGPPublicKeyRing ring = itRing.next();
-			Iterator<PGPPublicKey> itKey = ring.getPublicKeys();
-			if (!itKey.hasNext())
+			while (itRing.hasNext()) {
+				Iterator<PGPPublicKey> itKey = itRing.next().getPublicKeys();
+				while (itKey.hasNext()) 
+					publicKeys.add(itKey.next());
+			}
+			if (publicKeys.isEmpty())
 				throw new ExplicitException("No public key found");
-			return itKey.next();
+			return publicKeys;
 		} catch (IOException | PGPException e) {
 			throw new RuntimeException(e);
 		}

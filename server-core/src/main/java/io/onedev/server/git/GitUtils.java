@@ -683,8 +683,7 @@ public class GitUtils {
 								key.getPublicKey());
 						signature.update(data);
 						if (signature.verify()) {
-							String signer = GpgUtils.getEmailAddress(key.getPublicKey());
-							if (!key.shouldVerifyDataWriter() || signer.equals(dataWriter)) 
+							if (!key.shouldVerifyDataWriter() || key.getEmailAddress().equals(dataWriter)) 
 								return new SignatureVerified(key);
 							else 
 								return new SignatureUnverified(key, "Email address of signing key and committer is different");
@@ -696,7 +695,7 @@ public class GitUtils {
 						return new SignatureUnverified(key, "Signature verification failed");
 					}
 				} else {
-					return new SignatureUnverified(null, "Signature is signed with an unkown key "
+					return new SignatureUnverified(null, "Signature is signed with an unknown key "
 							+ "(key ID: " + GpgUtils.getKeyIDString(signature.getKeyID()) + ")");
 				}
 			} else {
