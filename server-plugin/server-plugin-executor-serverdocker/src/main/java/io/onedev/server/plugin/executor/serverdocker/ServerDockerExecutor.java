@@ -310,7 +310,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										}
 									} else if (facade instanceof BuildImageFacade || facade instanceof BuildImageFacade) {
 										DockerExecutorUtils.buildImage(newDocker(), (BuildImageFacade) facade, 
-												hostWorkspace, jobLogger);
+												hostBuildHome, jobLogger);
 									} else if (facade instanceof RunContainerFacade) {
 										RunContainerFacade rubContainerFacade = (RunContainerFacade) facade;
 										OsContainer container = rubContainerFacade.getContainer(osInfo);

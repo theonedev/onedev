@@ -14,7 +14,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable(order=160, name="Build Docker Image", description="Build and optionally publish docker image. "
-		+ "Registry logins should be specified in the job executor executing this step if registry authentication "
+		+ "<span class='text-danger'>Registry logins should be specified</span> in the job executor executing this step if registry authentication "
 		+ "is required for build or publish")
 public class BuildImageStep extends Step {
 
@@ -73,7 +73,7 @@ public class BuildImageStep extends Step {
 	}
 
 	static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 	
 	@Override

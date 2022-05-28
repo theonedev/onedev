@@ -187,6 +187,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	@Override
+	public boolean isPlaceholderAllowed() {
+		return false;
+	}
+
+	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		execute(UUID.randomUUID().toString(), jobLogger, testData.getDockerImage());
 	}
