@@ -13,6 +13,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
@@ -27,63 +28,66 @@ public class ServerDockerModule extends AbstractPluginModule {
 		super.configure();
 		
 		// put your guice bindings here
-		contribute(ImplementationProvider.class, new ImplementationProvider() {
 
-			@Override
-			public Class<?> getAbstractClass() {
-				return JobExecutor.class;
-			}
+		if (OneDev.getK8sService() == null) {
+			contribute(ImplementationProvider.class, new ImplementationProvider() {
 
-			@Override
-			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(ServerDockerExecutor.class);
-			}
-			
-		});
-		
-		contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
-
-			@Override
-			public JobExecutor discover(TaskLogger jobLogger) {
-				jobLogger.log("Checking if there is docker facility...");
-				
-				Commandline docker;
-				if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/docker").exists())
-					docker = new Commandline("/usr/local/bin/docker");
-				else
-					docker = new Commandline("docker");
-				
-				docker.addArgs("version");
-				try {
-					docker.execute(new LineConsumer() {
-			
-						@Override
-						public void consume(String line) {
-						}
-						
-					}, new LineConsumer() {
-			
-						@Override
-						public void consume(String line) {
-						}
-						
-					}).checkReturnCode();
-					
-					return new ServerDockerExecutor();
-				} catch (Exception e) {
-					if (ExceptionUtils.find(e, InterruptedException.class) != null)
-						throw ExceptionUtils.unchecked(e);
-					else
-						return null;
+				@Override
+				public Class<?> getAbstractClass() {
+					return JobExecutor.class;
 				}
-			}
 
-			@Override
-			public int getOrder() {
-				return ServerDockerExecutor.ORDER;
-			}
+				@Override
+				public Collection<Class<?>> getImplementations() {
+					return Sets.newHashSet(ServerDockerExecutor.class);
+				}
+				
+			});
 			
-		});
+			contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
+
+				@Override
+				public JobExecutor discover(TaskLogger jobLogger) {
+					jobLogger.log("Checking if there is docker facility...");
+					
+					Commandline docker;
+					if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/docker").exists())
+						docker = new Commandline("/usr/local/bin/docker");
+					else
+						docker = new Commandline("docker");
+					
+					docker.addArgs("version");
+					try {
+						docker.execute(new LineConsumer() {
+				
+							@Override
+							public void consume(String line) {
+							}
+							
+						}, new LineConsumer() {
+				
+							@Override
+							public void consume(String line) {
+							}
+							
+						}).checkReturnCode();
+						
+						return new ServerDockerExecutor();
+					} catch (Exception e) {
+						if (ExceptionUtils.find(e, InterruptedException.class) != null)
+							throw ExceptionUtils.unchecked(e);
+						else
+							return null;
+					}
+				}
+
+				@Override
+				public int getOrder() {
+					return ServerDockerExecutor.ORDER;
+				}
+				
+			});
+		}
 	}
 
 }

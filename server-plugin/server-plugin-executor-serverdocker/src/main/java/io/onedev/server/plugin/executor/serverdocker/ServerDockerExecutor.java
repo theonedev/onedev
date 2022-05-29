@@ -144,6 +144,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
+		if (OneDev.getK8sService() != null) {
+			throw new ExplicitException(""
+					+ "OneDev running inside kubernetes cluster does not support server docker executor. "
+					+ "Please use kubernetes executor instead");
+		}
 		File hostBuildHome = FileUtils.createTempDir("onedev-build");
 		try {
 			TaskLogger jobLogger = jobContext.getLogger();

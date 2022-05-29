@@ -1,19 +1,15 @@
 package io.onedev.server.plugin.executor.kubernetes;
 
-import java.io.File;
 import java.util.Collection;
 
-import org.apache.commons.lang.SystemUtils;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
-import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.rest.jersey.JerseyConfigurator;
@@ -46,36 +42,12 @@ public class KubernetesModule extends AbstractPluginModule {
 			
 			@Override
 			public JobExecutor discover(TaskLogger jobLogger) {
-				jobLogger.log("Checking if there is a Kubernetes cluster...");
+				jobLogger.log("Checking if inside Kubernetes cluster...");
 
-				Commandline kubectl;
-				if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/kubectl").exists())
-					kubectl = new Commandline("/usr/local/bin/kubectl");
-				else
-					kubectl = new Commandline("kubectl");
-				kubectl.addArgs("cluster-info");
-				try {
-					kubectl.execute(new LineConsumer() {
-			
-						@Override
-						public void consume(String line) {
-						}
-						
-					}, new LineConsumer() {
-			
-						@Override
-						public void consume(String line) {
-						}
-						
-					}).checkReturnCode();
-					
+				if (OneDev.getK8sService() != null)
 					return new KubernetesExecutor();
-				} catch (Exception e) {
-					if (ExceptionUtils.find(e, InterruptedException.class) != null)
-						throw ExceptionUtils.unchecked(e);
-					else
-						return null;
-				}
+				else
+					return null;
 			}
 
 			@Override

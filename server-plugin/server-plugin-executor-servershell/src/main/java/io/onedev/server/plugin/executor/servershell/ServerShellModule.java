@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.TaskLogger;
@@ -21,35 +22,36 @@ public class ServerShellModule extends AbstractPluginModule {
 		super.configure();
 		
 		// put your guice bindings here
-		contribute(ImplementationProvider.class, new ImplementationProvider() {
+		if (!Bootstrap.isInDocker()) {
+			contribute(ImplementationProvider.class, new ImplementationProvider() {
 
-			@Override
-			public Class<?> getAbstractClass() {
-				return JobExecutor.class;
-			}
+				@Override
+				public Class<?> getAbstractClass() {
+					return JobExecutor.class;
+				}
 
-			@Override
-			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(ServerShellExecutor.class);
-			}
+				@Override
+				public Collection<Class<?>> getImplementations() {
+					return Sets.newHashSet(ServerShellExecutor.class);
+				}
+				
+			});
 			
-		});
-		
-		contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
+			contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
 
-			@Override
-			public JobExecutor discover(TaskLogger jobLogger) {					
-				jobLogger.log("Fallback to shell facility");
-				return new ServerShellExecutor();
-			}
+				@Override
+				public JobExecutor discover(TaskLogger jobLogger) {		
+					jobLogger.log("Fallback to shell facility");
+					return new ServerShellExecutor();
+				}
 
-			@Override
-			public int getOrder() {
-				return ServerShellExecutor.ORDER;
-			}
-			
-		});
-
+				@Override
+				public int getOrder() {
+					return ServerShellExecutor.ORDER;
+				}
+				
+			});
+		}
 	}
 
 }

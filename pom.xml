@@ -589,7 +589,7 @@
 	</repositories>
 	<properties>
 		<commons.version>2.1.2</commons.version>
-		<agent.version>1.3.6</agent.version>
+		<agent.version>1.3.7</agent.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<logback.version>1.2.9</logback.version>
 		<antlr.version>4.7.2</antlr.version>

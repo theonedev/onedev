@@ -97,7 +97,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	private static final long serialVersionUID = 1L;
 
-	static final int ORDER = 100;
+	static final int ORDER = 40;
 	
 	private static final int POD_WATCH_TIMEOUT = 60;
 	

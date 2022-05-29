@@ -73,6 +73,15 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
+		if (OneDev.getK8sService() != null) {
+			throw new ExplicitException(""
+					+ "OneDev running inside kubernetes cluster does not support server shell executor. "
+					+ "Please use kubernetes executor instead");
+		} else if (Bootstrap.isInDocker()) {
+			throw new ExplicitException("Server shell executor is only supported when OneDev is installed "
+					+ "directly on bare metal/virtual machine");
+		}
+		
 		TaskLogger jobLogger = jobContext.getLogger();
 		OneDev.getInstance(ResourceManager.class).run(new Runnable() {
 

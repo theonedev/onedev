@@ -155,10 +155,14 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		}
 	}
 	
+	public static String getK8sService() {
+		return System.getenv("k8s_service");
+	}
+	
 	public String guessServerUrl() {
 	    Url serverUrl = null;
 	    
-		String k8sService = System.getenv("k8s_service");
+		String k8sService = getK8sService();
 		if (k8sService != null) { // we are running inside Kubernetes  
 			Commandline kubectl = new Commandline("kubectl");
 			kubectl.addArgs("get", "service", k8sService, "-o", 
