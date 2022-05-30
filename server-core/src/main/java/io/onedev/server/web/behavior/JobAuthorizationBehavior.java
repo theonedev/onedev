@@ -18,19 +18,19 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.job.requirement.JobRequirementLexer;
-import io.onedev.server.job.requirement.JobRequirementParser;
-import io.onedev.server.job.requirement.JobRequirement;
+import io.onedev.server.job.authorization.JobAuthorization;
+import io.onedev.server.job.authorization.JobAuthorizationLexer;
+import io.onedev.server.job.authorization.JobAuthorizationParser;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class JobRequirementBehavior extends ANTLRAssistBehavior {
+public class JobAuthorizationBehavior extends ANTLRAssistBehavior {
 
-	public JobRequirementBehavior() {
-		super(JobRequirementParser.class, "jobRequirement", false);
+	public JobAuthorizationBehavior() {
+		super(JobAuthorizationParser.class, "jobAuthorization", false);
 	}
 
 	@Override
@@ -49,11 +49,11 @@ public class JobRequirementBehavior extends ANTLRAssistBehavior {
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-							int operator = AntlrUtils.getLexerRule(JobRequirementLexer.ruleNames, operatorName);							
-							if (operator == JobRequirementLexer.Is) {
+							int operator = AntlrUtils.getLexerRule(JobAuthorizationLexer.ruleNames, operatorName);							
+							if (operator == JobAuthorizationLexer.Is) {
 								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 								Preconditions.checkState(fieldElements.size() == 1);
-								String fieldName = JobRequirement.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = JobAuthorization.getValue(fieldElements.get(0).getMatchedText());
 								if (fieldName.equals(Build.NAME_PROJECT)) {
 									if (!matchWith.contains("*") && !matchWith.contains("?"))
 										return SuggestionUtils.suggestProjects(matchWith);
@@ -82,9 +82,9 @@ public class JobRequirementBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = JobRequirement.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = JobAuthorization.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					JobRequirement.checkField(fieldName, AntlrUtils.getLexerRule(JobRequirementLexer.ruleNames, suggestedLiteral));
+					JobAuthorization.checkField(fieldName, AntlrUtils.getLexerRule(JobAuthorizationLexer.ruleNames, suggestedLiteral));
 				} catch (ExplicitException e) {
 					return null;
 				}

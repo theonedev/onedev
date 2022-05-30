@@ -4092,6 +4092,10 @@ public class DataMigrator {
 									executorElement.addElement("mountDockerSock").setText("false");
 								else if (executorElement.getName().contains("KubernetesExecutor")) 
 									executorElement.addElement("mountContainerSock").setText("false");
+								
+								Element jobRequirementElement = executorElement.element("jobRequirement");
+								if (jobRequirementElement != null)
+									jobRequirementElement.setName("jobAuthorization");
 							}
 						}						
 					}

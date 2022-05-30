@@ -52,8 +52,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	@Editable(order=400, description="Whether or not to mount docker sock into job container to "
 			+ "support docker operations in job commands, for instance to build docker image.<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of the agent "
-			+ "running the job by operating the mounted docker sock. You should configure job "
-			+ "requirement option below to make sure the executor can only be used by trusted "
+			+ "running the job by operating the mounted docker sock. You should configure "
+			+ "authorized jobs below to make sure the executor can only be used by trusted "
 			+ "jobs if this option is enabled")
 	public boolean isMountDockerSock() {
 		return mountDockerSock;

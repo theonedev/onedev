@@ -1,4 +1,4 @@
-package io.onedev.server.job.requirement;
+package io.onedev.server.job.authorization;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +20,14 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.job.requirement.JobRequirementParser.AndCriteriaContext;
-import io.onedev.server.job.requirement.JobRequirementParser.CriteriaContext;
-import io.onedev.server.job.requirement.JobRequirementParser.FieldOperatorValueCriteriaContext;
-import io.onedev.server.job.requirement.JobRequirementParser.JobRequirementContext;
-import io.onedev.server.job.requirement.JobRequirementParser.NotCriteriaContext;
-import io.onedev.server.job.requirement.JobRequirementParser.OperatorValueCriteriaContext;
-import io.onedev.server.job.requirement.JobRequirementParser.OrCriteriaContext;
-import io.onedev.server.job.requirement.JobRequirementParser.ParensCriteriaContext;
+import io.onedev.server.job.authorization.JobAuthorizationParser.AndCriteriaContext;
+import io.onedev.server.job.authorization.JobAuthorizationParser.CriteriaContext;
+import io.onedev.server.job.authorization.JobAuthorizationParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.job.authorization.JobAuthorizationParser.JobAuthorizationContext;
+import io.onedev.server.job.authorization.JobAuthorizationParser.NotCriteriaContext;
+import io.onedev.server.job.authorization.JobAuthorizationParser.OperatorValueCriteriaContext;
+import io.onedev.server.job.authorization.JobAuthorizationParser.OrCriteriaContext;
+import io.onedev.server.job.authorization.JobAuthorizationParser.ParensCriteriaContext;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.criteria.AndCriteria;
@@ -35,13 +35,13 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
 
-public class JobRequirement extends Criteria<ProjectAndBranch> {
+public class JobAuthorization extends Criteria<ProjectAndBranch> {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final Criteria<ProjectAndBranch> criteria;
 	
-	public JobRequirement(Criteria<ProjectAndBranch> criteria) {
+	public JobAuthorization(Criteria<ProjectAndBranch> criteria) {
 		this.criteria = criteria;
 	}
 
@@ -49,26 +49,26 @@ public class JobRequirement extends Criteria<ProjectAndBranch> {
 		return StringUtils.unescape(FenceAware.unfence(token));
 	}
 	
-	public static JobRequirement parse(String jobRequirementString) {
-		CharStream is = CharStreams.fromString(jobRequirementString); 
-		JobRequirementLexer lexer = new JobRequirementLexer(is);
+	public static JobAuthorization parse(String jobAuthorizationString) {
+		CharStream is = CharStreams.fromString(jobAuthorizationString); 
+		JobAuthorizationLexer lexer = new JobAuthorizationLexer(is);
 		lexer.removeErrorListeners();
 		lexer.addErrorListener(new BaseErrorListener() {
 
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new RuntimeException("Malformed job requirement", e);
+				throw new RuntimeException("Malformed job authorization", e);
 			}
 			
 		});
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		JobRequirementParser parser = new JobRequirementParser(tokens);
+		JobAuthorizationParser parser = new JobAuthorizationParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		JobRequirementContext jobRequirementContext = parser.jobRequirement();
+		JobAuthorizationContext jobAuthorizationContext = parser.jobAuthorization();
 
-		Criteria<ProjectAndBranch> criteria = new JobRequirementBaseVisitor<Criteria<ProjectAndBranch>>() {
+		Criteria<ProjectAndBranch> criteria = new JobAuthorizationBaseVisitor<Criteria<ProjectAndBranch>>() {
 
 			@Override
 			public Criteria<ProjectAndBranch> visitParensCriteria(ParensCriteriaContext ctx) {
@@ -86,7 +86,7 @@ public class JobRequirement extends Criteria<ProjectAndBranch> {
 				case Build.NAME_PROJECT:
 					return new ProjectCriteria(fieldValue);
 				default:
-					throw new RuntimeException("Unknown job requirement field: " + fieldName);
+					throw new RuntimeException("Unknown job authorization field: " + fieldName);
 				}
 			}
 			
@@ -117,14 +117,14 @@ public class JobRequirement extends Criteria<ProjectAndBranch> {
 				return new NotCriteria<ProjectAndBranch>(visit(ctx.criteria()));
 			}
 
-		}.visit(jobRequirementContext.criteria());
+		}.visit(jobAuthorizationContext.criteria());
 		
-		return new JobRequirement(criteria);
+		return new JobAuthorization(criteria);
 	}
 	
 	public static void checkField(String fieldName, int operator) {
 		if (fieldName.equals(Build.NAME_PROJECT) || fieldName.equals(Build.NAME_JOB)) {
-			if (operator != JobRequirementLexer.Is)
+			if (operator != JobAuthorizationLexer.Is)
 				throw newOperatorException(fieldName, operator);
 		} else {
 			throw new ExplicitException("Invalid field: " + fieldName);
@@ -133,7 +133,7 @@ public class JobRequirement extends Criteria<ProjectAndBranch> {
 	
 	private static ExplicitException newOperatorException(String fieldName, int operator) {
 		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" 
-				+ AntlrUtils.getLexerRuleName(JobRequirementLexer.ruleNames, operator) + "'");
+				+ AntlrUtils.getLexerRuleName(JobAuthorizationLexer.ruleNames, operator) + "'");
 	}
 
 	@Override
@@ -168,7 +168,7 @@ public class JobRequirement extends Criteria<ProjectAndBranch> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return AntlrUtils.getLexerRuleName(JobRequirementLexer.ruleNames, rule);
+		return AntlrUtils.getLexerRuleName(JobAuthorizationLexer.ruleNames, rule);
 	}
 	
 	@Override

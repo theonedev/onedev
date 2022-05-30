@@ -153,8 +153,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			+ "container to support container operations in job commands, for instance to build "
 			+ "container image.<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of k8s node "
-			+ "running the job by operating the mounted container sock. You should configure job "
-			+ "requirement option below to make sure the executor can only be used by trusted "
+			+ "running the job by operating the mounted container sock. You should configure "
+			+ "authorized jobs below to make sure the executor can only be used by trusted "
 			+ "jobs if this option is enabled")
 	public boolean isMountContainerSock() {
 		return mountContainerSock;

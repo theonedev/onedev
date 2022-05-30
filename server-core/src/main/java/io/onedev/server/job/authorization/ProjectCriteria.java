@@ -1,7 +1,7 @@
-package io.onedev.server.job.requirement;
+package io.onedev.server.job.authorization;
 
-import static io.onedev.server.job.requirement.JobRequirement.getRuleName;
-import static io.onedev.server.job.requirement.JobRequirementLexer.Is;
+import static io.onedev.server.job.authorization.JobAuthorization.getRuleName;
+import static io.onedev.server.job.authorization.JobAuthorizationLexer.Is;
 import static io.onedev.server.model.Build.NAME_PROJECT;
 
 import javax.persistence.criteria.CriteriaBuilder;

@@ -27,7 +27,7 @@ import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.JobRequirement;
+import io.onedev.server.web.editable.annotation.JobAuthorization;
 
 @ExtensionPoint
 @Editable
@@ -39,7 +39,7 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String name;
 	
-	private String jobRequirement;
+	private String jobAuthorization;
 	
 	private int cacheTTL = 7;
 	
@@ -62,16 +62,16 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=10000, name="Job Requirement", placeholder="Can be used by any jobs", 
-			description="Optionally specify job requirement of this executor. Only satisfied jobs can use this executor")
-	@JobRequirement
+	@Editable(order=10000, name="Authorized Jobs", placeholder="Can be used by any jobs", 
+			description="Optionally specify jobs authorized to use this executor")
+	@JobAuthorization
 	@Nullable
-	public String getJobRequirement() {
-		return jobRequirement;
+	public String getJobAuthorization() {
+		return jobAuthorization;
 	}
 
-	public void setJobRequirement(String jobRequirement) {
-		this.jobRequirement = jobRequirement;
+	public void setJobAuthorization(String jobAuthorization) {
+		this.jobAuthorization = jobAuthorization;
 	}
 
 	@Editable(order=50000, group="More Settings", description="Specify job cache TTL (time to live) by days. "
@@ -94,37 +94,37 @@ public abstract class JobExecutor implements Serializable {
 	
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (jobRequirement != null 
-				&& io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement).isUsingProject(projectPath)) {
+		if (jobAuthorization != null 
+				&& io.onedev.server.job.authorization.JobAuthorization.parse(jobAuthorization).isUsingProject(projectPath)) {
 			usage.add("job requirement" );
 		}
 		return usage;
 	}
 	
 	public void onMoveProject(String oldPath, String newPath) {
-		if (jobRequirement != null) {
-			io.onedev.server.job.requirement.JobRequirement parsedJobRequirement = 
-					io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement);
-			parsedJobRequirement.onMoveProject(oldPath, newPath);
-			jobRequirement = parsedJobRequirement.toString();
+		if (jobAuthorization != null) {
+			io.onedev.server.job.authorization.JobAuthorization parsedJobAuthorization = 
+					io.onedev.server.job.authorization.JobAuthorization.parse(jobAuthorization);
+			parsedJobAuthorization.onMoveProject(oldPath, newPath);
+			jobAuthorization = parsedJobAuthorization.toString();
 		}
 	}
 
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (jobRequirement != null 
-				&& io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement).isUsingUser(userName)) {
-			usage.add("job requirement" );
+		if (jobAuthorization != null 
+				&& io.onedev.server.job.authorization.JobAuthorization.parse(jobAuthorization).isUsingUser(userName)) {
+			usage.add("job authorization" );
 		}
 		return usage;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		if (jobRequirement != null) {
-			io.onedev.server.job.requirement.JobRequirement parsedJobRequirement = 
-					io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement);
-			parsedJobRequirement.onRenameUser(oldName, newName);
-			jobRequirement = parsedJobRequirement.toString();
+		if (jobAuthorization != null) {
+			io.onedev.server.job.authorization.JobAuthorization parsedJobAuthorization = 
+					io.onedev.server.job.authorization.JobAuthorization.parse(jobAuthorization);
+			parsedJobAuthorization.onRenameUser(oldName, newName);
+			jobAuthorization = parsedJobAuthorization.toString();
 		}
 	}
 	

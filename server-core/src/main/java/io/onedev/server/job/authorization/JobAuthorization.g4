@@ -1,6 +1,6 @@
-grammar JobRequirement;
+grammar JobAuthorization;
 
-jobRequirement
+jobAuthorization
     : WS* criteria WS* EOF
     ;
 

@@ -1,7 +1,7 @@
 # 7.3.0
-1. [CI/CD] Docker sock is mounted by default for server docker executor, remote docker executor and Kubernetes 
+1. [CI/CD] Docker sock is NOT mounted by default for server docker executor, remote docker executor and Kubernetes 
 executor for security reasons. If your CI job performs docker operation, the build may fail. You may enable 
-the mount docker sock option in related executors, but make sure to configure job requirement of the executor 
+the mount docker sock option in related executors, but make sure to configure authorized jobs of the executor 
 to only allow trusted jobs to use the executors
 
 # 7.0.0

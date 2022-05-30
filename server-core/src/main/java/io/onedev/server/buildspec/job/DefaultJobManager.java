@@ -100,7 +100,7 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.job.requirement.JobRequirement;
+import io.onedev.server.job.authorization.JobAuthorization;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
@@ -407,8 +407,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	private boolean isApplicable(JobExecutor executor, Build build) {
-		if (executor.getJobRequirement() != null) {
-			JobRequirement requirement = JobRequirement.parse(executor.getJobRequirement());
+		if (executor.getJobAuthorization() != null) {
+			JobAuthorization requirement = JobAuthorization.parse(executor.getJobAuthorization());
 			Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
 					.getDescendants(build.getProject(), Sets.newHashSet(build.getCommitId()));
 			descendants.add(build.getCommitId());

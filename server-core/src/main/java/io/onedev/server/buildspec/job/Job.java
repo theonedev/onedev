@@ -48,7 +48,7 @@ import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.job.requirement.JobRequirement;
+import io.onedev.server.job.authorization.JobAuthorization;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -163,10 +163,10 @@ public class Job implements NamedElement, Serializable, Validatable {
 		ProjectAndBranch projectAndBranch = new ProjectAndBranch(page.getProject(), page.getBlobIdent().revision);
 		for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
 			if (executor.isEnabled()) {
-				if (executor.getJobRequirement() == null) {
+				if (executor.getJobAuthorization() == null) {
 					applicableJobExecutors.add(executor.getName());
 				} else {
-					if (JobRequirement.parse(executor.getJobRequirement()).matches(projectAndBranch))
+					if (JobAuthorization.parse(executor.getJobAuthorization()).matches(projectAndBranch))
 						applicableJobExecutors.add(executor.getName());
 				}
 			}
