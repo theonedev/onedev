@@ -36,6 +36,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	
 	private String agentQuery;
 	
+	private boolean mountDockerSock;
+	
 	@Editable(order=390, name="Agent Selector", placeholder="Any agent", 
 			description="Specify agents applicable for this executor")
 	@io.onedev.server.web.editable.annotation.AgentQuery(forExecutor=true)
@@ -47,6 +49,20 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		this.agentQuery = agentQuery;
 	}
 
+	@Editable(order=400, description="Whether or not to mount docker sock into job container to "
+			+ "support docker operations in job commands, for instance to build docker image.<br>"
+			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of the agent "
+			+ "running the job by operating the mounted docker sock. You should configure job "
+			+ "requirement option below to make sure the executor can only be used by trusted "
+			+ "jobs if this option is enabled")
+	public boolean isMountDockerSock() {
+		return mountDockerSock;
+	}
+
+	public void setMountDockerSock(boolean mountDockerSock) {
+		this.mountDockerSock = mountDockerSock;
+	}
+	
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
 		AgentQuery parsedQeury = AgentQuery.parse(agentQuery, true);
@@ -73,8 +89,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				List<String> trustCertContent = getTrustCertContent();
 				DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(), 
 						jobContext.getProjectId(), jobContext.getCommitId().name(), jobContext.getBuildNumber(), 
-						jobContext.getActions(), jobContext.getRetried(), services, registryLogins, 
-						trustCertContent, getRunOptions());
+						jobContext.getActions(), jobContext.getRetried(), services, registryLogins,
+						mountDockerSock, trustCertContent, getRunOptions());
 				
 				try {
 					WebsocketUtils.call(agentSession, jobData, 0);

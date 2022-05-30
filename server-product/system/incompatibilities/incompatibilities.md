@@ -1,3 +1,9 @@
+# 7.3.0
+1. [CI/CD] Docker sock is mounted by default for server docker executor, remote docker executor and Kubernetes 
+executor for security reasons. If your CI job performs docker operation, the build may fail. You may enable 
+the mount docker sock option in related executors, but make sure to configure job requirement of the executor 
+to only allow trusted jobs to use the executors
+
 # 7.0.0
 
 1. [RESTful api] Email addresses of a user should now be retrieved via [UserResource.getEmailAddresses](/help/api/io.onedev.server.rest.UserResource/getEmailAddresses), and should be operated via [EmailAddressResource](/help/api/io.onedev.server.rest.EmailAddressResource)

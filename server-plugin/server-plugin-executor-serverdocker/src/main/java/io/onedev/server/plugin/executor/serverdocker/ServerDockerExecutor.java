@@ -93,6 +93,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private String dockerExecutable;
 	
+	private boolean mountDockerSock;
+	
 	private static transient volatile String hostInstallPath;
 
 	@Editable(order=400, description="Specify login information for docker registries if necessary")
@@ -102,6 +104,20 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
 		this.registryLogins = registryLogins;
+	}
+
+	@Editable(order=500, description="Whether or not to mount docker sock into job container to "
+			+ "support docker operations in job commands, for instance to build docker image.<br>"
+			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
+			+ "by operating the mounted docker sock. You should configure job requirement "
+			+ "option below to make sure the executor can only be used by trusted jobs if this "
+			+ "option is enabled")
+	public boolean isMountDockerSock() {
+		return mountDockerSock;
+	}
+
+	public void setMountDockerSock(boolean mountDockerSock) {
+		this.mountDockerSock = mountDockerSock;
 	}
 
 	@Editable(order=50050, group="More Settings", description="Optionally specify options to run container. For instance, you may use <tt>-m 2g</tt> "
@@ -247,10 +263,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 											docker.addArgs("-v", getHostPath(hostCachePath) + ":" + containerCachePath);
 										}
 										
-										if (SystemUtils.IS_OS_WINDOWS) 
-											docker.addArgs("-v", "//./pipe/docker_engine://./pipe/docker_engine");
-										else
-											docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+										if (isMountDockerSock()) {
+											if (SystemUtils.IS_OS_WINDOWS) 
+												docker.addArgs("-v", "//./pipe/docker_engine://./pipe/docker_engine");
+											else
+												docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+										}
 										
 										if (hostAuthInfoHome.get() != null) {
 											String hostPath = getHostPath(hostAuthInfoHome.get().getAbsolutePath());
