@@ -143,6 +143,7 @@ public class GitFilter implements Filter {
 	        environments.put("ONEDEV_CURL", settingManager.getSystemSetting().getCurlConfig().getExecutable());
 			environments.put("ONEDEV_URL", serverUrl);
 			environments.put("ONEDEV_USER_ID", SecurityUtils.getUserId().toString());
+			environments.put("ONEDEV_HOOK_TOKEN", GitUtils.HOOK_TOKEN);
 			environments.put("ONEDEV_REPOSITORY_ID", project.getId().toString());
 			
 			// to be compatible with old repository

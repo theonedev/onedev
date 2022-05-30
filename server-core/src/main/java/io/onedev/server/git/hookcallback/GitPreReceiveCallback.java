@@ -1,7 +1,6 @@
 package io.onedev.server.git.hookcallback;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -71,17 +70,14 @@ public class GitPreReceiveCallback extends HttpServlet {
 	@Sessional
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String clientIp = request.getHeader("X-Forwarded-For");
-        if (clientIp == null) clientIp = request.getRemoteAddr();
-
-        if (!InetAddress.getByName(clientIp).isLoopbackAddress()) {
+        List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
+        Preconditions.checkState(fields.size() == 3);
+        
+        if (!fields.get(2).equals(GitUtils.HOOK_TOKEN)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                    "Git hook callbacks can only be accessed from localhost.");
+                    "Git hook callbacks can only be accessed by OneDev itself");
             return;
         }
-        
-        List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
-        Preconditions.checkState(fields.size() == 2);
         
         SecurityUtils.getSubject().runAs(SecurityUtils.asPrincipal(Long.valueOf(fields.get(1))));
         try {

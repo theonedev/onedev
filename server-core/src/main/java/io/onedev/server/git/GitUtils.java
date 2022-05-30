@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -96,6 +97,8 @@ public class GitUtils {
 	public static final int SHORT_SHA_LENGTH = 8;
 	
 	private static final Logger logger = LoggerFactory.getLogger(GitUtils.class);
+	
+	public static final String HOOK_TOKEN = RandomStringUtils.randomAlphanumeric(20); 
 	
 	public static boolean isEmptyPath(String path) {
 		return Strings.isNullOrEmpty(path) || Objects.equal(path, DiffEntry.DEV_NULL);

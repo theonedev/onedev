@@ -537,7 +537,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         
         try {
 			String content = FileUtils.readFileToString(hookFile, Charset.defaultCharset());
-			if (!content.contains("ENV_GIT_ALTERNATE_OBJECT_DIRECTORIES"))
+			if (!content.contains("ONEDEV_HOOK_TOKEN"))
 				return false;
 		} catch (IOException e) {
 			throw new RuntimeException(e);

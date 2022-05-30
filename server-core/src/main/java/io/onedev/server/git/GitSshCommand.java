@@ -75,6 +75,7 @@ abstract class GitSshCommand implements Command, ServerSessionAware {
         SettingManager settingManager = OneDev.getInstance(SettingManager.class);
         environments.put("ONEDEV_CURL", settingManager.getSystemSetting().getCurlConfig().getExecutable());
 		environments.put("ONEDEV_URL", serverUrl);
+		environments.put("ONEDEV_HOOK_TOKEN", GitUtils.HOOK_TOKEN);
 		environments.put("ONEDEV_USER_ID", SecurityUtils.getUserId().toString());
 		environments.put("ONEDEV_REPOSITORY_ID", project.getId().toString());
 		return environments;
