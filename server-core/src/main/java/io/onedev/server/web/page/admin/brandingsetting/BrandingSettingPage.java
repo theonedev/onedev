@@ -33,7 +33,7 @@ public class BrandingSettingPage extends AdministrationPage {
 	}
 	
 	private File getLogoFile() {
-		return new File(Bootstrap.getSiteDir(), "logo.png");
+		return new File(Bootstrap.getSiteDir(), "assets/logo.png");
 	}
 
 	@Override

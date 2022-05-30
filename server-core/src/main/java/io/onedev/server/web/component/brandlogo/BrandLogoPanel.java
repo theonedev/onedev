@@ -18,7 +18,7 @@ public class BrandLogoPanel extends Panel {
 	}
 
 	private File getCustomLogoFile() {
-		return new File(Bootstrap.getSiteDir(), "logo.png");
+		return new File(Bootstrap.getSiteDir(), "assets/logo.png");
 	}
 	
 	@Override

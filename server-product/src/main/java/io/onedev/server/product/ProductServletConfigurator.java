@@ -1,5 +1,6 @@
 package io.onedev.server.product;
 
+import java.io.File;
 import java.util.EnumSet;
 
 import javax.inject.Inject;
@@ -119,8 +120,10 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		 * Configure a servlet to serve contents under site folder. Site folder can be used 
 		 * to hold site specific web assets.   
 		 */
-		ServletHolder fileServletHolder = new ServletHolder(new FileAssetServlet(Bootstrap.getSiteDir()));
+		File assetsDir = new File(Bootstrap.getSiteDir(), "assets");
+		ServletHolder fileServletHolder = new ServletHolder(new FileAssetServlet(assetsDir));
 		context.addServlet(fileServletHolder, "/site/*");
+		
 		context.addServlet(fileServletHolder, "/robots.txt");
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/api/*");	

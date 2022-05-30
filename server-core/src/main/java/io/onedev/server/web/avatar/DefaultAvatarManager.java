@@ -93,7 +93,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		if (StringUtils.isBlank(secondaryName))
 			secondaryName = primaryName;
 		
-		File avatarFile = new File(Bootstrap.getSiteDir(), "avatars/generated/" + encoded + ".png");
+		File avatarFile = new File(Bootstrap.getSiteDir(), "assets/avatars/generated/" + encoded + ".png");
 		if (!avatarFile.exists()) {
 			Lock avatarLock = LockUtils.getLock("generated-avatar:" + encoded);
 			avatarLock.lock();
@@ -129,7 +129,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public File getUploaded(User user) {
-		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/users/" + user.getId() + ".jpg");
+		return new File(Bootstrap.getSiteDir(), "assets/avatars/uploaded/users/" + user.getId() + ".jpg");
 	}
 
 	@Sessional
@@ -170,7 +170,7 @@ public class DefaultAvatarManager implements AvatarManager {
 
 	@Override
 	public File getUploaded(Long projectId) {
-		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/projects/" + projectId + ".jpg");
+		return new File(Bootstrap.getSiteDir(), "assets/avatars/uploaded/projects/" + projectId + ".jpg");
 	}
 
 	@Override

@@ -487,17 +487,48 @@ public class Upgrade extends DefaultPersistManager {
 			FileUtils.deleteFile(new File(upgradeDir, "boot/system.classpath"));
 		
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
-		
-		for (File file: new File(Bootstrap.getSiteDir(), "avatars").listFiles()) {
+
+		FileUtils.createDir(new File(upgradeDir, "site/assets"));
+		if (new File(upgradeDir, "site/robots.txt").exists()) {
+			try {
+				FileUtils.copyFile(
+						new File(upgradeDir, "site/robots.txt"), 
+						new File(upgradeDir, "site/assets/robots.txt"));
+				FileUtils.deleteFile(new File(upgradeDir, "site/robots.txt"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		if (new File(upgradeDir, "site/logo.png").exists()) {
+			try {
+				FileUtils.copyFile(
+						new File(upgradeDir, "site/logo.png"), 
+						new File(upgradeDir, "site/assets/logo.png"));
+				FileUtils.deleteFile(new File(upgradeDir, "site/logo.png"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		if (new File(upgradeDir, "site/avatars").exists()) {
+			try {
+				FileUtils.copyDirectory(
+						new File(upgradeDir, "site/avatars"), 
+						new File(upgradeDir, "site/assets/avatars"));
+				FileUtils.deleteDir(new File(upgradeDir, "site/avatars"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		for (File file: new File(Bootstrap.getSiteDir(), "assets/avatars").listFiles()) {
 			if (file.isFile()) {
 				try {
-					FileUtils.copyFileToDirectory(file, new File(upgradeDir, "site/avatars"));
+					FileUtils.copyFileToDirectory(file, new File(upgradeDir, "site/assets/avatars"));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
 		}
-		File uploadedDir = new File(upgradeDir, "site/avatars/uploaded");
+		File uploadedDir = new File(upgradeDir, "site/assets/avatars/uploaded");
 		File userUploadsDir = new File(uploadedDir, "users"); 
 		if (uploadedDir.exists() && !userUploadsDir.exists()) {
 			FileUtils.createDir(userUploadsDir);
