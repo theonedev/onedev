@@ -52,7 +52,6 @@ public class JobSecretAuthorizationContext {
 			PathMatcher matcher = new PathMatcher();
 			return project.equals(pullRequest.getSourceProject()) 
 					&& patternSet.matches(matcher, pullRequest.getTargetBranch())
-					&& pullRequest.getSourceBranch() != null 
 					&& patternSet.matches(matcher, pullRequest.getSourceBranch());
 		} else {
 			return false;

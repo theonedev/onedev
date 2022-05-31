@@ -22,7 +22,6 @@ import io.onedev.server.job.authorization.JobAuthorization;
 import io.onedev.server.job.authorization.JobAuthorizationLexer;
 import io.onedev.server.job.authorization.JobAuthorizationParser;
 import io.onedev.server.model.Build;
-import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -99,14 +98,7 @@ public class JobAuthorizationBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if ("criteriaValue".equals(spec.getLabel())) {
-				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-				if (!fieldElements.isEmpty()) {
-					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(Build.NAME_PROJECT))
-						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
-					else 
-						hints.add("Use '*' for wildcard match");
-				}
+				hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
 			}
 		} 
 		return hints;

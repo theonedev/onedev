@@ -406,9 +406,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	private boolean isApplicable(JobExecutor executor, Build build) {
+	private boolean isAuthorized(JobExecutor executor, Build build) {
 		if (executor.getJobAuthorization() != null) {
-			JobAuthorization requirement = JobAuthorization.parse(executor.getJobAuthorization());
+			JobAuthorization authorization = JobAuthorization.parse(executor.getJobAuthorization());
 			Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
 					.getDescendants(build.getProject(), Sets.newHashSet(build.getCommitId()));
 			descendants.add(build.getCommitId());
@@ -416,11 +416,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			for (RefInfo ref: build.getProject().getBranchRefInfos()) {
 				if (descendants.contains(ref.getPeeledObj())) {
 					String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
-					if (requirement.matches(new ProjectAndBranch(build.getProject(), branchName))) 
+					if (authorization.matches(new ProjectAndBranch(build.getProject(), branchName))) 
 						return true;
 				}
 			}
-			return false;
+			PullRequest request = build.getRequest();
+			return request != null 
+					&& request.getSource() != null 
+					&& authorization.matches(request.getTarget()) 
+					&& authorization.matches(request.getSource());
 		} else {
 			return true;
 		}
@@ -440,7 +444,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			if (jobExecutor != null) {
 				if (!jobExecutor.isEnabled())
 					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is disabled");
-				else if (!isApplicable(jobExecutor, build))
+				else if (!isAuthorized(jobExecutor, build))
 					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not applicable for current job");
 				else
 					return jobExecutor;
@@ -450,7 +454,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		} else {
 			if (!settingManager.getJobExecutors().isEmpty()) { 
 				for (JobExecutor executor: settingManager.getJobExecutors()) {
-					if (executor.isEnabled() && isApplicable(executor, build))
+					if (executor.isEnabled() && isAuthorized(executor, build))
 						return executor;
 				}
 				throw new ExplicitException("No applicable job executor");
