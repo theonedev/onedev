@@ -16,8 +16,11 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.job.resource.ResourceHolder;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 public abstract class JobContext {
+	
+	private final JobExecutor jobExecutor;
 	
 	private final String projectPath;
 	
@@ -39,8 +42,6 @@ public abstract class JobContext {
 	
 	private final List<Service> services;
 	
-	private final int cacheTTL;
-	
 	private final int retried;
 	
 	private final TaskLogger logger;	
@@ -49,10 +50,11 @@ public abstract class JobContext {
 	
 	protected final Collection<Thread> serverStepThreads = new ArrayList<>();
 	
-	public JobContext(String projectPath, Long projectId, Long buildNumber, File projectGitDir, 
-			List<Action> actions, int cpuRequirement, int memoryRequirement, ObjectId commitId, 
-			Collection<CacheSpec> caches, int cacheTTL, int retried, List<Service> services, 
+	public JobContext(JobExecutor jobExecutor, String projectPath, Long projectId, Long buildNumber, 
+			File projectGitDir, List<Action> actions, int cpuRequirement, int memoryRequirement, 
+			ObjectId commitId, Collection<CacheSpec> caches, int retried, List<Service> services, 
 			TaskLogger logger) {
+		this.jobExecutor = jobExecutor;
 		this.projectPath = projectPath;
 		this.projectId = projectId;
 		this.buildNumber = buildNumber;
@@ -62,12 +64,15 @@ public abstract class JobContext {
 		this.memoryRequirement = memoryRequirement;
 		this.commitId = commitId;
 		this.cacheSpecs = caches;
-		this.cacheTTL = cacheTTL;
 		this.retried = retried;
 		this.services = services;
 		this.logger = logger;
 	}
 	
+	public JobExecutor getJobExecutor() {
+		return jobExecutor;
+	}
+
 	public String getProjectPath() {
 		return projectPath;
 	}
@@ -106,10 +111,6 @@ public abstract class JobContext {
 
 	public TaskLogger getLogger() {
 		return logger;
-	}
-	
-	public int getCacheTTL() {
-		return cacheTTL;
 	}
 
 	public int getRetried() {

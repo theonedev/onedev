@@ -62,7 +62,7 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=10000, name="Authorized Jobs", placeholder="Can be used by any jobs", 
+	@Editable(order=10000, placeholder="Can be used by any jobs", 
 			description="Optionally specify jobs authorized to use this executor")
 	@JobAuthorization
 	@Nullable

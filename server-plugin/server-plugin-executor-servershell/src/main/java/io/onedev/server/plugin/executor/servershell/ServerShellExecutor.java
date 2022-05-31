@@ -63,8 +63,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	
 	private static final Object cacheHomeCreationLock = new Object();
 	
-	private File getCacheHome() {
-		File file = new File(Bootstrap.getSiteDir(), "cache");
+	private File getCacheHome(JobExecutor jobExecutor) {
+		File file = new File(Bootstrap.getSiteDir(), "cache/" + jobExecutor.getName());
 		if (!file.exists()) synchronized (cacheHomeCreationLock) {
 			FileUtils.createDir(file);
 		}
@@ -99,7 +99,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					}
 					
 					JobManager jobManager = OneDev.getInstance(JobManager.class);		
-					File cacheHomeDir = getCacheHome();
+					File cacheHomeDir = getCacheHome(jobContext.getJobExecutor());
 					
 					jobLogger.log("Setting up job cache...") ;
 					JobCache cache = new JobCache(cacheHomeDir) {

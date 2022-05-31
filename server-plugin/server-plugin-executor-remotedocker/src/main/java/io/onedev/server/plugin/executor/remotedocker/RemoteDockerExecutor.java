@@ -53,7 +53,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 			+ "support docker operations in job commands, for instance to build docker image.<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of the agent "
 			+ "running the job by operating the mounted docker sock. You should configure "
-			+ "authorized jobs below to make sure the executor can only be used by trusted "
+			+ "job authorization below to make sure the executor can only be used by trusted "
 			+ "jobs if this option is enabled")
 	public boolean isMountDockerSock() {
 		return mountDockerSock;
@@ -126,8 +126,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 								"password", login.getPassword()));
 					}
 					
-					TestDockerJobData jobData = new TestDockerJobData(jobToken, testData.getDockerImage(), 
-							registryLogins, getRunOptions());
+					TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken, 
+							testData.getDockerImage(), registryLogins, getRunOptions());
 					
 					try {
 						WebsocketUtils.call(agentSession, jobData, 0);

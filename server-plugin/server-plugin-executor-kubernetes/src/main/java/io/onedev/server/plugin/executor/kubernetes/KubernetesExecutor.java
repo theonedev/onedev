@@ -154,7 +154,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			+ "container image.<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of k8s node "
 			+ "running the job by operating the mounted container sock. You should configure "
-			+ "authorized jobs below to make sure the executor can only be used by trusted "
+			+ "job authorization below to make sure the executor can only be used by trusted "
 			+ "jobs if this option is enabled")
 	public boolean isMountContainerSock() {
 		return mountContainerSock;
@@ -533,7 +533,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				"image", jobService.getImage());
 		containerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
 				"cpu", jobService.getCpuRequirement() + "m", 
-				"memory", jobService.getMemoryRequirement() + "m")));
+				"memory", jobService.getMemoryRequirement() + "Mi")));
 		List<Map<Object, Object>> envs = new ArrayList<>();
 		for (EnvVar envVar: jobService.getEnvVars()) {
 			envs.add(CollectionUtils.newLinkedHashMap(
@@ -961,7 +961,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (jobContext != null) {
 					sidecarContainerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
 							"cpu", jobContext.getCpuRequirement() + "m", 
-							"memory", jobContext.getMemoryRequirement() + "m")));
+							"memory", jobContext.getMemoryRequirement() + "Mi")));
 				}
 				
 				containerSpecs.add(sidecarContainerSpec);

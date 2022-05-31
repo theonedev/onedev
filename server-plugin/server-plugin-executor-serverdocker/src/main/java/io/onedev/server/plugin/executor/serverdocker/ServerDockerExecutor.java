@@ -109,9 +109,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	@Editable(order=500, description="Whether or not to mount docker sock into job container to "
 			+ "support docker operations in job commands, for instance to build docker image.<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
-			+ "by operating the mounted docker sock. You should configure authorized jobs "
-			+ "below to make sure the executor can only be used by trusted jobs if this "
-			+ "option is enabled")
+			+ "by operating the mounted docker sock. You should configure job authorization below "
+			+ "to make sure the executor can only be used by trusted jobs if this option is enabled")
 	public boolean isMountDockerSock() {
 		return mountDockerSock;
 	}
@@ -150,8 +149,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			return new Commandline("docker");
 	}
 	
-	private File getCacheHome() {
-		File file = new File(Bootstrap.getSiteDir(), "cache");
+	private File getCacheHome(JobExecutor jobExecutor) {
+		File file = new File(Bootstrap.getSiteDir(), "cache/" + jobExecutor.getName());
 		if (!file.exists()) synchronized (cacheHomeCreationLock) {
 			FileUtils.createDir(file);
 		}
@@ -179,7 +178,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					jobContext.notifyJobRunning(null);
 					
 					JobManager jobManager = OneDev.getInstance(JobManager.class);		
-					File hostCacheHome = getCacheHome();
+					File hostCacheHome = getCacheHome(jobContext.getJobExecutor());
 					
 					jobLogger.log("Setting up job cache...") ;
 					JobCache cache = new JobCache(hostCacheHome) {
@@ -516,7 +515,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				Commandline docker = newDocker();
 				try {
 					workspaceDir = FileUtils.createTempDir("workspace");
-					cacheDir = new File(getCacheHome(), UUID.randomUUID().toString());
+					cacheDir = new File(getCacheHome(ServerDockerExecutor.this), UUID.randomUUID().toString());
 					FileUtils.createDir(cacheDir);
 					
 					jobLogger.log("Testing specified docker image...");

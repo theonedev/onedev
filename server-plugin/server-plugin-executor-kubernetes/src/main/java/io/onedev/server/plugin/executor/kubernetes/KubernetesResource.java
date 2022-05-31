@@ -66,7 +66,10 @@ public class KubernetesResource {
 		JobContext context = jobManager.getJobContext(getJobToken(), true);
 		if (StringUtils.isNotBlank(jobWorkspace))
 			context.reportJobWorkspace(jobWorkspace);	
-		JobData jobData = new JobData(context.getCommitId().name(), context.getActions());
+		JobData jobData = new JobData(
+				context.getJobExecutor().getName(), 
+				context.getCommitId().name(), 
+				context.getActions());
 		return SerializationUtils.serialize(jobData);
     }
 	

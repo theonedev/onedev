@@ -565,10 +565,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								Build.push(build);
 								JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
 								try {
-									return new JobContext(projectPath, projectId, buildNumber, projectGitDir, 
-											actions, job.getCpuRequirement(), job.getMemoryRequirement(), 
-											commitId, caches, executor.getCacheTTL(), retried.get(), 
-											services, jobLogger) {
+									return new JobContext(executor, projectPath, projectId, buildNumber, projectGitDir, 
+											actions, job.getCpuRequirement(), job.getMemoryRequirement(), commitId, 
+											caches, retried.get(), services, jobLogger) {
 										
 										@Override
 										public void notifyJobRunning(Long agentId) {
@@ -1341,7 +1340,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				@Override
 				public void accept(CacheInstance instance) {
 					long ellapsed = request.getCurrentTime().getTime() - request.getInstances().get(instance).getTime();
-					if (ellapsed > jobContext.getCacheTTL() * 24L * 3600L * 1000L) {
+					if (ellapsed > jobContext.getJobExecutor().getCacheTTL() * 24L * 3600L * 1000L) {
 						allocations.put(instance, null);
 						jobContext.getAllocatedCaches().add(instance.getName());
 						allAllocated.add(instance.getName());

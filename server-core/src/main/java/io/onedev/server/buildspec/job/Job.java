@@ -308,8 +308,12 @@ public class Job implements NamedElement, Serializable, Validatable {
 	}
 
 	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. "
-			+ "For instance for node.js projects, you may cache folder <tt>/root/.npm</tt> to avoid downloading "
-			+ "node modules for subsequent job executions")
+			+ "For instance for Java Maven projects executed by various docker executors, you may cache folder "
+			+ "<tt>/root/.m2/repository</tt> to avoid downloading dependencies for subsequent executions.<br>"
+			+ "<b class='text-danger'>WARNING</b>: When using cache, malicious jobs running with same job executor "
+			+ "can read or even pollute the cache intentionally using same cache key as yours. To avoid this "
+			+ "issue, make sure job executor executing your job can only be used by trusted jobs via job "
+			+ "authorization setting</b>")
 	@Valid
 	public List<CacheSpec> getCaches() {
 		return caches;
