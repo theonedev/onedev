@@ -1,6 +1,5 @@
 package io.onedev.server.web.resource;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +15,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.io.IOUtils;
+import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
@@ -30,7 +30,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ContentDetector;
 
 public class ArtifactResource extends AbstractResource {
 
@@ -85,12 +84,8 @@ public class ArtifactResource extends AbstractResource {
 		}
 			
 		ResourceResponse response = new ResourceResponse();
-		try (InputStream is = new BufferedInputStream(new FileInputStream(artifactFile))) {
-			response.setContentType(ContentDetector.detectMediaType(is, artifactPath).toString());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		
+		response.getHeaders().addHeader("X-Content-Type-Options", "nosniff");
+		response.setContentType(MimeTypes.OCTET_STREAM);
 		response.disableCaching();
 		
 		try {
@@ -98,7 +93,6 @@ public class ArtifactResource extends AbstractResource {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		
 		response.setContentLength(artifactFile.length());
 		
 		response.setWriteCallback(new WriteCallback() {
