@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.util.validation.annotation.SafePath;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -21,6 +22,7 @@ public class VolumeMount implements Serializable {
 
 	@Editable(order=100, description="Specify a path relative to job workspace to be used as mount source")
 	@Interpolative(variableSuggester="suggestVariables")
+	@SafePath
 	@NotEmpty
 	public String getSourcePath() {
 		return source;

@@ -12,6 +12,7 @@ import io.onedev.server.buildspec.job.gitcredential.DefaultCredential;
 import io.onedev.server.buildspec.job.gitcredential.GitCredential;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.validation.annotation.SafePath;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -74,6 +75,7 @@ public class CheckoutStep extends Step {
 			+ "<a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a> to clone code into. "
 			+ "Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
+	@SafePath
 	public String getCheckoutPath() {
 		return checkoutPath;
 	}

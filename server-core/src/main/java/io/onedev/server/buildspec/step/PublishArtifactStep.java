@@ -14,6 +14,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.validation.annotation.SafePath;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -31,6 +32,7 @@ public class PublishArtifactStep extends ServerSideStep {
 			+ "relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a> to publish "
 			+ "artifacts from. Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
+	@SafePath
 	@Override
 	public String getSourcePath() {
 		return sourcePath;

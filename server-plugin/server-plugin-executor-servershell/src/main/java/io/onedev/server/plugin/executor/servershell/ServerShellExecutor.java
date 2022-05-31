@@ -53,7 +53,11 @@ import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="This executor runs build jobs with OneDev server's shell facility")
+@Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description=""
+		+ "This executor runs build jobs with OneDev server's shell facility.<br>"
+		+ "<b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission "
+		+ "as OneDev server process. Make sure it can only be used by trusted jobs via job "
+		+ "authorization setting")
 @Horizontal
 public class ServerShellExecutor extends JobExecutor implements Testable<TestData> {
 

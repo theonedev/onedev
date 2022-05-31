@@ -76,7 +76,8 @@ import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", description="This executor runs build jobs as docker containers on OneDev server")
+@Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
+		description="This executor runs build jobs as docker containers on OneDev server")
 @ClassValidating
 @Horizontal
 public class ServerDockerExecutor extends JobExecutor implements Testable<TestData>, Validatable {
@@ -247,14 +248,19 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
 										
 										for (Map.Entry<String, String> entry: volumeMounts.entrySet()) {
+											if (entry.getKey().contains(".."))
+												throw new ExplicitException("Volume mount source path should not contain '..'");
 											String hostPath = getHostPath(new File(hostWorkspace, entry.getKey()).getAbsolutePath());
 											docker.addArgs("-v", hostPath + ":" + entry.getValue());
 										}
 										
-										if (entrypoint != null) 
+										if (entrypoint != null) {
 											docker.addArgs("-w", containerWorkspace);
-										else if (workingDir != null) 
+										} else if (workingDir != null) { 
+											if (workingDir.contains(".."))
+												throw new ExplicitException("Container working dir should not contain '..'");
 											docker.addArgs("-w", workingDir);
+										}
 										
 										for (Map.Entry<CacheInstance, String> entry: cache.getAllocations().entrySet()) {
 											String hostCachePath = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();

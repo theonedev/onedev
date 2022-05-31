@@ -16,6 +16,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.validation.annotation.SafePath;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -73,6 +74,7 @@ public class RunContainerStep extends Step {
 	}
 
 	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container")
+	@SafePath
 	@Nullable
 	public String getWorkingDir() {
 		return workingDir;

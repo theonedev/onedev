@@ -27,7 +27,11 @@ import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 
-@Editable(order=500, name="Remote Shell Executor", description="This executor runs build jobs with remote machines's shell facility via <a href='/administration/agents' target='_blank'>agents</a>")
+@Editable(order=500, name="Remote Shell Executor", description=""
+		+ "This executor runs build jobs with remote machines's shell facility via <a href='/administration/agents' target='_blank'>agents</a><br>"
+		+ "<b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission "
+		+ "as corresponding agent process. Make sure it can only be used by trusted jobs via job "
+		+ "authorization setting")
 @Horizontal
 public class RemoteShellExecutor extends ServerShellExecutor {
 

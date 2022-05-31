@@ -10,6 +10,7 @@ import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.validation.annotation.SafePath;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -31,6 +32,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=100, description="Optionally specify build path relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
+	@SafePath
 	public String getBuildPath() {
 		return buildPath;
 	}
@@ -42,6 +44,7 @@ public class BuildImageStep extends Step {
 	@Editable(order=200, description="Optionally specify Dockerfile relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use file <tt>Dockerfile</tt> under job workspace")
 	@Interpolative(variableSuggester="suggestVariables")
+	@SafePath
 	public String getDockerfile() {
 		return dockerfile;
 	}

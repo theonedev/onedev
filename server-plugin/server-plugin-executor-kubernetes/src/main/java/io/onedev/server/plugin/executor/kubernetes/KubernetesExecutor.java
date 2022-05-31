@@ -873,6 +873,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							
 							List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
 							for (Map.Entry<String, String> entry: container.getVolumeMounts().entrySet()) {
+								if (entry.getKey().contains(".."))
+									throw new ExplicitException("Volume mount source path should not container '..'");
 								String subPath = StringUtils.stripStart(entry.getKey(), "/\\");
 								if (osInfo.isWindows())
 									subPath = "workspace\\" + subPath;
