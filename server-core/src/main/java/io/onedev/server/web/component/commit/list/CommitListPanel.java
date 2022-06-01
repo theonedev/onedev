@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -98,6 +100,9 @@ public abstract class CommitListPanel extends Panel {
 	
 	private static final int MAX_PAGES = 50;
 	
+	private static final ReferenceMap<ObjectId, RevCommit> commitCache = 
+			new ReferenceMap<>(ReferenceStrength.HARD, ReferenceStrength.WEAK);
+	
 	private final IModel<String> queryStringModel;
 	
 	private final IModel<CommitQuery> queryModel = new LoadableDetachableModel<CommitQuery>() {
@@ -183,26 +188,41 @@ public abstract class CommitListPanel extends Panel {
 				commits.last = new ArrayList<>();
 				
 				for (int i=0; i<lastMaxCount; i++) { 
-					commits.last.add(revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i))));
+					commits.last.add(loadCommit(revWalk, ObjectId.fromString(commitHashes.get(i))));
 				}
 				
 				sort(commits.last, 0);
 				
 				commits.current = new ArrayList<>(commits.last);
 				for (int i=lastMaxCount; i<commitHashes.size(); i++)
-					commits.current.add(revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i))));
+					commits.current.add(loadCommit(revWalk, ObjectId.fromString(commitHashes.get(i))));
 				
 				sort(commits.current, lastMaxCount);
 
 				commits.last = separateByDate(commits.last);
 				commits.current = separateByDate(commits.current);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
 			}
 			
 			return commits;
 		}
 		
+		private RevCommit loadCommit(RevWalk revWalk, ObjectId commitId) {
+			RevCommit commit;
+			synchronized (commitCache) {
+				commit = commitCache.get(commitId);
+			}
+			if (commit == null) {
+				try {
+					commit = revWalk.parseCommit(commitId);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				synchronized (commitCache) {
+					commitCache.put(commitId, commit);
+				}
+			}
+			return commit;
+		}
 	};
 	
 	private final IModel<Map<String, List<String>>> labelsModel = new LoadableDetachableModel<Map<String, List<String>>>() {
