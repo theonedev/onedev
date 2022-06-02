@@ -69,7 +69,8 @@ public class BuildSpec implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final LoadingCache<String, byte[]> parseCache =  CacheBuilder.newBuilder().softValues().build(new CacheLoader<String, byte[]>() {
+	private static final LoadingCache<String, byte[]> parseCache =  
+			CacheBuilder.newBuilder().softValues().build(new CacheLoader<String, byte[]>() {
 	        
 		@Override
         public byte[] load(String key) {
