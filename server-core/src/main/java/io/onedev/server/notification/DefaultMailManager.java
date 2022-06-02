@@ -708,10 +708,7 @@ public class DefaultMailManager implements MailManager {
 										logger.error("Error monitoring inbox", e);
 									else
 										logger.warn("Lost connection to mail server, will reconnect later... ");
-									try {
-										Thread.sleep(5000);
-									} catch (InterruptedException e2) {
-									}
+									Thread.sleep(5000);
 								}
 							}
 						} else {
