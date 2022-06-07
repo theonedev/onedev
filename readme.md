@@ -54,6 +54,12 @@ With customizable issue states, we may address the issue with four states: open,
 
 ![fixing-build](doc/images/fixing-build.png)
 
+## Service Desk to Create/Discuss Issues via Email
+
+Service desk allows your users to submit tickets via email without the need to have a OneDev account. These tickets can then be created in desired projects, and assigned to appropriate members in your team. All further discussions over the tickets can take place completely in email, with discussion contents posted to ticket as comments. User will also get notifications when there are any ticket activities, for instance, when a relevant release is created or deployed
+
+![service-desk.png](doc/images/service-desk.png)
+
 ## A powerful and Intuitive Query Language
 
 Thanks to ANTLR again, OneDev ships sophisticated query languages for projects, commits, issues, builds, and pull requests, with intuitive auto-completions and hints. For instance, it enables our customers finding fixed issues between their running release and latest release, and enables us to find all commits submitted by someone touching specified modules, etc. 
