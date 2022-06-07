@@ -124,7 +124,11 @@
 .markdown-editor>.body>.preview>.markdown-rendered {
 	border: 1px solid var(--light-gray);
 	padding: 0.6rem;
-	border-radius: 0 0 0.42rem 0.42rem;
+	position: absolute;
+	top: 0;
+	bottom: 4px;
+	left: 0;
+	right: 0;
 	background: white;
 }
 .dark-mode .markdown-editor>.body>.preview>.markdown-rendered {
@@ -134,12 +138,6 @@
 
 .markdown-editor.preview-mode>.body>.edit, .markdown-editor.edit-mode>.body>.preview {
 	display: none !important;
-}
-.markdown-editor.normal-mode.split-mode>.body>.edit>textarea {
-	border-radius: 0 0 0 0.42rem;
-}
-.markdown-editor.normal-mode.split-mode>.body>.preview>.markdown-rendered {
-	border-radius: 0 0 0.42rem 0;
 }
 .markdown-editor.fullscreen>.body>* {
 	height: 100% !important;
@@ -162,16 +160,18 @@
 .markdown-editor.compact-mode.split-mode>.body>.preview {
 	margin-top: 0.5rem;
 }
-.markdown-editor.compact-mode.split-mode>.body>.preview>.markdown-rendered {
-	border-radius: 0.42rem;
-}
 
 .markdown-editor>.body>.edit>textarea {
 	width: 100%;
 	display: block;
 	resize: none;
 	padding: 0.6rem;
-	border-radius: 0 0 0.42rem 0.42rem;
+	border-radius: 0;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 4px;
 }
 .markdown-editor>.body>.preview>.markdown-rendered>.message {
 	color: var(--gray);
