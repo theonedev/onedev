@@ -74,6 +74,7 @@ import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
@@ -532,6 +533,15 @@ public abstract class CodeCommentListPanel extends Panel {
 				return "text-break";
 			}
 			
+		});
+		
+		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Resolved")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
+				cellItem.add(new Label(componentId, TextUtils.describe(rowModel.getObject().isResolved())));
+			}
+
 		});
 		
 		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Last Update")) {

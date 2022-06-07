@@ -75,9 +75,13 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
+	public static final String PROP_RESOLVED = "resolved";
+	
 	public static final String PROP_USER = "user";
 	
 	public static final String PROP_REPLIES = "replies";
+	
+	public static final String PROP_CHANGES = "changes";
 
 	public static final String PROP_ID = "id";
 	
@@ -114,8 +118,13 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	@Embedded
 	private CompareContext compareContext;
 	
+	private boolean resolved;
+	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
+	
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	private Collection<CodeCommentStatusChange> changes = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -178,6 +187,14 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 		this.replies = replies;
 	}
 
+	public Collection<CodeCommentStatusChange> getChanges() {
+		return changes;
+	}
+
+	public void setChanges(Collection<CodeCommentStatusChange> changes) {
+		this.changes = changes;
+	}
+
 	public String getUUID() {
 		return uuid;
 	}
@@ -200,6 +217,14 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 
 	public void setLastUpdate(LastUpdate lastUpdate) {
 		this.lastUpdate = lastUpdate;
+	}
+
+	public boolean isResolved() {
+		return resolved;
+	}
+
+	public void setResolved(boolean resolved) {
+		this.resolved = resolved;
 	}
 
 	public boolean isVisitedAfter(Date date) {

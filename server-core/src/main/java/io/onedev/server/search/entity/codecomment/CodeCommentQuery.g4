@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-	: operator=CreatedByMe #OperatorCriteria
+	: operator=(CreatedByMe|Resolved|Unresolved) #OperatorCriteria
     | operator=(CreatedBy|OnCommit) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsUntil|IsSince|IsGreaterThan|IsLessThan|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
@@ -22,6 +22,14 @@ order
 
 CreatedByMe
 	: 'created' WS+ 'by' WS+ 'me'
+	;
+	
+Resolved
+	: 'resolved'
+	;
+	
+Unresolved
+	: 'unresolved'
 	;
 	
 CreatedBy

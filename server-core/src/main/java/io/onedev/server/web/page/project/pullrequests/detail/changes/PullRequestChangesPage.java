@@ -52,11 +52,13 @@ import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
@@ -854,6 +856,16 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			compareContext.setNewCommitHash(state.newCommitHash);
 		} 
 		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
+	}
+	
+	@Override
+	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
+		if (change.isNew()) {
+			CompareContext compareContext = change.getCompareContext();
+			compareContext.setOldCommitHash(state.oldCommitHash);
+			compareContext.setNewCommitHash(state.newCommitHash);
+		} 
+		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
 	}
 	
 	@Override

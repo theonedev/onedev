@@ -1,47 +1,52 @@
 <wicket:panel>
 	<div class="code-comment">
-		<div wicket:id="comment" class="comment section"></div>
-		<div wicket:id="replies" class="reply section"></div>
-		<div wicket:id="addReply" class="add-reply"></div>
+		<div wicket:id="comment" class="comment d-flex pl-2 py-3 flex-nowrap"></div>
+		<div wicket:id="activities" class="activity d-flex pl-2 py-3 flex-nowrap"/>
+		<div wicket:id="actions" class="actions d-flex pl-2 py-3 flex-nowrap"></div>
 	</div>
-	<wicket:fragment wicket:id="viewFrag">
-		<div class="user-avatar"><a wicket:id="userAvatar"></a></div>
-		<div class="detail">
+	<wicket:fragment wicket:id="commentOrReplyViewFrag">
+		<div class="user-avatar flex-shrink-0"><a wicket:id="userAvatar"></a></div>
+		<div class="detail ml-3 flex-grow-1">
 			<div class="head text-muted mb-1">
 				<span wicket:id="userName" class="user-name"></span>
 				<span wicket:id="action" class="action"></span>
 				<span wicket:id="date" class="date"></span>
 				<a wicket:id="context" class="text-warning"><wicket:svg href="warning-o" class="icon icon-sm"/></a>					
+				<a wicket:id="anchor" class="reply-anchor ml-2"><wicket:svg href="link" class="icon rotate-45"/></a>
 			</div>
 			<div class="body">
 				<div wicket:id="content"></div>
 			</div>
-			<div wicket:id="foot" class="foot d-flex align-items-center mt-3">
+			<div wicket:id="foot" class="foot d-flex align-items-center font-size-sm mt-3">
 				<a wicket:id="edit" class="mr-2 text-muted text-hover-primary">Edit</a>
 				<span class="dot mr-2"></span>
 				<a wicket:id="delete" class="text-muted text-hover-primary">Delete</a>
 			</div>
 		</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="commentEditFrag">
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="feedback" class="feedback"></div>
-			<div class="form-group mb-3">
-				<div wicket:id="content"></div>
-			</div>
-			<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware mr-1">Save</button>
-			<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
-		</form>
+	<wicket:fragment wicket:id="commentOrReplyEditFrag">
+		<div class="user-avatar flex-shrink-0"><a wicket:id="userAvatar"></a></div>
+		<div class="detail ml-3 flex-grow-1">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="feedback" class="feedback"></div>
+				<div wicket:id="content" class="mb-3"></div>
+				<button wicket:id="save" class="btn btn-sm btn-primary mr-1"><span wicket:id="label"/></button>
+				<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
+			</form>
+		</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="replyEditFrag">
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="feedback" class="feedback"></div>
-			<div wicket:id="content" class="mb-3"></div>
-			<button wicket:id="save" class="btn btn-sm btn-primary mr-1"><span wicket:id="label"></span></button>
-			<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
-		</form>
+	<wicket:fragment wicket:id="actionsFrag">
+		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary mr-2">Reply</a>
+		<a wicket:id="resolve" class="btn btn-sm btn-outline-secondary mr-2">Resolve</a>
+		<a wicket:id="unresolve" class="btn btn-sm btn-outline-secondary">Unresolve</a>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="addReplyFrag">
-		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary"><wicket:svg href="reply" class="icon mr-2"></wicket:svg> Reply</a>
+	<wicket:fragment wicket:id="statusChangeFrag">
+		<div class="user-avatar flex-shrink-0"><a wicket:id="userAvatar"></a></div>
+		<div class="detail text-muted flex-grow-1 ml-3">
+			<span wicket:id="userName" class="user-name"></span>
+			<span wicket:id="action" class="action"></span>
+			<span wicket:id="date" class="date"></span>
+			<a wicket:id="context" class="text-warning"><wicket:svg href="warning-o" class="icon icon-sm"/></a>					
+		</div>
 	</wicket:fragment>
 </wicket:panel>

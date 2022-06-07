@@ -93,7 +93,14 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
 					@Override
 					public Criteria<CodeComment> visitOperatorCriteria(OperatorCriteriaContext ctx) {
-						return new CreatedByMeCriteria();
+						switch (ctx.operator.getType()) {
+						case CodeCommentQueryLexer.Resolved:
+							return new ResolvedCriteria();
+						case CodeCommentQueryLexer.Unresolved:
+							return new UnresolvedCriteria();
+						default:
+							return new CreatedByMeCriteria();
+						}
 					}
 					
 					@Override

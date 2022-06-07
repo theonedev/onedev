@@ -69,6 +69,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -969,6 +970,12 @@ public abstract class RevisionDiffPanel extends Panel {
 											}
 
 											@Override
+											protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
+												change.setCompareContext(getCompareContext());
+												annotationSupport.onSaveCommentStatusChange(change, note);
+											}
+											
+											@Override
 											protected boolean isContextDifferent(CompareContext compareContext) {
 												return RevisionDiffPanel.this.isContextDifferent(compareContext);
 											}
@@ -1177,6 +1184,12 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 			
 			@Override
+			protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
+				change.setCompareContext(getCompareContext());
+				annotationSupport.onSaveCommentStatusChange(change, note);
+			}
+			
+			@Override
 			protected boolean isContextDifferent(CompareContext compareContext) {
 				return RevisionDiffPanel.this.isContextDifferent(compareContext);
 			}
@@ -1278,6 +1291,40 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 		
+		head.add(new WebMarkupContainer("resolved") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new WebSocketObserver() {
+					
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+					
+					@Override
+					public Collection<String> getObservables() {
+						Set<String> observables = new HashSet<>();
+						if (annotationSupport != null && annotationSupport.getOpenComment() != null)
+							observables.add(CodeComment.getWebSocketObservable(annotationSupport.getOpenComment().getId()));
+						return observables;
+					}
+					
+				});
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(annotationSupport != null 
+						&& annotationSupport.getOpenComment() != null 
+						&& annotationSupport.getOpenComment().isResolved());
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		head.add(new AjaxLink<Void>("locate") {
 
 			@Override
@@ -1360,6 +1407,12 @@ public abstract class RevisionDiffPanel extends Panel {
 					protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 						reply.setCompareContext(getCompareContext());
 						annotationSupport.onSaveCommentReply(reply);
+					}
+					
+					@Override
+					protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
+						change.setCompareContext(getCompareContext());
+						annotationSupport.onSaveCommentStatusChange(change, note);
 					}
 					
 					@Override

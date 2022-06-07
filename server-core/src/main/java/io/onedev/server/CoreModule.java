@@ -99,6 +99,7 @@ import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
@@ -144,6 +145,7 @@ import io.onedev.server.entitymanager.impl.DefaultBuildQueryPersonalizationManag
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentReplyManager;
+import io.onedev.server.entitymanager.impl.DefaultCodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultCommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultEmailAddressManager;
 import io.onedev.server.entitymanager.impl.DefaultGitLfsLockManager;
@@ -413,6 +415,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(MembershipManager.class).to(DefaultMembershipManager.class);
 		bind(PullRequestChangeManager.class).to(DefaultPullRequestChangeManager.class);
 		bind(CodeCommentReplyManager.class).to(DefaultCodeCommentReplyManager.class);
+		bind(CodeCommentStatusChangeManager.class).to(DefaultCodeCommentStatusChangeManager.class);
 		bind(AttachmentStorageManager.class).to(DefaultAttachmentStorageManager.class);
 		bind(PullRequestInfoManager.class).to(DefaultPullRequestInfoManager.class);
 		bind(PullRequestNotificationManager.class);

@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.blob.render.source;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,6 +24,7 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -69,6 +71,7 @@ import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -77,6 +80,7 @@ import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -93,6 +97,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -349,6 +354,38 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			
 		}.setOutputMarkupId(true));
 		
+		head.add(new WebMarkupContainer("resolved") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				add(new WebSocketObserver() {
+					
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+					
+					@Override
+					public Collection<String> getObservables() {
+						Set<String> observables = new HashSet<>();
+						if (context.getOpenComment() != null)
+							observables.add(CodeComment.getWebSocketObservable(context.getOpenComment().getId()));
+						return observables;
+					}
+					
+				});
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(context.getOpenComment() != null && context.getOpenComment().isResolved());
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		head.add(new AjaxLink<Void>("close") {
 
 			@Override
@@ -390,6 +427,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					SourceViewPanel.this.onSaveCommentReply(reply);
 				}
 
+				@Override
+				protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
+					SourceViewPanel.this.onSaveCommentStatusChange(change, note);
+				}
+				
 				@Override
 				protected boolean isContextDifferent(CompareContext compareContext) {
 					return SourceViewPanel.this.isContextDifferent(compareContext);
@@ -531,6 +573,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								}
 
 								@Override
+								protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
+									SourceViewPanel.this.onSaveCommentStatusChange(change, note);
+								}
+								
+								@Override
 								protected boolean isContextDifferent(CompareContext compareContext) {
 									return SourceViewPanel.this.isContextDifferent(compareContext);
 								}
@@ -582,6 +629,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							SourceViewPanel.this.onSaveCommentReply(reply);
 						}
 
+						@Override
+						protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
+							SourceViewPanel.this.onSaveCommentStatusChange(change, note);
+						}
+						
 						@Override
 						protected boolean isContextDifferent(CompareContext compareContext) {
 							return SourceViewPanel.this.isContextDifferent(compareContext);
@@ -1160,6 +1212,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	private void onSaveCommentReply(CodeCommentReply reply) {
 		reply.setCompareContext(getCompareContext());
 		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
+	}
+	
+	private void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
+		change.setCompareContext(getCompareContext());
+		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
 	}
 	
 }

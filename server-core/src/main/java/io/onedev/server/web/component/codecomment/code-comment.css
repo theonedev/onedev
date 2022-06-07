@@ -10,46 +10,40 @@
 		display: none;
 	}
 }
-.code-comment>.section {
-	position: relative;
-	margin-left: -1rem;
-	padding-left: 1rem;
+.code-comment>div {
 	border-left: 4px solid white;
-}
-.dark-mode .code-comment>.section {
-	border-left-color: var(--dark-mode-dark);
-}
-.code-comment>.section>.detail, .code-comment>.section>form {
-	padding-bottom: 1rem;
-	padding-top: 1rem;
 	border-bottom: 1px solid var(--light);
 }
-.dark-mode .code-comment>.section>.detail, .dark-mode .code-comment>.section>form {
+.code-comment>div:last-child {
+	border-bottom: none;
+}
+.dark-mode .code-comment>div {
+	border-left-color: var(--dark-mode-dark);
 	border-bottom-color: var(--dark-mode-light-dark);
 }
-.code-comment>.section.new {
+
+.code-comment>.status-change>.detail {
+	margin-top: 0.25rem;
+}
+.code-comment>div.new {
 	border-left: 4px solid var(--primary);
 }
-.code-comment>.section>.user-avatar {
-	position: absolute;
-	left: 1rem;
-	top: 1rem;
-}
-.code-comment>.section>.user-avatar img {
+.code-comment>div>.user-avatar img {
 	width: 32px;
 	height: 32px;
 }
-.code-comment>.section>.detail {
-	padding-left: 3rem;
-}
-.code-comment>.section>.detail>.body {
+.code-comment>div>.detail>.body {
 	padding-top: 0.5rem;
 }
-.code-comment>.section>.detail>.body>.feedback .alert {
-	margin-bottom: 0;
+.code-comment>div .reply-anchor {
+	display: none;
 }
-.code-comment>.add-reply {
-	margin-top: 1.2rem;
+.code-comment>div:hover .reply-anchor {
+	display: inline;
+}
+
+.code-comment>div>.detail>.body>.feedback .alert {
+	margin-bottom: 0;
 }
 .code-comment .markdown-rendered {
 	font-size: inherit;

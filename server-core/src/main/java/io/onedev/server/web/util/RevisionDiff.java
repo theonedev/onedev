@@ -15,6 +15,7 @@ import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.support.Mark;
 
 public class RevisionDiff {
@@ -86,6 +87,8 @@ public class RevisionDiff {
 		void onSaveComment(CodeComment comment);
 		
 		void onSaveCommentReply(CodeCommentReply reply);
+		
+		void onSaveCommentStatusChange(CodeCommentStatusChange change, @Nullable String note);
 		
 	}	
 }

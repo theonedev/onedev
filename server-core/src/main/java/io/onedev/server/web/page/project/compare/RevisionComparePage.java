@@ -39,11 +39,13 @@ import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
@@ -860,6 +862,11 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
 	}
 
+	@Override
+	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
+		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
+	}
+	
 	@Override
 	public String getMarkUrl(Mark mark) {
 		State markState = new State();

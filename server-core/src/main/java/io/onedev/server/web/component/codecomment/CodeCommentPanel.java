@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.codecomment;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,12 +11,14 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
@@ -39,11 +42,13 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -67,7 +72,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 	private final Long commentId;
 	
-	private RepeatingView repliesView;
+	private RepeatingView activitiesView;
 	
 	/**
 	 * We pass comment id instead of comment model as we want to make sure that 
@@ -88,11 +93,11 @@ public abstract class CodeCommentPanel extends Panel {
 		return OneDev.getInstance(CodeCommentManager.class).load(commentId);
 	}
 
-	private WebMarkupContainer newCommentContainer() {
-		WebMarkupContainer commentContainer = new Fragment("comment", "viewFrag", this);
-		commentContainer.setOutputMarkupId(true);
+	private WebMarkupContainer newCommentOrReplyContainer() {
+		WebMarkupContainer viewFragment = new Fragment("comment", "commentOrReplyViewFrag", this);
+		viewFragment.setOutputMarkupId(true);
 		
-		commentContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+		viewFragment.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
@@ -101,14 +106,14 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}));
 		
-		commentContainer.add(new UserIdentPanel("userAvatar", getComment().getUser(), Mode.AVATAR));
-		commentContainer.add(new Label("userName", getComment().getUser().getDisplayName()));
-		commentContainer.add(new Label("action", "commented"));
-		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
+		viewFragment.add(new UserIdentPanel("userAvatar", getComment().getUser(), Mode.AVATAR));
+		viewFragment.add(new Label("userName", getComment().getUser().getDisplayName()));
+		viewFragment.add(new Label("action", "commented"));
+		viewFragment.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
 				.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
 		if (isContextDifferent(getComment().getCompareContext())) {
 			String url = OneDev.getInstance(UrlManager.class).urlFor(getComment());
-			commentContainer.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
+			viewFragment.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
@@ -118,10 +123,10 @@ public abstract class CodeCommentPanel extends Panel {
 				
 			});
 		} else {
-			commentContainer.add(new WebMarkupContainer("context").setVisible(false));
+			viewFragment.add(new WebMarkupContainer("context").setVisible(false));
 		}
 
-		commentContainer.add(new MarkdownViewer("content", new IModel<String>() {
+		viewFragment.add(new MarkdownViewer("content", new IModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -140,6 +145,8 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 			
 		}, null));
+		
+		viewFragment.add(new WebMarkupContainer("anchor").setVisible(false));
 
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
 		foot.setVisible(SecurityUtils.canModifyOrDelete(getComment()));
@@ -147,7 +154,9 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment(commentContainer.getId(), "commentEditFrag", CodeCommentPanel.this);
+				Fragment editFragment = new Fragment(viewFragment.getId(), "commentOrReplyEditFrag", CodeCommentPanel.this);
+				editFragment.add(new UserIdentPanel("userAvatar", getComment().getUser(), Mode.AVATAR));
+				
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				
@@ -188,14 +197,21 @@ public abstract class CodeCommentPanel extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						WebMarkupContainer commentContainer = newCommentContainer();
-						fragment.replaceWith(commentContainer);
-						target.add(commentContainer);
+						WebMarkupContainer commentOrReplyContainer = newCommentOrReplyContainer();
+						editFragment.replaceWith(commentOrReplyContainer);
+						target.add(commentOrReplyContainer);
 					}
 					
 				});
 				
 				form.add(new AjaxButton("save") {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new Label("label", "Save"));
+						add(AttributeAppender.append("class", "dirty-aware"));
+					}
 
 					@Override
 					protected void onError(AjaxRequestTarget target, Form<?> form) {
@@ -209,18 +225,18 @@ public abstract class CodeCommentPanel extends Panel {
 
 						CodeComment comment = getComment();
 						comment.setContent(contentInput.getModelObject());
-						WebMarkupContainer commentContainer = newCommentContainer();
-						fragment.replaceWith(commentContainer);
-						target.add(commentContainer);
+						WebMarkupContainer commentOrReplyContainer = newCommentOrReplyContainer();
+						editFragment.replaceWith(commentOrReplyContainer);
+						target.add(commentOrReplyContainer);
 						onSaveComment(target, comment);
 					}
 
 				});
 				
-				fragment.add(form);
-				fragment.setOutputMarkupId(true);
-				commentContainer.replaceWith(fragment);
-				target.add(fragment);
+				editFragment.add(form);
+				editFragment.setOutputMarkupId(true);
+				viewFragment.replaceWith(editFragment);
+				target.add(editFragment);
 			}
 			
 		});
@@ -248,168 +264,12 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		});
 		
-		commentContainer.add(foot);		
-		return commentContainer;
+		viewFragment.add(foot);		
+		return viewFragment;
 	}
 	
-	private CodeCommentReply getReply(Long replyId) {
-		return OneDev.getInstance(CodeCommentReplyManager.class).load(replyId);
-	}
-	
-	private WebMarkupContainer newReplyContainer(String componentId, CodeCommentReply reply) {
-		Long replyId = reply.getId();
-		Fragment replyContainer = new Fragment(componentId, "viewFrag", this, Model.of(replyId));
-		replyContainer.setOutputMarkupId(true);
-		replyContainer.setMarkupId(reply.getAnchor());
-		replyContainer.add(AttributeAppender.append("name", reply.getAnchor()));
-		
-		replyContainer.add(new UserIdentPanel("userAvatar", reply.getUser(), Mode.AVATAR));
-		replyContainer.add(new Label("userName", reply.getUser().getDisplayName()));
-		replyContainer.add(new Label("action", "replied"));
-		replyContainer.add(new Label("date", DateUtils.formatAge(reply.getDate()))
-				.add(new AttributeAppender("title", DateUtils.formatDateTime(reply.getDate()))));
-		if (isContextDifferent(reply.getCompareContext())) {
-			String url = OneDev.getInstance(UrlManager.class).urlFor(reply);
-			replyContainer.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.put("title", "Current context is different from the context when this reply is added, click to show the reply context");
-				}
-				
-			});
-		} else {
-			replyContainer.add(new WebMarkupContainer("context").setVisible(false));
-		}
-		
-		replyContainer.add(new MarkdownViewer("content", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return getReply(replyId).getContent();
-			}
-
-			@Override
-			public void setObject(String object) {
-				CodeCommentReply reply = getReply(replyId);
-				reply.setContent(object);
-				onSaveCommentReply(RequestCycle.get().find(AjaxRequestTarget.class), reply);
-			}
-			
-		}, null));			
-		
-		WebMarkupContainer foot = new WebMarkupContainer("foot");
-		foot.setVisible(SecurityUtils.canModifyOrDelete(reply));
-		
-		foot.add(new AjaxLink<Void>("edit") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment(replyContainer.getId(), "replyEditFrag", CodeCommentPanel.this, 
-						Model.of(replyId));
-				Form<?> form = new Form<Void>("form");
-				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent()), true) {
-
-					@Override
-					protected AttachmentSupport getAttachmentSupport() {
-						return new ProjectAttachmentSupport(getProject(), getComment().getUUID(), 
-								SecurityUtils.canManageCodeComments(getProject()));
-					}
-
-					@Override
-					protected Project getProject() {
-						return getComment().getProject();
-					}
-
-					@Override
-					protected List<User> getMentionables() {
-						return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
-					}
-
-				};
-				contentInput.setRequired(true);
-				contentInput.setLabel(Model.of("Comment"));
-				form.add(contentInput);
-				
-				FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
-				feedback.setOutputMarkupPlaceholderTag(true);
-				form.add(feedback);
-				
-				form.add(new AjaxLink<Void>("cancel") {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
-					}
-					
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						WebMarkupContainer replyContainer = newReplyContainer(componentId, getReply(replyId));
-						fragment.replaceWith(replyContainer);
-						target.add(replyContainer);
-					}
-					
-				});
-				
-				form.add(new AjaxButton("save") {
-
-					@Override
-					protected void onError(AjaxRequestTarget target, Form<?> form) {
-						super.onError(target, form);
-						target.add(feedback);
-					}
-
-					@Override
-					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-						super.onSubmit(target, form);
-
-						CodeCommentReply reply = getReply(replyId);
-						reply.setContent(contentInput.getModelObject());
-						onSaveCommentReply(target, reply);
-						reply.setContent(contentInput.getModelObject());
-						WebMarkupContainer replyContainer = newReplyContainer(componentId, reply);
-						fragment.replaceWith(replyContainer);
-						target.add(replyContainer);
-					}
-
-				}.add(new Label("label", "Save")));
-				
-				fragment.add(form);
-				fragment.setOutputMarkupId(true);
-				replyContainer.replaceWith(fragment);
-				target.add(fragment);
-			}
-			
-		});
-		foot.add(new AjaxLink<Void>("delete") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this reply?"));
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				replyContainer.remove();
-				OneDev.getInstance(CodeCommentReplyManager.class).delete(getReply(replyId));
-				target.appendJavaScript(String.format("$('#%s').remove();", replyContainer.getMarkupId()));
-			}
-			
-		});
-		
-		replyContainer.add(foot);		
-		return replyContainer;			
-	}
-	
-	private WebMarkupContainer newAddReplyContainer() {
-		WebMarkupContainer addReplyContainer = new Fragment("addReply", "addReplyFrag", this) {
+	private WebMarkupContainer newActionsContainer() {
+		WebMarkupContainer actionsContainer = new Fragment("actions", "actionsFrag", this) {
 
 			@Override
 			protected void onConfigure() {
@@ -418,76 +278,139 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 			
 		};
-		addReplyContainer.setOutputMarkupId(true);
-		addReplyContainer.add(new AjaxLink<Void>("reply") {
+		actionsContainer.setOutputMarkupId(true);
+		actionsContainer.add(new AjaxLink<Void>("reply") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onAddReply(target);
+				onAddReply(target, null);
 			}
 			
 		});
-		return addReplyContainer;
+		actionsContainer.add(new AjaxLink<Void>("resolve") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onAddReply(target, true);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getComment().isResolved());
+			}
+			
+		});
+		actionsContainer.add(new AjaxLink<Void>("unresolve") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onAddReply(target, false);
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getComment().isResolved());
+			}
+			
+		});
+		return actionsContainer;
+	}
+	
+	private List<CodeCommentActivity> getActivities() {
+		List<CodeCommentActivity> activities = new ArrayList<>();
+
+		for (CodeCommentStatusChange change: getComment().getChanges()) 
+			activities.add(new CodeCommentStatusChangeActivity(change));
+		
+		for (CodeCommentReply comment: getComment().getReplies())  
+			activities.add(new CodeCommentReplyActivity(comment));
+		
+		activities.sort((o1, o2) -> {
+			if (o1.getDate().getTime()<o2.getDate().getTime())
+				return -1;
+			else if (o1.getDate().getTime()>o2.getDate().getTime())
+				return 1;
+			else 
+				return 0;
+		});
+		
+		return activities;
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(newCommentContainer());
+		add(newCommentOrReplyContainer());
 		
-		repliesView = new RepeatingView("replies");
+		activitiesView = new RepeatingView("activities");
 
-		List<CodeCommentReply> replies = new ArrayList<>();
-		replies.addAll(getComment().getReplies());
+		List<CodeCommentActivity> activities = new ArrayList<>();
 
-		replies.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
+		for (CodeCommentStatusChange change: getComment().getChanges()) 
+			activities.add(new CodeCommentStatusChangeActivity(change));
+		
+		for (CodeCommentReply comment: getComment().getReplies())  
+			activities.add(new CodeCommentReplyActivity(comment));
+		
+		activities.sort((o1, o2) -> {
+			if (o1.getDate().getTime()<o2.getDate().getTime())
+				return -1;
+			else if (o1.getDate().getTime()>o2.getDate().getTime())
+				return 1;
+			else 
+				return 0;
+		});
 
-		for (CodeCommentReply reply: replies) {
-			Component replyContainer = newReplyContainer(repliesView.newChildId(), reply);				
-			if (!getComment().isVisitedAfter(reply.getDate()))
-				replyContainer.add(AttributeAppender.append("class", "new"));
-			repliesView.add(replyContainer);			
+		for (CodeCommentActivity activity: activities) {
+			Component activityContainer = activity.render(activitiesView.newChildId());				
+			if (!getComment().isVisitedAfter(activity.getDate()))
+				activityContainer.add(AttributeAppender.append("class", "new"));
+			activitiesView.add(activityContainer);			
 		}
-		add(repliesView);
-		add(newAddReplyContainer());
+		add(activitiesView);
+		add(newActionsContainer());
 		
 		add(new WebSocketObserver() {
 			
 			@Override
+			@SuppressWarnings("deprecation")
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				Date lastReplyDate;
-				String prevReplyMarkupId;
-				if (repliesView.size() != 0) {
-					@SuppressWarnings("deprecation")
-					Component lastReplyContainer = repliesView.get(repliesView.size()-1);
-					
-					CodeCommentReply lastReply = getReply((Long) lastReplyContainer.getDefaultModelObject());
-					lastReplyDate = lastReply.getDate();
-					prevReplyMarkupId = lastReplyContainer.getMarkupId();
-				} else {
-					lastReplyDate = getComment().getCreateDate();
-					prevReplyMarkupId = get("comment").getMarkupId();
-				}
+				Component prevActivityContainer;
+				if (activitiesView.size() > 0)
+					prevActivityContainer = activitiesView.get(activitiesView.size()-1);
+				else
+					prevActivityContainer = null;
 				
-				List<CodeCommentReply> replies = new ArrayList<>();
-				for (CodeCommentReply reply: getComment().getReplies()) {
-					if (reply.getDate().getTime()>lastReplyDate.getTime()) {
-						replies.add(reply);
+				List<CodeCommentActivity> newActivities = new ArrayList<>();
+				for (CodeCommentActivity activity: getActivities()) {
+					if (prevActivityContainer == null) {
+						newActivities.add(activity);
+					} else {
+						CodeCommentActivity lastActivity = (CodeCommentActivity)prevActivityContainer.getDefaultModelObject();
+						if (activity.getDate().getTime() > lastActivity.getDate().getTime()) 
+							newActivities.add(activity);
 					}
 				}
-				replies.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
-				
-				for (CodeCommentReply reply: replies) {
-					Component newReplyContainer = newReplyContainer(repliesView.newChildId(), reply); 
-					newReplyContainer.add(AttributeAppender.append("class", "new"));
-					repliesView.add(newReplyContainer);
-					
-					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							newReplyContainer.getMarkupId(), prevReplyMarkupId);
+
+				for (CodeCommentActivity activity: newActivities) {
+					Component newActivityContainer = activity.render(activitiesView.newChildId()); 
+					newActivityContainer.add(AttributeAppender.append("class", "new"));
+					activitiesView.add(newActivityContainer);
+
+					String script;
+					if (prevActivityContainer != null) {
+						script = String.format("$(\"<div id='%s'></div>\").insertAfter('#%s');", 
+								newActivityContainer.getMarkupId(), prevActivityContainer.getMarkupId());
+					} else {
+						script = String.format("$(\"<div id='%s'></div>\").insertAfter('#%s');", 
+								newActivityContainer.getMarkupId(), CodeCommentPanel.this.get("comment").getMarkupId());
+					}
 					handler.prependJavaScript(script);
-					handler.add(newReplyContainer);
-					prevReplyMarkupId = newReplyContainer.getMarkupId();
+					handler.add(newActivityContainer);
+					prevActivityContainer = newActivityContainer;
 				}
 				
 				OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
@@ -520,8 +443,10 @@ public abstract class CodeCommentPanel extends Panel {
 		response.render(CssHeaderItem.forReference(new CodeCommentCssResourceReference()));
 	}
 
-	private void onAddReply(AjaxRequestTarget target) {
-		Fragment fragment = new Fragment("addReply", "replyEditFrag", CodeCommentPanel.this);
+	private void onAddReply(AjaxRequestTarget target, @Nullable Boolean resolved) {
+		Fragment editFragment = new Fragment("actions", "commentOrReplyEditFrag", CodeCommentPanel.this);
+		editFragment.add(new UserIdentPanel("userAvatar", SecurityUtils.getUser(), Mode.AVATAR));
+		
 		Form<?> form = new Form<Void>("form");
 
 		String initialContent = "";
@@ -564,13 +489,21 @@ public abstract class CodeCommentPanel extends Panel {
 			}
 
 			@Override
+			protected List<Behavior> getInputBehaviors() {
+				List<Behavior> behaviors = new ArrayList<>();
+				if (resolved != null)
+					behaviors.add(AttributeModifier.replace("placeholder", "Leave a note"));
+				return behaviors;
+			}
+
+			@Override
 			protected List<User> getMentionables() {
 				return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
 			}
 			
 		};
-		contentInput.setRequired(true);
-		contentInput.setLabel(Model.of("Comment"));
+		contentInput.setRequired(resolved == null);
+		contentInput.setLabel(Model.of("Content"));
 		form.add(contentInput);
 		
 		FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
@@ -587,14 +520,25 @@ public abstract class CodeCommentPanel extends Panel {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				WebMarkupContainer addReplyContainer = newAddReplyContainer();
-				fragment.replaceWith(addReplyContainer);
-				target.add(addReplyContainer);
+				WebMarkupContainer actionsContainer = newActionsContainer();
+				editFragment.replaceWith(actionsContainer);
+				target.add(actionsContainer);
 			}
 			
 		});
 		
 		AjaxButton saveButton = new AjaxButton("save") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (resolved != null) {
+					add(new Label("label", "Ok"));
+				} else {
+					add(new Label("label", "Save"));
+					add(AttributeAppender.append("class", "dirty-aware"));
+				}
+			}
 
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
@@ -606,39 +550,38 @@ public abstract class CodeCommentPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				User user = SecurityUtils.getUser();
-				CodeComment comment = getComment();
-				Date date = new Date();
-				CodeCommentReply reply = new CodeCommentReply();
-				reply.setComment(comment);
-				reply.setDate(date);
-				reply.setUser(user);
-				reply.setContent(contentInput.getModelObject());
+				if (resolved == null) {
+					CodeCommentReply reply = new CodeCommentReply();
+					reply.setComment(getComment());
+					reply.setDate(new Date());
+					reply.setUser(SecurityUtils.getUser());
+					reply.setContent(contentInput.getModelObject());
+					
+					onSaveCommentReply(target, reply);
+				} else {
+					CodeCommentStatusChange change = new CodeCommentStatusChange();
+					change.setComment(getComment());
+					change.setDate(new Date());
+					change.setUser(SecurityUtils.getUser());
+					change.setResolved(resolved);
+					
+					onSaveCommentStatusChange(target, change, contentInput.getModelObject());
+				}
 				
-				onSaveCommentReply(target, reply);
-				
-				WebMarkupContainer replyContainer = newReplyContainer(repliesView.newChildId(), reply);
-				repliesView.add(replyContainer);
-
-				String script = String.format("$('#%s .add-reply').before('<div id=\"%s\"></div>');", 
-						CodeCommentPanel.this.getMarkupId(), replyContainer.getMarkupId());
-				target.prependJavaScript(script);
-				target.add(replyContainer);
-				
-				WebMarkupContainer addReplyContainer = newAddReplyContainer();
-				fragment.replaceWith(addReplyContainer);
-				target.add(addReplyContainer);
+				WebMarkupContainer actionsContainer = newActionsContainer();
+				editFragment.replaceWith(actionsContainer);
+				target.add(actionsContainer);
 			}
 
 		};
-		saveButton.add(new Label("label", "Save"));
-		saveButton.add(AttributeAppender.append("class", "dirty-aware"));
 		form.add(saveButton);
 		
-		fragment.add(form);
-		fragment.setOutputMarkupId(true);
-		get("addReply").replaceWith(fragment);
-		target.add(fragment);	
+		editFragment.add(form);
+		editFragment.add(AttributeAppender.append("class", "activity"));
+		
+		editFragment.setOutputMarkupId(true);
+		get("actions").replaceWith(editFragment);
+		target.add(editFragment);	
 		
 		String script = String.format("$('#%s textarea').caret(%d);", 
 				form.getMarkupId(), initialContent.length());
@@ -654,6 +597,284 @@ public abstract class CodeCommentPanel extends Panel {
 
 	protected abstract void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply);
 	
+	protected abstract void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, @Nullable String note);
+	
 	protected abstract boolean isContextDifferent(CompareContext compareContext);
 	
+	private interface CodeCommentActivity extends Serializable {
+		
+		Date getDate();
+		
+		Component render(String componentId);
+		
+		User getUser();
+		
+		String getAnchor();
+	}
+	
+	private class CodeCommentStatusChangeActivity implements CodeCommentActivity {
+
+		private final Long changeId;
+		
+		public CodeCommentStatusChangeActivity(CodeCommentStatusChange change) {
+			changeId = change.getId();
+		}
+		
+		@Override
+		public Component render(String componentId) {
+			Fragment fragment = new Fragment(componentId, "statusChangeFrag", CodeCommentPanel.this, Model.of(this));
+			fragment.add(new UserIdentPanel("userAvatar", getChange().getUser(), Mode.AVATAR));
+			fragment.add(new Label("userName", getChange().getUser().getDisplayName()));
+			if (getChange().isResolved())
+				fragment.add(new Label("action", "resolved"));
+			else
+				fragment.add(new Label("action", "unresolved"));
+			fragment.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
+					.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
+			if (isContextDifferent(getComment().getCompareContext())) {
+				String url = OneDev.getInstance(UrlManager.class).urlFor(getComment());
+				fragment.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.put("title", "Current context is different from this action, click to show the comment context");
+					}
+					
+				});
+			} else {
+				fragment.add(new WebMarkupContainer("context").setVisible(false));
+			}
+			fragment.add(AttributeAppender.append("class", "status-change"));
+			
+			fragment.setOutputMarkupId(true);
+			
+			return fragment;
+		}
+
+		public CodeCommentStatusChange getChange() {
+			return OneDev.getInstance(CodeCommentStatusChangeManager.class).load(changeId);
+		}
+		
+		@Override
+		public Date getDate() {
+			return getChange().getDate();
+		}
+
+		@Override
+		public String getAnchor() {
+			return getChange().getAnchor();
+		}
+
+		@Override
+		public User getUser() {
+			return getChange().getUser();
+		}
+
+	}
+	
+	public class CodeCommentReplyActivity implements CodeCommentActivity {
+
+		private final Long replyId;
+		
+		public CodeCommentReplyActivity(CodeCommentReply reply) {
+			replyId = reply.getId();
+		}
+		
+		@Override
+		public Component render(String componentId) {
+			CodeCommentReply reply = getReply();
+			Fragment viewFragment = new Fragment(componentId, "commentOrReplyViewFrag", 
+					CodeCommentPanel.this, Model.of(this));
+			viewFragment.setOutputMarkupId(true);
+			viewFragment.setMarkupId(reply.getAnchor());
+			viewFragment.add(AttributeAppender.append("name", reply.getAnchor()));
+			
+			viewFragment.add(new UserIdentPanel("userAvatar", reply.getUser(), Mode.AVATAR));
+			viewFragment.add(new Label("userName", reply.getUser().getDisplayName()));
+			viewFragment.add(new Label("action", "replied"));
+			viewFragment.add(new Label("date", DateUtils.formatAge(reply.getDate()))
+					.add(new AttributeAppender("title", DateUtils.formatDateTime(reply.getDate()))));
+			if (isContextDifferent(reply.getCompareContext())) {
+				String url = OneDev.getInstance(UrlManager.class).urlFor(reply);
+				viewFragment.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.put("title", "Current context is different from the context when this reply is added, click to show the reply context");
+					}
+					
+				});
+			} else {
+				viewFragment.add(new WebMarkupContainer("context").setVisible(false));
+			}
+			
+			viewFragment.add(new WebMarkupContainer("anchor") {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					tag.put("href", "#" + getReply().getAnchor());
+				}
+				
+			});
+			
+			viewFragment.add(new MarkdownViewer("content", new IModel<String>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public String getObject() {
+					return getReply().getContent();
+				}
+
+				@Override
+				public void setObject(String object) {
+					CodeCommentReply reply = getReply();
+					reply.setContent(object);
+					onSaveCommentReply(RequestCycle.get().find(AjaxRequestTarget.class), reply);
+				}
+				
+			}, null));			
+			
+			WebMarkupContainer foot = new WebMarkupContainer("foot");
+			foot.setVisible(SecurityUtils.canModifyOrDelete(reply));
+			
+			foot.add(new AjaxLink<Void>("edit") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					Fragment editFragment = new Fragment(viewFragment.getId(), 
+							"commentOrReplyEditFrag", CodeCommentPanel.this, 
+							Model.of(replyId));
+					editFragment.add(new UserIdentPanel("userAvatar", getReply().getUser(), Mode.AVATAR));
+					
+					Form<?> form = new Form<Void>("form");
+					CommentInput contentInput = new CommentInput("content", Model.of(getReply().getContent()), true) {
+
+						@Override
+						protected AttachmentSupport getAttachmentSupport() {
+							return new ProjectAttachmentSupport(getProject(), getComment().getUUID(), 
+									SecurityUtils.canManageCodeComments(getProject()));
+						}
+
+						@Override
+						protected Project getProject() {
+							return getComment().getProject();
+						}
+
+						@Override
+						protected List<User> getMentionables() {
+							return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
+						}
+
+					};
+					contentInput.setRequired(true);
+					contentInput.setLabel(Model.of("Comment"));
+					form.add(contentInput);
+					
+					FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
+					feedback.setOutputMarkupPlaceholderTag(true);
+					form.add(feedback);
+					
+					form.add(new AjaxLink<Void>("cancel") {
+
+						@Override
+						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+							super.updateAjaxAttributes(attributes);
+							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(form));
+						}
+						
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							Component activityContainer = new CodeCommentReplyActivity(getReply()).render(componentId);
+							editFragment.replaceWith(activityContainer);
+							target.add(activityContainer);
+						}
+						
+					});
+					
+					form.add(new AjaxButton("save") {
+
+						@Override
+						protected void onError(AjaxRequestTarget target, Form<?> form) {
+							super.onError(target, form);
+							target.add(feedback);
+						}
+
+						@Override
+						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+							super.onSubmit(target, form);
+
+							CodeCommentReply reply = getReply();
+							reply.setContent(contentInput.getModelObject());
+							onSaveCommentReply(target, reply);
+							reply.setContent(contentInput.getModelObject());
+							
+							Component activityContainer = new CodeCommentReplyActivity(reply).render(componentId);
+							editFragment.replaceWith(activityContainer);
+							target.add(activityContainer);
+						}
+
+					}.add(new Label("label", "Save")));
+					
+					editFragment.add(form);
+					editFragment.setOutputMarkupId(true);
+					editFragment.add(AttributeAppender.append("class", "reply"));
+					
+					viewFragment.replaceWith(editFragment);
+					target.add(editFragment);
+				}
+				
+			});
+			foot.add(new AjaxLink<Void>("delete") {
+
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this reply?"));
+				}
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					viewFragment.remove();
+					OneDev.getInstance(CodeCommentReplyManager.class).delete(getReply());
+					target.appendJavaScript(String.format("$('#%s').remove();", viewFragment.getMarkupId()));
+				}
+				
+			});
+			
+			viewFragment.add(foot);		
+			
+			viewFragment.add(AttributeAppender.append("class", "reply"));
+			
+			return viewFragment;			
+		}
+		
+		public Long getCommentId() {
+			return replyId;
+		}
+		
+		public CodeCommentReply getReply() {
+			return OneDev.getInstance(CodeCommentReplyManager.class).load(replyId);
+		}
+
+		@Override
+		public Date getDate() {
+			return getReply().getDate();
+		}
+
+		@Override
+		public String getAnchor() {
+			return getReply().getAnchor();
+		}
+
+		@Override
+		public User getUser() {
+			return getReply().getUser();
+		}
+		
+	}	
 }

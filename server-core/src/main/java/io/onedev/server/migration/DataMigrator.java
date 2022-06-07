@@ -4105,4 +4105,15 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate88(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.addElement("resolved").setText("false");
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }
