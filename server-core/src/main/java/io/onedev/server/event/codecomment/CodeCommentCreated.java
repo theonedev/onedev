@@ -15,7 +15,7 @@ public class CodeCommentCreated extends CodeCommentEvent {
 
 	@Override
 	public String getActivity() {
-		return "commented";
+		return "added";
 	}
 
 }

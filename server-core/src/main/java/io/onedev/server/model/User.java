@@ -520,6 +520,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return UNKNOWN_ID.equals(getId());
 	}
 	
+	public boolean isOrdinary() {
+		return getId() > 0;
+	}
+	
 	public Collection<UserAuthorization> getAuthorizations() {
 		return authorizations;
 	}

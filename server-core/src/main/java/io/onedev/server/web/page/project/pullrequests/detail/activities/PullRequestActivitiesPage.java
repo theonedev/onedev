@@ -312,16 +312,6 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 					input.clearMarkdown();
 
 					target.add(fragment);
-					
-					@SuppressWarnings("deprecation")
-					Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-					Component newActivityRow = newActivityRow(activitiesView.newChildId(), new PullRequestCommentedActivity(comment)); 
-					activitiesView.add(newActivityRow);
-					
-					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-							newActivityRow.getMarkupId(), lastActivityRow.getMarkupId());
-					target.prependJavaScript(script);
-					target.add(newActivityRow);
 				}
 
 				@Override

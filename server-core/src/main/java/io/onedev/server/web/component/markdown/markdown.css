@@ -167,11 +167,7 @@
 	resize: none;
 	padding: 0.6rem;
 	border-radius: 0;
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	bottom: 4px;
+	margin-bottom: 4px;
 }
 .markdown-editor>.body>.preview>.markdown-rendered>.message {
 	color: var(--gray);

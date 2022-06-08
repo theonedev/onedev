@@ -1,10 +1,14 @@
 package io.onedev.server.notification;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.SettingManager;
@@ -13,9 +17,10 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
+import io.onedev.server.event.codecomment.CodeCommentStatusChanged;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
-import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 
@@ -40,39 +45,58 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (event.getComment().getCompareContext().getPullRequest() == null) {
+		CodeComment comment = event.getComment();
+		if (comment.getCompareContext().getPullRequest() == null) {
 			String markdown = event.getMarkdown();
 			String renderedMarkdown = markdownManager.render(markdown);
 			String processedMarkdown = markdownManager.process(renderedMarkdown, event.getProject(), null, true);
 			
+			Collection<User> notifyUsers = new HashSet<>(); 
+			
+			notifyUsers.add(comment.getUser());
+			notifyUsers.addAll(comment.getReplies().stream().map(it->it.getUser()).collect(Collectors.toSet()));
+			notifyUsers.addAll(comment.getChanges().stream().map(it->it.getUser()).collect(Collectors.toSet()));
+			
 			for (String userName: new MentionParser().parseMentions(renderedMarkdown)) {
 				User user = userManager.findByName(userName);
-				if (user != null) { 
-					String url;
-					if (event instanceof CodeCommentCreated)
-						url = urlManager.urlFor(event.getComment());
-					else if (event instanceof CodeCommentReplied)
-						url = urlManager.urlFor(((CodeCommentReplied)event).getReply());
-					else 
-						url = null;
-					
-					if (url != null) {
-						String subject = String.format("[Code Comment] (Mentioned You) %s:%s", 
-								event.getProject().getPath(), event.getComment().getMark().getPath());
-						String summary = String.format("%s added code comment", 
-								event.getUser().getDisplayName());
-						String threadingReferences = "<" + event.getComment().getProject().getPath() 
-								+ "-codecomment-" + event.getComment().getId() + "@onedev>";
+				if (user != null) 
+					notifyUsers.add(user);
+			}
+		
+			Set<String> emailAddresses = notifyUsers.stream()
+					.filter(it-> it.isOrdinary() 
+							&& !it.equals(event.getUser()) 
+							&& it.getPrimaryEmailAddress() != null 
+							&& it.getPrimaryEmailAddress().isVerified())
+					.map(it->it.getPrimaryEmailAddress().getValue())
+					.collect(Collectors.toSet());
 
-						EmailAddress emailAddress = user.getPrimaryEmailAddress();
-						if (emailAddress != null && emailAddress.isVerified()) {
-							mailManager.sendMailAsync(Sets.newHashSet(emailAddress.getValue()), Lists.newArrayList(), 
-									Lists.newArrayList(), subject, 
-									getHtmlBody(event, summary, processedMarkdown, url, false, null), 
-									getTextBody(event, summary, markdown, url, false, null), 
-									null, threadingReferences);
-						}
-					}
+			if (!emailAddresses.isEmpty()) {
+				String url;
+				if (event instanceof CodeCommentCreated)
+					url = urlManager.urlFor(comment);
+				else if (event instanceof CodeCommentReplied)
+					url = urlManager.urlFor(((CodeCommentReplied)event).getReply());
+				else if (event instanceof CodeCommentStatusChanged)
+					url = urlManager.urlFor(((CodeCommentStatusChanged)event).getChange());
+				else 
+					url = null;
+				
+				if (url != null) {
+					String subject = String.format("[Code Comment] %s:%s", 
+							event.getProject().getPath(), comment.getMark().getPath());
+					
+					String summary = String.format("%s %s code comment", 
+							event.getUser().getDisplayName(), event.getActivity());
+					
+					String threadingReferences = "<" + comment.getProject().getPath() 
+							+ "-codecomment-" + comment.getId() + "@onedev>";
+
+					mailManager.sendMailAsync(emailAddresses, Lists.newArrayList(), 
+							Lists.newArrayList(), subject, 
+							getHtmlBody(event, summary, processedMarkdown, url, false, null), 
+							getTextBody(event, summary, markdown, url, false, null), 
+							null, threadingReferences);
 				}
 			}
 		}

@@ -22,7 +22,7 @@ public class CodeCommentReplied extends CodeCommentEvent {
 
 	@Override
 	public String getActivity() {
-		return "replied comment";
+		return "replied";
 	}
 
 }

@@ -20,6 +20,11 @@ public class CodeCommentStatusChanged extends CodeCommentEvent {
 		return change;
 	}
 
+	@Override
+	public String getMarkdown() {
+		return getNote();
+	}
+
 	@Nullable
 	public String getNote() {
 		return note;

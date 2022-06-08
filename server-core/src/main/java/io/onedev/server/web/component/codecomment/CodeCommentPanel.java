@@ -3,8 +3,6 @@ package io.onedev.server.web.component.codecomment;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +56,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.asset.caret.CaretResourceReference;
+import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -155,7 +153,6 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Fragment editFragment = new Fragment(viewFragment.getId(), "commentOrReplyEditFrag", CodeCommentPanel.this);
-				editFragment.add(new UserIdentPanel("userAvatar", getComment().getUser(), Mode.AVATAR));
 				
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
@@ -439,43 +436,16 @@ public abstract class CodeCommentPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new CaretResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		response.render(CssHeaderItem.forReference(new CodeCommentCssResourceReference()));
 	}
 
 	private void onAddReply(AjaxRequestTarget target, @Nullable Boolean resolved) {
 		Fragment editFragment = new Fragment("actions", "commentOrReplyEditFrag", CodeCommentPanel.this);
-		editFragment.add(new UserIdentPanel("userAvatar", SecurityUtils.getUser(), Mode.AVATAR));
 		
 		Form<?> form = new Form<Void>("form");
 
-		String initialContent = "";
-		
-		if (getComment().getCompareContext().getPullRequest() == null) {
-			// automatically adds mentioning if the code comment is not associated with any pull requests, 
-			// as otherwise no one will be aware of our comment
-			List<CodeCommentReply> replies = new ArrayList<>(getComment().getReplies());
-			Collections.sort(replies, new Comparator<CodeCommentReply>() {
-
-				@Override
-				public int compare(CodeCommentReply o1, CodeCommentReply o2) {
-					return o2.getDate().compareTo(o1.getDate());
-				}
-				
-			});
-			for (CodeCommentReply reply: replies) {
-				if (reply.getUser() != null && !reply.getUser().equals(SecurityUtils.getUser())) {
-					initialContent = "@" + reply.getUser().getName() + " ";
-					break;
-				}
-			}
-			if (initialContent.length() == 0 
-					&& getComment().getUser() != null 
-					&& !getComment().getUser().equals(SecurityUtils.getUser())) {
-				initialContent = "@" + getComment().getUser().getName() + " ";
-			}
-		}
-		CommentInput contentInput = new CommentInput("content", Model.of(initialContent), true) {
+		CommentInput contentInput = new CommentInput("content", Model.of(""), true) {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
@@ -583,8 +553,11 @@ public abstract class CodeCommentPanel extends Panel {
 		get("actions").replaceWith(editFragment);
 		target.add(editFragment);	
 		
-		String script = String.format("$('#%s textarea').caret(%d);", 
-				form.getMarkupId(), initialContent.length());
+		String script = String.format(""
+				+ "setTimeout(function() {"
+				+ "  $('#%s').scrollIntoView();"
+				+ "}, 0);", 
+				saveButton.getMarkupId());
 		target.appendJavaScript(script);
 	}
 	
@@ -646,6 +619,7 @@ public abstract class CodeCommentPanel extends Panel {
 				fragment.add(new WebMarkupContainer("context").setVisible(false));
 			}
 			fragment.add(AttributeAppender.append("class", "status-change"));
+			fragment.setMarkupId(getChange().getAnchor());
 			
 			fragment.setOutputMarkupId(true);
 			
@@ -749,7 +723,6 @@ public abstract class CodeCommentPanel extends Panel {
 					Fragment editFragment = new Fragment(viewFragment.getId(), 
 							"commentOrReplyEditFrag", CodeCommentPanel.this, 
 							Model.of(replyId));
-					editFragment.add(new UserIdentPanel("userAvatar", getReply().getUser(), Mode.AVATAR));
 					
 					Form<?> form = new Form<Void>("form");
 					CommentInput contentInput = new CommentInput("content", Model.of(getReply().getContent()), true) {

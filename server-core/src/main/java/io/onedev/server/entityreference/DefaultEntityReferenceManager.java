@@ -16,6 +16,7 @@ import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
+import io.onedev.server.event.codecomment.CodeCommentStatusChanged;
 import io.onedev.server.event.codecomment.CodeCommentUpdated;
 import io.onedev.server.event.issue.IssueChanged;
 import io.onedev.server.event.issue.IssueCommented;
@@ -261,6 +262,12 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	@Listen
 	public void on(CodeCommentReplied event) {
 		addReferenceChange(event.getComment(), event.getReply().getContent());
+	}
+	
+	@Transactional
+	@Listen
+	public void on(CodeCommentStatusChanged event) {
+		addReferenceChange(event.getComment(), event.getNote());
 	}
 	
 	@Transactional

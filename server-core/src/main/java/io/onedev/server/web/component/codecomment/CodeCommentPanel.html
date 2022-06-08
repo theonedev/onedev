@@ -25,15 +25,12 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="commentOrReplyEditFrag">
-		<div class="user-avatar flex-shrink-0"><a wicket:id="userAvatar"></a></div>
-		<div class="detail ml-3 flex-grow-1">
-			<form wicket:id="form" class="leave-confirm">
-				<div wicket:id="feedback" class="feedback"></div>
-				<div wicket:id="content" class="mb-3"></div>
-				<button wicket:id="save" class="btn btn-sm btn-primary mr-1"><span wicket:id="label"/></button>
-				<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
-			</form>
-		</div>
+		<form wicket:id="form" class="leave-confirm flex-grow-1">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div wicket:id="content" class="mb-3"></div>
+			<button wicket:id="save" class="btn btn-sm btn-primary mr-1"><span wicket:id="label"/></button>
+			<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
+		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
 		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary mr-2">Reply</a>

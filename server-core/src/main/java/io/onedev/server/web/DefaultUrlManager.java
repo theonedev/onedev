@@ -17,6 +17,7 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
@@ -63,6 +64,11 @@ public class DefaultUrlManager implements UrlManager {
 		return urlFor(reply.getComment(), reply.getCompareContext()) + "#" + reply.getAnchor();
 	}
 
+	@Override
+	public String urlFor(CodeCommentStatusChange change) {
+		return urlFor(change.getComment(), change.getCompareContext()) + "#" + change.getAnchor();
+	}
+	
 	private String urlFor(CodeComment comment, CompareContext compareContext) {
 		Project project = comment.getProject();
 		PullRequest request = compareContext.getPullRequest();
@@ -111,7 +117,7 @@ public class DefaultUrlManager implements UrlManager {
 				
 				ProjectBlobPage.fillParams(params, state);
 				
-				return url + "/blob/" + paramsEncoder.encodePageParameters(params);
+				return url + "/files/" + paramsEncoder.encodePageParameters(params);
 			}
 		}
 	}
