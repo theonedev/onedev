@@ -49,3 +49,6 @@
 	font-size: inherit;
 	line-height: inherit;
 }
+.code-comment-status-change-option .form-group {
+	margin-bottom: 0;
+}

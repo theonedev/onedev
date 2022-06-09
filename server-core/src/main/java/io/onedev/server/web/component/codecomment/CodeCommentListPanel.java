@@ -1,9 +1,12 @@
 package io.onedev.server.web.component.codecomment;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -43,8 +46,10 @@ import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.LastUpdate;
@@ -53,10 +58,12 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entitytext.CodeCommentTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Provider;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -197,11 +204,142 @@ public abstract class CodeCommentListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		add(new MenuLink("delete") {
+		add(new MenuLink("operations") {
 
+			private void changeStatus(AjaxRequestTarget target, 
+					Provider<Collection<CodeComment>> commentsProvider, boolean resolved) {
+				new BeanEditModalPanel(target, new StatusChangeOptionBean()) {
+					
+					@Override
+					protected String getCssClass() {
+						return "code-comment-status-change-option";
+					}
+
+					@Override
+					protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
+						Collection<CodeCommentStatusChange> changes = new ArrayList<>();
+						
+						for (CodeComment comment: commentsProvider.get()) {
+							CodeCommentStatusChange change = new CodeCommentStatusChange();
+							change.setComment(comment);
+							change.setCompareContext(comment.getCompareContext());
+							change.setDate(new Date());
+							change.setResolved(resolved);
+							change.setUser(SecurityUtils.getUser());
+							changes.add(change);
+						}
+						
+						String note = ((StatusChangeOptionBean) bean).getNote();
+						
+						OneDev.getInstance(CodeCommentStatusChangeManager.class).save(changes, note);
+						selectionColumn.getSelections().clear();
+						target.add(body);
+						
+						close();
+					}
+					
+				};
+			}
+			
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Resolve Selected Comments";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								changeStatus(target, new Provider<Collection<CodeComment>>() {
+
+									@Override
+									public Collection<CodeComment> get() {
+										return selectionColumn.getSelections().stream()
+												.map(it->it.getObject())
+												.collect(Collectors.toList());
+									}
+									
+								}, true);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select comments to resolve");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Unresolve Selected Comments";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								changeStatus(target, new Provider<Collection<CodeComment>>() {
+
+									@Override
+									public Collection<CodeComment> get() {
+										return selectionColumn.getSelections().stream()
+												.map(it->it.getObject())
+												.collect(Collectors.toList());
+									}
+									
+								}, false);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select comments to unresolve");
+								}
+							}
+							
+						};
+					}
+					
+				});
 				
 				menuItems.add(new MenuItem() {
 
@@ -256,6 +394,106 @@ public abstract class CodeCommentListPanel extends Panel {
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
 									tag.put("title", "Please select issues to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Resolve All Queried Comments";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								changeStatus(target, new Provider<Collection<CodeComment>>() {
+
+									@SuppressWarnings("unchecked")
+									@Override
+									public Collection<CodeComment> get() {
+										Collection<CodeComment> comments = new ArrayList<>();
+										for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
+											comments.add(it.next());
+										return comments;
+									}
+									
+								}, true);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(commentsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No comments to resolve");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Unresolve All Queried Comments";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								changeStatus(target, new Provider<Collection<CodeComment>>() {
+
+									@SuppressWarnings("unchecked")
+									@Override
+									public Collection<CodeComment> get() {
+										Collection<CodeComment> comments = new ArrayList<>();
+										for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
+											comments.add(it.next());
+										return comments;
+									}
+									
+								}, false);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(commentsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No comments to unresolve");
 								}
 							}
 							

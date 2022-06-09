@@ -1,5 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.Collection;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -58,6 +60,13 @@ public class DefaultCodeCommentStatusChangeManager extends BaseEntityManager<Cod
 			request.setCommentCount(request.getCommentCount()+1);
 			listenerRegistry.post(new PullRequestCodeCommentStatusChanged(request, change, note));
 		}
+	}
+	
+	@Transactional
+	@Override
+	public void save(Collection<CodeCommentStatusChange> changes, String note) {
+		for (CodeCommentStatusChange  change: changes)
+			save(change, note);
 	}
 	
 }
