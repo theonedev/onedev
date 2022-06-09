@@ -50,8 +50,8 @@ public class IssueQueryGrammarTest {
 		suggestions = codeAssist.suggest(new InputStatus("submitted by me", 15), "query");
 		assertEquals(3, suggestions.size());
 		assertEquals("submitted by me:15", suggestions.get(0).toString());
-		assertEquals("\"submitted by me\" :18", suggestions.get(1).toString());
-		assertEquals("submitted by me :16", suggestions.get(2).toString());
+		assertEquals("submitted by me :16", suggestions.get(1).toString());
+		assertEquals("\"submitted by me\" :18", suggestions.get(2).toString());
 	}
 	
 }
