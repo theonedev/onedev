@@ -20,7 +20,11 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=100, name="Branch update")
+@Editable(order=100, name="Branch update", description=""
+		+ "Job will run when code is committed. <b class='text-info'>NOTE:</b> This trigger will ignore commits "
+		+ "with message containing <code>[skip ci]</code>, <code>[ci skip]</code>, <code>[no ci]</code>, "
+		+ "<code>[skip job]</code>, <code>[job skip]</code>, or <code>[no job]</code>")
+
 public class BranchUpdateTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;
@@ -91,7 +95,8 @@ public class BranchUpdateTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String updatedBranch = GitUtils.ref2branch(refUpdated.getRefName());
 			Matcher matcher = new PathMatcher();
-			if (updatedBranch != null 
+			if (updatedBranch != null
+					&& !SKIP_COMMIT.apply(event.getProject().getRevCommit(refUpdated.getNewCommitId(), true))
 					&& (branches == null || PatternSet.parse(branches).matches(matcher, updatedBranch)) 
 					&& touchedFile(refUpdated)) {
 				return new SubmitReason() {

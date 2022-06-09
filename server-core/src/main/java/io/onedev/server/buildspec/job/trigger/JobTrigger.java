@@ -3,11 +3,13 @@ package io.onedev.server.buildspec.job.trigger;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 
 import org.apache.wicket.Component;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.Job;
@@ -33,10 +35,21 @@ public abstract class JobTrigger implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static Function<RevCommit, Boolean> SKIP_COMMIT = new Function<RevCommit, Boolean>() {
+
+		@Override
+		public Boolean apply(RevCommit commit) {
+			String message = commit.getFullMessage().toLowerCase();
+			return message.contains("[skip ci]") || message.contains("[ci skip]") || message.contains("[no ci]")
+					|| message.contains("[skip job]") || message.contains("[job skip]") || message.contains("[no job]");
+		}
+		
+	};
+	
 	private String projects;
 	
 	private List<ParamSupply> params = new ArrayList<>();
-
+	
 	@Editable(name="Applicable Projects", order=900, placeholder="Any project", description=""
 			+ "Optionally specify space-separated projects applicable for this trigger. "
 			+ "This is useful for instance when you want to prevent the job from being "

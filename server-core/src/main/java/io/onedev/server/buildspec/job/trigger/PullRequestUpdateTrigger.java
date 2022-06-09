@@ -7,7 +7,11 @@ import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(order=300, name="Pull request open or update", description="Job will run on the merge commit of target branch and source branch")
+@Editable(order=300, name="Pull request open or update", description=""
+		+ "Job will run on the merge commit of target branch and source branch.<br>"
+		+ "<b class='text-info'>NOTE:</b> Unless required by branch protection rule, this trigger will ignore commits "
+		+ "with message containing <code>[skip ci]</code>, <code>[ci skip]</code>, <code>[no ci]</code>, "
+		+ "<code>[skip job]</code>, <code>[job skip]</code>, or <code>[no job]</code>")
 public class PullRequestUpdateTrigger extends PullRequestTrigger {
 
 	private static final long serialVersionUID = 1L;
@@ -17,7 +21,8 @@ public class PullRequestUpdateTrigger extends PullRequestTrigger {
 		if (event instanceof PullRequestMergePreviewCalculated) {
 			PullRequestMergePreviewCalculated mergePreviewCalculated = (PullRequestMergePreviewCalculated) event;
 			PullRequest request = mergePreviewCalculated.getRequest();
-			return triggerMatches(request);
+			if (request.getRequiredJobs().contains(job.getName()) || !SKIP_COMMIT.apply(request.getLatestUpdate().getHeadCommit()))
+				return triggerMatches(request);
 		}
 		return null;
 	}
