@@ -175,8 +175,8 @@ public class Import implements Serializable, Validatable {
 				User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
 				if (user == null) {
 					throw new ExplicitException(String.format(
-							"Unable to import build spec as access token is invalid (import project: %s, access token: %s)", 
-							projectPath, accessToken));
+							"Unable to import build spec as access token is invalid (import project: %s)", 
+							projectPath));
 				}
 				subject = user.asSubject();
 			} else {
