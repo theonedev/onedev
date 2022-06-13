@@ -37,13 +37,18 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -53,6 +58,7 @@ import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.FileCreateOrUpdateRequest;
@@ -73,11 +79,20 @@ public class RepositoryResource {
 	private final ProjectManager projectManager;
 	
 	private final SettingManager settingManager;
+	
+    private final ListenerRegistry listenerRegistry;
+    
+    private final SessionManager sessionManager;
+    
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryResource.class);
 
 	@Inject
-	public RepositoryResource(ProjectManager projectManager, SettingManager settingManager) {
+	public RepositoryResource(ProjectManager projectManager, SessionManager sessionManager, 
+			ListenerRegistry listenerRegistry, SettingManager settingManager) {
 		this.projectManager = projectManager;
 		this.settingManager = settingManager;
+		this.sessionManager = sessionManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	@Api(order=10, description="List all branches")
@@ -386,30 +401,45 @@ public class RepositoryResource {
 		Project project = projectManager.load(projectId);
 		
 		List<String> revisionAndPathSegments = Splitter.on('/').splitToList(branchAndFile);
-		RevisionAndPath revisionAndPath = RevisionAndPath.parse(project, revisionAndPathSegments);
-
-		Ref ref = project.getBranchRef(revisionAndPath.getRevision());
-		if (ref == null)
-			throw new InvalidParamException("Not a branch: " + revisionAndPath.getRevision());
-			
-		if (!SecurityUtils.canModify(project, revisionAndPath.getRevision(), revisionAndPath.getPath())) {
-			throw new UnauthorizedException();
+		RevisionAndPath revisionAndPath;
+		String refName;
+		ObjectId oldCommitId;
+		if (project.getDefaultBranch() != null) {
+			revisionAndPath = RevisionAndPath.parse(project, revisionAndPathSegments);
+			Ref ref = project.getBranchRef(revisionAndPath.getRevision());
+			if (ref == null) 
+				throw new InvalidParamException("Not a branch: " + revisionAndPath.getRevision());
+			refName = ref.getName();
+			oldCommitId = ref.getObjectId();
+			if (revisionAndPath.getPath() == null)
+				throw new InvalidParamException("Branch and file should be specified");
+		} else {
+			if (revisionAndPathSegments.size() < 2)
+				throw new InvalidParamException("Branch and file should be specified");
+			revisionAndPath = new RevisionAndPath(
+					revisionAndPathSegments.get(0), 
+					StringUtils.join(revisionAndPathSegments.subList(1, revisionAndPathSegments.size())));
+			refName = GitUtils.branch2ref(revisionAndPath.getRevision());
+			oldCommitId = ObjectId.zeroId();
 		}
 
-		ObjectId oldCommitId = ref.getObjectId();
+		if (!SecurityUtils.canModify(project, revisionAndPath.getRevision(), revisionAndPath.getPath())) 
+			throw new UnauthorizedException();
 
 		Repository repository = project.getRepository();
 		
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
 		Set<String> oldPaths = new HashSet<>();
-		RevCommit revCommit = project.getRevCommit(oldCommitId, true);
-		try (TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), revisionAndPath.getPath(), revCommit.getTree())) {
-			if (treeWalk != null) {
-				oldPaths.add(revisionAndPath.getPath());
+		if (!oldCommitId.equals(ObjectId.zeroId())) {
+			RevCommit revCommit = project.getRevCommit(oldCommitId, true);
+			try (TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), revisionAndPath.getPath(), revCommit.getTree())) {
+				if (treeWalk != null) {
+					oldPaths.add(revisionAndPath.getPath());
+				}
+			} catch (IOException e) {
+				// ignore
 			}
-		} catch (IOException e) {
-			// ignore
 		}
 		
 		if (request instanceof FileCreateOrUpdateRequest) {
@@ -428,8 +458,30 @@ public class RepositoryResource {
 		}
 		
 		ObjectId newCommitId = new BlobEdits(oldPaths, newBlobs).commit(
-				repository, ref.getName(), oldCommitId, oldCommitId,
+				repository, refName, oldCommitId, oldCommitId,
 				user.asPerson(), request.getCommitMessage(), signingKey);
+
+		if (project.getDefaultBranch() == null)
+			project.setDefaultBranch(revisionAndPath.getRevision());
+		
+        sessionManager.runAsync(new Runnable() {
+
+			@Override
+			public void run() {
+		        try {
+		            Project project = projectManager.load(projectId);
+
+		        	if (!newCommitId.equals(ObjectId.zeroId()))
+		        		project.cacheObjectId(refName, newCommitId);
+		        	else 
+		        		project.cacheObjectId(refName, null);
+		        	listenerRegistry.post(new RefUpdated(project, refName, oldCommitId, newCommitId));
+		        } catch (Exception e) {
+		        	logger.error("Error posting ref updated event", e);
+				}
+			}
+        	
+        });
 		
 		FileEditResponse response = new FileEditResponse();
 		response.commitHash = newCommitId.name();

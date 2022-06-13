@@ -353,6 +353,7 @@ public class Project extends AbstractEntity {
 	
 	// SQL Server does not allow duplicate null values for unique column. So we use 
 	// special prefix to indicate null
+	@JsonIgnore
 	@Column(unique=true, nullable=false)
 	private String serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString();
 	

@@ -1,3 +1,6 @@
+# 7.3.5
+1. [RESTful api] Service desk name property of [project resource](/help/api/io.onedev.server.rest.ProjectResource) moved from basic info endpoint to setting endpoint
+
 # 7.3.0
 1. [CI/CD] Docker sock is NOT mounted by default for server docker executor, remote docker executor and Kubernetes 
 executor for security reasons. If your CI job performs docker operation, the build may fail. You may enable 

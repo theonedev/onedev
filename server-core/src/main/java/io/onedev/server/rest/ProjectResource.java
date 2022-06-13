@@ -95,6 +95,7 @@ public class ProjectResource {
     	if (!SecurityUtils.canManage(project)) 
 			throw new UnauthorizedException();
 		ProjectSetting setting = new ProjectSetting();
+		setting.serviceDeskName = project.getServiceDeskName();
 		setting.branchProtections = project.getBranchProtections();
 		setting.tagProtections = project.getTagProtections();
 		setting.buildSetting = project.getBuildSetting();
@@ -271,6 +272,7 @@ public class ProjectResource {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManage(project)) 
 			throw new UnauthorizedException();
+    	project.setServiceDeskName(setting.serviceDeskName);
 		project.setBranchProtections(setting.branchProtections);
 		project.setTagProtections(setting.tagProtections);
 		project.setBuildSetting(setting.buildSetting);
@@ -297,6 +299,8 @@ public class ProjectResource {
 	public static class ProjectSetting implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
+		
+		private String serviceDeskName;
 
 		private ArrayList<BranchProtection> branchProtections = new ArrayList<>();
 		
@@ -315,6 +319,14 @@ public class ProjectResource {
 		private ArrayList<WebHook> webHooks = new ArrayList<>();
 		
 		private LinkedHashMap<String, ContributedProjectSetting> contributedSettings = new LinkedHashMap<>();
+
+		public String getServiceDeskName() {
+			return serviceDeskName;
+		}
+
+		public void setServiceDeskName(String serviceDeskName) {
+			this.serviceDeskName = serviceDeskName;
+		}
 
 		public ArrayList<BranchProtection> getBranchProtections() {
 			return branchProtections;
