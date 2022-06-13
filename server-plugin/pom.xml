@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>7.3.4</version>
+		<version>7.3.5</version>
 	</parent>
 	<dependencies>
 		<dependency>
