@@ -64,4 +64,8 @@ $(function() {
 		if (e.keyCode == 27) 
 			$(".selection-popover").remove();
 	});
+	$(document).mousedown(function(e) {
+		if ($(e.target).closest(".selection-popover").length == 0)
+			$(".selection-popover").remove();
+	});
 });
