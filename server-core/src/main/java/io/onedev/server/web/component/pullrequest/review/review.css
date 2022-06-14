@@ -18,7 +18,7 @@
 	fill: var(--success);
 }
 .review-status-request-for-changes.icon {
-	fill: var(--danger);
+	fill: var(--warning);
 }
 .review-status-pending.icon {
 	fill: var(--warning);

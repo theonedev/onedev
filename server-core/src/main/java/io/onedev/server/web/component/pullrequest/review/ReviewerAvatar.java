@@ -5,7 +5,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.support.pullrequest.ReviewResult;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 
@@ -21,11 +21,11 @@ public abstract class ReviewerAvatar extends Panel {
 		super.onInitialize();
 		
 		add(new UserIdentPanel("avatar", getReview().getUser(), Mode.AVATAR));
-		add(new ReviewStatusIcon("status") {
+		add(new ReviewStatusIcon("status", true) {
 
 			@Override
-			protected ReviewResult getResult() {
-				return getReview().getResult();
+			protected Status getStatus() {
+				return getReview().getStatus();
 			}
 			
 		});

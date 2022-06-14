@@ -87,8 +87,8 @@ ul>li>a.code-comments.new .icon {
 	font-weight: 600;
 	margin-bottom: 0.8rem;
 }
-.pull-request-detail .more-info .reviews a.delete, 
-.pull-request-detail .more-info .assignments a.delete {
+.pull-request-detail .more-info .reviews .right, 
+.pull-request-detail .more-info .assignments .right {
 	margin-left: auto;
 }
 .pull-request-detail .more-info .submission td.name {

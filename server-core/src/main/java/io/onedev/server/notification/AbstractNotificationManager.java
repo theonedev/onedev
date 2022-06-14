@@ -14,14 +14,10 @@ import groovy.text.SimpleTemplateEngine;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Event;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.PullRequestAssignment;
-import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 
@@ -58,15 +54,6 @@ public abstract class AbstractNotificationManager {
 		} else if (event instanceof PullRequestEvent) {
 			template = StringUtils.join(settingManager.getNotificationTemplateSetting().getPullRequestNotificationTemplate(), "\n");
 			bindings.put("pullRequest", ((PullRequestEvent) event).getRequest());
-		} else if (event instanceof EntityPersisted) {
-			AbstractEntity entity = ((EntityPersisted) event).getEntity();
-			if (entity instanceof PullRequestReview) {
-				template = StringUtils.join(settingManager.getNotificationTemplateSetting().getPullRequestNotificationTemplate(), "\n");
-				bindings.put("pullRequest", ((PullRequestReview) entity).getRequest());
-			} else if (entity instanceof PullRequestAssignment) {
-				template = StringUtils.join(settingManager.getNotificationTemplateSetting().getPullRequestNotificationTemplate(), "\n");
-				bindings.put("pullRequest", ((PullRequestAssignment) entity).getRequest());
-			}
 		}  
 		if (template == null)
 			template = StringUtils.join(NotificationTemplateSetting.DEFAULT_TEMPLATE, "\n");

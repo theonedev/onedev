@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -48,7 +47,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.security.SecurityUtils;
@@ -87,7 +85,7 @@ public abstract class CodeCommentPanel extends Panel {
 		this.commentId = commentId;
 	}
 
-	protected CodeComment getComment() {
+	public CodeComment getComment() {
 		return OneDev.getInstance(CodeCommentManager.class).load(commentId);
 	}
 
@@ -415,10 +413,7 @@ public abstract class CodeCommentPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				Set<String> observables = Sets.newHashSet(CodeComment.getWebSocketObservable(commentId));
-				if (getPullRequest() != null)
-					observables.add(PullRequest.getWebSocketObservable(getPullRequest().getId()));
-				return observables;
+				return Sets.newHashSet(CodeComment.getWebSocketObservable(commentId));
 			}
 			
 		});
@@ -561,9 +556,6 @@ public abstract class CodeCommentPanel extends Panel {
 		target.appendJavaScript(script);
 	}
 	
-	@Nullable
-	protected abstract PullRequest getPullRequest();
-	
 	protected abstract void onDeleteComment(AjaxRequestTarget target, CodeComment comment);
 	
 	protected abstract void onSaveComment(AjaxRequestTarget target, CodeComment comment);
@@ -604,8 +596,8 @@ public abstract class CodeCommentPanel extends Panel {
 				fragment.add(new Label("action", "unresolved"));
 			fragment.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
 					.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
-			if (isContextDifferent(getComment().getCompareContext())) {
-				String url = OneDev.getInstance(UrlManager.class).urlFor(getComment());
+			if (isContextDifferent(getChange().getCompareContext())) {
+				String url = OneDev.getInstance(UrlManager.class).urlFor(getChange());
 				fragment.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
 
 					@Override

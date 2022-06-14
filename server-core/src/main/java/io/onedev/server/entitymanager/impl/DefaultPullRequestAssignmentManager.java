@@ -5,13 +5,11 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.model.PullRequest;
+import io.onedev.server.event.pullrequest.PullRequestAssigned;
+import io.onedev.server.event.pullrequest.PullRequestUnassigned;
 import io.onedev.server.model.PullRequestAssignment;
-import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeAddData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeRemoveData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -21,26 +19,22 @@ import io.onedev.server.security.SecurityUtils;
 public class DefaultPullRequestAssignmentManager extends BaseEntityManager<PullRequestAssignment> 
 		implements PullRequestAssignmentManager {
 
-	private final PullRequestChangeManager changeManager;
+	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultPullRequestAssignmentManager(Dao dao, PullRequestChangeManager changeManager) {
+	public DefaultPullRequestAssignmentManager(Dao dao, ListenerRegistry listenerRegistry) {
 		super(dao);
-		this.changeManager = changeManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	@Transactional
 	@Override
 	public void save(PullRequestAssignment assignment) {
 		super.save(assignment);
-		
-		PullRequest request = assignment.getRequest();		
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(request);
-		change.setData(new PullRequestAssigneeAddData(assignment.getUser()));
-		change.setUser(SecurityUtils.getUser());
-		changeManager.save(change);
+
+		listenerRegistry.post(new PullRequestAssigned(
+				SecurityUtils.getUser(), new Date(), 
+				assignment.getRequest(), assignment.getUser()));
 	}
 
 	@Transactional
@@ -48,14 +42,9 @@ public class DefaultPullRequestAssignmentManager extends BaseEntityManager<PullR
 	public void delete(PullRequestAssignment assignment) {
 		super.delete(assignment);
 		
-		PullRequest request = assignment.getRequest();
-		
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(request);
-		change.setData(new PullRequestAssigneeRemoveData(assignment.getUser()));
-		change.setUser(SecurityUtils.getUser());
-		changeManager.save(change);
+		listenerRegistry.post(new PullRequestUnassigned(
+				SecurityUtils.getUser(), new Date(), 
+				assignment.getRequest(), assignment.getUser()));
 	}
 		
 }

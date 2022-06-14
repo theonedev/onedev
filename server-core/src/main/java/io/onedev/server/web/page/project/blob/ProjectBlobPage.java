@@ -374,14 +374,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			return null;
 	}
 	
-	@Override
-	public PullRequest getPullRequest() {
-		if (state.requestId != null)
-			return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
-		else
-			return null;
-	}
-	
 	private void newBlobNavigator(@Nullable AjaxRequestTarget target) {
 		Component blobNavigator = new BlobNavigator(BLOB_NAVIGATOR_ID, this);
 		if (target != null) {
@@ -1419,9 +1411,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		 * Update pull request as this is a direct consequence of editing source branch. Also this 
 		 * is necessary to show the latest changes of the pull request after editing 
 		 */
-		PullRequest request = getPullRequest();
-		if (request != null)
+		if (state.requestId != null) {
+			PullRequest request = OneDev.getInstance(PullRequestManager.class).load(state.requestId);
 			OneDev.getInstance(PullRequestUpdateManager.class).checkUpdate(request);
+		}
 		
 		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
@@ -1664,7 +1657,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 	@Override
 	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {
-		return new JobSecretAuthorizationContext(getProject(), getCommit(), getPullRequest());
+		return new JobSecretAuthorizationContext(getProject(), getCommit(), null);
 	}
 
 	@Override

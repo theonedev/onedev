@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,16 +68,14 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestWatch;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -184,6 +183,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 	private PullRequestManager getPullRequestManager() {
 		return OneDev.getInstance(PullRequestManager.class);
+	}
+	
+	private PullRequestReviewManager getPullRequestReviewManager() {
+		return OneDev.getInstance(PullRequestReviewManager.class);
 	}
 	
 	private WebMarkupContainer newRequestHead() {
@@ -552,7 +555,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				super.onConfigure();
 				
 				setVisible(getPullRequest().isOpen() && !requestedForChanges() 
-						&& getPullRequest().getReviews().stream().anyMatch(it-> it.getResult()==null || it.getResult().getApproved()==null));
+						&& getPullRequest().getReviews().stream().anyMatch(it-> it.getStatus()==Status.PENDING));
 			}
 			
 		});
@@ -683,8 +686,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	}
 	
 	private boolean requestedForChanges() {
-		return getPullRequest().getReviews().stream().anyMatch(
-				it-> it.getResult()!=null && Boolean.FALSE.equals(it.getResult().getApproved()));
+		return getPullRequest().getReviews().stream()
+				.anyMatch(it-> it.getStatus() == Status.REQUESTED_FOR_CHANGES);
 	}
 	
 	private boolean hasUnsuccessfulRequiredBuilds() {
@@ -898,7 +901,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	
 						@Override
 						public void onClick() {
-							getPullRequestManager().check(getPullRequest());
+							getPullRequestManager().check(getPullRequest(), false);
 							if (getPullRequest().getCheckError() == null) 
 								Session.get().success("Pull request is synchronized");
 						}
@@ -1202,7 +1205,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getUser());
-					return review != null && (review.getResult() == null || review.getResult().getApproved() == null);
+					return review != null && review.getStatus() == Status.PENDING;
 				} else {
 					return false;
 				}
@@ -1221,15 +1224,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected boolean operate() {
 						if (canOperate()) {
-							User user = SecurityUtils.getUser();
-							PullRequest request = getPullRequest();
-							PullRequestReview review = request.getReview(user);
-							ReviewResult result = new ReviewResult();
-							result.setApproved(true);
-							result.setComment(getComment());
-							result.setCommit(request.getLatestUpdate().getHeadCommitHash());
-							review.setResult(result);
-							OneDev.getInstance(PullRequestReviewManager.class).save(review);
+							getPullRequestReviewManager().review(getPullRequest(), true, getComment());
 							Session.get().success("Approved");
 							return true;
 						} else {
@@ -1257,7 +1252,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getUser());
-					return review != null && (review.getResult() == null || review.getResult().getApproved() == null);
+					return review != null && review.getStatus() == Status.PENDING;
 				} else {
 					return false;
 				}
@@ -1276,15 +1271,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected boolean operate() {
 						if (canOperate()) {
-							User user = SecurityUtils.getUser();
-							PullRequest request = getPullRequest();
-							PullRequestReview review = request.getReview(user);
-							ReviewResult result = new ReviewResult();
-							result.setApproved(false);
-							result.setComment(getComment());
-							result.setCommit(request.getLatestUpdate().getHeadCommitHash());
-							review.setResult(result);
-							OneDev.getInstance(PullRequestReviewManager.class).save(review);
+							getPullRequestReviewManager().review(getPullRequest(), false, getComment());
 							Session.get().success("Requested For changes");
 							return true;
 						} else {
@@ -1295,62 +1282,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String getTitle() {
 						return "Confirm Request For Changes";
-					}
-				};
-			}
-			
-		});
-		
-		operationsContainer.add(new ModalLink("withdrawReview") {
-
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-
-			private boolean canOperate() {
-				PullRequest request = getPullRequest();
-				if (request.isOpen()) {
-					PullRequestReview review = request.getReview(SecurityUtils.getUser());
-					return review != null && review.getResult() != null 
-							&& review.getResult().getApproved() != null;
-				} else {
-					return false;
-				}
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(canOperate());
-			}
-
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
-					
-					@Override
-					protected boolean operate() {
-						if (canOperate()) {
-							User user = SecurityUtils.getUser();
-							PullRequest request = getPullRequest();
-							PullRequestReview review = request.getReview(user);
-							ReviewResult result = new ReviewResult();
-							result.setApproved(null);
-							result.setComment(getComment());
-							result.setCommit(request.getLatestUpdate().getHeadCommitHash());
-							review.setResult(result);							
-							OneDev.getInstance(PullRequestReviewManager.class).save(review);
-							Session.get().success("Review Withdrawed");
-							return true;
-						} else {
-							return false; 
-						}
-					}
-					
-					@Override
-					protected String getTitle() {
-						return "Confirm Withdraw";
 					}
 				};
 			}
@@ -1609,11 +1540,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected String load() {
-						for (CodeComment comment: getPullRequest().getCodeComments()) {
-							if (!comment.isVisitedAfter(comment.getLastUpdate().getDate())) 
-								return "new";
-						}
-						return "";
+						Date updateDate = getPullRequest().getCodeCommentsUpdateDate();
+						if (updateDate != null && !getPullRequest().isCodeCommentsVisitedAfter(updateDate))
+							return "new";
+						else
+							return "";
 					}
 					
 				}));

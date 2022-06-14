@@ -75,6 +75,8 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
+	public static final String NAME_RESOLVED = "Status";
+	
 	public static final String PROP_RESOLVED = "resolved";
 	
 	public static final String PROP_USER = "user";
@@ -89,6 +91,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 			NAME_CONTENT, NAME_REPLY, NAME_PATH, NAME_CREATE_DATE, NAME_UPDATE_DATE, NAME_REPLY_COUNT);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			NAME_RESOLVED, PROP_RESOLVED, 
 			NAME_CREATE_DATE, PROP_CREATE_DATE,
 			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
 			NAME_REPLY_COUNT, PROP_REPLY_COUNT);

@@ -22,14 +22,19 @@ import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.pullrequest.PullRequestAssigned;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommentStatusChanged;
 import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
+import io.onedev.server.event.pullrequest.PullRequestReviewRequested;
+import io.onedev.server.event.pullrequest.PullRequestReviewerRemoved;
+import io.onedev.server.event.pullrequest.PullRequestUnassigned;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.markdown.MarkdownManager;
@@ -38,18 +43,17 @@ import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
@@ -95,6 +99,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment());
 		else if (event instanceof PullRequestCodeCommentReplied)
 			url = urlManager.urlFor(((PullRequestCodeCommentReplied)event).getReply());
+		else if (event instanceof PullRequestCodeCommentStatusChanged)
+			url = urlManager.urlFor(((PullRequestCodeCommentStatusChanged)event).getChange());
 		else 
 			url = urlManager.urlFor(request);
 		
@@ -186,7 +192,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		Set<User> assignees = new HashSet<>();
 		if (event instanceof PullRequestOpened) {
 			for (PullRequestReview review: request.getReviews()) {
-				if (review.getResult() == null)
+				if (review.getStatus() == Status.PENDING)
 					reviewers.add(review.getUser());
 			}
 			for (PullRequestAssignment assignment: request.getAssignments())
@@ -194,35 +200,28 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		} else if (event instanceof PullRequestChanged) {
 			PullRequestChanged changeEvent = (PullRequestChanged) event;
 			PullRequestChangeData changeData = changeEvent.getChange().getData();
-			if (changeData instanceof PullRequestApproveData
-					|| changeData instanceof PullRequestRequestedForChangesData
-					|| changeData instanceof PullRequestDiscardData) { 
-				if (request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
-					String subject = String.format("[Pull Request %s] (%s) %s", request.getFQN(), 
-							WordUtils.capitalize(changeData.getActivity()), request.getTitle());
-					String threadingReferences = String.format("<%s-%s@onedev>", 
-							changeData.getActivity().replace(' ', '-'), request.getUUID());
-					EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified()) {
-						mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()), 
-								Lists.newArrayList(), Lists.newArrayList(), subject, 
-								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
-								getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
-								replyAddress, threadingReferences);
-					}
-					notifiedUsers.add(request.getSubmitter());
+			if ((changeData instanceof PullRequestApproveData
+						|| changeData instanceof PullRequestRequestedForChangesData
+						|| changeData instanceof PullRequestDiscardData)
+					&& request.getSubmitter() != null && !notifiedUsers.contains(request.getSubmitter())) {
+				String subject = String.format("[Pull Request %s] (%s) %s", request.getFQN(), 
+						WordUtils.capitalize(changeData.getActivity()), request.getTitle());
+				String threadingReferences = String.format("<%s-%s@onedev>", 
+						changeData.getActivity().replace(' ', '-'), request.getUUID());
+				EmailAddress emailAddress = request.getSubmitter().getPrimaryEmailAddress();
+				if (emailAddress != null && emailAddress.isVerified()) {
+					mailManager.sendMailAsync(Lists.newArrayList(emailAddress.getValue()), 
+							Lists.newArrayList(), Lists.newArrayList(), subject, 
+							getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+							getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
+							replyAddress, threadingReferences);
 				}
-			} else if (changeData instanceof PullRequestAssigneeAddData) {
-				PullRequestAssigneeAddData assigneeAddData = (PullRequestAssigneeAddData) changeData;
-				User assignee = assigneeAddData.getUser();
-				if (assignee != null) 
-					assignees.add(assignee);
-			} else if (changeData instanceof PullRequestReviewerAddData) {
-				PullRequestReviewerAddData reviewerAddData = (PullRequestReviewerAddData) changeData;
-				User reviewer = reviewerAddData.getUser();
-				if (reviewer != null) 
-					reviewers.add(reviewer);
+				notifiedUsers.add(request.getSubmitter());
 			}
+		} else if (event instanceof PullRequestAssigned) {
+			assignees.add(((PullRequestAssigned) event).getAssignee());
+		} else if (event instanceof PullRequestReviewRequested) {
+			reviewers.add(((PullRequestReviewRequested) event).getReviewer());
 		}
 
 		for (User assignee: assignees) {
@@ -251,14 +250,14 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		for (User reviewer: reviewers) {
 			pullRequestWatchManager.watch(request, reviewer, true);
 			if (!notifiedUsers.contains(reviewer)) {
-				String subject = String.format("[Pull Request %s] (Review Invitation) %s", 
+				String subject = String.format("[Pull Request %s] (Review Request) %s", 
 						request.getFQN(), request.getTitle());
 				String threadingReferences = String.format("<review-invitation-%s@onedev>", request.getUUID());
 				String reviewInvitationSummary;
 				if (user != null)
-					reviewInvitationSummary = user.getDisplayName() + " invited you to review";
+					reviewInvitationSummary = user.getDisplayName() + " requested review from you";
 				else
-					reviewInvitationSummary = "Invited you to review";
+					reviewInvitationSummary = "Requested review from you";
 				
 				EmailAddress emailAddress = reviewer.getPrimaryEmailAddress();
 				if (emailAddress != null && emailAddress.isVerified()) {
@@ -311,10 +310,15 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 					|| changeData instanceof PullRequestReopenData) {
 				notifyWatchers = true;
 			}
-		} else if (!(event instanceof PullRequestMergePreviewCalculated || event instanceof PullRequestBuildEvent)) {
+		} else if (!(event instanceof PullRequestMergePreviewCalculated 
+				|| event instanceof PullRequestBuildEvent
+				|| event instanceof PullRequestReviewRequested
+				|| event instanceof PullRequestReviewerRemoved
+				|| event instanceof PullRequestAssigned
+				|| event instanceof PullRequestUnassigned)) {
 			notifyWatchers = true;
 		}
-		
+		 
 		if (notifyWatchers) {
 			Collection<String> bccEmailAddresses = new HashSet<>();
 			

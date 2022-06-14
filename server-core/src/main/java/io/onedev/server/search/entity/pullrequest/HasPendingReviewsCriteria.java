@@ -10,7 +10,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.support.pullrequest.ReviewResult;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -21,15 +21,15 @@ public class HasPendingReviewsCriteria extends Criteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Join<?, ?> join = from.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
-		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);
-		join.on(builder.isNull(approvedPath));
+		Path<?> statusPath = EntityQuery.getPath(join, PullRequestReview.PROP_STATUS);
+		join.on(builder.equal(statusPath, Status.PENDING));
 		return join.isNotNull();
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
 		for (PullRequestReview review: request.getReviews()) {
-			if (review.getResult() == null)
+			if (review.getStatus() == Status.PENDING)
 				return true;
 		}
 		return false;

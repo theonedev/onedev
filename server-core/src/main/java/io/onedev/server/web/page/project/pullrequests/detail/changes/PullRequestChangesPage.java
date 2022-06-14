@@ -799,6 +799,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		state.commentId = comment.getId();
+		openCommentModel.detach();
 		state.mark = getPermanentMark(comment.getMark());
 		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
@@ -807,6 +808,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public void onCommentClosed(AjaxRequestTarget target) {
 		state.commentId = null;
+		openCommentModel.detach();
 		state.mark = null;
 		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);

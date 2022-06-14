@@ -56,10 +56,8 @@ public class DefaultCodeCommentStatusChangeManager extends BaseEntityManager<Cod
 		listenerRegistry.post(new CodeCommentStatusChanged(change, note));
 		
 		PullRequest request = comment.getCompareContext().getPullRequest();
-		if (request != null) {
-			request.setCommentCount(request.getCommentCount()+1);
+		if (request != null) 
 			listenerRegistry.post(new PullRequestCodeCommentStatusChanged(request, change, note));
-		}
 	}
 	
 	@Transactional

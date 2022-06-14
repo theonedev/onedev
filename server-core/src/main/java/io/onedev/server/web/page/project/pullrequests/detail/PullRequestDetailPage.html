@@ -62,8 +62,8 @@
 					<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-danger">
 						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as valid signature is required for head commit   
 					</div>
-					<div wicket:id="requestedForChanges" class="requested-for-changes text-danger">
-						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a> 
+					<div wicket:id="requestedForChanges" class="requested-for-changes text-warning">
+						<wicket:svg href="diff" class="icon"></wicket:svg> Pull request can not be merged now as it was <a class="more-info d-inline link-primary">requested for changes</a> 
 					</div>
 					<div wicket:id="waitingForReviews" class="waiting-for-reviews text-warning">
 						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as it is <a class="more-info d-inline link-primary">pending review</a>
@@ -88,14 +88,13 @@
 					</div>
 				</div>
 				<div wicket:id="requestOperations" class="operations">
-					<a wicket:id="merge" class="btn btn-sm btn-light-success">Merge</a>
-					<a wicket:id="discard" class="btn btn-sm btn-light-danger">Discard</a>
-					<a wicket:id="approve" class="btn btn-sm btn-light-primary">Approve</a>
-					<a wicket:id="requestForChanges" class="btn btn-sm btn-light-primary">Request For Changes</a>
-					<a wicket:id="withdrawReview" class="btn btn-sm btn-light-primary">Withdraw Review</a>
-					<a wicket:id="reopen" class="btn btn-sm btn-light-primary">Reopen</a>
-					<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-light-primary">Delete Source Branch</a>
-					<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-light-primary">Restore Source Branch</a>
+					<a wicket:id="merge" class="btn btn-sm btn-outline-success">Merge</a>
+					<a wicket:id="discard" class="btn btn-sm btn-outline-danger">Discard</a>
+					<a wicket:id="approve" class="btn btn-sm btn-outline-primary">Approve</a>
+					<a wicket:id="requestForChanges" class="btn btn-sm btn-outline-primary">Request For Changes</a>
+					<a wicket:id="reopen" class="btn btn-sm btn-outline-primary">Reopen</a>
+					<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-outline-primary">Delete Source Branch</a>
+					<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-outline-primary">Restore Source Branch</a>
 				</div>
 				<ul wicket:id="requestTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-5 mt-3 align-items-center"></ul>
 				<wicket:child></wicket:child>
@@ -116,7 +115,7 @@
 				<tr>
 					<td class="name">Target</td>
 					<td class="value text-break text-right">
-						<a wicket:id="changeTargetBranch" title="Change"><wicket:svg href="arrow" class="rotate-90 icon"/></a>
+						<a wicket:id="changeTargetBranch" class="btn btn-xs btn-icon btn-light btn-hover-primary" title="Change"><wicket:svg href="arrow" class="rotate-90 icon"/></a>
 						<a wicket:id="targetBranch"></a>
 					</td>
 				</tr>

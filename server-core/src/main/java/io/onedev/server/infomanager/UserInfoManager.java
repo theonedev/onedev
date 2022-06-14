@@ -13,6 +13,8 @@ public interface UserInfoManager {
 	
 	void visitPullRequest(User user, PullRequest request);
 	
+	void visitPullRequestCodeComments(User user, PullRequest request);
+	
 	void visitIssue(User user, Issue issue);
 	
 	void visitCodeComment(User user, CodeComment comment);
@@ -22,6 +24,9 @@ public interface UserInfoManager {
 	
 	@Nullable
 	Date getPullRequestVisitDate(User user, PullRequest request);
+	
+	@Nullable
+	Date getPullRequestCodeCommentsVisitDate(User user, PullRequest request);
 	
 	@Nullable
 	Date getCodeCommentVisitDate(User user, CodeComment comment);

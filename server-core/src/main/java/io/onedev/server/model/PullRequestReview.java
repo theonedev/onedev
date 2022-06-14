@@ -1,9 +1,8 @@
 package io.onedev.server.model;
 
-import java.util.Optional;
+import java.util.Date;
 
-import javax.annotation.Nullable;
-import javax.persistence.Embedded;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -11,8 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import io.onedev.server.model.support.pullrequest.ReviewResult;
 
 @Entity
 @Table(
@@ -27,7 +24,9 @@ public class PullRequestReview extends AbstractEntity {
 	
 	public static final String PROP_USER = "user";
 	
-	public static final String PROP_RESULT = "result";
+	public static final String PROP_STATUS = "status";
+	
+	public enum Status {PENDING, APPROVED, REQUESTED_FOR_CHANGES, EXCLUDED}
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -37,12 +36,12 @@ public class PullRequestReview extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private PullRequest request;
 	
-	@Embedded
-	private ReviewResult result;
+	@Column(nullable=false)
+	private Status status = Status.PENDING;
+	
+	private Date statusDate = new Date();
 	
 	private transient boolean dirty;
-	
-	private transient Optional<PullRequestUpdate> updateOptional;
 	
 	public User getUser() {
 		return user;
@@ -52,6 +51,16 @@ public class PullRequestReview extends AbstractEntity {
 		this.user = user;
 	}
 	
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+		statusDate = new Date();
+		dirty = true;
+	}
+
 	public PullRequest getRequest() {
 		return request;
 	}
@@ -60,16 +69,6 @@ public class PullRequestReview extends AbstractEntity {
 		this.request = request;
 	}
 
-	@Nullable
-	public ReviewResult getResult() {
-		return result;
-	}
-
-	public void setResult(@Nullable ReviewResult result) {
-		this.result = result;
-		dirty = true;
-	}
-	
 	public boolean isDirty() {
 		return dirty;
 	}
@@ -78,21 +77,12 @@ public class PullRequestReview extends AbstractEntity {
 		this.dirty = dirty;
 	}
 
-	@Nullable
-	public PullRequestUpdate getUpdate() {
-		if (updateOptional == null) {
-			PullRequestUpdate update = null;
-			if (result != null) {
-				for (PullRequestUpdate each: request.getUpdates()) {
-					if (each.getHeadCommitHash().equals(result.getCommit())) {
-						update = each;
-						break;
-					}
-				}
-			}
-			updateOptional = Optional.ofNullable(update);
-		}
-		return updateOptional.orElse(null);
+	public Date getStatusDate() {
+		return statusDate;
 	}
-	
+
+	public void setStatusDate(Date statusDate) {
+		this.statusDate = statusDate;
+	}
+
 }

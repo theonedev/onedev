@@ -248,7 +248,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 		
 												@Override
 												protected PullRequest getPullRequest() {
-													return context.getPullRequest();
+													return null;
 												}
 
 												@Override

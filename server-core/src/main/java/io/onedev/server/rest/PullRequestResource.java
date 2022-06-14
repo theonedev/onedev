@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,8 +25,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -40,6 +39,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
@@ -110,7 +110,9 @@ public class PullRequestResource {
 		PullRequest pullRequest = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
-    	return pullRequest.getReviews();
+    	return pullRequest.getReviews().stream()
+    			.filter(it-> it.getStatus() != Status.EXCLUDED)
+    			.collect(Collectors.toList());
     }
 	
 	@Api(order=500)
@@ -247,9 +249,13 @@ public class PullRequestResource {
 		update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 		request.getUpdates().add(update);
 
-		pullRequestManager.checkReviews(request, Lists.newArrayList());
+		pullRequestManager.checkReviews(request, false);
+		
 		for (Long reviewerId: data.getReviewerIds()) {
 			User reviewer = userManager.load(reviewerId);
+			if (reviewer.equals(request.getSubmitter()))
+				throw new ExplicitException("Pull request submitter can not be reviewer");
+			
 			if (request.getReview(reviewer) == null) {
 				PullRequestReview review = new PullRequestReview();
 				review.setRequest(request);

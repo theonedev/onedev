@@ -11,8 +11,8 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -25,10 +25,10 @@ public class ToBeReviewedByMeCriteria extends Criteria<PullRequest> {
 		if (User.get() != null) {
 			Join<?, ?> join = from.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
 			Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.PROP_USER);
-			Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);
+			Path<?> statusPath = EntityQuery.getPath(join, PullRequestReview.PROP_STATUS);
 			join.on(builder.and(
 					builder.equal(userPath, User.get()), 
-					builder.isNull(approvedPath)));
+					builder.equal(statusPath, Status.PENDING)));
 			return join.isNotNull();
 		} else {
 			throw new ExplicitException("Please login to perform this query");
@@ -39,7 +39,7 @@ public class ToBeReviewedByMeCriteria extends Criteria<PullRequest> {
 	public boolean matches(PullRequest request) {
 		if (User.get() != null) {
 			PullRequestReview review = request.getReview(User.get());
-			return review != null && (review.getResult() == null || review.getResult().getApproved() == null);
+			return review != null && review.getStatus() == Status.PENDING;
 		} else {
 			throw new ExplicitException("Please login to perform this query");
 		}

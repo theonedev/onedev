@@ -34,10 +34,12 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -82,7 +84,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
@@ -108,6 +109,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -354,11 +356,35 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			
 		}.setOutputMarkupId(true));
 		
-		head.add(new WebMarkupContainer("resolved") {
+		head.add(new Label("status", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (context.getOpenComment().isResolved()) {
+					return String.format(
+							"<svg class='icon text-success mr-1'><use xlink:href='%s'/></svg>", 
+							SpriteImage.getVersionedHref("tick-circle-o"));
+				} else {
+					return String.format(
+							"<svg class='icon text-warning mr-1'><use xlink:href='%s'/></svg>", 
+							SpriteImage.getVersionedHref("dot"));
+				}
+			}
+			
+		}) {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
+				
+				add(AttributeAppender.replace("title", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return context.getOpenComment().isResolved()? "Resolved": "Unresolved";
+					}
+					
+				}));
 				
 				add(new WebSocketObserver() {
 					
@@ -376,15 +402,17 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					}
 					
 				});
+				
+				setEscapeModelStrings(false);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(context.getOpenComment() != null && context.getOpenComment().isResolved());
+				setVisible(context.getOpenComment() != null);
 			}
 			
-		}.setOutputMarkupPlaceholderTag(true));
+		}.setOutputMarkupId(true));
 		
 		head.add(new AjaxLink<Void>("close") {
 
@@ -415,11 +443,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 					OneDev.getInstance(CodeCommentManager.class).save(comment);
 					target.add(commentContainer.get("head"));
-				}
-
-				@Override
-				protected PullRequest getPullRequest() {
-					return context.getPullRequest();
 				}
 
 				@Override
@@ -563,11 +586,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								}
 
 								@Override
-								protected PullRequest getPullRequest() {
-									return context.getPullRequest();
-								}
-
-								@Override
 								protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 									SourceViewPanel.this.onSaveCommentReply(reply);
 								}
@@ -617,11 +635,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 							OneDev.getInstance(CodeCommentManager.class).save(comment);
 							target.add(commentContainer.get("head"));
-						}
-
-						@Override
-						protected PullRequest getPullRequest() {
-							return context.getPullRequest();
 						}
 
 						@Override
@@ -826,7 +839,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private CompareContext getCompareContext() {
 		CompareContext compareContext = new CompareContext();
-		compareContext.setPullRequest(context.getPullRequest());
 		compareContext.setOldCommitHash(context.getCommit().name());
 		compareContext.setNewCommitHash(context.getCommit().name());
 		if (context.getBlobIdent().path != null)

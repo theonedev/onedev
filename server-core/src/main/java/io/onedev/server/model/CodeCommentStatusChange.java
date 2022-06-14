@@ -15,7 +15,8 @@ import io.onedev.server.model.support.CompareContext;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="o_comment_id"), @Index(columnList="o_user_id")})
+		@Index(columnList="o_comment_id"), @Index(columnList="o_user_id"), 
+		@Index(columnList="o_pullRequest_id")})
 public class CodeCommentStatusChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

@@ -2,127 +2,68 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
-import org.hibernate.criterion.Restrictions;
+import com.google.common.base.Preconditions;
 
-import com.google.common.collect.Lists;
-
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.exception.ReviewerRequiredException;
+import io.onedev.server.event.pullrequest.PullRequestReviewRequested;
+import io.onedev.server.event.pullrequest.PullRequestReviewerRemoved;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewWithdrawData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 
 @Singleton
 public class DefaultPullRequestReviewManager extends BaseEntityManager<PullRequestReview> 
 		implements PullRequestReviewManager {
 
-	private final PullRequestManager pullRequestManager;
-	
 	private final PullRequestChangeManager changeManager;
 	
-	@Inject
-	public DefaultPullRequestReviewManager(Dao dao, PullRequestManager pullRequestManager, 
-			PullRequestChangeManager changeManager) {
-		super(dao);
-		
-		this.pullRequestManager = pullRequestManager;
-		this.changeManager = changeManager;
-	}
-
-	@Override
-	public PullRequestReview find(PullRequest request, User user, String commit) {
-		EntityCriteria<PullRequestReview> criteria = EntityCriteria.of(PullRequestReview.class);
-		criteria.add(Restrictions.eq("user", user))
-				.add(Restrictions.eq("request", request))
-				.add(Restrictions.eq("commit", commit));
-		return find(criteria);
-	}	
+	private final ListenerRegistry listenerRegistry;
 	
-	@Transactional
-	@Override
-	public void delete(PullRequestReview review) {
-		PullRequest request = review.getRequest();
-		request.getReviews().remove(review);
-		User reviewer = review.getUser();
-		pullRequestManager.checkReviews(request, Lists.newArrayList(reviewer));
-		if (request.isNew()) {
-			if (request.getReview(reviewer) != null)
-				throw new ReviewerRequiredException(reviewer);
-		} else if (request.getReview(reviewer) == null) {
-			dao.remove(review);
-			PullRequestChange change = new PullRequestChange();
-			change.setDate(new Date());
-			change.setRequest(review.getRequest());
-			change.setData(new PullRequestReviewerRemoveData(reviewer));
-			change.setUser(SecurityUtils.getUser());
-			changeManager.save(change);
-			
-			for (PullRequestReview eachReview: request.getReviews()) {
-				if (eachReview.isNew())
-					save(eachReview);
-			}
-		} else {
-			throw new ReviewerRequiredException(reviewer);
-		}
+	@Inject
+	public DefaultPullRequestReviewManager(Dao dao, PullRequestChangeManager changeManager, 
+			ListenerRegistry listenerRegistry) {
+		super(dao);
+		this.changeManager = changeManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 
  	@Transactional
 	@Override
 	public void save(PullRequestReview review) {
- 		boolean isNew = review.isNew();
  		review.setDirty(false);
 		super.save(review);
-
-		PullRequestChange change = new PullRequestChange();
-		if (isNew) {
-			change.setDate(new Date());
-			change.setRequest(review.getRequest());
-			change.setData(new PullRequestReviewerAddData(review.getUser()));
-			change.setUser(SecurityUtils.getUser());
-			changeManager.save(change);
-		} else {
-			ReviewResult result = review.getResult();
-			
-			if (result != null) {
-				change.setDate(new Date());
-				change.setRequest(review.getRequest());
-				
-				if (Boolean.TRUE.equals(result.getApproved())) 
-					change.setData(new PullRequestApproveData());
-				else if (Boolean.FALSE.equals(result.getApproved()))
-					change.setData(new PullRequestRequestedForChangesData());
-				else
-					change.setData(new PullRequestReviewWithdrawData());
-				change.setUser(review.getUser());
-				changeManager.save(change, result.getComment());
-			}
+		
+		if (review.getStatus() == Status.PENDING) {
+			listenerRegistry.post(new PullRequestReviewRequested(
+					SecurityUtils.getUser(), review.getStatusDate(), 
+					review.getRequest(), review.getUser()));
+		} else if (review.getStatus() == Status.EXCLUDED) {
+			listenerRegistry.post(new PullRequestReviewerRemoved(
+					SecurityUtils.getUser(), review.getStatusDate(), 
+					review.getRequest(), review.getUser()));
 		}
 	}
 
-	@Sessional
+ 	@Sessional
 	@Override
 	public void populateReviews(Collection<PullRequest> requests) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
@@ -130,15 +71,39 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		
 		Root<PullRequestReview> root = query.from(PullRequestReview.class);
 		query.select(root);
-		root.join(PullRequestReview.PROP_REQUEST);
+		Join<PullRequest, PullRequest> join = root.join(PullRequestReview.PROP_REQUEST);
+		query.where(join.in(requests));
 		
-		query.where(root.get(PullRequestReview.PROP_REQUEST).in(requests));
-		
-		for (PullRequest request: requests)
+		for (PullRequest request: requests) 
 			request.setReviews(new ArrayList<>());
 		
 		for (PullRequestReview review: getSession().createQuery(query).getResultList())
 			review.getRequest().getReviews().add(review);
 	}
-	
+ 	
+	@Transactional
+	@Override
+	public void review(PullRequest request, boolean approved, String note) {
+		User user = SecurityUtils.getUser();
+		PullRequestReview review = request.getReview(user);
+		Preconditions.checkState(review != null && review.getStatus() == PullRequestReview.Status.PENDING);
+		if (approved)
+			review.setStatus(PullRequestReview.Status.APPROVED);
+		else
+			review.setStatus(PullRequestReview.Status.REQUESTED_FOR_CHANGES);
+			
+		save(review);
+		
+		PullRequestChange change = new PullRequestChange();
+		change.setDate(review.getStatusDate());
+		change.setRequest(request);
+		change.setUser(user);
+		if (approved)
+			change.setData(new PullRequestApproveData());
+		else
+			change.setData(new PullRequestRequestedForChangesData());
+		
+		changeManager.save(change, note);
+	}
+
 }

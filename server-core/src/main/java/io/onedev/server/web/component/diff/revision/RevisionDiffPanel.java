@@ -94,6 +94,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
@@ -959,11 +960,6 @@ public abstract class RevisionDiffPanel extends Panel {
 											}
 	
 											@Override
-											protected PullRequest getPullRequest() {
-												return RevisionDiffPanel.this.getPullRequest();
-											}
-	
-											@Override
 											protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 												reply.setCompareContext(getCompareContext());
 												annotationSupport.onSaveCommentReply(reply);
@@ -1173,11 +1169,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 
 			@Override
-			protected PullRequest getPullRequest() {
-				return RevisionDiffPanel.this.getPullRequest();
-			}
-
-			@Override
 			protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 				reply.setCompareContext(getCompareContext());
 				annotationSupport.onSaveCommentReply(reply);
@@ -1291,11 +1282,38 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		head.add(new WebMarkupContainer("resolved") {
+		head.add(new Label("status", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (annotationSupport.getOpenComment().isResolved()) {
+					return String.format(
+							"<svg class='icon text-success mr-1'><use xlink:href='%s'/></svg>", 
+							SpriteImage.getVersionedHref("tick-circle-o"));
+				} else {
+					return String.format(
+							"<svg class='icon text-warning mr-1'><use xlink:href='%s'/></svg>", 
+							SpriteImage.getVersionedHref("dot"));
+				}
+			}
+			
+		}) {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
+				
+				add(AttributeAppender.replace("title", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						if (annotationSupport.getOpenComment().isResolved()) 
+							return "Resolved";
+						else 
+							return "Unresolved";
+					}
+					
+				}));
 				
 				add(new WebSocketObserver() {
 					
@@ -1313,17 +1331,16 @@ public abstract class RevisionDiffPanel extends Panel {
 					}
 					
 				});
+				setEscapeModelStrings(false);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(annotationSupport != null 
-						&& annotationSupport.getOpenComment() != null 
-						&& annotationSupport.getOpenComment().isResolved());
+				setVisible(annotationSupport != null && annotationSupport.getOpenComment() != null);
 			}
 			
-		}.setOutputMarkupPlaceholderTag(true));
+		}.setOutputMarkupId(true));
 		
 		head.add(new AjaxLink<Void>("locate") {
 
@@ -1396,11 +1413,6 @@ public abstract class RevisionDiffPanel extends Panel {
 					protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
 						annotationSupport.onSaveComment(comment);
 						target.add(commentContainer.get("head"));
-					}
-
-					@Override
-					protected PullRequest getPullRequest() {
-						return RevisionDiffPanel.this.getPullRequest();
 					}
 
 					@Override

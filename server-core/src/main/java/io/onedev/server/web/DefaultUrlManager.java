@@ -73,12 +73,13 @@ public class DefaultUrlManager implements UrlManager {
 		Project project = comment.getProject();
 		PullRequest request = compareContext.getPullRequest();
 		PageParametersEncoder paramsEncoder = new PageParametersEncoder();
-		if (request != null) {
-			PageParameters params = new PageParameters();
-			PullRequestChangesPage.fillParams(params, PullRequestChangesPage.getState(comment, compareContext));
-			return urlFor(request) + "/changes" + paramsEncoder.encodePageParameters(params);
-		} else {
-			if (!compareContext.getOldCommitHash().equals(compareContext.getNewCommitHash())) {
+		
+		if (!compareContext.getOldCommitHash().equals(compareContext.getNewCommitHash())) {
+			if (request != null) {
+				PageParameters params = new PageParameters();
+				PullRequestChangesPage.fillParams(params, PullRequestChangesPage.getState(comment, compareContext));
+				return urlFor(request) + "/changes" + paramsEncoder.encodePageParameters(params);
+			} else {
 				RevCommit oldCommit;
 				if (compareContext.getOldCommitHash().equals(ObjectId.zeroId().name()))
 					oldCommit = null;
@@ -102,24 +103,26 @@ public class DefaultUrlManager implements UrlManager {
 					RevisionComparePage.fillParams(params, RevisionComparePage.getState(comment, compareContext));
 					return url + "/compare" + paramsEncoder.encodePageParameters(params);
 				}
-			} else {
-				String url = urlFor(comment.getProject());
-				PageParameters params = new PageParameters();
-				ProjectBlobPage.State state = ProjectBlobPage.getState(comment);
-				
-				// encode path param separately, otherwise it will be encoded as query param
-				state.blobIdent.path = null;
-				state.blobIdent.revision = null;
-				params.set(0, comment.getMark().getCommitHash());
-				List<String> pathSegments = Splitter.on("/").splitToList(comment.getMark().getPath());
-				for (int i=0; i<pathSegments.size(); i++) 
-					params.set(i+1, pathSegments.get(i));
-				
-				ProjectBlobPage.fillParams(params, state);
-				
-				return url + "/files/" + paramsEncoder.encodePageParameters(params);
 			}
-		}
+		} else {
+			String url = urlFor(comment.getProject());
+			PageParameters params = new PageParameters();
+			ProjectBlobPage.State state = ProjectBlobPage.getState(comment);
+			
+			// encode path param separately, otherwise it will be encoded as query param
+			state.blobIdent.path = null;
+			state.blobIdent.revision = null;
+			if (request != null)
+				state.requestId = request.getId();
+			params.set(0, comment.getMark().getCommitHash());
+			List<String> pathSegments = Splitter.on("/").splitToList(comment.getMark().getPath());
+			for (int i=0; i<pathSegments.size(); i++) 
+				params.set(i+1, pathSegments.get(i));
+			
+			ProjectBlobPage.fillParams(params, state);
+			
+			return url + "/files/" + paramsEncoder.encodePageParameters(params);
+		}		
 	}
 	
 	private static boolean isParent(RevCommit parent, RevCommit child) {

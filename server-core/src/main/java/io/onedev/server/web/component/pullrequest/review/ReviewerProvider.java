@@ -3,11 +3,11 @@ package io.onedev.server.web.component.pullrequest.review;
 import static io.onedev.server.util.match.MatchScoreUtils.filterAndSort;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.util.match.MatchScoreProvider;
 import io.onedev.server.web.WebConstants;
@@ -24,7 +24,11 @@ public abstract class ReviewerProvider extends AbstractUserChoiceProvider {
 		PullRequest request = getPullRequest();
 		
 		List<User> reviewers = OneDev.getInstance(UserManager.class).queryAndSort(request.getParticipants());
-		reviewers.removeAll(request.getReviews().stream().map(it->it.getUser()).collect(Collectors.toSet()));
+		for (PullRequestReview review: request.getReviews()) {
+			if (review.getStatus() != PullRequestReview.Status.EXCLUDED)
+				reviewers.remove(review.getUser());
+		}
+		reviewers.remove(request.getSubmitter());
 		
 		new ResponseFiller<User>(response).fill(filterAndSort(reviewers, new MatchScoreProvider<User>() {
 

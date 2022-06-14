@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAndBranch;
@@ -49,12 +48,13 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     void reopen(PullRequest request, @Nullable String note);
 
-    void check(PullRequest request);
+    void check(PullRequest request, boolean sourceUpdated);
     
     void merge(PullRequest request, @Nullable String commitMessage);
     
     void open(PullRequest request);
     
+    @Override
     void delete(PullRequest request);
     
 	void deleteSourceBranch(PullRequest request, @Nullable String note);
@@ -63,7 +63,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	int countOpen(Project targetProject);
 
-	void checkReviews(PullRequest request, List<User> unpreferableReviewers);
+	void checkReviews(PullRequest request, boolean sourceUpdated);
 	
 	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
 			boolean loadReviewsAndBuilds, int firstResult, int maxResults);

@@ -75,13 +75,13 @@ import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
@@ -773,11 +773,22 @@ public abstract class CodeCommentListPanel extends Panel {
 			
 		});
 		
-		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Resolved")) {
+		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Status")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
-				cellItem.add(new Label(componentId, TextUtils.describe(rowModel.getObject().isResolved())));
+				CodeComment comment = rowModel.getObject();
+				String label;
+				if (comment.isResolved()) {
+					label = String.format(
+							"<svg class='icon text-success mr-1'><use xlink:href='%s'/></svg> %s", 
+							SpriteImage.getVersionedHref("tick-circle-o"), "Resolved");
+				} else {
+					label = String.format(
+							"<svg class='icon text-warning mr-1'><use xlink:href='%s'/></svg> %s", 
+							SpriteImage.getVersionedHref("dot"), "Unresolved");
+				}
+				cellItem.add(new Label(componentId, label).setEscapeModelStrings(false));
 			}
 
 		});

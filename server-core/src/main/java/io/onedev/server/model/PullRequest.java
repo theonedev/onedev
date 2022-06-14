@@ -8,7 +8,6 @@ import static io.onedev.server.model.PullRequest.PROP_TITLE;
 import static io.onedev.server.model.PullRequest.PROP_UUID;
 
 import java.io.IOException;
-import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -282,6 +281,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	@Embedded
 	private LastUpdate lastUpdate;
+
+	@Column(name="CODE_COMMENTS_UPDT")
+	private Date codeCommentsUpdateDate;
 	
 	@Column(length=MAX_CHECK_ERROR_LEN)
 	@OptimisticLock(excluded=true)
@@ -585,8 +587,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	public List<PullRequestReview> getSortedReviews() {
-		List<PullRequestReview> sortedReviews = new ArrayList<>(reviews);
-			
+		List<PullRequestReview> sortedReviews = new ArrayList<>(getReviews());
 		Collections.sort(sortedReviews, new Comparator<PullRequestReview>() {
 
 			@Override
@@ -774,6 +775,15 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 
 	@Nullable
+	public Date getCodeCommentsUpdateDate() {
+		return codeCommentsUpdateDate;
+	}
+
+	public void setCodeCommentsUpdateDate(Date codeCommentsUpdateDate) {
+		this.codeCommentsUpdateDate = codeCommentsUpdateDate;
+	}
+
+	@Nullable
 	public String getCheckError() {
 		return checkError;
 	}
@@ -788,6 +798,16 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		User user = SecurityUtils.getUser();
 		if (user != null) {
 			Date visitDate = OneDev.getInstance(UserInfoManager.class).getPullRequestVisitDate(user, this);
+			return visitDate != null && visitDate.getTime()>date.getTime();
+		} else {
+			return true;
+		}
+	}
+	
+	public boolean isCodeCommentsVisitedAfter(Date date) {
+		User user = SecurityUtils.getUser();
+		if (user != null) {
+			Date visitDate = OneDev.getInstance(UserInfoManager.class).getPullRequestCodeCommentsVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
@@ -916,8 +936,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public boolean isAllReviewsApproved() {
 		for (PullRequestReview review: getReviews()) {
-			if (review.getResult() == null || !Boolean.TRUE.equals(review.getResult().getApproved())) 
+			if (review.getStatus() != PullRequestReview.Status.APPROVED
+					&& review.getStatus() != PullRequestReview.Status.EXCLUDED) { 
 				return false;
+			}
 		}
 		return true;
 	}
@@ -1015,7 +1037,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			if (comparisonBase != null)
 				infoManager.cacheComparisonBase(this, oldCommitId, newCommitId, comparisonBase);
 			else
-				throw new IllegalSelectorException();
+				throw new IllegalStateException();
 		}
 		return comparisonBase;
 	}

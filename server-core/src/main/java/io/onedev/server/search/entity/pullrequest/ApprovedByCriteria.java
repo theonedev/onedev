@@ -10,8 +10,8 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -29,17 +29,17 @@ public class ApprovedByCriteria extends Criteria<PullRequest> {
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		Join<?, ?> join = from.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
 		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.PROP_USER);
-		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);
+		Path<?> statusPath = EntityQuery.getPath(join, PullRequestReview.PROP_STATUS);
 		join.on(builder.and(
 				builder.equal(userPath, user), 
-				builder.equal(approvedPath, true)));
+				builder.equal(statusPath, Status.APPROVED)));
 		return join.isNotNull();
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
 		PullRequestReview review = request.getReview(user);
-		return review != null && review.getResult() != null && Boolean.TRUE.equals(review.getResult().getApproved());
+		return review != null && review.getStatus() == Status.APPROVED;
 	}
 
 	@Override

@@ -8,29 +8,32 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import io.onedev.server.model.support.pullrequest.ReviewResult;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public abstract class ReviewStatusIcon extends WebComponent {
 	
-	public ReviewStatusIcon(String id) {
+	private final boolean opposite;
+	
+	public ReviewStatusIcon(String id, boolean opposite) {
 		super(id);
+		this.opposite = opposite;
 	}
 
 	@Override
 	public void onComponentTagBody(final MarkupStream markupStream, final ComponentTag openTag) {
 		String icon;
 		String cssClass = "icon review-status review-status-";
-		if (getResult() == null || getResult().getApproved() == null) {
-			icon = "clock-o";
+		if (getStatus() == Status.PENDING) {
+			icon = opposite?"clock-o":"clock";
 			cssClass += "pending";
-		} else if (getResult().getApproved() == true) {
-			icon = "tick-circle-o";
+		} else if (getStatus() == Status.APPROVED) {
+			icon = opposite?"tick-circle-o":"tick-circle";
 			cssClass += "approved";
 		} else {
-			icon = "times-circle-o";
+			icon = opposite?"diff-o":"diff";
 			cssClass += "request-for-changes";
 		}
 		
@@ -48,16 +51,16 @@ public abstract class ReviewStatusIcon extends WebComponent {
 
 			@Override
 			protected String load() {
-				String title;
-				if (getResult() != null && getResult().getApproved() != null) {
-					if (getResult().getApproved() == true)
-						title = "Approved";
-					else 
-						title = "Request for changes";
-				} else {
-					title = "Pending review";
+				switch (getStatus()) {
+				case PENDING:
+					return "Pending review";
+				case APPROVED:
+					return "Approved";
+				case REQUESTED_FOR_CHANGES:
+					return "Requested for changes";
+				default:
+					throw new IllegalStateException("Unexpected review status: " + getStatus());
 				}
-				return title;
 			}
 			
 		}));
@@ -70,6 +73,6 @@ public abstract class ReviewStatusIcon extends WebComponent {
 		response.render(CssHeaderItem.forReference(new ReviewCssResourceReference()));
 	}
 
-	protected abstract ReviewResult getResult();
+	protected abstract Status getStatus();
 	
 }

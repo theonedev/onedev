@@ -14,6 +14,7 @@ import io.onedev.commons.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueEvent;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
@@ -40,6 +41,8 @@ public class DefaultUserInfoManager extends AbstractMultiEnvironmentManager impl
 	private static final int INFO_VERSION = 6;
 	
 	private static final String PULL_REQUEST_VISIT_STORE = "pullRequestVisit";
+	
+	private static final String PULL_REQUEST_CODE_COMMENTS_VISIT_STORE = "pullRequestCodeCommentsVisit";
 	
 	private static final String CODE_COMMENT_VISIT_STORE = "codeCommentVisit";
 
@@ -182,8 +185,44 @@ public class DefaultUserInfoManager extends AbstractMultiEnvironmentManager impl
 
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (event.getUser() != null)
+		if (event.getUser() != null) {
 			visitPullRequest(event.getUser(), event.getRequest());
+			if (event instanceof PullRequestCodeCommentEvent)
+				visitPullRequestCodeComments(event.getUser(), event.getRequest());
+		}
+	}
+
+	@Override
+	public void visitPullRequestCodeComments(User user, PullRequest request) {
+		Environment env = getEnv(request.getTargetProject().getId().toString());
+		Store store = getStore(env, PULL_REQUEST_CODE_COMMENTS_VISIT_STORE);
+		env.executeInTransaction(new TransactionalExecutable() {
+			
+			@Override
+			public void execute(Transaction txn) {
+				long time = new DateTime().plusSeconds(1).getMillis();
+				writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), time);
+			}
+			
+		});
+	}
+
+	@Override
+	public Date getPullRequestCodeCommentsVisitDate(User user, PullRequest request) {
+		Environment env = getEnv(request.getTargetProject().getId().toString());
+		Store store = getStore(env, PULL_REQUEST_CODE_COMMENTS_VISIT_STORE);
+		return env.computeInTransaction(new TransactionalComputable<Date>() {
+			
+			@Override
+			public Date compute(Transaction txn) {
+				long millis = readLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), -1);
+				if (millis != -1)
+					return new Date(millis);
+				else
+					return null;
+			}
+			
+		});
 	}
 
 }

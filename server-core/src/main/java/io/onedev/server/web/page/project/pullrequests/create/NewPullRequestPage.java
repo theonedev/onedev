@@ -250,7 +250,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 				update.setHeadCommitHash(source.getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
-				OneDev.getInstance(PullRequestManager.class).checkReviews(request, Lists.newArrayList());
+				OneDev.getInstance(PullRequestManager.class).checkReviews(request, false);
 
 				if (SecurityUtils.canWriteCode(target.getProject())) {
 					PullRequestAssignment assignment = new PullRequestAssignment();

@@ -13,6 +13,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SO
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,11 +75,16 @@ import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pullrequest.PullRequestAssigned;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChanged;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
+import io.onedev.server.event.pullrequest.PullRequestReviewRequested;
+import io.onedev.server.event.pullrequest.PullRequestReviewerRemoved;
+import io.onedev.server.event.pullrequest.PullRequestUnassigned;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
@@ -103,15 +109,11 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeAddData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeRemoveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchDeleteData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchRestoreData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
@@ -274,7 +276,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
 			listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
 		
-		checkAsync(Lists.newArrayList(request));
+		checkAsync(Lists.newArrayList(request), null);
 	}
 
 	@Transactional
@@ -433,7 +435,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
 			listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
 		
-		checkAsync(Lists.newArrayList(request));
+		checkAsync(Lists.newArrayList(request), null);
 		
 		listenerRegistry.post(event);
 	}
@@ -465,7 +467,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 
 	@Transactional
 	@Override
-	public void check(PullRequest request) {
+	public void check(PullRequest request, boolean sourceUpdated) {
 		try {
 			request.setCheckError(null);
 			if (request.isOpen() && request.isValid()) {
@@ -480,7 +482,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 					if (request.isMergedIntoTarget()) {
 						closeAsMerged(request, true);
 					} else {
-						checkReviews(request, Lists.newArrayList());
+						checkReviews(request, sourceUpdated);
 						
 						/*
 						 * If the check method runs concurrently, below statements may fail. It will 
@@ -577,7 +579,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			Criterion criterion = Restrictions.and(
 					ofOpen(), 
 					Restrictions.or(ofSource(projectAndBranch), ofTarget(projectAndBranch)));
-			checkAsync(query(EntityCriteria.of(PullRequest.class).add(criterion)));
+			checkAsync(query(EntityCriteria.of(PullRequest.class).add(criterion)), projectAndBranch);
 		}
 	}
 
@@ -658,7 +660,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		if (data instanceof PullRequestApproveData || data instanceof PullRequestDiscardData  
 				|| data instanceof PullRequestMergeStrategyChangeData
 				|| data instanceof PullRequestTargetBranchChangeData) {
-			checkAsync(Lists.newArrayList(event.getRequest()));
+			checkAsync(Lists.newArrayList(event.getRequest()), null);
 		}
 	}
 	
@@ -683,11 +685,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			boolean minorChange = false;
 			if (event instanceof PullRequestChanged) {
 				PullRequestChangeData changeData = ((PullRequestChanged)event).getChange().getData();
-				if (changeData instanceof PullRequestReviewerAddData 
-						|| changeData instanceof PullRequestReviewerRemoveData
-						|| changeData instanceof PullRequestAssigneeAddData
-						|| changeData instanceof PullRequestAssigneeRemoveData
-						|| changeData instanceof PullRequestSourceBranchDeleteData
+				if (changeData instanceof PullRequestSourceBranchDeleteData
 						|| changeData instanceof PullRequestSourceBranchRestoreData
 						|| changeData instanceof ReferencedFromAware) {
 					minorChange = true;
@@ -696,8 +694,14 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			if (!(event instanceof PullRequestOpened 
 					|| event instanceof PullRequestMergePreviewCalculated
 					|| event instanceof PullRequestBuildEvent
+					|| event instanceof PullRequestAssigned
+					|| event instanceof PullRequestUnassigned
+					|| event instanceof PullRequestReviewRequested
+					|| event instanceof PullRequestReviewerRemoved
 					|| minorChange)) {
 				event.getRequest().setLastUpdate(event.getLastUpdate());
+				if (event instanceof PullRequestCodeCommentEvent)
+					event.getRequest().setCodeCommentsUpdateDate(event.getDate());
 			}
 		}
 	}
@@ -719,7 +723,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	}
 	
 	@Sessional
-	protected void checkAsync(Collection<PullRequest> requests) {
+	protected void checkAsync(Collection<PullRequest> requests, @Nullable ProjectAndBranch source) {
 		Collection<Long> requestIds = requests.stream().map(it->it.getId()).collect(Collectors.toList());
 		if (!requestIds.isEmpty()) {
 			transactionManager.runAfterCommit(new Runnable() {
@@ -744,7 +748,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 
 											@Override
 											public void run() {
-									        	check(load(requestId));
+												PullRequest request = load(requestId);
+									        	check(request, request.getSource() != null && request.getSource().equals(source));
 											}
 											
 										});
@@ -764,142 +769,121 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	@Transactional
 	@Override
-	public void checkReviews(PullRequest request, List<User> unpreferableReviewers) {
-		unpreferableReviewers = new ArrayList<>(unpreferableReviewers);
-		unpreferableReviewers.remove(request.getSubmitter());
-		unpreferableReviewers.add(request.getSubmitter());
-		BranchProtection branchProtection = request.getTargetProject().getHierarchyBranchProtection(
-				request.getTargetBranch(), request.getSubmitter());
-		
-		ReviewRequirement reviewRequirement = branchProtection.getParsedReviewRequirement();
-		for (PullRequestReview review: request.getReviews()) {
-			if (!reviewRequirement.getUsers().contains(review.getUser()))
-				reviewRequirement.getUsers().add(review.getUser());
+	public void checkReviews(PullRequest request, boolean sourceUpdated) {
+		BranchProtection branchProtection = request.getTargetProject()
+				.getHierarchyBranchProtection(request.getTargetBranch(), request.getSubmitter());
+		Collection<String> changedFiles;
+		if (sourceUpdated) {
+			changedFiles = request.getLatestUpdate().getChangedFiles();
+		} else {
+			changedFiles = new HashSet<>();
+			for (PullRequestUpdate update: request.getUpdates())
+				changedFiles.addAll(update.getChangedFiles());
 		}
-		checkReviews(branchProtection.getParsedReviewRequirement(), request.getLatestUpdate(), unpreferableReviewers);
-
+		checkReviews(branchProtection.getParsedReviewRequirement(), 
+				request, changedFiles, sourceUpdated);
+		
 		ReviewRequirement checkedRequirement = ReviewRequirement.parse(null, true);
-		for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
-			if (branchProtection.getFileProtections().stream().allMatch(
-					it->checkedRequirement.covers(it.getParsedReviewRequirement()))) {
-				break;
-			}
-			PullRequestUpdate update = request.getSortedUpdates().get(i);
-			for (String file: update.getChangedFiles()) {
-				FileProtection fileProtection = branchProtection.getFileProtection(file);
-				if (!checkedRequirement.covers(fileProtection.getParsedReviewRequirement())) {
-					checkedRequirement.mergeWith(fileProtection.getParsedReviewRequirement());
-					checkReviews(fileProtection.getParsedReviewRequirement(), update, unpreferableReviewers);
-				}
+		
+		for (String file: changedFiles) {
+			FileProtection fileProtection = branchProtection.getFileProtection(file);
+			if (!checkedRequirement.covers(fileProtection.getParsedReviewRequirement())) {
+				checkedRequirement.mergeWith(fileProtection.getParsedReviewRequirement());
+				checkReviews(fileProtection.getParsedReviewRequirement(), 
+						request, Sets.newHashSet(file), sourceUpdated);
 			}
 		}
 	}
 
-	private void checkReviews(ReviewRequirement reviewRequirement, PullRequestUpdate update, List<User> unpreferableReviewers) {
-		PullRequest request = update.getRequest();
-		
+	private void checkReviews(ReviewRequirement reviewRequirement, PullRequest request, 
+			Collection<String> changedFiles, boolean sourceUpdated) {
 		for (User user: reviewRequirement.getUsers()) {
-			PullRequestReview review = request.getReview(user);
-			if (review == null) {
-				review = new PullRequestReview();
-				review.setRequest(request);
-				review.setUser(user);
-				request.getReviews().add(review);
-			} else if (review.getResult() != null && (review.getUpdate() == null || review.getUpdate().getId()<update.getId())) {
-				review.setResult(null);
+			if (!user.equals(request.getSubmitter())) {
+				PullRequestReview review = request.getReview(user);
+				if (review == null) {
+					review = new PullRequestReview();
+					review.setRequest(request);
+					review.setUser(user);
+					request.getReviews().add(review);
+				} else if (review.getStatus() == PullRequestReview.Status.EXCLUDED 
+						|| sourceUpdated && review.getStatus() != PullRequestReview.Status.PENDING) {
+					review.setStatus(PullRequestReview.Status.PENDING);
+				}
 			}
 		}
 		
 		for (Map.Entry<Group, Integer> entry: reviewRequirement.getGroups().entrySet()) {
 			Group group = entry.getKey();
 			int requiredCount = entry.getValue();
-			checkReviews(group.getMembers(), requiredCount, update, unpreferableReviewers);
+			Collection<User> users = new ArrayList<>(group.getMembers());
+			users.remove(request.getSubmitter());
+			checkReviews(users, requiredCount, request, changedFiles, sourceUpdated);
 		}
 	}
 	
 	private void checkReviews(Collection<User> users, int requiredCount, 
-			PullRequestUpdate update, List<User> unpreferableReviewers) {
-		PullRequest request = update.getRequest();
-
+			PullRequest request, Collection<String> changedFiles, boolean sourceUpdated) {
 		if (requiredCount == 0)
 			requiredCount = users.size();
-		
-		int effectiveCount = 0;
-		Set<User> potentialReviewers = new HashSet<>();
 		for (User user: users) {
 			PullRequestReview review = request.getReview(user);
-			if (review != null) {
-				if (review.getResult() == null)
-					requiredCount--;
-				else if (review.getUpdate() != null && review.getUpdate().getId()>=update.getId())
-					effectiveCount++;
-				else
-					potentialReviewers.add(user);
-			} else {
-				potentialReviewers.add(user);
+			if (review != null && review.getStatus() != PullRequestReview.Status.EXCLUDED) {
+				if (sourceUpdated && review.getStatus() != PullRequestReview.Status.PENDING)
+					review.setStatus(PullRequestReview.Status.PENDING);
+				requiredCount--;
 			}
-			if (effectiveCount >= requiredCount)
+			if (requiredCount <= 0)
 				break;
 		}
 
-		int missingCount = requiredCount - effectiveCount;
-		Set<User> reviewers = new HashSet<>();
-		
-		List<User> candidateReviewers = new ArrayList<>();
-		for (User user: potentialReviewers) {
-			PullRequestReview review = request.getReview(user);
-			if (review != null)
-				candidateReviewers.add(user);
-		}
-		
 		Project project = request.getTargetProject();
 		
-		commitInfoManager.sortUsersByContribution(candidateReviewers, project, update.getChangedFiles());
+		Set<User> reviewers = new HashSet<>();
 		
-		for (User user: candidateReviewers) {
-			reviewers.add(user);
-			request.getReview(user).setResult(null);
-			if (reviewers.size() == missingCount)
-				break;
-		}
-		
-		if (reviewers.size() < missingCount) {
-			candidateReviewers = new ArrayList<>();
-			for (User user: potentialReviewers) {
-				PullRequestReview review = request.getReview(user);
-				if (review == null && !unpreferableReviewers.contains(user)) 
+		if (requiredCount > 0) {
+			List<User> candidateReviewers = new ArrayList<>();
+			
+			for (User user: users) {
+				if (request.getReview(user) == null)
 					candidateReviewers.add(user);
 			}
-			commitInfoManager.sortUsersByContribution(candidateReviewers, project, update.getChangedFiles());
+			
+			commitInfoManager.sortUsersByContribution(candidateReviewers, project, changedFiles);
+			
 			for (User user: candidateReviewers) {
 				reviewers.add(user);
 				PullRequestReview review = new PullRequestReview();
 				review.setRequest(request);
 				review.setUser(user);
 				request.getReviews().add(review);
-				if (reviewers.size() == missingCount)
+				if (reviewers.size() == requiredCount)
 					break;
 			}
 		}
 		
-		if (reviewers.size() < missingCount) {
-			for (User reviewer: unpreferableReviewers) {
-				PullRequestReview review = request.getReview(reviewer);
-				if (review == null && potentialReviewers.contains(reviewer)) { 
-					reviewers.add(reviewer);
-					review = new PullRequestReview();
-					review.setRequest(request);
-					review.setUser(reviewer);
-					request.getReviews().add(review);
-					if (reviewers.size() == missingCount)
+		if (requiredCount > reviewers.size()) {
+			List<PullRequestReview> reviews = new ArrayList<>(request.getReviews());
+			Collections.sort(reviews, new Comparator<PullRequestReview>() {
+
+				@Override
+				public int compare(PullRequestReview o1, PullRequestReview o2) {
+					return o1.getStatusDate().compareTo(o2.getStatusDate());
+				}
+				
+			});
+			for (PullRequestReview review: reviews) {
+				if (review.getStatus() == PullRequestReview.Status.EXCLUDED) { 
+					reviewers.add(review.getUser());
+					review.setStatus(PullRequestReview.Status.PENDING);
+					if (reviewers.size() == requiredCount)
 						break;
 				}
 			}
 		}
-		if (reviewers.size() < missingCount) {
+		if (requiredCount > reviewers.size()) {
 			String errorMessage = String.format("Impossible to provide required number of reviewers "
 					+ "(candidates: %s, required number of reviewers: %d, pull request: #%d)", 
-					reviewers, missingCount, update.getRequest().getNumber());
+					reviewers, requiredCount, request.getNumber());
 			throw new ExplicitException(errorMessage);
 		}
 	}
@@ -1098,5 +1082,5 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			return getSession().createQuery(criteriaQuery).getResultList();
 		}
 	}
-	
+
 }

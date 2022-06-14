@@ -55,6 +55,7 @@ import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
@@ -753,14 +754,16 @@ public abstract class PullRequestListPanel extends Panel {
 				RepeatingView reviewsView = new RepeatingView("reviews");
 				for (PullRequestReview review: request.getSortedReviews()) {
 					Long reviewId = review.getId();
-					reviewsView.add(new ReviewerAvatar(reviewsView.newChildId()) {
-
-						@Override
-						protected PullRequestReview getReview() {
-							return OneDev.getInstance(PullRequestReviewManager.class).load(reviewId);
-						}
-						
-					});
+					if (review.getStatus() != Status.EXCLUDED) {
+						reviewsView.add(new ReviewerAvatar(reviewsView.newChildId()) {
+	
+							@Override
+							protected PullRequestReview getReview() {
+								return OneDev.getInstance(PullRequestReviewManager.class).load(reviewId);
+							}
+							
+						});
+					}
 				}
 				fragment.add(reviewsView);
 				

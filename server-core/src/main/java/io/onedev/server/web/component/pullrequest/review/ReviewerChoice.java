@@ -8,6 +8,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.select2.SelectToAddChoice;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
@@ -49,9 +50,14 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 
 	@Override
 	protected void onSelect(AjaxRequestTarget target, User user) {
-		PullRequestReview review = new PullRequestReview();
-		review.setRequest(getPullRequest());
-		review.setUser(user);
+		PullRequestReview review = getPullRequest().getReview(user);
+		if (review == null) {
+			review = new PullRequestReview();
+			review.setRequest(getPullRequest());
+			review.setUser(user);
+		} else {
+			review.setStatus(Status.PENDING);
+		}
 		
 		if (!getPullRequest().isNew()) 
 			OneDev.getInstance(PullRequestReviewManager.class).save(review);

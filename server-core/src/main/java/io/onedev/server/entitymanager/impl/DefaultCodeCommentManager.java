@@ -52,6 +52,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -96,25 +97,12 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 			listenerRegistry.post(event);
 			
 			PullRequest request = comment.getCompareContext().getPullRequest();
-			if (request != null) {
-				request.setCommentCount(request.getCommentCount() + 1);
-				if (comment.getCreateDate().after(request.getLastUpdate().getDate())) 
-					listenerRegistry.post(new PullRequestCodeCommentCreated(request, comment));
-			}
+			if (request != null && comment.getCreateDate().after(request.getLastUpdate().getDate())) 
+				listenerRegistry.post(new PullRequestCodeCommentCreated(request, comment));
 		} else {
 			dao.persist(comment);
 			listenerRegistry.post(new CodeCommentUpdated(SecurityUtils.getUser(), comment));
 		}
-	}
-
-	@Transactional
-	@Override
-	public void delete(CodeComment comment) {
-		super.delete(comment);
-
-		PullRequest request = comment.getCompareContext().getPullRequest();
-		if (request != null)
-			request.setCommentCount(request.getCommentCount() - comment.getReplyCount() - 1);
 	}
 
 	@Transactional
@@ -277,8 +265,8 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 				orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.ORDER_FIELDS.get(sort.getField()))));
 		}
 
-		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(CodeComment.PROP_ID)));
+		if (orders.isEmpty()) 
+			orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
 		query.orderBy(orders);
 		
 		return query;

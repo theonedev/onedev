@@ -2,6 +2,7 @@ package io.onedev.server.web.component.pullrequest.review;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -18,12 +19,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.exception.ReviewerRequiredException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -42,7 +43,9 @@ public abstract class ReviewListPanel extends Panel {
 
 			@Override
 			protected List<PullRequestReview> load() {
-				return getPullRequest().getSortedReviews();
+				return getPullRequest().getSortedReviews().stream()
+						.filter(it-> it.getStatus() != Status.EXCLUDED)
+						.collect(Collectors.toList());
 			}
 			
 		};		
@@ -77,14 +80,48 @@ public abstract class ReviewListPanel extends Panel {
 				
 				PullRequest request = getPullRequest();
 				
-				item.add(new ReviewStatusIcon("status") {
+				item.add(new ReviewStatusIcon("status", false) {
 
 					@Override
-					protected ReviewResult getResult() {
-						return item.getModelObject().getResult();
+					protected Status getStatus() {
+						return item.getModelObject().getStatus();
 					}
 					
 				}.setVisible(!request.isNew()));
+
+				item.add(new AjaxLink<Void>("refresh") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						
+						PullRequestReview review = item.getModelObject();
+						if (!review.getUser().equals(SecurityUtils.getUser())) {
+							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
+									+ "request another review from '" + review.getUser().getDisplayName() + "'?"));
+						}
+					}
+					
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						PullRequestReview review = item.getModelObject();
+						review.setStatus(Status.PENDING);
+						OneDev.getInstance(PullRequestReviewManager.class).save(review);
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						PullRequestReview review = item.getModelObject();
+						User currentUser = SecurityUtils.getUser();
+						setVisible(!request.isNew() 
+								&& !request.isMerged()
+								&& review.getStatus() != PullRequestReview.Status.PENDING								
+								&& (SecurityUtils.canModify(getPullRequest()) || review.getUser().equals(currentUser)));
+					}
+					
+				});
 				
 				item.add(new AjaxLink<Void>("delete") {
 
@@ -101,15 +138,31 @@ public abstract class ReviewListPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						PullRequestReview review = item.getModelObject();
-						
-						try {
-							OneDev.getInstance(PullRequestReviewManager.class).delete(review);
-							if (request.isNew()) 
-								target.add(ReviewListPanel.this);
-						} catch (ReviewerRequiredException e) {
-							getSession().warn("Reviewer '" + review.getUser().getDisplayName() 
-									+ "' is required and can not be removed");
+						review.setStatus(Status.EXCLUDED);
+						OneDev.getInstance(PullRequestManager.class).checkReviews(request, false);
+						User reviewer = review.getUser();
+						boolean reviewerRequired = false;
+						if (request.isNew()) {
+							if (request.getReview(reviewer).getStatus() != Status.EXCLUDED)
+								reviewerRequired = true;
+						} else if (request.getReview(reviewer).getStatus() == Status.EXCLUDED) {
+							PullRequestReviewManager reviewManager = 
+									OneDev.getInstance(PullRequestReviewManager.class);
+							reviewManager.save(review);
+							for (PullRequestReview eachReview: request.getReviews()) {
+								if (eachReview.isNew())
+									reviewManager.save(eachReview);
+							}
+						} else {
+							reviewerRequired = true;
 						}
+						if (reviewerRequired) {
+							getSession().warn("Reviewer '" + reviewer.getDisplayName() 
+									+ "' is required and can not be removed");
+						} else if (request.isNew()) {
+							target.add(ReviewListPanel.this);
+						}
+						
 						reviewsModel.detach();
 					}
 					
