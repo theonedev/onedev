@@ -4115,5 +4115,72 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate89(File dataDir, Stack<Integer> versions) {
+		Map<String, Integer> pullRequestCommentCounts = new HashMap<>();
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String pullRequestId = element.elementTextTrim("request");
+					Integer commentCount = pullRequestCommentCounts.get(pullRequestId);
+					if (commentCount == null) 
+						commentCount = 0;
+					commentCount++;
+					pullRequestCommentCounts.put(pullRequestId, commentCount);
+				}
+			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					String className = dataElement.attributeValue("class");
+					if (className.contains("PullRequestAssigneeAddData")
+							|| className.contains("PullRequestAssigneeRemoveData")
+							|| className.contains("PullRequestReviewerAddData")
+							|| className.contains("PullRequestReviewerRemoveData")
+							|| className.contains("PullRequestReviewWithdrawData")) {
+						element.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestReviews.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element resultElement = element.element("result");
+					if (resultElement != null) {
+						Element approvedElement = resultElement.element("approved");
+						if (approvedElement != null) {
+							if (approvedElement.getTextTrim().equals("true"))
+								element.addElement("status").setText("APPROVED");
+							else
+								element.addElement("status").setText("REQUESTED_FOR_CHANGES");
+						} else {
+							element.addElement("status").setText("PENDING");
+						}
+						resultElement.detach();
+					} else {
+						element.addElement("status").setText("PENDING");
+					}
+					Element statusDateElement = element.addElement("statusDate");
+					statusDateElement.addAttribute("class", "sql-timestamp");
+					statusDateElement.setText("2020-01-22T16:08:49.869000000Z");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Integer commentCount = pullRequestCommentCounts.get(element.elementTextTrim("id"));
+					if (commentCount == null)
+						commentCount = 0;
+					element.element("commentCount").setText(String.valueOf(commentCount));
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }
