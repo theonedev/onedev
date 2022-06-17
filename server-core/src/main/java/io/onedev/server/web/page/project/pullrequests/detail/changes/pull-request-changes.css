@@ -21,5 +21,11 @@
 	background: var(--light-warning);	
 }
 .dark-mode .commits-selector ul a.selected, .dark-mode .commits-selector ul a.selected:hover {
-	background: var(--dark-mode-lighter-dark);	
+	background: var(--dark-mode-light-warning);	
+}
+.commits-selector ul a.shift-selected, .commits-selector ul a.shift-selected:hover {
+	background: var(--light-primary);	
+}
+.dark-mode .commits-selector ul a.shift-selected, .dark-mode .commits-selector ul a.shift-selected:hover {
+	background: var(--dark-mode-light-primary);	
 }

@@ -1,46 +1,60 @@
 onedev.server.requestChanges = {
 	initCommitSelector: function(callback, baseCommit, fromIndex, toIndex) {
 		var $commits = $(".commits-selector ul a");
-		if (fromIndex!=undefined && toIndex!=undefined) {
+		if (fromIndex!=undefined && toIndex!=undefined) 
 			$commits.slice(fromIndex, toIndex+1).addClass("selected");
+			
+		fromIndex = toIndex = undefined;
+			
+		function onSelectionChanged() {
+			var oldCommit;
+			if (fromIndex == 0)
+				oldCommit = baseCommit;
+			else
+				oldCommit = $($(".commits-selector ul li").get(fromIndex-1)).data("hash");
+			var newCommit = $($(".commits-selector ul li").get(toIndex)).data("hash");
+			callback(oldCommit, newCommit);
 		}
-		var fromIndexToApply = fromIndex;
-		var toIndexToApply = toIndex;
 		
-		function onIndexChanged() {
-			var $apply = $(".commits-selector>.links a.selected-changes"); 
-			if (fromIndexToApply != fromIndex || toIndexToApply != toIndex) {
-				$apply.removeClass("disabled").off("click").click(function() {
-					var oldCommit;
-					if (fromIndexToApply == 0)
-						oldCommit = baseCommit;
-					else
-						oldCommit = $($(".commits-selector ul li").get(fromIndexToApply-1)).data("hash");
-					var newCommit = $($(".commits-selector ul li").get(toIndexToApply)).data("hash");
-					callback(oldCommit, newCommit);
-				});
+		$commits.mouseover(function(e) {
+			if (e.shiftKey) {
+				if (fromIndex != undefined) {
+					$commits.removeClass("shift-selected");
+					var index = $commits.index(this);
+					if (fromIndex < index) 
+						$commits.slice(fromIndex, index+1).addClass("shift-selected");
+					else 
+						$commits.slice(index, fromIndex+1).addClass("shift-selected");
+				}
 			} else {
-				$apply.addClass("disabled");
+				$commits.removeClass("shift-selected");
+				if (fromIndex != undefined)
+					$commits.eq(fromIndex).addClass("shift-selected");
 			}
-			$commits.removeClass("selected").slice(fromIndexToApply, toIndexToApply+1).addClass("selected");
-		}
+		});
 		
 		$commits.click(function(e) {
 			var index = $commits.index(this);
 			if (e.shiftKey) {
-				if (fromIndexToApply != undefined && toIndexToApply != undefined) {
-					if (index < fromIndexToApply) {
-						fromIndexToApply = index;
-					} else if (index > toIndexToApply) {
-						toIndexToApply = index;
-					} 
+				if (fromIndex == undefined) { 
+					fromIndex = index;
+					$(this).addClass("shift-selected");
+				} else if (fromIndex == index) {
+					fromIndex = undefined;
+					$(this).removeClass("shift-selected");
 				} else {
-					fromIndexToApply = toIndexToApply = index;
+					if (fromIndex < index) {
+						toIndex = index;
+					} else {
+						toIndex = fromIndex;
+						fromIndex = index;
+					}
+					onSelectionChanged();						
 				}
 			} else {
-				fromIndexToApply = toIndexToApply = index;
+				fromIndex = toIndex = index;
+				onSelectionChanged();
 			}
-			onIndexChanged();
 		});
 	}
 };

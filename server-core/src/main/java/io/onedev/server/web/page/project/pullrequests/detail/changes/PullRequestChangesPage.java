@@ -62,14 +62,12 @@ import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -456,33 +454,13 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						User user = getLoginUser();
 						if (user != null) {
 							PullRequest request = getPullRequest();
-							for (PullRequestComment comment: request.getComments()) { 
-								if (comment.getUser().equals(user) && 
-										(lastReviewDate == null || lastReviewDate.before(comment.getDate()))) {
-									lastReviewDate = comment.getDate();
-								}
-							}
 							
 							for (PullRequestChange change: request.getChanges()) {
 								if (user.equals(change.getUser()) 
 										&& (lastReviewDate == null || lastReviewDate.before(change.getDate()))
 										&& (change.getData() instanceof PullRequestApproveData 
-												|| change.getData() instanceof PullRequestReopenData
 												|| change.getData() instanceof PullRequestRequestedForChangesData)) {
 									lastReviewDate = change.getDate();
-								}
-							}
-							
-							for (CodeComment comment: request.getCodeComments()) {
-								if (user.equals(comment.getUser()) && 
-										(lastReviewDate == null || lastReviewDate.before(comment.getCreateDate()))) {
-									lastReviewDate = comment.getCreateDate();
-								}
-								for (CodeCommentReply reply: comment.getReplies()) {
-									if (user.equals(reply.getUser()) && 
-											(lastReviewDate == null || lastReviewDate.before(reply.getDate()))) {
-										lastReviewDate = reply.getDate();
-									}
 								}
 							}
 						}
