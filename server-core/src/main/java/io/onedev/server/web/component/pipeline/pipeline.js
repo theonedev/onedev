@@ -205,7 +205,7 @@ onedev.server.pipeline = {
 			});
 			paper.append(e);
 		});
-		$pipeline.find(".active").scrollIntoView();
+		$pipeline.find(".active")[0].scrollIntoViewIfNeeded(false);
 	},
 	onSortStart: function($uiItem) {
 		var $pipeline = $uiItem.closest(".pipeline");

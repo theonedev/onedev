@@ -47,7 +47,7 @@ onedev.server.layout = {
 				$this.toggleClass("open");
 				$this.next().slideToggle(300, function() {
 					$sidebarBody.trigger("resized");
-					$this.parent().scrollIntoView($sidebarBody[0], true);
+					$this.parent()[0].scrollIntoViewIfNeeded();
 				});
 			}
 		});
@@ -150,15 +150,11 @@ onedev.server.layout = {
 	onLoad: function() {
 		var $sidebarBody = $(".sidebar-body");
 		var scrollTop = window.sessionStorage.getItem("onedev.sidebar.scrollTop");
-		var currentMenuLinkCount = $(".sidebar-menu .menu-link").length;
 		if (scrollTop) {
 			window.sessionStorage.removeItem("onedev.sidebar.scrollTop");
 			$sidebarBody.scrollTop(scrollTop);	
 		} else {
-			var menuChanged = (currentMenuLinkCount != window.sessionStorage.getItem("onedev.sidebar.menuLinkCount"));
-			$(".sidebar-menu .menu-link.active:visible").last()
-					.scrollIntoView(document.querySelector(".sidebar-body"), menuChanged);
+			$(".sidebar-menu .menu-link.active:visible").last()[0].scrollIntoViewIfNeeded();
 		}
-		window.sessionStorage.setItem("onedev.sidebar.menuLinkCount", currentMenuLinkCount);
 	}
 }

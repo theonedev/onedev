@@ -21,7 +21,6 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -54,7 +53,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -431,7 +429,6 @@ public abstract class CodeCommentPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		response.render(CssHeaderItem.forReference(new CodeCommentCssResourceReference()));
 	}
 
@@ -550,7 +547,7 @@ public abstract class CodeCommentPanel extends Panel {
 		
 		String script = String.format(""
 				+ "setTimeout(function() {"
-				+ "  $('#%s').scrollIntoView();"
+				+ "  document.getElementById('%s').scrollIntoViewIfNeeded(false);"
 				+ "}, 0);", 
 				saveButton.getMarkupId());
 		target.appendJavaScript(script);

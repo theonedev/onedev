@@ -907,15 +907,16 @@ onedev.server.textDiff = {
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) {
 			var $scrollParent = $startTd.scrollParent();
-			$scrollParent.scrollTop($startTd.offset().top - $scrollParent.offset().top + $scrollParent.scrollTop()-50);
+			var marginTop = $startTd.closest(".text-diff").prev().height() + 120;
+			$scrollParent.scrollTop($startTd.offset().top - $scrollParent.offset().top + $scrollParent.scrollTop()-marginTop);
 		}
 	},
 	scrollIntoView: function($container, markRange) {
 		var markInfo = onedev.server.textDiff.getMarkInfo($container, markRange);
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
-		if ($startTd && $endTd)
-			$startTd.scrollIntoView();
+		if ($startTd && $endTd) 
+			$startTd[0].scrollIntoViewIfNeeded();
 	},
 	mark: function($container, markRangeOrMarkRanges) {
 		onedev.server.textDiff.clearMark($container);

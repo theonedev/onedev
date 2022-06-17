@@ -9,7 +9,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
-import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
 import io.onedev.server.web.page.base.BaseCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -25,7 +24,6 @@ public class SelectByTypingResourceReference extends BaseDependentResourceRefere
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = new ArrayList<>();
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseCssResourceReference()));
 		return dependencies;

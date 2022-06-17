@@ -14,7 +14,6 @@ import io.onedev.server.web.asset.commentindicator.CommentIndicatorCssResourceRe
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
-import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.asset.selectionpopover.SelectionPopoverResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
@@ -34,7 +33,6 @@ public class SourceViewResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectByTypingResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));

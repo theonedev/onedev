@@ -202,7 +202,7 @@ onedev.server.sourceView = {
 	syncOutline: function(symbolId) {
 		var $symbol = $("#" + symbolId);
 		var $body = $(".source-view>.outline>.content>.body");
-		$symbol.scrollIntoView();
+		$symbol[0].scrollIntoViewIfNeeded(true);
 		$body.find(".tree-content").removeClass("active");
 		$symbol.addClass("active");
 	},

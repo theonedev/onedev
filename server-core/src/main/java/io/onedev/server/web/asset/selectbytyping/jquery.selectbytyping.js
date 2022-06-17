@@ -44,7 +44,7 @@
 				var $prev = $selectables.eq(index);
 				$active.removeClass("active");
 				$prev.addClass("active");
-				$prev.scrollIntoView();
+				$prev[0].scrollIntoViewIfNeeded(false);
 			}
 		};
 		
@@ -59,7 +59,7 @@
 				var $next = $selectables.eq(index);
 				$active.removeClass("active");
 				$next.addClass("active");
-				$next.scrollIntoView();
+				$next[0].scrollIntoViewIfNeeded(false);
 			}
 		};
 		

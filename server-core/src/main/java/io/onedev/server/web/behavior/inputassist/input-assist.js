@@ -63,7 +63,7 @@ onedev.server.inputassist = {
 				} else {
 					$dropdown.find("li:not(.loading-indicator)").last().addClass("active");
 				}
-				$dropdown.find(".suggestions li.active").scrollIntoView();
+				$dropdown.find(".suggestions li.active")[0].scrollIntoViewIfNeeded(false);
 				onedev.server.inputassist.updateHelp($dropdown);
 				$dropdown.align($dropdown.data("alignment"));
 				return false;
@@ -83,7 +83,7 @@ onedev.server.inputassist = {
 				} else {
 					$dropdown.find("li:not(.loading-indicator)").first().addClass("active");
 				}
-				$dropdown.find(".suggestions li.active").scrollIntoView();
+				$dropdown.find(".suggestions li.active")[0].scrollIntoViewIfNeeded(false);
 				onedev.server.inputassist.updateHelp($dropdown);
 				$dropdown.align($dropdown.data("alignment"));
 				return false;

@@ -13,7 +13,6 @@ import io.onedev.server.web.asset.codeproblem.CodeProblemResourceReference;
 import io.onedev.server.web.asset.commentindicator.CommentIndicatorCssResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
-import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
 import io.onedev.server.web.asset.selectionpopover.SelectionPopoverResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -33,7 +32,6 @@ public class TextDiffResourceReference extends BaseDependentResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeProblemResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(
 				new CssResourceReference(TextDiffPanel.class, "text-diff.css")));

@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.diff.revision;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,7 +34,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -86,13 +86,13 @@ import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
@@ -299,6 +299,8 @@ public abstract class RevisionDiffPanel extends Panel {
 
 	private ListView<BlobChange> diffsView;
 	
+	private WebMarkupContainer navs;
+	
 	private WebMarkupContainer body;
 	
 	public RevisionDiffPanel(String id, String oldRev, String newRev, IModel<String> pathFilterModel, 
@@ -349,6 +351,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	private void doFilter(AjaxRequestTarget target) {
 		body.replace(commentContainer = newCommentContainer());
 		target.add(body);
+		target.add(navs);
 	}
 	
 	@Nullable
@@ -411,93 +414,35 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 
-		for (DiffViewMode each: DiffViewMode.values()) {
-			add(new AjaxLink<Void>(each.name().toLowerCase()) {
-
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
-				}
-				
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					diffMode = each;
-					WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-					Cookie cookie = new Cookie(COOKIE_VIEW_MODE, diffMode.name());
-					cookie.setMaxAge(Integer.MAX_VALUE);
-					cookie.setPath("/");
-					response.addCookie(cookie);
-					target.add(body);
-					
-					for (DiffViewMode each: DiffViewMode.values()) 
-						target.add(getParent().get(each.name().toLowerCase()));
-					
-					((BasePage)getPage()).resizeWindow(target);
-				}
-				
-			}.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-				@Override
-				protected String load() {
-					if (diffMode == each) {
-						if (diffMode == DiffViewMode.SPLIT)
-							return "active need-width";
-						else
-							return "active";
-					} else {
-						return "";
-					}
-				}
-				
-			})));
-		}
-		
-		add(new MenuLink("whitespaceOption") {
+		add(new AjaxLink<Void>("option") {
 
 			@Override
-			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				List<MenuItem> menuItems = new ArrayList<>();
-				
-				for (WhitespaceOption each: WhitespaceOption.values()) {
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return each.getDescription();
-						}
-
-						@Override
-						public boolean isSelected() {
-							return whitespaceOptionModel.getObject() == each;
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new AjaxLink<Void>(id) {
-
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									dropdown.close();
-									whitespaceOptionModel.setObject(each);
-									target.add(body);
-								}
-
-								@Override
-								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-									super.updateAjaxAttributes(attributes);
-									attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
-								}
-								
-							};
-						}
+			public void onClick(AjaxRequestTarget target) {
+				DiffOption diffOption = new DiffOption();
+				diffOption.setViewMode(diffMode);
+				new BeanEditModalPanel(target, diffOption) {
+					
+					@Override
+					protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
+						DiffOption diffOption = (DiffOption) bean;
+						diffMode = diffOption.getViewMode();
 						
-					});
-				}
-
-				return menuItems;
+						WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+						Cookie cookie = new Cookie(COOKIE_VIEW_MODE, diffMode.name());
+						cookie.setMaxAge(Integer.MAX_VALUE);
+						cookie.setPath("/");
+						response.addCookie(cookie);
+						
+						whitespaceOptionModel.setObject(diffOption.getWhitespaceOption());
+						
+						target.add(navs);
+						target.add(body);
+						
+						close();
+					}
+				};
 			}
-			
+
 		});
 		
 		Form<?> pathFilterForm = new Form<Void>("pathFilter");
@@ -550,6 +495,13 @@ public abstract class RevisionDiffPanel extends Panel {
 				doFilter(target);
 			}
 			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
+				attributes.getAjaxCallListeners().add(new TrackViewStateListener(false));
+			}
+			
 		});
 		
 		pathFilterForm.add(new AjaxButton("submit") {
@@ -558,6 +510,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
 				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(body));
+				attributes.getAjaxCallListeners().add(new TrackViewStateListener(false));
 			}
 			
 			@Override
@@ -569,23 +522,12 @@ public abstract class RevisionDiffPanel extends Panel {
 		});
 		
 		add(pathFilterForm);
-
-		body = new WebMarkupContainer(BODY_ID) {
-
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.onDomReady();"));
-			}
-			
-		};
-		body.setOutputMarkupId(true);
-		add(body);
-
-		body.add(new FencedFeedbackPanel("feedback", this));
-		body.add(commentContainer = newCommentContainer());
-
-		body.add(new WebMarkupContainer("showAllFiles") {
+		
+		navs = new WebMarkupContainer("navs");
+		navs.setOutputMarkupId(true);
+		add(navs);
+		
+		navs.add(new WebMarkupContainer("showAllFiles") {
 
 			@Override
 			protected void onInitialize() {
@@ -598,12 +540,13 @@ public abstract class RevisionDiffPanel extends Panel {
 					}
 					
 				}));
-				add(new AjaxLink<Void>("showSingleFile") {
+				add(new ViewStateAwareAjaxLink<Void>("showSingleFile") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						setCurrentFile(getTotalChanges().iterator().next().getPath());
 						target.add(body);
+						target.add(navs);
 					}
 
 					@Override
@@ -623,7 +566,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 		
-		body.add(new WebMarkupContainer("showSingleFile") {
+		navs.add(new WebMarkupContainer("showSingleFile") {
 
 			private int getIndex() {
 				int index = 0;
@@ -639,7 +582,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(new AjaxLink<Void>("prev") {
+				add(new ViewStateAwareAjaxLink<Void>("prev") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -647,6 +590,8 @@ public abstract class RevisionDiffPanel extends Panel {
 						if (index >=0 && index < getTotalChanges().size()) {
 							setCurrentFile(getTotalChanges().get(index).getPath());
 							target.add(body);
+							target.add(navs);
+							target.appendJavaScript("onedev.server.revisionDiff.scrollToFilesTop();");							
 						}
 					}
 
@@ -681,7 +626,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					
 				}));
 				
-				add(new AjaxLink<Void>("next") {
+				add(new ViewStateAwareAjaxLink<Void>("next") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -689,6 +634,8 @@ public abstract class RevisionDiffPanel extends Panel {
 						if (index >=0 && index < getTotalChanges().size()) {
 							setCurrentFile(getTotalChanges().get(index).getPath());
 							target.add(body);
+							target.add(navs);
+							target.appendJavaScript("onedev.server.revisionDiff.scrollToFilesTop();");							
 						}
 					}
 
@@ -710,12 +657,13 @@ public abstract class RevisionDiffPanel extends Panel {
 					
 				});
 				
-				add(new AjaxLink<Void>("showAllFiles") {
+				add(new ViewStateAwareAjaxLink<Void>("showAllFiles") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						setCurrentFile(null);
 						target.add(body);
+						target.add(navs);
 					}
 
 				});
@@ -728,7 +676,14 @@ public abstract class RevisionDiffPanel extends Panel {
 			}
 			
 		});
-		
+
+		body = new WebMarkupContainer(BODY_ID);
+		body.setOutputMarkupId(true);
+		add(body);
+
+		body.add(new FencedFeedbackPanel("feedback", this));
+		body.add(commentContainer = newCommentContainer());
+
 		body.add(new Label("tooManyFiles", new AbstractReadOnlyModel<String>() {
 
 			@Override
@@ -1388,7 +1343,6 @@ public abstract class RevisionDiffPanel extends Panel {
 						annotationSupport.onUnmark(target);
 					}
 				}
-				target.prependJavaScript("$('body').removeClass('hide-side-info');");
 			}
 			
 		});

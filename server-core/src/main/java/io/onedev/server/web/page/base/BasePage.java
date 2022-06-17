@@ -50,7 +50,9 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.unbescape.javascript.JavaScriptEscape;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
@@ -203,6 +205,8 @@ public abstract class BasePage extends WebPage {
 					builder.append(clazz.getSimpleName()).append(" ");
 					clazz = clazz.getSuperclass();
 				}
+				
+				builder.append(" ").append(Joiner.on(' ').join(getCssClasses()));
 				
 				if (darkMode)
 					builder.append(" dark-mode");
@@ -360,6 +364,10 @@ public abstract class BasePage extends WebPage {
 
 	protected int getPageRefreshInterval() {
 		return 0;
+	}
+	
+	protected Collection<String> getCssClasses() {
+		return Sets.newHashSet();
 	}
 	
 	public void resizeWindow(IPartialPageRequestHandler handler) {

@@ -22,7 +22,7 @@ onedev.server.projectSelector = {
 				$active.removeClass("active");
 				$prev.addClass("active");
 			}
-			$("li.project.active").scrollIntoView();
+			$("li.project.active")[0].scrollIntoViewIfNeeded(false);
 		});
 		
 		$input.bind("keydown", "down", function(e) {
@@ -33,7 +33,7 @@ onedev.server.projectSelector = {
 				$active.removeClass("active");
 				$next.addClass("active");
 			} 
-			$("li.project.active").scrollIntoView();
+			$("li.project.active")[0].scrollIntoViewIfNeeded(false);
 		});
 	}
 };

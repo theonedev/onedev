@@ -750,6 +750,11 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
+	protected Collection<String> getCssClasses() {
+		return Sets.newHashSet("hide-side-info");
+	}
+
+	@Override
 	public String getMarkUrl(Mark mark) {
 		State markState = new State();
 		markState.mark = getPermanentMark(mark);

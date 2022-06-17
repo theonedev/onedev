@@ -3,13 +3,14 @@
 	width: 100%;
 	border-collapse: separate;	
 }
-.text-diff>caption {
-	caption-side: top;
-}
-.text-diff>caption>div {
+.text-diff-caption {
 	border-radius: 0.42rem 0.42rem 0 0;
+	top: 64px; 
+	background: white; 
+	z-index: 5;	
 }
-.dark-mode .text-diff>caption>div {
+.dark-mode .text-diff-caption {
+	background: var(--dark-mode-dark);
     border-color: var(--dark-mode-lighter-dark) !important;
 }
 .text-diff>tbody {
@@ -280,3 +281,4 @@
 .dark-mode ::selection {
 	background-color: #1e496c;
 }
+

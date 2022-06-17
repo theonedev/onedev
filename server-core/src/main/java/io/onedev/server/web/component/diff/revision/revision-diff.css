@@ -1,3 +1,18 @@
+.revision-diff>.head {
+	position: sticky;
+	top: 0; 
+	background: white; 
+	z-index: 10;
+	padding-bottom: 1.6rem;
+	height: 64px;
+}
+.dark-mode .revision-diff>.head {
+	background: var(--dark-mode-dark);
+}
+.revision-diff>.head>.navs {
+	padding: 8px 12px;
+	border-style: dashed !important;
+}
 .revision-diff>.body>.title {
 	font-size: 1.2rem;
 	margin-bottom: 1.2rem;	
@@ -36,8 +51,8 @@
 }
 
 .revision-diff>.body>.detail>.comment {
-	top: 2rem;
-	max-height: calc(100vh - 2rem - var(--topbar-height));
+	top: 64px;
+	max-height: calc(100vh - 64px - var(--topbar-height));
 }
 
 .revision-diff>.body>.detail>.comment>.ui-resizable-handle {

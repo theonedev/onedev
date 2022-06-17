@@ -10,6 +10,23 @@ String.prototype.escapeHtml = function() {
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
 };
+
+if (!Element.prototype.scrollIntoViewIfNeeded) {
+    Element.prototype.scrollIntoViewIfNeeded = function ( centerIfNeeded = false) {
+        const el = this;
+        new IntersectionObserver( function( [entry] ) {
+            const ratio = entry.intersectionRatio;
+            if (ratio < 1) {
+                let place = ratio <= 0 && centerIfNeeded ? 'center' : 'nearest';
+                el.scrollIntoView( {
+                    block: place,
+                    inline: place
+                } );
+            }
+            this.disconnect();
+        } ).observe(this);
+    };
+}
  
 onedev.server = {
 	day: {

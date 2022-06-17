@@ -27,7 +27,7 @@ onedev.server.revisionSelector = {
 				$active.removeClass("active");
 				$prev.addClass("active");
 			}
-			$container.find("ul.items li.active").scrollIntoView();
+			$container.find("ul.items li.active")[0].scrollIntoViewIfNeeded(false);
 		});
 		$input.bind("keydown", "down", function(e) {
 			e.preventDefault();
@@ -37,7 +37,7 @@ onedev.server.revisionSelector = {
 				$active.removeClass("active");
 				$next.addClass("active");
 			}
-			$container.find("ul.items li.active").scrollIntoView();
+			$container.find("ul.items li.active")[0].scrollIntoViewIfNeeded(false);
 		});
 	}
 };

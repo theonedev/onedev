@@ -5,17 +5,9 @@
 			Revision indexing in progress... (symbol navigation in revisions will be accurate after indexed)
 		</div>
 		<!-- disable auto focus here as otherwise we have problems jumping to marked code blocks -->
-		<div class="head no-autofocus d-flex align-items-center flex-wrap">
-			<div class="view-mode mr-3 mb-4 flex-shrink-0">
-				<span class="btn-group">
-					<a wicket:id="unified" class="btn btn-outline-secondary">Unified</a>
-					<a wicket:id="split" class="btn btn-outline-secondary">Split</a>
-				</span>
-			</div>
-			<div class="whitespace-option mr-3 mb-4 flex-shrink-0">
-				<span wicket:id="whitespaceOption" class="btn btn-outline-secondary dropdown-toggle" title="White space options">White space</span>
-			</div>
-			<div class="path-filter mb-4 flex-grow-1">				
+		<div class="head no-autofocus d-flex align-items-center flex-nowrap">
+			<a wicket:id="option" class="btn btn-light btn-icon btn-lg flex-shrink-0 mr-3"><wicket:svg href="gear" class="icon"/></a>
+			<div class="path-filter flex-grow-1 mr-5">				
 				<form wicket:id="pathFilter">
 					<div class="clearable-wrapper">
 						<div class="input-group">
@@ -27,23 +19,25 @@
 					</div>
 				</form>
 			</div>
+			<div wicket:id="navs" class="ml-auto flex-shrink-0 border rounded navs">
+				<div wicket:id="showAllFiles" class="font-size-lg d-flex align-items-center flex-nowrap flex-shrink-0">
+					<span wicket:id="totalFiles"></span> 
+					<wicket:enclosure child="showSingleFile">
+					<span class="dot mx-3"></span>
+					<a wicket:id="showSingleFile">Show one by one</a>
+					</wicket:enclosure>
+				</div>
+				<div wicket:id="showSingleFile" class="font-size-lg d-flex align-items-center flex-nowrap flex-shrink-0">
+					<span wicket:id="message"></span>
+					<a wicket:id="prev" class="ml-3">Prev</a>
+					<a wicket:id="next" class="ml-2">Next</a>
+					<span class="dot mx-3"></span>
+					<a wicket:id="showAllFiles">Show all files</a>
+				</div>
+			</div>
 		</div>
 		<div wicket:id="body" class="body">
 			<div wicket:id="feedback"></div>
-			<div wicket:id="showAllFiles" class="font-size-lg d-flex align-items-center mb-4">
-				<span wicket:id="totalFiles"></span> 
-				<wicket:enclosure child="showSingleFile">
-				<span class="dot mx-3"></span>
-				<a wicket:id="showSingleFile">Show one by one</a>
-				</wicket:enclosure>
-			</div>
-			<div wicket:id="showSingleFile" class="font-size-lg d-flex align-items-center mb-4">
-				<span wicket:id="message"></span>
-				<a wicket:id="prev" class="ml-3">Prev</a>
-				<a wicket:id="next" class="ml-2">Next</a>
-				<span class="dot mx-3"></span>
-				<a wicket:id="showAllFiles">Show all files</a>
-			</div>
 			<div wicket:id="tooManyFiles" class="alert alert-notice alert-light-warning"></div>
 			<div class="detail d-flex align-items-stretch">
 				<div wicket:id="comment" class="comment need-width border border-right-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky mr-4">

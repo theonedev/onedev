@@ -784,7 +784,8 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
         state.trailingSpaceNewLine = false;
 
         state.f = state.block;
-        var indentation = stream.match(/^\s*/, true)[0].replace(/\t/g, '    ').length;
+		var match = stream.match(/^\s*/, true);
+        var indentation = match ? match[0].replace(/\t/g, '    ').length : 0;
         state.indentationDiff = Math.min(indentation - state.indentation, 4);
         state.indentation = state.indentation + state.indentationDiff;
         if (indentation > 0) return null;
