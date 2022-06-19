@@ -321,6 +321,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@OneToMany(mappedBy="compareContext.pullRequest")
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<PendingSuggestionApply> pendingSuggestionApplies = new ArrayList<>();
+	
 	private transient Boolean mergedIntoTarget;
 
 	private transient Boolean valid;
@@ -512,6 +515,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	public void setCodeComments(Collection<CodeComment> codeComments) {
 		this.codeComments = codeComments;
+	}
+
+	public Collection<PendingSuggestionApply> getPendingSuggestionApplies() {
+		return pendingSuggestionApplies;
+	}
+
+	public void setPendingSuggestionApplies(Collection<PendingSuggestionApply> pendingSuggestionApplies) {
+		this.pendingSuggestionApplies = pendingSuggestionApplies;
 	}
 
 	public Status getStatus() {

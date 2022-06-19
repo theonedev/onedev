@@ -119,6 +119,7 @@ import io.onedev.server.entitymanager.LinkAuthorizationManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
@@ -165,6 +166,7 @@ import io.onedev.server.entitymanager.impl.DefaultLinkAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultLinkSpecManager;
 import io.onedev.server.entitymanager.impl.DefaultMembershipManager;
 import io.onedev.server.entitymanager.impl.DefaultMilestoneManager;
+import io.onedev.server.entitymanager.impl.DefaultPendingSuggestionApplyManager;
 import io.onedev.server.entitymanager.impl.DefaultProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestAssignmentManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestChangeManager;
@@ -452,6 +454,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueTextManager.class).to(DefaultIssueTextManager.class);
 		bind(PullRequestTextManager.class).to(DefaultPullRequestTextManager.class);
 		bind(CodeCommentTextManager.class).to(DefaultCodeCommentTextManager.class);
+		bind(PendingSuggestionApplyManager.class).to(DefaultPendingSuggestionApplyManager.class);
 		
 		bind(WebHookManager.class);
 		

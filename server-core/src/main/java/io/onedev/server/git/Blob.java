@@ -14,10 +14,14 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.ContentDetector;
+import io.onedev.server.web.component.markdown.SuggestionSupport.SuggestFor;
 
 public class Blob {
 	
@@ -185,10 +189,24 @@ public class Blob {
 						builder.append(ch);
 					}
 				}
-				if (builder.length() != 0)
-					lines.add(builder.toString());
+				lines.add(builder.toString());
 			}
 			return lines;
 		}
+		
+		public SuggestFor getSuggestFor(PlanarRange range) {
+			List<String> linesInRange = getLines().subList(range.getFromRow(), range.getToRow()+1);			
+			
+			int to = 0;
+			for (int i=0; i<linesInRange.size()-1; i++)
+				to += linesInRange.get(i).length();
+			to += range.getToColumn();
+			
+			return new SuggestFor(
+					Joiner.on('\n').join(linesInRange), 
+					new LinearRange(range.getFromColumn(), to));
+		}
+		
 	}
+	
 }

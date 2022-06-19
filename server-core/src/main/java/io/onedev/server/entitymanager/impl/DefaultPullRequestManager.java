@@ -64,6 +64,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -170,6 +171,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	private final EntityReferenceManager referenceManager;
 	
+	private final PendingSuggestionApplyManager pendingSuggestionApplyManager;
+	
 	private final SettingManager settingManager;
 	
 	@Inject
@@ -180,6 +183,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			ExecutorService executorService, BuildManager buildManager, 
 			TransactionManager transactionManager, ProjectManager projectManager, 
 			CommitInfoManager commitInfoManager, EntityReferenceManager referenceManager, 
+			PendingSuggestionApplyManager pendingSuggestionApplyManager, 
 			SettingManager settingManager) {
 		super(dao);
 		
@@ -195,6 +199,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		this.projectManager = projectManager;
 		this.commitInfoManager = commitInfoManager;
 		this.referenceManager = referenceManager;
+		this.pendingSuggestionApplyManager = pendingSuggestionApplyManager;
 		this.settingManager = settingManager;
 	}
 	
@@ -296,6 +301,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		change.setRequest(request);
 		change.setUser(user);
 		changeManager.save(change, note);
+		
+		pendingSuggestionApplyManager.discard(null, request);
 	}
 	
 	@Transactional
@@ -463,6 +470,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		change.setData(new PullRequestMergeData(reason));
 		change.setRequest(request);
 		changeManager.save(change);
+		
+		pendingSuggestionApplyManager.discard(null, request);
 	}
 
 	@Transactional

@@ -41,8 +41,26 @@ onedev.server.markdown = {
 		var $preview = $body.children(".preview");
 		var $rendered = $preview.children(".markdown-rendered");
 		var $help = $head.children(".help");
+		var $suggestion = $head.find(".do-suggestion");
 		
 		$head.find(".dropdown>a").dropdown();
+		
+		if (onedev.server.util.isMac())		
+			$suggestion.attr("title", "Suggest changes (cmd-g)");
+		else
+			$suggestion.attr("title", "Suggest changes (ctrl-g)");
+
+		$suggestion.click(function() {
+			var content = $(this).data("content");
+			var from = parseInt($(this).data("from"));
+			var to = parseInt($(this).data("to"));
+			var langHint = "suggestion";
+			$input.focus();
+			var selected = $input.range();
+			document.execCommand("insertText", false, "\n```" + langHint + "\n" + content + "\n```\n");		
+			$input.range(selected.start+5+langHint.length+from, selected.start+5+langHint.length+to);
+			onedev.server.markdown.fireInputEvent($input);
+		});
 		
 		$editLink.click(function() {
 			$container.removeClass("preview-mode").removeClass("split-mode").addClass("edit-mode");
@@ -343,10 +361,15 @@ onedev.server.markdown = {
 						key = "";
 					if (e.shiftKey)
 						key = "shift-" + key;
-					var selector = onedev.server.markdown.shortcuts[key];
-					if (selector) {
+					if (key == "g") {
 						e.preventDefault();
-						$head.find(selector).click();
+						$suggestion.click();						
+					} else {
+						var selector = onedev.server.markdown.shortcuts[key];
+						if (selector) {
+							e.preventDefault();
+							$head.find(selector).click();
+						}
 					}
 				}
 				var $submit = getSubmit();
@@ -777,7 +800,7 @@ onedev.server.markdown = {
 			var selector = onedev.server.markdown.shortcuts[key];
 			var $action = $actionMenu.find(selector);
 			if ($actionMenu.closest(".floating").length != 0) 
-				$action.append("<span class='float-right'>" + prefix + key + "</span>");
+				$action.append("<span class='float-right ml-4 text-monospace font-size-sm'>" + prefix + key + "</span>");
 			else
 				$action.attr("title", $action.attr("title") + " (" + prefix + key + ")");
 		}

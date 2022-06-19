@@ -164,6 +164,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<SshKey> sshKeys = new ArrayList<>();
+    
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<PendingSuggestionApply> pendingSuggestionApplies = new ArrayList<>();
 
     @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -578,7 +581,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
         this.sshKeys = sshKeys;
     }
     
-    public Collection<EmailAddress> getEmailAddresses() {
+    public Collection<PendingSuggestionApply> getPendingSuggestionApplies() {
+		return pendingSuggestionApplies;
+	}
+
+	public void setPendingSuggestionApplies(Collection<PendingSuggestionApply> pendingSuggestionApplies) {
+		this.pendingSuggestionApplies = pendingSuggestionApplies;
+	}
+
+	public Collection<EmailAddress> getEmailAddresses() {
 		return emailAddresses;
 	}
 

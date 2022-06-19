@@ -67,6 +67,7 @@ import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.markdown.SuggestionSupport.SuggestFor;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -224,7 +225,26 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		});
 		
 		container.add(new WebMarkupContainer("doMention").setVisible(getUserMentionSupport() != null));
+		
+		container.add(new WebMarkupContainer("doSuggestion") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				SuggestFor suggestFor = getSuggestionSupport().getSuggestFor();
+				tag.put("data-content", suggestFor.getContent());
+				tag.put("data-from", suggestFor.getRange().getFrom());
+				tag.put("data-to", suggestFor.getRange().getTo());
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getSuggestionSupport() != null && !getSuggestionSupport().isOutdated());
+			}
 			
+		});
+		
 		edit.add(input = new TextArea<String>("input", Model.of(getModelObject())) {
 
 			@Override
@@ -556,6 +576,11 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	
 	@Nullable
 	protected AtWhoReferenceSupport getReferenceSupport() {
+		return null;
+	}
+	
+	@Nullable
+	protected SuggestionSupport getSuggestionSupport() {
 		return null;
 	}
 	
