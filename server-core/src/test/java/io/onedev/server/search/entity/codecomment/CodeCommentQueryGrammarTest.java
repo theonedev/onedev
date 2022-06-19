@@ -50,8 +50,8 @@ public class CodeCommentQueryGrammarTest {
 		suggestions = codeAssist.suggest(new InputStatus("created by me", 13), "query");
 		assertEquals(3, suggestions.size());
 		assertEquals("created by me:13", suggestions.get(0).toString());
-		assertEquals("created by me :14", suggestions.get(1).toString());
-		assertEquals("\"created by me\" :16", suggestions.get(2).toString());
+		assertEquals("\"created by me\" :16", suggestions.get(1).toString());
+		assertEquals("created by me :14", suggestions.get(2).toString());
 	}
 	
 }

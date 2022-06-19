@@ -50,8 +50,8 @@ public class PullRequestQueryGrammarTest {
 		suggestions = codeAssist.suggest(new InputStatus("open", 4), "query");
 		assertEquals(3, suggestions.size());
 		assertEquals("open:4", suggestions.get(0).toString());
-		assertEquals("open :5", suggestions.get(1).toString());
-		assertEquals("\"open\" :7", suggestions.get(2).toString());
+		assertEquals("\"open\" :7", suggestions.get(1).toString());
+		assertEquals("open :5", suggestions.get(2).toString());
 	}
 	
 }
