@@ -56,6 +56,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -159,6 +160,11 @@ public abstract class CodeCommentPanel extends Panel {
 					protected AttachmentSupport getAttachmentSupport() {
 						return new ProjectAttachmentSupport(getComment().getProject(), getComment().getUUID(), 
 								SecurityUtils.canManageCodeComments(getProject()));
+					}
+
+					@Override
+					protected SuggestionSupport getSuggestionSupport() {
+						return CodeCommentPanel.this.getSuggestionSupport();
 					}
 
 					@Override
@@ -431,6 +437,9 @@ public abstract class CodeCommentPanel extends Panel {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CodeCommentCssResourceReference()));
 	}
+	
+	@Nullable
+	protected abstract SuggestionSupport getSuggestionSupport();
 
 	private void onAddReply(AjaxRequestTarget target, @Nullable Boolean resolved) {
 		Fragment editFragment = new Fragment("actions", "commentOrReplyEditFrag", CodeCommentPanel.this);
@@ -445,6 +454,11 @@ public abstract class CodeCommentPanel extends Panel {
 						SecurityUtils.canManageCodeComments(getProject()));
 			}
 
+			@Override
+			protected SuggestionSupport getSuggestionSupport() {
+				return CodeCommentPanel.this.getSuggestionSupport();
+			}
+			
 			@Override
 			protected Project getProject() {
 				return getComment().getProject();
@@ -716,6 +730,11 @@ public abstract class CodeCommentPanel extends Panel {
 					Form<?> form = new Form<Void>("form");
 					CommentInput contentInput = new CommentInput("content", Model.of(getReply().getContent()), true) {
 
+						@Override
+						protected SuggestionSupport getSuggestionSupport() {
+							return CodeCommentPanel.this.getSuggestionSupport();
+						}
+						
 						@Override
 						protected AttachmentSupport getAttachmentSupport() {
 							return new ProjectAttachmentSupport(getProject(), getComment().getUUID(), 

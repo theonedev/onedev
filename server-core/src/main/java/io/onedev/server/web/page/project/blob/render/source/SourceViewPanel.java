@@ -103,6 +103,7 @@ import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -460,6 +461,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					return SourceViewPanel.this.isContextDifferent(compareContext);
 				}
 
+				@Override
+				protected SuggestionSupport getSuggestionSupport() {
+					return SourceViewPanel.this.getSuggestionSupport(context.getOpenComment().getMark().getRange());
+				}
+
 			};
 			commentContainer.add(commentPanel);
 		} else {
@@ -511,6 +517,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						protected ProjectAttachmentSupport getAttachmentSupport() {
 							return new ProjectAttachmentSupport(context.getProject(), uuid, 
 									SecurityUtils.canManageCodeComments(context.getProject()));
+						}
+
+						@Override
+						protected SuggestionSupport getSuggestionSupport() {
+							return SourceViewPanel.this.getSuggestionSupport(range);
 						}
 
 						@Override
@@ -600,6 +611,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 									return SourceViewPanel.this.isContextDifferent(compareContext);
 								}
 
+								@Override
+								protected SuggestionSupport getSuggestionSupport() {
+									return SourceViewPanel.this.getSuggestionSupport(range);
+								}
+
 							};
 							commentContainer.replace(commentPanel);
 							target.add(commentContainer);
@@ -650,6 +666,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						@Override
 						protected boolean isContextDifferent(CompareContext compareContext) {
 							return SourceViewPanel.this.isContextDifferent(compareContext);
+						}
+
+						@Override
+						protected SuggestionSupport getSuggestionSupport() {
+							return SourceViewPanel.this.getSuggestionSupport(getComment().getMark().getRange());
 						}
 
 					};
@@ -1229,6 +1250,38 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	private void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
 		change.setCompareContext(getCompareContext());
 		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
+	}
+	
+	private SuggestionSupport getSuggestionSupport(PlanarRange range) {
+		return new SuggestionSupport() {
+			
+			@Override
+			public boolean isOutdated() {
+				return false;
+			}
+			
+			@Override
+			public boolean isAuthorized() {
+				return SecurityUtils.canWriteCode(context.getProject());
+			}
+			
+			@Override
+			public SuggestFor getSuggestFor() {
+				return context.getProject().getBlob(context.getBlobIdent(), true).getText().getSuggestFor(range);
+			}
+			
+			@Override
+			public BatchApplySupport getBatchApplySupport() {
+				return null;
+			}
+			
+			@Override
+			public void applySuggestion(AjaxRequestTarget target, List<String> suggestion,
+					CommentResolveCallback resolveCallback) {
+				
+			}
+
+		};
 	}
 	
 }

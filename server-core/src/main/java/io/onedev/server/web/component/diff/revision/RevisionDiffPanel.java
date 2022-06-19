@@ -93,6 +93,7 @@ import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
@@ -930,6 +931,11 @@ public abstract class RevisionDiffPanel extends Panel {
 											protected boolean isContextDifferent(CompareContext compareContext) {
 												return RevisionDiffPanel.this.isContextDifferent(compareContext);
 											}
+
+											@Override
+											protected SuggestionSupport getSuggestionSupport() {
+												return RevisionDiffPanel.this.getSuggestionSupport();
+											}
 	
 										};
 										commentContainer.replace(commentPanel);
@@ -1138,6 +1144,11 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			protected boolean isContextDifferent(CompareContext compareContext) {
 				return RevisionDiffPanel.this.isContextDifferent(compareContext);
+			}
+
+			@Override
+			protected SuggestionSupport getSuggestionSupport() {
+				return RevisionDiffPanel.this.getSuggestionSupport();
 			}
 			
 		};
@@ -1386,6 +1397,11 @@ public abstract class RevisionDiffPanel extends Panel {
 						return RevisionDiffPanel.this.isContextDifferent(compareContext);
 					}
 					
+					@Override
+					protected SuggestionSupport getSuggestionSupport() {
+						return RevisionDiffPanel.this.getSuggestionSupport();
+					}
+					
 				};
 				commentContainer.add(commentPanel);
 			} else {
@@ -1476,6 +1492,10 @@ public abstract class RevisionDiffPanel extends Panel {
 		currentFileModel.detach();
 		
 		super.onDetach();
+	}
+	
+	protected SuggestionSupport getSuggestionSupport() {
+		return null;
 	}
 	
 	@Override
