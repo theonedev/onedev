@@ -7,7 +7,10 @@
 }
 
 .cm-searching {
-    background: rgb(125, 82, 1);
+	background: rgb(248, 234, 148);
+}
+.dark-mode .cm-searching {
+    background: rgb(179, 117, 3);
 }
 .CodeMirror-mark {
 	background: #8950FC;
@@ -23,10 +26,10 @@
 	background: var(--warning);
 }
 .cm-searching.cm-identifierhighlight {
-	background: #e8e9c5;
+    background: rgb(218, 143, 3);
 }
 .dark-mode .cm-searching.cm-identifierhighlight {
-	background: rgb(127, 112, 96);
+    background: rgb(125, 82, 1);
 }
 
 .cm-searching.cm-identifierhighlight.CodeMirror-mark {

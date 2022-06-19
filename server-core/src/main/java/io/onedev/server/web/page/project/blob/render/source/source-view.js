@@ -243,7 +243,7 @@ onedev.server.sourceView = {
 		$trigger.mouseover(function() {
 			onedev.server.codemirror.mark(cm, markRanges);
 		}).mouseout(function() {
-			onedev.server.sourceView.clearMark();
+			onedev.server.sourceView.restoreMark();
 		});
 
 		$trigger.mousedown(function() {
@@ -265,7 +265,7 @@ onedev.server.sourceView = {
 					$currentPopover.find(".problem-content").mouseover(function() {
 						onedev.server.codemirror.mark(cm, problems[$(this).index()].range);
 					}).mouseout(function() {
-						onedev.server.sourceView.clearMark();
+						onedev.server.sourceView.restoreMark();
 					}).each(function() {
 						var problem = problems[$(this).index()];
 						$(this).children(".add-comment").click(function() {
@@ -337,7 +337,7 @@ onedev.server.sourceView = {
 						onedev.server.codemirror.mark(cm, comment.range);
 					});
 					$(this).mouseout(function() {
-						onedev.server.sourceView.clearMark();
+						onedev.server.sourceView.restoreMark();
 					});
 					$(this).click(function() {
 						if (!$(this).hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) { 
@@ -361,7 +361,7 @@ onedev.server.sourceView = {
 			$indicator.mouseover(function() {
 				onedev.server.codemirror.mark(cm, comment.range);
 			}).mouseout(function() {
-				onedev.server.sourceView.clearMark();
+				onedev.server.sourceView.restoreMark();
 			});
 			$indicator.click(function() {
 				if (!$indicator.hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) { 
@@ -461,7 +461,7 @@ onedev.server.sourceView = {
 			onedev.server.sourceView.highlightCommentTrigger();				
 		}
 		$(window).resize();
-		onedev.server.sourceView.clearMark();
+		onedev.server.sourceView.restoreMark();
 	},
 	onAddComment: function(commentRange) {
 		$(".popover").popover("hide");
@@ -500,7 +500,7 @@ onedev.server.sourceView = {
 		$sourceView.removeData("openComment");
 		onedev.server.sourceView.highlightCommentTrigger();
 		$(window).resize();
-		onedev.server.sourceView.clearMark();
+		onedev.server.sourceView.restoreMark();
 	},
 	onToggleOutline: function() {
 		onedev.server.sourceView.exitFullScreen();
@@ -555,13 +555,14 @@ onedev.server.sourceView = {
 			onedev.server.codemirror.scrollTo(cm, markRange);
 		cm.setCursor({line: markRange.fromRow, ch: markRange.fromColumn});
 	},
-	clearMark: function() {
+	restoreMark: function() {
+		var $sourceView = $(".source-view");
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var markRange = $(".source-view").data("markRange");
+		var markRange = $sourceView.data("markRange");
 		if (markRange) 
-			onedev.server.codemirror.scrollIntoView(cm, markRange);
-		$(".source-view").removeData("markRange");
-		onedev.server.codemirror.clearMark(cm);			
+			onedev.server.codemirror.mark(cm, markRange);
+		else 
+			onedev.server.codemirror.clearMark(cm);
 	},
 	blame: function(blameInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
