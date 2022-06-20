@@ -3,6 +3,8 @@ package io.onedev.server.markdown;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.Repository;
@@ -25,6 +27,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -35,9 +38,10 @@ public class UrlProcessor implements MarkdownProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(UrlProcessor.class);
 	
 	@Override
-	public void process(Document rendered, Project project, Object context) {
-		if (RequestCycle.get() != null && context instanceof BlobRenderContext && project != null) {
-			BlobRenderContext blobRenderContext = (BlobRenderContext) context;
+	public void process(Document rendered, Project project, 
+			@Nullable BlobRenderContext blobRenderContext, 
+			@Nullable SuggestionSupport suggestionSupport) {
+		if (RequestCycle.get() != null && blobRenderContext != null && project != null) {
 			Repository repository = project.getRepository();
 			RevCommit commit;
 			if (blobRenderContext.getBlobIdent().revision != null) {

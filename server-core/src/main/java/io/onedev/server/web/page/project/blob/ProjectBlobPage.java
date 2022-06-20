@@ -1218,7 +1218,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		if (!blobIdent.revision.equals(state.blobIdent.revision)) {
 			state.blobIdent = blobIdent;
 			state.mode = Mode.VIEW;
-			state.commentId = null;
 			state.requestId = null;
 			newSearchResult(target, null);
 			onResolvedRevisionChange(target);
@@ -1227,7 +1226,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			state.blobIdent.path = blobIdent.path;
 			state.blobIdent.mode = blobIdent.mode;
 			state.mode = Mode.VIEW;
-			state.commentId = null;
 			newBlobNavigator(target);
 			newBlobOperations(target);
 			newBuildSupportNote(target);

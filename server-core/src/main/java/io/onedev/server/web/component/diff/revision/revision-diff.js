@@ -1,6 +1,6 @@
 onedev.server.revisionDiff = {
 	scrollToFilesTop: function() {
-		var $textDiffContent = $(".text-diff>tbody").first();
+		var $textDiffContent = $(".blob-text-diff>tbody").first();
 		if ($textDiffContent.length != 0) {
 			var $head = $(".revision-diff>.head");
 			var $textDiffCaption = $textDiffContent.parent().prev();
@@ -22,5 +22,14 @@ onedev.server.revisionDiff = {
 				}
 			});
 		}
+	},
+	onSuggestionBatchChanged: function() {
+		var $batch = $(".revision-diff .batched-suggestions");
+		$batch.removeClass("btn-light");
+		$batch.addClass("btn-warning"); 
+		setTimeout(function() {
+			$batch.removeClass("btn-warning");
+			$batch.addClass("btn-light"); 
+		}, 200);
 	}
 };

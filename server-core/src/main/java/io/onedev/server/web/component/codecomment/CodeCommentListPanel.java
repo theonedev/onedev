@@ -216,7 +216,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					}
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
+					protected void onSave(AjaxRequestTarget target, Serializable bean) {
 						Collection<CodeCommentStatusChange> changes = new ArrayList<>();
 						
 						for (CodeComment comment: commentsProvider.get()) {

@@ -12,6 +12,8 @@ import io.onedev.server.entityreference.ReferenceParser;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 
 public class BuildProcessor extends ReferenceParser implements MarkdownProcessor {
@@ -21,7 +23,9 @@ public class BuildProcessor extends ReferenceParser implements MarkdownProcessor
 	}
 
 	@Override
-	public void process(Document document, @Nullable Project project, Object context) {
+	public void process(Document document, @Nullable Project project, 
+			@Nullable BlobRenderContext blobRenderContext, 
+			@Nullable SuggestionSupport suggestionSupport) {
 		parseReferences(document, project);
 	}
 

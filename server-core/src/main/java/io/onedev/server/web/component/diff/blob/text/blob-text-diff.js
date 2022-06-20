@@ -1,4 +1,4 @@
-onedev.server.textDiff = {
+onedev.server.blobTextDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, callback, blameMessageCallback,
 			markRange, openComment, annotationInfo, commentContainerId, doclink) {
@@ -37,7 +37,7 @@ onedev.server.textDiff = {
 		});
 		$container.find("td.content").mouseover($container.data("onMouseOverContent"));
 
-		onedev.server.textDiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
+		onedev.server.blobTextDiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
 		
 		$container.selectionPopover("init", function(e) {
 	    	if ($(e.target).closest(".selection-popover").length != 0) {
@@ -67,28 +67,28 @@ onedev.server.textDiff = {
     		var endOffset = lastRange.endOffset;
     		
 			var $startDiff;
-			if ($start.hasClass("text-diff"))
+			if ($start.hasClass("blob-text-diff"))
 				$startDiff = $start;
-			else if ($start.children(".text-diff").length != 0)
-				$startDiff = $start.children(".text-diff");
+			else if ($start.children(".blob-text-diff").length != 0)
+				$startDiff = $start.children(".blob-text-diff");
 			else
-				$startDiff = $start.closest(".text-diff");
+				$startDiff = $start.closest(".blob-text-diff");
 			
 			var $endDiff;
-			if ($end.hasClass("text-diff"))
+			if ($end.hasClass("blob-text-diff"))
 				$endDiff = $end;
-			else if ($end.children(".text-diff").length != 0)
-				$endDiff = $end.children(".text-diff");
+			else if ($end.children(".blob-text-diff").length != 0)
+				$endDiff = $end.children(".blob-text-diff");
 			else
-				$endDiff = $end.closest(".text-diff");
+				$endDiff = $end.closest(".blob-text-diff");
 				
 			// selection must be within same file
 			if ($startDiff.length == 0 || $endDiff.length == 0 || !$startDiff.is($endDiff)) { 
 	    		return "close";
 			}
 			
-			var $startTd = $start.is("td.content")? $start: $start.closest(".text-diff td.content");
-			var $endTd = $end.is("td.content")? $end: $end.closest(".text-diff td.content");
+			var $startTd = $start.is("td.content")? $start: $start.closest(".blob-text-diff td.content");
+			var $endTd = $end.is("td.content")? $end: $end.closest(".blob-text-diff td.content");
 
 			// at least one side of selection must be within a table cell
 			if ($startTd.length == 0 && $endTd.length == 0) {
@@ -415,13 +415,13 @@ onedev.server.textDiff = {
 		let oldCoverages = annotationInfo.oldAnnotations.coverages;
 		for (var line in oldCoverages) {
 			if (oldCoverages.hasOwnProperty(line)) 
-				onedev.server.textDiff.addCoverateInfo($container, true, line, oldCoverages[line]);
+				onedev.server.blobTextDiff.addCoverateInfo($container, true, line, oldCoverages[line]);
 		}
 		
 		let newCoverages = annotationInfo.newAnnotations.coverages;
 		for (var line in newCoverages) {
 			if (newCoverages.hasOwnProperty(line)) 
-				onedev.server.textDiff.addCoverateInfo($container, false, line, newCoverages[line]);
+				onedev.server.blobTextDiff.addCoverateInfo($container, false, line, newCoverages[line]);
 		}
 
 		let oldProblems = annotationInfo.oldAnnotations.problems;
@@ -430,7 +430,7 @@ onedev.server.textDiff = {
 				let oldProblemsOnLine = oldProblems[line];
 				for (var i in oldProblemsOnLine) 
 					oldProblemsOnLine[i].range.leftSide = true;
-				onedev.server.textDiff.addProblemInfo($container, true, line, oldProblems[line]);
+				onedev.server.blobTextDiff.addProblemInfo($container, true, line, oldProblems[line]);
 			}
 		}
 		
@@ -440,7 +440,7 @@ onedev.server.textDiff = {
 				let newProblemsOnLine = newProblems[line];
 				for (var i in newProblemsOnLine) 
 					newProblemsOnLine[i].range.leftSide = false;
-				onedev.server.textDiff.addProblemInfo($container, false, line, newProblems[line]);
+				onedev.server.blobTextDiff.addProblemInfo($container, false, line, newProblems[line]);
 			}
 		}
 		
@@ -453,7 +453,7 @@ onedev.server.textDiff = {
 				let oldCommentsOnLine = oldComments[line];
 				for (var i in oldCommentsOnLine) 
 					oldCommentsOnLine[i].range.leftSide = true;
-		    	onedev.server.textDiff.addCommentIndicator($container, true, line, oldCommentsOnLine);
+		    	onedev.server.blobTextDiff.addCommentIndicator($container, true, line, oldCommentsOnLine);
 		    }
 		}
 		var newComments = annotationInfo.newAnnotations.comments;
@@ -462,33 +462,33 @@ onedev.server.textDiff = {
 				let newCommentsOnLine = newComments[line];
 				for (var i in newCommentsOnLine) 
 					newCommentsOnLine[i].range.leftSide = false;
-		    	onedev.server.textDiff.addCommentIndicator($container, false, line, newCommentsOnLine);
+		    	onedev.server.blobTextDiff.addCommentIndicator($container, false, line, newCommentsOnLine);
 		    }
 		}
 		
-		onedev.server.textDiff.highlightCommentTrigger($container);				
+		onedev.server.blobTextDiff.highlightCommentTrigger($container);				
 		
 		if (markRange) {
 			$container.data("markRange", markRange);
-			onedev.server.textDiff.mark($container, markRange);	
+			onedev.server.blobTextDiff.mark($container, markRange);	
 		}			
 	},
 	onWindowLoad: function(containerId, markRange) {
 		var $container = $("#" + containerId);
 		if (markRange && onedev.server.viewState.getFromHistory() === undefined)
-			onedev.server.textDiff.scrollTo($container, markRange);
+			onedev.server.blobTextDiff.scrollTo($container, markRange);
 		
 		var $scrollParent = $container.scrollParent();
 		if (!$scrollParent.data("onTextDiffScrollInstalled"))	{
 			$scrollParent.data("onTextDiffScrollInstalled", true);
 			$scrollParent.doneEvents("scroll", function() {
-				$(".text-diff").each(function() {
-					onedev.server.textDiff.highlightSyntax($(this).parent());
+				$(".blob-text-diff").each(function() {
+					onedev.server.blobTextDiff.highlightSyntax($(this).parent());
 				}, 100);
 			});
 		}		
 		
-		onedev.server.textDiff.highlightSyntax($container);
+		onedev.server.blobTextDiff.highlightSyntax($container);
 	},
 	highlightSyntax($container) {
 		var oldBlobPath = $container.find(".diff-title>span:first-child").text();
@@ -649,24 +649,17 @@ onedev.server.textDiff = {
 								}
 								
 								for (var i=0; i<text.length; i++) {
-									var currentClassNames = "";
-									function appendCurrentClassName(className) {
-										if (currentClassNames.length != 0)
-											currentClassNames += " ";
-										currentClassNames += className;	
-									}
+									var currentClassNames = $content[0].className;
+									if (currentClassNames == undefined)
+										currentClassNames = "";
 									
-									if ($content.hasClass("insert"))
-										appendCurrentClassName("insert");
-									if ($content.hasClass("delete"))
-										appendCurrentClassName("delete");
-									if ($content.hasClass("content-mark"))
-										appendCurrentClassName("content-mark");
-										
 									if (lineSyntaxes) {
 										var syntaxClassNames = lineSyntaxes[pos+i];
-										if (syntaxClassNames != undefined && syntaxClassNames.length != 0)
-											appendCurrentClassName(syntaxClassNames);
+										if (syntaxClassNames != undefined && syntaxClassNames.length != 0) {
+											if (currentClassNames.length != 0)
+												currentClassNames += " ";
+											currentClassNames += syntaxClassNames;	
+										}
 									}
 									if (currentClassNames != classNames) {
 										appendPartial();
@@ -693,7 +686,7 @@ onedev.server.textDiff = {
 								newLineIndex++;
 						}
 						
-						$codeTr.find(onedev.server.textDiff.symbolClasses).mouseover($container.data("symbolHover"));
+						$codeTr.find(onedev.server.blobTextDiff.symbolClasses).mouseover($container.data("symbolHover"));
 						if ($codeTr.is($lastCodeTr))
 							break;
 						$codeTr = $codeTr.next();
@@ -740,9 +733,7 @@ onedev.server.textDiff = {
 				newProcessed = true;
 				doneHighlight();
 			}
-		});
-		
-		
+		});		
 	},
 	initBlameTooltip: function(containerId, $hashLink) {
 		var $container = $("#" + containerId);
@@ -788,7 +779,7 @@ onedev.server.textDiff = {
 			if (loggedIn) {
 				$content.append(`<a class='comment'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg> Add comment on this selection</a>`);
 				$content.children("a.comment").click(function() {
-					if (onedev.server.textDiff.confirmUnsavedChanges($container)) {
+					if (onedev.server.blobTextDiff.confirmUnsavedChanges($container)) {
 						$container.data("callback")("addComment", markRange.leftSide, 
 								markRange.fromRow, markRange.fromColumn, markRange.toRow, markRange.toColumn);
 					}
@@ -864,8 +855,8 @@ onedev.server.textDiff = {
 			processBlames(1);
 		}
 		
-		onedev.server.textDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
-		onedev.server.textDiff.highlightSyntax($container);
+		onedev.server.blobTextDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
+		onedev.server.blobTextDiff.highlightSyntax($container);
 	},
 	getMarkInfo: function($container, markRange) {
 		var oldOrNew = markRange.leftSide?"old":"new";
@@ -902,24 +893,24 @@ onedev.server.textDiff = {
 		};
 	},
 	scrollTo: function($container, markRange) {
-		var markInfo = onedev.server.textDiff.getMarkInfo($container, markRange);
+		var markInfo = onedev.server.blobTextDiff.getMarkInfo($container, markRange);
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) {
 			var $scrollParent = $startTd.scrollParent();
-			var marginTop = $startTd.closest(".text-diff").prev().height() + 120;
+			var marginTop = $startTd.closest(".blob-text-diff").prev().height() + 120;
 			$scrollParent.scrollTop($startTd.offset().top - $scrollParent.offset().top + $scrollParent.scrollTop()-marginTop);
 		}
 	},
 	scrollIntoView: function($container, markRange) {
-		var markInfo = onedev.server.textDiff.getMarkInfo($container, markRange);
+		var markInfo = onedev.server.blobTextDiff.getMarkInfo($container, markRange);
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) 
 			$startTd[0].scrollIntoViewIfNeeded();
 	},
 	mark: function($container, markRangeOrMarkRanges) {
-		onedev.server.textDiff.clearMark($container);
+		onedev.server.blobTextDiff.clearMark($container);
 
 		var markRanges;		
 		if (Array.isArray(markRangeOrMarkRanges)) {
@@ -931,7 +922,7 @@ onedev.server.textDiff = {
 
 		for (let i in markRanges) {
 			let markRange = markRanges[i];
-			var markInfo = onedev.server.textDiff.getMarkInfo($container, markRange);
+			var markInfo = onedev.server.blobTextDiff.getMarkInfo($container, markRange);
 			var $startTd = markInfo.startTd;
 			var $endTd = markInfo.endTd;
 			if ($startTd && $endTd) {
@@ -1055,15 +1046,15 @@ onedev.server.textDiff = {
 	restoreMark: function($container) {
 		var markRange = $container.data("markRange");
 		if (markRange) {
-			onedev.server.textDiff.mark($container, markRange);
+			onedev.server.blobTextDiff.mark($container, markRange);
 		} else {
-			onedev.server.textDiff.clearMark($container);
+			onedev.server.blobTextDiff.clearMark($container);
 		}
 	},
 	addProblemInfo: function($container, leftSide, line, problems) {
 		let oldOrNew = leftSide?"old":"new";
 		$container.find("." + oldOrNew + ".problem-popover[data-line='" + line + "']").remove();
-		let $lineNumTd = onedev.server.textDiff.getLineNumTd($container, leftSide, line);
+		let $lineNumTd = onedev.server.blobTextDiff.getLineNumTd($container, leftSide, line);
 		
 		let $trigger = $(document.createElement("a"));
 		$trigger.addClass("problem-trigger");
@@ -1078,9 +1069,9 @@ onedev.server.textDiff = {
 			markRanges.push(problems[i].range);			
 		
 		$trigger.mouseover(function() {
-			onedev.server.textDiff.mark($container, markRanges);
+			onedev.server.blobTextDiff.mark($container, markRanges);
 		}).mouseout(function() {
-			onedev.server.textDiff.restoreMark($container);
+			onedev.server.blobTextDiff.restoreMark($container);
 		});
 
 		$trigger.mousedown(function() {
@@ -1100,13 +1091,13 @@ onedev.server.textDiff = {
 					var $currentPopover = $(`.problem-popover.${oldOrNew}[data-line='${line}']`);
 					$(".popover").not($currentPopover).popover("hide");
 					$currentPopover.find(".problem-content").mouseover(function() {
-						onedev.server.textDiff.mark($container, problems[$(this).index()].range);
+						onedev.server.blobTextDiff.mark($container, problems[$(this).index()].range);
 					}).mouseout(function() {
-						onedev.server.textDiff.restoreMark($container);
+						onedev.server.blobTextDiff.restoreMark($container);
 					}).each(function() {
 						var problem = problems[$(this).index()];
 						$(this).children(".add-comment").click(function() {
-							if (onedev.server.textDiff.confirmUnsavedChanges($container)) {
+							if (onedev.server.blobTextDiff.confirmUnsavedChanges($container)) {
 								$currentPopover.popover("hide");
 								var range = problem.range;
 								$container.data("callback")("addComment", leftSide, range.fromRow, range.fromColumn, 
@@ -1121,7 +1112,7 @@ onedev.server.textDiff = {
 		$lineNumTd.prepend($trigger);
 	},
 	addCoverateInfo: function($container, leftSide, line, coverageStatus) {
-		var $lineNumTd = onedev.server.textDiff.getLineNumTd($container, leftSide, line);
+		var $lineNumTd = onedev.server.blobTextDiff.getLineNumTd($container, leftSide, line);
 		var cssClass = coverageStatus.toLowerCase();
 		var title;
 		if (coverageStatus == 'COVERED') 
@@ -1136,7 +1127,7 @@ onedev.server.textDiff = {
 	addCommentIndicator: function($container, leftSide, line, comments) {
 		var oldOrNew = leftSide?"old":"new";
 		$container.find("." + oldOrNew + ".comment-popover[data-line='" + line + "']").remove();
-		var $lineNumTd = onedev.server.textDiff.getLineNumTd($container, leftSide, line);
+		var $lineNumTd = onedev.server.blobTextDiff.getLineNumTd($container, leftSide, line);
 		
 		var callback = $container.data("callback");
 		
@@ -1182,20 +1173,20 @@ onedev.server.textDiff = {
 				$currentPopover.find("a").each(function() {
 					$(this).mouseover(function() {
 						var comment = comments[$(this).index()];			        						
-						onedev.server.textDiff.mark($container, comment.range);
+						onedev.server.blobTextDiff.mark($container, comment.range);
 					});
 					$(this).mouseout(function() {
-						onedev.server.textDiff.restoreMark($container);
+						onedev.server.blobTextDiff.restoreMark($container);
 					});
 					$(this).click(function() {
-						if (!$(this).hasClass("active") && onedev.server.textDiff.confirmUnsavedChanges($container)) {
+						if (!$(this).hasClass("active") && onedev.server.blobTextDiff.confirmUnsavedChanges($container)) {
 							var comment = comments[$(this).index()];			        						
 							callback("openComment", comment.id, comment.range.leftSide, comment.range.fromRow, 
 									comment.range.fromColumn, comment.range.toRow, comment.range.toColumn);
 						}
 					});
 				});
-				onedev.server.textDiff.highlightCommentTrigger($container);				
+				onedev.server.blobTextDiff.highlightCommentTrigger($container);				
 			});
 		} else {
 			var comment = comments[0];
@@ -1204,13 +1195,13 @@ onedev.server.textDiff = {
 			$indicator.addClass("comment-trigger").attr("title", "Click to show comment of marked text");
 			$indicator.append("<svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg>");
 			$indicator.mouseover(function() {
-				onedev.server.textDiff.mark($container, comment.range);
+				onedev.server.blobTextDiff.mark($container, comment.range);
 			});
 			$indicator.mouseout(function() {
-				onedev.server.textDiff.restoreMark($container);
+				onedev.server.blobTextDiff.restoreMark($container);
 			});
 			$indicator.click(function() {
-				if (!$indicator.hasClass("active") && onedev.server.textDiff.confirmUnsavedChanges($container)) {
+				if (!$indicator.hasClass("active") && onedev.server.blobTextDiff.confirmUnsavedChanges($container)) {
 					callback("openComment", comment.id, comment.range.leftSide, comment.range.fromRow, 
 							comment.range.fromColumn, comment.range.toRow, comment.range.toColumn);
 				}
@@ -1237,7 +1228,7 @@ onedev.server.textDiff = {
 		var openComment = $container.data("openComment");
 		if (openComment) {
 			var line = parseInt(openComment.range.fromRow);
-			var $indicator = onedev.server.textDiff.getLineNumTd($container, openComment.range.leftSide, line).children(".comment-indicator");
+			var $indicator = onedev.server.blobTextDiff.getLineNumTd($container, openComment.range.leftSide, line).children(".comment-indicator");
 			if ($indicator.length != 0) {
 				var comments = $indicator.data("comments");
 				if (comments.length == 1) {
@@ -1261,7 +1252,7 @@ onedev.server.textDiff = {
 		var line = parseInt(comment.range.fromRow);		
 		var leftSide = comment.range.leftSide;
 		
-		var $indicator = onedev.server.textDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
+		var $indicator = onedev.server.blobTextDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
 		var comments;
 		if ($indicator.length != 0) {
 			comments = $indicator.data("comments");
@@ -1269,8 +1260,8 @@ onedev.server.textDiff = {
 			comments = [];
 		} 
 		comments.push(comment);
-		onedev.server.textDiff.addCommentIndicator($container, leftSide, line, comments);
-		onedev.server.textDiff.highlightCommentTrigger($container);				
+		onedev.server.blobTextDiff.addCommentIndicator($container, leftSide, line, comments);
+		onedev.server.blobTextDiff.highlightCommentTrigger($container);				
 	},
 	onCommentDeleted: function($container) {
 		$(".popover").popover("hide");
@@ -1281,7 +1272,7 @@ onedev.server.textDiff = {
 			
 			var line = parseInt(openComment.range.fromRow);
 			var leftSide = openComment.range.leftSide;
-			var $indicator = onedev.server.textDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
+			var $indicator = onedev.server.blobTextDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
 			var comments = $indicator.data("comments");
 			if (comments.length == 1) {
 				$indicator.remove();
@@ -1293,23 +1284,23 @@ onedev.server.textDiff = {
 						break;
 					}
 				}
-				onedev.server.textDiff.addCommentIndicator($container, leftSide, line, comments);
+				onedev.server.blobTextDiff.addCommentIndicator($container, leftSide, line, comments);
 			}
-			onedev.server.textDiff.highlightCommentTrigger($container);				
+			onedev.server.blobTextDiff.highlightCommentTrigger($container);				
 		}
 	},
 	onCommentOpened: function($container, comment) {
 		$(".popover").popover("hide");
 		$container.data("openComment", comment);
 		$container.data("markRange", comment.range);
-		onedev.server.textDiff.highlightCommentTrigger($container);
-		onedev.server.textDiff.mark($container, comment.range);
-		onedev.server.textDiff.scrollIntoView($container, comment.range);
+		onedev.server.blobTextDiff.highlightCommentTrigger($container);
+		onedev.server.blobTextDiff.mark($container, comment.range);
+		onedev.server.blobTextDiff.scrollIntoView($container, comment.range);
 	},
 	onCommentClosed: function($container) {
 		$(".popover").popover("hide");
 		$container.removeData("openComment");
-		onedev.server.textDiff.highlightCommentTrigger($container);
+		onedev.server.blobTextDiff.highlightCommentTrigger($container);
 	},
 	onAddComment: function($container, markRange) {
 		$(".popover").popover("hide");
@@ -1322,9 +1313,9 @@ onedev.server.textDiff = {
 		// continue to operate DOM in a timer to give browser a chance to 
 		// clear selections
 		setTimeout(function() {
-			onedev.server.textDiff.highlightCommentTrigger($container);
-			onedev.server.textDiff.mark($container, markRange);
-			onedev.server.textDiff.scrollIntoView($container, markRange);
+			onedev.server.blobTextDiff.highlightCommentTrigger($container);
+			onedev.server.blobTextDiff.mark($container, markRange);
+			onedev.server.blobTextDiff.scrollIntoView($container, markRange);
 		}, 100);
 	}
 };

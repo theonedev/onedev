@@ -28,6 +28,8 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.HtmlUtils;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.resource.AttachmentResource;
 
 @Singleton
@@ -79,10 +81,11 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	}
 
 	@Override
-	public Document process(Document document, @Nullable Project project, @Nullable Object context, boolean forExternal) {
+	public Document process(Document document, @Nullable Project project, @Nullable BlobRenderContext blobRenderContext, 
+			@Nullable SuggestionSupport suggestionSupport, boolean forExternal) {
 		document = HtmlUtils.sanitize(document);
 		for (MarkdownProcessor htmlTransformer: htmlTransformers)
-			htmlTransformer.process(document, project, context);
+			htmlTransformer.process(document, project, blobRenderContext, suggestionSupport);
 		
 		if (forExternal) {
 			for (Element element: document.body().getElementsByTag("img")) {
@@ -110,8 +113,11 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	}
 	
 	@Override
-	public String process(String html, Project project, Object context, boolean forExternal) {
-		return process(HtmlUtils.parse(html), project, context, forExternal).body().html();
+	public String process(String html, Project project, 
+			@Nullable BlobRenderContext blobRenderContext, 
+			@Nullable SuggestionSupport suggestionSupport, 
+			boolean forExternal) {
+		return process(HtmlUtils.parse(html), project, blobRenderContext, suggestionSupport, forExternal).body().html();
 	}
 
 	@Override

@@ -110,6 +110,8 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
+import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;
+import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -140,8 +142,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	private static final String COOKIE_OUTLINE_WIDTH = "sourceView.outline.width";
 	
 	private static final String COOKIE_COMMENT_WIDTH = "sourceView.comment.width";
-	
-	private static final String BODY_ID = "body";
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
@@ -433,7 +433,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
 		if (context.getOpenComment() != null) {
-			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, context.getOpenComment().getId()) {
+			CodeCommentPanel commentPanel = new CodeCommentPanel("body", context.getOpenComment().getId()) {
 
 				@Override
 				protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
@@ -463,13 +463,13 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 				@Override
 				protected SuggestionSupport getSuggestionSupport() {
-					return SourceViewPanel.this.getSuggestionSupport(context.getOpenComment().getMark().getRange());
+					return SourceViewPanel.this.getSuggestionSupport(context.getOpenComment().getMark());
 				}
 
 			};
 			commentContainer.add(commentPanel);
 		} else {
-			commentContainer.add(new WebMarkupContainer(BODY_ID));
+			commentContainer.add(new WebMarkupContainer("body"));
 			commentContainer.setVisible(false);
 		}
 		
@@ -495,7 +495,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					range = getRange(params, "param1", "param2", "param3", "param4");
 					commentContainer.setDefaultModelObject(range);
 					
-					Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", SourceViewPanel.this);
+					Fragment fragment = new Fragment("body", "newCommentFrag", SourceViewPanel.this);
 					fragment.setOutputMarkupId(true);
 					
 					Form<?> form = new Form<Void>("form");
@@ -511,6 +511,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						mentions.append("@").append(user.getName()).append(" ");
 					}
 					
+					Mark mark = new Mark();
+					mark.setCommitHash(context.getCommit().name());
+					mark.setPath(context.getBlobIdent().path);
+					mark.setRange(range);
+					
 					form.add(contentInput = new CommentInput("content", Model.of(mentions.toString()), true) {
 
 						@Override
@@ -521,7 +526,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 						@Override
 						protected SuggestionSupport getSuggestionSupport() {
-							return SourceViewPanel.this.getSuggestionSupport(range);
+							return SourceViewPanel.this.getSuggestionSupport(mark);
 						}
 
 						@Override
@@ -569,12 +574,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							CodeComment comment = new CodeComment();
 							comment.setUUID(uuid);
 							
-							Mark mark = new Mark();
-							mark.setCommitHash(context.getCommit().name());
-							mark.setPath(context.getBlobIdent().path);
-							
-							mark.setRange(range);
-							
 							comment.setMark(mark);
 							comment.setContent(contentInput.getModelObject());
 							comment.setUser(SecurityUtils.getUser());
@@ -613,7 +612,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 								@Override
 								protected SuggestionSupport getSuggestionSupport() {
-									return SourceViewPanel.this.getSuggestionSupport(range);
+									return SourceViewPanel.this.getSuggestionSupport(mark);
 								}
 
 							};
@@ -640,7 +639,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					range = getRange(params, "param2", "param3", "param4", "param5");
 					commentContainer.setDefaultModelObject(range);
 					
-					CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentId) {
+					CodeCommentPanel commentPanel = new CodeCommentPanel("body", commentId) {
 
 						@Override
 						protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
@@ -670,7 +669,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 						@Override
 						protected SuggestionSupport getSuggestionSupport() {
-							return SourceViewPanel.this.getSuggestionSupport(getComment().getMark().getRange());
+							return SourceViewPanel.this.getSuggestionSupport(getComment().getMark());
 						}
 
 					};
@@ -715,7 +714,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					}
 					if (closest != null) {
 						@SuppressWarnings("unchecked")
-						NestedTree<Symbol> tree = (NestedTree<Symbol>) outline.get(BODY_ID);
+						NestedTree<Symbol> tree = (NestedTree<Symbol>) outline.get("body");
 						Symbol current = closest;
 						while (current != null) {
 							tree.expand(current);
@@ -767,7 +766,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		});
 		
 		IModel<HashSet<Symbol>> state = new Model<HashSet<Symbol>>(new HashSet<>(getChildSymbols(symbols, null)));
-		NestedTree<Symbol> tree = new NestedTree<Symbol>(BODY_ID, newSymbolTreeProvider(symbols), state) {
+		NestedTree<Symbol> tree = new NestedTree<Symbol>("body", newSymbolTreeProvider(symbols), state) {
 
 			@Override
 			protected void onInitialize() {
@@ -877,7 +876,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	}
 
 	private void clearComment(AjaxRequestTarget target) {
-		commentContainer.replace(new WebMarkupContainer(BODY_ID));
+		commentContainer.replace(new WebMarkupContainer("body"));
 		commentContainer.setVisible(false);
 		target.add(commentContainer);
 	}
@@ -1252,35 +1251,60 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
 	}
 	
-	private SuggestionSupport getSuggestionSupport(PlanarRange range) {
+	private SuggestionSupport getSuggestionSupport(Mark mark) {
 		return new SuggestionSupport() {
 			
+			@Override
+			public SuggestFor getSuggestFor() {
+				return context.getProject().getBlob(mark.getBlobIdent(), true).getText()
+						.getSuggestFor(mark.getPath(), mark.getRange());
+			}
+			
+			@Override
+			public ApplySupport getApplySupport() {
+				if (SecurityUtils.canWriteCode(context.getProject())) {
+					return new ApplySupport() {
+	
+						@Override
+						public void applySuggestion(AjaxRequestTarget target, List<String> suggestion) {
+							SuggestionApplyBean bean = new SuggestionApplyBean();
+							String refName = context.getRefName();
+							if (refName != null) {
+								String branch = GitUtils.ref2branch(refName);
+								if (branch != null)
+									bean.setBranch(branch);
+							}
+							new SuggestionApplyModalPanel(target, bean) {
+
+								@Override
+								protected CodeComment getComment() {
+									return context.getOpenComment();
+								}
+
+								@Override
+								protected List<String> getSuggestion() {
+									return suggestion;
+								}
+
+							};								
+						}
+	
+						@Override
+						public BatchApplySupport getBatchSupport() {
+							return null;
+						}
+						
+					};
+				} else {
+					return null;
+				}
+			}
+
 			@Override
 			public boolean isOutdated() {
 				return false;
 			}
 			
-			@Override
-			public boolean isAuthorized() {
-				return SecurityUtils.canWriteCode(context.getProject());
-			}
-			
-			@Override
-			public SuggestFor getSuggestFor() {
-				return context.getProject().getBlob(context.getBlobIdent(), true).getText().getSuggestFor(range);
-			}
-			
-			@Override
-			public BatchApplySupport getBatchApplySupport() {
-				return null;
-			}
-			
-			@Override
-			public void applySuggestion(AjaxRequestTarget target, List<String> suggestion,
-					CommentResolveCallback resolveCallback) {
-				
-			}
-
 		};
 	}
 	

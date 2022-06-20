@@ -1,10 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import static io.onedev.server.model.PullRequest.CriterionHelper.ofOpen;
-import static io.onedev.server.model.PullRequest.CriterionHelper.ofSource;
-import static io.onedev.server.model.PullRequest.CriterionHelper.ofSourceProject;
-import static io.onedev.server.model.PullRequest.CriterionHelper.ofTarget;
-import static io.onedev.server.model.PullRequest.CriterionHelper.ofTargetProject;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
@@ -93,6 +88,7 @@ import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -106,7 +102,6 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.LastUpdate;
-import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
@@ -223,6 +218,12 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
     	query.setParameter("request", request);
     	query.executeUpdate();
     	
+    	query = getSession().createQuery(String.format("update CodeCommentStatusChange set %s=null where %s=:request",
+    			CodeCommentStatusChange.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
+    			CodeCommentStatusChange.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
+    	query.setParameter("request", request);
+    	query.executeUpdate();
+    	
 		dao.remove(request);
 	}
 
@@ -268,10 +269,9 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	@Override
 	public void reopen(PullRequest request, String note) {
 		User user = SecurityUtils.getUser();
-		request.setCloseInfo(null);
+		request.setStatus(Status.OPEN);
 
 		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
 		change.setData(new PullRequestReopenData());
 		change.setRequest(request);
 		change.setUser(user);
@@ -291,13 +291,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		
 		User user = SecurityUtils.getUser();
 		
-		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setUser(user);
-		request.setCloseInfo(closeInfo);
-		
 		PullRequestChange change = new PullRequestChange();
 		change.setData(new PullRequestDiscardData());
-		change.setDate(closeInfo.getDate());
 		change.setRequest(request);
 		change.setUser(user);
 		changeManager.save(change, note);
@@ -454,9 +449,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		
 		if (dueToMerged)
 			request.setLastMergePreview(null);
-		
-		CloseInfo closeInfo = new CloseInfo();
-		request.setCloseInfo(closeInfo);
 		
 		String reason;
 		if (dueToMerged)
@@ -627,11 +619,11 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	@Sessional
 	@Override
-	public PullRequest findLatest(Project targetProject) {
+	public PullRequest findLatest(Project project) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
-		criteria.add(Restrictions.or(ofSourceProject(targetProject), ofTargetProject(targetProject)));
-		criteria.addOrder(Order.desc("id"));
+		criteria.add(Restrictions.or(ofSourceProject(project), ofTargetProject(project)));
+		criteria.addOrder(Order.desc(PullRequest.PROP_ID));
 		return find(criteria);
 	}
 	
@@ -651,15 +643,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		criteria.add(ofOpen());
 		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
 		return query(criteria);
-	}
-
-	@Sessional
-	@Override
-	public int countOpen(Project targetProject) {
-		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(PullRequest.CriterionHelper.ofOpen());
-		criteria.add(PullRequest.CriterionHelper.ofTargetProject(targetProject));
-		return count(criteria);
 	}
 
 	@Transactional
@@ -1092,4 +1075,28 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		}
 	}
 
+	private Criterion ofOpen() {
+		return Restrictions.eq(PullRequest.PROP_STATUS, Status.OPEN);
+	}
+	
+	private Criterion ofTarget(ProjectAndBranch target) {
+		return Restrictions.and(
+				Restrictions.eq(PullRequest.PROP_TARGET_PROJECT, target.getProject()),
+				Restrictions.eq(PullRequest.PROP_TARGET_BRANCH, target.getBranch()));
+	}
+
+	private Criterion ofTargetProject(Project target) {
+		return Restrictions.eq(PullRequest.PROP_TARGET_PROJECT, target);
+	}
+	
+	private Criterion ofSource(ProjectAndBranch source) {
+		return Restrictions.and(
+				Restrictions.eq(PullRequest.PROP_SOURCE_PROJECT, source.getProject()),
+				Restrictions.eq(PullRequest.PROP_SOURCE_BRANCH, source.getBranch()));
+	}
+	
+	private Criterion ofSourceProject(Project source) {
+		return Restrictions.eq(PullRequest.PROP_SOURCE_PROJECT, source);
+	}
+	
 }

@@ -61,8 +61,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	void restoreSourceBranch(PullRequest request, @Nullable String note);
 	
-	int countOpen(Project targetProject);
-
 	void checkReviews(PullRequest request, boolean sourceUpdated);
 	
 	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 

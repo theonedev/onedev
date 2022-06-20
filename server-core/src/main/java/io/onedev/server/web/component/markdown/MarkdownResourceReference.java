@@ -9,8 +9,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import io.onedev.server.web.asset.atwho.AtWhoResourceReference;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
 import io.onedev.server.web.asset.clipboard.ClipboardResourceReference;
-import io.onedev.server.web.asset.codemirror.CodeMirrorResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
+import io.onedev.server.web.asset.diff.DiffResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
@@ -32,7 +32,7 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CaretResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AtWhoResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new CodeMirrorResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new DiffResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new TextareaCaretPositionResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new DoneEventsResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));

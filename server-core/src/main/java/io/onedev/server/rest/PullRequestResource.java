@@ -209,8 +209,8 @@ public class PullRequestResource {
 		if (target.equals(source))
 			throw new InvalidParamException("Source and target are the same");
 		
-		PullRequest request = pullRequestManager.findLatest(target.getProject());
-		if (request != null && source.equals(request.getSource()) && target.equals(request.getTarget()) && request.isOpen())
+		PullRequest request = pullRequestManager.findOpen(target, source);
+		if (request != null)
 			throw new InvalidParamException("Another pull request already open for this change");
 		
 		request = pullRequestManager.findEffective(target, source);

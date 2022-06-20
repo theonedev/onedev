@@ -6,7 +6,10 @@
 		</div>
 		<!-- disable auto focus here as otherwise we have problems jumping to marked code blocks -->
 		<div class="head no-autofocus d-flex align-items-center flex-nowrap">
-			<a wicket:id="option" class="btn btn-light btn-icon btn-lg flex-shrink-0 mr-3"><wicket:svg href="gear" class="icon"/></a>
+			<span wicket:id="operations" class="btn-group mr-3">
+				<a wicket:id="batchedSuggestions" class="batched-suggestions btn btn-light flex-shrink-0" title="Batched suggestions"><wicket:svg href="diff" class="icon icon-lg mr-2"/> <span wicket:id="count" class="mr-1">3</span><wicket:svg href="arrow" class="icon rotate-90"/></a>
+				<a wicket:id="option" class="btn btn-light btn-icon btn-lg flex-shrink-0"><wicket:svg href="gear" class="icon"/></a>
+			</span>
 			<div class="path-filter flex-grow-1 mr-5">				
 				<form wicket:id="pathFilter">
 					<div class="clearable-wrapper">

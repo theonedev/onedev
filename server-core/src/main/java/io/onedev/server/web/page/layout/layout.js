@@ -154,7 +154,9 @@ onedev.server.layout = {
 			window.sessionStorage.removeItem("onedev.sidebar.scrollTop");
 			$sidebarBody.scrollTop(scrollTop);	
 		} else {
-			$(".sidebar-menu .menu-link.active:visible").last()[0].scrollIntoViewIfNeeded();
+			var $lastActive = $(".sidebar-menu .menu-link.active:visible").last();
+			if ($lastActive.length != 0)
+				$lastActive[0].scrollIntoViewIfNeeded();
 		}
 	}
 }

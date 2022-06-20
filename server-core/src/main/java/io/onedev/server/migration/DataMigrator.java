@@ -4182,5 +4182,19 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate90(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element closeInfoElement = element.element("closeInfo");
+					if (closeInfoElement != null) 
+						closeInfoElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

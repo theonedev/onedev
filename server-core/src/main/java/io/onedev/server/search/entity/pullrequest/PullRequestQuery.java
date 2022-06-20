@@ -100,8 +100,6 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							return new ApprovedByMeCriteria();
 						case PullRequestQueryLexer.AssignedToMe:
 							return new AssignedToMeCriteria();
-						case PullRequestQueryLexer.DiscardedByMe:
-							return new DiscardedByMeCriteria();
 						case PullRequestQueryLexer.SomeoneRequestedForChanges:
 							return new SomeoneRequestedForChangesCriteria();
 						case PullRequestQueryLexer.HasFailedBuilds:
@@ -131,8 +129,6 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							return new RequestedForChangesByCriteria(getUser(value));
 						case PullRequestQueryLexer.SubmittedBy:
 							return new SubmittedByCriteria(getUser(value));
-						case PullRequestQueryLexer.DiscardedBy:
-							return new DiscardedByCriteria(getUser(value));
 						case PullRequestQueryLexer.IncludesCommit:
 							return new IncludesCommitCriteria(project, value);
 						case PullRequestQueryLexer.IncludesIssue:
@@ -162,8 +158,6 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								return new SubmitDateCriteria(value, operator);
 							case PullRequest.NAME_UPDATE_DATE:
 								return new UpdateDateCriteria(value, operator);
-							case PullRequest.NAME_CLOSE_DATE:
-								return new CloseDateCriteria(value, operator);
 							default:
 								throw new IllegalStateException();
 							}

@@ -12,7 +12,7 @@ public class ImageDiffRenderer implements DiffRenderer {
 	@Override
 	public Panel render(String panelId, MediaType mediaType, BlobChange change, DiffViewMode viewMode) {
 		if (mediaType.getType().equalsIgnoreCase("image"))
-			return new ImageDiffPanel(panelId, change);
+			return new BlobImageDiffPanel(panelId, change);
 		else
 			return null;
 	}

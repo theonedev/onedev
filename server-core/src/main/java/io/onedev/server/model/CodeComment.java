@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -25,17 +24,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobContent;
-import io.onedev.server.git.BlobEdits;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastUpdate;
@@ -43,8 +36,6 @@ import io.onedev.server.model.support.Mark;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 
 @Entity
 @Table(indexes={
@@ -297,42 +288,6 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 			}
 		}
 		return participants;
-	}
-	
-	public void applySuggestion(Project project, ObjectId commitId, BlobEdits blobEdits, List<String> suggestion) {
-		Map<String, BlobContent> newBlobs = blobEdits.getNewBlobs();
-		BlobContent blobContent = newBlobs.get(getMark().getPath());
-		if (blobContent == null) {
-			BlobIdent newBlobIdent = new BlobIdent(commitId.name(), getMark().getPath());
-			Blob newBlob = project.getBlob(newBlobIdent, false);
-			if (newBlob == null || newBlob.getText() == null || newBlob.getLfsPointer() != null)
-				throw new OutdatedSuggestionException(getMark());
-			Set<String> oldPaths = blobEdits.getOldPaths();
-			oldPaths.add(getMark().getPath());
-			blobContent = new BlobContent.Immutable(newBlob.getBytes(), FileMode.REGULAR_FILE);
-			newBlobs.put(getMark().getPath(), blobContent);
-		}
-
-		BlobIdent oldBlobIdent = new BlobIdent(getMark().getCommitHash(), getMark().getPath());
-		Blob.Text oldBlobText = project.getBlob(oldBlobIdent, true).getText();
-		List<String> oldLines = oldBlobText.getLines();
-		
-		String newTextContent = new String(blobContent.getBytes(), oldBlobText.getCharset());
-		List<String> newLines = new Blob.Text(oldBlobText.getCharset(), newTextContent).getLines();
-		Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
-		PlanarRange newRange = DiffUtils.mapRange(lineMapping, getMark().getRange());
-		if (newRange != null) {
-			List<String> editLines = new ArrayList<>();
-			for (int i=0; i<newRange.getFromRow(); i++)
-				editLines.add(newLines.get(i));
-			editLines.addAll(suggestion);
-			for (int i=newRange.getToRow()+1; i<newLines.size(); i++)
-				editLines.add(newLines.get(i));
-			byte[] editBytes = StringUtils.join(newLines, "\n").getBytes(oldBlobText.getCharset());
-			newBlobs.put(getMark().getPath(), new BlobContent.Immutable(editBytes, FileMode.REGULAR_FILE));
-		} else {
-			throw new OutdatedSuggestionException(getMark());
-		}
 	}
 	
 }

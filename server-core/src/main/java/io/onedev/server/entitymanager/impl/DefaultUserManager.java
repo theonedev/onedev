@@ -162,11 +162,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set closeInfo.user=:unknown where closeInfo.user=:user");
-    	query.setParameter("user", user);
-    	query.setParameter("unknown", getUnknown());
-    	query.executeUpdate();
-    	
     	query = getSession().createQuery("update PullRequest set lastUpdate.user=:unknown where lastUpdate.user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());

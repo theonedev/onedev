@@ -49,7 +49,7 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 		if (comment.getCompareContext().getPullRequest() == null) {
 			String markdown = event.getMarkdown();
 			String renderedMarkdown = markdownManager.render(markdown);
-			String processedMarkdown = markdownManager.process(renderedMarkdown, event.getProject(), null, true);
+			String processedMarkdown = markdownManager.process(renderedMarkdown, event.getProject(), null, null, true);
 			
 			Collection<User> notifyUsers = new HashSet<>(); 
 			

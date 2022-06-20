@@ -31,14 +31,20 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.git.exception.BlobEditException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.Mark;
+import io.onedev.server.util.diff.DiffUtils;
+import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 
 public class BlobEdits implements Serializable {
 	
@@ -47,6 +53,10 @@ public class BlobEdits implements Serializable {
 	private final Set<String> oldPaths;
 	
 	private final Map<String, BlobContent> newBlobs;
+	
+	public BlobEdits() {
+		this(new HashSet<>(), new HashMap<>());
+	}
 	
 	public BlobEdits(Set<String> oldPaths, Map<String, BlobContent> newBlobs) {
 		this.oldPaths = new HashSet<>();
@@ -193,6 +203,44 @@ public class BlobEdits implements Serializable {
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	public void applySuggestion(Project project, Mark mark, List<String> suggestion, ObjectId commitId) {
+		Map<String, BlobContent> newBlobs = getNewBlobs();
+		BlobContent blobContent = newBlobs.get(mark.getPath());
+		if (blobContent == null) {
+			BlobIdent newBlobIdent = new BlobIdent(commitId.name(), mark.getPath());
+			Blob newBlob = project.getBlob(newBlobIdent, false);
+			if (newBlob == null || newBlob.getText() == null || newBlob.getLfsPointer() != null)
+				throw new OutdatedSuggestionException(mark);
+			Set<String> oldPaths = getOldPaths();
+			oldPaths.add(mark.getPath());
+			blobContent = new BlobContent.Immutable(newBlob.getBytes(), FileMode.REGULAR_FILE);
+			newBlobs.put(mark.getPath(), blobContent);
+		}
+
+		BlobIdent oldBlobIdent = new BlobIdent(mark.getCommitHash(), mark.getPath());
+		Blob.Text oldBlobText = project.getBlob(oldBlobIdent, true).getText();
+		List<String> oldLines = oldBlobText.getLines();
+		
+		String newTextContent = new String(blobContent.getBytes(), oldBlobText.getCharset());
+		List<String> newLines = new Blob.Text(oldBlobText.getCharset(), newTextContent).getLines();
+		
+		Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
+		PlanarRange newRange = DiffUtils.mapRange(lineMapping, mark.getRange());
+		if (newRange != null) {
+			String eol = newTextContent.contains("\r\n")?"\r\n":"\n";
+			List<String> editLines = new ArrayList<>();
+			for (int i=0; i<newRange.getFromRow(); i++)
+				editLines.add(StringUtils.stripEnd(newLines.get(i), "\r"));
+			editLines.addAll(suggestion);
+			for (int i=newRange.getToRow()+1; i<newLines.size(); i++)
+				editLines.add(StringUtils.stripEnd(newLines.get(i), "\r"));
+			byte[] editBytes = Joiner.on(eol).join(editLines).getBytes(oldBlobText.getCharset());
+			newBlobs.put(mark.getPath(), new BlobContent.Immutable(editBytes, FileMode.REGULAR_FILE));
+		} else {
+			throw new OutdatedSuggestionException(mark);
 		}
 	}
 	

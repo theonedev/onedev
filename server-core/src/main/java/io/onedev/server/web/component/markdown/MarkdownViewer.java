@@ -2,6 +2,8 @@ package io.onedev.server.web.component.markdown;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -47,6 +49,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
 @SuppressWarnings("serial")
 public class MarkdownViewer extends GenericPanel<String> {
@@ -57,6 +60,10 @@ public class MarkdownViewer extends GenericPanel<String> {
 	
 	private static final String REFERENCE_ID = "referenceId";
 	
+	private static final String SUGGESTION_ACTION = "suggestionAction";
+	
+	private static final String SUGGESTION_CONTENT = "suggestionContent";
+	
 	private final ContentVersionSupport contentVersionSupport;
 	
 	private long lastContentVersion;
@@ -65,6 +72,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 	
 	private AbstractPostAjaxBehavior referenceBehavior;
 	
+	private AbstractPostAjaxBehavior suggestionBehavior;
+	
 	public MarkdownViewer(String id, IModel<String> model, @Nullable ContentVersionSupport contentVersionSupport) {
 		super(id, model);
 		this.contentVersionSupport = contentVersionSupport;
@@ -72,7 +81,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 			lastContentVersion = contentVersionSupport.getVersion();
 	}
 	
-	protected Object getRenderContext() {
+	protected BlobRenderContext getRenderContext() {
 		return null;
 	}
 	
@@ -84,7 +93,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 			if (getPage() instanceof ProjectPage)
 				project = ((ProjectPage) getPage()).getProject(); 
 			MarkdownManager manager = AppLoader.getInstance(MarkdownManager.class);
-			return manager.process(manager.render(markdown), project, getRenderContext(), false);
+			return manager.process(manager.render(markdown), project, 
+					getRenderContext(), getSuggestionSupport(), false);
 		} else {
 			return null;
 		}
@@ -243,7 +253,37 @@ public class MarkdownViewer extends GenericPanel<String> {
 			
 		});
 		
+		add(suggestionBehavior = new AbstractPostAjaxBehavior() {
+
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
+				String suggestionAction = params.getParameterValue(SUGGESTION_ACTION).toString();
+				String suggestionContent = params.getParameterValue(SUGGESTION_CONTENT).toString();
+				List<String> suggestion = StringUtils.splitToLines(suggestionContent);
+				switch (suggestionAction) {
+				case "apply":
+					getSuggestionSupport().getApplySupport().applySuggestion(target, suggestion);
+					break;
+				case "addToBatch":
+					getSuggestionSupport().getApplySupport().getBatchSupport().addToBatch(target, suggestion);
+					break;
+				case "removeFromBatch":
+					getSuggestionSupport().getApplySupport().getBatchSupport().removeFromBatch(target);
+					break;
+				default:
+					throw new RuntimeException("Unrecognized suggestion action: " + suggestionAction);
+				}
+			}
+			
+		});
+		
 		setOutputMarkupId(true);
+	}
+	
+	@Nullable
+	protected SuggestionSupport getSuggestionSupport() {
+		return null;
 	}
 	
 	@Override
@@ -260,11 +300,14 @@ public class MarkdownViewer extends GenericPanel<String> {
 		CharSequence referenceCallback = referenceBehavior.getCallbackFunction(
 				explicit(REFERENCE_TYPE), explicit(REFERENCE_ID));
 		
-		String script = String.format("onedev.server.markdown.onViewerDomReady('%s', %s, '%s', %s);", 
+		CharSequence suggestionCallback = suggestionBehavior.getCallbackFunction(
+				explicit(SUGGESTION_ACTION), explicit(SUGGESTION_CONTENT));
+		
+		String script = String.format("onedev.server.markdown.onViewerDomReady('%s', %s, '%s', %s, %s);", 
 				getMarkupId(), 
 				contentVersionSupport!=null?taskCallback:"undefined", 
 				SourcePositionTrackExtension.DATA_START_ATTRIBUTE, 
-				referenceCallback);
+				referenceCallback, suggestionCallback);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

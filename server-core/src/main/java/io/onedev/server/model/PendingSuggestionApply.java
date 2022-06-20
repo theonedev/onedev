@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -28,6 +29,8 @@ public class PendingSuggestionApply extends AbstractEntity {
 	
 	public static final String PROP_REQUEST = "request";
 	
+	public static final String PROP_COMMENT = "comment";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;
@@ -42,7 +45,7 @@ public class PendingSuggestionApply extends AbstractEntity {
 	
 	@Column(nullable=false)
 	@Lob
-	private List<String> suggestion;
+	private ArrayList<String> suggestion;
 	
 	public User getUser() {
 		return user;
@@ -72,7 +75,7 @@ public class PendingSuggestionApply extends AbstractEntity {
 		return suggestion;
 	}
 
-	public void setSuggestion(List<String> suggestion) {
+	public void setSuggestion(ArrayList<String> suggestion) {
 		this.suggestion = suggestion;
 	}
 

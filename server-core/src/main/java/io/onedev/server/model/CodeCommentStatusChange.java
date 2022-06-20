@@ -21,6 +21,8 @@ public class CodeCommentStatusChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_COMPARE_CONTEXT = "compareContext";
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private CodeComment comment;

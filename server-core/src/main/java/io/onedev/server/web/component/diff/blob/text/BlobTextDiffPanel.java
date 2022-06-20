@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.diff.blob.text;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
+import static io.onedev.server.util.diff.DiffRenderer.toHtml;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.EditParamsAware;
 
 @SuppressWarnings("serial")
-public class TextDiffPanel extends Panel {
+public class BlobTextDiffPanel extends Panel {
 
 	private final BlobChange change;
 	
@@ -132,7 +133,7 @@ public class TextDiffPanel extends Panel {
 	
 	private BlameInfo blameInfo;
 	
-	public TextDiffPanel(String id, BlobChange change, DiffViewMode diffMode, 
+	public BlobTextDiffPanel(String id, BlobChange change, DiffViewMode diffMode, 
 			@Nullable IModel<Boolean> blameModel) {
 		super(id);
 		
@@ -207,7 +208,7 @@ public class TextDiffPanel extends Panel {
 				} else {
 					blameInfo = getBlameInfo();
 				}
-				target.add(TextDiffPanel.this);
+				target.add(BlobTextDiffPanel.this);
 				blameModel.setObject(blameInfo != null);
 				((BasePage)getPage()).resizeWindow(target);
 			}
@@ -361,7 +362,7 @@ public class TextDiffPanel extends Panel {
 					
 					String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
 					expanded = StringUtils.replace(expanded, "\n", "");
-					String script = String.format("onedev.server.textDiff.expand('%s', %d, \"%s\");",
+					String script = String.format("onedev.server.blobTextDiff.expand('%s', %d, \"%s\");",
 							getMarkupId(), index, expanded);
 					target.appendJavaScript(script);
 					break;
@@ -381,7 +382,7 @@ public class TextDiffPanel extends Panel {
 					} else {
 						markUrl = "undefined";
 					}
-					script = String.format("onedev.server.textDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
+					script = String.format("onedev.server.blobTextDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
 							getMarkupId(), jsonOfPosition, convertToJson(commentRange), markUrl, 
 							JavaScriptEscape.escapeJavaScript(getMarkedText(commentRange)),
 							SecurityUtils.getUser()!=null);
@@ -392,7 +393,7 @@ public class TextDiffPanel extends Panel {
 					
 					commentRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
 					change.getAnnotationSupport().onAddComment(target, commentRange);
-					script = String.format("onedev.server.textDiff.onAddComment($('#%s'), %s);", 
+					script = String.format("onedev.server.blobTextDiff.onAddComment($('#%s'), %s);", 
 							getMarkupId(), convertToJson(commentRange));
 					target.appendJavaScript(script);
 					break;
@@ -401,7 +402,7 @@ public class TextDiffPanel extends Panel {
 					commentRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
 					change.getAnnotationSupport().onOpenComment(target, comment, commentRange);
-					script = String.format("onedev.server.textDiff.onCommentOpened($('#%s'), %s);", 
+					script = String.format("onedev.server.blobTextDiff.onCommentOpened($('#%s'), %s);", 
 							getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));
 					target.appendJavaScript(script);
 					break;
@@ -469,44 +470,11 @@ public class TextDiffPanel extends Panel {
 		return new DiffPlanarRange(leftSide, beginLine, beginChar, endLine, endChar);
 	}
 	
-	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
-		DiffBlock<String> block = change.getDiffBlocks().get(index);
-		if (index == 0) {
-			int start = block.getElements().size()-contextSize;
-			if (start < 0)
-				start=0;
-			else if (start > 0)
-				appendExpander(builder, index, start);
-			for (int j=start; j<block.getElements().size()-lastContextSize; j++) 
-				appendEqual(builder, block, j, lastContextSize);
-		} else if (index == change.getDiffBlocks().size()-1) {
-			int end = block.getElements().size();
-			int skipped = 0;
-			if (end > contextSize) {
-				skipped = end-contextSize;
-				end = contextSize;
-			}
-			for (int j=lastContextSize; j<end; j++)
-				appendEqual(builder, block, j, lastContextSize);
-			if (skipped != 0)
-				appendExpander(builder, index, skipped);
-		} else if (2*contextSize < block.getElements().size()) {
-			for (int j=lastContextSize; j<contextSize; j++)
-				appendEqual(builder, block, j, lastContextSize);
-			appendExpander(builder, index, block.getElements().size() - 2*contextSize);
-			for (int j=block.getElements().size()-contextSize; j<block.getElements().size()-lastContextSize; j++)
-				appendEqual(builder, block, j, lastContextSize);
-		} else {
-			for (int j=lastContextSize; j<block.getElements().size()-lastContextSize; j++)
-				appendEqual(builder, block, j, lastContextSize);
-		}
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(new TextDiffResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new BlobTextDiffResourceReference()));
 		
 		DiffCodeCommentInfo openCommentInfo;
 		DiffPlanarRange markRange;
@@ -530,7 +498,7 @@ public class TextDiffPanel extends Panel {
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
 		
-		String script = String.format("onedev.server.textDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s,"
+		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s,"
 				+ "%s, %s, %s, '%s');", getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
 				callback, blameMessageBehavior.getCallback(),
@@ -545,7 +513,7 @@ public class TextDiffPanel extends Panel {
 			jsonOfMarkRange = convertToJson(markRange);
 		else
 			jsonOfMarkRange = "undefined";
-		script = String.format("onedev.server.textDiff.onWindowLoad('%s', %s);", getMarkupId(), jsonOfMarkRange);
+		script = String.format("onedev.server.blobTextDiff.onWindowLoad('%s', %s);", getMarkupId(), jsonOfMarkRange);
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 	
@@ -754,6 +722,39 @@ public class TextDiffPanel extends Panel {
 			builder.append(toHtml(line, null));
 	}
 	
+	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
+		DiffBlock<String> block = change.getDiffBlocks().get(index);
+		if (index == 0) {
+			int start = block.getElements().size()-contextSize;
+			if (start < 0)
+				start=0;
+			else if (start > 0)
+				appendExpander(builder, index, start);
+			for (int j=start; j<block.getElements().size()-lastContextSize; j++) 
+				appendEqual(builder, block, j, lastContextSize);
+		} else if (index == change.getDiffBlocks().size()-1) {
+			int end = block.getElements().size();
+			int skipped = 0;
+			if (end > contextSize) {
+				skipped = end-contextSize;
+				end = contextSize;
+			}
+			for (int j=lastContextSize; j<end; j++)
+				appendEqual(builder, block, j, lastContextSize);
+			if (skipped != 0)
+				appendExpander(builder, index, skipped);
+		} else if (2*contextSize < block.getElements().size()) {
+			for (int j=lastContextSize; j<contextSize; j++)
+				appendEqual(builder, block, j, lastContextSize);
+			appendExpander(builder, index, block.getElements().size() - 2*contextSize);
+			for (int j=block.getElements().size()-contextSize; j<block.getElements().size()-lastContextSize; j++)
+				appendEqual(builder, block, j, lastContextSize);
+		} else {
+			for (int j=lastContextSize; j<block.getElements().size()-lastContextSize; j++)
+				appendEqual(builder, block, j, lastContextSize);
+		}
+	}
+	
 	private void appendEqual(StringBuilder builder, DiffBlock<String> block, int lineIndex, int lastContextSize) {
 		if (lastContextSize != 0)
 			builder.append("<tr class='code expanded'>");
@@ -839,30 +840,6 @@ public class TextDiffPanel extends Panel {
 			builder.append("</td>");
 		}
 		builder.append("</tr>");
-	}
-	
-	private static String toHtml(String text, @Nullable String cssClasses) {
-		String escapedText;
-		if (text.equals("\r")) {
-			escapedText = " ";
-		} else {
-			escapedText = "";
-			for (int i=0; i<text.length(); i++) {
-				char ch = text.charAt(i);
-				if (ch == ' ' || ch == '\t' || !Character.isWhitespace(ch))
-					escapedText += ch;
-			}
-			escapedText = HtmlEscape.escapeHtml5(escapedText);
-		}
-
-		if (cssClasses != null) {
-			StringBuilder htmlBuilder = new StringBuilder("<span ");
-			htmlBuilder.append("class='").append(cssClasses).append("'");
-			htmlBuilder.append(">").append(escapedText).append("</span>");
-			return htmlBuilder.toString();
-		} else {
-			return escapedText;
-		}
 	}
 	
 	private void appendDelete(StringBuilder builder, DiffBlock<String> block, int lineIndex, 
@@ -1056,19 +1033,19 @@ public class TextDiffPanel extends Panel {
 	}
 
 	public void onCommentDeleted(AjaxRequestTarget target) {
-		String script = String.format("onedev.server.textDiff.onCommentDeleted($('#%s'));", getMarkupId());
+		String script = String.format("onedev.server.blobTextDiff.onCommentDeleted($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
 		unmark(target);
 	}
 
 	public void onCommentClosed(AjaxRequestTarget target) {
-		String script = String.format("onedev.server.textDiff.onCommentClosed($('#%s'));", getMarkupId());
+		String script = String.format("onedev.server.blobTextDiff.onCommentClosed($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
 		unmark(target);
 	}
 
 	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange range) {
-		String script = String.format("onedev.server.textDiff.onCommentAdded($('#%s'), %s);", 
+		String script = String.format("onedev.server.blobTextDiff.onCommentAdded($('#%s'), %s);", 
 				getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, range)));
 		target.appendJavaScript(script);
 	}
@@ -1077,8 +1054,8 @@ public class TextDiffPanel extends Panel {
 		String script = String.format(""
 			+ "var $container = $('#%s');"
 			+ "var markRange = %s;"
-			+ "onedev.server.textDiff.scrollTo($container, markRange);"
-			+ "onedev.server.textDiff.mark($container, markRange);", 
+			+ "onedev.server.blobTextDiff.scrollTo($container, markRange);"
+			+ "onedev.server.blobTextDiff.mark($container, markRange);", 
 			getMarkupId(), convertToJson(markRange));
 		target.appendJavaScript(script);
 	}
@@ -1086,7 +1063,7 @@ public class TextDiffPanel extends Panel {
 	public void unmark(AjaxRequestTarget target) {
 		String script = String.format(""
 			+ "var $container = $('#%s');"
-			+ "onedev.server.textDiff.clearMark($container);"
+			+ "onedev.server.blobTextDiff.clearMark($container);"
 			+ "$container.removeData('markRange');", 
 			getMarkupId());
 		target.appendJavaScript(script);

@@ -458,7 +458,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							}
 
 							@Override
-							protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
+							protected void onSave(AjaxRequestTarget target, Serializable bean) {
 								fieldValues.putAll(FieldUtils.getFieldValues(
 										FieldUtils.newBeanComponentContext(beanDescriptor, bean), 
 										bean, FieldUtils.getEditableFields(getProject(), dependentFields)));

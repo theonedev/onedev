@@ -18,6 +18,8 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.TextNodeVisitor;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
 public class CommitProcessor implements MarkdownProcessor {
@@ -27,7 +29,9 @@ public class CommitProcessor implements MarkdownProcessor {
 	private static final Pattern PATTERN_COMMIT = Pattern.compile("(^|\\s)([a-z0-9]{40})($|\\s)");
 	
 	@Override
-	public void process(Document rendered, @Nullable Project project, Object context) {
+	public void process(Document rendered, @Nullable Project project, 
+			@Nullable BlobRenderContext blobRenderContext, 
+			@Nullable SuggestionSupport suggestionSupport) {
 		if (RequestCycle.get() != null) {
 			TextNodeVisitor visitor = new TextNodeVisitor() {
 				

@@ -14,7 +14,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 
 import io.onedev.commons.utils.LinearRange;
@@ -176,6 +175,11 @@ public class Blob {
 			return content;
 		}
 
+		/**
+		 * Get lines of the content. In case of using crlf at end of line, the cr character 
+		 * will be preserved at end of line
+		 * @return
+		 */
 		public List<String> getLines() {
 			if (lines == null) {
 				lines = new ArrayList<>();
@@ -194,16 +198,18 @@ public class Blob {
 			return lines;
 		}
 		
-		public SuggestFor getSuggestFor(PlanarRange range) {
-			List<String> linesInRange = getLines().subList(range.getFromRow(), range.getToRow()+1);			
+		public SuggestFor getSuggestFor(String fileName, PlanarRange range) {
+			List<String> editLines = new ArrayList<>();
+			
+			for (int i=range.getFromRow(); i<=range.getToRow(); i++) 
+				editLines.add(StringUtils.stripEnd(getLines().get(i), "\r"));
 			
 			int to = 0;
-			for (int i=0; i<linesInRange.size()-1; i++)
-				to += linesInRange.get(i).length();
+			for (int i=0; i<editLines.size()-1; i++)
+				to += editLines.get(i).length() + 1;
 			to += range.getToColumn();
 			
-			return new SuggestFor(
-					Joiner.on('\n').join(linesInRange), 
+			return new SuggestFor(fileName, editLines, 
 					new LinearRange(range.getFromColumn(), to));
 		}
 		

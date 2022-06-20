@@ -104,6 +104,10 @@ public class Mark implements Serializable {
 		}
 	}
 	
+	public BlobIdent getBlobIdent() {
+		return new BlobIdent(commitHash, path);
+	}
+	
 	@Nullable
 	public Mark mapTo(Project project, ObjectId commitId) {
 		List<String> newLines = new ArrayList<>();

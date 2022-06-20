@@ -310,7 +310,7 @@ public class FolderViewPanel extends Panel {
 		}, null) {
 
 			@Override
-			protected Object getRenderContext() {
+			protected BlobRenderContext getRenderContext() {
 				return context;
 			}
 

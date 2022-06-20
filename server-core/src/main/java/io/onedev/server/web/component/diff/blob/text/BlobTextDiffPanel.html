@@ -1,5 +1,5 @@
 <wicket:panel>
-	<div class="d-flex align-items-center px-3 py-2 border position-sticky text-diff-caption">
+	<div class="d-flex align-items-center px-3 py-2 border position-sticky blob-text-diff-caption">
 		<div wicket:id="diffStat" class="mr-2 text-nowrap"></div>
 		<div wicket:id="title" class="mr-3 text-break"></div>
 		<div wicket:id="actions" class="ml-auto text-nowrap">
@@ -8,7 +8,7 @@
 			<a wicket:id="editFile" title="Edit" class="btn btn-xs btn-icon btn-light btn-hover-secondary ml-1"><wicket:svg href="edit" class="icon"/></a>
 		</div>
 	</div>
-	<table class="text-diff cm-s-eclipse">
+	<table class="text-diff blob-text-diff cm-s-eclipse">
 		<wicket:container wicket:id="diffLines"></wicket:container>
 	</table>
 	<div wicket:id="symbolTooltip"></div>

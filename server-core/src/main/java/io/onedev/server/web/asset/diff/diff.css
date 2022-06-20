@@ -1,0 +1,80 @@
+.text-diff {
+	table-layout: fixed;
+	width: 100%;
+	border-collapse: separate;	
+}
+.text-diff>tbody {
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	font-size: 0.9rem;
+}
+
+.text-diff>tbody>tr>td.old.content {
+	background: #ffecec;
+}
+.dark-mode .text-diff>tbody>tr>td.old.content {
+	background: rgb(49, 16, 20);
+}
+.text-diff>tbody>tr>td.old.operation {
+	background: #ffecec;
+}
+.dark-mode .text-diff>tbody>tr>td.old.operation {
+	background: rgb(49, 16, 20);
+}
+.text-diff>tbody>tr>td.old .delete {
+	background-color: rgb(255, 146, 176);
+}
+.dark-mode .text-diff>tbody>tr>td.old .delete {
+	background-color: rgb(108, 35, 44);
+}
+.text-diff>tbody>tr>td.new.content {
+	background: #eaffea;
+}
+.dark-mode .text-diff>tbody>tr>td.new.content {
+	background: rgb(4, 38, 36);
+}
+.text-diff>tbody>tr>td.new.operation {
+	background: #eaffea;
+}
+.dark-mode .text-diff>tbody>tr>td.new.operation {
+	background: rgb(4, 38, 36);
+}
+.text-diff>tbody>tr>td.new .insert {
+	background-color: rgb(154, 255, 150);
+}
+.dark-mode .text-diff>tbody>tr>td.new .insert {
+	background-color: rgb(5, 96, 78);
+}
+.text-diff>tbody>tr>td.old.new.content {
+	background: #FCF8E4;
+}
+.dark-mode .text-diff>tbody>tr>td.old.new.content {
+	background: rgb(52, 34, 0);
+}
+.text-diff>tbody>tr>td.old.new.operation {
+	background: #FCF8E4;
+}
+.dark-mode .text-diff>tbody>tr>td.old.new.operation {
+	background: rgb(52, 34, 0);
+}
+.text-diff>tbody>tr>td.content {
+	white-space: pre-wrap;
+	word-wrap: break-word;
+}
+.text-diff>tbody>tr>td.operation {
+	font-weight: bold;
+	padding: 0 0.3rem 0 0.3rem;
+}
+.text-diff>tbody>tr.code {
+	background: inherit;
+	border: inherit;
+	border-radius: inherit;
+	padding: inherit;
+	margin: inherit;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+.dark-mode ::selection {
+	background-color: #1e496c;
+}
+

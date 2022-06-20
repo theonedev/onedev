@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -69,7 +71,6 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.Dao;
@@ -157,6 +158,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 		return params;
 	}
 
+	@Nullable
 	private String suggestSourceBranch() {
 		User user = getLoginUser();
 		Collection<String> verifiedEmailAddresses = user.getEmailAddresses().stream()
@@ -174,6 +176,10 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			return branchUpdates.get(branchUpdates.size()-1).getFirst();
 		else
 			return getProject().getDefaultBranch();
+	}
+	
+	private PullRequestManager getPullRequestManager() {
+		return OneDev.getInstance(PullRequestManager.class);
 	}
 	
 	public NewPullRequestPage(PageParameters params) {
@@ -213,11 +219,11 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 		}
 
 		AtomicReference<PullRequest> pullRequestRef = new AtomicReference<>(null);
-		PullRequest prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(target.getProject());
-		if (prevRequest != null && source.equals(prevRequest.getSource()) && target.equals(prevRequest.getTarget()) && prevRequest.isOpen())
+		PullRequest prevRequest = getPullRequestManager().findOpen(target, source);
+		if (prevRequest != null) 
 			pullRequestRef.set(prevRequest);
-		else if (target.getBranch() != null && source.getBranch() != null)
-			pullRequestRef.set(OneDev.getInstance(PullRequestManager.class).findEffective(target, source));
+		else if (target.getBranch() != null && source.getBranch() != null) 
+			pullRequestRef.set(getPullRequestManager().findEffective(target, source));
 		
 		if (pullRequestRef.get() == null) {
 			ObjectId baseCommitId;
@@ -237,10 +243,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 				request.setSubmitter(currentUser);
 				
 				request.setBaseCommitHash(baseCommitId.name());
-				if (request.getBaseCommitHash().equals(source.getObjectName())) {
+				if (request.getBaseCommitHash().equals(source.getObjectName())) 
 					request.setStatus(Status.MERGED);
-					request.setCloseInfo(new CloseInfo());
-				}
 	
 				PullRequestUpdate update = new PullRequestUpdate();
 				update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
@@ -250,7 +254,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 				update.setHeadCommitHash(source.getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
-				OneDev.getInstance(PullRequestManager.class).checkReviews(request, false);
+				getPullRequestManager().checkReviews(request, false);
 
 				if (SecurityUtils.canWriteCode(target.getProject())) {
 					PullRequestAssignment assignment = new PullRequestAssignment();
@@ -291,7 +295,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 
 				@Override
 				protected PullRequest load() {
-					return OneDev.getInstance(PullRequestManager.class).load(requestId);
+					return getPullRequestManager().load(requestId);
 				}
 				
 			};
@@ -680,7 +684,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 					for (PullRequestAssignment assignment: getPullRequest().getAssignments())
 						assignment.setUser(dao.load(User.class, assignment.getUser().getId()));
 					
-					OneDev.getInstance(PullRequestManager.class).open(getPullRequest());
+					getPullRequestManager().open(getPullRequest());
 					
 					setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest()));
 				}			

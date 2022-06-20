@@ -1,0 +1,221 @@
+.blob-text-diff-caption {
+	border-radius: 0.42rem 0.42rem 0 0;
+	top: 64px; 
+	background: white; 
+	z-index: 5;	
+}
+.dark-mode .blob-text-diff-caption {
+	background: var(--dark-mode-dark);
+    border-color: var(--dark-mode-lighter-dark) !important;
+}
+
+/* 
+ * have to use relative here as otherwise the last table row will have problem
+ * focusing on expander link. This relates to negative margin top 
+ * specified for change class in revision diff panel
+ */
+.blob-text-diff>tbody>tr>td {
+	position: relative;
+}
+.blob-text-diff>tbody>tr>td.number {
+	padding: 0 0.6rem 0.3rem 0;
+	border-left: 1px solid var(--light-gray);
+	text-align: right;
+	color: var(--gray);
+}
+.dark-mode .blob-text-diff>tbody>tr>td.number {
+	border-left-color: var(--dark-mode-lighter-dark);
+	color: var(--dark-mode-gray);
+}
+.blob-text-diff>tbody>tr>td.number>.coverage {
+	display: block;
+	position: absolute;
+	width: 4px;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+.blob-text-diff>tbody>tr>td.number>.covered {
+	background: var(--success);	
+}
+.blob-text-diff>tbody>tr>td.number>.not_covered {
+	background: var(--danger);	
+}
+.blob-text-diff>tbody>tr>td.number>.partially_covered {
+	background: var(--warning);	
+}
+.blob-text-diff>tbody>tr>td.number>.covered:hover {
+	background: #12827c;	
+}
+.blob-text-diff>tbody>tr>td.number>.not_covered:hover {
+	background: #BF3C4A;	
+}
+.blob-text-diff>tbody>tr>td.number>.partially_covered:hover {
+	background: #b37600;	
+}
+
+
+.blob-text-diff>tbody>tr:not(.expanded)+tr.expanded>td, .blob-text-diff>tbody>tr.expanded+tr:not(.expanded)>td {
+	border-top: 1px solid var(--light-gray);
+}
+.dark-mode .blob-text-diff>tbody>tr:not(.expanded)+tr.expanded>td, 
+.dark-mode .blob-text-diff>tbody>tr.expanded+tr:not(.expanded)>td {
+	border-top-color: var(--dark-mode-lighter-dark);
+}
+.blob-text-diff>tbody>tr.expanded>td {
+	background: #F6F9FC;
+}
+.dark-mode .blob-text-diff>tbody>tr.expanded>td {
+	background: var(--dark-mode-light-dark);
+}
+.blob-text-diff>tbody>tr.expander>td.skipped {
+	padding: 0.5rem 1.2rem;
+	border-left: 1px solid var(--light-gray);
+	background: #F0F8FF;
+	color: var(--gray);
+}
+.dark-mode .blob-text-diff>tbody>tr.expander>td.skipped {
+	border-left-color: var(--dark-mode-lighter-dark);
+	background: rgb(23, 33, 53);
+	color: var(--dark-mode-gray);
+}
+.blob-text-diff>tbody>tr.expander>td.expander {
+	text-align: center;
+	overflow: hidden;
+	vertical-align: middle;
+}
+.blob-text-diff>tbody>tr.expander>td.expander a {
+	display: block;
+	background: #F0F8FF;
+	color: var(--gray);
+	padding: 2rem 0;
+	margin: -2rem -1px;
+}
+.dark-mode .blob-text-diff>tbody>tr.expander>td.expander a {
+	background: rgb(23, 33, 53);
+	color: var(--gray);
+}
+
+.blob-text-diff>tbody>tr.expander>td.expander>a:hover, 
+.blob-text-diff>tbody>tr.expander>td.expander>a:focus {
+	background: var(--primary);
+	color: white;
+}
+
+.blob-text-diff>tbody>tr>td:last-child {
+	border-right: 1px solid var(--light-gray);
+}
+.dark-mode .blob-text-diff>tbody>tr>td:last-child {
+	border-right-color: var(--dark-mode-lighter-dark);
+}
+.blob-text-diff>tbody>tr:last-child>td:first-child {
+	border-radius: 0 0 0 0.42rem;
+}
+.blob-text-diff>tbody>tr:last-child>td:last-child {
+	border-radius: 0 0 0.42rem 0;
+}
+.blob-text-diff>tbody>tr>td.operation {
+	border-left: 1px solid var(--light-gray);
+}
+.dark-mode .blob-text-diff>tbody>tr>td.operation {
+	border-left-color: var(--dark-mode-lighter-dark);
+}
+.blob-text-diff>tbody>tr>td:FIRST-CHILD {
+	border-left: 1px solid var(--light-gray);
+}
+.dark-mode .blob-text-diff>tbody>tr>td:FIRST-CHILD {
+	border-left-color: var(--dark-mode-lighter-dark);
+}
+.blob-text-diff>tbody>tr:LAST-CHILD>td {
+	border-bottom: 1px solid var(--light-gray);
+}
+.dark-mode .blob-text-diff>tbody>tr:LAST-CHILD>td {
+	border-bottom-color: var(--dark-mode-lighter-dark);
+}
+.blob-text-diff>tbody>tr>td.old.operation {
+	border-left: 1px solid #f1c0c0;
+}
+.dark-mode .blob-text-diff>tbody>tr>td.old.operation {
+	border-left-color: rgb(97, 48, 63);
+}
+.blob-text-diff>tbody>tr>td.new.operation {
+	border-left: 1px solid #c1e9c1;
+}
+.dark-mode .blob-text-diff>tbody>tr>td.new.operation {
+	border-left-color: rgb(38, 76, 50);
+}
+.blob-text-diff>tbody>tr>td.old.new.operation {
+	border-left: 1px solid #EBD049;
+}
+.dark-mode .blob-text-diff>tbody>tr>td.old.new.operation {
+	border-left-color: rgb(103, 68, 0);
+}
+
+.blob-text-diff>tbody>tr>td.old.number {
+	background: #ffdddd;
+	border-left: 1px solid #f1c0c0;
+}
+.dark-mode .blob-text-diff>tbody>tr>td.old.number {
+	background: rgb(62, 20, 25);
+	border-left-color: rgb(97, 48, 63);
+}
+.blob-text-diff>tbody>tr>td.new.number {
+	background: #dbffdb;
+	border-left: 1px solid #c1e9c1;
+}
+.dark-mode .blob-text-diff>tbody>tr>td.new.number {
+	background: rgb(6, 49, 47);
+	border-left-color: rgb(38, 76, 50);
+}
+.blob-text-diff>tbody>tr>td.old.new.number {
+	background: #FAF3D0;
+	border-left: 1px solid #EBD049;
+}
+.dark-mode .blob-text-diff>tbody>tr>td.old.new.number {
+	background: rgb(66, 44, 0);
+	border-left-color: rgb(103, 68, 0);
+}
+.blob-text-diff>tbody>tr>td.content>span.content-mark {
+	background: #8950FC;
+	color: white !important;
+}
+.blob-text-diff>tbody>tr>td.content>span.content-mark.insert {
+	background: var(--success);
+}
+.blob-text-diff>tbody>tr>td.content>span.content-mark.delete {
+	background: var(--danger);
+}
+
+.blob-text-diff>tbody>tr>td.number>.comment-indicator,
+.blob-text-diff>tbody>tr>td.number>.problem-trigger {
+	margin-right: 0.3rem;
+}
+
+.blob-text-diff>tbody>tr>td.blame {
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	padding: 0 0.3rem;
+	border-left: 1px solid var(--secondary);
+}
+.blob-text-diff>tbody>tr>td.blame.abbr {
+	text-overflow: inherit;
+}
+.blob-text-diff>tbody>tr>td.blame .hash, .blob-text-diff>tbody>tr>td.blame .date {
+	margin-right: 0.6rem;
+}
+.blob-text-diff>tbody>tr>td.blame.abbr .hash {
+	margin-right: 0;
+}
+.blob-text-diff>tbody>tr>td.blame .same-as-above {
+	margin-left: 90px;
+	margin-top: -0.6rem;
+	color: var(--gray);
+	font-size: 1.2rem;
+}
+.blob-text-diff>tbody>tr>td.blame.abbr .same-as-above {
+	margin-left: 1rem;
+}
+
+

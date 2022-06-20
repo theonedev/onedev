@@ -237,52 +237,63 @@
 	width: 1.5rem; 
 	height: 1.5rem;
 }
-.dark-mode .markdown-rendered table thead {
+.dark-mode .markdown-rendered table:not('.text-diff') thead {
 	color: var(--light);
 }
-.markdown-rendered table {
+.markdown-rendered table:not('.text-diff') {
 	width: auto; 
 	margin-bottom: 1rem;
 }
-.markdown-rendered table th, .markdown-rendered table td {
+.markdown-rendered table:not('.text-diff') th, 
+.markdown-rendered table:not('.text-diff') td {
 	padding: 0.4rem 0.8rem; 
 	border: 1px solid var(--secondary);
 	word-break: break-word!important;
     overflow-wrap: break-word!important;
 }
-.dark-mode .markdown-rendered table th, .dark-mode .markdown-rendered table td {
+.dark-mode .markdown-rendered table:not('.text-diff') th, 
+.dark-mode .markdown-rendered table:not('.text-diff') td {
 	border-color: var(--dark-mode-lighter-dark);
 }
-.markdown-rendered table tr:nth-child(even) td {
+.markdown-rendered table:not('.text-diff') tr:nth-child(even) td {
 	background: var(--light);
 }
-.dark-mode .markdown-rendered table tr:nth-child(even) td {
+.dark-mode .markdown-rendered table:not('.text-diff') tr:nth-child(even) td {
 	background: #1b1b29;
 }
 .markdown-rendered h1, .markdown-rendered h2, .markdown-rendered h3, 
 .markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
 	font-weight: bold;
 }
-.markdown-rendered pre.highlighted {
+.markdown-rendered pre.code.suggestion {
+	white-space: normal;
+}
+.markdown-rendered pre.code {
 	padding: 0.6rem;
 	border: 1px dashed var(--secondary);
 	position: relative;
 	word-break: normal;
 	border-radius: 0.42rem;
 }
-.dark-mode .markdown-rendered pre.highlighted {
+.dark-mode .markdown-rendered pre.code {
 	border-color: var(--dark-mode-lighter-dark);
 }
-.markdown-rendered pre.highlighted>.copy {
+.markdown-rendered pre.code>.actions {
 	position: absolute;
 	right: 10px;
 	top: 10px;
 	display: none;
 }
-.markdown-rendered pre.highlighted:hover>.copy {
+.markdown-rendered pre.code>.actions>a {
+	background: white;
+}
+.dark-mode .markdown-rendered pre.code>.actions>a {
+	background: var(--dark-mode-dark);
+}
+.markdown-rendered pre.code:hover>.actions {
 	display: block;
 }
-.markdown-rendered pre.highlighted>code {
+.markdown-rendered pre.code>code {
 	background: none;
 }
 .markdown-rendered blockquote {

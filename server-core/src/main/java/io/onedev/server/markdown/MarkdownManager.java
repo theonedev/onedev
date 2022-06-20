@@ -7,6 +7,8 @@ import org.jsoup.nodes.Document;
 import com.vladsch.flexmark.util.ast.Node;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
 public interface MarkdownManager {
 	
@@ -23,8 +25,14 @@ public interface MarkdownManager {
 	
 	Node parse(String markdown);
 	
-	Document process(Document document, @Nullable Project project, @Nullable Object context, boolean forExternal);
+	Document process(Document document, @Nullable Project project, 
+			@Nullable BlobRenderContext blobRenderContext, 
+			@Nullable SuggestionSupport suggestionSupport, 
+			boolean forExternal);
 
-	String process(String html, @Nullable Project project, @Nullable Object context, boolean forExternal);
+	String process(String html, @Nullable Project project, 
+			@Nullable BlobRenderContext blobRenderContext, 
+			@Nullable SuggestionSupport suggestionSupport, 
+			boolean forExternal);
 	
 }

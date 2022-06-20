@@ -20,7 +20,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.diff.DiffRenderer;
-import io.onedev.server.web.component.diff.blob.text.TextDiffPanel;
+import io.onedev.server.web.component.diff.blob.text.BlobTextDiffPanel;
 import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -88,7 +88,7 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newFragment("Empty file removed.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, change, diffMode, blameModel) {
+				add(new BlobTextDiffPanel(CONTENT_ID, change, diffMode, blameModel) {
 
 					@Override
 					protected PullRequest getPullRequest() {
@@ -140,7 +140,7 @@ public class BlobDiffPanel extends Panel {
 					} else if (change.getAdditions() + change.getDeletions() == 0) {
 						add(newFragment("Content is identical", false));
 					} else {
-						add(new TextDiffPanel(CONTENT_ID, change, diffMode, blameModel) {
+						add(new BlobTextDiffPanel(CONTENT_ID, change, diffMode, blameModel) {
 
 							@Override
 							protected PullRequest getPullRequest() {
@@ -166,38 +166,38 @@ public class BlobDiffPanel extends Panel {
 
 	public void onCommentDeleted(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof TextDiffPanel) 
-			((TextDiffPanel) content).onCommentDeleted(target);
+		if (content instanceof BlobTextDiffPanel) 
+			((BlobTextDiffPanel) content).onCommentDeleted(target);
 	}
 
 	public void onCommentClosed(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof TextDiffPanel)
-			((TextDiffPanel) content).onCommentClosed(target);
+		if (content instanceof BlobTextDiffPanel)
+			((BlobTextDiffPanel) content).onCommentClosed(target);
 	}
 
 	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange range) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof TextDiffPanel) 
-			((TextDiffPanel) content).onCommentAdded(target, comment, range);
+		if (content instanceof BlobTextDiffPanel) 
+			((BlobTextDiffPanel) content).onCommentAdded(target, comment, range);
 	}
 
 	public void mark(AjaxRequestTarget target, DiffPlanarRange markRange) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof TextDiffPanel)
-			((TextDiffPanel) content).mark(target, markRange);
+		if (content instanceof BlobTextDiffPanel)
+			((BlobTextDiffPanel) content).mark(target, markRange);
 	}
 
 	public void unmark(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof TextDiffPanel)
-			((TextDiffPanel) content).unmark(target);
+		if (content instanceof BlobTextDiffPanel)
+			((BlobTextDiffPanel) content).unmark(target);
 	}
 	
 	public void onUnblame(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof TextDiffPanel) 
-			((TextDiffPanel) content).onUnblame(target);
+		if (content instanceof BlobTextDiffPanel) 
+			((BlobTextDiffPanel) content).onUnblame(target);
 	}
 
 }

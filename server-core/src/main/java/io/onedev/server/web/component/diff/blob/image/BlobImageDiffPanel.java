@@ -13,11 +13,11 @@ import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 
 @SuppressWarnings("serial")
-public class ImageDiffPanel extends Panel {
+public class BlobImageDiffPanel extends Panel {
 
 	private final BlobChange change;
 	
-	public ImageDiffPanel(String id, BlobChange change) {
+	public BlobImageDiffPanel(String id, BlobChange change) {
 		super(id);
 	
 		this.change = change;
@@ -55,7 +55,7 @@ public class ImageDiffPanel extends Panel {
 			add(image = new Image(id, new RawBlobResourceReference(), 
 					RawBlobResource.paramsOf(change.getProject(), blobIdent)));
 		} else {
-			add(image = new Image(id, new PackageResourceReference(ImageDiffPanel.class, "blank.png")));
+			add(image = new Image(id, new PackageResourceReference(BlobImageDiffPanel.class, "blank.png")));
 		}
 		return image;
 	}

@@ -398,7 +398,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 				newState.commentId = state.commentId;
 				newState.mark = state.mark;
 				
-				setResponsePage(RevisionComparePage.class,paramsOf(getProject(), newState));
+				setResponsePage(RevisionComparePage.class,paramsOf(newState.leftSide.getProject(), newState));
 			}
 
 		});

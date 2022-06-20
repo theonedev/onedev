@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -58,23 +60,33 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobChange;
+import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
+import io.onedev.server.model.PendingSuggestionApply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
@@ -85,6 +97,7 @@ import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
@@ -92,11 +105,18 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;
+import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.RevisionDiff;
@@ -114,10 +134,6 @@ public abstract class RevisionDiffPanel extends Panel {
 	private static final String COOKIE_VIEW_MODE = "onedev.server.diff.viewmode";
 	
 	private static final String COOKIE_COMMENT_WIDTH = "revisionDiff.comment.width";
-
-	private static final String BODY_ID = "body";
-	
-	private static final String DIFF_ID = "diff";
 
 	private final String oldRev;
 	
@@ -296,6 +312,17 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 	};
 	
+	private final IModel<List<PendingSuggestionApply>> pendingSuggestionAppliesModel = 
+			new LoadableDetachableModel<List<PendingSuggestionApply>>() {
+
+		@Override
+		protected List<PendingSuggestionApply> load() {
+			return OneDev.getInstance(PendingSuggestionApplyManager.class)
+					.query(SecurityUtils.getUser(), getPullRequest());
+		}
+		
+	};
+	
 	private WebMarkupContainer commentContainer;
 
 	private ListView<BlobChange> diffsView;
@@ -415,36 +442,193 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 
-		add(new AjaxLink<Void>("option") {
+		add(new WebMarkupContainer("operations") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				DiffOption diffOption = new DiffOption();
-				diffOption.setViewMode(diffMode);
-				new BeanEditModalPanel(target, diffOption) {
+			protected void onInitialize() {
+				super.onInitialize();
+
+				add(new MenuLink("batchedSuggestions") {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new Label("count", new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								return String.valueOf(pendingSuggestionAppliesModel.getObject().size());
+							}
+							
+						}));
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getPullRequest() != null 
+								&& SecurityUtils.getUser() != null 
+								&& !pendingSuggestionAppliesModel.getObject().isEmpty());
+					}
+
+					@Override
+					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+						List<MenuItem> menuItems = new ArrayList<>();
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public String getLabel() {
+								return "Commit";
+							}
+
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								return new AjaxLink<Void>(id) {
+
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										new BeanEditModalPanel(target, new SuggestionBatchApplyBean()) {
+											
+											@Override
+											protected void onSave(AjaxRequestTarget target, Serializable bean) {
+												String commitMessage = ((SuggestionBatchApplyBean) bean).getCommitMessage(); 
+												PullRequest request = getPullRequest();
+												ObjectId commitId = request.getLatestUpdate().getHeadCommit().copy();
+												try {
+													ObjectId newCommitId = OneDev.getInstance(PendingSuggestionApplyManager.class)
+															.apply(SecurityUtils.getUser(), request, commitMessage);
+													
+													OneDev.getInstance(PullRequestUpdateManager.class).checkUpdate(request);
+													
+													Long projectId = request.getSourceProject().getId();
+													String refName = GitUtils.branch2ref(request.getSourceBranch());
+													OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+
+														@Override
+														public void run() {
+															OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+
+																@Override
+																public void run() {
+																	Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+																	project.cacheObjectId(request.getSourceBranch(), newCommitId);
+																	RefUpdated refUpdated = new RefUpdated(project, refName, commitId, newCommitId);
+																	OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
+																}
+																
+															});
+														}
+														
+													});
+													
+													PullRequestChangesPage.State state = new PullRequestChangesPage.State();
+													state.oldCommitHash = commitId.name();
+													state.newCommitHash = newCommitId.name();
+													setResponsePage(
+															PullRequestChangesPage.class, 
+															PullRequestChangesPage.paramsOf(request, state));
+												} catch (ObsoleteCommitException e) {
+													Session.get().error("Pull request was updated by some others just now, please try again");
+												} catch (OutdatedSuggestionException e) {
+													Session.get().error("Please remove outdated suggestion on: " + e.getMark());
+													close();
+												}
+											}
+										};
+										dropdown.close();
+									}
+								};
+							}
+
+						});
+						
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public String getLabel() {
+								return "Discard";
+							}
+
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								return new AjaxLink<Void>(id) {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmClickListener(
+												"Do you really want to discard batched suggestions?"));
+									}
+
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										OneDev.getInstance(PendingSuggestionApplyManager.class)
+												.discard(SecurityUtils.getUser(), getPullRequest());
+										target.add(commentContainer);
+										target.add(RevisionDiffPanel.this.get("operations"));
+										dropdown.close();
+									}
+									
+								};
+							}
+							
+						});
+						return menuItems;
+					}
+					
+				});
+
+				add(new AjaxLink<Void>("option") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						DiffOption diffOption = new DiffOption();
+						diffOption.setWhitespaceOption(whitespaceOptionModel.getObject());
+						diffOption.setViewMode(diffMode);
+						new BeanEditModalPanel(target, diffOption) {
+							
+							@Override
+							protected void onSave(AjaxRequestTarget target, Serializable bean) {
+								DiffOption diffOption = (DiffOption) bean;
+								diffMode = diffOption.getViewMode();
+								
+								WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+								Cookie cookie = new Cookie(COOKIE_VIEW_MODE, diffMode.name());
+								cookie.setMaxAge(Integer.MAX_VALUE);
+								cookie.setPath("/");
+								response.addCookie(cookie);
+								
+								whitespaceOptionModel.setObject(diffOption.getWhitespaceOption());
+								
+								target.add(navs);
+								target.add(body);
+								
+								close();
+							}
+						};
+					}
+
+				});
+				
+				add(new WebSocketObserver() {
 					
 					@Override
-					protected void onSave(AjaxRequestTarget target, Serializable bean, Collection<String> propertyNames) {
-						DiffOption diffOption = (DiffOption) bean;
-						diffMode = diffOption.getViewMode();
-						
-						WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-						Cookie cookie = new Cookie(COOKIE_VIEW_MODE, diffMode.name());
-						cookie.setMaxAge(Integer.MAX_VALUE);
-						cookie.setPath("/");
-						response.addCookie(cookie);
-						
-						whitespaceOptionModel.setObject(diffOption.getWhitespaceOption());
-						
-						target.add(navs);
-						target.add(body);
-						
-						close();
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
 					}
-				};
-			}
-
-		});
+					
+					@Override
+					public Collection<String> getObservables() {
+						Collection<String> observables = Sets.newHashSet();
+						if (getPullRequest() != null)
+							observables.add(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+						return observables;
+					}
+					
+				});
+			}			
+			
+		}.setOutputMarkupId(true));
 		
 		Form<?> pathFilterForm = new Form<Void>("pathFilter");
 		TextField<String> filterInput;
@@ -678,7 +862,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		});
 
-		body = new WebMarkupContainer(BODY_ID);
+		body = new WebMarkupContainer("body");
 		body.setOutputMarkupId(true);
 		add(body);
 
@@ -715,7 +899,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + encodePath(change.getPath()));
-				item.add(new BlobDiffPanel(DIFF_ID, change, diffMode, getBlobBlameModel(change)) {
+				item.add(new BlobDiffPanel("diff", change, diffMode, getBlobBlameModel(change)) {
 
 					@Override
 					protected PullRequest getPullRequest() {
@@ -814,7 +998,7 @@ public abstract class RevisionDiffPanel extends Panel {
 								Mark mark = getMark(commentRange);
 								commentContainer.setDefaultModelObject(mark);
 								
-								Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", RevisionDiffPanel.this);
+								Fragment fragment = new Fragment("body", "newCommentFrag", RevisionDiffPanel.this);
 								fragment.setOutputMarkupId(true);
 								
 								Form<?> form = new Form<Void>("form");
@@ -845,6 +1029,11 @@ public abstract class RevisionDiffPanel extends Panel {
 												SecurityUtils.canManageCodeComments(getProject()));
 									}
 	
+									@Override
+									protected SuggestionSupport getSuggestionSupport() {
+										return RevisionDiffPanel.this.getSuggestionSupport(mark);
+									}
+
 									@Override
 									protected Project getProject() {
 										return RevisionDiffPanel.this.getProject();
@@ -934,7 +1123,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 											@Override
 											protected SuggestionSupport getSuggestionSupport() {
-												return RevisionDiffPanel.this.getSuggestionSupport();
+												return RevisionDiffPanel.this.getSuggestionSupport(mark);
 											}
 	
 										};
@@ -1116,7 +1305,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	}
 	
 	private void onOpenComment(AjaxRequestTarget target, CodeComment comment, Mark mark) {
-		CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, comment.getId()) {
+		CodeCommentPanel commentPanel = new CodeCommentPanel("body", comment.getId()) {
 
 			@Override
 			protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
@@ -1148,7 +1337,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			protected SuggestionSupport getSuggestionSupport() {
-				return RevisionDiffPanel.this.getSuggestionSupport();
+				return RevisionDiffPanel.this.getSuggestionSupport(mark);
 			}
 			
 		};
@@ -1367,7 +1556,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					if (commentRange != null)
 						commentContainer.setDefaultModelObject(change.getMark(commentRange));
 				}
-				CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, openComment.getId()) {
+				CodeCommentPanel commentPanel = new CodeCommentPanel("body", openComment.getId()) {
 
 					@Override
 					protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
@@ -1399,19 +1588,37 @@ public abstract class RevisionDiffPanel extends Panel {
 					
 					@Override
 					protected SuggestionSupport getSuggestionSupport() {
-						return RevisionDiffPanel.this.getSuggestionSupport();
+						return RevisionDiffPanel.this.getSuggestionSupport(getComment().getMark());
 					}
 					
 				};
 				commentContainer.add(commentPanel);
 			} else {
-				commentContainer.add(new WebMarkupContainer(BODY_ID));
+				commentContainer.add(new WebMarkupContainer("body"));
 				commentContainer.setVisible(false);
 			}
 		} else {
-			commentContainer.add(new WebMarkupContainer(BODY_ID));
+			commentContainer.add(new WebMarkupContainer("body"));
 			commentContainer.setVisible(false);
 		}
+		
+		commentContainer.add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				if (component.isVisible())
+					handler.add(component);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				Set<String> observables = new HashSet<>();
+				if (getPullRequest() != null)
+					observables.add(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return observables;
+			}
+			
+		});
 		
 		return commentContainer;
 	}
@@ -1447,7 +1654,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				if (object instanceof ListItem) {
 					ListItem<BlobChange> item = (ListItem<BlobChange>) object;
 					if (item.getModelObject().getPaths().contains(blobPath)) {
-						visit.stop((BlobDiffPanel) item.get(DIFF_ID));
+						visit.stop((BlobDiffPanel) item.get("diff"));
 					} else {
 						visit.dontGoDeeper();
 					}
@@ -1475,7 +1682,7 @@ public abstract class RevisionDiffPanel extends Panel {
 	}
 	
 	private void clearComment(AjaxRequestTarget target) {
-		commentContainer.replace(new WebMarkupContainer(BODY_ID));
+		commentContainer.replace(new WebMarkupContainer("body"));
 		commentContainer.setVisible(false);
 		target.add(commentContainer);
 		((BasePage)getPage()).resizeWindow(target);
@@ -1490,12 +1697,166 @@ public abstract class RevisionDiffPanel extends Panel {
 		pathFilterModel.detach();
 		whitespaceOptionModel.detach();
 		currentFileModel.detach();
+		pendingSuggestionAppliesModel.detach();
 		
 		super.onDetach();
 	}
 	
-	protected SuggestionSupport getSuggestionSupport() {
-		return null;
+	private SuggestionSupport getSuggestionSupport(Mark mark) {
+		return new SuggestionSupport() {
+			
+			@Override
+			public SuggestFor getSuggestFor() {
+				return getProject().getBlob(mark.getBlobIdent(), true).getText()
+						.getSuggestFor(mark.getPath(), mark.getRange());
+			}
+			
+			@Override
+			public ApplySupport getApplySupport() {
+				PullRequest request = getPullRequest();
+				if (request != null) {
+					if (request.isOpen()) {
+						if (SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), mark.getPath())) {
+							return new ApplySupport() {
+
+								@Override
+								public void applySuggestion(AjaxRequestTarget target, List<String> suggestion) {
+									SuggestionApplyBean bean = new SuggestionApplyBean();
+									bean.setBranch(getPullRequest().getSourceBranch());
+									new SuggestionApplyModalPanel(target, bean) {
+
+										@Override
+										protected CodeComment getComment() {
+											return annotationSupport.getOpenComment();
+										}
+
+										@Override
+										protected PullRequest getPullRequest() {
+											return RevisionDiffPanel.this.getPullRequest();
+										}
+
+										@Override
+										protected List<String> getSuggestion() {
+											return suggestion;
+										}
+
+									};								
+								}
+
+								@Override
+								public BatchApplySupport getBatchSupport() {
+									return new BatchApplySupport() {
+										
+										@Override
+										public List<String> getInBatch() {
+											for (PendingSuggestionApply pendingApply: pendingSuggestionAppliesModel.getObject()) {
+												if (pendingApply.getComment().equals(annotationSupport.getOpenComment()))
+													return pendingApply.getSuggestion();
+											}
+											return null;
+										}
+
+										private void onBatchChange(AjaxRequestTarget target) {
+											target.add(RevisionDiffPanel.this.get("operations"));
+											target.add(commentContainer);
+											target.appendJavaScript("onedev.server.revisionDiff.onSuggestionBatchChanged();");
+										}
+										
+										@Override
+										public void addToBatch(AjaxRequestTarget target, List<String> suggestion) {
+											PendingSuggestionApply pendingApply = new PendingSuggestionApply();
+											pendingApply.setComment(annotationSupport.getOpenComment());
+											pendingApply.setRequest(getPullRequest());
+											pendingApply.setUser(SecurityUtils.getUser());
+											pendingApply.setSuggestion(new ArrayList<String>(suggestion));
+											OneDev.getInstance(PendingSuggestionApplyManager.class).save(pendingApply);
+											onBatchChange(target);
+										}
+
+										@Override
+										public void removeFromBatch(AjaxRequestTarget target) {
+											target.add(RevisionDiffPanel.this.get("operations"));
+											for (Iterator<PendingSuggestionApply> it = pendingSuggestionAppliesModel.getObject().iterator(); it.hasNext();) {
+												PendingSuggestionApply pendingApply = it.next();
+												if (pendingApply.getRequest().equals(getPullRequest())
+														&& pendingApply.getUser().equals(SecurityUtils.getUser())
+														&& pendingApply.getComment().equals(annotationSupport.getOpenComment())) {
+													it.remove();
+													OneDev.getInstance(PendingSuggestionApplyManager.class).delete(pendingApply);
+													break;
+												}
+											}
+											onBatchChange(target);
+										}
+										
+									};
+								}
+								
+							};
+						} else {
+							return null;
+						}
+					} else {
+						return null;
+					}
+				} else if (SecurityUtils.canWriteCode(annotationSupport.getOpenComment().getProject())) {
+					return new ApplySupport() {
+
+						@Override
+						public void applySuggestion(AjaxRequestTarget target, List<String> suggestion) {
+							SuggestionApplyBean bean = new SuggestionApplyBean();
+							String refName = getProject().getRefName(newRev);
+							if (refName != null) {
+								String branch = GitUtils.ref2branch(refName);
+								if (branch != null)
+									bean.setBranch(branch);
+							}
+							new SuggestionApplyModalPanel(target, bean) {
+
+								@Override
+								protected CodeComment getComment() {
+									return annotationSupport.getOpenComment();
+								}
+
+								@Override
+								protected List<String> getSuggestion() {
+									return suggestion;
+								}
+
+							};								
+						}
+
+						@Override
+						public BatchApplySupport getBatchSupport() {
+							return null;
+						}
+						
+					};
+				} else {
+					return null;
+				}
+			}
+
+			@Override
+			public boolean isOutdated() {
+				if (getPullRequest() != null) {
+					if (getPullRequest().isOpen()) {
+						try {
+							new BlobEdits().applySuggestion(getPullRequest().getSourceProject(), mark, 
+									new ArrayList<>(), getPullRequest().getSourceHead());
+							return false;
+						} catch (OutdatedSuggestionException e) {
+							return true;
+						}
+					} else {
+						return true;
+					}
+				} else {
+					return false;
+				}
+			}
+			
+		};
 	}
 	
 	@Override

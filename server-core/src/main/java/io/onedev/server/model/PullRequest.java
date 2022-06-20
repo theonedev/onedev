@@ -46,8 +46,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OptimisticLock;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
@@ -64,7 +62,6 @@ import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastUpdate;
-import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
@@ -85,9 +82,7 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList="o_targetProject_id"), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_sourceProject_id"), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH), 
-				@Index(columnList=CloseInfo.COLUMN_DATE), @Index(columnList=PROP_STATUS), 
-				@Index(columnList=CloseInfo.COLUMN_USER), 
-				@Index(columnList="o_numberScope_id")},
+				@Index(columnList=PROP_STATUS), @Index(columnList="o_numberScope_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -155,8 +150,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_STATUS = "status";
 	
-	public static final String PROP_CLOSE_INFO = "closeInfo";
-	
 	public static final String PROP_LAST_MERGE_PREVIEW = "lastMergePreview";
 	
 	public static final String PROP_ID = "id";
@@ -186,7 +179,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
 			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
-			NAME_CLOSE_DATE, PROP_CLOSE_INFO + "." + CloseInfo.PROP_DATE,
 			NAME_NUMBER, PROP_NUMBER,
 			NAME_STATUS, PROP_STATUS,
 			NAME_TARGET_PROJECT, PROP_TARGET_PROJECT,
@@ -217,9 +209,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Column(nullable=false)
 	private Status status = Status.OPEN;
 	
-	@Embedded
-	private CloseInfo closeInfo;
-
 	@Api(order=100)
 	@Column(nullable=false, length=MAX_TITLE_LEN)
 	@OptimisticLock(excluded=true)
@@ -533,15 +522,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.status = status;
 	}
 
-	@Nullable
-	public CloseInfo getCloseInfo() {
-		return closeInfo;
-	}
-
-	public void setCloseInfo(CloseInfo closeInfo) {
-		this.closeInfo = closeInfo;
-	}
-
 	public boolean isOpen() {
 		return status == Status.OPEN;
 	}
@@ -667,41 +647,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		GitUtils.updateRef(refUpdate);
 	}
 	
-	public static class CriterionHelper {
-		public static Criterion ofOpen() {
-			return Restrictions.isNull("closeInfo");
-		}
-		
-		public static Criterion ofClosed() {
-			return Restrictions.isNotNull("closeInfo");
-		}
-		
-		public static Criterion ofTarget(ProjectAndBranch target) {
-			return Restrictions.and(
-					Restrictions.eq("targetProject", target.getProject()),
-					Restrictions.eq("targetBranch", target.getBranch()));
-		}
-
-		public static Criterion ofTargetProject(Project target) {
-			return Restrictions.eq("targetProject", target);
-		}
-		
-		public static Criterion ofSource(ProjectAndBranch source) {
-			return Restrictions.and(
-					Restrictions.eq("sourceProject", source.getProject()),
-					Restrictions.eq("sourceBranch", source.getBranch()));
-		}
-		
-		public static Criterion ofSourceProject(Project source) {
-			return Restrictions.eq("sourceProject", source);
-		}
-		
-		public static Criterion ofSubmitter(User submitter) {
-			return Restrictions.eq("submitter", submitter);
-		}
-		
-	}
-
 	public Date getSubmitDate() {
 		return submitDate;
 	}

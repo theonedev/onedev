@@ -51,16 +51,28 @@ onedev.server.sourceView = {
 		onedev.server.codemirror.bindShortcuts(cm);
 		onedev.server.sourceView.checkShortcutsBinding();
 	    
-	    $(".blob-view").selectionPopover("init", function(e) {
+		var lastFrom, lastTo;
+	    $(".source-view").selectionPopover("init", function(e) {
 	    	if ($(e.target).closest(".selection-popover").length != 0) {
 	    		return;
 			}
 	    	var from = cm.getCursor("from");
 	    	var to = cm.getCursor("to");
 	    	if (from.line != to.line || from.ch != to.ch) {
-	    		callback("openSelectionPopover", from.line, from.ch, to.line, to.ch);
+				if (lastFrom == undefined || lastTo == undefined 
+						|| lastFrom.line != from.line || lastFrom.ch != from.ch
+						|| lastTo.line != to.line || lastTo.ch != to.ch) {
+					if (to.ch == 0)
+	    				callback("openSelectionPopover", from.line, from.ch, to.line-1, cm.doc.getLine(to.line-1).length);
+					else
+	    				callback("openSelectionPopover", from.line, from.ch, to.line, to.ch);
+				}
+				lastFrom = from;
+				lastTo = to;
 	    		return;
 	    	} else {
+				lastFrom = from;
+				lastTo = to;
 	    		return "close";
 	    	}
 	    });
@@ -410,8 +422,8 @@ onedev.server.sourceView = {
 			$content.append(`<a href='${loginHref}' class='comment'>${svg} Login to comment on selection</a>`);
 		}			
 		
-		$(".blob-view").selectionPopover("open", {
-			position: position,
+		$(".source-view").selectionPopover("open", {
+			position: onedev.server.mouseState.position,
 			content: $content
 		});
 	},
@@ -469,7 +481,7 @@ onedev.server.sourceView = {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		$sourceView.data("markRange", commentRange);
-		$(".blob-view").selectionPopover("close");
+		$(".source-view").selectionPopover("close");
 
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		onedev.server.codemirror.clearSelection(cm);
@@ -500,7 +512,7 @@ onedev.server.sourceView = {
 		$sourceView.removeData("openComment");
 		onedev.server.sourceView.highlightCommentTrigger();
 		$(window).resize();
-		onedev.server.sourceView.restoreMark();
+		onedev.server.sourceView.clearMark();
 	},
 	onToggleOutline: function() {
 		onedev.server.sourceView.exitFullScreen();
@@ -563,6 +575,10 @@ onedev.server.sourceView = {
 			onedev.server.codemirror.mark(cm, markRange);
 		else 
 			onedev.server.codemirror.clearMark(cm);
+	},
+	clearMark: function() {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		onedev.server.codemirror.clearMark(cm);
 	},
 	blame: function(blameInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		

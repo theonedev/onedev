@@ -139,7 +139,14 @@ public abstract class CodeCommentPanel extends Panel {
 				OneDev.getInstance(CodeCommentManager.class).save(comment);				
 			}
 			
-		}, null));
+		}, null) {
+
+			@Override
+			protected SuggestionSupport getSuggestionSupport() {
+				return CodeCommentPanel.this.getSuggestionSupport();
+			}
+			
+		});
 		
 		viewFragment.add(new WebMarkupContainer("anchor").setVisible(false));
 
@@ -714,7 +721,14 @@ public abstract class CodeCommentPanel extends Panel {
 					onSaveCommentReply(RequestCycle.get().find(AjaxRequestTarget.class), reply);
 				}
 				
-			}, null));			
+			}, null) {
+				
+				@Override
+				protected SuggestionSupport getSuggestionSupport() {
+					return CodeCommentPanel.this.getSuggestionSupport();
+				}
+				
+			});			
 			
 			WebMarkupContainer foot = new WebMarkupContainer("foot");
 			foot.setVisible(SecurityUtils.canModifyOrDelete(reply));

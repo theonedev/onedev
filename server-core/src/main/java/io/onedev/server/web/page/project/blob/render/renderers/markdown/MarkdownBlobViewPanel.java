@@ -24,7 +24,7 @@ public class MarkdownBlobViewPanel extends BlobViewPanel {
 		add(new MarkdownViewer("markdown", Model.of(blob.getText().getContent()), null) {
 
 			@Override
-			protected Object getRenderContext() {
+			protected BlobRenderContext getRenderContext() {
 				return context;
 			}
 			

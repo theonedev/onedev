@@ -48,6 +48,7 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.loader.AppLoader;
@@ -149,8 +150,27 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		else
 			project = null;
 		
+		SuggestionSupport suggestionSupport = new SuggestionSupport() {
+
+			@Override
+			public SuggestFor getSuggestFor() {
+				return MarkdownEditor.this.getSuggestionSupport().getSuggestFor();
+			}
+
+			@Override
+			public boolean isOutdated() {
+				return MarkdownEditor.this.getSuggestionSupport().isOutdated();
+			}
+
+			@Override
+			public ApplySupport getApplySupport() {
+				return null;
+			}
+			
+		};
 		MarkdownManager manager = OneDev.getInstance(MarkdownManager.class);
-		return manager.process(manager.render(markdown), project, blobRenderContext, false);
+		return manager.process(manager.render(markdown), project, blobRenderContext, 
+				suggestionSupport, false);
 	}
 	
 	@Override
@@ -232,15 +252,18 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				SuggestFor suggestFor = getSuggestionSupport().getSuggestFor();
-				tag.put("data-content", suggestFor.getContent());
+				tag.put("data-content", Joiner.on('\n').join(suggestFor.getContent()));
 				tag.put("data-from", suggestFor.getRange().getFrom());
 				tag.put("data-to", suggestFor.getRange().getTo());
+				
+				if (getSuggestionSupport().isOutdated())
+					tag.put("disabled", "disabled");
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getSuggestionSupport() != null && !getSuggestionSupport().isOutdated());
+				setVisible(getSuggestionSupport() != null);
 			}
 			
 		});
@@ -271,8 +294,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				public void renderHead(IHeaderResponse response) {
 					super.renderHead(response);
 					String script = String.format(
-							"onedev.server.markdown.initRendered($('#%s>.body>.preview>.markdown-rendered'));", 
-							container.getMarkupId());
+							"onedev.server.markdown.initRendered('%s');", container.getMarkupId());
 					response.render(OnDomReadyHeaderItem.forScript(script));
 				}
 				
@@ -515,11 +537,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		});
 	}
 	
-	@Override
-	protected void onComponentTag(ComponentTag tag) {
-		super.onComponentTag(tag);
-	}
-
 	@Override
 	public void convertInput() {
 		setConvertedInput(input.getConvertedInput());

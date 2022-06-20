@@ -67,7 +67,7 @@ public abstract class ProjectEvent extends Event {
 			String renderedMarkdown = getRenderedMarkdown();
 			if (renderedMarkdown != null) {
 				processedMarkdown = Optional.of(OneDev.getInstance(MarkdownManager.class)
-						.process(renderedMarkdown, getProject(), null, true));
+						.process(renderedMarkdown, getProject(), null, null, true));
 			} else {
 				processedMarkdown = Optional.empty();
 			}

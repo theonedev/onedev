@@ -55,7 +55,7 @@ abstract class BeanEditContentPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				onSave(target, getBean());
+				onSave(target);
 			}
 			
 		});
@@ -87,7 +87,7 @@ abstract class BeanEditContentPanel extends Panel {
 	@Nullable
 	protected abstract String getTitle();
 	
-	protected abstract void onSave(AjaxRequestTarget target, Serializable bean);
+	protected abstract void onSave(AjaxRequestTarget target);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 }

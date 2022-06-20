@@ -45,23 +45,27 @@ onedev.server.markdown = {
 		
 		$head.find(".dropdown>a").dropdown();
 		
-		if (onedev.server.util.isMac())		
-			$suggestion.attr("title", "Suggest changes (cmd-g)");
-		else
-			$suggestion.attr("title", "Suggest changes (ctrl-g)");
+		if ($suggestion.attr("disabled") == "disabled") {
+			$suggestion.attr("title", "Commented code is outdated");
+		} else {
+			if (onedev.server.util.isMac())		
+				$suggestion.attr("title", "Suggest changes (cmd-g)");
+			else
+				$suggestion.attr("title", "Suggest changes (ctrl-g)");
+				
+			$suggestion.click(function() {
+				var content = $(this).data("content");
+				var from = parseInt($(this).data("from"));
+				var to = parseInt($(this).data("to"));
+				var langHint = "suggestion";
+				$input.focus();
+				var selected = $input.range();
+				document.execCommand("insertText", false, "\n```" + langHint + "\n" + content + "\n```\n");		
+				$input.range(selected.start+5+langHint.length+from, selected.start+5+langHint.length+to);
+				onedev.server.markdown.fireInputEvent($input);
+			});
+		}
 
-		$suggestion.click(function() {
-			var content = $(this).data("content");
-			var from = parseInt($(this).data("from"));
-			var to = parseInt($(this).data("to"));
-			var langHint = "suggestion";
-			$input.focus();
-			var selected = $input.range();
-			document.execCommand("insertText", false, "\n```" + langHint + "\n" + content + "\n```\n");		
-			$input.range(selected.start+5+langHint.length+from, selected.start+5+langHint.length+to);
-			onedev.server.markdown.fireInputEvent($input);
-		});
-		
 		$editLink.click(function() {
 			$container.removeClass("preview-mode").removeClass("split-mode").addClass("edit-mode");
 			$input.focus();
@@ -853,7 +857,7 @@ onedev.server.markdown = {
 		
 		$rendered.html(html);
 		
-		onedev.server.markdown.initRendered($rendered);
+		onedev.server.markdown.initRendered(containerId);
 
 		// Avoid loading existing image
 		$rendered.find("img").each(function() {
@@ -874,7 +878,10 @@ onedev.server.markdown = {
             onedev.server.markdown.syncPreviewScroll(containerId);
         });
 	},
-	initRendered: function($rendered) {
+	initRendered: function(containerId) {
+		var $container = $("#" + containerId);
+		var $rendered = $container.find(".markdown-rendered");
+		
 		$rendered.find("span.header-anchor").parent().addClass("header-anchor");
 		$rendered.find("a.header-anchor").each(function() {
 			var $headerAnchor = $(this);
@@ -927,22 +934,71 @@ onedev.server.markdown = {
 		
 		$rendered.find("pre>code").each(function() {
 			var $this = $(this);
-			var modeName = $this.data("language");
-			if (modeName) {
-			    var modeInfo = CodeMirror.findModeByName(modeName);
-		        if (modeInfo) 
-					onedev.server.codemirror.highlightSyntax($this.text(), modeInfo, this);
+			var suggestionFile = $this.data("suggestionfile");
+			if (suggestionFile) {
+				onedev.server.diff.highlightSyntax($this.children(".text-diff"), suggestionFile);
+			} else {
+				var modeName = $this.data("language");
+				if (modeName) {
+				    var modeInfo = CodeMirror.findModeByName(modeName);
+			        if (modeInfo) { 
+						onedev.server.codemirror.highlightSyntax($this.text(), modeInfo, this);
+						$this.addClass("cm-s-eclipse");
+					}
+				}
 			}
-			var $copyWrapper = $("<div class='copy'></div>");
-			$this.parent().append($copyWrapper);
+			var $actions = $("<div class='actions'></div>");
+			$this.parent().append($actions);
 			var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg>";
-			var $copyButton = $("<a class='pressable' title='Copy to clipboard'>" + icon + "</a>");
-			$copyWrapper.append($copyButton);
-			new Clipboard($copyButton[0], {text: function() {return $this.text();}});			
+			var $copy = $("<a class='pressable' title='Copy to clipboard'>" + icon + "</a>");
+			$actions.append($copy);
+			new Clipboard($copy[0], {
+				text: function() {
+					if ($this.parent().hasClass("suggestion"))
+						return $this.data("suggestion");
+					else
+						return $this.text();
+				}
+			});			
+			
+			var suggestionCallback = $container.data("suggestionCallback");
+			if (suggestionCallback) {
+				if ($this.data("suggestionoutdated")) {
+					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg>";
+					var $warning = $("<a class='ml-2' disabled='disabled' title='This suggestion is outdated'>" + icon + "</a>");
+					$actions.append($warning);
+				} else if ($this.data("suggestionapplyinbatch")) {
+					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#clock'/></svg>";
+					var $removeFromBatch = $("<a class='pressable ml-2' title='Added to batch to be committed with other suggestions later, click to remove'>" + icon + "</a>");
+					$removeFromBatch.click(function() {
+						suggestionCallback("removeFromBatch");
+					});
+					$actions.append($removeFromBatch);
+				} else if ($this.data("suggestionappliable")) {
+					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#add-to-git'/></svg>";
+					var $apply = $("<a class='pressable ml-2' title='Apply suggestion by committing the change'>" + icon + "</a>");
+					$actions.append($apply);
+					$apply.click(function() {
+						suggestionCallback("apply", $this.data("suggestion"));
+					});
+					
+					if ($this.data("suggestionbatchappliable")) {
+						var icon = "<svg class='icon flip-x'><use xlink:href='" + onedev.server.icons + "#batch'/></svg>";
+						var $addToBatch = $("<a class='pressable ml-2' title='Add to batch to be committed with other suggestions later'>" + icon + "</a>");
+						$addToBatch.click(function() {
+							suggestionCallback("addToBatch", $this.data("suggestion"));
+						});
+						$actions.append($addToBatch);
+					}
+				}
+			}
 		});
 	},
-	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback) {
+	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback, 
+			suggestionCallback) {
 		var $container = $("#" + containerId);
+		$container.data("suggestionCallback", suggestionCallback);
+		
 		var $rendered = $container.find(".markdown-rendered");
 		
 		var content = $rendered.data("content");
@@ -985,7 +1041,7 @@ onedev.server.markdown = {
 			}
 		}, alignment);
 		
-		onedev.server.markdown.initRendered($rendered);
+		onedev.server.markdown.initRendered(containerId);
 		
 		var $img = $rendered.find("img");
 		$img.each(function() {

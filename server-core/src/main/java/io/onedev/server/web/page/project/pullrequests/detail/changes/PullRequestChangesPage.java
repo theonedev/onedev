@@ -168,18 +168,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		
 	};
 	
-	private final IModel<CodeComment> openCommentModel = new LoadableDetachableModel<CodeComment>() {
-
-		@Override
-		protected CodeComment load() {
-			if (state.commentId != null) 
-				return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
-			else
-				return null;
-		}
-		
-	};
-	
 	private transient Map<ImmutableTriple<ObjectId, ObjectId, String>, Map<Integer, Integer>> lineMappingCache;
 	
 	public PullRequestChangesPage(PageParameters params) {
@@ -566,7 +554,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		comparisonBaseModel.detach();
 		oldCommentsModel.detach();
 		newCommentsModel.detach();
-		openCommentModel.detach();
 		super.onDetach();
 	}
 	
@@ -772,7 +759,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	
 	@Override
 	public CodeComment getOpenComment() {
-		return openCommentModel.getObject();
+		if (state.commentId != null) 
+			return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+		else
+			return null;
 	}
 
 	private ObjectId getComparisonBase() {
@@ -782,7 +772,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		state.commentId = comment.getId();
-		openCommentModel.detach();
 		state.mark = getPermanentMark(comment.getMark());
 		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
@@ -791,7 +780,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public void onCommentClosed(AjaxRequestTarget target) {
 		state.commentId = null;
-		openCommentModel.detach();
 		state.mark = null;
 		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
