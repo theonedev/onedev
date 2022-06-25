@@ -60,8 +60,8 @@ onedev.server.markdown = {
 				var langHint = "suggestion";
 				$input.focus();
 				var selected = $input.range();
-				document.execCommand("insertText", false, "\n```" + langHint + "\n" + content + "\n```\n");		
-				$input.range(selected.start+5+langHint.length+from, selected.start+5+langHint.length+to);
+				document.execCommand("insertText", false, "```" + langHint + "\n" + content + "\n```\n");		
+				$input.range(selected.start+4+langHint.length+from, selected.start+4+langHint.length+to);
 				onedev.server.markdown.fireInputEvent($input);
 			});
 		}
@@ -727,11 +727,11 @@ onedev.server.markdown = {
 			var langHint = "programming language";
 			var selected = $input.range();
 			if (selected.length != 0) {
-				document.execCommand("insertText", false, "\n```" + langHint + "\n" + selected.text + "\n```\n");				
-				$input.range(selected.start+4, selected.start+4+langHint.length);
+				document.execCommand("insertText", false, "```" + langHint + "\n" + selected.text + "\n```\n");				
+				$input.range(selected.start+3, selected.start+3+langHint.length);
 			} else {
-				document.execCommand("insertText", false, "\n```" + langHint + "\n```\n");				
-				$input.range(selected.start+4, selected.start+4+langHint.length);
+				document.execCommand("insertText", false, "```" + langHint + "\n```\n");				
+				$input.range(selected.start+3, selected.start+3+langHint.length);
 			}
 			closeMenu();			
 			onedev.server.markdown.fireInputEvent($input);
@@ -949,42 +949,42 @@ onedev.server.markdown = {
 			}
 			var $actions = $("<div class='actions'></div>");
 			$this.parent().append($actions);
-			var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg>";
-			var $copy = $("<a class='pressable' title='Copy to clipboard'>" + icon + "</a>");
-			$actions.append($copy);
-			new Clipboard($copy[0], {
-				text: function() {
-					if ($this.parent().hasClass("suggestion"))
-						return $this.data("suggestion");
-					else
+			
+			if (!$this.parent().hasClass("suggestion")) {
+				var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg>";
+				var $copy = $("<a class='pressable' title='Copy to clipboard'>" + icon + "</a>");
+				$actions.append($copy);
+				new Clipboard($copy[0], {
+					text: function() {
 						return $this.text();
-				}
-			});			
+					}
+				});			
+			}
 			
 			var suggestionCallback = $container.data("suggestionCallback");
 			if (suggestionCallback) {
 				if ($this.data("suggestionoutdated")) {
-					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg>";
-					var $warning = $("<a class='ml-2' disabled='disabled' title='This suggestion is outdated'>" + icon + "</a>");
+					var icon = "<svg class='icon icon-sm'><use xlink:href='" + onedev.server.icons + "#warning'/></svg>";
+					var $warning = $("<a class='ml-2' disabled='disabled' title='Suggestion is outdated either due to code change or pull request close'>" + icon + "</a>");
 					$actions.append($warning);
 				} else if ($this.data("suggestionapplyinbatch")) {
-					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#clock'/></svg>";
-					var $removeFromBatch = $("<a class='pressable ml-2' title='Added to batch to be committed with other suggestions later, click to remove'>" + icon + "</a>");
+					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#minus-square'/></svg>";
+					var $removeFromBatch = $("<a class='pressable ml-2' title='Remove from batch'>" + icon + "</a>");
 					$removeFromBatch.click(function() {
 						suggestionCallback("removeFromBatch");
 					});
 					$actions.append($removeFromBatch);
 				} else if ($this.data("suggestionappliable")) {
 					var icon = "<svg class='icon'><use xlink:href='" + onedev.server.icons + "#add-to-git'/></svg>";
-					var $apply = $("<a class='pressable ml-2' title='Apply suggestion by committing the change'>" + icon + "</a>");
+					var $apply = $("<a class='pressable ml-2' title='Commit suggestion'>" + icon + "</a>");
 					$actions.append($apply);
 					$apply.click(function() {
 						suggestionCallback("apply", $this.data("suggestion"));
 					});
 					
 					if ($this.data("suggestionbatchappliable")) {
-						var icon = "<svg class='icon flip-x'><use xlink:href='" + onedev.server.icons + "#batch'/></svg>";
-						var $addToBatch = $("<a class='pressable ml-2' title='Add to batch to be committed with other suggestions later'>" + icon + "</a>");
+						var icon = "<svg class='icon flip-x'><use xlink:href='" + onedev.server.icons + "#plus-square'/></svg>";
+						var $addToBatch = $("<a class='pressable ml-2' title='Add to batch to commit with other suggestions later'>" + icon + "</a>");
 						$addToBatch.click(function() {
 							suggestionCallback("addToBatch", $this.data("suggestion"));
 						});

@@ -13,7 +13,7 @@ public class SuggestionBatchApplyBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String commitMessage;
+	private String commitMessage = "Apply suggested changes from code comments";
 
 	@Editable
 	@OmitName

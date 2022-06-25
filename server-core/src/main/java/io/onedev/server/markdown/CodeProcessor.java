@@ -70,7 +70,8 @@ public class CodeProcessor implements MarkdownProcessor {
 					SuggestFor suggestFor = suggestionSupport.getSuggestFor();
 					List<String> content = suggestFor.getContent();
 					List<DiffBlock<String>> diffBlocks = DiffUtils.diff(content, suggestion);
-					codeElement.html(new DiffRenderer(diffBlocks).renderDiffs());
+					codeElement.html("<div class='pb-2 mb-2 head font-size-xs mx-n2 px-2'>Suggested change</div>" 
+								+ new DiffRenderer(diffBlocks).renderDiffs());
 					codeElement.attr("data-suggestion", suggestionContent);
 					codeElement.attr("data-suggestionfile", suggestFor.getFileName());
 					codeElement.parent().addClass("suggestion");

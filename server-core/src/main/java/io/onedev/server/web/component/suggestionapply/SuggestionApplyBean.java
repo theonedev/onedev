@@ -15,7 +15,7 @@ public class SuggestionApplyBean implements Serializable {
 
 	private String branch;
 	
-	private String commitMessage;
+	private String commitMessage = "Apply suggested change from code comment";
 
 	@Editable(order=100, description="Specify branch to commit suggested change")
 	@BranchChoice

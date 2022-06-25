@@ -268,6 +268,12 @@
 .markdown-rendered pre.code.suggestion {
 	white-space: normal;
 }
+.markdown-rendered pre.code.suggestion>code>.head {
+	border-bottom: 1px dashed var(--secondary);
+}
+.dark-mode .markdown-rendered pre.code.suggestion>code>.head {
+	border-color: var(--dark-mode-lighter-dark);
+}
 .markdown-rendered pre.code {
 	padding: 0.6rem;
 	border: 1px dashed var(--secondary);
@@ -281,8 +287,11 @@
 .markdown-rendered pre.code>.actions {
 	position: absolute;
 	right: 10px;
-	top: 10px;
+	top: 8px;
 	display: none;
+}
+.markdown-rendered pre.code.suggestion>.actions {
+	display: block;
 }
 .markdown-rendered pre.code>.actions>a {
 	background: white;
