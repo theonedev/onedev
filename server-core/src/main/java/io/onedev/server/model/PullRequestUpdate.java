@@ -109,6 +109,7 @@ public class PullRequestUpdate extends AbstractEntity {
 				treeWalk.addTree(headCommit.getTree());
 				treeWalk.addTree(comparisonBaseCommit.getTree());
 				treeWalk.setFilter(TreeFilter.ANY_DIFF);
+				treeWalk.setRecursive(true);
 				while (treeWalk.next())
 					changedFiles.add(treeWalk.getPathString());
 			} catch (IOException e) {

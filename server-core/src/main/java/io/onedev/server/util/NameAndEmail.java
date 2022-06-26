@@ -16,9 +16,9 @@ public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 	
 	private final String emailAddress;
 	
-	public NameAndEmail(@Nullable String name, String emailAddress) {
-		this.name = name;
-		this.emailAddress = emailAddress;
+	public NameAndEmail(@Nullable String name, @Nullable String emailAddress) {
+		this.name = name!=null?name:"";
+		this.emailAddress = emailAddress!=null?emailAddress:"";
 	}
 
 	public NameAndEmail(PersonIdent person) {
@@ -29,12 +29,10 @@ public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 		return new PersonIdent(name, emailAddress);
 	}
 	
-	@Nullable
 	public String getName() {
 		return name;
 	}
 
-	@Nullable
 	public String getEmailAddress() {
 		return emailAddress;
 	}
@@ -59,9 +57,10 @@ public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 
 	@Override
 	public int compareTo(NameAndEmail nameAndEmail) {
-		if (name != null && nameAndEmail.name != null)
-			return name.compareTo(nameAndEmail.name);
-		else 
+		int result = name.compareTo(nameAndEmail.name);
+		if (result != 0)
+			return result;
+		else
 			return emailAddress.compareTo(nameAndEmail.emailAddress);
 	}
 	

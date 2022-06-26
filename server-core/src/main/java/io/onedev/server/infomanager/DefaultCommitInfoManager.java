@@ -89,7 +89,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final int INFO_VERSION = 12;
+	private static final int INFO_VERSION = 13;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
 	
@@ -121,11 +121,15 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	
 	private static final String INDEX_TO_USER_STORE = "indexToUser";
 	
+	private static final String EMAIL_TO_INDEX_STORE = "emailToIndex";
+	
 	private static final String DAILY_CONTRIBUTIONS_STORE = "dailyContributions";
 	
 	private static final ByteIterable NEXT_PATH_INDEX_KEY = new StringByteIterable("nextPathIndex");
 	
 	private static final ByteIterable NEXT_USER_INDEX_KEY = new StringByteIterable("nextUserIndex");
+	
+	private static final ByteIterable NEXT_EMAIL_INDEX_KEY = new StringByteIterable("nextEmailIndex");
 	
 	private static final ByteIterable LAST_COMMIT_KEY = new StringByteIterable("lastCommit");
 	
@@ -191,6 +195,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
 		Store indexToPathStore = getStore(env, INDEX_TO_PATH_STORE);
 		Store userToIndexStore = getStore(env, USER_TO_INDEX_STORE);
+		Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);
 		Store indexToUserStore = getStore(env, INDEX_TO_USER_STORE);
 		Store fixCommitsStore = getStore(env, FIX_COMMITS_STORE);
 		
@@ -235,6 +240,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 							
 							NextIndex nextIndex = new NextIndex();
 							nextIndex.user = readInt(defaultStore, txn, NEXT_USER_INDEX_KEY, 0);
+							nextIndex.email = readInt(defaultStore, txn, NEXT_EMAIL_INDEX_KEY, 0);
 							nextIndex.path = readInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, 0);
 							
 							Map<Long, Integer> commitCountCache = new HashMap<>();
@@ -351,20 +357,27 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 												indexToUserStore.put(txn, new IntByteIterable(userIndex), authorKey);
 											}
 											
+											ByteIterable emailKey = new StringByteIterable(nameAndEmail.getEmailAddress());											
+											int emailIndex = readInt(emailToIndexStore, txn, emailKey, -1);
+											if (emailIndex == -1) {
+												emailIndex = nextIndex.email++;
+												writeInt(emailToIndexStore, txn, emailKey, emailIndex);
+											}
+											
 											for (FileChange change: currentCommit.getFileChanges()) {
 												for (String path: change.getPaths()) {
 													int pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
 															nextIndex, path);
-													updateCommitCount(commitCountsStore, txn, commitCountCache, userIndex, pathIndex);
+													updateCommitCount(commitCountsStore, txn, commitCountCache, emailIndex, pathIndex);
 													while (path.contains("/")) {
 														path = StringUtils.substringBeforeLast(path, "/");
 														pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
 																nextIndex, path);
-														updateCommitCount(commitCountsStore, txn, commitCountCache, userIndex, pathIndex);
+														updateCommitCount(commitCountsStore, txn, commitCountCache, emailIndex, pathIndex);
 													}
 													pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
 															nextIndex, "");
-													updateCommitCount(commitCountsStore, txn, commitCountCache, userIndex, pathIndex);
+													updateCommitCount(commitCountsStore, txn, commitCountCache, emailIndex, pathIndex);
 												}
 											}
 										}
@@ -414,6 +427,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 							totalCommitCountCache.remove(project.getId());
 							
 							writeInt(defaultStore, txn, NEXT_USER_INDEX_KEY, nextIndex.user);
+							writeInt(defaultStore, txn, NEXT_EMAIL_INDEX_KEY, nextIndex.email);
 							writeInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, nextIndex.path);
 							
 							userBytes = SerializationUtils.serialize((Serializable) users);
@@ -761,14 +775,14 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	}
 	
 	private void updateCommitCount(Store store, Transaction txn, 
-			Map<Long, Integer> commitCountCache, int userIndex, int pathIndex) {
-		long commitCountKey = (userIndex<<32)|pathIndex;
+			Map<Long, Integer> commitCountCache, int emailIndex, int pathIndex) {
+		long commitCountKey = ((long)emailIndex<<32)|pathIndex;
 		
-		Integer commitCountOfPathByUser = commitCountCache.get(commitCountKey);
-		if (commitCountOfPathByUser == null)
-			commitCountOfPathByUser = readInt(store, txn, new LongByteIterable(commitCountKey), 0);
-		commitCountOfPathByUser ++;
-		commitCountCache.put(commitCountKey, commitCountOfPathByUser);
+		Integer commitCountOfPathByEmail = commitCountCache.get(commitCountKey);
+		if (commitCountOfPathByEmail == null)
+			commitCountOfPathByEmail = readInt(store, txn, new LongByteIterable(commitCountKey), 0);
+		commitCountOfPathByEmail ++;
+		commitCountCache.put(commitCountKey, commitCountOfPathByEmail);
 	}
 	
 	public List<NameAndEmail> getUsers(Project project) {
@@ -879,7 +893,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	@Override
 	public int getCommitCount(Project project, User user, String path) {
 		Environment env = getEnv(project.getId().toString());
-		Store emailToIndexStore = getStore(env, USER_TO_INDEX_STORE);
+		Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);
 		Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
 		Store commitCountStore = getStore(env, COMMIT_COUNTS_STORE);
 
@@ -889,11 +903,11 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 			public Integer compute(Transaction txn) {
 				AtomicInteger count = new AtomicInteger(0);
 				user.getEmailAddresses().stream().filter(it->it.isVerified()).forEach(it-> {
-					int userIndex = readInt(emailToIndexStore, txn, new StringByteIterable(it.getValue()), -1);
-					if (userIndex != -1) {
+					int emailIndex = readInt(emailToIndexStore, txn, new StringByteIterable(it.getValue()), -1);
+					if (emailIndex != -1) {
 						int pathIndex = readInt(pathToIndexStore, txn, new StringByteIterable(path), -1);
 						if (pathIndex != -1) {
-							long commitCountKey = (userIndex<<32)|pathIndex;
+							long commitCountKey = ((long)emailIndex<<32)|pathIndex;
 							count.addAndGet(readInt(commitCountStore, txn, new LongByteIterable(commitCountKey), 0));
 						} 
 					} 
@@ -1427,6 +1441,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 
 	private static class NextIndex {
 		int user;
+		
+		int email;
 		
 		int path;
 	}
