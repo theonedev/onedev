@@ -1413,15 +1413,21 @@ public abstract class RevisionDiffPanel extends Panel {
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
-		float commentWidth;
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
-		if (cookie != null) 
-			commentWidth = Float.parseFloat(cookie.getValue());
-		else 
-			commentWidth = 300;
-		
-		commentContainer.add(AttributeAppender.append("style", "width:" + commentWidth + "px"));
+		commentContainer.add(AttributeAppender.append("style", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				float commentWidth;
+				WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+				Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
+				if (cookie != null) 
+					commentWidth = Float.parseFloat(cookie.getValue());
+				else 
+					commentWidth = 300;
+				return "width:" + commentWidth + "px";
+			}
+			
+		}));
 		
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		head.setOutputMarkupId(true);
