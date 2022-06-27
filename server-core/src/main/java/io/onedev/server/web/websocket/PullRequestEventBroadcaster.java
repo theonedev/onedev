@@ -20,6 +20,7 @@ public class PullRequestEventBroadcaster {
 	@Listen
 	public void on(PullRequestEvent event) {
 		webSocketManager.notifyObservableChange(PullRequest.getWebSocketObservable(event.getRequest().getId()));
+		webSocketManager.notifyObservableChange(PullRequest.getClosedWebSocketObservable(event.getRequest().getId()));
 	}
 
 }

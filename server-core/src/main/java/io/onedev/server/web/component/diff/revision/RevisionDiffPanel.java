@@ -323,6 +323,8 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 	};
 	
+	private float commentWidth = 300;
+	
 	private WebMarkupContainer commentContainer;
 
 	private ListView<BlobChange> diffsView;
@@ -621,7 +623,7 @@ public abstract class RevisionDiffPanel extends Panel {
 					public Collection<String> getObservables() {
 						Collection<String> observables = Sets.newHashSet();
 						if (getPullRequest() != null)
-							observables.add(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+							observables.add(PullRequest.getClosedWebSocketObservable(getPullRequest().getId()));
 						return observables;
 					}
 					
@@ -1417,13 +1419,11 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			protected String load() {
-				float commentWidth;
 				WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 				Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
+				// cookie will not be sent for websocket request
 				if (cookie != null) 
 					commentWidth = Float.parseFloat(cookie.getValue());
-				else 
-					commentWidth = 300;
 				return "width:" + commentWidth + "px";
 			}
 			
@@ -1620,7 +1620,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			public Collection<String> getObservables() {
 				Set<String> observables = new HashSet<>();
 				if (getPullRequest() != null)
-					observables.add(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+					observables.add(PullRequest.getClosedWebSocketObservable(getPullRequest().getId()));
 				return observables;
 			}
 			
