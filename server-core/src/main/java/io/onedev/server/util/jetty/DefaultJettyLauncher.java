@@ -13,6 +13,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.tika.mime.MimeTypes;
+import org.eclipse.jetty.http.HttpCookie.SameSite;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -66,6 +67,8 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
         servletContextHandler.addFilter(DisableTraceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
         
         servletContextHandler.getSessionHandler().setSessionIdPathParameterName(null);
+        servletContextHandler.getSessionHandler().setSameSite(SameSite.LAX);  
+        servletContextHandler.getSessionHandler().setHttpOnly(true);  
         
         /*
          * By default contributions is in reverse dependency order. We reverse the order so that 
