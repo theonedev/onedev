@@ -23,8 +23,6 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 	
 	private String toRev;
 	
-	private String path;
-	
 	public ListChangedFilesCommand(File gitDir, Map<String, String> gitEnvs) {
 		super(gitDir, gitEnvs);
 	}
@@ -39,11 +37,6 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 		return this;
 	}
 	
-	public ListChangedFilesCommand path(String path) {
-		this.path = path;
-		return this;
-	}
-	
 	@Override
 	public Collection<String> call() {
 		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
@@ -54,9 +47,6 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 		Commandline cmd = cmd();
 		
 		cmd.addArgs("diff", "--name-only", "--no-renames", fromRev + ".." + toRev);
-		
-		if (path != null)
-			cmd.addArgs("--", path);
 		
 		cmd.execute(new LineConsumer() {
 

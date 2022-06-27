@@ -55,6 +55,8 @@ import io.onedev.server.git.GitContributor;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.GitCommit;
+import io.onedev.server.git.command.ListFileChangesCommand;
+import io.onedev.server.git.command.ListFilesCommand;
 import io.onedev.server.git.command.ListNumStatsCommand;
 import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.RevListCommand;
@@ -89,13 +91,11 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final int INFO_VERSION = 13;
+	private static final int INFO_VERSION = 14;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
 	
 	private static final int COLLECT_BATCH_SIZE = 10000;
-	
-	private static final int MAX_COLLECTING_FILES = 50000;
 	
 	private static final int MAX_HISTORY_PATHS = 100;
 	
@@ -136,6 +136,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	private static final ByteIterable LAST_COMMIT_OF_LINE_STATS_KEY = new StringByteIterable("lastCommitOfLineStats");
 	
 	private static final ByteIterable LAST_COMMIT_OF_CONTRIBS_KEY = new StringByteIterable("lastCommitOfContribs");
+	
+	private static final ByteIterable LAST_COMMIT_OF_FILES_KEY = new StringByteIterable("lastCommitOfFiles");
 	
 	private static final ByteIterable LINE_STATS_KEY = new StringByteIterable("lineStats");
 	
@@ -252,13 +254,6 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 							else
 								users = new HashSet<>();
 
-							Map<String, Long> files;
-							byte[] fileBytes = readBytes(defaultStore, txn, FILES_KEY);
-							if (fileBytes != null)
-								files = (Map<String, Long>) SerializationUtils.deserialize(fileBytes);
-							else
-								files = new HashMap<>();
-
 							new ElementPumper<GitCommit>() {
 
 								@Override
@@ -335,11 +330,6 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 											if (addNextCommit)
 												fixingCommits.add(currentCommitId);
 											writeCommits(fixCommitsStore, txn, issueKey, fixingCommits);
-										}
-										
-										if (currentCommit.getCommitDate() != null) {
-											for (String file: currentCommit.getChangedFiles())
-												files.put(file, currentCommit.getCommitDate().getTime());
 										}
 										
 										if (currentCommit.getCommitter() != null)
@@ -434,16 +424,6 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 							defaultStore.put(txn, USERS_KEY, new ArrayByteIterable(userBytes));
 							usersCache.remove(project.getId());
 							
-							if (files.size() > MAX_COLLECTING_FILES) {
-								List<String> fileList = new ArrayList<>(files.keySet());
-								fileList.sort((file1, file2)->files.get(file1).compareTo(files.get(file2)));
-								for (int i=0; i<fileList.size() - MAX_COLLECTING_FILES; i++)
-									files.remove(fileList.get(i));
-							}
-							fileBytes = SerializationUtils.serialize((Serializable) files);
-							defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(fileBytes));
-							filesCache.remove(project.getId());
-							
 							for (Map.Entry<Long, Integer> entry: commitCountCache.entrySet()) 
 								writeInt(commitCountsStore, txn, new LongByteIterable(entry.getKey()), entry.getValue());
 							
@@ -458,6 +438,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		if (GitUtils.branch2ref(project.getDefaultBranch()).equals(refName)) {
 			collectLineStats(project, commitId);
 			collectContribs(project, commitId);
+			collectFiles(project, commitId);
 		}		
 		
 		logger.debug("Collected commit information (project: {}, ref: {})", project.getPath(), refName);
@@ -573,6 +554,85 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		});
 	}
 	
+	private void collectFiles(Project project, ObjectId commitId) {
+		Environment env = getEnv(project.getId().toString());
+		Store defaultStore = getStore(env, DEFAULT_STORE);
+		
+		Repository repository = project.getRepository();
+		
+		ObjectId lastCommitId = env.computeInTransaction(new TransactionalComputable<ObjectId>() {
+			
+			@Override
+			public ObjectId compute(Transaction txn) {
+				ObjectId lastCommitId;
+				byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_OF_FILES_KEY);
+				if (lastCommitBytes != null) {
+					lastCommitId = ObjectId.fromRaw(lastCommitBytes);
+					try {
+						if (!repository.getObjectDatabase().has(lastCommitId))
+							lastCommitId = null;
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				} else {
+					lastCommitId = null;
+				}
+				return lastCommitId;
+			}
+		});
+
+		if (lastCommitId == null) {
+			env.executeInTransaction(new TransactionalExecutable() {
+				
+				@Override
+				public void execute(Transaction txn) {
+					ListFilesCommand command = new ListFilesCommand(project.getGitDir());
+					Collection<String> files = command.revision(commitId.name()).call();
+					
+					byte[] bytesOfFiles = SerializationUtils.serialize((Serializable) files);
+					defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytesOfFiles));
+					defaultStore.put(txn, LAST_COMMIT_OF_FILES_KEY, new CommitByteIterable(commitId));
+					filesCache.remove(project.getId());
+				}
+				
+			});
+		} else {
+			env.executeInTransaction(new TransactionalExecutable() {
+				
+				@SuppressWarnings("unchecked")
+				@Override
+				public void execute(Transaction txn) {
+					Collection<String> files;
+					byte[] bytesOfFiles = readBytes(defaultStore, txn, FILES_KEY);
+					if (bytesOfFiles != null) 
+						files = (Set<String>) SerializationUtils.deserialize(bytesOfFiles);
+					else 
+						files = new HashSet<>();
+					
+					boolean filesChanged = false;
+					ListFileChangesCommand command = new ListFileChangesCommand(project.getGitDir());
+					for (FileChange change: command.fromRev(lastCommitId.name()).toRev(commitId.name()).call()) {
+						if (change.getOldPath() == null && change.getNewPath() != null) {
+							files.add(change.getNewPath());
+							filesChanged = true;
+						} else if (change.getOldPath() != null && change.getNewPath() == null) {
+							files.remove(change.getOldPath());
+							filesChanged = true;
+						}
+					}
+
+					if (filesChanged) {
+						bytesOfFiles = SerializationUtils.serialize((Serializable) files);
+						defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytesOfFiles));
+						defaultStore.put(txn, LAST_COMMIT_OF_FILES_KEY, new CommitByteIterable(commitId));
+						filesCache.remove(project.getId());
+					}
+				}
+				
+			});
+		} 
+	}	
+	
 	private void collectLineStats(Project project, ObjectId commitId) {
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -672,7 +732,6 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 				}
 				
 			});
-			
 		}		
 	}
 	
@@ -818,7 +877,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		List<String> files = filesCache.get(project.getId());
 		if (files == null) {
 			Environment env = getEnv(project.getId().toString());
-			final Store store = getStore(env, DEFAULT_STORE);
+			Store store = getStore(env, DEFAULT_STORE);
 
 			files = env.computeInReadonlyTransaction(new TransactionalComputable<List<String>>() {
 
@@ -827,13 +886,11 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 				public List<String> compute(Transaction txn) {
 					byte[] bytes = readBytes(store, txn, FILES_KEY);
 					if (bytes != null) {
-						List<String> files = new ArrayList<>(
-								((Map<String, Long>)SerializationUtils.deserialize(bytes)).keySet());
+						List<String> files = new ArrayList<>((Collection<String>)SerializationUtils.deserialize(bytes));
 						Map<String, List<String>> segmentsMap = new HashMap<>();
 						Splitter splitter = Splitter.on("/");
-						for (String file: files) {
+						for (String file: files) 
 							segmentsMap.put(file, splitter.splitToList(file));
-						}
 						files.sort(new Comparator<String>() {
 
 							@Override
