@@ -111,6 +111,11 @@ public class GitPostReceiveCallback extends HttpServlet {
         	if (branch != null && project.getDefaultBranch() != null && !branch.equals(project.getDefaultBranch()))
         		showPullRequestLink(output, project, branch);
         	
+        	if (!oldObjectId.equals(ObjectId.zeroId())) 
+        		oldObjectId = project.getRevCommit(oldObjectId, true).copy();
+        	if (!newObjectId.equals(ObjectId.zeroId())) 
+        		newObjectId = project.getRevCommit(newObjectId, true).copy();
+        	
         	eventData.add(new ImmutableTriple<>(refName, oldObjectId, newObjectId));
     		
         	field = field.substring(40);
