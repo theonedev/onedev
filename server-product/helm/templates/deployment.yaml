@@ -101,6 +101,8 @@ spec:
         - name: mysql
           image: mysql:5.7
           args:
+            - "--character-set-server=utf8mb4"
+            - "--collation-server=utf8mb4_unicode_ci"
             - "--ignore-db-dir=lost+found"
           env:
             - name: MYSQL_DATABASE
