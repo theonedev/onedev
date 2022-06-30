@@ -123,6 +123,27 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			
 		}).add(newOnChangeBehavior(form)));
 		
+		form.add(new CheckBox("confidentialCheck", new IModel<Boolean>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Boolean getObject() {
+				return selectedFields.contains(NAME_CONFIDENTIAL);
+			}
+
+			@Override
+			public void setObject(Boolean object) {
+				if (object)
+					selectedFields.add(NAME_CONFIDENTIAL);
+				else
+					selectedFields.remove(NAME_CONFIDENTIAL);
+			}
+			
+		}).add(newOnChangeBehavior(form)));
+		
 		form.add(new CheckBox("milestoneCheck", new IModel<Boolean>() {
 
 			@Override
@@ -200,6 +221,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		Set<String> excludedProperties = new HashSet<>();
 		if (!selectedFields.contains(NAME_STATE))
 			excludedProperties.add(PROP_STATE);
+		if (!selectedFields.contains(NAME_CONFIDENTIAL))
+			excludedProperties.add(PROP_CONFIDENTIAL);
 		if (!selectedFields.contains(NAME_MILESTONES))
 			excludedProperties.add(PROP_MILESTONES);
 		
@@ -253,6 +276,12 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						else
 							state = null;
 						
+						Boolean confidential;
+						if (selectedFields.contains(NAME_CONFIDENTIAL))
+							confidential = builtInFieldsBean.isConfidential();
+						else
+							confidential = null;
+						
 						Collection<Milestone> milestones;
 						if (selectedFields.contains(NAME_MILESTONES)) {
 							milestones = new ArrayList<>();
@@ -268,7 +297,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						Map<String, Object> fieldValues = FieldUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
 								customFieldsBean, selectedFields);
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
-								getIssueIterator(), state, milestones, fieldValues, comment);
+								getIssueIterator(), state, confidential, milestones, fieldValues, comment);
 						onUpdated(target);
 					}
 					

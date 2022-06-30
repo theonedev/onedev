@@ -1055,34 +1055,46 @@ onedev.server.markdown = {
 	},
 	renderIssueTooltip: function(title, state, stateFontColor, stateBackgroundColor) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.empty().append("" +
-				"<div class='d-flex issue align-items-center'>" +
-				"  <span class='state badge mr-3'></span> <span class='title font-weight-bold'></span>" +
-				"</div>");
-		$tooltip.find(".state").css({
-			"color": stateFontColor,
-			"background": stateBackgroundColor
-		}).text(state);
-		$tooltip.find(".title").text(title);
+		if (title) {
+			$tooltip.empty().append("" +
+					"<div class='d-flex issue align-items-center'>" +
+					"  <span class='state badge mr-3'></span> <span class='title font-weight-bold'></span>" +
+					"</div>");
+			$tooltip.find(".state").css({
+				"color": stateFontColor,
+				"background": stateBackgroundColor
+			}).text(state);
+			$tooltip.find(".title").text(title);
+		} else {
+			$tooltip.empty().append("<i>Permission denied</i>");			
+		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
 	renderPullRequestTooltip: function(title, status, statusCss) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.empty().append("" +
-				"<div class='d-flex align-items-center'>" +
-				"  <span class='badge status mr-3'></span> <span class='title font-weight-bold'></span>" +
-				"</div>");
-		$tooltip.find(".status").addClass(statusCss).text(status);
-		$tooltip.find(".title").text(title);
+		if (title) {
+			$tooltip.empty().append("" +
+					"<div class='d-flex align-items-center'>" +
+					"  <span class='badge status mr-3'></span> <span class='title font-weight-bold'></span>" +
+					"</div>");
+			$tooltip.find(".status").addClass(statusCss).text(status);
+			$tooltip.find(".title").text(title);
+		} else {
+			$tooltip.empty().append("<i>Permission denied</i>");			
+		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
 	renderBuildTooltip: function(title, iconHref, iconCss) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.empty().append("" +
-				"<div class='d-flex align-items-center'>" +
-				"  <svg class='mr-2 " + iconCss + "'><use xlink:href='" + iconHref + "'/></svg> <span class='title font-weight-bold'></span>" +
-				"</div>");
-		$tooltip.find(".title").text(title);
+		if (title) {
+			$tooltip.empty().append("" +
+					"<div class='d-flex align-items-center'>" +
+					"  <svg class='mr-2 " + iconCss + "'><use xlink:href='" + iconHref + "'/></svg> <span class='title font-weight-bold'></span>" +
+					"</div>");
+			$tooltip.find(".title").text(title);
+		} else {
+			$tooltip.empty().append("<i>Permission denied</i>");			
+		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
 	renderUserTooltip: function(avatarUrl, name) {
@@ -1097,12 +1109,16 @@ onedev.server.markdown = {
 	},
 	renderCommitTooltip: function(author, date, commitMessage) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.empty().append("" +
-				"  <div class='font-weight-bolder mb-2'><span class='author'></span> <span class='date'></span></div>" +
-				"  <pre class='body mb-0'></pre>");
-		$tooltip.find(".author").text(author);
-		$tooltip.find(".date").text(date);
-		$tooltip.find(".body").text(commitMessage);
+		if (commitMessage) {
+			$tooltip.empty().append("" +
+					"  <div class='font-weight-bolder mb-2'><span class='author'></span> <span class='date'></span></div>" +
+					"  <pre class='body mb-0'></pre>");
+			$tooltip.find(".author").text(author);
+			$tooltip.find(".date").text(date);
+			$tooltip.find(".body").text(commitMessage);
+		} else {
+			$tooltip.empty().append("<i>Permission denied</i>");			
+		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
 	onEmojisLoaded: function(containerId, emojis) {

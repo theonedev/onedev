@@ -104,7 +104,7 @@ public class GroovyScript implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjects(matchWith);
+		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 		
 	public final boolean isAuthorized(ScriptIdentity identity) {

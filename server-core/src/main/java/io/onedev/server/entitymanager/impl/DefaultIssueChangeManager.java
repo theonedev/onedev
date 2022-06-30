@@ -58,6 +58,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
+import io.onedev.server.model.support.issue.changedata.IssueConfidentialChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueLinkAddData;
 import io.onedev.server.model.support.issue.changedata.IssueLinkChangeData;
@@ -193,6 +194,22 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Transactional
 	@Override
+	public void changeConfidential(Issue issue, boolean confidential) {
+		boolean prevConfidential = issue.isConfidential();
+		if (confidential != prevConfidential) {
+			issue.setConfidential(confidential);
+			
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueConfidentialChangeData(prevConfidential, issue.isConfidential()));
+			save(change);
+			dao.persist(issue);
+		}
+	}
+	
+	@Transactional
+	@Override
 	public void addSchedule(Issue issue, Milestone milestone) {
 		issueScheduleManager.save(issue.addSchedule(milestone));
 		
@@ -256,16 +273,19 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	@Transactional
 	@Override
-	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
-			@Nullable Collection<Milestone> milestones, Map<String, Object> fieldValues, 
-			@Nullable String comment) {
+	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Boolean confidential,
+			@Nullable Collection<Milestone> milestones, Map<String, Object> fieldValues, @Nullable String comment) {
 		while (issues.hasNext()) {
 			Issue issue = issues.next();
 			String prevState = issue.getState();
+			boolean prevConfidential = issue.isConfidential();
 			Collection<Milestone> prevMilestones = issue.getMilestones();
 			Map<String, Input> prevFields = issue.getFieldInputs();
 			if (state != null)
 				issue.setState(state);
+			
+			if (confidential != null)
+				issue.setConfidential(confidential);
 			
 			if (milestones != null) 
 				issueScheduleManager.syncMilestones(issue, milestones);
@@ -274,6 +294,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			issueFieldManager.saveFields(issue);
 
 			if (!prevState.equals(issue.getState()) 
+					|| prevConfidential != issue.isConfidential()
 					|| !prevFields.equals(issue.getFieldInputs()) 
 					|| !new HashSet<>(prevMilestones).equals(new HashSet<>(issue.getMilestones()))) {
 				IssueChange change = new IssueChange();
@@ -284,7 +305,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				prevMilestoneList.sort(new Milestone.DatesAndStatusComparator());
 				List<Milestone> currentMilestoneList = new ArrayList<>(issue.getMilestones());
 				currentMilestoneList.sort(new Milestone.DatesAndStatusComparator());
-				change.setData(new IssueBatchUpdateData(prevState, issue.getState(), prevMilestoneList, 
+				change.setData(new IssueBatchUpdateData(prevState, issue.getState(), 
+						prevConfidential, issue.isConfidential(), prevMilestoneList, 
 						currentMilestoneList, prevFields, issue.getFieldInputs()));
 				save(change, comment);
 			}
@@ -741,8 +763,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 		
 		IssueLinkChangeData data = new IssueLinkChangeData(spec.getName(opposite), 
-				getIssueSummary(issue, prevLinkedIssue), 
-				getIssueSummary(issue, linkedIssue));
+				getLinkedIssueInfo(issue, prevLinkedIssue), 
+				getLinkedIssueInfo(issue, linkedIssue));
 		change.setData(data);
 		save(change);
 		
@@ -764,7 +786,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			IssueChange change = new IssueChange();
 			change.setIssue(prevLinkedIssue);
 			change.setUser(SecurityUtils.getUser());
-			String prevIssueSummary = getIssueSummary(prevLinkedIssue, issue);
+			String prevIssueSummary = getLinkedIssueInfo(prevLinkedIssue, issue);
 			if (multiple)
 				change.setData(new IssueLinkRemoveData(linkName, prevIssueSummary));
 			else
@@ -775,7 +797,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			IssueChange change = new IssueChange();
 			change.setIssue(linkedIssue);
 			change.setUser(SecurityUtils.getUser());
-			String issueSummary = getIssueSummary(linkedIssue, issue);
+			String issueSummary = getLinkedIssueInfo(linkedIssue, issue);
 			if (multiple)
 				change.setData(new IssueLinkAddData(linkName, issueSummary));
 			else
@@ -785,12 +807,12 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	}
 	
 	@Nullable
-	private String getIssueSummary(Issue issue, @Nullable Issue linkedIssue) {
+	private String getLinkedIssueInfo(Issue issue, @Nullable Issue linkedIssue) {
 		if (linkedIssue != null) {
 			if (linkedIssue.getNumberScope().equals(issue.getNumberScope()))
-				return linkedIssue.getNumberAndTitle();
+				return "#" + linkedIssue.getNumber();
 			else
-				return linkedIssue.getProject() + linkedIssue.getNumberAndTitle();
+				return linkedIssue.getProject() + "#" + linkedIssue.getNumber();
 		} else {
 			return null;
 		}
@@ -808,7 +830,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 	
 		String linkName = spec.getName(opposite);
-		IssueLinkAddData data = new IssueLinkAddData(linkName, getIssueSummary(issue, linkedIssue));
+		IssueLinkAddData data = new IssueLinkAddData(linkName, getLinkedIssueInfo(issue, linkedIssue));
 		change.setData(data);
 		save(change);
 		
@@ -827,7 +849,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 		
 		String linkName = spec.getName(opposite);
-		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, getIssueSummary(issue, linkedIssue));
+		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, getLinkedIssueInfo(issue, linkedIssue));
 		change.setData(data);
 		save(change);
 		

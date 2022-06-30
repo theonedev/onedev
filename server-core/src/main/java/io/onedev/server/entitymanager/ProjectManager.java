@@ -8,7 +8,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
-import org.apache.lucene.search.Query;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.Repository;
 
@@ -69,23 +68,15 @@ public interface ProjectManager extends EntityManager<Project> {
 	int count(Criteria<Project> criteria);
 
 	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> path, String pathPattern);
-	
-	Query getPathMatchQuery(String fieldName, String pathPattern);
-	
-	Predicate getSubtreePredicate(CriteriaBuilder builder, Path<Project> path, Project project);
-	
-	Query getSubtreeQuery(String fieldName, Project project);
-	
-	Predicate getProjectsPredicate(CriteriaBuilder builder, Path<Project> path, Collection<Project> projects);
-	
-	Query getProjectsQuery(String fieldName, Collection<Project> projects);
-	
+		
 	List<ProjectFacade> getChildren(Long projectId);
 	
 	void move(Collection<Project> projects, @Nullable Project parent);
 
 	void delete(Collection<Project> projects);
 	
-	int findLongestMatch(List<String> pathSegments);
+	Collection<Long> getProjectIds();
+	
+	Collection<Long> getSubtreeIds(Long projectId);
 	
 }

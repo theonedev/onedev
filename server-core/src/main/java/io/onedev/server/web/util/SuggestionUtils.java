@@ -138,7 +138,7 @@ public class SuggestionUtils {
 		}, ":");
 	}
 	
-	public static List<InputSuggestion> suggestProjects(String matchWith) {
+	public static List<InputSuggestion> suggestProjectPaths(String matchWith) {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 		List<String> projectPaths = projectManager.getPermittedProjects(new AccessProject())
 				.stream()
@@ -146,6 +146,16 @@ public class SuggestionUtils {
 				.sorted()
 				.collect(Collectors.toList());
 		return suggest(projectPaths, matchWith);
+	}
+	
+	public static List<InputSuggestion> suggestProjectNames(String matchWith) {
+		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		List<String> projectNames = projectManager.getPermittedProjects(new AccessProject())
+				.stream()
+				.map(it->it.getName())
+				.sorted()
+				.collect(Collectors.toList());
+		return suggest(projectNames, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestAgents(String matchWith) {

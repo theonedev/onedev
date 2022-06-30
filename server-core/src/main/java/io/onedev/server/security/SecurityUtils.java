@@ -47,7 +47,9 @@ import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildReports;
+import io.onedev.server.security.permission.AccessConfidentialIssues;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.EditIssueField;
@@ -176,7 +178,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (role != null) {
 			User user = getUser();
 			if (user != null) {
-				for (UserAuthorization authorization: user.getAuthorizations()) {
+				for (UserAuthorization authorization: user.getProjectAuthorizations()) {
 					Project authorizedProject = authorization.getProject();
 					if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project)) 
 						return true;
@@ -204,7 +206,25 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canAccess(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, new AccessProject()));
+		return canAccess(getSubject(), project);
+	}
+	
+	public static boolean canAccessConfidentialIssues(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new AccessConfidentialIssues()));
+	}
+	
+	public static boolean canAccess(Issue issue) {
+		return canAccess(SecurityUtils.getSubject(), issue);
+	}
+	
+	public static boolean canAccess(Subject subject, Project project) {
+		return subject.isPermitted(new ProjectPermission(project, new AccessProject()));
+	}
+	
+	public static boolean canAccess(Subject subject, Issue issue) {
+		Permission permission = new ProjectPermission(issue.getProject(), new ConfidentialIssuePermission(issue));
+		return issue.isConfidential() && subject.isPermitted(permission)
+				|| !issue.isConfidential() && canAccess(subject, issue.getProject());
 	}
 	
 	public static boolean canCreateChildren(Project project) {

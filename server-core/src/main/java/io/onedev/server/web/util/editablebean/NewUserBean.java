@@ -1,4 +1,4 @@
-package io.onedev.server.web.util;
+package io.onedev.server.web.util.editablebean;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;

@@ -196,7 +196,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggest(candidates, matchWith);
 										} else if (fieldName.equals(NAME_PROJECT)) {
 											if (!matchWith.contains("*"))
-												return SuggestionUtils.suggestProjects(matchWith);
+												return SuggestionUtils.suggestProjectPaths(matchWith);
 											else
 												return null;
 										} else if (fieldName.equals(NAME_STATE)) {

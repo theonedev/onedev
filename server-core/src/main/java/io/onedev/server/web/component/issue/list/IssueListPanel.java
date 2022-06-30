@@ -1287,7 +1287,17 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					protected void populateItem(ListItem<Issue> item) {
-						item.add(newIssueDetail("content", item.getModelObject().getId(), null));
+						Issue issue = item.getModelObject();
+						if (SecurityUtils.canAccess(issue)) {
+							item.add(newIssueDetail("content", issue.getId(), null));
+						} else {
+							Fragment fragment = new Fragment("content", "unauthorizedLinkedIssueFrag", IssueListPanel.this);
+							if (getProject().equals(issue.getProject()))
+								fragment.add(new Label("number", "#" + issue.getNumber()));
+							else
+								fragment.add(new Label("number", issue.getProject().getPath() + "#" + issue.getNumber()));
+							item.add(fragment);
+						}
 					}
 
 					@Override

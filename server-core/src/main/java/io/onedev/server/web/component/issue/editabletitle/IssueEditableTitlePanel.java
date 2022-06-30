@@ -4,6 +4,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -118,6 +119,16 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			}
 			
 		}).setEscapeModelStrings(false));
+		
+		titleViewer.add(new WebMarkupContainer("confidential") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getIssue().isConfidential());
+			}
+			
+		});
 		
 		titleViewer.add(new AjaxLink<Void>("edit") {
 

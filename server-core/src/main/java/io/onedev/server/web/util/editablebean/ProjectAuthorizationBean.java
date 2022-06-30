@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin;
+package io.onedev.server.web.util.editablebean;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ import io.onedev.server.web.editable.annotation.ProjectChoice;
 import io.onedev.server.web.editable.annotation.RoleChoice;
 
 @Editable
-public class AuthorizationBean implements Serializable {
+public class ProjectAuthorizationBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

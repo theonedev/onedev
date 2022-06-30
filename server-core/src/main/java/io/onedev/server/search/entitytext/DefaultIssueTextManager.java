@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -38,6 +39,7 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.criteria.Criteria;
 
 @Singleton
 public class DefaultIssueTextManager extends EntityTextManager<Issue> implements IssueTextManager {
@@ -47,6 +49,8 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 	private static final String FIELD_NUMBER = "number";
 	
 	private static final String FIELD_TITLE = "title";
+	
+	private static final String FIELD_CONFIDENTIAL = "confidential";
 	
 	private static final String FIELD_DESCRIPTION = "description";
 	
@@ -69,7 +73,7 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 
 	@Override
 	protected int getIndexVersion() {
-		return 1;
+		return 2;
 	}
 
 	@Transactional
@@ -100,6 +104,7 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 	protected void addFields(Document document, Issue entity) {
 		document.add(new LongPoint(FIELD_PROJECT_ID, entity.getProject().getId()));
 		document.add(new LongPoint(FIELD_NUMBER, entity.getNumber()));
+		document.add(new LongPoint(FIELD_CONFIDENTIAL, entity.isConfidential()?1:0));
 		document.add(new TextField(FIELD_TITLE, entity.getTitle(), Store.NO));
 		if (entity.getDescription() != null)
 			document.add(new TextField(FIELD_DESCRIPTION, entity.getDescription(), Store.NO));
@@ -110,24 +115,32 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 		if (projectScope != null) {
 			BooleanQuery.Builder projectQueryBuilder = new BooleanQuery.Builder();
-			if (projectScope.isRecursive())
-				projectQueryBuilder.add(projectManager.getSubtreeQuery(FIELD_PROJECT_ID, projectScope.getProject()), Occur.SHOULD);
-			else
-				projectQueryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectScope.getProject().getId()), Occur.SHOULD);
+			Project project = projectScope.getProject();
+			if (projectScope.isRecursive()) 
+				projectQueryBuilder.add(buildQuery(projectManager.getSubtreeIds(project.getId())), Occur.SHOULD);
+			else if (SecurityUtils.canAccessConfidentialIssues(projectScope.getProject()))
+				projectQueryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.SHOULD);
+			else 
+				projectQueryBuilder.add(getNonConfidentialQuery(project), Occur.SHOULD);
+			
 			if (projectScope.isInherited()) {
 				for (Project ancestor: projectScope.getProject().getAncestors()) {
-					if (SecurityUtils.canAccess(ancestor))
+					if (SecurityUtils.canAccessConfidentialIssues(ancestor))
 						projectQueryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, ancestor.getId()), Occur.SHOULD);
+					else if (SecurityUtils.canAccess(ancestor)) 
+						projectQueryBuilder.add(getNonConfidentialQuery(ancestor), Occur.SHOULD);
 				}
 			}
 			projectQueryBuilder.setMinimumNumberShouldMatch(1);
 			queryBuilder.add(projectQueryBuilder.build(), Occur.MUST);
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject());
-			if (!projects.isEmpty()) 
-				queryBuilder.add(projectManager.getProjectsQuery(FIELD_PROJECT_ID, projects), Occur.MUST);
-			else
+			if (!projects.isEmpty()) {
+				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(Collectors.toList());
+				queryBuilder.add(buildQuery(projectIds), Occur.MUST);
+			} else {
 				return null;
+			}
 		}
 		
 		BooleanQuery.Builder contentQueryBuilder = new BooleanQuery.Builder();
@@ -156,6 +169,40 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 		queryBuilder.add(contentQueryBuilder.build(), Occur.MUST);
 		
 		return queryBuilder.build();		
+	}
+	
+	private Query buildQuery(Collection<Long> projectIds) {
+		Collection<Long> allIds = projectManager.getProjectIds();
+		if (SecurityUtils.isAdministrator()) {
+			return Criteria.forManyValues(FIELD_PROJECT_ID, projectIds, allIds);
+		} else {
+			Collection<Long> projectIdsWithConfidentialIssuePermission = new ArrayList<>();
+			Collection<Long> projectIdsWithoutConfidentialIssuePermission = new ArrayList<>();
+			for (Long projectId: projectIds) {
+				Project project = projectManager.load(projectId);
+				if (SecurityUtils.canAccessConfidentialIssues(project)) 
+					projectIdsWithConfidentialIssuePermission.add(projectId);
+				else
+					projectIdsWithoutConfidentialIssuePermission.add(projectId);
+			}
+			BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+			queryBuilder.add(Criteria.forManyValues(
+					FIELD_PROJECT_ID, projectIdsWithConfidentialIssuePermission, allIds), Occur.SHOULD);
+			BooleanQuery.Builder nonConfidentialQueryBuilder = new BooleanQuery.Builder();
+			nonConfidentialQueryBuilder.add(Criteria.forManyValues(
+					FIELD_PROJECT_ID, projectIdsWithoutConfidentialIssuePermission, allIds), Occur.MUST);
+			nonConfidentialQueryBuilder.add(LongPoint.newExactQuery(FIELD_CONFIDENTIAL, 0L), Occur.MUST);
+			queryBuilder.add(nonConfidentialQueryBuilder.build(), Occur.SHOULD);
+			queryBuilder.setMinimumNumberShouldMatch(1);
+			return queryBuilder.build();
+		}
+	}
+	
+	private BooleanQuery getNonConfidentialQuery(Project project) {
+		BooleanQuery.Builder builder = new BooleanQuery.Builder();
+		builder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
+		builder.add(LongPoint.newExactQuery(FIELD_CONFIDENTIAL, 0L), Occur.MUST);
+		return builder.build();
 	}
 
 	@Override

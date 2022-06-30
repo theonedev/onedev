@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-    : operator=(SubmittedByMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
+    : operator=(Confidential|SubmittedByMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
     | operator=(SubmittedBy|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
@@ -73,6 +73,10 @@ FixedBetween
 
 SubmittedByMe
 	: 'submitted' WS+ 'by' WS+ 'me'
+	;
+	
+Confidential
+	: 'confidential'
 	;
 	
 CurrentIssue

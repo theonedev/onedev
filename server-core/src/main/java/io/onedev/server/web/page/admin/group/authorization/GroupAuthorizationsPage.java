@@ -16,9 +16,9 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.page.admin.AuthorizationBean;
-import io.onedev.server.web.page.admin.AuthorizationsBean;
 import io.onedev.server.web.page.admin.group.GroupPage;
+import io.onedev.server.web.util.editablebean.ProjectAuthorizationBean;
+import io.onedev.server.web.util.editablebean.ProjectAuthorizationsBean;
 
 @SuppressWarnings("serial")
 public class GroupAuthorizationsPage extends GroupPage {
@@ -31,9 +31,9 @@ public class GroupAuthorizationsPage extends GroupPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		AuthorizationsBean authorizationsBean = new AuthorizationsBean();
+		ProjectAuthorizationsBean authorizationsBean = new ProjectAuthorizationsBean();
 		for (GroupAuthorization authorization: getGroup().getAuthorizations()) {
-			AuthorizationBean authorizationBean = new AuthorizationBean();
+			ProjectAuthorizationBean authorizationBean = new ProjectAuthorizationBean();
 			authorizationBean.setProjectPath(authorization.getProject().getPath());
 			authorizationBean.setRoleName(authorization.getRole().getName());
 			authorizationsBean.getAuthorizations().add(authorizationBean);
@@ -47,7 +47,7 @@ public class GroupAuthorizationsPage extends GroupPage {
 
 				Set<String> projectPaths = new HashSet<>();
 				Collection<GroupAuthorization> authorizations = new ArrayList<>();
-				for (AuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
+				for (ProjectAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 					if (projectPaths.contains(authorizationBean.getProjectPath())) {
 						error("Duplicate authorizations found: " + authorizationBean.getProjectPath());
 						return;

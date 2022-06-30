@@ -66,7 +66,7 @@ public abstract class JobTrigger implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjects(matchWith);
+		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 
 	@Editable(name="Job Parameters", order=1000)

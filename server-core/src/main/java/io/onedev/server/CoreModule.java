@@ -101,6 +101,7 @@ import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
+import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
@@ -148,6 +149,7 @@ import io.onedev.server.entitymanager.impl.DefaultCodeCommentQueryPersonalizatio
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentReplyManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultCommitQueryPersonalizationManager;
+import io.onedev.server.entitymanager.impl.DefaultIssueAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultEmailAddressManager;
 import io.onedev.server.entitymanager.impl.DefaultGitLfsLockManager;
 import io.onedev.server.entitymanager.impl.DefaultGpgKeyManager;
@@ -455,6 +457,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestTextManager.class).to(DefaultPullRequestTextManager.class);
 		bind(CodeCommentTextManager.class).to(DefaultCodeCommentTextManager.class);
 		bind(PendingSuggestionApplyManager.class).to(DefaultPendingSuggestionApplyManager.class);
+		bind(IssueAuthorizationManager.class).to(DefaultIssueAuthorizationManager.class);
 		
 		bind(WebHookManager.class);
 		

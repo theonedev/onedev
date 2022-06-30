@@ -1362,4 +1362,31 @@ public class BuildSpec implements Serializable, Validatable {
 		}			
 	}	
 	
+	@SuppressWarnings("unused")
+	private void migrate17(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			if (((ScalarNode)specTuple.getKeyNode()).getValue().equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					List<MappingNode> actionNodes = new ArrayList<>();
+					for (Iterator<NodeTuple> itJobTuple = jobNode.getValue().iterator(); itJobTuple.hasNext();) {
+						NodeTuple jobTuple = itJobTuple.next();
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("postBuildActions")) {
+							SequenceNode actionsNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node actionNodeItem: actionsNode.getValue()) {
+								MappingNode actionNode = (MappingNode) actionNodeItem;
+								if (actionNode.getTag().getValue().equals("!CreateIssueAction")) { 
+									actionNode.getValue().add(new NodeTuple(
+											new ScalarNode(Tag.STR, "issueConfidential"), new ScalarNode(Tag.STR, "false")));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+	
 }

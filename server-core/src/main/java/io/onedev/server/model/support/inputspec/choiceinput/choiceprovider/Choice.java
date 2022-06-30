@@ -57,7 +57,7 @@ public class Choice implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjects(matchWith);
+		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 	
 }

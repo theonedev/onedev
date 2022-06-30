@@ -129,7 +129,7 @@ public class UserResource {
     public Collection<UserAuthorization> getAuthorizations(@PathParam("userId") Long userId) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-    	return userManager.load(userId).getAuthorizations();
+    	return userManager.load(userId).getProjectAuthorizations();
     }
 	
 	@Api(order=400)

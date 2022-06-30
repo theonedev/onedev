@@ -43,6 +43,8 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -143,6 +145,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
 	public static final String PROP_FIELDS = "fields";
+	
+	public static final String PROP_AUTHORIZATIONS = "authorizations";
 		
 	public static final String PROP_SOURCE_LINKS = "sourceLinks";
 	
@@ -155,6 +159,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	public static final String PROP_ID = "id";
 	
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
+	
+	public static final String PROP_CONFIDENTIAL = "confidential";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
@@ -285,6 +291,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	@JsonIgnore
 	private String noSpaceTitle;
 	
+	private boolean confidential;
+	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
 	
@@ -299,6 +307,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWatch> watches = new ArrayList<>();
+	
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<IssueAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy=IssueLink.PROP_TARGET, cascade=CascadeType.REMOVE)
 	private Collection<IssueLink> sourceLinks = new ArrayList<>();
@@ -346,6 +358,14 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public void setDescription(String description) {
 		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
+	}
+
+	public boolean isConfidential() {
+		return confidential;
+	}
+
+	public void setConfidential(boolean confidential) {
+		this.confidential = confidential;
 	}
 
 	public Project getNumberScope() {
@@ -482,6 +502,14 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		} else {
 			return super.getWatch(user, false);
 		}
+	}
+
+	public Collection<IssueAuthorization> getAuthorizations() {
+		return authorizations;
+	}
+
+	public void setAuthorizations(Collection<IssueAuthorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 	public int getVoteCount() {

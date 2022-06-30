@@ -38,6 +38,8 @@ public class CreateIssueAction extends PostBuildAction {
 	
 	private String issueDescription;
 	
+	private boolean issueConfidential;
+	
 	private List<FieldSupply> issueFields = new ArrayList<>();
 	
 	@Editable(order=1000, name="Title", group="Issue Detail", description="Specify title of the issue")
@@ -60,6 +62,15 @@ public class CreateIssueAction extends PostBuildAction {
 
 	public void setIssueDescription(String issueDescription) {
 		this.issueDescription = issueDescription;
+	}
+
+	@Editable(order=1060, name="Confidential", group="Issue Detail", description="Whether or not the issue should be confidential")
+	public boolean isIssueConfidential() {
+		return issueConfidential;
+	}
+
+	public void setIssueConfidential(boolean issueConfidential) {
+		this.issueConfidential = issueConfidential;
 	}
 
 	@SuppressWarnings("unused")
@@ -99,6 +110,7 @@ public class CreateIssueAction extends PostBuildAction {
 				issue.setState(issueSetting.getInitialStateSpec().getName());
 				
 				issue.setDescription(getIssueDescription());
+				issue.setConfidential(isIssueConfidential());
 				for (FieldSupply supply: getIssueFields()) {
 					Object fieldValue = issueSetting.getFieldSpec(supply.getName())
 							.convertToObject(supply.getValueProvider().getValue());

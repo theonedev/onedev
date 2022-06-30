@@ -19,6 +19,7 @@ public class SpecifiedValue implements ValueProvider {
 
 	private List<String> value = new ArrayList<>();
 	
+	@Editable
 	@Override
 	public List<String> getValue() {
 		return value;

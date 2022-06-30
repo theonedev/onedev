@@ -22,7 +22,7 @@ public class IssueLinkAddData extends IssueChangeData {
 	
 	@Override
 	public String getActivity() {
-		return "added \"" + linkName + "\" (" + issueSummary + ")";
+		return "added \"" + linkName + "\" " + issueSummary;
 	}
 
 	@Override

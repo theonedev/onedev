@@ -33,6 +33,8 @@ public abstract class Criteria<T> implements Serializable {
 
 	public static final int IN_CLAUSE_LIMIT = 1000;
 	
+	private static final int RANGE_THRESHOLD = 6;
+	
 	private boolean withParens;
 	
 	public static Predicate forManyValues(CriteriaBuilder builder, Path<Long> path, Collection<Long> matchValues, 
@@ -87,7 +89,7 @@ public abstract class Criteria<T> implements Serializable {
 		
 		List<Long> discreteValues = new ArrayList<>();
 		for (List<Long> range: new RangeBuilder(listOfInValues, listOfAllValues).getRanges()) {
-			if (range.size() <= 2) 
+			if (range.size() <= RANGE_THRESHOLD) 
 				discreteValues.addAll(range);
 			else 
 				builder.forRange(range.get(0), range.get(range.size()-1));

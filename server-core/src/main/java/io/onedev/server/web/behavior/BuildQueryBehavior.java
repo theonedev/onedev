@@ -118,7 +118,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 										return !suggestions.isEmpty()? suggestions: null;
 									} else if (fieldName.equals(Build.NAME_PROJECT)) {
 										if (!matchWith.contains("*"))
-											return SuggestionUtils.suggestProjects(matchWith);
+											return SuggestionUtils.suggestProjectPaths(matchWith);
 										else
 											return null;
 									} else if (fieldName.equals(Build.NAME_JOB)) {

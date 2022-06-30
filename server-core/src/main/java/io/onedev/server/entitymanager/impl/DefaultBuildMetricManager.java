@@ -271,7 +271,7 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 				} else {
 					User user = SecurityUtils.getUser();
 					if (user != null) {
-						for (UserAuthorization authorization: user.getAuthorizations()) {
+						for (UserAuthorization authorization: user.getProjectAuthorizations()) {
 							if (project.equals(authorization.getProject())) {
 								populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
 										project, authorization.getRole());

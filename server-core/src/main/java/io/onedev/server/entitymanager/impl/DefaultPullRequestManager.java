@@ -25,6 +25,7 @@ import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -881,22 +882,25 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	}
 	
 	private Predicate[] getPredicates(@Nullable Project targetProject, @Nullable Criteria<PullRequest> criteria, 
-			CriteriaQuery<?> query, From<PullRequest, PullRequest> root, CriteriaBuilder builder) {
+			CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {
-			predicates.add(builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
+			predicates.add(builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode()); 
 			if (!projects.isEmpty()) {
-				predicates.add(projectManager.getProjectsPredicate(builder, 
-						root.get(PullRequest.PROP_TARGET_PROJECT), projects));
+				Collection<Long> allIds = projectManager.getProjectIds();
+				Collection<Long> projectIds = 
+						projects.stream().map(it->it.getId()).collect(Collectors.toList());
+				Path<Long> projectIdPath = from.get(PullRequest.PROP_TARGET_PROJECT).get(Project.PROP_ID);
+				predicates.add(Criteria.forManyValues(builder, projectIdPath, projectIds, allIds));
 			} else {
 				predicates.add(builder.disjunction());
 			}
 		}
 		
 		if (criteria != null) 
-			predicates.add(criteria.getPredicate(query, root, builder));
+			predicates.add(criteria.getPredicate(query, from, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	

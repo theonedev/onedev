@@ -63,6 +63,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
@@ -90,6 +91,7 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.ReceiveMailSetting;
 import io.onedev.server.model.support.administration.SenderAuthorization;
@@ -126,6 +128,8 @@ public class DefaultMailManager implements MailManager {
 	
 	private final IssueWatchManager issueWatchManager;
 	
+	private final IssueAuthorizationManager issueAuthorizationManager;
+	
 	private final PullRequestManager pullRequestManager;
 	
 	private final PullRequestCommentManager pullRequestCommentManager;
@@ -149,7 +153,8 @@ public class DefaultMailManager implements MailManager {
 			IssueCommentManager issueCommentManager, IssueWatchManager issueWatchManager, 
 			PullRequestManager pullRequestManager, PullRequestCommentManager pullRequestCommentManager, 
 			PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
-			UrlManager urlManager, EmailAddressManager emailAddressManager) {
+			UrlManager urlManager, EmailAddressManager emailAddressManager, 
+			IssueAuthorizationManager issueAuthorizationManager) {
 		this.transactionManager = transactionManager;
 		this.settingManager = setingManager;
 		this.userManager = userManager;
@@ -164,6 +169,7 @@ public class DefaultMailManager implements MailManager {
 		this.executorService = executorService;
 		this.urlManager = urlManager;
 		this.emailAddressManager = emailAddressManager;
+		this.issueAuthorizationManager = issueAuthorizationManager;
 	}
 
 	@Sessional
@@ -459,6 +465,8 @@ public class DefaultMailManager implements MailManager {
 									if (user == null) 
 										user = createUser(each, issue.getProject(), authorization.getAuthorizedRole());
 									issueWatchManager.watch(issue, user, true);
+									if (issue.isConfidential()) 
+										issueAuthorizationManager.authorize(issue, user);
 								} catch (UnauthorizedException e) {
 									logger.error("Error adding receipient to watch list", e);
 								}
@@ -622,9 +630,10 @@ public class DefaultMailManager implements MailManager {
 		GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
 		issue.setState(issueSetting.getInitialStateSpec().getName());
 		
-		List<FieldSupply> issueFields = settingManager.getServiceDeskSetting()
+		IssueCreationSetting issueCreationSetting = settingManager.getServiceDeskSetting()
 				.getIssueCreationSetting(submitter.getAddress(), project);
-		for (FieldSupply supply: issueFields) {
+		issue.setConfidential(issueCreationSetting.isConfidential());
+		for (FieldSupply supply: issueCreationSetting.getIssueFields()) {
 			Object fieldValue = issueSetting.getFieldSpec(supply.getName())
 					.convertToObject(supply.getValueProvider().getValue());
 			issue.setFieldValue(supply.getName(), fieldValue);
@@ -659,7 +668,7 @@ public class DefaultMailManager implements MailManager {
 		emailAddressManager.save(emailAddress);
 		
 		boolean found = false;
-		for (UserAuthorization authorization: user.getAuthorizations()) {
+		for (UserAuthorization authorization: user.getProjectAuthorizations()) {
 			if (authorization.getProject().equals(project)) {
 				found = true;
 				break;

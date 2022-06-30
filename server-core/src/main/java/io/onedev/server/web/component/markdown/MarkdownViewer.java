@@ -178,13 +178,15 @@ public class MarkdownViewer extends GenericPanel<String> {
 				case "issue":
 					Issue issue = OneDev.getInstance(IssueManager.class).findByFQN(referenceId);
 					// check permission here as issue project may not be the same as current project
-					if (issue != null && SecurityUtils.canAccess(issue.getProject())) {
+					if (issue != null && SecurityUtils.canAccess(issue)) {
 						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
-						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s')", 
+						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s');", 
 								Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(issue.getTitle())), 
 								JavaScriptEscape.escapeJavaScript(issue.getState()), 
 								ColorUtils.isLight(color)? "black": "white", color);
 						target.appendJavaScript(script);
+					} else {
+						target.appendJavaScript("onedev.server.markdown.renderIssueTooltip();");
 					}
 					break;
 				case "pull request":
@@ -204,10 +206,12 @@ public class MarkdownViewer extends GenericPanel<String> {
 							statusCss = "badge-danger";
 						}
 						
-						String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s')", 
+						String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s');", 
 								Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(request.getTitle())), 
 								status, statusCss);
 						target.appendJavaScript(script);
+					} else {
+						target.appendJavaScript("onedev.server.markdown.renderPullRequestTooltip();");
 					}
 					break;
 				case "build":
@@ -220,9 +224,11 @@ public class MarkdownViewer extends GenericPanel<String> {
 						String title = build.getJobName();
 						if (build.getVersion() != null)
 							title += " : " + build.getVersion();
-						String script = String.format("onedev.server.markdown.renderBuildTooltip('%s', '%s', '%s')", 
+						String script = String.format("onedev.server.markdown.renderBuildTooltip('%s', '%s', '%s');", 
 								JavaScriptEscape.escapeJavaScript(title), iconHref, iconCss);
 						target.appendJavaScript(script);
+					} else {
+						target.appendJavaScript("onedev.server.markdown.renderBuildTooltip();");
 					}
 					break;
 				case "user":
@@ -238,12 +244,14 @@ public class MarkdownViewer extends GenericPanel<String> {
 				case "commit":
 					ProjectPage page = (ProjectPage) getPage();
 					RevCommit commit = page.getProject().getRevCommit(ObjectId.fromString(referenceId), false);
-					if (commit != null) {
-						String script = String.format("onedev.server.markdown.renderCommitTooltip('%s', '%s', '%s')", 
+					if (commit != null && SecurityUtils.canReadCode(page.getProject())) {
+						String script = String.format("onedev.server.markdown.renderCommitTooltip('%s', '%s', '%s');", 
 								JavaScriptEscape.escapeJavaScript(commit.getAuthorIdent().getName()), 
 								JavaScriptEscape.escapeJavaScript(DateUtils.formatAge(commit.getCommitterIdent().getWhen())), 
 								JavaScriptEscape.escapeJavaScript(commit.getFullMessage()));
 						target.appendJavaScript(script);
+					} else {
+						target.appendJavaScript("onedev.server.markdown.renderCommitTooltip();");
 					}
 					break;
 				default:

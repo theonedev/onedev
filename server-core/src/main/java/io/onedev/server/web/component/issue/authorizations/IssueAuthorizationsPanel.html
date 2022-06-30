@@ -1,0 +1,23 @@
+<wicket:panel>
+	<div class="issue-authorization-list">
+		<div class="alert alert-light alert-notice mb-5">
+			Specify additional users able to access this confidential issue besides those granted permission via role. 
+			Users referenced in the issue will be authorized automatically 
+		</div>
+		<div class="head d-flex flex-wrap">
+			<div class="clearable-wrapper mr-3 mb-4">
+				<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by name...">
+			</div>
+			<div class="mr-3 mb-4">
+				<input wicket:id="addNew" type="hidden" class="form-control">
+			</div>
+		</div>
+		<table wicket:id="authorizations" class="authorizations table"></table>
+	</div>
+	<wicket:fragment wicket:id="nameFrag">
+		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="actionFrag">
+		<a wicket:id="unauthorize" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Unauthorize this user"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
+	</wicket:fragment>
+</wicket:panel>

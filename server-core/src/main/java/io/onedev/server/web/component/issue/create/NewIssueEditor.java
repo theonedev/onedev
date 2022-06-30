@@ -18,6 +18,7 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -74,6 +75,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	private TextField<String> titleInput;
 	
 	private CommentInput descriptionInput;
+	
+	private CheckBox confidentialInput;
 	
 	private MilestoneMultiChoice milestoneChoice;
 	
@@ -192,6 +195,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 		lastDescriptionTemplate = getDescriptionTemplate(issue);
 		add(descriptionInput = newDescriptionInput(lastDescriptionTemplate));
+		
+		add(confidentialInput = new CheckBox("confidential", Model.of(false))); 
 		
 		Collection<Milestone> milestones = issue.getMilestones();
 		milestoneChoice = new MilestoneMultiChoice("milestones", Model.of(milestones), 
@@ -364,6 +369,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Issue issue = newIssue();
 		issue.setTitle(titleInput.getConvertedInput());
 		issue.setDescription(descriptionInput.getConvertedInput());
+		issue.setConfidential(confidentialInput.getConvertedInput());
 		
 		fieldEditor.convertInput();
 		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(getProject());

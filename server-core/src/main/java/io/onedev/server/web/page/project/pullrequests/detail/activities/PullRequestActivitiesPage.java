@@ -45,6 +45,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
@@ -148,8 +149,16 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 		if (showChangeHistory) {
 			for (PullRequestChange change: getPullRequest().getChanges()) {
-				if (!(change.getData() instanceof ReferencedFromAware) 
-						|| ((ReferencedFromAware<?>)change.getData()).getReferencedFrom() != null) {
+				if (change.getData() instanceof ReferencedFromAware) {
+					ReferencedFromAware<?> referencedFromAware = (ReferencedFromAware<?>) change.getData();
+					if (referencedFromAware.getReferencedFrom() instanceof Issue) {
+						Issue issue = (Issue) referencedFromAware.getReferencedFrom();
+						if (SecurityUtils.canAccess(issue))
+							otherActivities.add(new PullRequestChangeActivity(change));
+					} else if (referencedFromAware.getReferencedFrom() != null) {
+						otherActivities.add(new PullRequestChangeActivity(change));
+					}
+				} else {
 					otherActivities.add(new PullRequestChangeActivity(change));
 				}
 			}

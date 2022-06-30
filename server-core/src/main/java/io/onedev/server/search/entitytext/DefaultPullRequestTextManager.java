@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.criteria.Criteria;
 
 @Singleton
 public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest> 
@@ -112,10 +114,13 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 			queryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode());
-			if (!projects.isEmpty()) 
-				queryBuilder.add(projectManager.getProjectsQuery(FIELD_PROJECT_ID, projects), Occur.MUST);
-			else
+			if (!projects.isEmpty()) {
+				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(Collectors.toList());
+				Collection<Long> allIds = projectManager.getProjectIds();
+				queryBuilder.add(Criteria.forManyValues(FIELD_PROJECT_ID, projectIds, allIds), Occur.MUST);
+			} else {
 				return null;
+			}
 		}
 		BooleanQuery.Builder contentQueryBuilder = new BooleanQuery.Builder();
 		

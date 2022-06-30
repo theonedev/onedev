@@ -4200,4 +4200,47 @@ public class DataMigrator {
 	private void migrate91(File dataDir, Stack<Integer> versions) {
 	}
 	
+	private void migrate92(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())  
+					element.addElement("confidential").setText("false");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("codePrivilege").equals("WRITE"))
+						element.addElement("accessConfidentialIssues").setText("true");
+					else
+						element.addElement("accessConfidentialIssues").setText("false");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					if (dataElement.attributeValue("class").contains("IssueBatchUpdateData")) {
+						dataElement.addElement("oldConfidential").setText("false");
+						dataElement.addElement("newConfidential").setText("false");
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SERVICE_DESK_SETTING")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element issueCreationSettingElement: valueElement.element("issueCreationSettings").elements()) 
+								issueCreationSettingElement.addElement("issueConfidential").setText("false");
+						}						
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

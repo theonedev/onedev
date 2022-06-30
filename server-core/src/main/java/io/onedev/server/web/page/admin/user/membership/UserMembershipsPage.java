@@ -56,15 +56,10 @@ import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.select2.SelectToAddChoice;
 import io.onedev.server.web.page.admin.group.profile.GroupProfilePage;
 import io.onedev.server.web.page.admin.user.UserPage;
-import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
 public class UserMembershipsPage extends UserPage {
 
-	private static final String PARAM_PAGE = "page";
-	
-	private static final String PARAM_QUERY = "query";
-	
 	private String query;
 	
 	private DataTable<Membership, Void> membershipsTable;
@@ -75,7 +70,6 @@ public class UserMembershipsPage extends UserPage {
 	
 	public UserMembershipsPage(PageParameters params) {
 		super(params);
-		query = params.get(PARAM_QUERY).toString();
 	}
 
 	private EntityCriteria<Membership> getCriteria() {
@@ -370,26 +364,8 @@ public class UserMembershipsPage extends UserPage {
 			}
 		};
 		
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
-			
-			@Override
-			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getUser());
-				params.add(PARAM_PAGE, currentPage+1);
-				if (query != null)
-					params.add(PARAM_QUERY, query);
-				return params;
-			}
-			
-			@Override
-			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
-			}
-			
-		};
-		
 		add(membershipsTable = new DefaultDataTable<Membership, Void>("memberships", columns, dataProvider, 
-				WebConstants.PAGE_SIZE, pagingHistorySupport));
+				WebConstants.PAGE_SIZE, null));
 	}
 
 }

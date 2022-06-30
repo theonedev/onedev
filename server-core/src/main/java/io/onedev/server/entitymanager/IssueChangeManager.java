@@ -23,6 +23,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void changeTitle(Issue issue, String title);
 	
+	void changeConfidential(Issue issue, boolean confidential);
+	
 	void changeFields(Issue issue, Map<String, Object> fieldValues);
 
 	void changeMilestones(Issue issue, Collection<Milestone> milestones);
@@ -36,9 +38,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void changeState(Issue issue, String state, Map<String, Object> fieldValues, 
 			Collection<String> removeFields, @Nullable String comment);
 	
-	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
-			@Nullable Collection<Milestone> milestone, Map<String, Object> fieldValues, 
-			@Nullable String comment);
+	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Boolean confidential,
+			@Nullable Collection<Milestone> milestone, Map<String, Object> fieldValues, @Nullable String comment);
 	
 	List<IssueChange> queryAfter(Long afterChangeId, int count);
 	

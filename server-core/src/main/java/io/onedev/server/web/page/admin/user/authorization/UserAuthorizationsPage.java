@@ -16,9 +16,9 @@ import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.page.admin.AuthorizationBean;
-import io.onedev.server.web.page.admin.AuthorizationsBean;
 import io.onedev.server.web.page.admin.user.UserPage;
+import io.onedev.server.web.util.editablebean.ProjectAuthorizationBean;
+import io.onedev.server.web.util.editablebean.ProjectAuthorizationsBean;
 
 @SuppressWarnings("serial")
 public class UserAuthorizationsPage extends UserPage {
@@ -31,9 +31,9 @@ public class UserAuthorizationsPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		AuthorizationsBean authorizationsBean = new AuthorizationsBean();
-		for (UserAuthorization authorization: getUser().getAuthorizations()) {
-			AuthorizationBean authorizationBean = new AuthorizationBean();
+		ProjectAuthorizationsBean authorizationsBean = new ProjectAuthorizationsBean();
+		for (UserAuthorization authorization: getUser().getProjectAuthorizations()) {
+			ProjectAuthorizationBean authorizationBean = new ProjectAuthorizationBean();
 			authorizationBean.setProjectPath(authorization.getProject().getPath());
 			authorizationBean.setRoleName(authorization.getRole().getName());
 			authorizationsBean.getAuthorizations().add(authorizationBean);
@@ -47,7 +47,7 @@ public class UserAuthorizationsPage extends UserPage {
 
 				Set<String> projectNames = new HashSet<>();
 				Collection<UserAuthorization> authorizations = new ArrayList<>();
-				for (AuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
+				for (ProjectAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 					if (projectNames.contains(authorizationBean.getProjectPath())) {
 						error("Duplicate authorizations found: " + authorizationBean.getProjectPath());
 						return;

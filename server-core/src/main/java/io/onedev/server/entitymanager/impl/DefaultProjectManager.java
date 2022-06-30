@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -520,7 +521,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
        	authorization.setUser(user);
        	authorization.setRole(roleManager.getOwner());
        	project.getUserAuthorizations().add(authorization);
-       	user.getAuthorizations().add(authorization);
+       	user.getProjectAuthorizations().add(authorization);
        	userAuthorizationManager.save(authorization);
     	
         FileUtils.cleanDir(project.getGitDir());
@@ -772,10 +773,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = getPermittedProjects(new AccessProject());
-			if (!projects.isEmpty())
-				predicates.add(getProjectsPredicate(builder, from, projects));
-			else
+			if (!projects.isEmpty()) {
+				Collection<Long> allIds = getProjectIds();
+				Collection<Long> projectIds = 
+						projects.stream().map(it->it.getId()).collect(Collectors.toList());
+				predicates.add(Criteria.forManyValues(builder, from.get(Project.PROP_ID), projectIds, allIds));
+			} else {
 				predicates.add(builder.disjunction());
+			}
 		}
 		if (criteria != null) 
 			predicates.add(criteria.getPredicate(query, from, builder));
@@ -862,13 +867,29 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return ids;
 	}
 
-	private Collection<Long> getSubtreeIds(Long projectId) {
-		Collection<Long> treeIds = Sets.newHashSet(projectId);
-		for (ProjectFacade facade: cache.values()) {
-			if (projectId.equals(facade.getParentId()))
-				treeIds.addAll(getSubtreeIds(facade.getId()));
+	@Override
+	public Collection<Long> getSubtreeIds(Long projectId) {
+		cacheLock.readLock().lock();
+		try {
+			Collection<Long> treeIds = Sets.newHashSet(projectId);
+			for (ProjectFacade facade: cache.values()) {
+				if (projectId.equals(facade.getParentId()))
+					treeIds.addAll(getSubtreeIds(facade.getId()));
+			}
+			return treeIds;
+		} finally {
+			cacheLock.readLock().unlock();
 		}
-		return treeIds;
+	}
+	
+	@Override
+	public Collection<Long> getProjectIds() {
+		cacheLock.readLock().lock();
+		try {
+			return new HashSet<>(cache.keySet());
+		} finally {
+			cacheLock.readLock().unlock();
+		}
 	}
 	
 	@Override
@@ -877,59 +898,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		try {
 			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
 					getMatchingIds(pathPattern), cache.keySet());		
-		} finally {
-			cacheLock.readLock().unlock();
-		}
-	}
-	
-	@Override
-	public org.apache.lucene.search.Query getPathMatchQuery(String fieldName, String pathPattern) {
-		cacheLock.readLock().lock();
-		try {
-			return Criteria.forManyValues(fieldName, getMatchingIds(pathPattern), cache.keySet());		
-		} finally {
-			cacheLock.readLock().unlock();
-		}
-	}
-	
-	@Override
-	public Predicate getSubtreePredicate(CriteriaBuilder builder, Path<Project> path, Project project) {
-		cacheLock.readLock().lock();
-		try {
-			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
-					getSubtreeIds(project.getId()), cache.keySet());		
-		} finally {
-			cacheLock.readLock().unlock();
-		}
-	}
-
-	@Override
-	public org.apache.lucene.search.Query getSubtreeQuery(String fieldName, Project project) {
-		cacheLock.readLock().lock();
-		try {
-			return Criteria.forManyValues(fieldName, getSubtreeIds(project.getId()), cache.keySet());		
-		} finally {
-			cacheLock.readLock().unlock();
-		}
-	}
-	
-	@Override
-	public Predicate getProjectsPredicate(CriteriaBuilder builder, Path<Project> path, Collection<Project> projects) {
-		cacheLock.readLock().lock();
-		try {
-			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
-					projects.stream().map(it->it.getId()).collect(toList()), cache.keySet());		
-		} finally {
-			cacheLock.readLock().unlock();
-		}
-	}
-
-	@Override
-	public org.apache.lucene.search.Query getProjectsQuery(String fieldName, Collection<Project> projects) {
-		cacheLock.readLock().lock();
-		try {
-			return Criteria.forManyValues(fieldName, projects.stream().map(it->it.getId()).collect(toList()), 
-					cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
@@ -971,29 +939,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return null;
     }
 
-	private int findLongestMatch(@Nullable Long parentId, List<String> pathSegments) {
-		if (!pathSegments.isEmpty()) {
-			String name = pathSegments.get(0);
-			Long projectId = findProjectId(parentId, name);
-			if (projectId != null)
-				return findLongestMatch(projectId, pathSegments.subList(1, pathSegments.size())) + 1;
-			else
-				return 0;
-		} else {
-			return 0;
-		}
-	}
-	
-	@Override
-	public int findLongestMatch(List<String> pathSegments) {
-		cacheLock.readLock().lock();
-		try {
-			return findLongestMatch(null, pathSegments);
-		} finally {
-			cacheLock.readLock().unlock();
-		}
-	}
-	
 	@Override
 	public List<ProjectFacade> getChildren(Long projectId) {
 		cacheLock.readLock().lock();

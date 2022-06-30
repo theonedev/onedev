@@ -17,7 +17,6 @@ import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
@@ -109,7 +108,7 @@ public class ServiceDeskSetting implements Serializable {
 		return null;
 	}
 	
-	public List<FieldSupply> getIssueCreationSetting(String senderAddress, Project project) {
+	public IssueCreationSetting getIssueCreationSetting(String senderAddress, Project project) {
 		for (IssueCreationSetting setting: issueCreationSettings) {
 			String senderPatterns = setting.getSenderEmails();
 			if (senderPatterns == null)
@@ -123,7 +122,7 @@ public class ServiceDeskSetting implements Serializable {
 			
 			if (senderPatternSet.matches(new StringMatcher(), senderAddress) 
 					&& projectPatternSet.matches(new PathMatcher(), project.getPath())) {
-				return setting.getIssueFields();
+				return setting;
 			}
 		}
 		String errorMessage = String.format("No issue creation setting (sender: %s, project: %s)", 

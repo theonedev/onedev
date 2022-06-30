@@ -87,7 +87,7 @@ public class IssueResource {
     @GET
     public Issue getBasicInfo(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canAccess(issue.getProject())) 
+    	if (!SecurityUtils.canAccess(issue)) 
 			throw new UnauthorizedException();
     	return issue;
     }
@@ -97,7 +97,7 @@ public class IssueResource {
     @GET
     public Collection<IssueField> getFields(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canAccess(issue.getProject())) 
+    	if (!SecurityUtils.canAccess(issue)) 
 			throw new UnauthorizedException();
     	return issue.getFields();
     }
@@ -107,7 +107,7 @@ public class IssueResource {
     @GET
     public Collection<IssueChange> getChanges(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canAccess(issue.getProject())) 
+    	if (!SecurityUtils.canAccess(issue)) 
 			throw new UnauthorizedException();
     	return issue.getChanges();
     }
@@ -117,7 +117,7 @@ public class IssueResource {
     @GET
     public Collection<IssueComment> getComments(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canAccess(issue.getProject())) 
+    	if (!SecurityUtils.canAccess(issue)) 
 			throw new UnauthorizedException();
     	return issue.getComments();
     }
@@ -127,7 +127,7 @@ public class IssueResource {
     @GET
     public Collection<Milestone> getMilestones(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canAccess(issue.getProject())) 
+    	if (!SecurityUtils.canAccess(issue)) 
 			throw new UnauthorizedException();
     	return issue.getMilestones();
     }
@@ -137,7 +137,7 @@ public class IssueResource {
     @GET
     public Collection<IssueVote> getVotes(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canAccess(issue.getProject())) 
+    	if (!SecurityUtils.canAccess(issue)) 
 			throw new UnauthorizedException();
     	return issue.getVotes();
     }
@@ -147,7 +147,7 @@ public class IssueResource {
     @GET
     public Collection<IssueWatch> getWatches(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
-    	if (!SecurityUtils.canAccess(issue.getProject())) 
+    	if (!SecurityUtils.canAccess(issue)) 
 			throw new UnauthorizedException();
     	return issue.getWatches();
     }
@@ -216,6 +216,7 @@ public class IssueResource {
     	Issue issue = new Issue();
     	issue.setTitle(data.getTitle());
     	issue.setDescription(data.getDescription());
+    	issue.setConfidential(data.isConfidential());
     	issue.setProject(project);
     	issue.setSubmitDate(new Date());
     	issue.setSubmitter(user);
@@ -266,6 +267,17 @@ public class IssueResource {
     	if (!SecurityUtils.canModify(issue))
 			throw new UnauthorizedException();
 		issueManager.saveDescription(issue, description);
+		return Response.ok().build();
+    }
+	
+	@Api(order=1250)
+	@Path("/{issueId}/confidential")
+    @POST
+    public Response setConfidential(@PathParam("issueId") Long issueId, boolean confidential) {
+		Issue issue = issueManager.load(issueId);
+    	if (!SecurityUtils.canModify(issue))
+			throw new UnauthorizedException();
+		issueChangeManager.changeConfidential(issue, confidential);
 		return Response.ok().build();
     }
 	
@@ -374,6 +386,8 @@ public class IssueResource {
 		
 		private String description;
 		
+		private boolean confidential;
+		
 		private List<Long> milestoneIds = new ArrayList<>();
 		
 		private Map<String, String> fields = new HashMap<>();
@@ -402,6 +416,14 @@ public class IssueResource {
 
 		public void setDescription(String description) {
 			this.description = description;
+		}
+
+		public boolean isConfidential() {
+			return confidential;
+		}
+
+		public void setConfidential(boolean confidential) {
+			this.confidential = confidential;
 		}
 
 		public List<Long> getMilestoneIds() {

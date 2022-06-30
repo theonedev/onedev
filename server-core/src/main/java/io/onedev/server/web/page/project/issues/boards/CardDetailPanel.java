@@ -38,6 +38,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
+import io.onedev.server.web.component.issue.authorizations.IssueAuthorizationsPanel;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 import io.onedev.server.web.component.issue.editabletitle.IssueEditableTitlePanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
@@ -181,6 +182,27 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 				}
 				
 			});
+			
+			if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue())) {
+				tabs.add(new AjaxActionTab(Model.of("Authorizations")) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+						Component content = new IssueAuthorizationsPanel(TAB_CONTENT_ID) {
+
+							@Override
+							protected Issue getIssue() {
+								return CardDetailPanel.this.getIssue();
+							}
+
+						}.setOutputMarkupId(true);
+						
+						CardDetailPanel.this.replace(content);
+						target.add(content);
+					}
+					
+				});
+			}
 		}
 		
 		add(new Tabbable("tabs", tabs).setOutputMarkupId(true));

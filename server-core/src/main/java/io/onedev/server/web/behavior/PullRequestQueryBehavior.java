@@ -102,7 +102,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
 											|| fieldName.equals(PullRequest.NAME_SOURCE_PROJECT)) {
 										if (!matchWith.contains("*"))
-											return SuggestionUtils.suggestProjects(matchWith);
+											return SuggestionUtils.suggestProjectPaths(matchWith);
 										else
 											return null;
 									} else if (fieldName.equals(PullRequest.NAME_TARGET_BRANCH) 

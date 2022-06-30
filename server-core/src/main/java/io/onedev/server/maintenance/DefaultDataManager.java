@@ -66,7 +66,7 @@ import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.init.Skippable;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
-import io.onedev.server.web.util.NewUserBean;
+import io.onedev.server.web.util.editablebean.NewUserBean;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {

@@ -98,6 +98,16 @@ public abstract class IssueLinkPanel extends Panel {
 			}
 			
 		}.setEscapeModelStrings(false).setOutputMarkupId(true));
+		
+		add(new WebMarkupContainer("confidential") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getIssue().isConfidential());
+			}
+			
+		});
 	}
 
 	protected abstract Issue getIssue();

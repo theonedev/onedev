@@ -58,7 +58,7 @@ public class SenderAuthorization implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjects(matchWith);
+		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 	
 	@Editable(order=175, name="Authorized Role", description="Specify authorized role for above projects")

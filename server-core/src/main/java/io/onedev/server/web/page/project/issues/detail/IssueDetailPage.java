@@ -103,6 +103,11 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	}
 	
 	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canAccess(getIssue());
+	}
+
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
@@ -151,6 +156,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			// Do not calculate fix builds now as it might be slow
 			tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
 		}
+		if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue()))
+			tabs.add(new IssueTab("Authorizations", IssueAuthorizationsPage.class));
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		

@@ -1,3 +1,9 @@
+# 7.4.0
+
+### RESTful api
+
+1. A boolean property "confidential" must be added to create endpoint of [issue resource](/help/api/io.onedev.server.rest.IssueResource/create) to indicate whether or not the issue is confidential
+
 # 7.3.5
 1. [RESTful api] Service desk name property of [project resource](/help/api/io.onedev.server.rest.ProjectResource) moved from basic info endpoint to setting endpoint
 

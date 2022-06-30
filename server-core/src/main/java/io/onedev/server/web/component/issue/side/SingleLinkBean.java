@@ -13,6 +13,7 @@ public class SingleLinkBean implements Serializable {
 	private Long issueId;
 
 	@IssueChoice
+	@Editable
 	public Long getIssueId() {
 		return issueId;
 	}

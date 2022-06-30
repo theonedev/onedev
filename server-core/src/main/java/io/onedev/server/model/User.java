@@ -125,7 +125,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-	private Collection<UserAuthorization> authorizations = new ArrayList<>();
+	private Collection<UserAuthorization> projectAuthorizations = new ArrayList<>();
+	
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<IssueAuthorization> issueAuthorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -527,12 +531,20 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return getId() > 0;
 	}
 	
-	public Collection<UserAuthorization> getAuthorizations() {
-		return authorizations;
+	public Collection<UserAuthorization> getProjectAuthorizations() {
+		return projectAuthorizations;
 	}
 
-	public void setAuthorizations(Collection<UserAuthorization> authorizations) {
-		this.authorizations = authorizations;
+	public void setProjectAuthorizations(Collection<UserAuthorization> projectAuthorizations) {
+		this.projectAuthorizations = projectAuthorizations;
+	}
+
+	public Collection<IssueAuthorization> getIssueAuthorizations() {
+		return issueAuthorizations;
+	}
+
+	public void setIssueAuthorizations(Collection<IssueAuthorization> issueAuthorizations) {
+		this.issueAuthorizations = issueAuthorizations;
 	}
 
 	@Override
@@ -822,5 +834,5 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		Collections.sort(gpgKeys);
 		return gpgKeys;
 	}
-	
+
 }

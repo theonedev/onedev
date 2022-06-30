@@ -55,7 +55,7 @@ public class JobAuthorizationBehavior extends ANTLRAssistBehavior {
 								String fieldName = JobAuthorization.getValue(fieldElements.get(0).getMatchedText());
 								if (fieldName.equals(Build.NAME_PROJECT)) {
 									if (!matchWith.contains("*") && !matchWith.contains("?"))
-										return SuggestionUtils.suggestProjects(matchWith);
+										return SuggestionUtils.suggestProjectPaths(matchWith);
 									else
 										return null;
 								}

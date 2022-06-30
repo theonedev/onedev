@@ -111,8 +111,16 @@ public abstract class IssueActivitiesPanel extends Panel {
 		
 		if (showChangeHistory) {
 			for (IssueChange change: getIssue().getChanges()) {
-				if (!(change.getData() instanceof ReferencedFromAware) 
-						|| ((ReferencedFromAware<?>)change.getData()).getReferencedFrom() != null) {
+				if (change.getData() instanceof ReferencedFromAware) {
+					ReferencedFromAware<?> referencedFromAware = (ReferencedFromAware<?>) change.getData();
+					if (referencedFromAware.getReferencedFrom() instanceof Issue) {
+						Issue issue = (Issue) referencedFromAware.getReferencedFrom();
+						if (SecurityUtils.canAccess(issue))
+							otherActivities.add(new IssueChangeActivity(change));
+					} else if (referencedFromAware.getReferencedFrom() != null) {
+						otherActivities.add(new IssueChangeActivity(change));
+					}
+				} else {
 					otherActivities.add(new IssueChangeActivity(change));
 				}
 			}

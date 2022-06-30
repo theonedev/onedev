@@ -923,7 +923,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				} else {
 					User user = SecurityUtils.getUser();
 					if (user != null) {
-						for (UserAuthorization authorization: user.getAuthorizations()) {
+						for (UserAuthorization authorization: user.getProjectAuthorizations()) {
 							if (authorization.getProject().isSelfOrAncestorOf(project)) {
 								populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
 										authorization.getRole());

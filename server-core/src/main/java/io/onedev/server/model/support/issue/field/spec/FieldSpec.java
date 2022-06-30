@@ -156,7 +156,7 @@ public abstract class FieldSpec extends InputSpec {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjects(matchWith);
+		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 	
 	private GlobalIssueSetting getIssueSetting() {

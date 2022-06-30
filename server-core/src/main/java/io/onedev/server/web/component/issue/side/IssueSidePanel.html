@@ -10,6 +10,16 @@
 				</table>
 			</div>
 		</div>
+		<wicket:enclosure child="confidential">
+		<div class="confidential d-flex align-items-center justify-content-between">
+			<div class="font-weight-bolder mr-3">Confidential</div>
+			<div class="switch switch-sm switch-primary">
+				<label>
+					<input wicket:id="confidential" type="checkbox">
+				</label>
+			</div>
+		</div>
+		</wicket:enclosure>
 		<div wicket:id="milestones" class="milestones">
 			<div class="head">Milestones</div>
 			<ul class="body list-unstyled mb-0">
@@ -75,6 +85,11 @@
 			<div class="title d-flex text-nowrap">
 				<a wicket:id="title" class="text-truncate"><span wicket:id="label"></span></a>
 			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="unauthorizedLinkedIssueFrag">
+		<div class="bg-light rounded p-3">
+			<span wicket:id="number" class="mr-2"></span> <wicket:svg href="warning" class="icon"></wicket:svg> You are not authorized to access this issue
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="multipleLinksFrag">

@@ -21,12 +21,14 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
@@ -91,8 +93,13 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 	           		if (defaultLoginGroup != null) 
 	           			permissions.addAll(getGroupPermissions(defaultLoginGroup, user));
 		           	
-		        	for (UserAuthorization authorization: user.getAuthorizations()) 
+		        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
     					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+		        	for (IssueAuthorization authorization: user.getIssueAuthorizations()) {
+    					permissions.add(new ProjectPermission(
+    							authorization.getIssue().getProject(), 
+    							new ConfidentialIssuePermission(authorization.getIssue())));
+		        	}
 		        } 
 		        if (userId != 0L || settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
 			        for (Project project: projectManager.query()) {

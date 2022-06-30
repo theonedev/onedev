@@ -16,6 +16,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -23,6 +24,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -33,6 +35,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
@@ -94,13 +97,17 @@ public abstract class IssueSidePanel extends Panel {
 
 	private static final int MAX_DISPLAY_AVATARS = 20;
 	
+	private boolean confidential;
+	
 	public IssueSidePanel(String id) {
 		super(id);
+		confidential = getIssue().isConfidential();
 	}
 
 	@Override
 	protected void onBeforeRender() {
 		addOrReplace(newFieldsContainer());
+		addOrReplace(newConfidentialContainer());
 		addOrReplace(newMilestonesContainer());
 		addOrReplace(newLinksContainer());
 		addOrReplace(newVotesContainer());
@@ -209,6 +216,22 @@ public abstract class IssueSidePanel extends Panel {
 			}
 			
 		};
+	}
+	
+	private Component newConfidentialContainer() {
+		CheckBox confidentialInput = new CheckBox("confidential", new PropertyModel<Boolean>(this, "confidential"));
+		confidentialInput.add(new AjaxFormComponentUpdatingBehavior("change") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				OneDev.getInstance(IssueChangeManager.class).changeConfidential(getIssue(), confidential);
+				setResponsePage(getPage());
+			}
+			
+		});
+		confidentialInput.setVisible(SecurityUtils.canModify(getIssue()));
+		
+		return confidentialInput;
 	}
 	
 	private Component newLinksContainer() {
@@ -409,48 +432,57 @@ public abstract class IssueSidePanel extends Panel {
 	
 	private Component newLinkedIssueContainer(String componentId, Issue linkedIssue, 
 			@Nullable LinkDeleteListener deleteListener) {
-		Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
-		Link<Void> link = new BookmarkablePageLink<Void>("number", IssueActivitiesPage.class, 
-				IssueActivitiesPage.paramsOf(linkedIssue));
-		if (linkedIssue.getNumberScope().equals(getIssue().getNumberScope()))
-			link.add(new Label("label", "#" + linkedIssue.getNumber()));
-		else
-			link.add(new Label("label", linkedIssue.getFQN().toString()));
-		fragment.add(link);
-		
-		Long issueId = linkedIssue.getId();
-		fragment.add(new AjaxLink<Void>("delete") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-						"Do you really want to remove this?"));
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				Issue linkedIssue = getIssueManager().load(issueId);
-				deleteListener.onDelete(target, linkedIssue);
-			}
+		if (SecurityUtils.canAccess(linkedIssue)) {
+			Long linkedIssueId = linkedIssue.getId();
+			Fragment fragment = new Fragment(componentId, "linkedIssueFrag", this);
+			Link<Void> link = new BookmarkablePageLink<Void>("number", IssueActivitiesPage.class, 
+					IssueActivitiesPage.paramsOf(linkedIssue));
+			if (linkedIssue.getNumberScope().equals(getIssue().getNumberScope()))
+				link.add(new Label("label", "#" + linkedIssue.getNumber()));
+			else
+				link.add(new Label("label", linkedIssue.getFQN().toString()));
+			fragment.add(link);
 			
-		}.setVisible(deleteListener != null));
-		
-		fragment.add(new IssueStateBadge("state", new LoadableDetachableModel<Issue>() {
+			fragment.add(new AjaxLink<Void>("delete") {
 
-			@Override
-			protected Issue load() {
-				return getIssueManager().load(issueId);
-			}
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmClickListener(
+							"Do you really want to remove this?"));
+				}
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					Issue linkedIssue = getIssueManager().load(linkedIssueId);
+					deleteListener.onDelete(target, linkedIssue);
+				}
+				
+			}.setVisible(deleteListener != null));
 			
-		}));
-		
-		link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
-				IssueActivitiesPage.paramsOf(linkedIssue));
-		link.add(new Label("label", linkedIssue.getTitle()));
-		fragment.add(link);
-		
-		return fragment;
+			fragment.add(new IssueStateBadge("state", new LoadableDetachableModel<Issue>() {
+
+				@Override
+				protected Issue load() {
+					return getIssueManager().load(linkedIssueId);
+				}
+				
+			}));
+			
+			link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
+					IssueActivitiesPage.paramsOf(linkedIssue));
+			link.add(new Label("label", linkedIssue.getTitle()));
+			fragment.add(link);
+			
+			return fragment;
+		} else {
+			Fragment fragment = new Fragment(componentId, "unauthorizedLinkedIssueFrag", IssueSidePanel.this);
+			if (getProject().equals(linkedIssue.getProject()))
+				fragment.add(new Label("number", "#" + linkedIssue.getNumber()));
+			else
+				fragment.add(new Label("number", linkedIssue.getProject().getPath() + "#" + linkedIssue.getNumber()));
+			return fragment;
+		}
 	}
 	
 	private Component newMilestonesContainer() {

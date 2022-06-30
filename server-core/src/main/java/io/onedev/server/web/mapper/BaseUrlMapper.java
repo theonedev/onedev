@@ -95,6 +95,7 @@ import io.onedev.server.web.page.project.imports.ProjectImportPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.detail.IssueAuthorizationsPage;
 import io.onedev.server.web.page.project.issues.detail.IssueBuildsPage;
 import io.onedev.server.web.page.project.issues.detail.IssueCommitsPage;
 import io.onedev.server.web.page.project.issues.detail.IssuePullRequestsPage;
@@ -322,6 +323,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("projects/${project}/issues/${issue}/commits", IssueCommitsPage.class));
 		add(new BasePageMapper("projects/${project}/issues/${issue}/pull-requests", IssuePullRequestsPage.class));
 		add(new BasePageMapper("projects/${project}/issues/${issue}/builds", IssueBuildsPage.class));
+		add(new BasePageMapper("projects/${project}/issues/${issue}/authorizations", IssueAuthorizationsPage.class));
 		add(new BasePageMapper("projects/${project}/issues/new", NewIssuePage.class));
 		add(new BasePageMapper("projects/${project}/issues/import/${importer}", IssueImportPage.class));
 		add(new BasePageMapper("projects/${project}/milestones", MilestoneListPage.class));

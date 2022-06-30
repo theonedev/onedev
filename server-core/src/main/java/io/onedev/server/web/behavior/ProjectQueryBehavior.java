@@ -70,7 +70,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							if (fieldElements.isEmpty()) {
 								if (operator == ProjectQueryLexer.ForksOf || operator == ProjectQueryLexer.ChildrenOf) {
 									if (!matchWith.contains("*"))
-										return SuggestionUtils.suggestProjects(matchWith);
+										return SuggestionUtils.suggestProjectPaths(matchWith);
 									else
 										return null;
 								} else { 
@@ -83,9 +83,14 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 									if (fieldName.equals(Project.NAME_UPDATE_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
-									} else if (fieldName.equals(Project.NAME_NAME) || fieldName.equals(Project.NAME_PATH)) {
+									} else if (fieldName.equals(Project.NAME_NAME)) {
 										if (!matchWith.contains("*"))
-											return SuggestionUtils.suggestProjects(matchWith);
+											return SuggestionUtils.suggestProjectNames(matchWith);
+										else
+											return null;
+									} else if (fieldName.equals(Project.NAME_PATH)) {
+										if (!matchWith.contains("*"))
+											return SuggestionUtils.suggestProjectPaths(matchWith);
 										else
 											return null;
 									} else if (fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {

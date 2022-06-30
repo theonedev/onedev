@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.Listen;
+import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
@@ -40,6 +41,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.security.SecurityUtils;
 
 @Singleton
 public class IssueNotificationManager extends AbstractNotificationManager {
@@ -47,8 +49,10 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	private final MailManager mailManager;
 	
 	private final UrlManager urlManager;
+
+	private final IssueAuthorizationManager authorizationManager;
 	
-	private final IssueWatchManager issueWatchManager;
+	private final IssueWatchManager watchManager;
 	
 	private final UserManager userManager;
 	
@@ -56,14 +60,15 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	
 	@Inject
 	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager,
-			UrlManager urlManager, IssueWatchManager issueWatchManager, UserInfoManager userInfoManager,
-			UserManager userManager, SettingManager settingManager) {
+			UrlManager urlManager, IssueWatchManager watchManager, UserInfoManager userInfoManager,
+			UserManager userManager, SettingManager settingManager, IssueAuthorizationManager authorizationManager) {
 		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
-		this.issueWatchManager = issueWatchManager;
+		this.watchManager = watchManager;
 		this.userInfoManager = userInfoManager;
 		this.userManager = userManager;
+		this.authorizationManager = authorizationManager;
 	}
 	
 	@Transactional
@@ -110,7 +115,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 			
 		}.getWatches().entrySet()) {
-			issueWatchManager.watch(issue, entry.getKey(), entry.getValue());
+			if (SecurityUtils.canAccess(entry.getKey().asSubject(), issue))
+				watchManager.watch(issue, entry.getKey(), entry.getValue());
 		}
 		
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
@@ -137,14 +143,15 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 			
 		}.getWatches().entrySet()) {
-			issueWatchManager.watch(issue, entry.getKey(), entry.getValue());
+			if (SecurityUtils.canAccess(entry.getKey().asSubject(), issue))
+				watchManager.watch(issue, entry.getKey(), entry.getValue());
 		}
 		
 		Collection<User> notifiedUsers = Sets.newHashSet();
 		if (user != null) {
 			notifiedUsers.add(user); // no need to notify the user generating the event
 			if (!user.isSystem())
-				issueWatchManager.watch(issue, user, true);
+				watchManager.watch(issue, user, true);
 		}
 
 		Map<String, Group> newGroups = event.getNewGroups();
@@ -168,8 +175,10 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 				}
 			}
 			
-			for (User member: entry.getValue().getMembers())
-				issueWatchManager.watch(issue, member, true);
+			for (User member: entry.getValue().getMembers()) {
+				watchManager.watch(issue, member, true);
+				authorizationManager.authorize(issue, member);
+			}
 			
 			notifiedUsers.addAll(entry.getValue().getMembers());
 		}
@@ -190,8 +199,10 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 				}
 			}
 			
-			for (User each: entry.getValue())
-				issueWatchManager.watch(issue, each, true);
+			for (User each: entry.getValue()) {
+				watchManager.watch(issue, each, true);
+				authorizationManager.authorize(issue, each);
+			}
 			notifiedUsers.addAll(entry.getValue());
 		}
 		
@@ -205,7 +216,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			for (String userName: new MentionParser().parseMentions(event.getRenderedMarkdown())) {
 				User mentionedUser = userManager.findByName(userName);
 				if (mentionedUser != null) {
-					issueWatchManager.watch(issue, mentionedUser, true);
+					watchManager.watch(issue, mentionedUser, true);
+					authorizationManager.authorize(issue, mentionedUser);
 					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {
 						String subject = String.format("[Issue %s] (Mentioned You) %s", issue.getFQN(), issue.getTitle());
 						String threadingReferences = String.format("<mentioned-%s@onedev>", issue.getUUID());
@@ -233,7 +245,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 				if (watch.isWatching()
 						&& (visitDate == null || visitDate.before(event.getDate()))
 						&& !notifiedUsers.contains(watch.getUser())
-						&& !isNotified(notifiedEmailAddresses, watch.getUser())) {
+						&& !isNotified(notifiedEmailAddresses, watch.getUser())
+						&& SecurityUtils.canAccess(issue)) {
 					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
 					if (emailAddress != null && emailAddress.isVerified())
 						bccEmailAddresses.add(emailAddress.getValue());

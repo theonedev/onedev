@@ -36,6 +36,8 @@ public class IssueCreationSetting implements Serializable {
 	
 	private String applicableProjects;
 	
+	private boolean confidential;
+	
 	private List<FieldSupply> issueFields = new ArrayList<>();
 
 	@Editable(order=100, name="Applicable Senders", placeholder="Any sender", 
@@ -65,9 +67,18 @@ public class IssueCreationSetting implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjects(matchWith);
+		return SuggestionUtils.suggestProjectPaths(matchWith);
 	}
 	
+	@Editable(order=200, description="Whether or not created issue should be confidential")
+	public boolean isConfidential() {
+		return confidential;
+	}
+
+	public void setConfidential(boolean confidential) {
+		this.confidential = confidential;
+	}
+
 	@Editable(order=300)
 	@FieldNamesProvider("getFieldNames")
 	@OmitName

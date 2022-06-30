@@ -35,6 +35,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildReports;
+import io.onedev.server.security.permission.AccessConfidentialIssues;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.EditIssueField;
@@ -87,6 +88,8 @@ public class Role extends AbstractEntity implements Permission, Validatable {
 	private CodePrivilege codePrivilege = CodePrivilege.NONE;
 	
 	private boolean manageIssues;
+	
+	private boolean accessConfidentialIssues;
 	
 	private boolean scheduleIssues;
 	
@@ -208,6 +211,16 @@ public class Role extends AbstractEntity implements Permission, Validatable {
 	@SuppressWarnings("unused")
 	private static boolean isManageIssuesDisabled() {
 		return !(boolean)EditContext.get().getInputValue("manageIssues");
+	}
+	
+	@Editable(order=450, description="This permission enables one to access confidential issues")
+	@ShowCondition("isManageIssuesDisabled")
+	public boolean isAccessConfidentialIssues() {
+		return accessConfidentialIssues;
+	}
+
+	public void setAccessConfidentialIssues(boolean accessConfidentialIssues) {
+		this.accessConfidentialIssues = accessConfidentialIssues;
 	}
 	
 	@Editable(order=500, description="This permission enables one to schedule issues into milestones")
@@ -343,6 +356,8 @@ public class Role extends AbstractEntity implements Permission, Validatable {
 				permissions.add(new WriteCode());
 			if (manageIssues) 
 				permissions.add(new ManageIssues());
+			if (accessConfidentialIssues)
+				permissions.add(new AccessConfidentialIssues());
 			if (scheduleIssues)
 				permissions.add(new ScheduleIssues());
 			permissions.add(new EditIssueField(editableIssueFields.getIncludeFields()));

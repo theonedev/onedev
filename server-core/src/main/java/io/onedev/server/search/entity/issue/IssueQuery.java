@@ -134,6 +134,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 					@Override
 					public Criteria<Issue> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
+						case IssueQueryLexer.Confidential:
+							return new ConfidentialCriteria();
 						case IssueQueryLexer.SubmittedByMe:
 							if (!option.withCurrentUserCriteria())
 								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");

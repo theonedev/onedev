@@ -20,13 +20,19 @@ public class BuiltInFieldsBean implements Serializable {
 
 	public static final String NAME_STATE = "State";
 	
+	public static final String NAME_CONFIDENTIAL = "Confidential";
+	
 	public static final String NAME_MILESTONES = "Milestones";
 	
 	public static final String PROP_STATE = "state";
 	
+	public static final String PROP_CONFIDENTIAL = "confidential";
+	
 	public static final String PROP_MILESTONES = "milestones";
 	
 	private String state;
+	
+	private boolean confidential;
 	
 	private List<String> milestones;
 
@@ -39,6 +45,15 @@ public class BuiltInFieldsBean implements Serializable {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	@Editable(order=150)
+	public boolean isConfidential() {
+		return confidential;
+	}
+
+	public void setConfidential(boolean confidential) {
+		this.confidential = confidential;
 	}
 
 	@Editable(order=200)
