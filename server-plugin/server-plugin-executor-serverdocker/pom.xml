@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>7.3.15</version>
+		<version>7.4.0</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.executor.serverdocker.ServerDockerModule</moduleClass>
