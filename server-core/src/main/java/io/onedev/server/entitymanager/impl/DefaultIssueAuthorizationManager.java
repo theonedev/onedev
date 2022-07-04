@@ -46,6 +46,7 @@ public class DefaultIssueAuthorizationManager extends BaseEntityManager<IssueAut
 			IssueAuthorization authorization = new IssueAuthorization();
 			authorization.setIssue(issue);
 			authorization.setUser(user);
+			issue.getAuthorizations().add(authorization);
 			save(authorization);
 		}
 	}
