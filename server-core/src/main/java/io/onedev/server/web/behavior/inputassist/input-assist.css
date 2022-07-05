@@ -1,19 +1,19 @@
 .floating>.content>.input-assist {
 	padding: 1rem;
 }
-.input-assist .suggestions {
+.floating>.content>.input-assist .suggestions {
 	max-height: 400px;
 }
-.input-assist li.suggestion .content {
+.floating>.content>.input-assist li.suggestion .content {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-.input-assist .help {
+.floating>.content>.input-assist .help {
 	border: 1px dashed var(--secondary);
 }
-.dark-mode .input-assist .help {
+.dark-mode .floating>.content>.input-assist .help {
 	border-color: var(--dark-mode-dark-gray);
 }
-.input-assist .help li {
+.floating>.content>.input-assist .help li {
 	list-style: disc;
 	margin-left: 1.5rem;
 }

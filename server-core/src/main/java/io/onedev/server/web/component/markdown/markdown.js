@@ -188,7 +188,7 @@ onedev.server.markdown = {
 		 * 
 		 */
 		$input.on("keydown", function(e) {
-			if (e.keyCode == 13 && $(".atwho-view, .input-assist").filter(":visible").length == 0) {
+			if (e.keyCode == 13 && $(".atwho-view, .floating>.content>.input-assist").filter(":visible").length == 0) {
 				if ((e.metaKey || e.ctrlKey) && getSubmit().length != 0) 
 					return;
 					
