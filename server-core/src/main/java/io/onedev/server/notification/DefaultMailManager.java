@@ -1,7 +1,9 @@
 package io.onedev.server.notification;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,24 +24,28 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.mail.Authenticator;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
-import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.jsoup.Jsoup;
@@ -103,6 +109,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.validation.UserNameValidator;
@@ -211,7 +218,27 @@ public class DefaultMailManager implements MailManager {
 		System.arraycopy(md5Bytes, 0, threadIndexBytes, 6, md5Bytes.length);
 		return Base64.encodeBase64String(threadIndexBytes);
 	}
+	
+    private String createFoldedHeaderValue(String name, String value) {
+    	try {
+			return MimeUtility.fold(name.length() + 2, MimeUtility.encodeText(value, StandardCharsets.UTF_8.name(), null));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+    }
 
+    private InternetAddress createInetAddress(String emailAddress, @Nullable String name) {
+        InternetAddress inetAddress;
+		try {
+			inetAddress = new InternetAddress(emailAddress);
+			inetAddress.setPersonal(name);
+			inetAddress.validate();
+		} catch (AddressException | UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+        return inetAddress;
+    }
+    
 	@Override
 	public void sendMail(MailSetting mailSetting, Collection<String> toList, Collection<String> ccList, 
 			Collection<String> bccList, String subject, String htmlBody, String textBody, 
@@ -223,50 +250,79 @@ public class DefaultMailManager implements MailManager {
 			mailSetting = settingManager.getMailSetting();
 		
 		if (mailSetting != null) {
-			HtmlEmail email = new HtmlEmail();
-			try {
-				email.setHtmlMsg(htmlBody);
-				email.setTextMsg(textBody);
-			} catch (EmailException e) {
-				throw new RuntimeException(e);
-			}
-			
-	        email.setSocketConnectionTimeout(Bootstrap.SOCKET_CONNECT_TIMEOUT);
-	        email.setSocketTimeout(mailSetting.getTimeout()*1000);
+			Properties properties = new Properties();
+	        properties.setProperty("mail.smtp.host", mailSetting.getSmtpHost());
+	        properties.setProperty("mail.smtp.port", String.valueOf(mailSetting.getSmtpPort()));
+	        properties.setProperty("mail.transport.protocol", "smtp");
+	 
+	        properties.setProperty("mail.smtp.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
+	        properties.setProperty("mail.smtp.timeout", String.valueOf(mailSetting.getTimeout()*1000));
+	        properties.setProperty("mail.smtp.starttls.enable", String.valueOf(mailSetting.isEnableStartTLS()));
+	        properties.setProperty("mail.smtp.starttls.required", "false");
 	        
-	        email.setStartTLSEnabled(mailSetting.isEnableStartTLS());
-	        email.setSSLOnConnect(false);
-	        email.setSSLCheckServerIdentity(false);
-	        if (references != null) {
-	        	email.addHeader("References", references);
-	        	email.addHeader("In-Reply-To", references);
-	        	email.addHeader("Thread-Index", getThreadIndex(references));
+	        Authenticator authenticator;
+	        if (mailSetting.getSmtpUser() != null) {
+	        	properties.setProperty("mail.smtp.auth", "true");
+	        	String smtpUser = mailSetting.getSmtpUser();
+	        	String smtpPassword = mailSetting.getSmtpPassword();
+	        	authenticator = new Authenticator() {
+		        	
+		            @Override
+		            protected PasswordAuthentication getPasswordAuthentication() {
+		                return new PasswordAuthentication(smtpUser, smtpPassword);
+		            }
+		            
+		        };	        	
+	        } else {
+	        	authenticator = null;
 	        }
-			
-			try {
+	        
+	        try {
+				Session session = Session.getInstance(properties, authenticator);	        
+				
+				MimeMultipart bodyPart = new MimeMultipart("alternative");
+				
+				MimeBodyPart htmlPart = new MimeBodyPart();
+				htmlPart.setContent(htmlBody, "text/html; charset=" + StandardCharsets.UTF_8.name());
+				bodyPart.addBodyPart(htmlPart, 0);
+				
+				MimeBodyPart textPart = new MimeBodyPart();
+				textPart.setText(textBody, StandardCharsets.UTF_8.name());
+				bodyPart.addBodyPart(textPart, 0);
+
+				Message message = new MimeMessage(session);
+				
+				if (references != null) {
+				    Map<String, String> headers = CollectionUtils.newHashMap(
+				    		"References", references, 
+				    		"In-Reply-To", references, 
+				    		"Thread-Index", getThreadIndex(references));
+				    
+				    for (Map.Entry<String, String> entry: headers.entrySet())
+				    	message.addHeader(entry.getKey(), createFoldedHeaderValue(entry.getKey(), entry.getValue()));
+				}
+				
+				message.setFrom(createInetAddress(mailSetting.getEmailAddress(), "OneDev"));
+				
+				if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
+					throw new ExplicitException("At least one receiver address should be specified");
+				
+				message.setRecipients(RecipientType.TO, 
+						toList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
+				message.setRecipients(RecipientType.CC, 
+						ccList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
+				message.setRecipients(RecipientType.BCC, 
+						bccList.stream().map(it->createInetAddress(it, null)).toArray(InternetAddress[]::new));
 				if (replyAddress != null)
-					email.setReplyTo(Lists.newArrayList(InternetAddress.parse(replyAddress)));
-				email.setFrom(mailSetting.getEmailAddress());
-				for (String address: toList)
-					email.addTo(address);
-				for (String address: ccList)
-					email.addCc(address);
-				for (String address: bccList)
-					email.addBcc(address);
-		
-				email.setHostName(mailSetting.getSmtpHost());
-				email.setSmtpPort(mailSetting.getSmtpPort());
-				email.setSslSmtpPort(String.valueOf(mailSetting.getSmtpPort()));
-		        String smtpUser = mailSetting.getSmtpUser();
-				if (smtpUser != null)
-					email.setAuthentication(smtpUser, mailSetting.getSmtpPassword());
-				email.setCharset(CharEncoding.UTF_8);
+					message.setReplyTo(new InternetAddress[]{createInetAddress(replyAddress, null)});
+
+				message.setSubject(subject);
+				message.setContent(bodyPart);
+
+				logger.debug("Sending email (subject: {}, to: {}, cc: {}, bcc: {})... ", subject, toList, ccList, bccList);
 				
-				email.setSubject(subject);
-				
-				logger.debug("Sending email (to: {}, subject: {})... ", toList, subject);
-				email.send();
-			} catch (EmailException | AddressException e) {
+	            Transport.send(message);
+			} catch (MessagingException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
