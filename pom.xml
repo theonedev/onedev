@@ -599,7 +599,7 @@
 		<hibernate.version>5.4.24.Final</hibernate.version>
 		<wicketbootstrap.version>0.10.18</wicketbootstrap.version>
 		<lucene.version>8.7.0</lucene.version>
-		<shiro.version>1.7.1</shiro.version>
+		<shiro.version>1.9.1</shiro.version>
 		<jgit.version>5.13.0.202109080827-r</jgit.version>
 		<flexmark.version>0.62.2</flexmark.version>
 		<groovy.version>3.0.10</groovy.version>
