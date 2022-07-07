@@ -15,7 +15,7 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.openid.connect.sdk.OIDCAccessTokenResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 
@@ -58,8 +58,8 @@ public class GitHubConnector extends OpenIdConnector {
 	}
 
 	@Override
-	protected SsoAuthenticated processTokenResponse(OIDCAccessTokenResponse tokenSuccessResponse) {
-		BearerAccessToken accessToken = (BearerAccessToken) tokenSuccessResponse.getAccessToken();
+	protected SsoAuthenticated processTokenResponse(OIDCTokenResponse tokenResponse) {
+		BearerAccessToken accessToken = (BearerAccessToken) tokenResponse.getTokens().getBearerAccessToken();
 
 		try {
 			UserInfoRequest userInfoRequest = new UserInfoRequest(

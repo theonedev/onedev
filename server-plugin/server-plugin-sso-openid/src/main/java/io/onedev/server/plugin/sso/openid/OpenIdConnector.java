@@ -20,8 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.JWT;
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ErrorObject;
@@ -29,11 +30,12 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -44,7 +46,8 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCAccessTokenResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 
@@ -168,10 +171,9 @@ public class OpenIdConnector extends SsoConnector {
 			AuthenticationResponse authenticationResponse = AuthenticationResponseParser.parse(
 					new URI(request.getRequestURI() + "?" + request.getQueryString()));
 			if (authenticationResponse instanceof AuthenticationErrorResponse) {
-				throw buildException(((AuthenticationErrorResponse)authenticationResponse).getErrorObject()); 
+				throw buildException(authenticationResponse.toErrorResponse().getErrorObject()); 
 			} else {
-				AuthenticationSuccessResponse authenticationSuccessResponse = 
-						(AuthenticationSuccessResponse)authenticationResponse;
+				AuthenticationSuccessResponse authenticationSuccessResponse = authenticationResponse.toSuccessResponse();
 				
 				String state = (String) Session.get().getAttribute(SESSION_ATTR_STATE);
 				
@@ -186,33 +188,25 @@ public class OpenIdConnector extends SsoConnector {
 				ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 				TokenRequest tokenRequest = new TokenRequest(
 						new URI(getCachedProviderMetadata().getTokenEndpoint()), clientAuth, codeGrant);
-				HTTPResponse httpResponse = tokenRequest.toHTTPRequest().send();
-				if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
-					JSONObject jsonObject = httpResponse.getContentAsJSONObject();
-					if (jsonObject.get("error") != null) 
-						throw buildException(TokenErrorResponse.parse(jsonObject).getErrorObject());
-					else 
-						return processTokenResponse(OIDCAccessTokenResponse.parse(jsonObject));
-				} else {
-					ErrorObject error = TokenErrorResponse.parse(httpResponse).getErrorObject();
-					if (error != null) {
-						throw buildException(error);
-					} else {
-						String message = String.format("Error requesting OIDC token: http status: %d", 
-								httpResponse.getStatusCode());
-						throw new AuthenticationException(message);
-					}
-				}
+				
+				HTTPRequest httpRequest = tokenRequest.toHTTPRequest();
+				httpRequest.setAccept(ContentType.APPLICATION_JSON.toString());
+				TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpRequest.send());
+				
+				if (tokenResponse.indicatesSuccess()) 
+					return processTokenResponse((OIDCTokenResponse)tokenResponse.toSuccessResponse());
+				else 
+					throw buildException(tokenResponse.toErrorResponse().getErrorObject());
 			}
 		} catch (ParseException | URISyntaxException|SerializeException|IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	protected SsoAuthenticated processTokenResponse(OIDCAccessTokenResponse tokenSuccessResponse) {
+	protected SsoAuthenticated processTokenResponse(OIDCTokenResponse tokenResponse) {
 		try {
-			JWT idToken = tokenSuccessResponse.getIDToken();
-			ReadOnlyJWTClaimsSet claims = idToken.getJWTClaimsSet();
+			JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+			JWTClaimsSet claims = idToken.getJWTClaimsSet();
 			
 			if (!claims.getIssuer().equals(getCachedProviderMetadata().getIssuer()))
 				throw new AuthenticationException("Inconsistent issuer in provider metadata and ID token");
@@ -227,7 +221,7 @@ public class OpenIdConnector extends SsoConnector {
 
 			String subject = claims.getSubject();
 			
-			BearerAccessToken accessToken = (BearerAccessToken) tokenSuccessResponse.getAccessToken();
+			BearerAccessToken accessToken = tokenResponse.getOIDCTokens().getBearerAccessToken();
 
 			UserInfoRequest userInfoRequest = new UserInfoRequest(
 					new URI(getCachedProviderMetadata().getUserInfoEndpoint()), accessToken);
