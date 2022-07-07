@@ -593,7 +593,7 @@
 		<slf4j.version>1.7.30</slf4j.version>
 		<logback.version>1.2.9</logback.version>
 		<antlr.version>4.7.2</antlr.version>
-		<jetty.version>9.4.43.v20210629</jetty.version>
+		<jetty.version>10.0.10</jetty.version>
 		<wicket.version>7.17.0</wicket.version>
 		<jersey.version>2.26</jersey.version>
 		<hibernate.version>5.4.24.Final</hibernate.version>
