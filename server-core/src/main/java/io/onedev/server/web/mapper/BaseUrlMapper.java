@@ -133,6 +133,7 @@ import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
 import io.onedev.server.web.page.simple.security.EmailAddressVerificationPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.security.LogoutPage;
+import io.onedev.server.web.page.simple.security.OAuthCallbackPage;
 import io.onedev.server.web.page.simple.security.PasswordResetPage;
 import io.onedev.server.web.page.simple.security.SignUpPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
@@ -223,6 +224,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("verify-email-address/${emailAddress}/${verificationCode}", 
 				EmailAddressVerificationPage.class));
 		add(new BasePageMapper(SsoProcessPage.MOUNT_PATH + "/${stage}/${connector}", SsoProcessPage.class));
+		add(new BasePageMapper(OAuthCallbackPage.MOUNT_PATH, OAuthCallbackPage.class));
 	}
  	
 	private void addAdministrationPages() {

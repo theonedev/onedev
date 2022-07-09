@@ -1,4 +1,4 @@
-package io.onedev.server.notification;
+package io.onedev.server.mail;
 
 import java.util.Collection;
 import java.util.concurrent.Future;
@@ -7,8 +7,6 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.administration.MailSetting;
-import io.onedev.server.model.support.administration.ReceiveMailSetting;
 
 public interface MailManager {
 	
@@ -18,7 +16,7 @@ public interface MailManager {
 			Collection<String> bccList, String subject, String htmlBody, 
 			String textBody, @Nullable String replyAddress, @Nullable String references);
 	
-	void sendMail(MailSetting mailSetting, Collection<String> toList, Collection<String> ccList, 
+	void sendMail(MailSendSetting sendSetting, Collection<String> toList, Collection<String> ccList, 
 			Collection<String> bccList, String subject, String htmlBody, String textBody, 
 			@Nullable String replyAddress, @Nullable String references);
 	
@@ -38,7 +36,6 @@ public interface MailManager {
 	@Nullable
 	public String getUnsubscribeAddress(PullRequest request);
 	
-	Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, int timeout, 
-			MessageListener listener, MailPosition MailPosition);
+	Future<?> monitorInbox(MailCheckSetting mailCheckSetting, MessageListener listener, MailPosition MailPosition);
 
 }

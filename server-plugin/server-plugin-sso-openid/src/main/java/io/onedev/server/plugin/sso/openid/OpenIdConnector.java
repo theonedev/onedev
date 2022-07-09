@@ -57,6 +57,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.util.OAuthUtils;
 import io.onedev.server.util.validation.annotation.UrlSegment;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
@@ -263,23 +264,7 @@ public class OpenIdConnector extends SsoConnector {
 	}
 	
 	protected RuntimeException buildException(ErrorObject error) {
-		String errorMessage;
-		if ("redirect_uri_mismatch".equals(error.getCode())) {
-			errorMessage = "Redirect uri mismatch: make sure the server url specified in system setting is the same as "
-					+ "root part of the authorization callback url specified at " + getName() + " side";
-		} else {
-			List<String> details = new ArrayList<>();
-			if (error.getCode() != null) 
-				details.add("code: " + error.getCode());
-			if (error.getDescription() != null)
-				details.add("description: " + error.getDescription());
-			if (error.getHTTPStatusCode() != 0)
-				details.add("http status code: " + error.getHTTPStatusCode());
-			
-			errorMessage = "OIDC response error (" + StringUtils.join(details, ", ") + ")";
-		}
-		
-		return new AuthenticationException(errorMessage);
+		return new AuthenticationException(OAuthUtils.getErrorMessage(error));
 	}
 
 	@Override

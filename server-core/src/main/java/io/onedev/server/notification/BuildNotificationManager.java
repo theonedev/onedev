@@ -20,6 +20,7 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.build.BuildUpdated;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildQueryPersonalization;

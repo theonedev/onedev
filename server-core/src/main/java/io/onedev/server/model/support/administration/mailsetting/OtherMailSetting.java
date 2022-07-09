@@ -1,16 +1,16 @@
-package io.onedev.server.model.support.administration;
-
-import java.io.Serializable;
-
-import javax.validation.constraints.Min;
+package io.onedev.server.model.support.administration.mailsetting;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.mail.BasicAuthPassword;
+import io.onedev.server.mail.MailCheckSetting;
+import io.onedev.server.mail.MailCredential;
+import io.onedev.server.mail.MailSendSetting;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 
-@Editable
-public class MailSetting implements Serializable {
+@Editable(order=10000, name="Other Provider")
+public class OtherMailSetting extends MailSetting {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -24,11 +24,9 @@ public class MailSetting implements Serializable {
 	
 	private String emailAddress;
 	
-	private ReceiveMailSetting receiveMailSetting;
+	private OtherInboxPollSetting otherInboxPollSetting;
 	
 	private boolean enableStartTLS = true;
-	
-	private int timeout = 60;
 
 	@Editable(order=100, name="SMTP Host")
 	@NotEmpty
@@ -97,22 +95,41 @@ public class MailSetting implements Serializable {
 	@Editable(order=450, name="Check Incoming Email", description="Enable this to post issue and pull request comments via email<br>"
 			+ "<b class='text-danger'>NOTE:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> "
 			+ "needs to be enabled for system email address, as OneDev uses it to track issue and pull request contexts")
-	public ReceiveMailSetting getReceiveMailSetting() {
-		return receiveMailSetting;
+	public OtherInboxPollSetting getOtherInboxPollSetting() {
+		return otherInboxPollSetting;
 	}
 
-	public void setReceiveMailSetting(ReceiveMailSetting receiveMailSetting) {
-		this.receiveMailSetting = receiveMailSetting;
+	public void setOtherInboxPollSetting(OtherInboxPollSetting otherInboxPollSetting) {
+		this.otherInboxPollSetting = otherInboxPollSetting;
 	}
 
-	@Editable(order=600, description="Specify timeout in seconds when communicating with mail server")
-	@Min(value=10, message="This value should not be less than 10")
-	public int getTimeout() {
-		return timeout;
+	@Override
+	public MailSendSetting getSendSetting() {
+		MailCredential credential;
+		if (smtpPassword != null)
+			credential = new BasicAuthPassword(smtpPassword);
+		else
+			credential = null;
+		return new MailSendSetting(smtpHost, smtpPort, smtpUser, credential, emailAddress, enableStartTLS, getTimeout());
 	}
 
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
+	@Override
+	public MailCheckSetting getCheckSetting() {
+		if (otherInboxPollSetting != null) {
+			String imapUser = otherInboxPollSetting.getImapAuth().getUserName(this);
+			MailCredential imapCredential;
+			String imapPassword = otherInboxPollSetting.getImapAuth().getPassword(this);
+			if (imapPassword != null)
+				imapCredential = new BasicAuthPassword(imapPassword);
+			else
+				imapCredential = null;
+			
+			return new MailCheckSetting(otherInboxPollSetting.getImapHost(), otherInboxPollSetting.getImapPort(), 
+					imapUser, imapCredential, emailAddress, otherInboxPollSetting.isEnableSSL(), 
+					otherInboxPollSetting.getPollInterval(), getTimeout());
+		} else {
+			return null;
+		}
 	}
-	
+
 }

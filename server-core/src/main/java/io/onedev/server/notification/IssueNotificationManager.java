@@ -27,6 +27,7 @@ import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.EmailAddress;

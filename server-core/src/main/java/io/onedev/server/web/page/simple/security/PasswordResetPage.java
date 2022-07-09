@@ -21,9 +21,9 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
-import io.onedev.server.notification.MailManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.page.simple.SimplePage;
@@ -117,7 +117,7 @@ public class PasswordResetPage extends SimplePage {
 							}
 							
 							mailManager.sendMail(
-									settingManager.getMailSetting(), 
+									settingManager.getMailSetting().getSendSetting(), 
 									Arrays.asList(emailAddressValue),
 									Lists.newArrayList(), Lists.newArrayList(), 
 									"[Password Reset] Your OneDev Password Has Been Reset", 

@@ -8,14 +8,7 @@
 		<artifactId>server-plugin</artifactId>
 		<version>7.4.3</version>
 	</parent>
-	<dependencies>
-		<dependency>
-			<groupId>com.nimbusds</groupId>
-			<artifactId>oauth2-oidc-sdk</artifactId>
-		</dependency>
-	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.sso.openid.OpenIdModule</moduleClass>
-		<okta-jwt.version>0.4.0</okta-jwt.version>
 	</properties>
 </project>

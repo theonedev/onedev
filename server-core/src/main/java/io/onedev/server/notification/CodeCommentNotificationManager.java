@@ -18,6 +18,7 @@ import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
 import io.onedev.server.event.codecomment.CodeCommentStatusChanged;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.CodeComment;

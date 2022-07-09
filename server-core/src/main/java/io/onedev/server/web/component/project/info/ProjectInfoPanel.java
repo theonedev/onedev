@@ -103,16 +103,16 @@ public abstract class ProjectInfoPanel extends Panel {
         SettingManager settingManager = OneDev.getInstance(SettingManager.class);
         if (settingManager.getServiceDeskSetting() != null
         		&& settingManager.getMailSetting() != null 
-        		&& settingManager.getMailSetting().getReceiveMailSetting() != null
+        		&& settingManager.getMailSetting().getCheckSetting() != null
         		&& getProject().isIssueManagement()) {
         	
         	String subAddressed;
         	
-			ParsedEmailAddress emailAddress = ParsedEmailAddress.parse(settingManager.getMailSetting().getEmailAddress());
+			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(settingManager.getMailSetting().getCheckSetting().getCheckAddress());
 			if (getProject().getServiceDeskName() != null)
-				subAddressed = emailAddress.getSubAddressed(getProject().getServiceDeskName());
+				subAddressed = checkAddress.getSubAddressed(getProject().getServiceDeskName());
 			else
-				subAddressed = emailAddress.getSubAddressed(getProject().getPath());
+				subAddressed = checkAddress.getSubAddressed(getProject().getPath());
         	
         	add(new WebMarkupContainer("serviceDesk") {
 

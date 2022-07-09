@@ -21,9 +21,9 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
-import io.onedev.server.notification.MailManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -213,7 +213,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 				user.getName(), serverUrl, emailAddress.getValue(), verificationUrl);
 		
 		mailManager.sendMail(
-				settingManager.getMailSetting(), 
+				settingManager.getMailSetting().getSendSetting(), 
 				Arrays.asList(emailAddress.getValue()),
 				Lists.newArrayList(), Lists.newArrayList(), 
 				"[Verification] Please Verify Your Email Address", 

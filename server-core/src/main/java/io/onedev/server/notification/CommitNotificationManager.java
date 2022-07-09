@@ -22,6 +22,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.CommitQueryPersonalization;
 import io.onedev.server.model.EmailAddress;

@@ -1,4 +1,4 @@
-package io.onedev.server.notification;
+package io.onedev.server.mail;
 
 import java.io.Serializable;
 

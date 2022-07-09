@@ -37,6 +37,7 @@ import io.onedev.server.event.pullrequest.PullRequestReviewerRemoved;
 import io.onedev.server.event.pullrequest.PullRequestUnassigned;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.EmailAddress;

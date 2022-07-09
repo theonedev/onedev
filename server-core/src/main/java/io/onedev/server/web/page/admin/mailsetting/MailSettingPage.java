@@ -10,10 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -28,11 +26,11 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.MailSetting;
-import io.onedev.server.model.support.administration.ReceiveMailSetting;
-import io.onedev.server.notification.MailManager;
-import io.onedev.server.notification.MailPosition;
-import io.onedev.server.notification.MessageListener;
+import io.onedev.server.mail.MailCheckSetting;
+import io.onedev.server.mail.MailManager;
+import io.onedev.server.mail.MailPosition;
+import io.onedev.server.mail.MessageListener;
+import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ParsedEmailAddress;
@@ -88,24 +86,6 @@ public class MailSettingPage extends AdministrationPage {
 			}
 
 			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-
-				BeanEditor receiveMailSettingEditor = editor.visitChildren(BeanEditor.class, new IVisitor<BeanEditor, BeanEditor>() {
-
-					public void component(BeanEditor component, IVisit<BeanEditor> visit) {
-						if (component.getModelObject() instanceof ReceiveMailSetting)
-							visit.stop(component); 
-					}
-					
-				});
-				if (receiveMailSettingEditor != null && receiveMailSettingEditor.isVisibleInHierarchy())
-					tag.put("value", "Test Sending & Receiving Mail");
-				else
-					tag.put("value", "Test Sending Mail");
-			}
-
-			@Override
 			protected String runTask(TaskLogger logger) {
 				return OneDev.getInstance(SessionManager.class).call(new Callable<String>() {
 
@@ -113,8 +93,8 @@ public class MailSettingPage extends AdministrationPage {
 					public String call() {
 						MailManager mailManager = OneDev.getInstance(MailManager.class);
 						MailSetting mailSetting = mailSettingHolder.getMailSetting();
-						ReceiveMailSetting receiveSetting = mailSetting.getReceiveMailSetting();
-						if (receiveSetting != null) {
+						MailCheckSetting checkSetting = mailSetting.getCheckSetting();
+						if (checkSetting != null) {
 							String uuid = UUID.randomUUID().toString();
 							AtomicReference<Future<?>> futureRef = new AtomicReference<>(null);
 							MessageListener listener = new MessageListener() {
@@ -127,15 +107,15 @@ public class MailSettingPage extends AdministrationPage {
 								
 							};				
 
-							receiveSetting = SerializationUtils.clone(receiveSetting);
-							receiveSetting.setPollInterval(5);
-							futureRef.set(mailManager.monitorInbox(receiveSetting, mailSetting.getTimeout(), 
-									listener, new MailPosition()));
+							checkSetting = new MailCheckSetting(checkSetting.getImapHost(), checkSetting.getImapPort(), 
+									checkSetting.getImapUser(), checkSetting.getImapCredential(), checkSetting.getCheckAddress(), 
+									checkSetting.isEnableSSL(), 5, checkSetting.getTimeout());
+							futureRef.set(mailManager.monitorInbox(checkSetting, listener, new MailPosition()));
 							
-							ParsedEmailAddress emailAddress = ParsedEmailAddress.parse(mailSetting.getEmailAddress());
-							String subAddressed = emailAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);
+							ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
+							String subAddressed = checkAddress.getSubAddressed(MailManager.TEST_SUB_ADDRESS);
 							logger.log("Sending test mail to " + subAddressed + "...");
-							mailManager.sendMail(mailSetting, 
+							mailManager.sendMail(mailSetting.getSendSetting(), 
 									Sets.newHashSet(subAddressed), Lists.newArrayList(), Lists.newArrayList(), uuid, 
 									"[Test] Test Email From OneDev", "This is a test email from OneDev", null, null);
 
@@ -158,7 +138,7 @@ public class MailSettingPage extends AdministrationPage {
 							io.onedev.server.model.EmailAddress emailAddress = SecurityUtils.getUser().getPrimaryEmailAddress();
 							if (emailAddress != null) {
 								String body = "Great, your mail setting is working!";
-								mailManager.sendMail(mailSettingHolder.getMailSetting(), Sets.newHashSet(emailAddress.getValue()), 
+								mailManager.sendMail(mailSettingHolder.getMailSetting().getSendSetting(), Sets.newHashSet(emailAddress.getValue()), 
 										Lists.newArrayList(), Lists.newArrayList(), "[Test] Test Email From OneDev", 
 										body, body, null, null);
 								return "Test mail has been sent to " + emailAddress.getValue() + ", please check your mail box";

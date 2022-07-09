@@ -1,4 +1,4 @@
-package io.onedev.server.notification;
+package io.onedev.server.mail;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -98,10 +98,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.IssueCreationSetting;
-import io.onedev.server.model.support.administration.MailSetting;
-import io.onedev.server.model.support.administration.ReceiveMailSetting;
 import io.onedev.server.model.support.administration.SenderAuthorization;
 import io.onedev.server.model.support.administration.ServiceDeskSetting;
+import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -240,36 +239,40 @@ public class DefaultMailManager implements MailManager {
     }
     
 	@Override
-	public void sendMail(MailSetting mailSetting, Collection<String> toList, Collection<String> ccList, 
+	public void sendMail(MailSendSetting sendSetting, Collection<String> toList, Collection<String> ccList, 
 			Collection<String> bccList, String subject, String htmlBody, String textBody, 
 			String replyAddress, String references) {
 		if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
 			return;
 
-		if (mailSetting == null)
-			mailSetting = settingManager.getMailSetting();
+		if (sendSetting == null) {
+			MailSetting mailSetting = settingManager.getMailSetting();
+			sendSetting = mailSetting!=null? mailSetting.getSendSetting(): null;
+		}
 		
-		if (mailSetting != null) {
+		if (sendSetting != null) {
 			Properties properties = new Properties();
-	        properties.setProperty("mail.smtp.host", mailSetting.getSmtpHost());
-	        properties.setProperty("mail.smtp.port", String.valueOf(mailSetting.getSmtpPort()));
+	        properties.setProperty("mail.smtp.host", sendSetting.getSmtpHost());
+	        properties.setProperty("mail.smtp.port", String.valueOf(sendSetting.getSmtpPort()));
 	        properties.setProperty("mail.transport.protocol", "smtp");
 	 
 	        properties.setProperty("mail.smtp.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
-	        properties.setProperty("mail.smtp.timeout", String.valueOf(mailSetting.getTimeout()*1000));
-	        properties.setProperty("mail.smtp.starttls.enable", String.valueOf(mailSetting.isEnableStartTLS()));
+	        properties.setProperty("mail.smtp.timeout", String.valueOf(sendSetting.getTimeout()*1000));
+	        properties.setProperty("mail.smtp.starttls.enable", String.valueOf(sendSetting.isEnableStartTLS()));
 	        properties.setProperty("mail.smtp.starttls.required", "false");
 	        
 	        Authenticator authenticator;
-	        if (mailSetting.getSmtpUser() != null) {
+	        if (sendSetting.getSmtpUser() != null) {
 	        	properties.setProperty("mail.smtp.auth", "true");
-	        	String smtpUser = mailSetting.getSmtpUser();
-	        	String smtpPassword = mailSetting.getSmtpPassword();
+	        	if (sendSetting.getSmtpCredential() instanceof OAuthAccessToken)
+	        		properties.setProperty("mail.smtp.auth.mechanisms", "XOAUTH2");
+	        	String smtpUser = sendSetting.getSmtpUser();
+	        	String credentialValue = sendSetting.getSmtpCredential()!=null?sendSetting.getSmtpCredential().getValue():null;
 	        	authenticator = new Authenticator() {
 		        	
 		            @Override
 		            protected PasswordAuthentication getPasswordAuthentication() {
-		                return new PasswordAuthentication(smtpUser, smtpPassword);
+		                return new PasswordAuthentication(smtpUser, credentialValue);
 		            }
 		            
 		        };	        	
@@ -302,7 +305,7 @@ public class DefaultMailManager implements MailManager {
 				    	message.addHeader(entry.getKey(), createFoldedHeaderValue(entry.getKey(), entry.getValue()));
 				}
 				
-				message.setFrom(createInetAddress(mailSetting.getEmailAddress(), "OneDev"));
+				message.setFrom(createInetAddress(sendSetting.getSenderAddress(), "OneDev"));
 				
 				if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
 					throw new ExplicitException("At least one receiver address should be specified");
@@ -333,8 +336,7 @@ public class DefaultMailManager implements MailManager {
 	@Override
 	public void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 			String subject, String htmlBody, String textBody, String replyAddress, String references) {
-		sendMail(settingManager.getMailSetting(), toList, ccList, bccList, subject, htmlBody, 
-				textBody, replyAddress, references);
+		sendMail(null, toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, references);
 	}
 	
 	@Transactional
@@ -369,7 +371,7 @@ public class DefaultMailManager implements MailManager {
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	protected void onMessage(MailSetting mailSetting, Message message) throws MessagingException, IOException {
+	protected void onMessage(MailSendSetting sendSetting, MailCheckSetting checkSetting, Message message) throws MessagingException, IOException {
 			String[] toHeader = message.getHeader("To");
 			String[] fromHeader = message.getHeader("From");
 			String[] ccHeader = message.getHeader("Cc");
@@ -391,7 +393,7 @@ public class DefaultMailManager implements MailManager {
 						authorization = serviceDeskSetting.getSenderAuthorization(from.getAddress());
 						designatedProject = serviceDeskSetting.getDesignatedProject(from.getAddress());
 					} 
-					ParsedEmailAddress parsedSystemAddress = ParsedEmailAddress.parse(mailSetting.getEmailAddress());
+					ParsedEmailAddress parsedSystemAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
 					
 					Collection<Issue> issues = new ArrayList<>();
 					Collection<PullRequest> pullRequests = new ArrayList<>();
@@ -457,7 +459,7 @@ public class DefaultMailManager implements MailManager {
 										}
 									} else {
 										checkPermission(from, issue.getProject(), new AccessProject(), user, authorization);
-										addComment(issue, message, from, receiverEmailAddresses, user, authorization);
+										addComment(sendSetting, issue, message, from, receiverEmailAddresses, user, authorization);
 										issues.add(issue);
 									}
 								} else if (subAddress.contains("pullrequest")) {
@@ -481,7 +483,7 @@ public class DefaultMailManager implements MailManager {
 										}
 									} else {
 										checkPermission(from, pullRequest.getTargetProject(), new ReadCode(), user, authorization);
-										addComment(pullRequest, message, from, receiverEmailAddresses, user, authorization);
+										addComment(sendSetting, pullRequest, message, from, receiverEmailAddresses, user, authorization);
 										pullRequests.add(pullRequest);
 									}
 								} else {
@@ -567,8 +569,8 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	@Nullable
-	private String stripQuotation(String content) {
-		String quotedSender = settingManager.getMailSetting().getEmailAddress();
+	private String stripQuotation(MailSendSetting sendSetting, String content) {
+		String quotedSender = sendSetting.getSenderAddress();
 		Pattern pattern = Pattern.compile("(^|\\W)" + quotedSender.replace(".", "\\.") + "($|\\W)");
 		
 		Document document = HtmlUtils.parse(content);
@@ -623,7 +625,7 @@ public class DefaultMailManager implements MailManager {
 		}
 	}
 	
-	private void addComment(Issue issue, Message message, InternetAddress author, 
+	private void addComment(MailSendSetting sendSetting, Issue issue, Message message, InternetAddress author, 
 			Collection<String> receiverEmailAddresses, @Nullable User user, 
 			@Nullable SenderAuthorization authorization) throws IOException, MessagingException {
 		IssueComment comment = new IssueComment();
@@ -631,14 +633,14 @@ public class DefaultMailManager implements MailManager {
 		if (user == null)
 			user = createUser(author, issue.getProject(), authorization.getAuthorizedRole());
 		comment.setUser(user);
-		String content = stripQuotation(readText(issue.getProject(), issue.getUUID(), message));
+		String content = stripQuotation(sendSetting, readText(issue.getProject(), issue.getUUID(), message));
 		if (content != null) {
 			comment.setContent("<div class='no-color'>" + content + "</div>");
 			issueCommentManager.save(comment, receiverEmailAddresses);
 		}
 	}
 	
-	private void addComment(PullRequest pullRequest, Message message, InternetAddress author, 
+	private void addComment(MailSendSetting sendSetting, PullRequest pullRequest, Message message, InternetAddress author, 
 			Collection<String> receiverEmailAddresses, @Nullable User user, 
 			@Nullable SenderAuthorization authorization) throws IOException, MessagingException {
 		PullRequestComment comment = new PullRequestComment();
@@ -646,7 +648,7 @@ public class DefaultMailManager implements MailManager {
 		if (user == null)
 			user = createUser(author, pullRequest.getProject(), authorization.getAuthorizedRole());
 		comment.setUser(user);
-		String content = stripQuotation(readText(pullRequest.getProject(), pullRequest.getUUID(), message));
+		String content = stripQuotation(sendSetting, readText(pullRequest.getProject(), pullRequest.getUUID(), message));
 		if (content != null) {
 			comment.setContent("<div class='no-color'>" + content + "</div>");
 			pullRequestCommentManager.save(comment, receiverEmailAddresses);
@@ -750,15 +752,16 @@ public class DefaultMailManager implements MailManager {
 				while (thread != null) {
 					try {
 						MailSetting mailSetting = settingManager.getMailSetting();
-						if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
+						MailCheckSetting checkSetting = mailSetting!=null?mailSetting.getCheckSetting():null;
+						if (checkSetting != null) {
+							MailSendSetting sendSetting = mailSetting.getSendSetting();
 							MailPosition mailPosition = new MailPosition();
 							while (thread != null) {
-								Future<?> future = monitorInbox(mailSetting.getReceiveMailSetting(), mailSetting.getTimeout(), 
-										new MessageListener() {
+								Future<?> future = monitorInbox(checkSetting, new MessageListener() {
 									
 									@Override
 									public void onReceived(Message message) throws IOException, MessagingException {
-										onMessage(mailSetting, message);
+										onMessage(sendSetting, checkSetting, message);
 									}
 									
 								}, mailPosition);
@@ -801,8 +804,7 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	@Override
-	public Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, int timeout, 
-			MessageListener listener, MailPosition lastPosition) {
+	public Future<?> monitorInbox(MailCheckSetting checkSetting, MessageListener listener, MailPosition lastPosition) {
 		return executorService.submit(new Runnable() {
 
 			private void processMessages(IMAPFolder inbox, AtomicInteger messageNumber) throws MessagingException {
@@ -832,22 +834,25 @@ public class DefaultMailManager implements MailManager {
 			public void run() {
 		        Properties properties = new Properties();
 		        
-		        properties.setProperty("mail.imap.host", receiveMailSetting.getImapHost());
-		        properties.setProperty("mail.imap.port", String.valueOf(receiveMailSetting.getImapPort()));
-		        properties.setProperty("mail.imap.ssl.enable", String.valueOf(receiveMailSetting.isEnableSSL()));        
+		        properties.setProperty("mail.imap.host", checkSetting.getImapHost());
+		        properties.setProperty("mail.imap.port", String.valueOf(checkSetting.getImapPort()));
+		        properties.setProperty("mail.imap.ssl.enable", String.valueOf(checkSetting.isEnableSSL()));        
 		 
 		        properties.setProperty("mail.imap.socketFactory.fallback", "false");
-		        properties.setProperty("mail.imap.socketFactory.port", String.valueOf(receiveMailSetting.getImapPort()));
+		        properties.setProperty("mail.imap.socketFactory.port", String.valueOf(checkSetting.getImapPort()));
 		        
 		        properties.setProperty("mail.imap.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
-		        properties.setProperty("mail.imap.timeout", String.valueOf(timeout*1000));
+		        properties.setProperty("mail.imap.timeout", String.valueOf(checkSetting.getTimeout()*1000));
+	        	if (checkSetting.getImapCredential() instanceof OAuthAccessToken)
+	        		properties.setProperty("mail.imap.auth.mechanisms", "XOAUTH2");
 				
 				Session session = Session.getInstance(properties);
 				Store store = null;
 				IMAPFolder inbox = null;
 				try {
 					store = session.getStore("imap");
-					store.connect(receiveMailSetting.getImapUser(), receiveMailSetting.getImapPassword());
+					String credentialValue = checkSetting.getImapCredential()!=null?checkSetting.getImapCredential().getValue():null;
+					store.connect(checkSetting.getImapUser(), credentialValue);
 					inbox = (IMAPFolder) store.getFolder("INBOX");
 					inbox.open(Folder.READ_ONLY);
 					
@@ -879,7 +884,7 @@ public class DefaultMailManager implements MailManager {
 
 					long time = System.currentTimeMillis();
 					while (true) { 
-						Thread.sleep(receiveMailSetting.getPollInterval()*1000);
+						Thread.sleep(checkSetting.getPollInterval()*1000);
 						processMessages(inbox, messageNumber);
 						
 						// discard inbox periodically to save memory
@@ -910,9 +915,10 @@ public class DefaultMailManager implements MailManager {
 	@Override
 	public String getReplyAddress(Issue issue) {
 		MailSetting mailSetting = settingManager.getMailSetting();
-		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
-			ParsedEmailAddress systemAddress = ParsedEmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getSubAddressed("issue~" + issue.getId()); 
+		MailCheckSetting checkSetting = mailSetting!=null? mailSetting.getCheckSetting(): null;
+		if (checkSetting != null) {
+			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
+			return checkAddress.getSubAddressed("issue~" + issue.getId()); 
 		} else {
 			return null;
 		}
@@ -921,9 +927,10 @@ public class DefaultMailManager implements MailManager {
 	@Override
 	public String getReplyAddress(PullRequest request) {
 		MailSetting mailSetting = settingManager.getMailSetting();
-		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
-			ParsedEmailAddress systemAddress = ParsedEmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getSubAddressed("pullrequest~" + request.getId()); 
+		MailCheckSetting checkSetting = mailSetting!=null? mailSetting.getCheckSetting(): null;
+		if (checkSetting != null) {
+			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
+			return checkAddress.getSubAddressed("pullrequest~" + request.getId()); 
 		} else {
 			return null;
 		}
@@ -932,9 +939,10 @@ public class DefaultMailManager implements MailManager {
 	@Override
 	public String getUnsubscribeAddress(Issue issue) {
 		MailSetting mailSetting = settingManager.getMailSetting();
-		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
-			ParsedEmailAddress systemAddress = ParsedEmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getSubAddressed("issueunsubscribe~" + issue.getId()); 
+		MailCheckSetting checkSetting = mailSetting!=null? mailSetting.getCheckSetting(): null;
+		if (checkSetting != null) {
+			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
+			return checkAddress.getSubAddressed("issueunsubscribe~" + issue.getId()); 
 		} else {
 			return null;
 		}
@@ -943,9 +951,10 @@ public class DefaultMailManager implements MailManager {
 	@Override
 	public String getUnsubscribeAddress(PullRequest request) {
 		MailSetting mailSetting = settingManager.getMailSetting();
-		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
-			ParsedEmailAddress systemAddress = ParsedEmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getSubAddressed("pullrequestunsubscribe~" + request.getId()); 
+		MailCheckSetting checkSetting = mailSetting!=null? mailSetting.getCheckSetting(): null;
+		if (checkSetting != null) {
+			ParsedEmailAddress checkAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
+			return checkAddress.getSubAddressed("pullrequestunsubscribe~" + request.getId()); 
 		} else {
 			return null;
 		}

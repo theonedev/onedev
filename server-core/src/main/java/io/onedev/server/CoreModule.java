@@ -206,6 +206,8 @@ import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.job.resource.DefaultResourceManager;
 import io.onedev.server.job.resource.ResourceManager;
+import io.onedev.server.mail.DefaultMailManager;
+import io.onedev.server.mail.MailManager;
 import io.onedev.server.maintenance.ApplyDatabaseConstraints;
 import io.onedev.server.maintenance.BackupDatabase;
 import io.onedev.server.maintenance.CheckDataVersion;
@@ -224,9 +226,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.notification.BuildNotificationManager;
 import io.onedev.server.notification.CodeCommentNotificationManager;
 import io.onedev.server.notification.CommitNotificationManager;
-import io.onedev.server.notification.DefaultMailManager;
 import io.onedev.server.notification.IssueNotificationManager;
-import io.onedev.server.notification.MailManager;
 import io.onedev.server.notification.PullRequestNotificationManager;
 import io.onedev.server.notification.WebHookManager;
 import io.onedev.server.persistence.DefaultIdManager;
