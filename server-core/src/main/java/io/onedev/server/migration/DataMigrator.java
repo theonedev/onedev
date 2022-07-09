@@ -4234,7 +4234,7 @@ public class DataMigrator {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
 							for (Element issueCreationSettingElement: valueElement.element("issueCreationSettings").elements()) 
-								issueCreationSettingElement.addElement("issueConfidential").setText("false");
+								issueCreationSettingElement.addElement("confidential").setText("false");
 						}						
 					}
 				}
