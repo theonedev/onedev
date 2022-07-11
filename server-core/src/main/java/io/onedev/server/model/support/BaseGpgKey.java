@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.Column;
+import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 import javax.validation.ConstraintValidatorContext;
 
@@ -27,7 +28,8 @@ public class BaseGpgKey extends AbstractEntity implements Validatable {
     
     public static final String PROP_CONTENT = "content";
     
-    @Column(nullable=false, length=5000)
+	@Lob
+	@Column(length=65535, nullable=false)
     private String content;
     
     private transient List<PGPPublicKey> publicKeys;
