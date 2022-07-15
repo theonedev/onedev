@@ -53,7 +53,8 @@ public class JobPrivilege implements Serializable {
 		return SuggestionUtils.suggest(jobNames, matchWith);
 	}
 
-	@Editable(order=100, description="This permission is required to delete builds. It implies all other job permissions")
+	@Editable(order=100, description="Job administrative permission, including deleting builds of the job. "
+			+ "It implies all other job permissions")
 	public boolean isManageJob() {
 		return manageJob;
 	}

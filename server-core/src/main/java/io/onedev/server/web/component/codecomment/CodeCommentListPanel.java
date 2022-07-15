@@ -42,6 +42,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -52,6 +54,9 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
@@ -341,66 +346,68 @@ public abstract class CodeCommentListPanel extends Panel {
 					
 				});
 				
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Delete Selected Comments";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								new ConfirmModalPanel(target) {
+				if (SecurityUtils.canManageCodeComments(getProject())) {
+					menuItems.add(new MenuItem() {
+	
+						@Override
+						public String getLabel() {
+							return "Delete Selected Comments";
+						}
+						
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+	
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<CodeComment> comments = new ArrayList<>();
+											for (IModel<CodeComment> each: selectionColumn.getSelections())
+												comments.add(each.getObject());
+											OneDev.getInstance(CodeCommentManager.class).delete(comments);
+											selectionColumn.getSelections().clear();
+											target.add(body);
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to delete selected issues";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+										
+									};
 									
-									@Override
-									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<CodeComment> comments = new ArrayList<>();
-										for (IModel<CodeComment> each: selectionColumn.getSelections())
-											comments.add(each.getObject());
-										OneDev.getInstance(CodeCommentManager.class).delete(comments);
-										selectionColumn.getSelections().clear();
-										target.add(body);
-									}
-									
-									@Override
-									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete selected issues";
-									}
-									
-									@Override
-									protected String getConfirmInput() {
-										return "yes";
-									}
-									
-								};
-								
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select issues to delete");
 								}
-							}
-							
-						};
-					}
-					
-				});
+								
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
+								
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select issues to delete");
+									}
+								}
+								
+							};
+						}
+						
+					});
+				}
 				
 				menuItems.add(new MenuItem() {
 
@@ -502,75 +509,76 @@ public abstract class CodeCommentListPanel extends Panel {
 					
 				});
 				
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Delete All Queried Comments";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@SuppressWarnings("unchecked")
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								
-								new ConfirmModalPanel(target) {
+				if (SecurityUtils.canManageCodeComments(getProject())) {
+					menuItems.add(new MenuItem() {
+	
+						@Override
+						public String getLabel() {
+							return "Delete All Queried Comments";
+						}
+						
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+	
+								@SuppressWarnings("unchecked")
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
 									
-									@Override
-									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<CodeComment> comments = new ArrayList<>();
-										for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
-											comments.add(it.next());
-										OneDev.getInstance(CodeCommentManager.class).delete(comments);
-										selectionColumn.getSelections().clear();
-										target.add(body);
-									}
-									
-									@Override
-									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete all queried comments";
-									}
-									
-									@Override
-									protected String getConfirmInput() {
-										return "yes";
-									}
-									
-								};
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(commentsTable.getItemCount() != 0);
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No comments to delete");
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<CodeComment> comments = new ArrayList<>();
+											for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
+												comments.add(it.next());
+											OneDev.getInstance(CodeCommentManager.class).delete(comments);
+											selectionColumn.getSelections().clear();
+											target.add(body);
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to delete all queried comments";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+										
+									};
 								}
-							}
-							
-						};
-					}
-					
-				});
-				
+								
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(commentsTable.getItemCount() != 0);
+								}
+								
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No comments to delete");
+									}
+								}
+								
+							};
+						}
+						
+					});
+				}				
 				return menuItems;
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getProject() != null && SecurityUtils.canManageCodeComments(getProject()));
+				setVisible(selectionColumn != null);
 			}
 
 		});
@@ -721,8 +729,17 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 		List<IColumn<CodeComment, Void>> columns = new ArrayList<>();
 		
-		if (getProject() != null && SecurityUtils.canManageCodeComments(getProject())) 
+		if (SecurityUtils.canManageCodeComments(getProject())) {
 			columns.add(selectionColumn = new SelectionColumn<CodeComment, Void>());
+		} else if (getPullRequest() != null) {
+			Collection<User> keyUsers = Sets.newHashSet(getPullRequest().getSubmitter());
+			for (PullRequestReview review: getPullRequest().getReviews())
+				keyUsers.add(review.getUser());
+			for (PullRequestAssignment assignment: getPullRequest().getAssignments())
+				keyUsers.add(assignment.getUser());
+			if (keyUsers.contains(SecurityUtils.getUser()))
+				columns.add(selectionColumn = new SelectionColumn<CodeComment, Void>());				
+		} 
 		
 		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("")) {
 
