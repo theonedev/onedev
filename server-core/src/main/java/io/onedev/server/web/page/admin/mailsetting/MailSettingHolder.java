@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 public class MailSettingHolder implements Serializable {
@@ -13,8 +12,7 @@ public class MailSettingHolder implements Serializable {
 
 	private MailSetting mailSetting;
 
-	@Editable(placeholder="Disable")
-	@OmitName
+	@Editable(name="Provider", placeholder="None")
 	public MailSetting getMailSetting() {
 		return mailSetting;
 	}

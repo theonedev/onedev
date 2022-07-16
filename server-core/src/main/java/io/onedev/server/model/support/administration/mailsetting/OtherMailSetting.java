@@ -9,7 +9,7 @@ import io.onedev.server.mail.MailSendSetting;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 
-@Editable(order=10000, name="Other Provider")
+@Editable(order=10000, name="Other")
 public class OtherMailSetting extends MailSetting {
 	
 	private static final long serialVersionUID = 1L;
@@ -47,9 +47,7 @@ public class OtherMailSetting extends MailSetting {
 		this.smtpPort = smtpPort;
 	}
 
-	@Editable(order=300, name="SMTP User", description=
-		"Optionally specify user name here if the SMTP host needs authentication"
-		)
+	@Editable(order=300, name="SMTP User")
 	public String getSmtpUser() {
 		return smtpUser;
 	}
@@ -58,9 +56,7 @@ public class OtherMailSetting extends MailSetting {
 		this.smtpUser = smtpUser;
 	}
 
-	@Editable(order=400, name="SMTP Password", description=
-		"Optionally specify password here if the SMTP host needs authentication"
-		)
+	@Editable(order=400, name="SMTP Password")
 	@Password(autoComplete="new-password")
 	public String getSmtpPassword() {
 		return smtpPassword;
@@ -105,25 +101,19 @@ public class OtherMailSetting extends MailSetting {
 
 	@Override
 	public MailSendSetting getSendSetting() {
-		MailCredential credential;
+		MailCredential smtpCredential;
 		if (smtpPassword != null)
-			credential = new BasicAuthPassword(smtpPassword);
+			smtpCredential = new BasicAuthPassword(smtpPassword);
 		else
-			credential = null;
-		return new MailSendSetting(smtpHost, smtpPort, smtpUser, credential, emailAddress, enableStartTLS, getTimeout());
+			smtpCredential = null;
+		return new MailSendSetting(smtpHost, smtpPort, smtpUser, smtpCredential, emailAddress, enableStartTLS, getTimeout());
 	}
 
 	@Override
 	public MailCheckSetting getCheckSetting() {
 		if (otherInboxPollSetting != null) {
-			String imapUser = otherInboxPollSetting.getImapAuth().getUserName(this);
-			MailCredential imapCredential;
-			String imapPassword = otherInboxPollSetting.getImapAuth().getPassword(this);
-			if (imapPassword != null)
-				imapCredential = new BasicAuthPassword(imapPassword);
-			else
-				imapCredential = null;
-			
+			String imapUser = otherInboxPollSetting.getImapUser();
+			MailCredential imapCredential = new BasicAuthPassword(otherInboxPollSetting.getImapPassword());
 			return new MailCheckSetting(otherInboxPollSetting.getImapHost(), otherInboxPollSetting.getImapPort(), 
 					imapUser, imapCredential, emailAddress, otherInboxPollSetting.isEnableSSL(), 
 					otherInboxPollSetting.getPollInterval(), getTimeout());

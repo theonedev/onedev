@@ -4246,4 +4246,25 @@ public class DataMigrator {
 	private void migrate93(File dataDir, Stack<Integer> versions) {
 	}
 	
+	private void migrate94(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addAttribute("class", "io.onedev.server.model.support.administration.mailsetting.OtherMailSetting");
+							Element receiveMailSettingElement = valueElement.element("receiveMailSetting");
+							if (receiveMailSettingElement != null) 
+								receiveMailSettingElement.setName("otherInboxPollSetting");
+						}						
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}		
+	}
+	
 }

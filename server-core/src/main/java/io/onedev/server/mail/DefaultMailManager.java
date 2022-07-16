@@ -851,7 +851,7 @@ public class DefaultMailManager implements MailManager {
 				IMAPFolder inbox = null;
 				try {
 					store = session.getStore("imap");
-					String credentialValue = checkSetting.getImapCredential()!=null?checkSetting.getImapCredential().getValue():null;
+					String credentialValue = checkSetting.getImapCredential().getValue();
 					store.connect(checkSetting.getImapUser(), credentialValue);
 					inbox = (IMAPFolder) store.getFolder("INBOX");
 					inbox.open(Folder.READ_ONLY);

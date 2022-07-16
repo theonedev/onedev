@@ -1,10 +1,9 @@
 package io.onedev.server.model.support.administration.mailsetting;
 
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Password;
 
 @Editable
 public class OtherInboxPollSetting extends InboxPollSetting {
@@ -15,7 +14,9 @@ public class OtherInboxPollSetting extends InboxPollSetting {
 	
 	private int imapPort = 993;
 	
-	private ImapAuth imapAuth = new UseSmtpAuth();
+	private String imapUser;
+	
+	private String imapPassword;
 	
 	private boolean enableSSL = true;
 	
@@ -38,14 +39,27 @@ public class OtherInboxPollSetting extends InboxPollSetting {
 		this.imapPort = imapPort;
 	}
 
-	@Editable(order=300, name="Authentication")
-	@NotNull
-	public ImapAuth getImapAuth() {
-		return imapAuth;
+	@Editable(order=300, name="IMAP User", description="Specify IMAP user name.<br>"
+			+ "<b class='text-danger'>NOTE: </b> This account should be able to receive emails sent to system "
+			+ "email address specified above")
+	@NotEmpty
+	public String getImapUser() {
+		return imapUser;
 	}
 
-	public void setImapAuth(ImapAuth imapAuth) {
-		this.imapAuth = imapAuth;
+	public void setImapUser(String imapUser) {
+		this.imapUser = imapUser;
+	}
+
+	@Editable(order=400, name="IMAP Password")
+	@Password(autoComplete="new-password")
+	@NotEmpty
+	public String getImapPassword() {
+		return imapPassword;
+	}
+
+	public void setImapPassword(String imapPassword) {
+		this.imapPassword = imapPassword;
 	}
 
 	@Editable(order=700, name="Enable IMAP SSL", description="Whether or not to enable SSL when connect to IMAP server")

@@ -2,8 +2,6 @@ package io.onedev.server.mail;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
-
 public class MailSendSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -22,7 +20,7 @@ public class MailSendSetting implements Serializable {
 	
 	private final int timeout;
 
-	public MailSendSetting(String smtpHost, int smtpPort, @Nullable String smtpUser, @Nullable MailCredential smtpCredential,
+	public MailSendSetting(String smtpHost, int smtpPort, String smtpUser, MailCredential smtpCredential,
 			String senderAddress, boolean enableStartTLS, int timeout) {
 		this.smtpHost = smtpHost;
 		this.smtpPort = smtpPort;

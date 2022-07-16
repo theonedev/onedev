@@ -2,8 +2,6 @@ package io.onedev.server.mail;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
-
 public class MailCheckSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -24,7 +22,7 @@ public class MailCheckSetting implements Serializable {
 	
 	private final int timeout;
 
-	public MailCheckSetting(String imapHost, int imapPort, @Nullable String imapUser, @Nullable MailCredential imapCredential,
+	public MailCheckSetting(String imapHost, int imapPort, String imapUser, MailCredential imapCredential,
 			String checkAddress, boolean enableSSL, int pollInterval, int timeout) {
 		this.imapHost = imapHost;
 		this.imapPort = imapPort;
