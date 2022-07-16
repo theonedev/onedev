@@ -214,9 +214,9 @@ public class PressButtonTrigger extends TransitionTrigger {
 	@Override
 	public String getDescription() {
 		if (authorizedRoles.isEmpty())
-			return "Button '" + buttonLabel + "' is pressed by any user";
+			return "button '" + buttonLabel + "' is pressed by any user";
 		else
-			return "Button '" + buttonLabel + "' is pressed by any user of roles " + authorizedRoles;
+			return "button '" + buttonLabel + "' is pressed by any user of roles " + authorizedRoles;
 	}
 	
 }

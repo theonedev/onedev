@@ -10,9 +10,9 @@ public class MergePullRequestTrigger extends PullRequestTrigger {
 	@Override
 	public String getDescription() {
 		if (getBranches() != null)
-			return "Pull request to branches '" + getBranches() + "' is merged";
+			return "pull request to branches '" + getBranches() + "' is merged";
 		else
-			return "Pull request to any branch is merged";
+			return "pull request to any branch is merged";
 	}
 
 }

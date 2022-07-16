@@ -94,14 +94,14 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public String getDescription() {
 		if (jobNames != null) {
 			if (branches != null)
-				return "Build is successful for jobs '" + jobNames + "' on branches '" + branches + "'";
+				return "build is successful for jobs '" + jobNames + "' on branches '" + branches + "'";
 			else
-				return "Build is successful for jobs '" + jobNames + "' on any branch";
+				return "build is successful for jobs '" + jobNames + "' on any branch";
 		} else {
 			if (branches != null)
-				return "Build is successful for any job on branches '" + branches + "'";
+				return "build is successful for any job on branches '" + branches + "'";
 			else
-				return "Build is successful for any job and branch";
+				return "build is successful for any job and branch";
 		}
 	}
 	
