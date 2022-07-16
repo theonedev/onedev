@@ -10,9 +10,9 @@ public class OpenPullRequestTrigger extends PullRequestTrigger {
 	@Override
 	public String getDescription() {
 		if (getBranches() != null)
-			return "Pull request to branches '" + getBranches() + "' is opened";
+			return "pull request to branches '" + getBranches() + "' is opened";
 		else
-			return "Pull request to any branch is opened";
+			return "pull request to any branch is opened";
 	}
 
 }

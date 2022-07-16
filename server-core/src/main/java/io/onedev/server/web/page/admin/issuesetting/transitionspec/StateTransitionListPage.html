@@ -8,6 +8,15 @@
 		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add issue state transition"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 		<table wicket:id="stateTransitions" class="table table-hover"></table>
 	</div>
+	<wicket:fragment wicket:id="descriptionFrag">
+		<div class="font-weight-bolder text-nowrap mb-2">
+			<span wicket:id="fromStates"></span> 
+			<wicket:svg href="arrow3" class="icon"/> 
+			<span wicket:id="toState"></span>
+		</div>
+		<div wicket:id="when" class="mb-2"></div>
+		<div wicket:id="applicable"></div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="actionColumnFrag">
 		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="More"><wicket:svg href="ellipsis" class="icon"></wicket:svg></a>
 		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>

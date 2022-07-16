@@ -10,9 +10,9 @@ public class DiscardPullRequestTrigger extends PullRequestTrigger {
 	@Override
 	public String getDescription() {
 		if (getBranches() != null)
-			return "Pull request to branches '" + getBranches() + "' is discarded";
+			return "pull request to branches '" + getBranches() + "' is discarded";
 		else
-			return "Pull request to any branch is discarded";
+			return "pull request to any branch is discarded";
 	}
 
 }

@@ -109,37 +109,27 @@ public class StateTransitionListPage extends IssueSettingPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("From States")) {
+		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				TransitionSpec transition = rowModel.getObject();
-				cellItem.add(new Label(componentId, StringUtils.join(transition.getFromStates())));
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("To State")) {
+				Fragment fragment = new Fragment(componentId, "descriptionFrag", StateTransitionListPage.this);
+				if (transition.getFromStates().size() > 1)
+					fragment.add(new Label("fromStates", "[" + StringUtils.join(transition.getFromStates(), ",") + "]"));
+				else
+					fragment.add(new Label("fromStates", transition.getFromStates().iterator().next()));
+				
+				fragment.add(new Label("toState", transition.getToState()));
 
-			@Override
-			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				TransitionSpec transition = rowModel.getObject();
-				cellItem.add(new Label(componentId, transition.getToState()));
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("Do Transition When")) {
+				fragment.add(new Label("when", "When " + transition.getTrigger().getDescription()));
 
-			@Override
-			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				TransitionSpec transition = rowModel.getObject();
-				cellItem.add(new Label(componentId, transition.getTrigger().getDescription()));
-			}
-
-			@Override
-			public String getCssClass() {
-				return "d-none d-lg-table-cell";
+				if (transition.getTrigger().getIssueQuery() != null)
+					fragment.add(new Label("applicable", "For issues matching: " + transition.getTrigger().getIssueQuery()));
+				else
+					fragment.add(new Label("applicable", "For all issues"));
+				
+				cellItem.add(fragment);
 			}
 			
 		});		

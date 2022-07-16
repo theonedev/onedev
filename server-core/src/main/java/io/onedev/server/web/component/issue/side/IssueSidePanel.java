@@ -46,6 +46,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
@@ -140,10 +141,13 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		if (SecurityUtils.canManageIssues(getProject()))
+		String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
+		if (SecurityUtils.canManageIssues(getProject()) 
+				|| getIssue().getState().equals(initialState) && getIssue().getSubmitter().equals(SecurityUtils.getUser())) {
 			addOrReplace(newDeleteLink("delete"));		
-		else
+		} else {
 			addOrReplace(new WebMarkupContainer("delete").setVisible(false));
+		}
 		
 		super.onBeforeRender();
 	}
