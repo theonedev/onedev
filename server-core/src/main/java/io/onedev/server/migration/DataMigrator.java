@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.thoughtworks.xstream.core.JVM;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
@@ -4261,6 +4262,20 @@ public class DataMigrator {
 								receiveMailSettingElement.setName("otherInboxPollSetting");
 						}						
 					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}		
+	}
+	
+	private void migrate95(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("GpgKeys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element contentElement = element.element("content");
+					byte[] bytes = contentElement.getText().getBytes(StandardCharsets.UTF_8);
+					contentElement.setText(JVM.getBase64Codec().encode(bytes));
 				}
 				dom.writeToFile(file, false);
 			}

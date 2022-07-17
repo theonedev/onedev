@@ -1,5 +1,6 @@
 package io.onedev.server.model.support;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,9 +29,13 @@ public class BaseGpgKey extends AbstractEntity implements Validatable {
     
     public static final String PROP_CONTENT = "content";
     
+    /**
+     * 1. GpgKey can be very long
+     * 2. Use bytea of postgresql to store this field avoid auto committing issue of lob 
+     */
 	@Lob
 	@Column(length=65535, nullable=false)
-    private String content;
+    private byte[] content;
     
     private transient List<PGPPublicKey> publicKeys;
 
@@ -39,16 +44,22 @@ public class BaseGpgKey extends AbstractEntity implements Validatable {
     @Multiline
     @OmitName
     public String getContent() {
-        return content;
+    	if (content != null)
+    		return new String(content, StandardCharsets.UTF_8);
+    	else
+    		return null;
     }
 
     public void setContent(String content) {
-        this.content = content;
+    	if (content != null)
+    		this.content = content.getBytes(StandardCharsets.UTF_8);
+    	else
+    		this.content = null;
     }
 
 	public List<PGPPublicKey> getPublicKeys() {
 		if (publicKeys == null)
-			publicKeys = GpgUtils.parse(content);
+			publicKeys = GpgUtils.parse(getContent());
 		return publicKeys;
 	}
 	
@@ -62,7 +73,7 @@ public class BaseGpgKey extends AbstractEntity implements Validatable {
 			return true;
 		} else {
 			try {
-				GpgUtils.parse(content);
+				GpgUtils.parse(getContent());
 				return true;
 			} catch (Exception e) {
 				context.disableDefaultConstraintViolation();
