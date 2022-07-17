@@ -15,6 +15,7 @@ import io.onedev.server.mail.MailSendSetting;
 import io.onedev.server.mail.OAuthAccessToken;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.editable.annotation.RefreshToken;
 
 @Editable(order=100, name="Office 365")
@@ -46,7 +47,7 @@ public class Office365Setting extends MailSetting {
 		this.tenantId = tenantId;
 	}
 
-	@Editable(order=100, description="Client ID (or application ID) of OneDev app registered in Azure AD")
+	@Editable(order=100, description="Client ID (or application ID) of this OneDev instance registered in Azure AD")
 	@NotEmpty
 	public String getClientId() {
 		return clientId;
@@ -56,7 +57,8 @@ public class Office365Setting extends MailSetting {
 		this.clientId = clientId;
 	}
 
-	@Editable(order=200, description="Client secret of OneDev app registered in Azure AD")
+	@Editable(order=200, description="Client secret of this OneDev instance registered in Azure AD")
+	@Password
 	@NotEmpty
 	public String getClientSecret() {
 		return clientSecret;
@@ -66,7 +68,7 @@ public class Office365Setting extends MailSetting {
 		this.clientSecret = clientSecret;
 	}
 
-	@Editable(order=300, description="Principal name of the user to login into office 365 mail server to "
+	@Editable(order=300, description="Principal name of the account to login into office 365 mail server to "
 			+ "send/receive emails")
 	@NotEmpty
 	public String getUserPrincipalName() {
@@ -77,7 +79,7 @@ public class Office365Setting extends MailSetting {
 		this.userPrincipalName = userPrincipalName;
 	}
 
-	@Editable(order=400, description="Long-live refresh token of above user which will be used to generate access token "
+	@Editable(order=400, description="Long-live refresh token of above account which will be used to generate access token "
 			+ "to access office 365 mail server. <b class='text-info'>TIPS: </b> you may use the button at right "
 			+ "side of this field to generate refresh token. Note that whenever tenant id, client id, client secret, or "
 			+ "user principal name is changed, refresh token should be re-generated")
@@ -142,8 +144,7 @@ public class Office365Setting extends MailSetting {
 			@Override
 			public Map<String, String> getAuthorizeParams() {
 				Map<String, String> params = new HashMap<>();
-				if (userPrincipalName != null)
-					params.put("login_hint", userPrincipalName);
+				params.put("login_hint", userPrincipalName);
 				return params;
 			}
 			
