@@ -71,7 +71,7 @@ public class Office365Setting extends MailSetting {
 	}
 
 	@Editable(order=300, description="Principal name of the account to login into office 365 mail server to "
-			+ "send/receive emails")
+			+ "send/receive emails. It is normally primary email address of the account")
 	@NotEmpty
 	public String getUserPrincipalName() {
 		return userPrincipalName;
@@ -95,9 +95,9 @@ public class Office365Setting extends MailSetting {
 		this.refreshToken = refreshToken;
 	}
 	
-	@Editable(order=410, description="Email address (primary or alias) of above account. This address will be used as "
-			+ "sender address of various notifications. Emails targeting this address will also be checked in inbox "
-			+ "of above user if <code>Check Incoming Email</code> option is enabled below")
+	@Editable(order=410, description="Primary or alias email address of above account to be used as sender address "
+			+ "of various notifications. Emails targeting this address will also be checked in inbox of above user "
+			+ "if <code>Check Incoming Email</code> option is enabled below")
 	@NotEmpty
 	public String getEmailAddress() {
 		return emailAddress;
