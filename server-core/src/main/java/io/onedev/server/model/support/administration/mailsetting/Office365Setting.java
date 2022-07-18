@@ -145,6 +145,7 @@ public class Office365Setting extends MailSetting {
 			public Map<String, String> getAuthorizeParams() {
 				Map<String, String> params = new HashMap<>();
 				params.put("login_hint", userPrincipalName);
+				params.put("prompt", "consent");
 				return params;
 			}
 			
