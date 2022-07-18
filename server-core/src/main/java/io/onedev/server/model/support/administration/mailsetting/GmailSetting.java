@@ -19,7 +19,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.editable.annotation.RefreshToken;
 
-@Editable(order=200, name="Gmail")
+@Editable(order=200, name="Gmail", description="Gmail service with OAuth authentication")
 public class GmailSetting extends MailSetting {
 
 	private static final long serialVersionUID = 1L;
@@ -85,6 +85,16 @@ public class GmailSetting extends MailSetting {
 		this.refreshToken = refreshToken;
 	}
 	
+	@Editable(order=500, name="Check Incoming Email", description="Enable this to check inbox of above account "
+			+ "to open issues, post issue comments, or post pull request comments from email")
+	public InboxPollSetting getInboxPollSetting() {
+		return inboxPollSetting;
+	}
+
+	public void setInboxPollSetting(InboxPollSetting inboxPollSetting) {
+		this.inboxPollSetting = inboxPollSetting;
+	}
+
 	@SuppressWarnings("unused")
 	private static RefreshToken.Callback getRefreshTokenCallback() {
 		String clientId = (String) EditContext.get().getInputValue("clientId");
@@ -139,15 +149,6 @@ public class GmailSetting extends MailSetting {
 		};
 	}
 	
-	@Editable(order=500, name="Check Incoming Email")
-	public InboxPollSetting getInboxPollSetting() {
-		return inboxPollSetting;
-	}
-
-	public void setInboxPollSetting(InboxPollSetting inboxPollSetting) {
-		this.inboxPollSetting = inboxPollSetting;
-	}
-
 	@Override
 	public MailSendSetting getSendSetting() {
 		MailCredential smtpCredential = new OAuthAccessToken(

@@ -18,7 +18,9 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.editable.annotation.RefreshToken;
 
-@Editable(order=100, name="Office 365")
+@Editable(order=100, name="Office 365", description=""
+		+ "Office 365 mail provider with OAuth authentication. "
+		+ "Click <a href='https://robinshen.medium.com/oauth-authentication-for-office-365-mail-service-ff9497caf074' target='_blank'>here</a> for an example setup")
 public class Office365Setting extends MailSetting {
 
 	private static final long serialVersionUID = 1L;
@@ -37,7 +39,7 @@ public class Office365Setting extends MailSetting {
 	
 	private InboxPollSetting inboxPollSetting;
 	
-	@Editable(order=50, description="Specify tenant ID to perform OAuth authentcation against")
+	@Editable(order=50, name="Directory (tenant) ID", description="Specify ID of the Azure AD this OneDev instance is registered in")
 	@NotEmpty
 	public String getTenantId() {
 		return tenantId;
@@ -47,7 +49,7 @@ public class Office365Setting extends MailSetting {
 		this.tenantId = tenantId;
 	}
 
-	@Editable(order=100, description="Client ID (or application ID) of this OneDev instance registered in Azure AD")
+	@Editable(order=100, name="Application (client) ID", description="Specify application (tenant) ID of this OneDev instance registered in Azure AD")
 	@NotEmpty
 	public String getClientId() {
 		return clientId;
@@ -93,9 +95,9 @@ public class Office365Setting extends MailSetting {
 		this.refreshToken = refreshToken;
 	}
 	
-	@Editable(order=410, name="System Email Address", description="This email address will be used as sender "
-			+ "address for various notifications. Its inbox will also be checked if <code>Check Incoming Email</code> "
-			+ "option is enabled below")
+	@Editable(order=410, description="Email address (primary or alias) of above account. This address will be used as "
+			+ "sender address of various notifications. Emails targeting this address will also be checked in inbox "
+			+ "of above user if <code>Check Incoming Email</code> option is enabled below")
 	@NotEmpty
 	public String getEmailAddress() {
 		return emailAddress;
@@ -109,14 +111,25 @@ public class Office365Setting extends MailSetting {
 		return String.format("https://login.microsoftonline.com/%s/oauth2/v2.0/token", tenantId);
 	}
 
+	@Editable(order=450, name="Check Incoming Email", description="Enable this to post issue and pull request comments via email. "
+			+ "<b class='text-danger'>NOTE:</b> <a href='https://docs.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online' target='_blank'>Sub addressing</a> "
+			+ "needs to be enabled for above email address, as OneDev uses it to track issue and pull request contexts")
+	public InboxPollSetting getInboxPollSetting() {
+		return inboxPollSetting;
+	}
+
+	public void setInboxPollSetting(InboxPollSetting inboxPollSetting) {
+		this.inboxPollSetting = inboxPollSetting;
+	}
+
 	@SuppressWarnings("unused")
 	private static RefreshToken.Callback getRefreshTokenCallback() {
 		String tenantId = (String) EditContext.get().getInputValue("tenantId");
 		if (tenantId == null)
-			throw new ExplicitException("Tenant ID needs to be specified to generate refresh token");
+			throw new ExplicitException("Directory (tenant) ID needs to be specified to generate refresh token");
 		String clientId = (String) EditContext.get().getInputValue("clientId");
 		if (clientId == null)
-			throw new ExplicitException("Client ID needs to be specified to generate refresh token");
+			throw new ExplicitException("Application (client) ID needs to be specified to generate refresh token");
 		String clientSecret = (String) EditContext.get().getInputValue("clientSecret");
 		if (clientSecret == null)
 			throw new ExplicitException("Client secret needs to be specified to generate refresh token");
@@ -172,15 +185,6 @@ public class Office365Setting extends MailSetting {
 		};
 	}
 	
-	@Editable(order=500, name="Check Incoming Email")
-	public InboxPollSetting getInboxPollSetting() {
-		return inboxPollSetting;
-	}
-
-	public void setInboxPollSetting(InboxPollSetting inboxPollSetting) {
-		this.inboxPollSetting = inboxPollSetting;
-	}
-
 	@Override
 	public MailSendSetting getSendSetting() {
 		MailCredential smtpCredential = new OAuthAccessToken(

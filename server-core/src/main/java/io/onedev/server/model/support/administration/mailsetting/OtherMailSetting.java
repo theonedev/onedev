@@ -66,9 +66,9 @@ public class OtherMailSetting extends MailSetting {
 		this.smtpPassword = smtpPassword;
 	}
 
-	@Editable(order=410, name="System Email Address", description="This email address will be used as sender "
-			+ "address for various notifications. Its inbox will also be checked if <tt>Check Incoming Email</tt>"
-			+ "option is enabled below")
+	@Editable(order=410, description="This address will be used as sender address of various notifications. "
+			+ "Emails targeting this address and its sub addressing in the IMAP inbox will also be checked if "
+			+ "<code>Check Incoming Email</code> option is enabled below")
 	@NotEmpty
 	public String getEmailAddress() {
 		return emailAddress;
@@ -88,9 +88,9 @@ public class OtherMailSetting extends MailSetting {
 		this.enableStartTLS = enableStartTLS;
 	}
 
-	@Editable(order=450, name="Check Incoming Email", description="Enable this to post issue and pull request comments via email<br>"
+	@Editable(order=450, name="Check Incoming Email", description="Enable this to post issue and pull request comments via email. "
 			+ "<b class='text-danger'>NOTE:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> "
-			+ "needs to be enabled for system email address, as OneDev uses it to track issue and pull request contexts")
+			+ "needs to be enabled for above email address, as OneDev uses it to track issue and pull request contexts")
 	public OtherInboxPollSetting getOtherInboxPollSetting() {
 		return otherInboxPollSetting;
 	}
