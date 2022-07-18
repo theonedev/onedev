@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.issues.detail;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -88,11 +89,16 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				} catch (NumberFormatException e) {
 					throw new ValidationException("Invalid issue number: " + issueNumberString);
 				}
+				
 				Issue issue = getIssueManager().find(getProject(), issueNumber);
-				OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
-				if (!issue.getProject().equals(getProject())) 
-					throw new RestartResponseException(getPageClass(), paramsOf(issue));
-				return issue;
+				if (issue == null) { 
+					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
+				} else {
+					OneDev.getInstance(IssueLinkManager.class).loadDeepLinks(issue);
+					if (!issue.getProject().equals(getProject())) 
+						throw new RestartResponseException(getPageClass(), paramsOf(issue));
+					return issue;
+				}
 			}
 
 		};

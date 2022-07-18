@@ -164,11 +164,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				if (request == null) {
 					throw new EntityNotFoundException("Unable to find pull request #" 
 							+ requestNumber + " in project " + getProject());
-				}
-				else if (!request.getTargetProject().equals(getProject()))
+				} else if (!request.getTargetProject().equals(getProject())) {
 					throw new RestartResponseException(getPageClass(), paramsOf(request));
-				else
+				} else {
 					return request;
+				}
 			}
 
 		};
