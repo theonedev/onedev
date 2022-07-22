@@ -612,8 +612,8 @@ public abstract class CodeCommentPanel extends Panel {
 				fragment.add(new Label("action", "resolved"));
 			else
 				fragment.add(new Label("action", "unresolved"));
-			fragment.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
-					.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
+			fragment.add(new Label("date", DateUtils.formatAge(getChange().getDate()))
+					.add(new AttributeAppender("title", DateUtils.formatDateTime(getChange().getDate()))));
 			if (isContextDifferent(getChange().getCompareContext())) {
 				String url = OneDev.getInstance(UrlManager.class).urlFor(getChange());
 				fragment.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
