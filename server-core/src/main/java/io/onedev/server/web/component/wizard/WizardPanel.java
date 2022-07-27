@@ -10,10 +10,13 @@ package io.onedev.server.web.component.wizard;
 
 import java.util.List;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -27,13 +30,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.persistence.TransactionManager;
 
 @SuppressWarnings("serial")
-public abstract class Wizard extends Panel {
+public abstract class WizardPanel extends Panel {
 
 	private List<? extends WizardStep> steps;
 	
 	private int activeStepIndex;
 	
-	public Wizard(String id, List<? extends WizardStep> steps) {
+	public WizardPanel(String id, List<? extends WizardStep> steps) {
 		super(id);
 		
 		Preconditions.checkArgument(steps != null && !steps.isEmpty());
@@ -72,6 +75,7 @@ public abstract class Wizard extends Panel {
 		});
 		
 		form.add(new FencedFeedbackPanel("feedback", form));
+		getActiveStep().init();
 		form.add(getActiveStep().render("content"));
 		form.add(new Link<Void>("previous") {
 
@@ -96,24 +100,6 @@ public abstract class Wizard extends Panel {
 			}
 			
 		});
-		form.add(new Link<Void>("skip") {
-
-			@Override
-			public void onClick() {
-				getActiveStep().getSkippable().skip();
-				if (activeStepIndex == steps.size() - 1)
-					finished(); 
-				else
-					form.replace(getActiveStep().render("content"));
-			}
-			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getActiveStep().getSkippable() != null);
-			}
-
-		});
 		form.add(new Button("next") {
 
 			@Override
@@ -128,6 +114,7 @@ public abstract class Wizard extends Panel {
 					
 				});
 				activeStepIndex++;
+				getActiveStep().init();
 				form.replace(getActiveStep().render("content"));
 			}
 			
@@ -138,31 +125,20 @@ public abstract class Wizard extends Panel {
 			}
 
 		});
-		form.add(new Button("finish") {
+		
+		form.add(newEndActions("endActions").add(new Behavior() {
 
 			@Override
-			public void onSubmit() {
-				super.onSubmit();
-				OneDev.getInstance(TransactionManager.class).run(new Runnable() {
-
-					@Override
-					public void run() {
-						getActiveStep().complete();
-					}
-					
-				});
-				finished();
+			public void onConfigure(Component component) {
+				super.onConfigure(component);
+				component.setVisible(activeStepIndex == steps.size()-1);
 			}
 			
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(activeStepIndex == steps.size()-1);
-			}
-
-		});
+		}));
 		add(form);
 	}
+	
+	protected abstract WebMarkupContainer newEndActions(String componentId);
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {
@@ -170,10 +146,8 @@ public abstract class Wizard extends Panel {
 		response.render(CssHeaderItem.forReference(new WizardResourceReference()));
 	}
 
-	private WizardStep getActiveStep() {
+	public WizardStep getActiveStep() {
 		return steps.get(activeStepIndex);
 	}
-
-	protected abstract void finished();
 
 }

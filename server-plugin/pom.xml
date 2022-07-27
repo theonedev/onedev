@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>server-plugin</artifactId>
 	<packaging>pom</packaging>
@@ -20,31 +22,31 @@
 		<module>server-plugin-executor-kubernetes</module>
 		<module>server-plugin-executor-serverdocker</module>
 		<module>server-plugin-buildspec-maven</module>
-    	<module>server-plugin-buildspec-gradle</module>
-    	<module>server-plugin-buildspec-node</module>
-	    <module>server-plugin-authenticator-ldap</module>
-	    <module>server-plugin-sso-openid</module>
-    	<module>server-plugin-report-markdown</module>
-   		<module>server-plugin-report-jest</module>
-	    <module>server-plugin-report-clover</module>
-	    <module>server-plugin-report-checkstyle</module>
-	    <module>server-plugin-import-github</module>
-    <module>server-plugin-import-youtrack</module>
-    <module>server-plugin-import-gitlab</module>
-    <module>server-plugin-import-gitea</module>
-    <module>server-plugin-import-bitbucketcloud</module>
-    <module>server-plugin-import-jiracloud</module>
-    <module>server-plugin-executor-remotedocker</module>
-    <module>server-plugin-executor-servershell</module>
-    <module>server-plugin-executor-remoteshell</module>
-    <module>server-plugin-report-unittest</module>
-    <module>server-plugin-report-junit</module>
-    <module>server-plugin-report-coverage</module>
-    <module>server-plugin-report-jacoco</module>
-    <module>server-plugin-report-problem</module>
-    <module>server-plugin-report-spotbugs</module>
-    <module>server-plugin-report-pmd</module>
-    <module>server-plugin-report-cpd</module>
-    <module>server-plugin-sso-discord</module>
-  </modules>
+		<module>server-plugin-buildspec-gradle</module>
+		<module>server-plugin-buildspec-node</module>
+		<module>server-plugin-authenticator-ldap</module>
+		<module>server-plugin-sso-openid</module>
+		<module>server-plugin-report-markdown</module>
+		<module>server-plugin-report-jest</module>
+		<module>server-plugin-report-clover</module>
+		<module>server-plugin-report-checkstyle</module>
+		<module>server-plugin-import-github</module>
+		<module>server-plugin-import-gitlab</module>
+		<module>server-plugin-import-gitea</module>
+		<module>server-plugin-import-bitbucketcloud</module>
+		<module>server-plugin-import-jiracloud</module>
+		<module>server-plugin-import-youtrack</module>
+		<module>server-plugin-executor-remotedocker</module>
+		<module>server-plugin-executor-servershell</module>
+		<module>server-plugin-executor-remoteshell</module>
+		<module>server-plugin-report-unittest</module>
+		<module>server-plugin-report-junit</module>
+		<module>server-plugin-report-coverage</module>
+		<module>server-plugin-report-jacoco</module>
+		<module>server-plugin-report-problem</module>
+		<module>server-plugin-report-spotbugs</module>
+		<module>server-plugin-report-pmd</module>
+		<module>server-plugin-report-cpd</module>
+		<module>server-plugin-sso-discord</module>
+	</modules>
 </project>

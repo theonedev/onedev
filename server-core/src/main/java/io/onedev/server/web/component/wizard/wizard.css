@@ -7,7 +7,7 @@
 .wizard>.body {
 	margin-bottom: 1.5rem;
 }
-.wizard>.foot>* {
+.wizard>.foot button {
 	margin-right: 1rem;
 }
 .wizard>.foot>:last-child {

@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.issue.list;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -324,7 +323,7 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				Collection<IssueImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
+				Collection<IssueImporter> importers = new ArrayList<>();
 				
 				List<IssueImporterContribution> contributions = 
 						new ArrayList<>(OneDev.getExtensions(IssueImporterContribution.class));
@@ -341,7 +340,7 @@ public abstract class IssueListPanel extends Panel {
 					importers.addAll(contribution.getImporters());
 				
 				List<MenuItem> menuItems = new ArrayList<>();
-				for (IssueImporter<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: importers) {
+				for (IssueImporter importer: importers) {
 					menuItems.add(new MenuItem() {
 
 						@Override

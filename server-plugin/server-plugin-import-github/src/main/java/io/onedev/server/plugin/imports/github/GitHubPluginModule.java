@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.imports.github;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 import com.google.common.collect.Lists;
@@ -17,6 +16,8 @@ import io.onedev.server.imports.ProjectImporterContribution;
  */
 public class GitHubPluginModule extends AbstractPluginModule {
 
+	static final String NAME = "GitHub";
+
 	@Override
 	protected void configure() {
 		super.configure();
@@ -24,7 +25,7 @@ public class GitHubPluginModule extends AbstractPluginModule {
 		contribute(ProjectImporterContribution.class, new ProjectImporterContribution() {
 
 			@Override
-			public Collection<ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> getImporters() {
+			public Collection<ProjectImporter> getImporters() {
 				return Lists.newArrayList(new GitHubProjectImporter());
 			}
 
@@ -38,7 +39,7 @@ public class GitHubPluginModule extends AbstractPluginModule {
 		contribute(IssueImporterContribution.class, new IssueImporterContribution() {
 
 			@Override
-			public Collection<IssueImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> getImporters() {
+			public Collection<IssueImporter> getImporters() {
 				return Lists.newArrayList(new GitHubIssueImporter());
 			}
 

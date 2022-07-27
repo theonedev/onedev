@@ -1,5 +1,11 @@
 <wicket:extend>
 	<div class="project-import card m-2 m-sm-5">
-		<div wicket:id="importer" class="card-body"></div>
+		<div class="card-body">
+			<div wicket:id="wizard"></div>
+		</div>
 	</div>
+	<wicket:fragment wicket:id="endActionsFrag">
+		<input wicket:id="dryRun" type="submit" class="btn btn-light-primary mr-1" value="Dry Run">
+		<input wicket:id="import" type="submit" class="btn btn-primary mr-1" value="Import">
+	</wicket:fragment>
 </wicket:extend>

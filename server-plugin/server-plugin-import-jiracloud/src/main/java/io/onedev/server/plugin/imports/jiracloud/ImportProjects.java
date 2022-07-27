@@ -15,16 +15,18 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 @ClassValidating
-public class ProjectImportSource implements Serializable, Validatable {
+public class ImportProjects implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<ProjectMapping> projectMappings = new ArrayList<>();
 	
 	@Editable(order=100, name="Projects to Import")
+	@OmitName
 	@Size(min=1, max=10000, message="No projects to import")
 	public List<ProjectMapping> getProjectMappings() {
 		return projectMappings;

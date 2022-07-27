@@ -1,73 +1,88 @@
 package io.onedev.server.plugin.imports.youtrack;
 
-import static io.onedev.server.plugin.imports.youtrack.ImportUtils.NAME;
-import static io.onedev.server.plugin.imports.youtrack.ImportUtils.importIssues;
-import static io.onedev.server.plugin.imports.youtrack.ImportUtils.list;
-
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
-import javax.ws.rs.client.Client;
+import com.google.common.collect.Lists;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.util.ImportStep;
 
-public class YouTrackIssueImporter extends IssueImporter<ImportServer, IssueImportSource, ImportOption> {
+public class YouTrackIssueImporter implements IssueImporter {
 
 	private static final long serialVersionUID = 1L;
 	
+	private final ImportStep<ImportServer> serverStep = new ImportStep<ImportServer>() {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public String getTitle() {
+			return "Authenticate to YouTrack";
+		}
+
+		@Override
+		protected ImportServer newSetting() {
+			return new ImportServer();
+		}
+		
+	};
+	
+	private final ImportStep<ImportProject> projectStep = new ImportStep<ImportProject>() {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public String getTitle() {
+			return "Choose project";
+		}
+
+		@Override
+		protected ImportProject newSetting() {
+			ImportProject project = new ImportProject();
+			project.server = serverStep.getSetting();
+			return project;
+		}
+		
+	};
+	
+	private final ImportStep<ImportOption> optionStep = new ImportStep<ImportOption>() {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public String getTitle() {
+			return "Specify import option";
+		}
+
+		@Override
+		protected ImportOption newSetting() {
+			ImportServer server = serverStep.getSetting();
+			String project = projectStep.getSetting().getProject();
+			return server.buildImportOption(project);
+		}
+		
+	};
+	
 	@Override
 	public String getName() {
-		return NAME;
+		return YouTrackPluginModule.NAME;
 	}
 
 	@Override
-	public String doImport(ImportServer where, IssueImportSource what, ImportOption how, Project project,
-			boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
-		logger.log("Importing issues from '" + what.getProject() + "'...");
-		Client client = where.newClient();
-		try {
-			String apiEndpoint = where.getApiEndpoint("/admin/projects?fields=id,name");
-			for (JsonNode projectNode: list(client, apiEndpoint, logger)) {
-				if (what.getProject().equals(projectNode.get("name").asText())) { 
-					ImportResult result = importIssues(where, projectNode.get("id").asText(), 
-							project, retainIssueNumbers, how, dryRun, logger);
-					return result.toHtml("Issues imported successfully");
-				}
-			}
-			throw new ExplicitException("Unable to find YouTrack project: " + what.getProject());
-		} finally {
-			client.close();
-		}
+	public String doImport(Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+		ImportServer server = serverStep.getSetting();
+		String youTrackProject = projectStep.getSetting().getProject();
+		ImportOption option = optionStep.getSetting();
+		
+		return server.importIssues(project, youTrackProject, option, retainIssueNumbers, dryRun, logger);
 	}
 
 	@Override
-	public IssueImportSource getWhat(ImportServer where, TaskLogger logger) {
-		WicketUtils.getPage().setMetaData(ImportServer.META_DATA_KEY, where);
-		return new IssueImportSource();
+	public List<ImportStep<? extends Serializable>> getSteps() {
+		return Lists.newArrayList(serverStep, projectStep, optionStep);
 	}
 
-	@Override
-	public ImportOption getHow(ImportServer where, IssueImportSource what, TaskLogger logger) {
-		Client client = where.newClient();
-		try {
-			String apiEndpoint = where.getApiEndpoint("/admin/projects?fields=id,name,customFields(field(name),bundle(values(name)))");
-			for (JsonNode projectNode: list(client, apiEndpoint, logger)) {
-				if (what.getProject().equals(projectNode.get("name").asText())) {  
-					List<JsonNode> projectNodes = new ArrayList<>();
-					projectNodes.add(projectNode);
-					return ImportUtils.buildImportOption(where, projectNodes, logger);
-				}
-			}
-			throw new ExplicitException("Unable to find YouTrack project: " + what.getProject());
-		} finally {
-			client.close();
-		}
-	}
-	
 }

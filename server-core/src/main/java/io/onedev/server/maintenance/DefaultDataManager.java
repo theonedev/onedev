@@ -63,7 +63,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.util.init.Skippable;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.util.editablebean.NewUserBean;
@@ -138,11 +137,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 			manualConfigs.add(new ManualConfig("Create Administrator Account", null, new NewUserBean()) {
 
 				@Override
-				public Skippable getSkippable() {
-					return null;
-				}
-
-				@Override
 				public void complete() {
 					NewUserBean newUserBean = (NewUserBean) getSetting();
 					User user = new User();
@@ -207,11 +201,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 			manualConfigs.add(new ManualConfig("Specify System Setting", null, 
 					systemSetting, excludedProps) {
-	
-				@Override
-				public Skippable getSkippable() {
-					return null;
-				}
 	
 				@Override
 				public void complete() {
@@ -303,11 +292,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 					setting.getValue(), new HashSet<>(), true) {
 	
 				@Override
-				public Skippable getSkippable() {
-					return null;
-				}
-	
-				@Override
 				public void complete() {
 					settingManager.saveServiceDeskSetting((ServiceDeskSetting) getSetting());
 				}
@@ -330,11 +314,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 			manualConfigs.add(new ManualConfig("Specify Mail Setting", null, setting.getValue()) {
 
 				@Override
-				public Skippable getSkippable() {
-					return null;
-				}
-
-				@Override
 				public void complete() {
 					settingManager.saveMailSetting((MailSetting) getSetting());
 				}
@@ -348,11 +327,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
 			Serializable backupSetting = setting.getValue();
 			manualConfigs.add(new ManualConfig("Specify Backup Setting", null, backupSetting) {
-
-				@Override
-				public Skippable getSkippable() {
-					return null;
-				}
 
 				@Override
 				public void complete() {

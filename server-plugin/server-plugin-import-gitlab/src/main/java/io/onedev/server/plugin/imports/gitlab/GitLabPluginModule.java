@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.imports.gitlab;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 import com.google.common.collect.Lists;
@@ -17,14 +16,15 @@ import io.onedev.server.imports.ProjectImporterContribution;
  */
 public class GitLabPluginModule extends AbstractPluginModule {
 
-	@Override
+	static final String NAME = "GitLab";
+	
 	protected void configure() {
 		super.configure();
 		
 		contribute(ProjectImporterContribution.class, new ProjectImporterContribution() {
 
 			@Override
-			public Collection<ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> getImporters() {
+			public Collection<ProjectImporter> getImporters() {
 				return Lists.newArrayList(new GitLabProjectImporter());
 			}
 
@@ -38,7 +38,7 @@ public class GitLabPluginModule extends AbstractPluginModule {
 		contribute(IssueImporterContribution.class, new IssueImporterContribution() {
 
 			@Override
-			public Collection<IssueImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> getImporters() {
+			public Collection<IssueImporter> getImporters() {
 				return Lists.newArrayList(new GitLabIssueImporter());
 			}
 

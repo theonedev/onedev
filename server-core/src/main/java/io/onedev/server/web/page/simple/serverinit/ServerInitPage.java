@@ -14,12 +14,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ManualConfigStep;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.util.init.Skippable;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.component.wizard.ManualConfigStep;
-import io.onedev.server.web.component.wizard.Wizard;
+import io.onedev.server.web.component.wizard.DefaultEndActionsPanel;
+import io.onedev.server.web.component.wizard.WizardPanel;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.simple.SimplePage;
 
@@ -42,26 +42,6 @@ public class ServerInitPage extends SimplePage {
 				
 				clonedConfigs.add(new ManualConfig(lastConfig.getTitle(), lastConfig.getDescription(), 
 						lastConfig.getSetting(), lastConfig.getExcludeProperties(), lastConfig.isForceOrdinaryStyle()) {
-		
-					@Override
-					public Skippable getSkippable() {
-						final Skippable skippable = lastConfig.getSkippable();
-						if (skippable != null) {
-							return new Skippable() {
-
-								@Override
-								public void skip() {
-									skippable.skip();
-									InitStage initStage = OneDev.getInstance().getInitStage();
-									if (initStage != null)
-										initStage.finished();
-								}
-								
-							};
-						} else {
-							return null;
-						}
-					}
 		
 					@Override
 					public void complete() {
@@ -92,15 +72,23 @@ public class ServerInitPage extends SimplePage {
 			List<ManualConfigStep> configSteps = new ArrayList<ManualConfigStep>();
 			for (ManualConfig each: initStage.getManualConfigs())
 				configSteps.add(new ManualConfigStep(each));
-			add(new Wizard("wizard", configSteps) {
+			add(new WizardPanel("wizard", configSteps) {
 
 				@Override
-				protected void finished() {
-					WebSession.get().logout();
-					User root = OneDev.getInstance(UserManager.class).getRoot();
-					SecurityUtils.getSubject().runAs(root.getPrincipals());
-					throw new RestartResponseException(ProjectListPage.class);
+				protected WebMarkupContainer newEndActions(String componentId) {
+					return new DefaultEndActionsPanel(componentId, this) {
+						
+						@Override
+						protected void finished() {
+							WebSession.get().logout();
+							User root = OneDev.getInstance(UserManager.class).getRoot();
+							SecurityUtils.getSubject().runAs(root.getPrincipals());
+							throw new RestartResponseException(ProjectListPage.class);
+						}
+						
+					};
 				}
+
 				
 			});
 		} else {

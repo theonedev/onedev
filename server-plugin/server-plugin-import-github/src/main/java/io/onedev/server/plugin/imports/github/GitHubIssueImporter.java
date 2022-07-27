@@ -1,10 +1,8 @@
 package io.onedev.server.plugin.imports.github;
 
-import static io.onedev.server.plugin.imports.github.ImportUtils.NAME;
-import static io.onedev.server.plugin.imports.github.ImportUtils.buildImportOption;
-import static io.onedev.server.plugin.imports.github.ImportUtils.importIssues;
-
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,35 +12,81 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.util.ImportStep;
 
-public class GitHubIssueImporter extends IssueImporter<ImportServer, IssueImportSource, IssueImportOption> {
+public class GitHubIssueImporter implements IssueImporter {
 
 	private static final long serialVersionUID = 1L;
 	
+	private final ImportStep<ImportServer> serverStep = new ImportStep<ImportServer>() {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public String getTitle() {
+			return "Authenticate to GitHub";
+		}
+
+		@Override
+		protected ImportServer newSetting() {
+			return new ImportServer();
+		}
+		
+	};
+	
+	private final ImportStep<ImportRepository> repositoryStep = new ImportStep<ImportRepository>() {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public String getTitle() {
+			return "Choose repository";
+		}
+
+		@Override
+		protected ImportRepository newSetting() {
+			ImportRepository repository = new ImportRepository();
+			repository.server = serverStep.getSetting();
+			return repository;
+		}
+		
+	};
+	
+	private final ImportStep<IssueImportOption> optionStep = new ImportStep<IssueImportOption>() {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public String getTitle() {
+			return "Specify import option";
+		}
+
+		@Override
+		protected IssueImportOption newSetting() {
+			return serverStep.getSetting().buildIssueImportOption(
+					Lists.newArrayList(repositoryStep.getSetting().getRepository()));
+		}
+		
+	};
+	
 	@Override
 	public String getName() {
-		return NAME;
+		return GitHubPluginModule.NAME;
 	}
 	
 	@Override
-	public String doImport(ImportServer where, IssueImportSource what, IssueImportOption how, Project project,
-			boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
-		logger.log("Importing issues from repository " + what.getRepository() + "...");
+	public String doImport(Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+		logger.log("Importing issues from repository " + repositoryStep.getSetting().getRepository() + "...");
 		Map<String, Optional<User>> users = new HashMap<>();
-		return importIssues(where, what.getRepository(), project, retainIssueNumbers, how, users, dryRun, logger)
-				.toHtml("Issues imported successfully");
+		
+		ImportResult result = serverStep.getSetting().importIssues(repositoryStep.getSetting().getRepository(), 
+				project,retainIssueNumbers, optionStep.getSetting(), users, dryRun, logger);
+		return result.toHtml("Issues imported successfully");
 	}
 
 	@Override
-	public IssueImportSource getWhat(ImportServer where, TaskLogger logger) {
-		WicketUtils.getPage().setMetaData(ImportServer.META_DATA_KEY, where);
-		return new IssueImportSource();
+	public List<ImportStep<? extends Serializable>> getSteps() {
+		return Lists.newArrayList(serverStep, repositoryStep, optionStep);
 	}
 
-	@Override
-	public IssueImportOption getHow(ImportServer where, IssueImportSource what, TaskLogger logger) {
-		return buildImportOption(where, Lists.newArrayList(what.getRepository()), logger);
-	}
-	
 }

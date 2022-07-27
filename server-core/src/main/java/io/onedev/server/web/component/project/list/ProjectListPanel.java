@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.project.list;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -894,7 +893,7 @@ public class ProjectListPanel extends Panel {
 	
 				@Override
 				protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-					Collection<ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
+					Collection<ProjectImporter> importers = new ArrayList<>();
 					List<ProjectImporterContribution> contributions = 
 							new ArrayList<>(OneDev.getExtensions(ProjectImporterContribution.class));
 					Collections.sort(contributions, new Comparator<ProjectImporterContribution>() {
@@ -910,7 +909,7 @@ public class ProjectListPanel extends Panel {
 						importers.addAll(contribution.getImporters());
 					
 					List<MenuItem> menuItems = new ArrayList<>();
-					for (ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: importers) {
+					for (ProjectImporter importer: importers) {
 						menuItems.add(new MenuItem() {
 	
 							@Override

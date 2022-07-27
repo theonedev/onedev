@@ -11,7 +11,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.RoleChoice;
 
 @Editable
-public class ProjectImportOption implements Serializable {
+public class ImportOption implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.wizard;
+package io.onedev.server.util;
 
 import java.io.Serializable;
 
@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.form.FormComponent;
 
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
+import io.onedev.server.web.component.wizard.WizardStep;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -30,22 +31,6 @@ public class ManualConfigStep implements WizardStep {
 	}
 
 	@Override
-	public Skippable getSkippable() {
-		if (config.getSkippable() != null) {
-			return new Skippable() {
-
-				@Override
-				public void skip() {
-					config.getSkippable().skip();
-				}
-				
-			};
-		} else {
-			return null;
-		}
-	}
-
-	@Override
 	public void complete() {
 		config.complete();
 	}
@@ -60,4 +45,9 @@ public class ManualConfigStep implements WizardStep {
 	public String getDescription() {
 		return config.getDescription();
 	}
+
+	@Override
+	public void init() {
+	}
+	
 }

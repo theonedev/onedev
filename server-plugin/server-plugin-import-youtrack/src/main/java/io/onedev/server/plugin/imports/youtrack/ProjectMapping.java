@@ -5,10 +5,11 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.validation.annotation.ProjectPath;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class ProjectMapping implements Serializable {
@@ -47,7 +48,9 @@ public class ProjectMapping implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		return WicketUtils.getPage().getMetaData(ImportServer.META_DATA_KEY).getProjectChoices();
+		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		ImportProjects setting = (ImportProjects) editor.getModelObject();
+		return setting.server.listProjects();
 	}
 	
 }

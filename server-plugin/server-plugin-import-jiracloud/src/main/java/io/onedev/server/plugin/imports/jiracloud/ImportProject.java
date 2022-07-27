@@ -1,24 +1,25 @@
-package io.onedev.server.plugin.imports.youtrack;
+package io.onedev.server.plugin.imports.jiracloud;
 
 import java.io.Serializable;
 import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
-public class IssueImportSource implements Serializable {
+public class ImportProject implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	ImportServer server;
+	
 	private String project;
 
-	@Editable(order=100, name="YouTrack Project", description="Choose YouTrack project to "
-			+ "import issues from. Available projects will be populated when above options "
-			+ "are specified")
+	@Editable(order=400, name="JIRA Project", description="Choose JIRA project to import issues from")
 	@ChoiceProvider("getProjectChoices")
 	@NotEmpty
 	public String getProject() {
@@ -31,7 +32,9 @@ public class IssueImportSource implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		return WicketUtils.getPage().getMetaData(ImportServer.META_DATA_KEY).getProjectChoices();
+		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
+		ImportProject setting = (ImportProject) editor.getModelObject();
+		return setting.server.listProjects();
 	}
 	
 }

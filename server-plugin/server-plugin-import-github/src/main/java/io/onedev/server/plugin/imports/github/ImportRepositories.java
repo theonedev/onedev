@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.gitlab;
+package io.onedev.server.plugin.imports.github;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,17 +15,19 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 @ClassValidating
-public class ProjectImportSource implements Serializable, Validatable {
+public class ImportRepositories implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<ProjectMapping> projectMappings = new ArrayList<>();
 	
-	@Editable(order=100, name="Projects to Import")
-	@Size(min=1, max=10000, message="No projects to import")
+	@Editable(order=100)
+	@Size(min=1, max=10000, message="No repositories to import")
+	@OmitName
 	public List<ProjectMapping> getProjectMappings() {
 		return projectMappings;
 	}

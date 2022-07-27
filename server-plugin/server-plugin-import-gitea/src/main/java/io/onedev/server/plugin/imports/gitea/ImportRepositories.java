@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.gitea;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,10 +15,11 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 @ClassValidating
-public class ProjectImportSource implements Serializable, Validatable {
+public class ImportRepositories implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,6 +27,7 @@ public class ProjectImportSource implements Serializable, Validatable {
 	
 	@Editable(order=100, name="Repositories to Import")
 	@Size(min=1, max=10000, message="No repositories to import")
+	@OmitName
 	public List<ProjectMapping> getProjectMappings() {
 		return projectMappings;
 	}

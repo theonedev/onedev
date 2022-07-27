@@ -49,4 +49,15 @@ public class CollectionUtils extends org.apache.commons.collections.CollectionUt
 		return list;
 	}
 	
+	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
+        list.sort(Map.Entry.comparingByValue());
+
+        Map<K, V> sorted = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) 
+            sorted.put(entry.getKey(), entry.getValue());
+		
+        return sorted;
+	}
+	
 }
