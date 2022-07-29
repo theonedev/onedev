@@ -267,7 +267,7 @@
   border-color: var(--danger);
 }
 .is-invalid .select2-drop-active,
-.is-invalid.select2-drop-active 
+.is-invalid.select2-drop-active, 
 .dark-mode .is-invalid .select2-drop-active,
 .dark-mode .is-invalid.select2-drop-active {
   border-color: var(--danger);
