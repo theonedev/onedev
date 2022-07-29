@@ -251,6 +251,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		pushState(target, url.toString(), queryInput.getModelObject());
 		
 		target.add(body);
+		resizeWindow(target);
 	}
 	
 	@Override
