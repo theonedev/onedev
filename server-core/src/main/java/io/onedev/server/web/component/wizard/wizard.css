@@ -7,7 +7,7 @@
 .wizard>.body {
 	margin-bottom: 1.5rem;
 }
-.wizard>.foot button {
+.wizard>.foot button, .wizard>.foot input {
 	margin-right: 1rem;
 }
 .wizard>.foot>:last-child {

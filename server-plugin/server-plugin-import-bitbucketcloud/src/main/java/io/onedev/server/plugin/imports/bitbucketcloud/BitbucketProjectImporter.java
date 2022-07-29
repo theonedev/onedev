@@ -97,7 +97,7 @@ public class BitbucketProjectImporter implements ProjectImporter {
 	public String doImport(boolean dryRun, TaskLogger logger) {
 		ImportRepositories repositories = repositoriesStep.getSetting();
 		ImportOption option = optionStep.getSetting();
-		return serverStep.getSetting().doImport(repositories, option, dryRun, logger);
+		return serverStep.getSetting().importProjects(repositories, option, dryRun, logger);
 	}
 
 	@Override

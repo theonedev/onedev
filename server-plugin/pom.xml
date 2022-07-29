@@ -36,6 +36,7 @@
 		<module>server-plugin-import-bitbucketcloud</module>
 		<module>server-plugin-import-jiracloud</module>
 		<module>server-plugin-import-youtrack</module>
+		<module>server-plugin-import-url</module>
 		<module>server-plugin-executor-remotedocker</module>
 		<module>server-plugin-executor-servershell</module>
 		<module>server-plugin-executor-remoteshell</module>

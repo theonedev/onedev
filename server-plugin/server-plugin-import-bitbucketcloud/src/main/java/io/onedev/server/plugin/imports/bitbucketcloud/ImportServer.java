@@ -173,7 +173,7 @@ public class ImportServer implements Serializable, Validatable {
 		}
 	}
 	
-	String doImport(ImportRepositories repositories, ImportOption option, boolean dryRun, TaskLogger logger) {
+	String importProjects(ImportRepositories repositories, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Collection<Long> projectIds = new ArrayList<>();
 		
 		Client client = newClient();
