@@ -34,9 +34,7 @@ public class ImportServer implements Serializable, Validatable {
 	
 	private String url;
 	
-	private String userName;
-	
-	private String password;
+	private Authentication authentication;
 	
 	private String project;
 	
@@ -51,25 +49,15 @@ public class ImportServer implements Serializable, Validatable {
 		this.url = url;
 	}
 
-	@Editable(order=10)
-	public String getUserName() {
-		return userName;
+	@Editable(order=10, name="Require Autentication")
+	public Authentication getAuthentication() {
+		return authentication;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setAuthentication(Authentication authentication) {
+		this.authentication = authentication;
 	}
 
-	@Editable(order=100)
-	@Password
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	
 	@Editable(order=200, placeholderProvider="getProjectPlaceholder", 
 			description="Specify project to be created at OneDev side")
 	public String getProject() {
@@ -113,14 +101,15 @@ public class ImportServer implements Serializable, Validatable {
 			Preconditions.checkState(project.isNew());				
 			
 			URIBuilder builder = new URIBuilder(getUrl());
-			builder.setUserInfo(getUserName(), getPassword());
+			if (authentication != null)
+				builder.setUserInfo(authentication.getUserName(), authentication.getPassword());
 			
 			SensitiveMasker.push(new SensitiveMasker() {
 
 				@Override
 				public String mask(String text) {
-					if (getPassword() != null)
-						return StringUtils.replace(text, getPassword(), "******");
+					if (authentication != null)
+						return StringUtils.replace(text, authentication.getPassword(), "******");
 					else
 						return text;
 				}
@@ -182,5 +171,36 @@ public class ImportServer implements Serializable, Validatable {
 		
 		return isValid;
 	}
-	
+
+	@Editable
+	public static class Authentication implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		
+		private String userName;
+		
+		private String password;
+
+		@Editable(order=100)
+		@NotEmpty
+		public String getUserName() {
+			return userName;
+		}
+
+		public void setUserName(String userName) {
+			this.userName = userName;
+		}
+
+		@Editable(order=200)
+		@Password
+		@NotEmpty
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+		
+	}
 }
