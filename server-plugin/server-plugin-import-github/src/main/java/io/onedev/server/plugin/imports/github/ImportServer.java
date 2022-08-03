@@ -552,8 +552,7 @@ public class ImportServer implements Serializable, Validatable {
 					project.setDefaultRole(option.getPublicRole());
 				
 				URIBuilder builder = new URIBuilder(repoNode.get("clone_url").asText());
-				if (isPrivate)
-					builder.setUserInfo("git", getAccessToken());
+				builder.setUserInfo("git", getAccessToken());
 				
 				if (!dryRun) {
 					projectManager.clone(project, builder.build().toString());

@@ -204,8 +204,7 @@ public class ImportServer implements Serializable, Validatable {
 					throw new ExplicitException("Https clone url not found");
 				
 				URIBuilder builder = new URIBuilder(cloneUrl);
-				if (isPrivate)
-					builder.setUserInfo(getUserName(), getAppPassword());
+				builder.setUserInfo(getUserName(), getAppPassword());
 				
 				if (!dryRun) {
 					projectManager.clone(project, builder.build().toString());

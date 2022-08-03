@@ -284,8 +284,7 @@ public class ImportServer implements Serializable, Validatable {
 					project.setDefaultRole(option.getPublicRole());
 				
 				URIBuilder builder = new URIBuilder(projectNode.get("http_url_to_repo").asText());
-				if (!visibility.equals("public"))
-					builder.setUserInfo("git", getAccessToken());
+				builder.setUserInfo("git", getAccessToken());
 				
 				if (!dryRun) {
 					projectManager.clone(project, builder.build().toString());
