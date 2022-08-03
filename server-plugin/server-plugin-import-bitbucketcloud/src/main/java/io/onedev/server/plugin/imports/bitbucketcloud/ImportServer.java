@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -207,7 +208,19 @@ public class ImportServer implements Serializable, Validatable {
 				builder.setUserInfo(getUserName(), getAppPassword());
 				
 				if (!dryRun) {
-					projectManager.clone(project, builder.build().toString());
+					SensitiveMasker.push(new SensitiveMasker() {
+
+						@Override
+						public String mask(String text) {
+							return StringUtils.replace(text, getAppPassword(), "******");
+						}
+						
+					});
+					try {
+						projectManager.clone(project, builder.build().toString());
+					} finally {
+						SensitiveMasker.pop();
+					}
 					projectIds.add(project.getId());
 				}
 			}

@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -555,7 +556,19 @@ public class ImportServer implements Serializable, Validatable {
 				builder.setUserInfo("git", getAccessToken());
 				
 				if (!dryRun) {
-					projectManager.clone(project, builder.build().toString());
+					SensitiveMasker.push(new SensitiveMasker() {
+
+						@Override
+						public String mask(String text) {
+							return StringUtils.replace(text, getAccessToken(), "******");
+						}
+						
+					});
+					try {
+						projectManager.clone(project, builder.build().toString());
+					} finally {
+						SensitiveMasker.pop();
+					}
 					projectIds.add(project.getId());
 				}
 

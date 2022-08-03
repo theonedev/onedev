@@ -11,6 +11,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -114,7 +115,22 @@ public class ImportServer implements Serializable, Validatable {
 			builder.setUserInfo(getUserName(), getPassword());
 			
 			if (!dryRun) {
-				getProjectManager().clone(project, builder.build().toString());
+				SensitiveMasker.push(new SensitiveMasker() {
+
+					@Override
+					public String mask(String text) {
+						if (getPassword() != null)
+							return StringUtils.replace(text, getPassword(), "******");
+						else
+							return text;
+					}
+					
+				});
+				try {
+					getProjectManager().clone(project, builder.build().toString());
+				} finally {
+					SensitiveMasker.pop();
+				}
 				projectId = project.getId();
 			}
 			

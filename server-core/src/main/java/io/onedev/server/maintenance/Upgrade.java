@@ -603,22 +603,36 @@ public class Upgrade extends DefaultPersistManager {
 				FileUtils.writeStringToFile(serverPropsFile, serverProps, StandardCharsets.UTF_8);
 			}
 
-			File logbackPropsFile = new File(upgradeDir, "conf/logback.xml");
-			String logbackProps = FileUtils.readFileToString(logbackPropsFile, StandardCharsets.UTF_8);
-			if (!logbackProps.contains("AggregatedServiceLoader")) 
-				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "logback.xml"), logbackPropsFile);
+			File logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
+			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, StandardCharsets.UTF_8);
+			if (!logbackConfig.contains("AggregatedServiceLoader")) 
+				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "logback.xml"), logbackConfigFile);
 			
 			File sampleKeystoreFile = new File(upgradeDir, "conf/sample.keystore");
 			if (sampleKeystoreFile.exists())
 				FileUtils.deleteFile(sampleKeystoreFile);
 			
-			File logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
-			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, StandardCharsets.UTF_8);
-			logbackConfig = StringUtils.replace(logbackConfig, "<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
+			logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
+			logbackConfig = FileUtils.readFileToString(logbackConfigFile, StandardCharsets.UTF_8);
+			logbackConfig = StringUtils.replace(logbackConfig, 
+					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"><maxFileSize>1MB</maxFileSize></triggeringPolicy>");
 			logbackConfig = StringUtils.replace(logbackConfig, "gitplex", "turbodev");
 			logbackConfig = StringUtils.replace(logbackConfig, "com.turbodev", "io.onedev");
 			logbackConfig = StringUtils.replace(logbackConfig, "turbodev", "onedev");
+			
+			if (!logbackConfig.contains("MaskingPatternLayout")) {
+				logbackConfig = StringUtils.replace(logbackConfig, 
+						"ch.qos.logback.classic.encoder.PatternLayoutEncoder",
+						"ch.qos.logback.core.encoder.LayoutWrappingEncoder");
+				logbackConfig = StringUtils.replace(logbackConfig, 
+						"<pattern>", 
+						"<layout class=\"io.onedev.commons.bootstrap.MaskingPatternLayout\">\n				<pattern>");
+				logbackConfig = StringUtils.replace(logbackConfig, 
+						"</pattern>", 
+						"</pattern>\n			</layout>");
+			}
+			
 			FileUtils.writeStringToFile(logbackConfigFile, logbackConfig, StandardCharsets.UTF_8);
 			
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
