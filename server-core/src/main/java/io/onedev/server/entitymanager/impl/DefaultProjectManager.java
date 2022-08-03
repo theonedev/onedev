@@ -34,6 +34,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.api.Git;
@@ -76,6 +77,7 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
@@ -529,6 +531,52 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         checkSanity(project);
         
         listenerRegistry.post(new ProjectCreated(project));
+        
+        List<ImmutableTriple<String, ObjectId, ObjectId>> refUpdatedEventData = new ArrayList<>();
+        
+        for (RefInfo refInfo: project.getBranchRefInfos()) {
+        	refUpdatedEventData.add(new ImmutableTriple<>(refInfo.getRef().getName(), 
+        			ObjectId.zeroId(), refInfo.getObj().getId().copy()));
+        }
+        for (RefInfo refInfo: project.getTagRefInfos()) {
+        	refUpdatedEventData.add(new ImmutableTriple<>(refInfo.getRef().getName(), 
+        			ObjectId.zeroId(), refInfo.getPeeledObj().getId().copy()));
+        }
+        
+        Long projectId = project.getId();
+        
+        transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+		        sessionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+				        try {
+				            Project project = load(projectId);
+
+				            for (ImmutableTriple<String, ObjectId, ObjectId> each: refUpdatedEventData) {
+				            	String refName = each.getLeft();
+				            	ObjectId oldObjectId = each.getMiddle();
+				            	ObjectId newObjectId = each.getRight();
+					        	if (!newObjectId.equals(ObjectId.zeroId()))
+					        		project.cacheObjectId(refName, newObjectId);
+					        	else 
+					        		project.cacheObjectId(refName, null);
+				            	
+					        	listenerRegistry.post(new RefUpdated(project, refName, oldObjectId, newObjectId));
+				            }
+				        } catch (Exception e) {
+				        	logger.error("Error posting ref updated event", e);
+						}
+					}
+		        	
+		        });
+			}
+        	
+        });
+        
     }
     
 	private boolean isGitHookValid(File gitDir, String hookName) {
