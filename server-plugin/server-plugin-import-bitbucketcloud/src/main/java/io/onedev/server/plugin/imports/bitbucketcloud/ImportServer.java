@@ -32,6 +32,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
@@ -207,21 +208,23 @@ public class ImportServer implements Serializable, Validatable {
 				URIBuilder builder = new URIBuilder(cloneUrl);
 				builder.setUserInfo(getUserName(), getAppPassword());
 				
-				if (!dryRun) {
-					SensitiveMasker.push(new SensitiveMasker() {
+				SensitiveMasker.push(new SensitiveMasker() {
 
-						@Override
-						public String mask(String text) {
-							return StringUtils.replace(text, getAppPassword(), "******");
-						}
-						
-					});
-					try {
-						projectManager.clone(project, builder.build().toString());
-					} finally {
-						SensitiveMasker.pop();
+					@Override
+					public String mask(String text) {
+						return StringUtils.replace(text, getAppPassword(), "******");
 					}
-					projectIds.add(project.getId());
+					
+				});
+				try {
+					if (dryRun) {
+						new LsRemoteCommand().remote(builder.build().toString()).refs("HEAD").quiet(true).call();
+					} else {
+						projectManager.clone(project, builder.build().toString());
+						projectIds.add(project.getId());
+					}
+				} finally {
+					SensitiveMasker.pop();
 				}
 			}
 			

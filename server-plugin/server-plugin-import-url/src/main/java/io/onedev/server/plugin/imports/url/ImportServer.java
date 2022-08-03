@@ -17,6 +17,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.EditContext;
@@ -114,24 +115,26 @@ public class ImportServer implements Serializable, Validatable {
 			URIBuilder builder = new URIBuilder(getUrl());
 			builder.setUserInfo(getUserName(), getPassword());
 			
-			if (!dryRun) {
-				SensitiveMasker.push(new SensitiveMasker() {
+			SensitiveMasker.push(new SensitiveMasker() {
 
-					@Override
-					public String mask(String text) {
-						if (getPassword() != null)
-							return StringUtils.replace(text, getPassword(), "******");
-						else
-							return text;
-					}
-					
-				});
-				try {
-					getProjectManager().clone(project, builder.build().toString());
-				} finally {
-					SensitiveMasker.pop();
+				@Override
+				public String mask(String text) {
+					if (getPassword() != null)
+						return StringUtils.replace(text, getPassword(), "******");
+					else
+						return text;
 				}
-				projectId = project.getId();
+				
+			});
+			try {
+				if (dryRun) {
+					new LsRemoteCommand().remote(builder.build().toString()).refs("HEAD").quiet(true).call();
+				} else {
+					getProjectManager().clone(project, builder.build().toString());
+					projectId = project.getId();
+				}
+			} finally {
+				SensitiveMasker.pop();
 			}
 			
 			return "project imported successfully";

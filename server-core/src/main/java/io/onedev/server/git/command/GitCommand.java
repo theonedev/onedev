@@ -22,11 +22,11 @@ public abstract class GitCommand<V> {
 	
 	private final Map<String, String> environments;
 	
-	public GitCommand(File gitDir, @Nullable Map<String, String> environments) {
+	public GitCommand(@Nullable File gitDir, @Nullable Map<String, String> environments) {
 		this.gitDir = gitDir;
 		this.environments = environments;
 		
-		if (!gitDir.exists())
+		if (gitDir != null && !gitDir.exists())
 		    FileUtils.createDir(gitDir);
 	}
 
@@ -48,7 +48,9 @@ public abstract class GitCommand<V> {
 	
 	public Commandline cmd() {
 		String gitExe = getGitExe();
-		Commandline cmd = new Commandline(gitExe).workingDir(gitDir);
+		Commandline cmd = new Commandline(gitExe);
+		if (gitDir != null)
+			cmd.workingDir(gitDir);
 		if (environments != null)
 			cmd.environments(environments);
 		return cmd;

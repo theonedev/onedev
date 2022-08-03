@@ -51,6 +51,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferenceMigrator;
+import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
@@ -287,21 +288,23 @@ public class ImportServer implements Serializable, Validatable {
 				URIBuilder builder = new URIBuilder(projectNode.get("http_url_to_repo").asText());
 				builder.setUserInfo("git", getAccessToken());
 				
-				if (!dryRun) {
-					SensitiveMasker.push(new SensitiveMasker() {
+				SensitiveMasker.push(new SensitiveMasker() {
 
-						@Override
-						public String mask(String text) {
-							return StringUtils.replace(text, getAccessToken(), "******");
-						}
-						
-					});
-					try {
-						projectManager.clone(project, builder.build().toString());
-					} finally {
-						SensitiveMasker.pop();
+					@Override
+					public String mask(String text) {
+						return StringUtils.replace(text, getAccessToken(), "******");
 					}
-					projectIds.add(project.getId());
+					
+				});
+				try {
+					if (dryRun) { 
+						new LsRemoteCommand().remote(builder.build().toString()).refs("HEAD").quiet(true).call();
+					} else {
+						projectManager.clone(project, builder.build().toString());
+						projectIds.add(project.getId());
+					}
+				} finally {
+					SensitiveMasker.pop();
 				}
 
 				if (option.getIssueImportOption() != null) {
