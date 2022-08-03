@@ -2,6 +2,9 @@ package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.server.web.editable.annotation.Editable;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
@@ -10,6 +13,8 @@ import oshi.hardware.HardwareAbstractionLayer;
 public class PerformanceSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1;
+	
+	private static final Logger logger=  LoggerFactory.getLogger(PerformanceSetting.class);
 	
 	private int cpuIntensiveTaskConcurrency;
 	
@@ -24,10 +29,19 @@ public class PerformanceSetting implements Serializable {
 	private int maxCodeSearchEntries = 100;
 	
 	public PerformanceSetting() {
-		HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
-		cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount();
-		serverJobExecutorCpuQuota = hardware.getProcessor().getLogicalProcessorCount()*1000;
-		serverJobExecutorMemoryQuota = (int) (hardware.getMemory().getTotal()/1024/1024);				
+		try {
+			HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
+			cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount();
+			serverJobExecutorCpuQuota = hardware.getProcessor().getLogicalProcessorCount()*1000;
+			serverJobExecutorMemoryQuota = (int) (hardware.getMemory().getTotal()/1024/1024);				
+		} catch (Exception e) {
+			logger.debug("Error calling oshi", e);
+			logger.warn("Unable to call oshi to set default performance setting. Assume some arbitrary numbers. "
+					+ "You may change it later via menu 'administration / performance setting'");
+			cpuIntensiveTaskConcurrency = 4;
+			serverJobExecutorCpuQuota = 4000;
+			serverJobExecutorMemoryQuota = 8000;
+		}
 	}
 
 	@Editable(order=100, name="CPU Intensive Task Concurrency", description="Specify max concurrent CPU intensive "

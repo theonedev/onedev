@@ -2796,11 +2796,16 @@ public class DataMigrator {
 					if (key.equals("SYSTEM")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
-							int cpu = hardware.getProcessor().getLogicalProcessorCount()*1000;
-							valueElement.addElement("cpu").setText(String.valueOf(cpu));
-							int memory = (int) (hardware.getMemory().getTotal()/1024/1024);
-							valueElement.addElement("memory").setText(String.valueOf(memory));
+							try {
+								HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
+								int cpu = hardware.getProcessor().getLogicalProcessorCount()*1000;
+								valueElement.addElement("cpu").setText(String.valueOf(cpu));
+								int memory = (int) (hardware.getMemory().getTotal()/1024/1024);
+								valueElement.addElement("memory").setText(String.valueOf(memory));
+							} catch (Exception e) {
+								valueElement.addElement("cpu").setText("4000");
+								valueElement.addElement("memory").setText("8000");
+							}
 						}
 					} else if (key.equals("JOB_EXECUTORS")) {
 						Element valueElement = element.element("value");
