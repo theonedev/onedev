@@ -36,6 +36,15 @@
     if (loading.hasOwnProperty(mode)) return loading[mode].push(cont);
 
     var file = options && options.path ? options.path(mode) : CodeMirror.modeURL.replace(/%N/g, mode);
+	var lastIndex = file.lastIndexOf('.');
+	if (lastIndex != -1) {
+		var filePrefix = file.substr(0, lastIndex); 
+		var fileSuffix = file.substr(lastIndex);
+		file = filePrefix + "-ver-" + onedev.server.bootTimestamp + fileSuffix;
+	} else {
+		file = file + "-ver-" + onedev.server.bootTimestamp;
+	}
+	
     if (options && options.loadMode) {
       options.loadMode(file, function() { ensureDeps(mode, cont, options) })
     } else if (env == "plain") {

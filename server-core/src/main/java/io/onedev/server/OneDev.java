@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -72,6 +73,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	private final TaskScheduler taskScheduler;
 	
 	private final ExecutorService executorService;
+	
+	private final Date bootDate = new Date();
 	
 	private volatile InitStage initStage;
 	
@@ -260,6 +263,10 @@ public class OneDev extends AbstractPlugin implements Serializable {
 
 	public static <T> Set<T> getExtensions(Class<T> extensionPoint) {
 		return AppLoader.getExtensions(extensionPoint);
+	}
+
+	public Date getBootDate() {
+		return bootDate;
 	}
 
 	@Sessional
