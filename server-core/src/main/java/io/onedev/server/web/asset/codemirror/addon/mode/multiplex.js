@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -12,7 +12,7 @@
 "use strict";
 
 CodeMirror.multiplexingMode = function(outer /*, others */) {
-  // Others should be {open, close, mode [, delimStyle] [, innerStyle]} objects
+  // Others should be {open, close, mode [, delimStyle] [, innerStyle] [, parseDelimiters]} objects
   var others = Array.prototype.slice.call(arguments, 1);
 
   function indexOf(string, pattern, from, returnEnd) {
@@ -29,7 +29,8 @@ CodeMirror.multiplexingMode = function(outer /*, others */) {
       return {
         outer: CodeMirror.startState(outer),
         innerActive: null,
-        inner: null
+        inner: null,
+        startingInner: false
       };
     },
 
@@ -37,7 +38,8 @@ CodeMirror.multiplexingMode = function(outer /*, others */) {
       return {
         outer: CodeMirror.copyState(outer, state.outer),
         innerActive: state.innerActive,
-        inner: state.innerActive && CodeMirror.copyState(state.innerActive.mode, state.inner)
+        inner: state.innerActive && CodeMirror.copyState(state.innerActive.mode, state.inner),
+        startingInner: state.startingInner
       };
     },
 
@@ -49,8 +51,17 @@ CodeMirror.multiplexingMode = function(outer /*, others */) {
           var found = indexOf(oldContent, other.open, stream.pos);
           if (found == stream.pos) {
             if (!other.parseDelimiters) stream.match(other.open);
+            state.startingInner = !!other.parseDelimiters
             state.innerActive = other;
-            state.inner = CodeMirror.startState(other.mode, outer.indent ? outer.indent(state.outer, "") : 0);
+
+            // Get the outer indent, making sure to handle CodeMirror.Pass
+            var outerIndent = 0;
+            if (outer.indent) {
+              var possibleOuterIndent = outer.indent(state.outer, "", "");
+              if (possibleOuterIndent !== CodeMirror.Pass) outerIndent = possibleOuterIndent;
+            }
+
+            state.inner = CodeMirror.startState(other.mode, outerIndent);
             return other.delimStyle && (other.delimStyle + " " + other.delimStyle + "-open");
           } else if (found != -1 && found < cutOff) {
             cutOff = found;
@@ -66,7 +77,8 @@ CodeMirror.multiplexingMode = function(outer /*, others */) {
           state.innerActive = state.inner = null;
           return this.token(stream, state);
         }
-        var found = curInner.close ? indexOf(oldContent, curInner.close, stream.pos, curInner.parseDelimiters) : -1;
+        var found = curInner.close && !state.startingInner ?
+            indexOf(oldContent, curInner.close, stream.pos, curInner.parseDelimiters) : -1;
         if (found == stream.pos && !curInner.parseDelimiters) {
           stream.match(curInner.close);
           state.innerActive = state.inner = null;
@@ -75,6 +87,7 @@ CodeMirror.multiplexingMode = function(outer /*, others */) {
         if (found > -1) stream.string = oldContent.slice(0, found);
         var innerToken = curInner.mode.token(stream, state.inner);
         if (found > -1) stream.string = oldContent;
+        else if (stream.pos > stream.start) state.startingInner = false
 
         if (found == stream.pos && curInner.parseDelimiters)
           state.innerActive = state.inner = null;
@@ -88,10 +101,10 @@ CodeMirror.multiplexingMode = function(outer /*, others */) {
       }
     },
 
-    indent: function(state, textAfter) {
+    indent: function(state, textAfter, line) {
       var mode = state.innerActive ? state.innerActive.mode : outer;
       if (!mode.indent) return CodeMirror.Pass;
-      return mode.indent(state.innerActive ? state.inner : state.outer, textAfter);
+      return mode.indent(state.innerActive ? state.inner : state.outer, textAfter, line);
     },
 
     blankLine: function(state) {
@@ -104,7 +117,7 @@ CodeMirror.multiplexingMode = function(outer /*, others */) {
           var other = others[i];
           if (other.open === "\n") {
             state.innerActive = other;
-            state.inner = CodeMirror.startState(other.mode, mode.indent ? mode.indent(state.outer, "") : 0);
+            state.inner = CodeMirror.startState(other.mode, mode.indent ? mode.indent(state.outer, "", "") : 0);
           }
         }
       } else if (state.innerActive.close === "\n") {

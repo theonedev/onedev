@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -48,7 +48,7 @@ CodeMirror.defineMode("velocity", function() {
             else if (state.inParams)
                 return chain(stream, state, tokenString(ch));
         }
-        // is it one of the special signs []{}().,;? Seperator?
+        // is it one of the special signs []{}().,;? Separator?
         else if (/[\[\]{}\(\),;\.]/.test(ch)) {
             if (ch == "(" && beforeParams)
                 state.inParams = true;
@@ -82,7 +82,8 @@ CodeMirror.defineMode("velocity", function() {
         }
         // variable?
         else if (ch == "$") {
-            stream.eatWhile(/[\w\d\$_\.{}]/);
+            stream.eat("!");
+            stream.eatWhile(/[\w\d\$_\.{}-]/);
             // is it one of the specials?
             if (specials && specials.propertyIsEnumerable(stream.current())) {
                 return "keyword";

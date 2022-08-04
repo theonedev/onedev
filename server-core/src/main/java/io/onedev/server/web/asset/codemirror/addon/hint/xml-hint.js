@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -13,9 +13,15 @@
 
   var Pos = CodeMirror.Pos;
 
+  function matches(hint, typed, matchInMiddle) {
+    if (matchInMiddle) return hint.indexOf(typed) >= 0;
+    else return hint.lastIndexOf(typed, 0) == 0;
+  }
+
   function getHints(cm, options) {
     var tags = options && options.schemaInfo;
     var quote = (options && options.quoteChar) || '"';
+    var matchInMiddle = options && options.matchInMiddle;
     if (!tags) return;
     var cur = cm.getCursor(), token = cm.getTokenAt(cur);
     if (token.end > cur.ch) {
@@ -23,7 +29,7 @@
       token.string = token.string.slice(0, cur.ch - token.start);
     }
     var inner = CodeMirror.innerMode(cm.getMode(), token.state);
-    if (inner.mode.name != "xml") return;
+    if (!inner.mode.xmlCurrentTag) return
     var result = [], replaceToken = false, prefix;
     var tag = /\btag\b/.test(token.type) && !/>$/.test(token.string);
     var tagName = tag && /^\w/.test(token.string), tagStart;
@@ -38,25 +44,28 @@
       tagType = "close";
     }
 
-    if (!tag && !inner.state.tagName || tagType) {
+    var tagInfo = inner.mode.xmlCurrentTag(inner.state)
+    if (!tag && !tagInfo || tagType) {
       if (tagName)
         prefix = token.string;
       replaceToken = tagType;
-      var cx = inner.state.context, curTag = cx && tags[cx.tagName];
-      var childList = cx ? curTag && curTag.children : tags["!top"];
+      var context = inner.mode.xmlCurrentContext ? inner.mode.xmlCurrentContext(inner.state) : []
+      var inner = context.length && context[context.length - 1]
+      var curTag = inner && tags[inner]
+      var childList = inner ? curTag && curTag.children : tags["!top"];
       if (childList && tagType != "close") {
-        for (var i = 0; i < childList.length; ++i) if (!prefix || childList[i].lastIndexOf(prefix, 0) == 0)
+        for (var i = 0; i < childList.length; ++i) if (!prefix || matches(childList[i], prefix, matchInMiddle))
           result.push("<" + childList[i]);
       } else if (tagType != "close") {
         for (var name in tags)
-          if (tags.hasOwnProperty(name) && name != "!top" && name != "!attrs" && (!prefix || name.lastIndexOf(prefix, 0) == 0))
+          if (tags.hasOwnProperty(name) && name != "!top" && name != "!attrs" && (!prefix || matches(name, prefix, matchInMiddle)))
             result.push("<" + name);
       }
-      if (cx && (!prefix || tagType == "close" && cx.tagName.lastIndexOf(prefix, 0) == 0))
-        result.push("</" + cx.tagName + ">");
+      if (inner && (!prefix || tagType == "close" && matches(inner, prefix, matchInMiddle)))
+        result.push("</" + inner + ">");
     } else {
       // Attribute completion
-      var curTag = tags[inner.state.tagName], attrs = curTag && curTag.attrs;
+      var curTag = tagInfo && tags[tagInfo.name], attrs = curTag && curTag.attrs;
       var globalAttrs = tags["!attrs"];
       if (!attrs && !globalAttrs) return;
       if (!attrs) {
@@ -86,24 +95,37 @@
             quote = token.string.charAt(len - 1);
             prefix = token.string.substr(n, len - 2);
           }
+          if (n) { // an opening quote
+            var line = cm.getLine(cur.line);
+            if (line.length > token.end && line.charAt(token.end) == quote) token.end++; // include a closing quote
+          }
           replaceToken = true;
         }
-        for (var i = 0; i < atValues.length; ++i) if (!prefix || atValues[i].lastIndexOf(prefix, 0) == 0)
-          result.push(quote + atValues[i] + quote);
+        var returnHintsFromAtValues = function(atValues) {
+          if (atValues)
+            for (var i = 0; i < atValues.length; ++i) if (!prefix || matches(atValues[i], prefix, matchInMiddle))
+              result.push(quote + atValues[i] + quote);
+          return returnHints();
+        };
+        if (atValues && atValues.then) return atValues.then(returnHintsFromAtValues);
+        return returnHintsFromAtValues(atValues);
       } else { // An attribute name
         if (token.type == "attribute") {
           prefix = token.string;
           replaceToken = true;
         }
-        for (var attr in attrs) if (attrs.hasOwnProperty(attr) && (!prefix || attr.lastIndexOf(prefix, 0) == 0))
+        for (var attr in attrs) if (attrs.hasOwnProperty(attr) && (!prefix || matches(attr, prefix, matchInMiddle)))
           result.push(attr);
       }
     }
-    return {
-      list: result,
-      from: replaceToken ? Pos(cur.line, tagStart == null ? token.start : tagStart) : cur,
-      to: replaceToken ? Pos(cur.line, token.end) : cur
-    };
+    function returnHints() {
+      return {
+        list: result,
+        from: replaceToken ? Pos(cur.line, tagStart == null ? token.start : tagStart) : cur,
+        to: replaceToken ? Pos(cur.line, token.end) : cur
+      };
+    }
+    return returnHints();
   }
 
   CodeMirror.registerHelper("hint", "xml", getHints);

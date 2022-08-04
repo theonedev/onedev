@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function() {
   CodeMirror.defineMode("markdown_with_stex", function(){
@@ -30,4 +30,20 @@
   MT(
     "stexInsideMarkdown",
     "[strong **Equation:**] [delim&delim-open $][inner&tag \\pi][delim&delim-close $]");
+
+  CodeMirror.defineMode("identical_delim_multiplex", function() {
+    return CodeMirror.multiplexingMode(CodeMirror.getMode({indentUnit: 2}, "javascript"), {
+      open: "#",
+      close: "#",
+      mode: CodeMirror.getMode({}, "markdown"),
+      parseDelimiters: true,
+      innerStyle: "q"
+    });
+  });
+
+  var mode2 = CodeMirror.getMode({}, "identical_delim_multiplex");
+
+  test.mode("identical_delimiters_with_parseDelimiters", mode2, [
+    "[keyword let] [def x] [operator =] [q #foo][q&em *bar*][q #];"
+  ], "multiplexing")
 })();

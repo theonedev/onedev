@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -31,7 +31,7 @@ CodeMirror.defineMode("sparql", function(config) {
                              "graph", "by", "asc", "desc", "as", "having", "undef", "values", "group",
                              "minus", "in", "not", "service", "silent", "using", "insert", "delete", "union",
                              "true", "false", "with",
-                             "data", "copy", "to", "move", "add", "create", "drop", "clear", "load"]);
+                             "data", "copy", "to", "move", "add", "create", "drop", "clear", "load", "into"]);
   var operatorChars = /[*+\-<>=&|\^\/!\?]/;
 
   function tokenBase(stream, state) {
@@ -41,7 +41,7 @@ CodeMirror.defineMode("sparql", function(config) {
       if(ch == "?" && stream.match(/\s/, false)){
         return "operator";
       }
-      stream.match(/^[\w\d]*/);
+      stream.match(/^[A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][A-Za-z0-9_\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]*/);
       return "variable-2";
     }
     else if (ch == "<" && !stream.match(/^[\s\u00a0=]/, false)) {
@@ -61,11 +61,10 @@ CodeMirror.defineMode("sparql", function(config) {
       return "comment";
     }
     else if (operatorChars.test(ch)) {
-      stream.eatWhile(operatorChars);
       return "operator";
     }
     else if (ch == ":") {
-      stream.eatWhile(/[\w\d\._\-]/);
+      eatPnLocal(stream);
       return "atom";
     }
     else if (ch == "@") {
@@ -75,7 +74,7 @@ CodeMirror.defineMode("sparql", function(config) {
     else {
       stream.eatWhile(/[_\w\d]/);
       if (stream.eat(":")) {
-        stream.eatWhile(/[\w\d_\-]/);
+        eatPnLocal(stream);
         return "atom";
       }
       var word = stream.current();
@@ -86,6 +85,10 @@ CodeMirror.defineMode("sparql", function(config) {
       else
         return "variable";
     }
+  }
+
+  function eatPnLocal(stream) {
+    stream.match(/(\.(?=[\w_\-\\%])|[:\w_-]|\\[-\\_~.!$&'()*+,;=/?#@%]|%[a-f\d][a-f\d])+/i);
   }
 
   function tokenLiteral(quote) {

@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -13,7 +13,7 @@
 
   var noOptions = {};
   var nonWS = /[^\s\u00a0]/;
-  var Pos = CodeMirror.Pos;
+  var Pos = CodeMirror.Pos, cmp = CodeMirror.cmpPos;
 
   function firstNonWS(str) {
     var found = str.search(nonWS);
@@ -46,12 +46,17 @@
 
   // Rough heuristic to try and detect lines that are part of multi-line string
   function probablyInsideString(cm, pos, line) {
-    return /\bstring\b/.test(cm.getTokenTypeAt(Pos(pos.line, 0))) && !/^[\'\"`]/.test(line)
+    return /\bstring\b/.test(cm.getTokenTypeAt(Pos(pos.line, 0))) && !/^[\'\"\`]/.test(line)
+  }
+
+  function getMode(cm, pos) {
+    var mode = cm.getMode()
+    return mode.useInnerComments === false || !mode.innerMode ? mode : cm.getModeAt(pos)
   }
 
   CodeMirror.defineExtension("lineComment", function(from, to, options) {
     if (!options) options = noOptions;
-    var self = this, mode = self.getModeAt(from);
+    var self = this, mode = getMode(self, from);
     var firstLine = self.getLine(from.line);
     if (firstLine == null || probablyInsideString(self, from, firstLine)) return;
 
@@ -73,7 +78,7 @@
         var baseString = null;
         for (var i = from.line; i < end; ++i) {
           var line = self.getLine(i);
-          var whitespace = line.slice(0, firstNonWS(line));
+          var whitespace = line.search(nonWS) === -1 ? line : line.slice(0, firstNonWS(line));
           if (baseString == null || baseString.length > whitespace.length) {
             baseString = whitespace;
           }
@@ -95,7 +100,7 @@
 
   CodeMirror.defineExtension("blockComment", function(from, to, options) {
     if (!options) options = noOptions;
-    var self = this, mode = self.getModeAt(from);
+    var self = this, mode = getMode(self, from);
     var startString = options.blockCommentStart || mode.blockCommentStart;
     var endString = options.blockCommentEnd || mode.blockCommentEnd;
     if (!startString || !endString) {
@@ -121,7 +126,9 @@
           if (i != end || lastLineHasText)
             self.replaceRange(lead + pad, Pos(i, 0));
       } else {
+        var atCursor = cmp(self.getCursor("to"), to) == 0, empty = !self.somethingSelected()
         self.replaceRange(endString, to);
+        if (atCursor) self.setSelection(empty ? to : self.getCursor("from"), to)
         self.replaceRange(startString, from);
       }
     });
@@ -129,7 +136,7 @@
 
   CodeMirror.defineExtension("uncomment", function(from, to, options) {
     if (!options) options = noOptions;
-    var self = this, mode = self.getModeAt(from);
+    var self = this, mode = getMode(self, from);
     var end = Math.min(to.ch != 0 || to.line == from.line ? to.line : to.line - 1, self.lastLine()), start = Math.min(from.line, end);
 
     // Try finding line comments
@@ -167,13 +174,11 @@
     if (open == -1) return false
     var endLine = end == start ? startLine : self.getLine(end)
     var close = endLine.indexOf(endString, end == start ? open + startString.length : 0);
-    if (close == -1 && start != end) {
-      endLine = self.getLine(--end);
-      close = endLine.indexOf(endString);
-    }
+    var insideStart = Pos(start, open + 1), insideEnd = Pos(end, close + 1)
     if (close == -1 ||
-        !/comment/.test(self.getTokenTypeAt(Pos(start, open + 1))) ||
-        !/comment/.test(self.getTokenTypeAt(Pos(end, close + 1))))
+        !/comment/.test(self.getTokenTypeAt(insideStart)) ||
+        !/comment/.test(self.getTokenTypeAt(insideEnd)) ||
+        self.getRange(insideStart, insideEnd, "\n").indexOf(endString) > -1)
       return false;
 
     // Avoid killing block comments completely outside the selection.

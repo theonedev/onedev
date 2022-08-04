@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 // mode(s) for the sequence chart dsl's mscgen, xù and msgenny
 // For more information on mscgen, see the site of the original author:
@@ -33,9 +33,9 @@
     },
     xu: {
       "keywords" : ["msc", "xu"],
-      "options" : ["hscale", "width", "arcgradient", "wordwraparcs", "watermark"],
+      "options" : ["hscale", "width", "arcgradient", "wordwraparcs", "wordwrapentities", "watermark"],
       "constants" : ["true", "false", "on", "off", "auto"],
-      "attributes" : ["label", "idurl", "id", "url", "linecolor", "linecolour", "textcolor", "textcolour", "textbgcolor", "textbgcolour", "arclinecolor", "arclinecolour", "arctextcolor", "arctextcolour", "arctextbgcolor", "arctextbgcolour", "arcskip"],
+      "attributes" : ["label", "idurl", "id", "url", "linecolor", "linecolour", "textcolor", "textcolour", "textbgcolor", "textbgcolour", "arclinecolor", "arclinecolour", "arctextcolor", "arctextcolour", "arctextbgcolor", "arctextbgcolour", "arcskip", "title", "deactivate", "activate", "activation"],
       "brackets" : ["\\{", "\\}"],  // [ and  ] are brackets too, but these get handled in with lists
       "arcsWords" : ["note", "abox", "rbox", "box", "alt", "else", "opt", "break", "par", "seq", "strict", "neg", "critical", "ignore", "consider", "assert", "loop", "ref", "exc"],
       "arcsOthers" : ["\\|\\|\\|", "\\.\\.\\.", "---", "--", "<->", "==", "<<=>>", "<=>", "\\.\\.", "<<>>", "::", "<:>", "->", "=>>", "=>", ">>", ":>", "<-", "<<=", "<=", "<<", "<:", "x-", "-x"],
@@ -44,7 +44,7 @@
     },
     msgenny: {
       "keywords" : null,
-      "options" : ["hscale", "width", "arcgradient", "wordwraparcs", "watermark"],
+      "options" : ["hscale", "width", "arcgradient", "wordwraparcs", "wordwrapentities", "watermark"],
       "constants" : ["true", "false", "on", "off", "auto"],
       "attributes" : null,
       "brackets" : ["\\{", "\\}"],
@@ -72,11 +72,11 @@
   CodeMirror.defineMIME("text/x-msgenny", {name: "mscgen", language: "msgenny"});
 
   function wordRegexpBoundary(pWords) {
-    return new RegExp("\\b(" + pWords.join("|") + ")\\b", "i");
+    return new RegExp("^\\b(?:" + pWords.join("|") + ")\\b", "i");
   }
 
   function wordRegexp(pWords) {
-    return new RegExp("(" + pWords.join("|") + ")", "i");
+    return new RegExp("^(?:" + pWords.join("|") + ")", "i");
   }
 
   function startStateFn() {
@@ -153,7 +153,7 @@
         return "variable";
 
       /* attribute lists */
-      if (!pConfig.inAttributeList && !!pConfig.attributes && pStream.match(/\[/, true, true)) {
+      if (!pConfig.inAttributeList && !!pConfig.attributes && pStream.match('[', true, true)) {
         pConfig.inAttributeList = true;
         return "bracket";
       }
@@ -161,7 +161,7 @@
         if (pConfig.attributes !== null && pStream.match(wordRegexpBoundary(pConfig.attributes), true, true)) {
           return "attribute";
         }
-        if (pStream.match(/]/, true, true)) {
+        if (pStream.match(']', true, true)) {
           pConfig.inAttributeList = false;
           return "bracket";
         }

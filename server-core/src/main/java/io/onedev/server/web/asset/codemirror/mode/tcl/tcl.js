@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 //tcl mode by Ford_Lawnmower :: Based on Velocity mode by Steve O'Hara
 
@@ -131,7 +131,8 @@ CodeMirror.defineMode("tcl", function() {
       token: function(stream, state) {
         if (stream.eatSpace()) return null;
         return state.tokenize(stream, state);
-      }
+      },
+      lineComment: "#"
     };
 });
 CodeMirror.defineMIME("text/x-tcl", "tcl");

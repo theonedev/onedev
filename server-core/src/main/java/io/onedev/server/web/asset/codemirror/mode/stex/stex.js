@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 /*
  * Author: Constantin Jucovschi (c.jucovschi@jacobs-university.de)
@@ -16,7 +16,7 @@
 })(function(CodeMirror) {
   "use strict";
 
-  CodeMirror.defineMode("stex", function() {
+  CodeMirror.defineMode("stex", function(_config, parserConfig) {
     "use strict";
 
     function pushCommand(state, command) {
@@ -78,6 +78,14 @@
     plugins["begin"] = addPluginPattern("begin", "tag", ["atom"]);
     plugins["end"] = addPluginPattern("end", "tag", ["atom"]);
 
+    plugins["label"    ] = addPluginPattern("label"    , "tag", ["atom"]);
+    plugins["ref"      ] = addPluginPattern("ref"      , "tag", ["atom"]);
+    plugins["eqref"    ] = addPluginPattern("eqref"    , "tag", ["atom"]);
+    plugins["cite"     ] = addPluginPattern("cite"     , "tag", ["atom"]);
+    plugins["bibitem"  ] = addPluginPattern("bibitem"  , "tag", ["atom"]);
+    plugins["Bibitem"  ] = addPluginPattern("Bibitem"  , "tag", ["atom"]);
+    plugins["RBibitem" ] = addPluginPattern("RBibitem" , "tag", ["atom"]);
+
     plugins["DEFAULT"] = function () {
       this.name = "DEFAULT";
       this.style = "tag";
@@ -95,7 +103,7 @@
       // Do we look like '\command' ?  If so, attempt to apply the plugin 'command'
       if (source.match(/^\\[a-zA-Z@]+/)) {
         var cmdName = source.current().slice(1);
-        plug = plugins[cmdName] || plugins["DEFAULT"];
+        plug = plugins.hasOwnProperty(cmdName) ? plugins[cmdName] : plugins["DEFAULT"];
         plug = new plug();
         pushCommand(state, plug);
         setState(state, beginParams);
@@ -115,6 +123,10 @@
       // find if we're starting various math modes
       if (source.match("\\[")) {
         setState(state, function(source, state){ return inMathMode(source, state, "\\]"); });
+        return "keyword";
+      }
+      if (source.match("\\(")) {
+        setState(state, function(source, state){ return inMathMode(source, state, "\\)"); });
         return "keyword";
       }
       if (source.match("$$")) {
@@ -161,7 +173,7 @@
       if (source.eatSpace()) {
         return null;
       }
-      if (source.match(endModeSeq)) {
+      if (endModeSeq && source.match(endModeSeq)) {
         setState(state, normal);
         return "keyword";
       }
@@ -223,9 +235,10 @@
 
     return {
       startState: function() {
+        var f = parserConfig.inMathMode ? function(source, state){ return inMathMode(source, state); } : normal;
         return {
           cmdState: [],
-          f: normal
+          f: f
         };
       },
       copyState: function(s) {

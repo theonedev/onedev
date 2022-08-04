@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 // Highlighting text that matches the selection
 //
@@ -16,7 +16,7 @@
 // highlighted only if the selected text is a word. showToken, when enabled,
 // will cause the current token to be highlighted when nothing is selected.
 // delay is used to specify how much time to wait, in milliseconds, before
-// highlighting the matches. If annotateScrollbar is enabled, the occurences
+// highlighting the matches. If annotateScrollbar is enabled, the occurrences
 // will be highlighted on the scrollbar via the matchesonscrollbar addon.
 
 (function(mod) {
@@ -90,7 +90,9 @@
     var state = cm.state.matchHighlighter;
     cm.addOverlay(state.overlay = makeOverlay(query, hasBoundary, style));
     if (state.options.annotateScrollbar && cm.showMatchesOnScrollbar) {
-      var searchFor = hasBoundary ? new RegExp("\\b" + query + "\\b") : query;
+      var searchFor = hasBoundary ? new RegExp((/\w/.test(query.charAt(0)) ? "\\b" : "") +
+                                               query.replace(/[\\\[.+*?(){|^$]/g, "\\$&") +
+                                               (/\w/.test(query.charAt(query.length - 1)) ? "\\b" : "")) : query;
       state.matchesonscroll = cm.showMatchesOnScrollbar(searchFor, false,
         {className: "CodeMirror-selection-highlight-scrollbar"});
     }

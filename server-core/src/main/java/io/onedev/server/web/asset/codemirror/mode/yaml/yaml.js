@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -38,9 +38,9 @@ CodeMirror.defineMode("yaml", function() {
         state.pair = false;
         state.pairStart = false;
         /* document start */
-        if(stream.match(/---/)) { return "def"; }
+        if(stream.match('---')) { return "def"; }
         /* document end */
-        if (stream.match(/\.\.\./)) { return "def"; }
+        if (stream.match('...')) { return "def"; }
         /* array list item */
         if (stream.match(/\s*-\s+/)) { return 'meta'; }
       }
@@ -57,12 +57,12 @@ CodeMirror.defineMode("yaml", function() {
         return 'meta';
       }
 
-      /* list seperator */
+      /* list separator */
       if (state.inlineList > 0 && !esc && ch == ',') {
         stream.next();
         return 'meta';
       }
-      /* pairs seperator */
+      /* pairs separator */
       if (state.inlinePairs > 0 && !esc && ch == ',') {
         state.keyCol = 0;
         state.pair = false;
@@ -108,7 +108,9 @@ CodeMirror.defineMode("yaml", function() {
         literal: false,
         escaped: false
       };
-    }
+    },
+    lineComment: "#",
+    fold: "indent"
   };
 });
 

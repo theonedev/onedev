@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -43,7 +43,7 @@ CodeMirror.defineMode("sieve", function(config) {
     if (ch == "(") {
       state._indent.push("(");
       // add virtual angel wings so that editor behaves...
-      // ...more sane incase of broken brackets
+      // ...more sane in case of broken brackets
       state._indent.push("{");
       return null;
     }
@@ -170,7 +170,7 @@ CodeMirror.defineMode("sieve", function(config) {
       if (stream.eatSpace())
         return null;
 
-      return (state.tokenize || tokenBase)(stream, state);;
+      return (state.tokenize || tokenBase)(stream, state);
     },
 
     indent: function(state, _textAfter) {

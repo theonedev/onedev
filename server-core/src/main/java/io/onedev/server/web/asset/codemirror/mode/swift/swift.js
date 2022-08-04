@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 // Swift mode created by Michael Kaminsky https://github.com/mkaminsky11
 
@@ -19,14 +19,14 @@
     return set
   }
 
-  var keywords = wordSet(["_","var","let","class","enum","extension","import","protocol","struct","func","typealias","associatedtype",
+  var keywords = wordSet(["_","var","let","actor","class","enum","extension","import","protocol","struct","func","typealias","associatedtype",
                           "open","public","internal","fileprivate","private","deinit","init","new","override","self","subscript","super",
                           "convenience","dynamic","final","indirect","lazy","required","static","unowned","unowned(safe)","unowned(unsafe)","weak","as","is",
                           "break","case","continue","default","else","fallthrough","for","guard","if","in","repeat","switch","where","while",
-                          "defer","return","inout","mutating","nonmutating","catch","do","rethrows","throw","throws","try","didSet","get","set","willSet",
+                          "defer","return","inout","mutating","nonmutating","isolated","nonisolated","catch","do","rethrows","throw","throws","async","await","try","didSet","get","set","willSet",
                           "assignment","associativity","infix","left","none","operator","postfix","precedence","precedencegroup","prefix","right",
                           "Any","AnyObject","Type","dynamicType","Self","Protocol","__COLUMN__","__FILE__","__FUNCTION__","__LINE__"])
-  var definingKeywords = wordSet(["var","let","class","enum","extension","import","protocol","struct","func","typealias","associatedtype","for"])
+  var definingKeywords = wordSet(["var","let","actor","class","enum","extension","import","protocol","struct","func","typealias","associatedtype","for"])
   var atoms = wordSet(["true","false","nil","self","super","_"])
   var types = wordSet(["Array","Bool","Character","Dictionary","Double","Float","Int","Int8","Int16","Int32","Int64","Never","Optional","Set","String",
                        "UInt8","UInt16","UInt32","UInt64","Void"])
@@ -73,9 +73,9 @@
       stream.match("..")
       return "punctuation"
     }
-    if (ch == '"' || ch == "'") {
-      stream.next()
-      var tokenize = tokenString(ch)
+    var stringMatch
+    if (stringMatch = stream.match(/("""|"|')/)) {
+      var tokenize = tokenString.bind(null, stringMatch[0])
       state.tokenize.push(tokenize)
       return tokenize(stream, state)
     }
@@ -116,30 +116,43 @@
     }
   }
 
-  function tokenString(quote) {
-    return function(stream, state) {
-      var ch, escaped = false
-      while (ch = stream.next()) {
-        if (escaped) {
-          if (ch == "(") {
-            state.tokenize.push(tokenUntilClosingParen())
-            return "string"
-          }
-          escaped = false
-        } else if (ch == quote) {
-          break
-        } else {
-          escaped = ch == "\\"
+  function tokenString(openQuote, stream, state) {
+    var singleLine = openQuote.length == 1
+    var ch, escaped = false
+    while (ch = stream.peek()) {
+      if (escaped) {
+        stream.next()
+        if (ch == "(") {
+          state.tokenize.push(tokenUntilClosingParen())
+          return "string"
         }
+        escaped = false
+      } else if (stream.match(openQuote)) {
+        state.tokenize.pop()
+        return "string"
+      } else {
+        stream.next()
+        escaped = ch == "\\"
       }
-      state.tokenize.pop()
-      return "string"
     }
+    if (singleLine) {
+      state.tokenize.pop()
+    }
+    return "string"
   }
 
   function tokenComment(stream, state) {
-    stream.match(/^(?:[^*]|\*(?!\/))*/)
-    if (stream.match("*/")) state.tokenize.pop()
+    var ch
+    while (true) {
+      stream.match(/^[^/*]+/, true)
+      ch = stream.next()
+      if (!ch) break
+      if (ch === "/" && stream.eat("*")) {
+        state.tokenize.push(tokenComment)
+      } else if (ch === "*" && stream.eat("/")) {
+        state.tokenize.pop()
+      }
+    }
     return "comment"
   }
 

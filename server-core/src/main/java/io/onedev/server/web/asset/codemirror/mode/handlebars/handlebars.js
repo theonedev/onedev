@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -13,9 +13,13 @@
 
   CodeMirror.defineSimpleMode("handlebars-tags", {
     start: [
+      { regex: /\{\{\{/, push: "handlebars_raw", token: "tag" },
       { regex: /\{\{!--/, push: "dash_comment", token: "comment" },
       { regex: /\{\{!/,   push: "comment", token: "comment" },
       { regex: /\{\{/,    push: "handlebars", token: "tag" }
+    ],
+    handlebars_raw: [
+      { regex: /\}\}\}/, pop: true, token: "tag" },
     ],
     handlebars: [
       { regex: /\}\}/, pop: true, token: "tag" },
@@ -46,7 +50,11 @@
     comment: [
       { regex: /\}\}/, pop: true, token: "comment" },
       { regex: /./, token: "comment" }
-    ]
+    ],
+    meta: {
+      blockCommentStart: "{{--",
+      blockCommentEnd: "--}}"
+    }
   });
 
   CodeMirror.defineMode("handlebars", function(config, parserConfig) {
@@ -54,7 +62,7 @@
     if (!parserConfig || !parserConfig.base) return handlebars;
     return CodeMirror.multiplexingMode(
       CodeMirror.getMode(config, parserConfig.base),
-      {open: "{{", close: "}}", mode: handlebars, parseDelimiters: true}
+      {open: "{{", close: /\}\}\}?/, mode: handlebars, parseDelimiters: true}
     );
   });
 

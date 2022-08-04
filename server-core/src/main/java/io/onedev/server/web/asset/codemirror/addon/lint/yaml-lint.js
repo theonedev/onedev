@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function(mod) {
   if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -17,10 +17,23 @@
 
 CodeMirror.registerHelper("lint", "yaml", function(text) {
   var found = [];
-  try { jsyaml.load(text); }
+  if (!window.jsyaml) {
+    if (window.console) {
+      window.console.error("Error: window.jsyaml not defined, CodeMirror YAML linting cannot run.");
+    }
+    return found;
+  }
+  try { jsyaml.loadAll(text); }
   catch(e) {
-      var loc = e.mark;
-      found.push({ from: CodeMirror.Pos(loc.line, loc.column), to: CodeMirror.Pos(loc.line, loc.column), message: e.message });
+      var loc = e.mark,
+          // js-yaml YAMLException doesn't always provide an accurate lineno
+          // e.g., when there are multiple yaml docs
+          // ---
+          // ---
+          // foo:bar
+          from = loc ? CodeMirror.Pos(loc.line, loc.column) : CodeMirror.Pos(0, 0),
+          to = from;
+      found.push({ from: from, to: to, message: e.message });
   }
   return found;
 });
