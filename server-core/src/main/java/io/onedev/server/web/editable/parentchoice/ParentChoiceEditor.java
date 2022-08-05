@@ -13,6 +13,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.permission.CreateChildren;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -33,9 +34,13 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
 
 		Map<String, String> projectPaths = new LinkedHashMap<>();
 		Project currentProject = Project.get();
-		for (Project project: OneDev.getInstance(ProjectManager.class).getPermittedProjects(new CreateChildren())) {
-			if (currentProject == null || !currentProject.isSelfOrAncestorOf(project))
-				projectPaths.put(project.getPath(), project.getPath());
+		ProjectCollection projects = OneDev.getInstance(ProjectManager.class)
+				.getPermittedProjects(new CreateChildren());
+		for (Long projectId: projects.getIds()) {
+			if (currentProject == null || !projects.getCache().isSelfOrAncestorOf(currentProject.getId(), projectId)) {
+				String projectPath = projects.getCache().getPath(projectId);
+				projectPaths.put(projectPath, projectPath);
+			}
 		}
 		String selection = getModelObject();
 		

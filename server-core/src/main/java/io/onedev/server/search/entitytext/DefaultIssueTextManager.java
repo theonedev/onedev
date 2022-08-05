@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -134,13 +133,11 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 			projectQueryBuilder.setMinimumNumberShouldMatch(1);
 			queryBuilder.add(projectQueryBuilder.build(), Occur.MUST);
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject());
-			if (!projects.isEmpty()) {
-				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(Collectors.toList());
+			Collection<Long> projectIds = projectManager.getPermittedProjects(new AccessProject()).getIds();
+			if (!projectIds.isEmpty()) 
 				queryBuilder.add(buildQuery(projectIds), Occur.MUST);
-			} else {
+			else 
 				return null;
-			}
 		}
 		
 		BooleanQuery.Builder contentQueryBuilder = new BooleanQuery.Builder();
@@ -172,7 +169,7 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 	}
 	
 	private Query buildQuery(Collection<Long> projectIds) {
-		Collection<Long> allIds = projectManager.getProjectIds();
+		Collection<Long> allIds = projectManager.getIds();
 		if (SecurityUtils.isAdministrator()) {
 			return Criteria.forManyValues(FIELD_PROJECT_ID, projectIds, allIds);
 		} else {

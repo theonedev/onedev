@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.project;
 
-import java.util.Collection;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
@@ -9,6 +7,7 @@ import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -18,9 +17,9 @@ import io.onedev.server.web.component.svg.SpriteImage;
 @SuppressWarnings("serial")
 public abstract class ProjectPicker extends DropdownLink {
 
-	private final IModel<Collection<Project>> projectsModel; 
+	private final IModel<ProjectCollection> projectsModel; 
 	
-	public ProjectPicker(String id, IModel<Collection<Project>> projectsModel) {
+	public ProjectPicker(String id, IModel<ProjectCollection> projectsModel) {
 		super(id);
 	
 		this.projectsModel = projectsModel;

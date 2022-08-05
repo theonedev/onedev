@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.project.selector;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -30,6 +29,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.match.MatchScoreProvider;
 import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -41,13 +41,13 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 @SuppressWarnings("serial")
 public abstract class ProjectSelector extends Panel {
 
-	private final IModel<Collection<Project>> projectsModel;
+	private final IModel<ProjectCollection> projectsModel;
 	
-	private ListView<Project> projectsView;
+	private ListView<Long> projectsView;
 	
 	private String searchInput;
 	
-	public ProjectSelector(String id, IModel<Collection<Project>> projectsModel) {
+	public ProjectSelector(String id, IModel<ProjectCollection> projectsModel) {
 		super(id);
 		
 		this.projectsModel = projectsModel;
@@ -114,33 +114,35 @@ public abstract class ProjectSelector extends Panel {
 			
 		});
 		
-		projectsContainer.add(projectsView = new ListView<Project>("projects", 
-				new LoadableDetachableModel<List<Project>>() {
+		projectsContainer.add(projectsView = new ListView<Long>("projects", 
+				new LoadableDetachableModel<List<Long>>() {
 
 			@Override
-			protected List<Project> load() {
-				MatchScoreProvider<Project> matchScoreProvider = new MatchScoreProvider<Project>() {
+			protected List<Long> load() {
+				MatchScoreProvider<Long> matchScoreProvider = new MatchScoreProvider<Long>() {
 
 					@Override
-					public double getMatchScore(Project object) {
-						return MatchScoreUtils.getMatchScore(object.getPath(), searchInput);
+					public double getMatchScore(Long object) {
+						return MatchScoreUtils.getMatchScore(
+								projectsModel.getObject().getCache().getPath(object), searchInput);
 					}
 					
 				};
 				
-				return MatchScoreUtils.filterAndSort(projectsModel.getObject(), matchScoreProvider);
+				return MatchScoreUtils.filterAndSort(projectsModel.getObject().getIds(), matchScoreProvider);
 			}
 			
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<Project> item) {
-				Project project = item.getModelObject();
+			protected void populateItem(ListItem<Long> item) {
+				Long projectId = item.getModelObject();
 				AjaxLink<Void> link = new PreventDefaultAjaxLink<Void>("link") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						onSelect(target, item.getModelObject());
+						Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+						onSelect(target, project);
 					}
 					
 					@Override
@@ -152,15 +154,15 @@ public abstract class ProjectSelector extends Panel {
 					}
 					
 				};
-				if (project.equals(getCurrent())) 
+				if (projectId.equals(Project.idOf(getCurrent()))) 
 					link.add(AttributeAppender.append("class", " current"));
-				link.add(new ProjectAvatar("avatar", project.getId()));
-				link.add(new Label("path", project.getPath()));
+				link.add(new ProjectAvatar("avatar", projectId));
+				link.add(new Label("path", projectsModel.getObject().getCache().getPath(projectId)));
 				item.add(link);
 				
 				if (item.getIndex() == 0)
 					item.add(AttributeAppender.append("class", "active"));
-				item.add(AttributeAppender.append("data-id", project.getId()));
+				item.add(AttributeAppender.append("data-id", projectId));
 			}
 			
 		});

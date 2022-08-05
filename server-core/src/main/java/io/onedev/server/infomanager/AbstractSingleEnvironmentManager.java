@@ -18,7 +18,8 @@ public abstract class AbstractSingleEnvironmentManager extends AbstractEnvironme
 
 	@Listen
 	public synchronized void on(SystemStopping event) {
-		env.close();
+		if (env != null)
+			env.close();
 	}
 	
 	protected abstract File getEnvDir();

@@ -47,6 +47,7 @@ import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.match.PatternApplied;
 import io.onedev.server.util.match.WildcardUtils;
@@ -140,22 +141,22 @@ public class SuggestionUtils {
 	
 	public static List<InputSuggestion> suggestProjectPaths(String matchWith) {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		List<String> projectPaths = projectManager.getPermittedProjects(new AccessProject())
-				.stream()
-				.map(it->it.getPath())
-				.sorted()
-				.collect(Collectors.toList());
+		ProjectCollection projects = projectManager.getPermittedProjects(new AccessProject());
+		List<String> projectPaths = new ArrayList<>();
+		for (Long projectId: projects.getIds()) 
+			projectPaths.add(projects.getCache().getPath(projectId));
+		Collections.sort(projectPaths);
 		return suggest(projectPaths, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestProjectNames(String matchWith) {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		List<String> projectNames = projectManager.getPermittedProjects(new AccessProject())
-				.stream()
-				.map(it->it.getName())
-				.sorted()
-				.collect(Collectors.toList());
-		return suggest(projectNames, matchWith);
+		ProjectCollection projects = projectManager.getPermittedProjects(new AccessProject());
+		List<String> projectPaths = new ArrayList<>();
+		for (Long projectId: projects.getIds()) 
+			projectPaths.add(projects.getCache().get(projectId).getName());
+		Collections.sort(projectPaths);
+		return suggest(projectPaths, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestAgents(String matchWith) {
@@ -364,12 +365,14 @@ public class SuggestionUtils {
 				}
 			} else {
 				List<InputSuggestion> suggestions = new ArrayList<>();
-				for (Project each: projectManager.getPermittedProjects(new AccessProject())) {
-					LinearRange match = LinearRange.match(each.getPath() + scopeSeparator, matchWith);
+				ProjectCollection projects = projectManager.getPermittedProjects(new AccessProject());
+				for (Long projectId: projects.getIds()) {
+					String projectPath = projects.getCache().getPath(projectId);
+					LinearRange match = LinearRange.match(projectPath + scopeSeparator, matchWith);
 					if (match != null) {
 						suggestions.add(new InputSuggestion(
-								each.getPath() + scopeSeparator, 
-								each.getPath().length() + scopeSeparator.length(), 
+								projectPath + scopeSeparator, 
+								projectPath.length() + scopeSeparator.length(), 
 								"select project first", 
 								match));
 						if (suggestions.size() >= InputAssistBehavior.MAX_SUGGESTIONS)

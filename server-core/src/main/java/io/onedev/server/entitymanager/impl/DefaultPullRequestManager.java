@@ -128,6 +128,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.concurrent.BatchWorkManager;
@@ -887,13 +888,11 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		if (targetProject != null) {
 			predicates.add(builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode()); 
-			if (!projects.isEmpty()) {
-				Collection<Long> allIds = projectManager.getProjectIds();
-				Collection<Long> projectIds = 
-						projects.stream().map(it->it.getId()).collect(Collectors.toList());
+			ProjectCollection projects = projectManager.getPermittedProjects(new ReadCode());
+			if (!projects.getIds().isEmpty()) {
 				Path<Long> projectIdPath = from.get(PullRequest.PROP_TARGET_PROJECT).get(Project.PROP_ID);
-				predicates.add(Criteria.forManyValues(builder, projectIdPath, projectIds, allIds));
+				predicates.add(Criteria.forManyValues(builder, projectIdPath, projects.getIds(), 
+						projects.getCache().getIds()));
 			} else {
 				predicates.add(builder.disjunction());
 			}

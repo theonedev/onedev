@@ -78,6 +78,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectBuildStats;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -345,10 +346,10 @@ public class ProjectListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+								return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
 				
 									@Override
-									protected Collection<Project> load() {
+									protected ProjectCollection load() {
 										return getTargetProjects();
 									}
 									
@@ -604,10 +605,10 @@ public class ProjectListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+								return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
 				
 									@Override
-									protected Collection<Project> load() {
+									protected ProjectCollection load() {
 										return getTargetProjects();
 									}
 									
@@ -858,17 +859,9 @@ public class ProjectListPanel extends Panel {
 				return menuItems;
 			}
 			
-			private Collection<Project> getTargetProjects() {
-				List<Project> projects = new ArrayList<>(getProjectManager().getPermittedProjects(new CreateChildren()));
-				
-				Collections.sort(projects, new Comparator<Project>() {
-
-					@Override
-					public int compare(Project o1, Project o2) {
-						return o1.getPath().compareTo(o2.getPath());
-					}
-					
-				});
+			private ProjectCollection getTargetProjects() {
+				ProjectCollection projects = getProjectManager().getPermittedProjects(new CreateChildren());
+				projects.sortByPath();
 				return projects;
 			}
 

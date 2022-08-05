@@ -82,6 +82,7 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
@@ -431,25 +432,19 @@ public abstract class IssueListPanel extends Panel {
 
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
-					return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+					return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
 	
 						@Override
-						protected Collection<Project> load() {
-							List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
-									.getPermittedProjects(new AccessProject()));
+						protected ProjectCollection load() {
+							ProjectCollection collection = OneDev.getInstance(ProjectManager.class)
+									.getPermittedProjects(new AccessProject());
 							
-							Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagement();
-							CollectionUtils.filter(projects, issueManagementEnabledPredicate);							
-							
-							Collections.sort(projects, new Comparator<Project>() {
-	
-								@Override
-								public int compare(Project o1, Project o2) {
-									return o1.getPath().compareTo(o2.getPath());
-								}
-								
-							});
-							return projects;
+							Predicate<Long> issueManagementPredicate = 
+									item -> collection.getCache().get(item).isIssueManagement();
+									
+							CollectionUtils.filter(collection.getIds(), issueManagementPredicate);							
+							collection.sortByPath();
+							return collection;
 						}
 						
 					}) {
@@ -658,10 +653,10 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+								return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
 				
 									@Override
-									protected Collection<Project> load() {
+									protected ProjectCollection load() {
 										return getTargetProjects();
 									}
 									
@@ -881,10 +876,10 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+								return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
 				
 									@Override
-									protected Collection<Project> load() {
+									protected ProjectCollection load() {
 										return getTargetProjects();
 									}
 									
@@ -1016,22 +1011,14 @@ public abstract class IssueListPanel extends Panel {
 				return menuItems;
 			}
 			
-			private Collection<Project> getTargetProjects() {
-				List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
-						.getPermittedProjects(new AccessProject()));
+			private ProjectCollection getTargetProjects() {
+				ProjectCollection projects = OneDev.getInstance(ProjectManager.class).getPermittedProjects(new AccessProject());
 				
-				Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagement();
-				CollectionUtils.filter(projects, issueManagementEnabledPredicate);							
-				projects.remove(getProject());
-				
-				Collections.sort(projects, new Comparator<Project>() {
-
-					@Override
-					public int compare(Project o1, Project o2) {
-						return o1.getPath().compareTo(o2.getPath());
-					}
-					
-				});
+				Predicate<Long> issueManagementPredicate = 
+						item -> projects.getCache().get(item).isIssueManagement();
+				CollectionUtils.filter(projects.getIds(), issueManagementPredicate);							
+				projects.getIds().remove(getProject().getId());
+				projects.sortByPath();
 				return projects;
 			}
 
