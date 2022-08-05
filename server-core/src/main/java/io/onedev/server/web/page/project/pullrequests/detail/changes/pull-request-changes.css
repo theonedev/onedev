@@ -1,3 +1,6 @@
+.PullRequestChangesPage>body>.main {
+	min-width: 768px;
+}
 .commits-selector ul a {
 	text-decoration: none;
 	display: block;

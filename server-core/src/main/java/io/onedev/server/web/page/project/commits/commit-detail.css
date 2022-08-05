@@ -1,3 +1,7 @@
+.CommitDetailPage>body>.main {
+	min-width: 768px;
+}
+
 .commit-detail .list-group-item {
 	padding: 1.25rem 1.5rem;
 }

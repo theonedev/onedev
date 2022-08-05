@@ -64,6 +64,7 @@ import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.BuildSpecParseException;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
@@ -1074,6 +1075,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								}
 							}
 						}
+					} catch (BuildSpecParseException e) {
+						logger.warn("Malformed build spec (project: {}, branch: {})", 
+								project.getPath(), defaultBranch);
 					} finally {
 						JobSecretAuthorizationContext.pop();
 					}

@@ -57,7 +57,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.web.asset.revisioncompare.RevisionCompareCssResourceReference;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -553,6 +552,8 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(
+				new io.onedev.server.web.asset.revisioncompare.RevisionCompareCssResourceReference()));
 		response.render(CssHeaderItem.forReference(new RevisionCompareCssResourceReference()));
 	}
 
