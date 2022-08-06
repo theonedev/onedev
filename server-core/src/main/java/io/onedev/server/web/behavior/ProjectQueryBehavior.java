@@ -27,6 +27,7 @@ import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.search.entity.project.ProjectQueryParser;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -96,10 +97,10 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {
 										if (!matchWith.contains("*")) {
 											ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-											List<String> serviceDeskNames = projectManager.getPermittedProjects(new AccessProject())
-													.stream()
-													.filter(it->it.getServiceDeskName() != null)
-													.map(it->it.getServiceDeskName())
+											ProjectCollection projects = projectManager.getPermittedProjects(new AccessProject());
+											List<String> serviceDeskNames = projects.getIds().stream()
+													.map(it->projects.getCache().get(it).getServiceDeskName())
+													.filter(it-> it != null)
 													.sorted()
 													.collect(Collectors.toList());
 											return SuggestionUtils.suggest(serviceDeskNames, matchWith);

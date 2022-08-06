@@ -2,8 +2,6 @@ package io.onedev.server.web.component.pullrequest.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -63,6 +61,7 @@ import io.onedev.server.search.entitytext.PullRequestTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -630,20 +629,13 @@ public abstract class PullRequestListPanel extends Panel {
 	
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
-					return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+					return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
 	
 						@Override
-						protected Collection<Project> load() {
-							List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
-									.getPermittedProjects(new ReadCode()));
-							Collections.sort(projects, new Comparator<Project>() {
-	
-								@Override
-								public int compare(Project o1, Project o2) {
-									return o1.getPath().compareTo(o2.getPath());
-								}
-								
-							});
+						protected ProjectCollection load() {
+							ProjectCollection projects = OneDev.getInstance(ProjectManager.class)
+									.getPermittedProjects(new ReadCode());
+							projects.sortByPath();
 							return projects;
 						}
 						

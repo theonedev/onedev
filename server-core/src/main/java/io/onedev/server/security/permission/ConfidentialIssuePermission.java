@@ -22,4 +22,8 @@ public class ConfidentialIssuePermission implements Permission {
 		}
 	}
 
+	public Issue getIssue() {
+		return issue;
+	}
+
 }

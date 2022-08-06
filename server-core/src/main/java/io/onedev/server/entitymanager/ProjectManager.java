@@ -14,6 +14,7 @@ import org.eclipse.jgit.lib.Repository;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectFacade;
 
@@ -61,8 +62,6 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Repository getRepository(Project project);
 	
-	Collection<Project> getPermittedProjects(Permission permission);
-	
 	List<Project> query(EntityQuery<Project> query, int firstResult, int maxResults);
 	
 	int count(Criteria<Project> criteria);
@@ -75,8 +74,10 @@ public interface ProjectManager extends EntityManager<Project> {
 
 	void delete(Collection<Project> projects);
 	
-	Collection<Long> getProjectIds();
+	Collection<Long> getIds();
 	
 	Collection<Long> getSubtreeIds(Long projectId);
+	
+	ProjectCollection getPermittedProjects(Permission permission);
 	
 }

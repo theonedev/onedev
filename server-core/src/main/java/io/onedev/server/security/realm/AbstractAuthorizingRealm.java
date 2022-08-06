@@ -18,20 +18,17 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Group;
-import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
-import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
 
 public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
@@ -46,6 +43,8 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
     
     protected final SessionManager sessionManager;
     
+    private final IssueAuthorizationManager issueAuthorizationManager;
+    
     protected final SettingManager settingManager;
     
     @SuppressWarnings("serial")
@@ -55,58 +54,70 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 	@Inject
     public AbstractAuthorizingRealm(UserManager userManager, GroupManager groupManager, 
     		ProjectManager projectManager, SessionManager sessionManager, 
-    		SettingManager settingManager, EmailAddressManager emailAddressManager) {
+    		SettingManager settingManager, EmailAddressManager emailAddressManager, 
+    		IssueAuthorizationManager issueAuthorizationManager) {
     	this.userManager = userManager;
     	this.groupManager = groupManager;
     	this.projectManager = projectManager;
     	this.sessionManager = sessionManager;
     	this.settingManager = settingManager;
     	this.emailAddressManager = emailAddressManager;
+    	this.issueAuthorizationManager = issueAuthorizationManager;
     }
 
-	private Collection<Permission> getGroupPermissions(Group group, User user) {
-		Collection<Permission> permissions = new ArrayList<>();
-		if (group.isAdministrator()) 
-			permissions.add(new SystemAdministration());
-		else if (group.isCreateRootProjects()) 
-			permissions.add(new CreateRootProjects());
-		for (GroupAuthorization authorization: group.getAuthorizations()) 
-			permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-		return permissions;
-	}
-	
 	private AuthorizationInfo newAuthorizationInfo(Long userId) {
 		Collection<Permission> permissions = sessionManager.call(new Callable<Collection<Permission>>() {
 
 			@Override
 			public Collection<Permission> call() throws Exception {
 				Collection<Permission> permissions = new ArrayList<>();
+				permissions.add(new Permission() {
 
-		        if (userId != 0L) { 
-		            User user = userManager.load(userId);
-		        	if (user.isRoot() || user.isSystem()) 
-		        		permissions.add(new SystemAdministration());
-		        	permissions.add(new UserAdministration(user));
-		           	for (Group group: user.getGroups())
-		           		permissions.addAll(getGroupPermissions(group, user));
-		           	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-	           		if (defaultLoginGroup != null) 
-	           			permissions.addAll(getGroupPermissions(defaultLoginGroup, user));
-		           	
-		        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
-    					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-		        	for (IssueAuthorization authorization: user.getIssueAuthorizations()) {
-    					permissions.add(new ProjectPermission(
-    							authorization.getIssue().getProject(), 
-    							new ConfidentialIssuePermission(authorization.getIssue())));
-		        	}
-		        } 
-		        if (userId != 0L || settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
-			        for (Project project: projectManager.query()) {
-			        	if (project.getDefaultRole() != null)
-			        		permissions.add(new ProjectPermission(project, project.getDefaultRole()));
-			        }
-		        }
+					@Override
+					public boolean implies(Permission p) {
+				        if (userId != 0L) { 
+				            User user = userManager.load(userId);
+				        	if (user.isRoot() || user.isSystem()) 
+				        		return true;
+				        	if (new UserAdministration(user).implies(p))
+				        		return true;
+				           	for (Group group: user.getGroups()) {
+				           		if (group.implies(p))
+				           			return true;
+				           	} 
+				           	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+			           		if (defaultLoginGroup != null && defaultLoginGroup.implies(p)) 
+			           			return true;
+				           	
+			           		if (p instanceof ProjectPermission) {
+					        	ProjectPermission projectPermission = (ProjectPermission) p;
+					        	if (projectPermission.getPrivilege() instanceof ConfidentialIssuePermission) {
+					        		ConfidentialIssuePermission confidentialIssuePermission = 
+					        				(ConfidentialIssuePermission) projectPermission.getPrivilege();
+					        		if (issueAuthorizationManager.find(confidentialIssuePermission.getIssue(), user) != null)
+					        			return true;
+					        	}
+					        	for (UserAuthorization authorization: user.getProjectAuthorizations()) { 
+			    					if (new ProjectPermission(authorization.getProject(), authorization.getRole()).implies(p))
+			    						return true;
+					        	}
+			           		}
+				        } 
+				        if (p instanceof ProjectPermission 
+				        		&& (userId != 0L || settingManager.getSecuritySetting().isEnableAnonymousAccess())) {
+				        	ProjectPermission projectPermission = (ProjectPermission) p;
+				        	Project project = projectPermission.getProject();
+				        	Permission privilege = projectPermission.getPrivilege();
+				        	do {
+				        		if (project.getDefaultRole() != null && project.getDefaultRole().implies(privilege))
+				        			return true;
+				        		project = project.getParent();
+				        	} while (project != null);
+				        }
+						return false;
+					}
+					
+				});
 				return permissions;
 			}
 			

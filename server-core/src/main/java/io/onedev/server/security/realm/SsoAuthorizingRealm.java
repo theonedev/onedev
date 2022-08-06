@@ -15,6 +15,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -39,8 +40,10 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
     public SsoAuthorizingRealm(UserManager userManager, MembershipManager membershipManager, 
     		GroupManager groupManager, ProjectManager projectManager, SessionManager sessionManager, 
     		TransactionManager transactionManager, SshKeyManager sshKeyManager, 
-    		SettingManager settingManager, EmailAddressManager emailAddressManager) {
-		super(userManager, groupManager, projectManager, sessionManager, settingManager, emailAddressManager);
+    		SettingManager settingManager, EmailAddressManager emailAddressManager, 
+    		IssueAuthorizationManager issueAuthorizationManager) {
+		super(userManager, groupManager, projectManager, sessionManager, settingManager, 
+				emailAddressManager, issueAuthorizationManager);
 		setCredentialsMatcher(new AllowAllCredentialsMatcher());
 		
     	this.membershipManager = membershipManager;

@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.revisionpicker;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -14,7 +14,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.web.component.project.ProjectPicker;
 
 @SuppressWarnings("serial")
@@ -63,18 +64,22 @@ public abstract class AffinalRevisionPicker extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ProjectPicker("projectPicker", new LoadableDetachableModel<Collection<Project>>() {
+		add(new ProjectPicker("projectPicker", new LoadableDetachableModel<ProjectCollection>() {
 
 			@Override
-			protected Collection<Project> load() {
+			protected ProjectCollection load() {
 				Project project = OneDev.getInstance(Dao.class).load(Project.class, projectId);
 				List<Project> affinals = project.getForkRoot().getForkChildren();
 				affinals.add(0, project.getForkRoot());
+				
+				ProjectCollection projects = OneDev.getInstance(ProjectManager.class)
+						.getPermittedProjects(new ReadCode());
 				for (Iterator<Project> it = affinals.iterator(); it.hasNext();) {
-					if (!SecurityUtils.canReadCode(it.next()))
+					if (!projects.getIds().contains(it.next().getId()))
 						it.remove();
 				}
-				return affinals;
+				return new ProjectCollection(projects.getCache(), 
+						affinals.stream().map(it->it.getId()).collect(Collectors.toList()));
 			}
 			
 		}) {

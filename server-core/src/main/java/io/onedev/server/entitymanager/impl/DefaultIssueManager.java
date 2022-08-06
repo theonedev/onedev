@@ -12,7 +12,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -392,9 +391,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			}
 			predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
-			if (!projects.isEmpty()) { 
-				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(Collectors.toList());
+			Collection<Long> projectIds = projectManager.getPermittedProjects(new AccessProject()).getIds(); 
+			if (!projectIds.isEmpty()) { 
 				predicates.add(builder.or(
 						getPredicate(builder, root, projectIds), 
 						getAuthorizationPredicate(query, builder, root, projectIds)));
@@ -426,7 +424,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			Predicate userPredicate = builder.equal(authorizationRoot.get(IssueAuthorization.PROP_USER), user);
 			Path<Long> projectIdPath = root.get(Issue.PROP_PROJECT).get(Project.PROP_ID);
 			return builder.and(
-					Criteria.forManyValues(builder, projectIdPath, projectIds, projectManager.getProjectIds()), 
+					Criteria.forManyValues(builder, projectIdPath, projectIds, projectManager.getIds()), 
 					builder.exists(authorizationQuery.where(issuePredicate, userPredicate))); 
 		} else {
 			return builder.disjunction();
@@ -451,7 +449,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	}
 	
 	private Predicate getPredicate(CriteriaBuilder builder, Root<Issue> root, Collection<Long> projectIds) {
-		Collection<Long> allIds = projectManager.getProjectIds();
+		Collection<Long> allIds = projectManager.getIds();
 		Path<Project> projectPath = root.get(Issue.PROP_PROJECT);
 		Path<Long> projectIdPath = projectPath.get(Project.PROP_ID);
 		if (SecurityUtils.isAdministrator()) {
@@ -1010,7 +1008,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private Predicate getSubtreePredicate(CriteriaBuilder builder, Path<Project> projectPath, Project project) {
 		Collection<Long> subtreeIds = projectManager.getSubtreeIds(project.getId());
-		Collection<Long> allIds = projectManager.getProjectIds();
+		Collection<Long> allIds = projectManager.getIds();
 		return Criteria.forManyValues(builder, projectPath.get(Project.PROP_ID), subtreeIds, allIds);
 	}
 	

@@ -701,7 +701,8 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ProjectFacade getFacade() {
-		return new ProjectFacade(getId(), getName(), getServiceDeskName(), Project.idOf(getParent()));
+		return new ProjectFacade(getId(), getName(), getServiceDeskName(), isIssueManagement(), 
+				Role.idOf(getDefaultRole()), Project.idOf(getParent()));
 	}
 	
 	/**

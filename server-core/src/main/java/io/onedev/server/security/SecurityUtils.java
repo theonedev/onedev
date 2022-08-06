@@ -114,7 +114,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return true;
 		} else {
 			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-			return !projectManager.getPermittedProjects(new CreateChildren()).isEmpty();
+			return !projectManager.getPermittedProjects(new CreateChildren()).getIds().isEmpty();
 		}
 	}
 	

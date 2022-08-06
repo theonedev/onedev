@@ -33,6 +33,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.JobSecretAuthorizationContext;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -84,9 +85,10 @@ public class Import implements Serializable, Validatable {
 	private static List<String> getProjectChoices() {
 		List<String> choices = new ArrayList<>();
 		Project project = ((ProjectPage)WicketUtils.getPage()).getProject();
-		for (Project each: OneDev.getInstance(ProjectManager.class).getPermittedProjects(new AccessProject())) {
-			if (!each.equals(project))
-				choices.add(each.getPath());
+		ProjectCollection projects = OneDev.getInstance(ProjectManager.class).getPermittedProjects(new AccessProject());
+		for (Long projectId: projects.getIds()) {
+			if (!projectId.equals(Project.idOf(project)))
+				choices.add(projects.getCache().getPath(projectId));
 		}
 		
 		Collections.sort(choices);

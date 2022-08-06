@@ -1,15 +1,11 @@
 package io.onedev.server.entitymanager.impl;
 
-import static java.util.stream.Collectors.toList;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -81,11 +76,14 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
@@ -103,10 +101,10 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.util.ProjectCache;
+import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
@@ -151,7 +149,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private final Map<Long, Date> updateDates = new ConcurrentHashMap<>();
 	
-	private final Map<Long, ProjectFacade> cache = new HashMap<>();
+	private final ProjectCache cache = new ProjectCache(new HashMap<>());
 	
 	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
 	
@@ -294,7 +292,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				public void run() {
 					cacheLock.writeLock().lock();
 					try {
-						cache.put(facade.getId(), facade);
+						cache.cache(facade);
 					} finally {
 						cacheLock.writeLock().unlock();
 					}
@@ -370,7 +368,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     public Project findByPath(String path) {
 		cacheLock.readLock().lock();
 		try {
-			Long projectId = findProjectId(path);
+			Long projectId = cache.findId(path);
 			if (projectId != null)
 				return load(projectId);
 			else
@@ -380,24 +378,13 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
     }
     
-    @Nullable
-    private Long findProjectId(String path) {
-    	Long projectId = null;
-    	for (String name: Splitter.on("/").omitEmptyStrings().trimResults().split(path)) {
-    		projectId = findProjectId(projectId, name);
-    		if (projectId == null)
-    			break;
-    	}
-    	return projectId;
-    }
-    
     @Sessional
     @Override
     public Project findByServiceDeskName(String serviceDeskName) {
 		cacheLock.readLock().lock();
 		try {
 			Long projectId = null;
-			for (ProjectFacade facade: cache.values()) {
+			for (ProjectFacade facade: cache.getAll()) {
 				if (serviceDeskName.equals(facade.getServiceDeskName())) {
 					projectId = facade.getId();
 					break;
@@ -454,8 +441,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.readLock().lock();
 		try {
 			Long projectId = null;
-			for (ProjectFacade facade: cache.values()) {
-				if (facade.getName().equalsIgnoreCase(name) && Objects.equals(Project.idOf(parent), facade.getParentId())) {
+			for (ProjectFacade facade: cache.getAll()) {
+				if (facade.getName().equalsIgnoreCase(name) 
+						&& Objects.equals(Project.idOf(parent), facade.getParentId())) {
 					projectId = facade.getId();
 					break;
 				}
@@ -673,7 +661,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.writeLock().lock();
 		try {
 			for (Project project: query()) {
-				cache.put(project.getId(), project.getFacade());
+				cache.cache(project.getFacade());
 				checkSanity(project);
 			}
 		} finally {
@@ -785,14 +773,73 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return count(true);
 	}
 	
-	@Sessional
-	@Override
-	public Collection<Project> getPermittedProjects(Permission permission) {
-		return query().stream()
-				.filter(it->SecurityUtils.getSubject().isPermitted(new ProjectPermission(it, permission)))
-				.collect(toList());
+	private void addSubTreeIds(Collection<Long> projectIds, Project project) {
+		projectIds.add(project.getId());
+		for (Project descendant: project.getDescendants())
+			projectIds.add(descendant.getId());
 	}
-
+	
+	@Override
+	public ProjectCollection getPermittedProjects(Permission permission) {
+		ProjectCache cacheClone;
+		cacheLock.readLock().lock();
+		try {
+			cacheClone = cache.clone();
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+		
+		Collection<Long> permittedProjectIds;
+		User user = SecurityUtils.getUser();
+        if (user != null) { 
+        	if (user.isRoot() || user.isSystem()) { 
+       			return new ProjectCollection(cacheClone, new ArrayList<>(cacheClone.getIds()));
+        	} else {
+        		permittedProjectIds = new HashSet<>();
+               	for (Group group: user.getGroups()) {
+               		if (group.isAdministrator())
+               			return new ProjectCollection(cacheClone, new ArrayList<>(cacheClone.getIds()));
+               		for (GroupAuthorization authorization: group.getAuthorizations()) {
+               			if (authorization.getRole().implies(permission)) 
+               				addSubTreeIds(permittedProjectIds, authorization.getProject());
+               		}
+               	}
+               	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+           		if (defaultLoginGroup != null) {
+               		if (defaultLoginGroup.isAdministrator())
+               			return new ProjectCollection(cacheClone, new ArrayList<>(cacheClone.getIds()));
+               		for (GroupAuthorization authorization: defaultLoginGroup.getAuthorizations()) {
+               			if (authorization.getRole().implies(permission)) 
+               				addSubTreeIds(permittedProjectIds, authorization.getProject());
+               		}
+           		}
+           		
+	        	for (UserAuthorization authorization: user.getProjectAuthorizations()) { 
+           			if (authorization.getRole().implies(permission)) 
+           				addSubTreeIds(permittedProjectIds, authorization.getProject());
+	        	}
+	        	addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
+        	}
+        } else {
+    		permittedProjectIds = new HashSet<>();
+    		if (settingManager.getSecuritySetting().isEnableAnonymousAccess())
+    			addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
+        } 
+        permittedProjectIds.retainAll(cacheClone.getIds());
+        return new ProjectCollection(cacheClone, new ArrayList<>(permittedProjectIds));
+	}	
+	
+	private void addIdsPermittedByDefaultRole(ProjectCache cache, Collection<Long> projectIds, 
+			Permission permission) {
+		for (ProjectFacade project: cache.getAll()) {
+			if (project.getDefaultRoleId() != null) {
+				Role defaultRole = roleManager.load(project.getDefaultRoleId());
+				if (defaultRole.implies(permission)) 
+					projectIds.addAll(cache.getSubtreeIds(project.getId()));
+			}
+		}
+	}
+	
 	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Project> query = builder.createQuery(Project.class);
@@ -820,12 +867,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			From<Project, Project> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = getPermittedProjects(new AccessProject());
-			if (!projects.isEmpty()) {
-				Collection<Long> allIds = getProjectIds();
-				Collection<Long> projectIds = 
-						projects.stream().map(it->it.getId()).collect(Collectors.toList());
-				predicates.add(Criteria.forManyValues(builder, from.get(Project.PROP_ID), projectIds, allIds));
+			ProjectCollection collection = getPermittedProjects(new AccessProject());
+			if (!collection.getIds().isEmpty()) {
+				predicates.add(Criteria.forManyValues(builder, from.get(Project.PROP_ID), 
+						collection.getIds(), collection.getCache().getIds()));
 			} else {
 				predicates.add(builder.disjunction());
 			}
@@ -882,59 +927,27 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			logger.error("Error flushing project update dates", e);
 		}
 	}
-
+	
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
 		return SimpleScheduleBuilder.repeatMinutelyForever();
 	}
 	
-	private String getPath(Long id) {
-		ProjectFacade facade = cache.get(id);
-		if (facade != null) {
-			if (facade.getParentId() != null) {
-				String parentPath = getPath(facade.getParentId());
-				if (parentPath != null)
-					return parentPath + "/" + facade.getName();
-				else
-					return null;
-			} else {
-				return facade.getName();
-			}
-		} else {
-			return null;
-		}
-	}
-
-	private Collection<Long> getMatchingIds(String pathPattern) {
-		Collection<Long> ids = new HashSet<>();
-		for (Long id: cache.keySet()) {
-			String path = getPath(id);
-			if (path != null && WildcardUtils.matchPath(pathPattern, path))
-				ids.add(id);
-		}
-		return ids;
-	}
-
 	@Override
 	public Collection<Long> getSubtreeIds(Long projectId) {
 		cacheLock.readLock().lock();
 		try {
-			Collection<Long> treeIds = Sets.newHashSet(projectId);
-			for (ProjectFacade facade: cache.values()) {
-				if (projectId.equals(facade.getParentId()))
-					treeIds.addAll(getSubtreeIds(facade.getId()));
-			}
-			return treeIds;
+			return cache.getSubtreeIds(projectId);
 		} finally {
 			cacheLock.readLock().unlock();
 		}
 	}
 	
 	@Override
-	public Collection<Long> getProjectIds() {
+	public Collection<Long> getIds() {
 		cacheLock.readLock().lock();
 		try {
-			return new HashSet<>(cache.keySet());
+			return new HashSet<>(cache.getIds());
 		} finally {
 			cacheLock.readLock().unlock();
 		}
@@ -945,7 +958,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.readLock().lock();
 		try {
 			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
-					getMatchingIds(pathPattern), cache.keySet());		
+					cache.getMatchingIds(pathPattern), cache.getIds());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
@@ -978,33 +991,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			delete(independent);
 	}
     
-	@Nullable
-    private Long findProjectId(@Nullable Long parentId, String name) {
-		for (ProjectFacade facade: cache.values()) {
-			if (facade.getName().equalsIgnoreCase(name) && Objects.equals(parentId, facade.getParentId())) 
-				return facade.getId();
-		}
-		return null;
-    }
-
 	@Override
 	public List<ProjectFacade> getChildren(Long projectId) {
 		cacheLock.readLock().lock();
 		try {
-			List<ProjectFacade> children = new ArrayList<>();
-			for (ProjectFacade facade: cache.values()) {
-				if (projectId.equals(facade.getParentId()))
-					children.add(facade);
-			}
-			Collections.sort(children, new Comparator<ProjectFacade>() {
-
-				@Override
-				public int compare(ProjectFacade o1, ProjectFacade o2) {
-					return o1.getName().compareTo(o2.getName());
-				}
-				
-			});
-			return children;
+			return cache.getChildren(projectId);
 		} finally {
 			cacheLock.readLock().unlock();
 		}

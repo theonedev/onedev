@@ -9,10 +9,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
+import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.security.permission.CreateRootProjects;
+import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ShowCondition;
@@ -20,7 +23,7 @@ import io.onedev.server.web.editable.annotation.ShowCondition;
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class Group extends AbstractEntity {
+public class Group extends AbstractEntity implements Permission {
 
 	private static final long serialVersionUID = 1L;
 
@@ -129,6 +132,21 @@ public class Group extends AbstractEntity {
 	public int compareTo(AbstractEntity entity) {
 		Group group = (Group) entity;
 		return getName().compareTo(group.getName());
+	}
+
+	@Override
+	public boolean implies(Permission p) {
+		if (isAdministrator()) 
+			return true;
+		if (isCreateRootProjects() && new CreateRootProjects().implies(p))
+			return true;
+		if (p instanceof ProjectPermission) {
+			for (GroupAuthorization authorization: getAuthorizations()) { 
+				if (new ProjectPermission(authorization.getProject(), authorization.getRole()).implies(p))
+					return true;
+			}
+		}
+		return false;
 	}
 	
 }
