@@ -319,7 +319,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		AtomicBoolean namespaceExists = new AtomicBoolean(false);
 		Commandline kubectl = newKubeCtl();
 		kubectl.addArgs("get", "namespaces", "--field-selector", "metadata.name=" + namespace, 
-				"-o", "name", "--chunk-size=", "0");
+				"-o", "name", "--chunk-size=0");
 		kubectl.execute(new LineConsumer() {
 
 			@Override

@@ -21,7 +21,9 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable(order=150, name="Run Docker Container", description="Run specified docker container. To access files in "
-		+ "job workspace, either use environment variable <tt>JOB_WORKSPACE</tt>, or specify volume mounts")
+		+ "job workspace, either use environment variable <tt>JOB_WORKSPACE</tt>, or specify volume mounts. "
+		+ "<b class='text-warning'>NOTE:</b> If this step runs with a Kubernetes executor, the option "
+		+ "<code>mount container sock</code> of that executor must be enabled")
 public class RunContainerStep extends Step {
 
 	private static final long serialVersionUID = 1L;
