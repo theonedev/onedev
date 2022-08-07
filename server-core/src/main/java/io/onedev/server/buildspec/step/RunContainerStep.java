@@ -75,6 +75,7 @@ public class RunContainerStep extends Step {
 
 	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container")
 	@SafePath
+	@Interpolative(variableSuggester="suggestVariables")
 	@Nullable
 	public String getWorkingDir() {
 		return workingDir;
