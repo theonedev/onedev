@@ -31,6 +31,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.infomanager.CommitInfoManager;
@@ -69,12 +70,15 @@ public class ProjectResource {
 	
 	private final CommitInfoManager commitInfoManager;
 	
+	private final UrlManager urlManager;
+	
 	@Inject
 	public ProjectResource(ProjectManager projectManager, MilestoneManager milestoneManager, 
-			CommitInfoManager commitInfoManager) {
+			CommitInfoManager commitInfoManager, UrlManager urlManager) {
 		this.projectManager = projectManager;
 		this.milestoneManager = milestoneManager;
 		this.commitInfoManager = commitInfoManager;
+		this.urlManager = urlManager;
 	}
 
 	@Api(order=100)
@@ -85,6 +89,21 @@ public class ProjectResource {
     	if (!SecurityUtils.canAccess(project))
 			throw new UnauthorizedException();
     	return project;
+    }
+	
+	@Api(order=150)
+	@Path("/{projectId}/clone-url")
+    @GET
+    public CloneUrl getCloneURL(@PathParam("projectId") Long projectId) {
+    	Project project = projectManager.load(projectId);
+    	if (!SecurityUtils.canAccess(project))
+			throw new UnauthorizedException();
+
+    	CloneUrl cloneUrl = new CloneUrl();
+    	cloneUrl.setHttp(urlManager.cloneUrlFor(project, false));
+    	cloneUrl.setSsh(urlManager.cloneUrlFor(project, true));
+    	
+    	return cloneUrl;
     }
 	
 	@Api(order=200)
@@ -295,6 +314,32 @@ public class ProjectResource {
     	projectManager.delete(project);
     	return Response.ok().build();
     }
+	
+	public static class CloneUrl implements Serializable {
+		
+		private static final long serialVersionUID = 1L;
+
+		private String http;
+		
+		private String ssh;
+
+		public String getHttp() {
+			return http;
+		}
+
+		public void setHttp(String http) {
+			this.http = http;
+		}
+
+		public String getSsh() {
+			return ssh;
+		}
+
+		public void setSsh(String ssh) {
+			this.ssh = ssh;
+		}
+		
+	}
 	
 	public static class ProjectSetting implements Serializable {
 		
