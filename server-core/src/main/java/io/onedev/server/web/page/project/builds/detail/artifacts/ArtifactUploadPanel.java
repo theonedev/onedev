@@ -78,30 +78,35 @@ public abstract class ArtifactUploadPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				LockUtils.write(getBuild().getArtifactsLockKey(), new Callable<Void>() {
+				if (directory.contains("..")) {
+					error("'..' is not allowed in the directory");
+					target.add(feedback);
+				} else {
+					LockUtils.write(getBuild().getArtifactsLockKey(), new Callable<Void>() {
 
-					@Override
-					public Void call() throws Exception {
-						File artifactsDir = getBuild().getArtifactsDir();
-						for (FileUpload upload: uploads) {
-							String filePath = FilenameUtils.sanitizeFilename(upload.getFileName());
-							if (directory != null)
-								filePath = directory + "/" + filePath;
-							File file = new File(artifactsDir, filePath);
-							FileUtils.createDir(file.getParentFile());
-							try (	InputStream is = upload.getInputStream();
-									OutputStream os = new FileOutputStream(file)) {
-								IOUtils.copy(is, os);
-							} finally {
-								upload.release();
+						@Override
+						public Void call() throws Exception {
+							File artifactsDir = getBuild().getArtifactsDir();
+							for (FileUpload upload: uploads) {
+								String filePath = FilenameUtils.sanitizeFilename(upload.getFileName());
+								if (directory != null)
+									filePath = directory + "/" + filePath;
+								File file = new File(artifactsDir, filePath);
+								FileUtils.createDir(file.getParentFile());
+								try (	InputStream is = upload.getInputStream();
+										OutputStream os = new FileOutputStream(file)) {
+									IOUtils.copy(is, os);
+								} finally {
+									upload.release();
+								}
 							}
+							return null;
 						}
-						return null;
-					}
+						
+					});
 					
-				});
-				
-				onUploaded(target);
+					onUploaded(target);
+				}
 			}
 
 			@Override
