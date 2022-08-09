@@ -31,7 +31,7 @@ import io.onedev.server.search.code.query.TooGeneralQueryException;
 public class JUnitReportParserTest extends AppLoaderMocker {
 
 	@Test
-	public void test() {
+	public void testJUnit() {
 		try (InputStream is = Resources.getResource(JUnitReportParserTest.class, "test-result.xml").openStream()) {
 			Mockito.when(AppLoader.getInstance(CodeSearchManager.class)).thenReturn(new CodeSearchManager() {
 
@@ -72,6 +72,50 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 		} catch (IOException|DocumentException e) {
 			throw new RuntimeException(e);
 		}		
+	}
+	
+	@Test
+	public void testJUnitReport() {
+		try (InputStream is = Resources.getResource(JUnitReportParserTest.class, "test-results.xml").openStream()) {
+			Mockito.when(AppLoader.getInstance(CodeSearchManager.class)).thenReturn(new CodeSearchManager() {
+
+				@Override
+				public List<QueryHit> search(Project project, ObjectId commit, BlobQuery query)
+						throws InterruptedException, TooGeneralQueryException {
+					return null;
+				}
+
+				@Override
+				public List<Symbol> getSymbols(Project project, ObjectId blobId, String blobPath) {
+					return null;
+				}
+
+				@Override
+				public List<Symbol> getSymbols(IndexSearcher searcher, ObjectId blobId, String blobPath) {
+					return null;
+				}
+
+				@Override
+				public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
+					return "Test.java";
+				}
+
+			});
+
+			Build build = new Build();
+			build.setCommitHash(ObjectId.zeroId().name());
+
+			SAXReader reader = new SAXReader();
+			UnitTestReport report = new UnitTestReport(JUnitReportParser.parse(build, reader.read(is)), true);
+
+			assertEquals(2, report.getTestSuites().size());
+			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.PASSED)).size());
+			assertEquals(4, report.getTestCases(null, null, Sets.newSet(Status.FAILED)).size());
+			assertEquals(2, report.getTestCases(null, null, Sets.newSet(Status.SKIPPED)).size());
+
+		} catch (IOException|DocumentException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
