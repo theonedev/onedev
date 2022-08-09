@@ -45,8 +45,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Validator;
 
-import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.Permission;
 import org.apache.tika.mime.MediaType;
@@ -80,6 +80,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -105,6 +106,7 @@ import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
@@ -2056,6 +2058,16 @@ public class Project extends AbstractEntity {
 		projects.addAll(getDescendants());
 		projects.addAll(getAncestors());
 		return projects;
+	}
+	
+	@JsonProperty
+	public String getHttpCloneUrl() {
+		return OneDev.getInstance(UrlManager.class).cloneUrlFor(this, false);
+	}
+	
+	@JsonProperty
+	public String getSshCloneUrl() {
+		return OneDev.getInstance(UrlManager.class).cloneUrlFor(this, true);
 	}
 	
 }

@@ -242,7 +242,7 @@ public class ProjectResource {
 			throw new ExplicitException("Can not use current or descendant project as parent");
 		
 		Project projectWithSameName = projectManager.find(parent, project.getName());
-		if (projectWithSameName != null) {
+		if (projectWithSameName != null && !projectWithSameName.equals(project)) {
 			if (parent != null) {
 				throw new ExplicitException("Name '" + project.getName() + "' is already used by another project under '" 
 						+ parent.getPath() + "'");
