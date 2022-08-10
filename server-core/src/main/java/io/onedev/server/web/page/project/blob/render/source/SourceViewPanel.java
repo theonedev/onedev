@@ -571,59 +571,65 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
 							
-							CodeComment comment = new CodeComment();
-							comment.setUUID(uuid);
-							
-							comment.setMark(mark);
-							comment.setContent(contentInput.getModelObject());
-							comment.setUser(SecurityUtils.getUser());
-							comment.setProject(context.getProject());
-							comment.setCompareContext(getCompareContext());
-							
-							OneDev.getInstance(CodeCommentManager.class).save(comment);
-							
-							CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
-
-								@Override
-								protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-									SourceViewPanel.this.onCommentDeleted(target);
-								}
-
-								@Override
-								protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-									OneDev.getInstance(CodeCommentManager.class).save(comment);
-									target.add(commentContainer.get("head"));
-								}
-
-								@Override
-								protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-									SourceViewPanel.this.onSaveCommentReply(reply);
-								}
-
-								@Override
-								protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
-									SourceViewPanel.this.onSaveCommentStatusChange(change, note);
-								}
+							String content = contentInput.getModelObject();
+							if (content.length() > CodeComment.MAX_CONTENT_LEN) {
+								error("Comment too long");
+								target.add(feedback);
+							} else {
+								CodeComment comment = new CodeComment();
+								comment.setUUID(uuid);
 								
-								@Override
-								protected boolean isContextDifferent(CompareContext compareContext) {
-									return SourceViewPanel.this.isContextDifferent(compareContext);
-								}
+								comment.setMark(mark);
+								comment.setContent(content);
+								comment.setUser(SecurityUtils.getUser());
+								comment.setProject(context.getProject());
+								comment.setCompareContext(getCompareContext());
+								
+								OneDev.getInstance(CodeCommentManager.class).save(comment);
+								
+								CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
-								@Override
-								protected SuggestionSupport getSuggestionSupport() {
-									return SourceViewPanel.this.getSuggestionSupport(mark);
-								}
+									@Override
+									protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
+										SourceViewPanel.this.onCommentDeleted(target);
+									}
 
-							};
-							commentContainer.replace(commentPanel);
-							target.add(commentContainer);
+									@Override
+									protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+										OneDev.getInstance(CodeCommentManager.class).save(comment);
+										target.add(commentContainer.get("head"));
+									}
 
-							String script = String.format("onedev.server.sourceView.onCommentAdded(%s);", 
-									convertToJson(new CodeCommentInfo(comment, range)));
-							target.appendJavaScript(script);
-							
-							context.onCommentOpened(target, comment, range);
+									@Override
+									protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
+										SourceViewPanel.this.onSaveCommentReply(reply);
+									}
+
+									@Override
+									protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
+										SourceViewPanel.this.onSaveCommentStatusChange(change, note);
+									}
+									
+									@Override
+									protected boolean isContextDifferent(CompareContext compareContext) {
+										return SourceViewPanel.this.isContextDifferent(compareContext);
+									}
+
+									@Override
+									protected SuggestionSupport getSuggestionSupport() {
+										return SourceViewPanel.this.getSuggestionSupport(mark);
+									}
+
+								};
+								commentContainer.replace(commentPanel);
+								target.add(commentContainer);
+
+								String script = String.format("onedev.server.sourceView.onCommentAdded(%s);", 
+										convertToJson(new CodeCommentInfo(comment, range)));
+								target.appendJavaScript(script);
+								
+								context.onCommentOpened(target, comment, range);
+							}
 						}
 
 					});

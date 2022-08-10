@@ -39,6 +39,7 @@ import com.google.common.collect.Lists;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.Listen;
 import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -1079,6 +1080,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public void saveDescription(Issue issue, @Nullable String description) {
 		String prevDescription = issue.getDescription();
 		if (!Objects.equal(description, prevDescription)) {
+			if (description != null && description.length() > Issue.MAX_DESCRIPTION_LEN)
+				throw new ExplicitException("Description too long"); 
 			issue.setDescription(description);
 			entityReferenceManager.addReferenceChange(issue, description);
 			save(issue);

@@ -251,17 +251,22 @@ public abstract class IssueActivitiesPanel extends Panel {
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					super.onSubmit(target, form);
-
-					IssueComment comment = new IssueComment();
-					comment.setContent(input.getModelObject());
-					comment.setUser(SecurityUtils.getUser());
-					comment.setDate(new Date());
-					comment.setIssue(getIssue());
-					OneDev.getInstance(IssueCommentManager.class).save(comment);
-					
-					input.clearMarkdown();
-					
-					target.add(fragment);
+					String content = input.getModelObject();
+					if (content.length() > IssueComment.MAX_CONTENT_LEN) {
+						error("Comment too long");
+						target.add(form);
+					} else {
+						IssueComment comment = new IssueComment();
+						comment.setContent(content);
+						comment.setUser(SecurityUtils.getUser());
+						comment.setDate(new Date());
+						comment.setIssue(getIssue());
+						OneDev.getInstance(IssueCommentManager.class).save(comment);
+						
+						input.clearMarkdown();
+						
+						target.add(fragment);
+					}
 				}
 
 				@Override

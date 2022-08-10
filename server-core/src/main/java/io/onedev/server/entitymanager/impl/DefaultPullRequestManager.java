@@ -1052,6 +1052,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	public void saveDescription(PullRequest request, @Nullable String description) {
 		String prevDescription = request.getDescription();
 		if (!Objects.equal(description, prevDescription)) {
+			if (description != null && description.length() > PullRequest.MAX_DESCRIPTION_LEN)
+				throw new ExplicitException("Description too long"); 
 			request.setDescription(description);
 			referenceManager.addReferenceChange(request, description);
 			save(request);

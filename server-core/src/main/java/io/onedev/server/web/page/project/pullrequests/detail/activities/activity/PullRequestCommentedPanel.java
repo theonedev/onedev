@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -73,6 +74,8 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
+				if (comment.length() > PullRequestComment.MAX_CONTENT_LEN)
+					throw new ExplicitException("Comment too long");
 				PullRequestCommentedPanel.this.getComment().setContent(comment);
 				OneDev.getInstance(PullRequestCommentManager.class).save(PullRequestCommentedPanel.this.getComment());
 			}

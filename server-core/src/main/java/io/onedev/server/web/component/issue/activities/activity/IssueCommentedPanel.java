@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -61,6 +62,8 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
+				if (comment.length() > IssueComment.MAX_CONTENT_LEN)
+					throw new ExplicitException("Comment too long");
 				IssueCommentedPanel.this.getComment().setContent(comment);
 				OneDev.getInstance(IssueCommentManager.class).save(IssueCommentedPanel.this.getComment());
 			}

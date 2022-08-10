@@ -1083,60 +1083,66 @@ public abstract class RevisionDiffPanel extends Panel {
 									protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 										super.onSubmit(target, form);
 										
-										CodeComment comment = new CodeComment();
-										comment.setUUID(uuid);
-										comment.setProject(getProject());
-										comment.setUser(SecurityUtils.getUser());
-										comment.setMark(mark);
-										comment.setCompareContext(getCompareContext());
-										comment.setContent(contentInput.getModelObject());
-										
-										annotationSupport.onSaveComment(comment);
-										
-										CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
-	
-											@Override
-											protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-												RevisionDiffPanel.this.onCommentDeleted(target, comment);
-											}
+										String content = contentInput.getModelObject();
+										if (content.length() > CodeComment.MAX_CONTENT_LEN) {
+											error("Comment too long");
+											target.add(feedback);
+										} else {
+											CodeComment comment = new CodeComment();
+											comment.setUUID(uuid);
+											comment.setProject(getProject());
+											comment.setUser(SecurityUtils.getUser());
+											comment.setMark(mark);
+											comment.setCompareContext(getCompareContext());
+											comment.setContent(content);
 											
-											@Override
-											protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-												annotationSupport.onSaveComment(comment);
-												target.add(commentContainer.get("head"));
-											}
-	
-											@Override
-											protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-												reply.setCompareContext(getCompareContext());
-												annotationSupport.onSaveCommentReply(reply);
-											}
-
-											@Override
-											protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
-												change.setCompareContext(getCompareContext());
-												annotationSupport.onSaveCommentStatusChange(change, note);
-											}
+											annotationSupport.onSaveComment(comment);
 											
-											@Override
-											protected boolean isContextDifferent(CompareContext compareContext) {
-												return RevisionDiffPanel.this.isContextDifferent(compareContext);
-											}
+											CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
+		
+												@Override
+												protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
+													RevisionDiffPanel.this.onCommentDeleted(target, comment);
+												}
+												
+												@Override
+												protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+													annotationSupport.onSaveComment(comment);
+													target.add(commentContainer.get("head"));
+												}
+		
+												@Override
+												protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
+													reply.setCompareContext(getCompareContext());
+													annotationSupport.onSaveCommentReply(reply);
+												}
 
-											@Override
-											protected SuggestionSupport getSuggestionSupport() {
-												return RevisionDiffPanel.this.getSuggestionSupport(mark);
-											}
-	
-										};
-										commentContainer.replace(commentPanel);
-										target.add(commentContainer);
-										
-										BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
-										if (blobDiffPanel != null) 
-											blobDiffPanel.onCommentAdded(target, comment, commentRange);
-	
-										annotationSupport.onCommentOpened(target, comment);
+												@Override
+												protected void onSaveCommentStatusChange(AjaxRequestTarget target, CodeCommentStatusChange change, String note) {
+													change.setCompareContext(getCompareContext());
+													annotationSupport.onSaveCommentStatusChange(change, note);
+												}
+												
+												@Override
+												protected boolean isContextDifferent(CompareContext compareContext) {
+													return RevisionDiffPanel.this.isContextDifferent(compareContext);
+												}
+
+												@Override
+												protected SuggestionSupport getSuggestionSupport() {
+													return RevisionDiffPanel.this.getSuggestionSupport(mark);
+												}
+		
+											};
+											commentContainer.replace(commentPanel);
+											target.add(commentContainer);
+											
+											BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
+											if (blobDiffPanel != null) 
+												blobDiffPanel.onCommentAdded(target, comment, commentRange);
+		
+											annotationSupport.onCommentOpened(target, comment);
+										}
 									}
 	
 								});

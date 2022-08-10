@@ -229,12 +229,19 @@ public abstract class CodeCommentPanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						CodeComment comment = getComment();
-						comment.setContent(contentInput.getModelObject());
-						WebMarkupContainer commentOrReplyContainer = newCommentOrReplyContainer();
-						editFragment.replaceWith(commentOrReplyContainer);
-						target.add(commentOrReplyContainer);
-						onSaveComment(target, comment);
+						String content = contentInput.getModelObject();
+						if (content.length() > CodeComment.MAX_CONTENT_LEN) {
+							error("Comment too long");
+							target.add(feedback);
+						} else {
+							CodeComment comment = getComment();
+							
+							comment.setContent(contentInput.getModelObject());
+							WebMarkupContainer commentOrReplyContainer = newCommentOrReplyContainer();
+							editFragment.replaceWith(commentOrReplyContainer);
+							target.add(commentOrReplyContainer);
+							onSaveComment(target, comment);
+						}
 					}
 
 				});
@@ -532,28 +539,34 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-
-				if (resolved == null) {
-					CodeCommentReply reply = new CodeCommentReply();
-					reply.setComment(getComment());
-					reply.setDate(new Date());
-					reply.setUser(SecurityUtils.getUser());
-					reply.setContent(contentInput.getModelObject());
-					
-					onSaveCommentReply(target, reply);
-				} else {
-					CodeCommentStatusChange change = new CodeCommentStatusChange();
-					change.setComment(getComment());
-					change.setDate(new Date());
-					change.setUser(SecurityUtils.getUser());
-					change.setResolved(resolved);
-					
-					onSaveCommentStatusChange(target, change, contentInput.getModelObject());
-				}
 				
-				WebMarkupContainer actionsContainer = newActionsContainer();
-				editFragment.replaceWith(actionsContainer);
-				target.add(actionsContainer);
+				String content = contentInput.getModelObject();
+				if (content.length() > CodeCommentReply.MAX_CONTENT_LEN) {
+					error("Comment too long");
+					target.add(feedback);
+				} else {
+					if (resolved == null) {
+						CodeCommentReply reply = new CodeCommentReply();
+						reply.setComment(getComment());
+						reply.setDate(new Date());
+						reply.setUser(SecurityUtils.getUser());
+						reply.setContent(content);
+						
+						onSaveCommentReply(target, reply);
+					} else {
+						CodeCommentStatusChange change = new CodeCommentStatusChange();
+						change.setComment(getComment());
+						change.setDate(new Date());
+						change.setUser(SecurityUtils.getUser());
+						change.setResolved(resolved);
+						
+						onSaveCommentStatusChange(target, change, contentInput.getModelObject());
+					}
+					
+					WebMarkupContainer actionsContainer = newActionsContainer();
+					editFragment.replaceWith(actionsContainer);
+					target.add(actionsContainer);
+				}
 			}
 
 		};
@@ -802,15 +815,20 @@ public abstract class CodeCommentPanel extends Panel {
 						@Override
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
-
-							CodeCommentReply reply = getReply();
-							reply.setContent(contentInput.getModelObject());
-							onSaveCommentReply(target, reply);
-							reply.setContent(contentInput.getModelObject());
 							
-							Component activityContainer = new CodeCommentReplyActivity(reply).render(componentId);
-							editFragment.replaceWith(activityContainer);
-							target.add(activityContainer);
+							String content = contentInput.getModelObject();
+							if (content.length() > CodeCommentReply.MAX_CONTENT_LEN) {
+								error("Comment too long");
+								target.add(feedback);
+							} else {
+								CodeCommentReply reply = getReply();
+								reply.setContent(content);
+								onSaveCommentReply(target, reply);
+								
+								Component activityContainer = new CodeCommentReplyActivity(reply).render(componentId);
+								editFragment.replaceWith(activityContainer);
+								target.add(activityContainer);
+							}
 						}
 
 					}.add(new Label("label", "Save")));

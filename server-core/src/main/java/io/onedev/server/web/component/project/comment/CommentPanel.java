@@ -24,6 +24,7 @@ import org.hibernate.StaleStateException;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
@@ -149,7 +150,10 @@ public abstract class CommentPanel extends Panel {
 						} catch (StaleStateException e) {
 							warn("Some one changed the content you are editing. Reload the page and try again.");
 							target.add(feedback);
-						}
+						} catch (ExplicitException e) {
+							error(e.getMessage());
+							target.add(feedback);
+						}							
 					}
 					
 					@Override

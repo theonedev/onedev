@@ -305,7 +305,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			input.setRequired(true).setLabel(Model.of("Comment"));
 			form.add(input);
 			
-			form.add(new FencedFeedbackPanel("feedback", input));
+			form.add(new FencedFeedbackPanel("feedback", form));
 			
 			form.add(new AjaxSubmitLink("save") {
 
@@ -313,14 +313,20 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					super.onSubmit(target, form);
 
-					PullRequestComment comment = new PullRequestComment();
-					comment.setRequest(getPullRequest());
-					comment.setUser(getLoginUser());
-					comment.setContent(input.getModelObject());
-					OneDev.getInstance(PullRequestCommentManager.class).save(comment);
-					input.clearMarkdown();
+					String content = input.getModelObject();
+					if (content.length() > PullRequestComment.MAX_CONTENT_LEN) {
+						form.error("Comment too long");
+						target.add(form);
+					} else {
+						PullRequestComment comment = new PullRequestComment();
+						comment.setRequest(getPullRequest());
+						comment.setUser(getLoginUser());
+						comment.setContent(input.getModelObject());
+						OneDev.getInstance(PullRequestCommentManager.class).save(comment);
+						input.clearMarkdown();
 
-					target.add(fragment);
+						target.add(fragment);
+					}
 				}
 
 				@Override
