@@ -16,8 +16,8 @@ public class DefaultWicketFilter extends WebSocketFilter {
 	private final WebApplication application;
 	
 	@Inject
-	public DefaultWicketFilter(WebApplication application, WebSocketPolicy webSocketPolicy) {
-		super(webSocketPolicy);
+	public DefaultWicketFilter(WebApplication application) {
+		super(WebSocketPolicy.newServerPolicy());
 		
 		this.application = application;
 		setFilterPath("");

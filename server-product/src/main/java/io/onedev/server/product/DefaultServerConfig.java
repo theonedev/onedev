@@ -11,9 +11,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.internal.guava.Preconditions;
 
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.util.ServerConfig;
 
 @Singleton
@@ -33,11 +33,7 @@ public class DefaultServerConfig implements ServerConfig {
 	
 	private static final String PROP_KEYSTOREPASSWORD = "keystore_password";
 	
-	private static final String PROP_SESSION_TIMEOUT = "session_timeout";
-	
 	private int httpPort;
-	
-	private int sessionTimeout;
 	
 	private int httpsPort;
 
@@ -119,24 +115,11 @@ public class DefaultServerConfig implements ServerConfig {
 			Preconditions.checkState(trustCertsDir.exists(), 
 					"Trust certs directory not exist: " + trustCertsDir.getAbsolutePath());
 		}
-		
-		String sessionTimeoutStr = System.getenv(PROP_SESSION_TIMEOUT);
-		if (StringUtils.isBlank(sessionTimeoutStr))
-			sessionTimeoutStr = props.getProperty(PROP_SESSION_TIMEOUT);
-		if (StringUtils.isNotBlank(sessionTimeoutStr))
-			sessionTimeout = Integer.parseInt(sessionTimeoutStr.trim());
-		else
-			throw new ExplicitException(PROP_SESSION_TIMEOUT + " should be specified");
 	}
 	
 	@Override
 	public int getHttpPort() {
 		return httpPort;
-	}
-
-	@Override
-	public int getSessionTimeout() {
-		return sessionTimeout;
 	}
 
 	@Override

@@ -19,7 +19,6 @@ import org.apache.wicket.protocol.ws.api.registry.IKey;
 import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.joda.time.DateTime;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
@@ -43,11 +42,11 @@ public class DefaultWebSocketManager implements WebSocketManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWebSocketManager.class);
 	
+	private static final int KEEP_ALIVE_INTERVAL = 30;
+	
 	private final Application application;
 	
 	private final TransactionManager transactionManager;
-	
-	private final WebSocketPolicy webSocketPolicy;
 	
 	private final TaskScheduler taskScheduler;
 	
@@ -65,10 +64,9 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	
 	@Inject
 	public DefaultWebSocketManager(Application application, TransactionManager transactionManager, 
-			WebSocketPolicy webSocketPolicy, TaskScheduler taskScheduler, ExecutorService executorService) {
+			TaskScheduler taskScheduler, ExecutorService executorService) {
 		this.application = application;
 		this.transactionManager = transactionManager;
-		this.webSocketPolicy = webSocketPolicy;
 		this.taskScheduler = taskScheduler;
 		this.executorService = executorService;
 	}
@@ -152,7 +150,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 			
 			@Override
 			public ScheduleBuilder<?> getScheduleBuilder() {
-				return SimpleScheduleBuilder.repeatSecondlyForever((int)webSocketPolicy.getIdleTimeout()/2000);
+				return SimpleScheduleBuilder.repeatSecondlyForever(KEEP_ALIVE_INTERVAL);
 			}
 			
 			@Override

@@ -47,7 +47,6 @@ import org.apache.wicket.Application;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.hibernate.CallbackException;
@@ -101,12 +100,12 @@ import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
-import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -149,12 +148,12 @@ import io.onedev.server.entitymanager.impl.DefaultCodeCommentQueryPersonalizatio
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentReplyManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultCommitQueryPersonalizationManager;
-import io.onedev.server.entitymanager.impl.DefaultIssueAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultEmailAddressManager;
 import io.onedev.server.entitymanager.impl.DefaultGitLfsLockManager;
 import io.onedev.server.entitymanager.impl.DefaultGpgKeyManager;
 import io.onedev.server.entitymanager.impl.DefaultGroupAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultGroupManager;
+import io.onedev.server.entitymanager.impl.DefaultIssueAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueFieldManager;
@@ -342,7 +341,6 @@ import io.onedev.server.web.websocket.DefaultWebSocketManager;
 import io.onedev.server.web.websocket.IssueEventBroadcaster;
 import io.onedev.server.web.websocket.PullRequestEventBroadcaster;
 import io.onedev.server.web.websocket.WebSocketManager;
-import io.onedev.server.web.websocket.WebSocketPolicyProvider;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -651,7 +649,6 @@ public class CoreModule extends AbstractPluginModule {
 	private void configureWeb() {
 		bind(WicketServlet.class).to(DefaultWicketServlet.class);
 		bind(WicketFilter.class).to(DefaultWicketFilter.class);
-		bind(WebSocketPolicy.class).toProvider(WebSocketPolicyProvider.class);
 		bind(EditSupportRegistry.class).to(DefaultEditSupportRegistry.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 
