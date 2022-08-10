@@ -96,8 +96,8 @@ public class Office365Setting extends MailSetting {
 	}
 	
 	@Editable(order=410, description="Primary or alias email address of above account to be used as sender address "
-			+ "of various notifications. Emails targeting this address will also be checked in inbox of above user "
-			+ "if <code>Check Incoming Email</code> option is enabled below")
+			+ "of various notifications. Emails targeting this address will also be checked to post various "
+			+ "comments if <code>Check Incoming Email</code> option is enabled below")
 	@NotEmpty
 	public String getEmailAddress() {
 		return emailAddress;

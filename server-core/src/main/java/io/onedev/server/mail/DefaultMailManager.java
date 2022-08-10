@@ -583,20 +583,43 @@ public class DefaultMailManager implements MailManager {
 	
 	@Nullable
 	private String stripQuotation(MailSendSetting sendSetting, String content) {
-		String quotedSender = sendSetting.getSenderAddress();
-		Pattern pattern = Pattern.compile("(^|\\W)" + quotedSender.replace(".", "\\.") + "($|\\W)");
+		String senderAddress = sendSetting.getSenderAddress();
+		Pattern senderAddressPattern = Pattern.compile(
+				"(^|\\W)" + senderAddress.replace(".", "\\.") + "($|\\W)", 
+				Pattern.CASE_INSENSITIVE);
+		
+		String smtpUser = sendSetting.getSmtpUser();
+		
+		Pattern smtpUserPattern;
+		if (smtpUser != null && smtpUser.contains("@") && !smtpUser.equalsIgnoreCase(senderAddress)) { 
+			smtpUserPattern = Pattern.compile(
+					"(^|\\W)" + smtpUser.replace(".", "\\.") + "($|\\W)", 
+					Pattern.CASE_INSENSITIVE);
+		} else {
+			smtpUserPattern = null;
+		}
 		
 		Document document = HtmlUtils.parse(content);
 		document.select(".gmail_quote").remove();
 		document.outputSettings().prettyPrint(false);
 		
 		Element quotedSenderElement = null;
-		for (Element element: document.getElementsContainingOwnText(quotedSender)) {
-			if (pattern.matcher(element.text()).find()) {
+		for (Element element: document.getElementsContainingOwnText(senderAddress)) {
+			if (senderAddressPattern.matcher(element.text()).find()) {
 				quotedSenderElement = element;
 				break;
 			}
 		}
+		
+		if (quotedSenderElement == null && smtpUserPattern != null) {
+			for (Element element: document.getElementsContainingOwnText(smtpUser)) {
+				if (smtpUserPattern.matcher(element.text()).find()) {
+					quotedSenderElement = element;
+					break;
+				}
+			}
+		}
+		
 		if (quotedSenderElement != null) {
 			Element quotedSenderBlockElement = quotedSenderElement.parent();
 			while (quotedSenderBlockElement != null 
