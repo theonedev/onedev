@@ -25,9 +25,9 @@ public class Office365Setting extends MailSetting {
 
 	private static final long serialVersionUID = 1L;
 	
-	private String tenantId;
-	
 	private String clientId;
+	
+	private String tenantId;
 	
 	private String clientSecret;
 	
@@ -39,16 +39,6 @@ public class Office365Setting extends MailSetting {
 	
 	private InboxPollSetting inboxPollSetting;
 	
-	@Editable(order=50, name="Directory (tenant) ID", description="Specify ID of the Azure AD this OneDev instance is registered in")
-	@NotEmpty
-	public String getTenantId() {
-		return tenantId;
-	}
-
-	public void setTenantId(String tenantId) {
-		this.tenantId = tenantId;
-	}
-
 	@Editable(order=100, name="Application (client) ID", description="Specify application (tenant) ID of this OneDev instance registered in Azure AD")
 	@NotEmpty
 	public String getClientId() {
@@ -57,6 +47,16 @@ public class Office365Setting extends MailSetting {
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
+	}
+
+	@Editable(order=150, name="Directory (tenant) ID", description="Specify ID of the Azure AD this OneDev instance is registered in")
+	@NotEmpty
+	public String getTenantId() {
+		return tenantId;
+	}
+
+	public void setTenantId(String tenantId) {
+		this.tenantId = tenantId;
 	}
 
 	@Editable(order=200, description="Client secret of this OneDev instance registered in Azure AD")
