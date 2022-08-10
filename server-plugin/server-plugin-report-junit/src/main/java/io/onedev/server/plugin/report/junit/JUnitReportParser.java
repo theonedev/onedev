@@ -37,7 +37,6 @@ public class JUnitReportParser {
 		
 		for (Element testSuiteElement : rootElements) {
 			String name = testSuiteElement.attributeValue("name");
-			String test = testSuiteElement.attributeValue("time");
 			long duration = getDouble(testSuiteElement.attributeValue("time"));
 			int tests = getInt(testSuiteElement.attributeValue("tests"));
 			int failures =getInt(testSuiteElement.attributeValue("failures"));
