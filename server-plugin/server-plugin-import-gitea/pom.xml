@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>7.4.18</version>
+		<version>7.4.19</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.imports.gitea.GiteaPluginModule</moduleClass>
