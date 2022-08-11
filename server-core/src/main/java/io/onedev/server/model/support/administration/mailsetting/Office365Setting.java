@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
@@ -98,6 +99,7 @@ public class Office365Setting extends MailSetting {
 	@Editable(order=410, description="Primary or alias email address of above account to be used as sender address "
 			+ "of various notifications. Emails targeting this address will also be checked to post various "
 			+ "comments if <code>Check Incoming Email</code> option is enabled below")
+	@Email
 	@NotEmpty
 	public String getEmailAddress() {
 		return emailAddress;
