@@ -394,6 +394,7 @@ public class DefaultMailManager implements MailManager {
 					designatedProject = serviceDeskSetting.getDesignatedProject(from.getAddress());
 				} 
 				ParsedEmailAddress parsedSystemAddress = ParsedEmailAddress.parse(checkSetting.getCheckAddress());
+				logger.trace("Parsed system address: " + parsedSystemAddress);
 				
 				Collection<Issue> issues = new ArrayList<>();
 				Collection<PullRequest> pullRequests = new ArrayList<>();
@@ -412,6 +413,9 @@ public class DefaultMailManager implements MailManager {
 					logger.trace("Processing on behalf of receiver '" + receiver.getAddress() + "'");
 					
 					ParsedEmailAddress parsedReceiverAddress = ParsedEmailAddress.parse(receiver.getAddress());
+					
+					logger.trace("Parsed receiver address: " + parsedReceiverAddress);
+					
 					if (parsedReceiverAddress.toString().equals(parsedSystemAddress.toString())) {
 						logger.trace("Message is targeting system address");
 						if (serviceDeskSetting != null) {
@@ -516,6 +520,7 @@ public class DefaultMailManager implements MailManager {
 							}
 						}
 					} else {
+						logger.trace("Adding receiver to involved list");
 						involved.add(receiver);
 					}
 				}
