@@ -70,6 +70,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 				.set(TablesExtension.APPEND_MISSING_COLUMNS, true)
 				.set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
 				.set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
+				.set(TablesExtension.CLASS_NAME, "table")
 				.set(Parser.EXTENSIONS, extensions);
 	}
 	

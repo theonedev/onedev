@@ -237,28 +237,24 @@
 	width: 1.5rem; 
 	height: 1.5rem;
 }
-.dark-mode .markdown-rendered table:not('.text-diff') thead {
-	color: var(--light);
-}
-.markdown-rendered table:not('.text-diff') {
+.markdown-rendered table.table {
 	width: auto; 
 	margin-bottom: 1rem;
 }
-.markdown-rendered table:not('.text-diff') th, 
-.markdown-rendered table:not('.text-diff') td {
-	padding: 0.4rem 0.8rem; 
+.markdown-rendered table.table th, 
+.markdown-rendered table.table td {
 	border: 1px solid var(--secondary);
-	word-break: break-word!important;
-    overflow-wrap: break-word!important;
+	word-break: break-word !important;
+    overflow-wrap: break-word !important;
 }
-.dark-mode .markdown-rendered table:not('.text-diff') th, 
-.dark-mode .markdown-rendered table:not('.text-diff') td {
+.dark-mode .markdown-rendered table.table th, 
+.dark-mode .markdown-rendered table.table td {
 	border-color: var(--dark-mode-lighter-dark);
 }
-.markdown-rendered table:not('.text-diff') tr:nth-child(even) td {
+.markdown-rendered table.table tr:nth-child(odd) td {
 	background: var(--light);
 }
-.dark-mode .markdown-rendered table:not('.text-diff') tr:nth-child(even) td {
+.dark-mode .markdown-rendered table.table tr:nth-child(odd) td {
 	background: #1b1b29;
 }
 .markdown-rendered h1, .markdown-rendered h2, .markdown-rendered h3, 
