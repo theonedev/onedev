@@ -7,10 +7,10 @@ import static io.onedev.server.model.User.PROP_SSO_CONNECTOR;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -39,6 +39,7 @@ import com.google.common.base.MoreObjects;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.NamedProjectQuery;
@@ -50,7 +51,7 @@ import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
@@ -214,6 +215,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private transient Collection<Group> groups;
     
     private transient List<EmailAddress> sortedEmailAddresses;
+    
+    private transient Optional<EmailAddress> primaryEmailAddress;
+    
+    private transient Optional<EmailAddress> gitEmailAddress;
     
 	public QueryPersonalization<NamedProjectQuery> getProjectQueryPersonalization() {
 		return new QueryPersonalization<NamedProjectQuery>() {
@@ -550,17 +555,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Override
 	public int compareTo(AbstractEntity entity) {
 		User user = (User) entity;
-		if (getDisplayName().equals(user.getDisplayName())) {
-			return getId().compareTo(entity.getId());
-		} else {
-			return getDisplayName().compareTo(user.getDisplayName());
-		}
-	}
-
-	public double getMatchScore(@Nullable String queryTerm) {
-		double scoreOfName = MatchScoreUtils.getMatchScore(name, queryTerm);
-		double scoreOfFullName = MatchScoreUtils.getMatchScore(fullName, queryTerm);
-		return Math.max(scoreOfName, scoreOfFullName);
+		return getDisplayName().compareTo(user.getDisplayName());
 	}
 
 	public Collection<Group> getGroups() {
@@ -794,37 +789,27 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public List<EmailAddress> getSortedEmailAddresses() {
 		if (sortedEmailAddresses == null) {
 			sortedEmailAddresses = new ArrayList<>(getEmailAddresses());
-			Collections.sort(sortedEmailAddresses, new Comparator<EmailAddress>() {
-
-				@Override
-				public int compare(EmailAddress o1, EmailAddress o2) {
-					if (o1.isPrimary() && o2.isPrimary() || !o1.isPrimary() && !o2.isPrimary()) {
-						if (o1.isGit() && o2.isGit() || !o1.isGit() && !o2.isGit()) 
-							return o1.getId().compareTo(o2.getId());
-						else if (o1.isGit()) 
-							return -1;
-						else 
-							return 1;
-					} else if (o1.isPrimary()) {
-						return -1;
-					} else {
-						return 1;
-					}
-				}
-				
-			});
+			Collections.sort(sortedEmailAddresses);
 		}
 		return sortedEmailAddresses;
 	}
 	
+	private EmailAddressManager getEmailAddressManager() {
+		return OneDev.getInstance(EmailAddressManager.class);
+	}
+	
 	@Nullable
 	public EmailAddress getPrimaryEmailAddress() {
-		return getSortedEmailAddresses().stream().filter(it->it.isPrimary()).findFirst().orElse(null);
+		if (primaryEmailAddress == null)
+			primaryEmailAddress = Optional.ofNullable(getEmailAddressManager().findPrimary(this));
+		return primaryEmailAddress.orElse(null);
 	}
 
 	@Nullable
 	public EmailAddress getGitEmailAddress() {
-		return getSortedEmailAddresses().stream().filter(it->it.isGit()).findFirst().orElse(null);
+		if (gitEmailAddress == null)
+			gitEmailAddress = Optional.ofNullable(getEmailAddressManager().findGit(this));
+		return gitEmailAddress.orElse(null);
 	}
 	
 	public List<GpgKey> getGpgKeys() {
@@ -835,4 +820,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return gpgKeys;
 	}
 
+	public UserFacade getFacade() {
+		return new UserFacade(getId(), getName(), getFullName(), getAccessToken());
+	}
+	
 }

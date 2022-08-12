@@ -13,6 +13,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.Input;
 
 public class IssueOpened extends IssueEvent {
@@ -68,6 +69,11 @@ public class IssueOpened extends IssueEvent {
 	@Override
 	public String getActivity() {
 		return "opened";
+	}
+
+	@Override
+	public IssueEvent cloneIn(Dao dao) {
+		return new IssueOpened(dao.load(Issue.class, getIssue().getId()));
 	}
 
 }

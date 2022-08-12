@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.revisionpicker;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +26,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
@@ -48,7 +44,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.InputChangeBehavior;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.createtag.CreateTagPanel;
@@ -107,7 +102,8 @@ public abstract class RevisionSelector extends Panel {
 		revInput = null;
 		target.add(revField);
 		newItemsView(target);
-		String script = String.format("onedev.server.revisionSelector.bindInputKeys('%s');", getMarkupId(true));
+		String script = String.format("$('#%s input').selectByTyping($('#%s'));", 
+				getMarkupId(true), getMarkupId(true));
 		target.appendJavaScript(script);
 		target.focusComponent(revField);
 	}
@@ -184,36 +180,6 @@ public abstract class RevisionSelector extends Panel {
 		};
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
-		
-		add(new AbstractPostAjaxBehavior() {
-			
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				String value = params.getParameterValue("value").toString();
-				if (StringUtils.isNotBlank(value)) {
-					if (value.startsWith(COMMIT_FLAG)) {
-						selectRevision(target, value.substring(COMMIT_FLAG.length()));
-					} else if (value.startsWith(ADD_FLAG)) {
-						value = value.substring(ADD_FLAG.length());
-						onCreateRef(target, value);
-					} else {
-						selectRevision(target, value);
-					}
-				} else if (StringUtils.isNotBlank(revInput)) { 
-					selectRevision(target, revInput.trim());
-				}
-			}
-
-			@Override
-			public void renderHead(Component component, IHeaderResponse response) {
-				super.renderHead(component, response);
-				String script = String.format("onedev.server.revisionSelector.init('%s', %s);", 
-						getMarkupId(true), getCallbackFunction(explicit("value")));
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-			
-		});
 		
 		revField.add(new InputChangeBehavior() {
 			
@@ -406,7 +372,6 @@ public abstract class RevisionSelector extends Panel {
 			link.add(new WebMarkupContainer("icon"));
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
 		item.setOutputMarkupId(true);
-		item.add(AttributeAppender.append("data-value", HtmlEscape.escapeHtml5(itemValue)));
 		item.add(link);
 		
 		return item;
@@ -486,6 +451,9 @@ public abstract class RevisionSelector extends Panel {
 		super.renderHead(response);
 
 		response.render(JavaScriptHeaderItem.forReference(new RevisionSelectorResourceReference()));
+		
+		String script = String.format("onedev.server.revisionSelector.onDomReady('%s');", getMarkupId(true));
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, String revision);

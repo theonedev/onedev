@@ -4,6 +4,7 @@ import java.util.Date;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.dao.Dao;
 
 public class CodeCommentUpdated extends CodeCommentEvent {
 
@@ -21,4 +22,11 @@ public class CodeCommentUpdated extends CodeCommentEvent {
 		return "updated";
 	}
 
+	@Override
+	public CodeCommentEvent cloneIn(Dao dao) {
+		return new CodeCommentUpdated(
+				dao.load(User.class, getUser().getId()),
+				dao.load(CodeComment.class, getComment().getId()));
+	}
+	
 }

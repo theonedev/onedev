@@ -43,6 +43,7 @@ import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
@@ -232,7 +233,10 @@ public abstract class IssueActivitiesPanel extends Panel {
 				
 				@Override
 				protected List<User> getMentionables() {
-					return OneDev.getInstance(UserManager.class).queryAndSort(getIssue().getParticipants());
+					UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();		
+					List<User> users = new ArrayList<>(cache.getUsers());
+					users.sort(cache.comparingDisplayName(getIssue().getParticipants()));
+					return users;
 				}
 				
 				@Override

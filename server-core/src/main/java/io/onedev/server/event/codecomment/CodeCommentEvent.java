@@ -5,6 +5,7 @@ import java.util.Date;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.dao.Dao;
 
 public abstract class CodeCommentEvent extends ProjectEvent {
 
@@ -24,4 +25,5 @@ public abstract class CodeCommentEvent extends ProjectEvent {
 		return comment;
 	}
 
+	public abstract CodeCommentEvent cloneIn(Dao dao);
 }

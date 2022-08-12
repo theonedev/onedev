@@ -73,12 +73,15 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
@@ -884,6 +887,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected AbstractEntity getEntity() {
 						return getPullRequest();
+					}
+
+					@Override
+					protected boolean isAuthorized(User user) {
+						return user.asSubject().isPermitted(new ProjectPermission(getProject(), new ReadCode()));
 					}
 					
 				});

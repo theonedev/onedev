@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -76,6 +77,7 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -152,6 +154,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final IssueLinkManager linkManager;
 	
+	private final SessionManager sessionManager;
+	
 	private final Map<Long, Map<Long, Long>> idCache = new HashMap<>();
 	
 	private final ReadWriteLock idCacheLock = new ReentrantReadWriteLock();
@@ -164,7 +168,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			RoleManager roleManager, AttachmentStorageManager attachmentStorageManager, 
 			IssueCommentManager commentManager, EntityReferenceManager entityReferenceManager, 
 			LinkSpecManager linkSpecManager, IssueLinkManager linkManager, 
-			IssueAuthorizationManager authorizationManager) {
+			IssueAuthorizationManager authorizationManager, SessionManager sessionManager) {
 		super(dao);
 		this.fieldManager = fieldManager;
 		this.queryPersonalizationManager = queryPersonalizationManager;
@@ -180,6 +184,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.commentManager = commentManager;
 		this.entityReferenceManager = entityReferenceManager;
 		this.authorizationManager = authorizationManager;
+		this.sessionManager = sessionManager;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -243,8 +248,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issue.setNumberScope(issue.getProject().getForkRoot());
 		issue.setNumber(getNextNumber(issue.getNumberScope()));
 		
-		IssueOpened event = new IssueOpened(issue);
-		issue.setLastUpdate(event.getLastUpdate());
+		issue.setLastUpdate(new IssueOpened(issue).getLastUpdate());
 		
 		save(issue);
 
@@ -258,7 +262,23 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issue.getAuthorizations().add(authorization);
 		authorizationManager.save(authorization);
 		
-		listenerRegistry.post(event);
+		Long issueId = issue.getId();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				sessionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						listenerRegistry.post(new IssueOpened(load(issueId)));
+					}
+					
+				});
+			}
+			
+		});
+		
 	}
 
 	@Transactional
@@ -392,8 +412,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			}
 			predicates.add(builder.or(projectPredicates.toArray(new Predicate[0])));
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Long> projectIds = projectManager.getPermittedProjects(new AccessProject()).getIds(); 
-			if (!projectIds.isEmpty()) { 
+			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
+			if (!projects.isEmpty()) { 
+				Collection<Long> projectIds = projects.stream().map(it->it.getId()).collect(Collectors.toSet());
 				predicates.add(builder.or(
 						getPredicate(builder, root, projectIds), 
 						getAuthorizationPredicate(query, builder, root, projectIds)));

@@ -51,6 +51,7 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.UrlUtils;
+import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -86,6 +87,10 @@ public abstract class CodeCommentPanel extends Panel {
 
 	public CodeComment getComment() {
 		return OneDev.getInstance(CodeCommentManager.class).load(commentId);
+	}
+	
+	private UserManager getUserManager() {
+		return OneDev.getInstance(UserManager.class);
 	}
 
 	private WebMarkupContainer newCommentOrReplyContainer() {
@@ -181,7 +186,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 					@Override
 					protected List<User> getMentionables() {
-						return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
+						return CodeCommentPanel.this.getMentionables();
 					}
 					
 				};
@@ -488,7 +493,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			protected List<User> getMentionables() {
-				return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
+				return CodeCommentPanel.this.getMentionables();
 			}
 			
 		};
@@ -670,6 +675,13 @@ public abstract class CodeCommentPanel extends Panel {
 
 	}
 	
+	private List<User> getMentionables() {
+		UserCache cache = getUserManager().cloneCache();		
+		List<User> users = new ArrayList<>(cache.getUsers());
+		users.sort(cache.comparingDisplayName(getComment().getParticipants()));
+		return users;
+	}
+	
 	public class CodeCommentReplyActivity implements CodeCommentActivity {
 
 		private final Long replyId;
@@ -775,7 +787,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 						@Override
 						protected List<User> getMentionables() {
-							return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
+							return CodeCommentPanel.this.getMentionables();
 						}
 
 					};

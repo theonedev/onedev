@@ -128,7 +128,6 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.concurrent.BatchWorkManager;
@@ -734,7 +733,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 					        	 * can not lock the check method directly as the lock should be put outside 
 					        	 * of transaction
 					        	 */
-					        	LockUtils.call("request-" + requestId + "-check", new Callable<Void>() {
+					        	LockUtils.call(PullRequest.getSerialLockName(requestId), true, new Callable<Void>() {
 
 									@Override
 									public Void call() throws Exception {
@@ -888,11 +887,12 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		if (targetProject != null) {
 			predicates.add(builder.equal(from.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
 		} else if (!SecurityUtils.isAdministrator()) {
-			ProjectCollection projects = projectManager.getPermittedProjects(new ReadCode());
-			if (!projects.getIds().isEmpty()) {
+			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode());
+			if (!projects.isEmpty()) {
 				Path<Long> projectIdPath = from.get(PullRequest.PROP_TARGET_PROJECT).get(Project.PROP_ID);
-				predicates.add(Criteria.forManyValues(builder, projectIdPath, projects.getIds(), 
-						projects.getCache().getIds()));
+				predicates.add(Criteria.forManyValues(builder, projectIdPath, 
+						projects.stream().map(it->it.getId()).collect(Collectors.toSet()), 
+						projectManager.getIds()));
 			} else {
 				predicates.add(builder.disjunction());
 			}

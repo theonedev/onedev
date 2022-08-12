@@ -120,7 +120,7 @@ public class ProblemReportPage extends BuildReportPage {
 			
 			@Override
 			protected List<InputSuggestion> suggest(String matchWith) {
-				return SuggestionUtils.suggestPaths(filePaths, matchWith);
+				return SuggestionUtils.suggestByPattern(filePaths, matchWith);
 			}
 			
 			@Override

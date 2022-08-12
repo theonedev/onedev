@@ -17,7 +17,10 @@ import io.onedev.server.model.support.inputspec.userchoiceinput.defaultvalueprov
 public class UserChoiceInput {
 	
 	public static List<String> getPossibleValues() {
-		return OneDev.getInstance(UserManager.class).query().stream().map(user->user.getName()).collect(Collectors.toList());
+		return OneDev.getInstance(UserManager.class).cloneCache().values().stream()
+				.map(it->it.getName())
+				.sorted()
+				.collect(Collectors.toList());
 	}
 
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 

@@ -91,8 +91,7 @@ import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.match.MatchScoreProvider;
-import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.util.Similarities;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
@@ -1160,19 +1159,17 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			protected void onTypingDone(AjaxRequestTarget target) {
 				String searchInput = StringUtils.trimToNull(searchField.getInput());
 				
-				MatchScoreProvider<Symbol> matchScoreProvider = new MatchScoreProvider<Symbol>() {
+				List<Symbol> similarSymbols = new Similarities<Symbol>(symbols) {
 
 					@Override
-					public double getMatchScore(Symbol object) {
-						return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+					protected double getSimilarScore(Symbol item) {
+						return Similarities.getSimilarScore(item.getName(), searchInput);
 					}
 					
 				};
 				
-				List<Symbol> matchedSymbols = MatchScoreUtils.filterAndSort(symbols, matchScoreProvider);
-				
 				List<Symbol> filteredSymbols = new ArrayList<>();
-				for (Symbol matchSymbol: matchedSymbols) {
+				for (Symbol matchSymbol: similarSymbols) {
 					Symbol currentSymbol = matchSymbol;
 					while (currentSymbol != null) {
 						if (!filteredSymbols.contains(currentSymbol))

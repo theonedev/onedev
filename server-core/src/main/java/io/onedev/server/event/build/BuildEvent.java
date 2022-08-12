@@ -7,10 +7,11 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
-public class BuildEvent extends ProjectEvent implements CommitAware {
+public abstract class BuildEvent extends ProjectEvent implements CommitAware {
 
 	private Build build;
 	
@@ -37,4 +38,6 @@ public class BuildEvent extends ProjectEvent implements CommitAware {
 		return build.getStatus().toString();
 	}
 
+	public abstract BuildEvent cloneIn(Dao dao);
+	
 }

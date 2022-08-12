@@ -79,6 +79,7 @@ import io.onedev.server.model.support.issue.transitiontrigger.StateTransitionTri
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -115,6 +116,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	private final TransactionManager transactionManager;
 	
+	private final SessionManager sessionManager;
+	
 	private final ProjectManager projectManager;
 	
 	private final PullRequestManager pullRequestManager;
@@ -139,7 +142,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			ProjectManager projectManager, BuildManager buildManager, 
 			ExecutorService executorService, PullRequestManager pullRequestManager, 
 			ListenerRegistry listenerRegistry, TaskScheduler taskScheduler, 
-			IssueScheduleManager issueScheduleManager, IssueLinkManager issueLinkManager) {
+			IssueScheduleManager issueScheduleManager, IssueLinkManager issueLinkManager, 
+			SessionManager sessionManager) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
@@ -152,6 +156,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		this.taskScheduler = taskScheduler;
 		this.issueScheduleManager = issueScheduleManager;
 		this.issueLinkManager = issueLinkManager;
+		this.sessionManager = sessionManager;
 	}
 
 	@Transactional
@@ -167,8 +172,23 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			dao.persist(comment);
 			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
 		}
-		
-		listenerRegistry.post(new IssueChanged(change, note));
+
+		Long changeId = change.getId();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				sessionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						listenerRegistry.post(new IssueChanged(load(changeId), note));
+					}
+					
+				});
+			}
+			
+		});
 	}
 	
 	@Override

@@ -1,35 +1,35 @@
-package io.onedev.server.util;
+package io.onedev.server.util.facade;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
-import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.Similarities;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class ProjectCache {
+public class ProjectCache extends HashMap<Long, ProjectFacade> {
 
-	private final Map<Long, ProjectFacade> projects;
-
-	public ProjectCache(Map<Long, ProjectFacade> projects) {
-		this.projects = projects;
-	}
-
+	private static final long serialVersionUID = 1L;
+	
 	public boolean isSelfOrAncestorOf(Long parentId, Long childId) {
 		if (parentId.equals(childId)) { 
 			return true;
 		} else {
-			ProjectFacade childProject = projects.get(childId);
+			ProjectFacade childProject = get(childId);
 			if (childProject.getParentId() != null)
 				return isSelfOrAncestorOf(parentId, childProject.getParentId());
 			else
@@ -37,30 +37,9 @@ public class ProjectCache {
 		}
 	}
 	
-	public Collection<Long> getIds() {
-		return projects.keySet();
-	}
-	
-	public Collection<ProjectFacade> getAll() {
-		return projects.values();
-	}
-	
-	@Nullable
-	public ProjectFacade get(Long id) {
-		return projects.get(id);
-	}
-	
-	public void cache(ProjectFacade project) {
-		projects.put(project.getId(), project);
-	}
-	
-	public void remove(Long id) {
-		projects.remove(id);
-	}
-	
 	@Nullable
 	public String getPath(Long id) {
-		ProjectFacade project = projects.get(id);
+		ProjectFacade project = get(id);
 		if (project != null) {
 			if (project.getParentId() != null) {
 				String parentPath = getPath(project.getParentId());
@@ -78,7 +57,7 @@ public class ProjectCache {
 	
 	public Collection<Long> getMatchingIds(String pathPattern) {
 		Collection<Long> ids = new HashSet<>();
-		for (Long id: projects.keySet()) {
+		for (Long id: keySet()) {
 			String path = getPath(id);
 			if (path != null && WildcardUtils.matchPath(pathPattern, path))
 				ids.add(id);
@@ -88,7 +67,7 @@ public class ProjectCache {
 
 	public Collection<Long> getSubtreeIds(Long id) {
 		Collection<Long> treeIds = Sets.newHashSet(id);
-		for (ProjectFacade facade: projects.values()) {
+		for (ProjectFacade facade: values()) {
 			if (id.equals(facade.getParentId()))
 				treeIds.addAll(getSubtreeIds(facade.getId()));
 		}
@@ -108,7 +87,7 @@ public class ProjectCache {
     
 	@Nullable
     public Long findId(@Nullable Long parentId, String name) {
-		for (ProjectFacade project: projects.values()) {
+		for (ProjectFacade project: values()) {
 			if (project.getName().equalsIgnoreCase(name) && Objects.equals(parentId, project.getParentId())) 
 				return project.getId();
 		}
@@ -117,7 +96,7 @@ public class ProjectCache {
 	
 	public List<ProjectFacade> getChildren(Long id) {
 		List<ProjectFacade> children = new ArrayList<>();
-		for (ProjectFacade facade: projects.values()) {
+		for (ProjectFacade facade: values()) {
 			if (id.equals(facade.getParentId()))
 				children.add(facade);
 		}
@@ -134,7 +113,30 @@ public class ProjectCache {
 	
 	@Override
 	public ProjectCache clone() {
-		return new ProjectCache(projects);
+		ProjectCache clone = new ProjectCache();
+		clone.putAll(this);
+		return clone;
+	}
+
+	public double getSimilarScore(Project project, @Nullable String term) {
+		String path = getPath(project.getId());
+		return Similarities.getSimilarScore(path, term);
+	}
+
+	public Collection<Project> getProjects() {
+		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		return keySet().stream().map(it->projectManager.load(it)).collect(Collectors.toSet());
+	}
+	
+	public Comparator<Project> comparingPath() {
+		return new Comparator<Project>() {
+
+			@Override
+			public int compare(Project o1, Project o2) {
+				return getPath(o1.getId()).compareTo(getPath(o2.getId()));
+			}
+			
+		};		
 	}
 	
 }

@@ -7,6 +7,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestUpdated extends PullRequestEvent {
 
@@ -39,4 +40,10 @@ public class PullRequestUpdated extends PullRequestEvent {
 		}
 		return committers;
 	}
+
+	@Override
+	public PullRequestEvent cloneIn(Dao dao) {
+		return new PullRequestUpdated(dao.load(PullRequestUpdate.class, update.getId()));
+	}
+	
 }

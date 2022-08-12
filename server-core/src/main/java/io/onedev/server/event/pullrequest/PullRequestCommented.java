@@ -3,6 +3,7 @@ package io.onedev.server.event.pullrequest;
 import java.util.Collection;
 
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestCommented extends PullRequestEvent {
 
@@ -32,6 +33,13 @@ public class PullRequestCommented extends PullRequestEvent {
 	@Override
 	public String getActivity() {
 		return "commented";
+	}
+
+	@Override
+	public PullRequestEvent cloneIn(Dao dao) {
+		return new PullRequestCommented(
+				dao.load(PullRequestComment.class, comment.getId()), 
+				notifiedEmailAddresses);
 	}
 
 }

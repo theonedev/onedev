@@ -39,8 +39,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.ParamSpecAware;
 import io.onedev.server.buildspec.step.Step;
-import io.onedev.server.util.match.MatchScoreProvider;
-import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.util.Similarities;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
@@ -327,30 +326,28 @@ abstract class StepEditPanel extends Panel implements BuildSpecAware, ParamSpecA
 						
 						NestedTree<TreeNode> tree;
 						if (searchInput != null) {
-							MatchScoreProvider<TreeNode> matchScoreProvider = new MatchScoreProvider<TreeNode>() {
+							List<TreeNode> similarNodes = new Similarities<TreeNode>(nodes) {
 
 								@Override
-								public double getMatchScore(TreeNode object) {
-									String fullName = object.getName();
-									if (object instanceof StepNode) {
-										StepNode stepNode = (StepNode) object;
+								protected double getSimilarScore(TreeNode item) {
+									String fullName = item.getName();
+									if (item instanceof StepNode) {
+										StepNode stepNode = (StepNode) item;
 										String groupName = EditableUtils.getGroup(stepNode.stepClass);
 										if (groupName != null)
 											fullName = groupName + "/" + fullName;
 									}
-									return MatchScoreUtils.getMatchScore(
+									return Similarities.getSimilarScore(
 											StringUtils.deleteWhitespace(fullName), 
 											StringUtils.deleteWhitespace(searchInput));
 								}
 								
 							};
 							
-							List<TreeNode> matchNodes = MatchScoreUtils.filterAndSort(nodes, matchScoreProvider);
-							
 							List<TreeNode> filteredNodes = new ArrayList<>();
 							
 							Set<String> addedGroups = new HashSet<>();
-							for (TreeNode matchNode: matchNodes) {
+							for (TreeNode matchNode: similarNodes) {
 								if (matchNode instanceof StepNode) {
 									StepNode currentNode = (StepNode) matchNode;
 									filteredNodes.add(currentNode);

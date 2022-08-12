@@ -123,4 +123,13 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 		return count(getCriteria(term));
 	}
 
+	@Sessional
+	@Override
+	public List<Group> queryAdminstrator() {
+		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
+		criteria.add(Restrictions.eq(Group.PROP_ADMINISTRATOR, true));
+		criteria.setCacheable(true);
+		return query(criteria);
+	}
+
 }

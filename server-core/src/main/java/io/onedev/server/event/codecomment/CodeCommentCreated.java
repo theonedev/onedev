@@ -1,6 +1,7 @@
 package io.onedev.server.event.codecomment;
 
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.persistence.dao.Dao;
 
 public class CodeCommentCreated extends CodeCommentEvent {
 
@@ -16,6 +17,11 @@ public class CodeCommentCreated extends CodeCommentEvent {
 	@Override
 	public String getActivity() {
 		return "added";
+	}
+
+	@Override
+	public CodeCommentEvent cloneIn(Dao dao) {
+		return new CodeCommentCreated(dao.load(CodeComment.class, getComment().getId()));
 	}
 
 }

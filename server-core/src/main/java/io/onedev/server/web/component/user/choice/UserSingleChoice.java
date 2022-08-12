@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.user.choice;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -12,7 +12,7 @@ import io.onedev.server.web.component.select2.Select2Choice;
 @SuppressWarnings("serial")
 public class UserSingleChoice extends Select2Choice<User> {
 
-	public UserSingleChoice(String id, IModel<User> selectionModel, IModel<Collection<User>> choicesModel) {
+	public UserSingleChoice(String id, IModel<User> selectionModel, IModel<List<User>> choicesModel) {
 		super(id, selectionModel, new UserChoiceProvider(choicesModel));
 	}
 

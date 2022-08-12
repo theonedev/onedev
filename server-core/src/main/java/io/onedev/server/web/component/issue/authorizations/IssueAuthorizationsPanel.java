@@ -4,10 +4,8 @@ import static io.onedev.server.model.IssueAuthorization.PROP_ISSUE;
 import static io.onedev.server.model.IssueAuthorization.PROP_USER;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Session;
@@ -35,6 +33,8 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -43,8 +43,8 @@ import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.match.MatchScoreProvider;
-import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
@@ -73,10 +73,13 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 	private EntityCriteria<IssueAuthorization> getCriteria() {
 		EntityCriteria<IssueAuthorization> criteria = 
 				EntityCriteria.of(IssueAuthorization.class);
-		if (query != null)
-			criteria.createCriteria(PROP_USER).add(Restrictions.ilike(User.PROP_NAME, query, MatchMode.ANYWHERE)); 
-		else
+		if (query != null) {
+			criteria.createCriteria(PROP_USER).add(Restrictions.or(
+					Restrictions.ilike(User.PROP_NAME, query, MatchMode.ANYWHERE), 
+					Restrictions.ilike(User.PROP_FULL_NAME, query, MatchMode.ANYWHERE))); 
+		} else {
 			criteria.setCacheable(true);
+		}
 		criteria.add(Restrictions.eq(PROP_ISSUE, getIssue()));
 		return criteria;
 	}
@@ -104,22 +107,22 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 
 			@Override
 			public void query(String term, int page, Response<User> response) {
-				List<User> notAuthorized = OneDev.getInstance(UserManager.class).query();
-				notAuthorized.removeAll(getIssue().getAuthorizations().stream()
-						.map(it->it.getUser()).collect(Collectors.toList()));
-				Collections.sort(notAuthorized);
-				Collections.reverse(notAuthorized);
+				UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
 				
-				notAuthorized = MatchScoreUtils.filterAndSort(notAuthorized, new MatchScoreProvider<User>() {
+				List<User> users = new ArrayList<>(cache.getUsers());
+				users.removeAll(getIssue().getAuthorizedUsers());
+				users.sort(cache.comparingDisplayName(Sets.newHashSet()));
+				
+				users = new Similarities<User>(users) {
 
 					@Override
-					public double getMatchScore(User object) {
-						return object.getMatchScore(term);
+					public double getSimilarScore(User object) {
+						return cache.getSimilarScore(object, term);
 					}
 					
-				});
+				};
 				
-				new ResponseFiller<>(response).fill(notAuthorized, page, WebConstants.PAGE_SIZE);
+				new ResponseFiller<>(response).fill(users, page, WebConstants.PAGE_SIZE);
 			}
 
 		}) {

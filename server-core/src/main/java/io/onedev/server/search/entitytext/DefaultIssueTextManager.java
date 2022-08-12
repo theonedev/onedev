@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -133,7 +134,10 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 			projectQueryBuilder.setMinimumNumberShouldMatch(1);
 			queryBuilder.add(projectQueryBuilder.build(), Occur.MUST);
 		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Long> projectIds = projectManager.getPermittedProjects(new AccessProject()).getIds();
+			Collection<Long> projectIds = projectManager.getPermittedProjects(new AccessProject()).stream()
+					.map(it->it.getId())
+					.collect(Collectors.toSet());
+			
 			if (!projectIds.isEmpty()) 
 				queryBuilder.add(buildQuery(projectIds), Occur.MUST);
 			else 

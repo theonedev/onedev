@@ -21,7 +21,7 @@ public class ResponseFiller<T> {
 			from = to;
 		}
 		response.addAll(values.subList(from, to));
-		response.setHasMore(to<values.size());
+		response.setHasMore(to < values.size());
 	}
 	
 }

@@ -22,7 +22,6 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -46,15 +45,15 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
     
     private final SshKeyManager sshKeyManager;
     
+    private final EmailAddressManager emailAddressManager;
+    
 	@Inject
     public PasswordAuthorizingRealm(UserManager userManager, SettingManager settingManager, 
     		MembershipManager membershipManager, GroupManager groupManager, 
     		ProjectManager projectManager, SessionManager sessionManager, 
     		TransactionManager transactionManager, SshKeyManager sshKeyManager, 
-    		PasswordService passwordService, EmailAddressManager emailAddressManager, 
-    		IssueAuthorizationManager issueAuthorizationManager) {
-		super(userManager, groupManager, projectManager, sessionManager, 
-				settingManager, emailAddressManager, issueAuthorizationManager);
+    		PasswordService passwordService, EmailAddressManager emailAddressManager) {
+		super(userManager, groupManager, projectManager, sessionManager, settingManager);
 		
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(passwordService);
@@ -63,6 +62,7 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
     	this.transactionManager = transactionManager;
     	this.membershipManager = membershipManager;
     	this.sshKeyManager = sshKeyManager;
+    	this.emailAddressManager = emailAddressManager;
     }
 
 	@Override

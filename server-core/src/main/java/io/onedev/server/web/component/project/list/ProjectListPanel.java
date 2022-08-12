@@ -78,10 +78,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectBuildStats;
-import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
@@ -346,10 +346,10 @@ public class ProjectListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
+								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
 				
 									@Override
-									protected ProjectCollection load() {
+									protected List<Project> load() {
 										return getTargetProjects();
 									}
 									
@@ -605,10 +605,10 @@ public class ProjectListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
+								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
 				
 									@Override
-									protected ProjectCollection load() {
+									protected List<Project> load() {
 										return getTargetProjects();
 									}
 									
@@ -859,9 +859,10 @@ public class ProjectListPanel extends Panel {
 				return menuItems;
 			}
 			
-			private ProjectCollection getTargetProjects() {
-				ProjectCollection projects = getProjectManager().getPermittedProjects(new CreateChildren());
-				projects.sortByPath();
+			private List<Project> getTargetProjects() {
+				ProjectCache cache = getProjectManager().cloneCache();
+				List<Project> projects = new ArrayList<>(getProjectManager().getPermittedProjects(new CreateChildren()));
+				projects.sort(cache.comparingPath());
 				return projects;
 			}
 

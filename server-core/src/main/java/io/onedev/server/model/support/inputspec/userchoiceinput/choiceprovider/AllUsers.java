@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Sets;
@@ -8,6 +9,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 import io.onedev.server.web.util.WicketUtils;
@@ -19,14 +21,21 @@ public class AllUsers implements ChoiceProvider {
 
 	@Override
 	public List<User> getChoices(boolean allPossible) {
-		UserManager userManager = OneDev.getInstance(UserManager.class);
+		UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
+		
 		if (WicketUtils.getPage() instanceof IssueDetailPage) {
 			IssueDetailPage issueDetailPage = (IssueDetailPage) WicketUtils.getPage();
-			return userManager.queryAndSort(issueDetailPage.getIssue().getParticipants());
+			List<User> users = new ArrayList<>(cache.getUsers());
+			users.sort(cache.comparingDisplayName(issueDetailPage.getIssue().getParticipants()));
+			return users;
 		} else if (SecurityUtils.getUser() != null) {
-			return userManager.queryAndSort(Sets.newHashSet(SecurityUtils.getUser()));
+			List<User> users = new ArrayList<>(cache.getUsers());
+			users.sort(cache.comparingDisplayName(Sets.newHashSet(SecurityUtils.getUser())));
+			return users;
 		} else {
-			return userManager.queryAndSort(Sets.newHashSet());
+			List<User> users = new ArrayList<>(cache.getUsers());
+			users.sort(cache.comparingDisplayName(Sets.newHashSet()));
+			return users;
 		}
 	}
 

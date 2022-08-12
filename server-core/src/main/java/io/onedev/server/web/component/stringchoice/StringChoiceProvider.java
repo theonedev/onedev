@@ -10,8 +10,7 @@ import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
-import io.onedev.server.util.match.MatchScoreProvider;
-import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.util.Similarities;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 import io.onedev.server.web.component.select2.Response;
@@ -56,24 +55,26 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 
 	@Override
 	public void query(String term, int page, Response<String> response) {
-		List<String> matched;
+		List<String> similarities;
 		if (StringUtils.isNotBlank(term)) {
 			Map<String, String> choices = choicesModel.getObject();
-			matched =  MatchScoreUtils.filterAndSort(choices.keySet(), new MatchScoreProvider<String>() {
+			similarities =  new Similarities<String>(choices.keySet()) {
+
+				private static final long serialVersionUID = 1L;
 
 				@Override
-				public double getMatchScore(String object) {
-					return MatchScoreUtils.getMatchScore(choices.get(object), term);
+				public double getSimilarScore(String object) {
+					return Similarities.getSimilarScore(choices.get(object), term);
 				}
 				
-			});
+			};
 			
-			if (tagsMode && !matched.contains(term))
-				matched.add(term);
+			if (tagsMode && !similarities.contains(term))
+				similarities.add(term);
 		} else {
-			matched = new ArrayList<>(choicesModel.getObject().keySet());
+			similarities = new ArrayList<>(choicesModel.getObject().keySet());
 		}
-		new ResponseFiller<String>(response).fill(matched, page, WebConstants.PAGE_SIZE);
+		new ResponseFiller<String>(response).fill(similarities, page, WebConstants.PAGE_SIZE);
 	}
 	
 }

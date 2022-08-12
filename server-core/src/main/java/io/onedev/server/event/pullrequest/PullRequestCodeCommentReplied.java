@@ -2,6 +2,7 @@ package io.onedev.server.event.pullrequest;
 
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestCodeCommentReplied extends PullRequestCodeCommentEvent {
 
@@ -24,6 +25,13 @@ public class PullRequestCodeCommentReplied extends PullRequestCodeCommentEvent {
 	@Override
 	public String getActivity() {
 		return "replied code comment"; 
+	}
+
+	@Override
+	public PullRequestEvent cloneIn(Dao dao) {
+		return new PullRequestCodeCommentReplied(
+				dao.load(PullRequest.class, getRequest().getId()), 
+				dao.load(CodeCommentReply.class, reply.getId()));
 	}
 
 }

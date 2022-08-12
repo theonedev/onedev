@@ -31,6 +31,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.commit.CommitQuery;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadCode;
 
 @Singleton
 public class CommitNotificationManager extends AbstractNotificationManager {
@@ -85,22 +87,24 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 			Collection<String> notifyEmails = new HashSet<>();
 			for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
 				User user = entry.getKey();
-				for (String queryString: entry.getValue()) {
-					User.push(user);
-					try {
-						if (CommitQuery.parse(project, queryString).matches(event)) {
-							EmailAddress emailAddress = user.getPrimaryEmailAddress();
-							if (emailAddress != null && emailAddress.isVerified())
-								notifyEmails.add(emailAddress.getValue());
-							break;
+				if (user.asSubject().isPermitted(new ProjectPermission(event.getProject(), new ReadCode()))) {
+					for (String queryString: entry.getValue()) {
+						User.push(user);
+						try {
+							if (CommitQuery.parse(project, queryString).matches(event)) {
+								EmailAddress emailAddress = user.getPrimaryEmailAddress();
+								if (emailAddress != null && emailAddress.isVerified())
+									notifyEmails.add(emailAddress.getValue());
+								break;
+							}
+						} catch (Exception e) {
+							String message = String.format("Error processing commit subscription "
+									+ "(user: %s, project: %s, commit: %s, query: %s)", 
+									user.getName(), project.getPath(), event.getNewCommitId().name(), queryString);
+							logger.error(message, e);
+						} finally {
+							User.pop();
 						}
-					} catch (Exception e) {
-						String message = String.format("Error processing commit subscription "
-								+ "(user: %s, project: %s, commit: %s, query: %s)", 
-								user.getName(), project.getPath(), event.getNewCommitId().name(), queryString);
-						logger.error(message, e);
-					} finally {
-						User.pop();
 					}
 				}
 			}

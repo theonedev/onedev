@@ -1,3 +1,6 @@
+.project-selector .projects, .project-selector .no-projects {
+	height: 400px;
+}
 .project-selector input {
 	padding-right: 2rem;
 }

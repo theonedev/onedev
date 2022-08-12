@@ -8,6 +8,7 @@ import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
@@ -57,6 +58,11 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 			commitId = ObjectId.zeroId();
 		}
 		return new ProjectScopedCommit(getProject(), commitId);
+	}
+
+	@Override
+	public PullRequestEvent cloneIn(Dao dao) {
+		return new PullRequestChanged(dao.load(PullRequestChange.class, change.getId()), note);
 	}
 
 }

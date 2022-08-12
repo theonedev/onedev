@@ -2,7 +2,6 @@ package io.onedev.server.web.page.admin.group.membership;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,6 +32,8 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -41,8 +42,8 @@ import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.match.MatchScoreProvider;
-import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
@@ -78,10 +79,13 @@ public class GroupMembershipsPage extends GroupPage {
 
 	private EntityCriteria<Membership> getCriteria() {
 		EntityCriteria<Membership> criteria = EntityCriteria.of(Membership.class);
-		if (query != null)
-			criteria.createCriteria("user").add(Restrictions.ilike("name", query, MatchMode.ANYWHERE)); 
-		else
+		if (query != null) {
+			criteria.createCriteria("user").add(Restrictions.or(
+					Restrictions.ilike(User.PROP_NAME, query, MatchMode.ANYWHERE), 
+					Restrictions.ilike(User.PROP_FULL_NAME, query, MatchMode.ANYWHERE))); 
+		} else {
 			criteria.setCacheable(true);
+		}
 		criteria.add(Restrictions.eq("group", getGroup()));
 		return criteria;
 	}
@@ -110,21 +114,22 @@ public class GroupMembershipsPage extends GroupPage {
 
 			@Override
 			public void query(String term, int page, Response<User> response) {
-				List<User> nonMembers = OneDev.getInstance(UserManager.class).query();
-				nonMembers.removeAll(getGroup().getMembers());
-				Collections.sort(nonMembers);
-				Collections.reverse(nonMembers);
+				UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
 				
-				nonMembers = MatchScoreUtils.filterAndSort(nonMembers, new MatchScoreProvider<User>() {
+				List<User> users = new ArrayList<>(cache.getUsers());
+				users.removeAll(getGroup().getMembers());
+				users.sort(cache.comparingDisplayName(Sets.newHashSet()));
+				
+				users = new Similarities<User>(users) {
 
 					@Override
-					public double getMatchScore(User object) {
-						return object.getMatchScore(term);
+					public double getSimilarScore(User object) {
+						return cache.getSimilarScore(object, term);
 					}
 					
-				});
+				};
 				
-				new ResponseFiller<>(response).fill(nonMembers, page, WebConstants.PAGE_SIZE);
+				new ResponseFiller<>(response).fill(users, page, WebConstants.PAGE_SIZE);
 			}
 
 		}) {

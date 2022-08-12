@@ -4,10 +4,9 @@ import static io.onedev.server.model.User.PROP_PASSWORD;
 import static io.onedev.server.model.User.PROP_SSO_CONNECTOR;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,12 +16,16 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import org.apache.shiro.authz.Permission;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -32,8 +35,12 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.model.IssueAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.persistence.IdManager;
@@ -43,6 +50,9 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.security.permission.ConfidentialIssuePermission;
+import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
 
 @Singleton
@@ -58,13 +68,17 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     
     private final EmailAddressManager emailAddressManager;
     
+    private final GroupManager groupManager;
+    
     private final TransactionManager transactionManager;
     
-	private final Map<String, Long> idCache = new ConcurrentHashMap<>();
+	private final UserCache cache = new UserCache();
+	
+	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
 	
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
-    		IssueFieldManager issueFieldManager, IdManager idManager, 
+    		IssueFieldManager issueFieldManager, IdManager idManager, GroupManager groupManager,
     		EmailAddressManager emailAddressManager, TransactionManager transactionManager) {
         super(dao);
         
@@ -74,6 +88,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
         this.idManager = idManager;
         this.emailAddressManager = emailAddressManager;
         this.transactionManager = transactionManager;
+        this.groupManager = groupManager;
     }
 
 	@Transactional
@@ -81,6 +96,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	public void replicate(User user) {
 		getSession().replicate(user, ReplicationMode.OVERWRITE);
 		idManager.useId(User.class, user.getId());
+		cacheAfterCommit(user);
 	}
 	
     @Transactional
@@ -223,32 +239,46 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Sessional
     @Override
     public User findByName(String userName) {
-		userName = userName.toLowerCase();
-		Long id = idCache.get(userName);
-		if (id != null) {
-			User user = get(id);
-			if (user != null && user.getName().equals(userName))
-				return user;
+		cacheLock.readLock().lock();
+		try {
+			UserFacade facade = cache.findByName(userName);
+			if (facade != null)
+				return load(facade.getId());
+			else
+				return null;
+		} finally {
+			cacheLock.readLock().unlock();
 		}
-		return null;
     }
 
 	@Sessional
     @Override
     public User findByFullName(String fullName) {
-		EntityCriteria<User> criteria = newCriteria();
-		criteria.add(Restrictions.ilike(User.PROP_FULL_NAME, fullName));
-		criteria.setCacheable(true);
-		return find(criteria);
+		cacheLock.readLock().lock();
+		try {
+			UserFacade facade = cache.findByFullName(fullName);
+			if (facade != null)
+				return load(facade.getId());
+			else
+				return null;
+		} finally {
+			cacheLock.readLock().unlock();
+		}
     }
 	
 	@Sessional
     @Override
     public User findByAccessToken(String accessToken) {
-		EntityCriteria<User> criteria = newCriteria();
-		criteria.add(Restrictions.eq(User.PROP_ACCESS_TOKEN, accessToken));
-		criteria.setCacheable(true);
-		return find(criteria);
+		cacheLock.readLock().lock();
+		try {
+			UserFacade facade = cache.findByAccessToken(accessToken);
+			if (facade != null)
+				return load(facade.getId());
+			else
+				return null;
+		} finally {
+			cacheLock.readLock().unlock();
+		}
     }
 	
 	@Override
@@ -264,33 +294,33 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		return count(true);
 	}
 
-	@Override
-	public List<User> queryAndSort(Collection<User> topUsers) {
-		List<User> users = query();
-		users.sort(Comparator.comparing(User::getDisplayName));
-		users.removeAll(topUsers);
-		users.addAll(0, topUsers);
-		return users;
-	}
-
     @Sessional
     @Listen
     public void on(SystemStarted event) {
-    	for (User user: query()) 
-    		idCache.put(user.getName(), user.getId());
+    	cacheLock.writeLock().lock();
+    	try {
+        	for (User user: query()) 
+        		cache.put(user.getId(), user.getFacade());
+    	} finally {
+    		cacheLock.writeLock().unlock();
+    	}
     }
 	
     @Transactional
     @Listen
     public void on(EntityRemoved event) {
     	if (event.getEntity() instanceof User) {
-    		User user = (User) event.getEntity();
-    		String name = user.getName();
+    		Long id = event.getEntity().getId();
     		transactionManager.runAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-					idCache.remove(name);
+			    	cacheLock.writeLock().lock();
+			    	try {
+			    		cache.remove(id);
+			    	} finally {
+			    		cacheLock.writeLock().unlock();
+			    	}
 				}
 				
     		});
@@ -300,19 +330,25 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Transactional
     @Listen
     public void on(EntityPersisted event) {
-    	if (event.getEntity() instanceof User) {
-    		User user = (User) event.getEntity();
-    		String name = user.getName();
-    		Long id = user.getId();
-    		transactionManager.runAfterCommit(new Runnable() {
+    	if (event.getEntity() instanceof User) 
+    		cacheAfterCommit((User) event.getEntity());
+    }
+    
+    private void cacheAfterCommit(User user) {
+    	UserFacade facade = user.getFacade();
+		transactionManager.runAfterCommit(new Runnable() {
 
-				@Override
-				public void run() {
-					idCache.put(name, id);
-				}
-    			
-    		});
-    	}
+			@Override
+			public void run() {
+		    	cacheLock.writeLock().lock();
+		    	try {
+		    		cache.put(facade.getId(), facade);
+		    	} finally {
+		    		cacheLock.writeLock().unlock();
+		    	}
+			}
+			
+		});
     }
     
 	@Transactional
@@ -395,4 +431,66 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			return null;
 	}
 
+	@Override
+	public UserCache cloneCache() {
+		cacheLock.readLock().lock();
+		try {
+			return cache.clone();
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+
+	@Override
+	public Collection<User> getAuthorizedUsers(Project project, Permission permission) {
+		UserCache cacheClone;
+		cacheLock.readLock().lock();
+		try {
+			cacheClone = cache.clone();
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+
+		Collection<User> authorizedUsers = Sets.newHashSet(getRoot());
+
+       	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+   		if (defaultLoginGroup != null && defaultLoginGroup.isAdministrator())
+   			return cacheClone.getUsers();
+   		
+		for (Group group: groupManager.queryAdminstrator()) {
+			for (User user: group.getMembers())
+				authorizedUsers.add(user);
+		}
+		
+		Project current = project;
+		do {
+			if (current.getDefaultRole() != null && current.getDefaultRole().implies(permission)) 
+	   			return cacheClone.getUsers();
+			
+			for (UserAuthorization authorization: current.getUserAuthorizations()) {  
+				if (authorization.getRole().implies(permission))
+					authorizedUsers.add(authorization.getUser());
+			}
+			
+			for (GroupAuthorization authorization: current.getGroupAuthorizations()) {  
+				if (authorization.getRole().implies(permission)) {
+					if (authorization.getGroup().equals(defaultLoginGroup))
+			   			return cacheClone.getUsers();
+					
+					for (User user: authorization.getGroup().getMembers())
+						authorizedUsers.add(user);
+				}
+			}
+			current = current.getParent();
+		} while (current != null);
+		
+		if (permission instanceof ConfidentialIssuePermission) {
+			ConfidentialIssuePermission confidentialIssuePermission = (ConfidentialIssuePermission) permission;
+			for (IssueAuthorization authorization: confidentialIssuePermission.getIssue().getAuthorizations()) 
+				authorizedUsers.add(authorization.getUser());
+		}
+
+        return authorizedUsers;	
+	}
+	
 }

@@ -9,6 +9,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
+import io.onedev.server.persistence.dao.Dao;
 
 public class IssueChanged extends IssueEvent {
 
@@ -59,6 +60,11 @@ public class IssueChanged extends IssueEvent {
 	@Override
 	public ActivityDetail getActivityDetail() {
 		return getChange().getData().getActivityDetail();
+	}
+
+	@Override
+	public IssueEvent cloneIn(Dao dao) {
+		return new IssueChanged(dao.load(IssueChange.class, change.getId()), comment);		
 	}
 
 }

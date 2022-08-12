@@ -61,7 +61,6 @@ import io.onedev.server.search.entitytext.PullRequestTextManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.emoji.Emojis;
@@ -629,13 +628,13 @@ public abstract class PullRequestListPanel extends Panel {
 	
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
-					return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
+					return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
 	
 						@Override
-						protected ProjectCollection load() {
-							ProjectCollection projects = OneDev.getInstance(ProjectManager.class)
-									.getPermittedProjects(new ReadCode());
-							projects.sortByPath();
+						protected List<Project> load() {
+							ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+							List<Project> projects = new ArrayList<Project>(projectManager.getPermittedProjects(new ReadCode()));
+							projects.sort(projectManager.cloneCache().comparingPath());
 							return projects;
 						}
 						

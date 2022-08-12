@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.project.choice;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -13,8 +14,8 @@ public class ProjectMultiChoice extends Select2MultiChoice<Project> {
 
 	private static final long serialVersionUID = 1L;
 
-	public ProjectMultiChoice(String id, IModel<Collection<Project>> model, AbstractProjectChoiceProvider choiceProvider) {
-		super(id, model, choiceProvider);
+	public ProjectMultiChoice(String id, IModel<Collection<Project>> model, IModel<List<Project>> choicesModel) {
+		super(id, model, new ProjectChoiceProvider(choicesModel));
 	}
 
 	@Override

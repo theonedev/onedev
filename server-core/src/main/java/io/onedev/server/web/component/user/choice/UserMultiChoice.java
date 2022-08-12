@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.user.choice;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -13,7 +14,8 @@ public class UserMultiChoice extends Select2MultiChoice<User> {
 
 	private static final long serialVersionUID = 1L;
 
-	public UserMultiChoice(String id, IModel<Collection<User>> selectionsModel, IModel<Collection<User>>choicesModel) {
+	public UserMultiChoice(String id, IModel<Collection<User>> selectionsModel, 
+			IModel<List<User>> choicesModel) {
 		super(id, selectionsModel, new UserChoiceProvider(choicesModel));
 	}
 

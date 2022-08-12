@@ -21,6 +21,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -65,7 +66,7 @@ public class EmailAddress extends AbstractEntity {
 	}
 
 	@Editable
-	public String getVerficationCode() {
+	public String getVerificationCode() {
 		return verificationCode;
 	}
 
@@ -108,7 +109,12 @@ public class EmailAddress extends AbstractEntity {
 	}
 
 	public boolean isVerified() {
-    	return getVerficationCode() == null;
+    	return getVerificationCode() == null;
     }
 
+	public EmailAddressFacade getFacade() {
+		return new EmailAddressFacade(getId(), getValue(), isPrimary(), isGit(), 
+				getVerificationCode(), getOwner().getId());
+	}
+	
 }

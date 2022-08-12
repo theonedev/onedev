@@ -327,6 +327,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	private transient Collection<Build> currentBuilds;
 	
+	private transient Collection<User> assignees;
+	
 	public String getTitle() {
 		return title;
 	}
@@ -669,6 +671,12 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	public void setAssignments(Collection<PullRequestAssignment> assignments) {
 		this.assignments = assignments;
+	}
+	
+	public Collection<User> getAssignees() {
+		if (assignees == null) 
+			assignees = getAssignments().stream().map(it->it.getUser()).collect(Collectors.toSet());
+		return assignees;
 	}
 
 	public Collection<Build> getBuilds() {
@@ -1144,4 +1152,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return null;
 	}
 
+	public static String getSerialLockName(Long requestId) {
+		return "pull-request-" + requestId + "-serial";
+	}
+	
 }

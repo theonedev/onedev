@@ -241,7 +241,6 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 
 	@Override
 	public void onResourceRequested() {
-
 		// this is the callback that retrieves matching choices used to populate
 		// the dropdown
 
@@ -282,7 +281,7 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 		} catch (JSONException e) {
 			throw new RuntimeException("Could not write Json response", e);
 		}
-
+		
 		try {
 			out.flush();
 		} catch (IOException e) {

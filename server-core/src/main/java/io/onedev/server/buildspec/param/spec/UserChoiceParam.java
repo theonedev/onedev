@@ -2,13 +2,10 @@ package io.onedev.server.buildspec.param.spec;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.AllUsers;
 import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
@@ -74,7 +71,7 @@ public class UserChoiceParam extends ParamSpec {
 
 	@Override
 	public List<String> getPossibleValues() {
-		return OneDev.getInstance(UserManager.class).query().stream().map(user->user.getName()).collect(Collectors.toList());
+		return UserChoiceInput.getPossibleValues();
 	}
 
 	@Override

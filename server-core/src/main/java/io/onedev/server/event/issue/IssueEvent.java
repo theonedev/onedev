@@ -9,6 +9,7 @@ import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.dao.Dao;
 
 public abstract class IssueEvent extends ProjectEvent {
 
@@ -32,5 +33,7 @@ public abstract class IssueEvent extends ProjectEvent {
 	public Map<String, Group> getNewGroups() {
 		return new HashMap<>();
 	}
+	
+	public abstract IssueEvent cloneIn(Dao dao);
 	
 }

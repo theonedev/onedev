@@ -64,8 +64,7 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
-import io.onedev.server.util.match.MatchScoreProvider;
-import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.util.Similarities;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -128,6 +127,11 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected AbstractEntity getEntity() {
 				return getIssue();
+			}
+
+			@Override
+			protected boolean isAuthorized(User user) {
+				return SecurityUtils.canAccess(user.asSubject(), getIssue());
 			}
 			
 		});
@@ -581,15 +585,14 @@ public abstract class IssueSidePanel extends Panel {
 				List<Milestone> milestones = getProject().getSortedHierarchyMilestones();
 				milestones.removeAll(getIssue().getMilestones());
 				
-				milestones = MatchScoreUtils.filterAndSort(
-						milestones, new MatchScoreProvider<Milestone>() {
+				milestones = new Similarities<Milestone>(milestones) {
 
 					@Override
-					public double getMatchScore(Milestone object) {
-						return MatchScoreUtils.getMatchScore(object.getName(), term);
+					public double getSimilarScore(Milestone object) {
+						return Similarities.getSimilarScore(object.getName(), term);
 					}
 					
-				});
+				};
 				new ResponseFiller<Milestone>(response).fill(milestones, page, WebConstants.PAGE_SIZE);
 			}
 			

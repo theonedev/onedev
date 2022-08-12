@@ -67,28 +67,37 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
+	public final boolean equals(Object other) {
+		return equals(this, other);
+	}
+
+	@Override
+	public final int hashCode() {
+		return hashCode(this);
+	}
+	
+	public static boolean equals(Object o1, Object o2) {
+		if (o1 == o2) {
 			return true;
-		} else if (other instanceof AbstractEntity) {
-			AbstractEntity otherEntity = (AbstractEntity) other;
-			if (getId() == null || otherEntity.getId() == null)
-				return super.equals(other);
+		} else if (o1 instanceof AbstractEntity && o2 instanceof AbstractEntity) {
+			Long id1 = ((AbstractEntity) o1).getId();
+			Long id2 = ((AbstractEntity) o2).getId();
+			if (id1 != null && id2 != null)
+				return new EqualsBuilder().append(id1, id2).isEquals();
 			else 
-				return new EqualsBuilder().append(getId(), otherEntity.getId()).isEquals();
+				return false;
 		} else {
 			return false;
 		}
 	}
-
-	@Override
-	public int hashCode() {
-		if (getId() == null)
-			return super.hashCode();
+	
+	public static int hashCode(AbstractEntity entity) {
+		if (entity.getId() != null)
+			return new HashCodeBuilder(17, 37).append(entity.getId()).toHashCode();
 		else
-			return new HashCodeBuilder(17, 37).append(getId()).toHashCode();
+			return System.identityHashCode(entity);
 	}
-
+	
 	@Override
 	public int compareTo(AbstractEntity entity) {
 		if (getId() != null) {

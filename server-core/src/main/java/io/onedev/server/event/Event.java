@@ -29,5 +29,5 @@ public abstract class Event {
 	public Date getDate() {
 		return date;
 	}
-	
+
 }

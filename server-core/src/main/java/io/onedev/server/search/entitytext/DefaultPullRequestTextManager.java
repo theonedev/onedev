@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -36,7 +37,6 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -113,10 +113,13 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 		if (project != null) {
 			queryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
 		} else if (!SecurityUtils.isAdministrator()) {
-			ProjectCollection projects = projectManager.getPermittedProjects(new ReadCode());
-			if (!projects.getIds().isEmpty()) {
-				Collection<Long> allIds = projects.getCache().getIds();
-				queryBuilder.add(Criteria.forManyValues(FIELD_PROJECT_ID, projects.getIds(), allIds), Occur.MUST);
+			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode());
+			if (!projects.isEmpty()) {
+				Query projectsQuery = Criteria.forManyValues(
+						FIELD_PROJECT_ID, 
+						projects.stream().map(it->it.getId()).collect(Collectors.toSet()), 
+						projectManager.getIds());
+				queryBuilder.add(projectsQuery, Occur.MUST);
 			} else {
 				return null;
 			}

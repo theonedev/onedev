@@ -1,4 +1,4 @@
-package io.onedev.server.util.match;
+package io.onedev.server.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,23 +10,25 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public class MatchScoreUtils {
+public abstract class Similarities<T> extends ArrayList<T> {
 
-	public static <T> List<T> filterAndSort(Collection<T> list, MatchScoreProvider<T> matchScoreProvider) {
-		Map<T, Double> matchScores = new HashMap<>();
-		List<T> newList = new ArrayList<>();
-		for (T item: list) {
-			double matchScore = matchScoreProvider.getMatchScore(item);
-			if (matchScore > 0) {
-				matchScores.put(item, matchScore);
-				newList.add(item);
+	private static final long serialVersionUID = 1L;
+
+	public Similarities(Collection<T> collection) {
+		Map<T, Double> similarScores = new HashMap<>();
+		List<T> list = new ArrayList<>();
+		for (T item: collection) {
+			double similarScore = getSimilarScore(item);
+			if (similarScore > 0) {
+				similarScores.put(item, similarScore);
+				list.add(item);
 			}
 		}
-		Collections.sort(newList, new Comparator<T>() {
+		Collections.sort(list, new Comparator<T>() {
 
 			@Override
 			public int compare(T o1, T o2) {
-				double result = matchScores.get(o1) - matchScores.get(o2);
+				double result = similarScores.get(o1) - similarScores.get(o2);
 				if (result < 0)
 					return 1;
 				else if (result > 0)
@@ -36,11 +38,12 @@ public class MatchScoreUtils {
 			}
 			
 		});
-		
-		return newList;
+		addAll(list);
 	}
-
-	public static double getMatchScore(@Nullable String text, @Nullable String query) {
+	
+	protected abstract double getSimilarScore(T item);
+	
+	public static double getSimilarScore(@Nullable String text, @Nullable String query) {
 		if (query == null)
 			query = "";
 		else

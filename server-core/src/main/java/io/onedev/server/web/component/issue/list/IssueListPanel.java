@@ -82,8 +82,8 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.LinkSide;
-import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener.AttachMode;
@@ -432,19 +432,23 @@ public abstract class IssueListPanel extends Panel {
 
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
-					return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
+					return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
 	
 						@Override
-						protected ProjectCollection load() {
-							ProjectCollection collection = OneDev.getInstance(ProjectManager.class)
-									.getPermittedProjects(new AccessProject());
+						protected List<Project> load() {
+							List<Project> projects = new ArrayList<>(getProjectManger().getPermittedProjects(new AccessProject()));
 							
-							Predicate<Long> issueManagementPredicate = 
-									item -> collection.getCache().get(item).isIssueManagement();
-									
-							CollectionUtils.filter(collection.getIds(), issueManagementPredicate);							
-							collection.sortByPath();
-							return collection;
+							ProjectCache cache = getProjectManger().cloneCache();
+							CollectionUtils.filter(projects, new Predicate<Project>() {
+
+								@Override
+								public boolean evaluate(Project object) {
+									return cache.get(object.getId()).isIssueManagement();
+								}
+								
+							});							
+							projects.sort(cache.comparingPath());
+							return projects;
 						}
 						
 					}) {
@@ -653,10 +657,10 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
+								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
 				
 									@Override
-									protected ProjectCollection load() {
+									protected List<Project> load() {
 										return getTargetProjects();
 									}
 									
@@ -876,10 +880,10 @@ public abstract class IssueListPanel extends Panel {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown2) {
-								return new ProjectSelector(id, new LoadableDetachableModel<ProjectCollection>() {
+								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
 				
 									@Override
-									protected ProjectCollection load() {
+									protected List<Project> load() {
 										return getTargetProjects();
 									}
 									
@@ -1011,15 +1015,24 @@ public abstract class IssueListPanel extends Panel {
 				return menuItems;
 			}
 			
-			private ProjectCollection getTargetProjects() {
-				ProjectCollection projects = OneDev.getInstance(ProjectManager.class).getPermittedProjects(new AccessProject());
+			private List<Project> getTargetProjects() {
+				Collection<Project> collection = getProjectManger().getPermittedProjects(new AccessProject());
+				ProjectCache cache = getProjectManger().cloneCache();
 				
-				Predicate<Long> issueManagementPredicate = 
-						item -> projects.getCache().get(item).isIssueManagement();
-				CollectionUtils.filter(projects.getIds(), issueManagementPredicate);							
-				projects.getIds().remove(getProject().getId());
-				projects.sortByPath();
-				return projects;
+				CollectionUtils.filter(collection, new Predicate<Project>() {
+
+					@Override
+					public boolean evaluate(Project object) {
+						return cache.get(object.getId()).isIssueManagement();
+					}
+					
+				});
+				collection.remove(getProject());
+				
+				List<Project> list = new ArrayList<>(collection);
+				list.sort(cache.comparingPath());
+				
+				return list;
 			}
 
 			@Override
@@ -1344,6 +1357,10 @@ public abstract class IssueListPanel extends Panel {
 		issuesTable.add(new NoRecordsBehavior());
 
 		setOutputMarkupId(true);
+	}
+	
+	private ProjectManager getProjectManger() {
+		return OneDev.getInstance(ProjectManager.class);
 	}
 	
 	@Nullable

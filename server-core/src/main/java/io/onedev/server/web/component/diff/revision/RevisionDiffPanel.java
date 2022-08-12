@@ -662,7 +662,7 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			protected List<InputSuggestion> suggest(String matchWith) {
-				return SuggestionUtils.suggestPaths(listOfInvolvedPaths, matchWith);
+				return SuggestionUtils.suggestByPattern(listOfInvolvedPaths, matchWith);
 			}
 
 			@Override

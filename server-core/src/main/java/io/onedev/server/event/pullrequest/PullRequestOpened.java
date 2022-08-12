@@ -1,6 +1,7 @@
 package io.onedev.server.event.pullrequest;
 
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestOpened extends PullRequestEvent {
 
@@ -16,6 +17,11 @@ public class PullRequestOpened extends PullRequestEvent {
 	@Override
 	public String getActivity() {
 		return "opened";
+	}
+
+	@Override
+	public PullRequestEvent cloneIn(Dao dao) {
+		return new PullRequestOpened(dao.load(PullRequest.class, getRequest().getId()));
 	}
 
 }

@@ -30,11 +30,15 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -56,6 +60,26 @@ public class UserListPage extends AdministrationPage {
 	private static final String PARAM_PAGE = "page";
 	
 	private static final String PARAM_QUERY = "query";
+
+	private final IModel<List<User>> usersModel = new LoadableDetachableModel<List<User>>() {
+
+		@Override
+		protected List<User> load() {
+			UserCache cache = getUserManager().cloneCache();
+			List<User> users = new ArrayList<>(cache.getUsers());
+			users.sort(cache.comparingDisplayName(Sets.newHashSet()));
+			users = new Similarities<User>(users) {
+
+				@Override
+				protected double getSimilarScore(User item) {
+					return cache.getSimilarScore(item, query);
+				}
+				
+			};
+			return users;
+		}
+		
+	};
 	
 	private TextField<String> searchField;
 	
@@ -297,12 +321,16 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			public Iterator<? extends User> iterator(long first, long count) {
-				return getUserManager().query(query, (int)first, (int)count).iterator();
+				List<User> users = usersModel.getObject();
+				if (first + count > users.size())
+					return users.subList((int)first, users.size()).iterator();
+				else
+					return users.subList((int)first, (int) (first+count)).iterator();
 			}
 
 			@Override
 			public long calcSize() {
-				return OneDev.getInstance(UserManager.class).count(query);
+				return usersModel.getObject().size();
 			}
 
 			@Override
@@ -312,7 +340,7 @@ public class UserListPage extends AdministrationPage {
 
 					@Override
 					protected User load() {
-						return OneDev.getInstance(UserManager.class).load(id);
+						return getUserManager().load(id);
 					}
 					
 				};
@@ -343,6 +371,12 @@ public class UserListPage extends AdministrationPage {
 	
 	private UserManager getUserManager() {
 		return OneDev.getInstance(UserManager.class);
+	}
+
+	@Override
+	protected void onDetach() {
+		usersModel.detach();
+		super.onDetach();
 	}
 
 	@Override

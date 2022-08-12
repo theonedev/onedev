@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.project.choice;
 
+import java.util.List;
+
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
@@ -10,8 +12,8 @@ import io.onedev.server.web.component.select2.Select2Choice;
 @SuppressWarnings("serial")
 public class ProjectSingleChoice extends Select2Choice<Project> {
 
-	public ProjectSingleChoice(String id, IModel<Project> model, AbstractProjectChoiceProvider choiceProvider) {
-		super(id, model, choiceProvider);
+	public ProjectSingleChoice(String id, IModel<Project> model, IModel<List<Project>> choicesModel) {
+		super(id, model, new ProjectChoiceProvider(choicesModel));
 	}
 
 	@Override

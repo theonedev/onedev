@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -74,13 +73,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SecurityUtils.class);
 	
-	public static Collection<User> getAuthorizedUsers(Project project, Permission permission) {
-		UserManager userManager = OneDev.getInstance(UserManager.class);
-		return userManager.query().stream()
-				.filter(it->it.asSubject().isPermitted(new ProjectPermission(project, permission)))
-				.collect(Collectors.toList());
-	}
-
 	@Nullable
 	public static User getUser() {
 		Long userId = getUserId();
@@ -114,7 +106,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return true;
 		} else {
 			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-			return !projectManager.getPermittedProjects(new CreateChildren()).getIds().isEmpty();
+			return !projectManager.getPermittedProjects(new CreateChildren()).isEmpty();
 		}
 	}
 	

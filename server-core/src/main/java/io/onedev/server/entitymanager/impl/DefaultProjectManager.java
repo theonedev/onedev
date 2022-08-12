@@ -7,7 +7,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -101,10 +101,9 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.util.ProjectCache;
-import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
@@ -149,7 +148,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private final Map<Long, Date> updateDates = new ConcurrentHashMap<>();
 	
-	private final ProjectCache cache = new ProjectCache(new HashMap<>());
+	private final ProjectCache cache = new ProjectCache();
 	
 	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
 	
@@ -292,7 +291,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				public void run() {
 					cacheLock.writeLock().lock();
 					try {
-						cache.cache(facade);
+						cache.put(facade.getId(), facade);
 					} finally {
 						cacheLock.writeLock().unlock();
 					}
@@ -384,7 +383,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.readLock().lock();
 		try {
 			Long projectId = null;
-			for (ProjectFacade facade: cache.getAll()) {
+			for (ProjectFacade facade: cache.values()) {
 				if (serviceDeskName.equals(facade.getServiceDeskName())) {
 					projectId = facade.getId();
 					break;
@@ -441,7 +440,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.readLock().lock();
 		try {
 			Long projectId = null;
-			for (ProjectFacade facade: cache.getAll()) {
+			for (ProjectFacade facade: cache.values()) {
 				if (facade.getName().equalsIgnoreCase(name) 
 						&& Objects.equals(Project.idOf(parent), facade.getParentId())) {
 					projectId = facade.getId();
@@ -661,7 +660,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.writeLock().lock();
 		try {
 			for (Project project: query()) {
-				cache.cache(project.getFacade());
+				cache.put(project.getId(), project.getFacade());
 				checkSanity(project);
 			}
 		} finally {
@@ -780,7 +779,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	@Override
-	public ProjectCollection getPermittedProjects(Permission permission) {
+	public Collection<Project> getPermittedProjects(Permission permission) {
 		ProjectCache cacheClone;
 		cacheLock.readLock().lock();
 		try {
@@ -793,12 +792,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		User user = SecurityUtils.getUser();
         if (user != null) { 
         	if (user.isRoot() || user.isSystem()) { 
-       			return new ProjectCollection(cacheClone, new ArrayList<>(cacheClone.getIds()));
+       			return cacheClone.getProjects();
         	} else {
         		permittedProjectIds = new HashSet<>();
                	for (Group group: user.getGroups()) {
                		if (group.isAdministrator())
-               			return new ProjectCollection(cacheClone, new ArrayList<>(cacheClone.getIds()));
+               			return cacheClone.getProjects();
                		for (GroupAuthorization authorization: group.getAuthorizations()) {
                			if (authorization.getRole().implies(permission)) 
                				addSubTreeIds(permittedProjectIds, authorization.getProject());
@@ -807,7 +806,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
                	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
            		if (defaultLoginGroup != null) {
                		if (defaultLoginGroup.isAdministrator())
-               			return new ProjectCollection(cacheClone, new ArrayList<>(cacheClone.getIds()));
+               			return cacheClone.getProjects();
                		for (GroupAuthorization authorization: defaultLoginGroup.getAuthorizations()) {
                			if (authorization.getRole().implies(permission)) 
                				addSubTreeIds(permittedProjectIds, authorization.getProject());
@@ -825,13 +824,13 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		if (settingManager.getSecuritySetting().isEnableAnonymousAccess())
     			addIdsPermittedByDefaultRole(cacheClone, permittedProjectIds, permission);
         } 
-        permittedProjectIds.retainAll(cacheClone.getIds());
-        return new ProjectCollection(cacheClone, new ArrayList<>(permittedProjectIds));
+        
+        return permittedProjectIds.stream().map(it->load(it)).collect(Collectors.toSet());
 	}	
 	
 	private void addIdsPermittedByDefaultRole(ProjectCache cache, Collection<Long> projectIds, 
 			Permission permission) {
-		for (ProjectFacade project: cache.getAll()) {
+		for (ProjectFacade project: cache.values()) {
 			if (project.getDefaultRoleId() != null) {
 				Role defaultRole = roleManager.load(project.getDefaultRoleId());
 				if (defaultRole.implies(permission)) 
@@ -867,10 +866,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			From<Project, Project> from, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
-			ProjectCollection collection = getPermittedProjects(new AccessProject());
-			if (!collection.getIds().isEmpty()) {
+			Collection<Project> projects = getPermittedProjects(new AccessProject());
+			if (!projects.isEmpty()) {
 				predicates.add(Criteria.forManyValues(builder, from.get(Project.PROP_ID), 
-						collection.getIds(), collection.getCache().getIds()));
+						projects.stream().map(it->it.getId()).collect(Collectors.toSet()), getIds()));
 			} else {
 				predicates.add(builder.disjunction());
 			}
@@ -947,7 +946,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public Collection<Long> getIds() {
 		cacheLock.readLock().lock();
 		try {
-			return new HashSet<>(cache.getIds());
+			return new HashSet<>(cache.keySet());
 		} finally {
 			cacheLock.readLock().unlock();
 		}
@@ -958,7 +957,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.readLock().lock();
 		try {
 			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
-					cache.getMatchingIds(pathPattern), cache.getIds());		
+					cache.getMatchingIds(pathPattern), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
@@ -996,6 +995,16 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.readLock().lock();
 		try {
 			return cache.getChildren(projectId);
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+
+	@Override
+	public ProjectCache cloneCache() {
+		cacheLock.readLock().lock();
+		try {
+			return cache.clone();
 		} finally {
 			cacheLock.readLock().unlock();
 		}

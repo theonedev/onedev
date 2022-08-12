@@ -53,6 +53,7 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -293,7 +294,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				@Override
 				protected List<User> getMentionables() {
-					return OneDev.getInstance(UserManager.class).queryAndSort(getPullRequest().getParticipants());
+					UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();		
+					List<User> users = new ArrayList<>(cache.getUsers());
+					users.sort(cache.comparingDisplayName(getPullRequest().getParticipants()));
+					return users;
 				}
 				
 				@Override

@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.project.comment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -29,6 +30,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -246,7 +248,10 @@ public abstract class CommentPanel extends Panel {
 	protected abstract DeleteCallback getDeleteCallback();
 	
 	protected List<User> getMentionables() {
-		return OneDev.getInstance(UserManager.class).queryAndSort(Sets.newHashSet());
+		UserCache cache = OneDev.getInstance(UserManager.class).cloneCache();
+		List<User> users = new ArrayList<>(cache.getUsers());
+		users.sort(cache.comparingDisplayName(Sets.newHashSet()));
+		return users;
 	}	
 	
 }

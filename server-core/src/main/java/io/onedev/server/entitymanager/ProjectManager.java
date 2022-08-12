@@ -14,9 +14,9 @@ import org.eclipse.jgit.lib.Repository;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.ProjectCollection;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.facade.ProjectCache;
 
 public interface ProjectManager extends EntityManager<Project> {
 	
@@ -78,6 +78,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Collection<Long> getSubtreeIds(Long projectId);
 	
-	ProjectCollection getPermittedProjects(Permission permission);
+	Collection<Project> getPermittedProjects(Permission permission);
+	
+	ProjectCache cloneCache();
 	
 }
