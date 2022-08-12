@@ -59,8 +59,9 @@ public class GmailSetting extends MailSetting {
 		this.clientSecret = clientSecret;
 	}
 
-	@Editable(order=300, description="Specify account name to login to Gmail to send/receive emails. "
-			+ "This should be a Gmail address")
+	@Editable(order=300, description="Specify account name to login to Gmail. This should be a Gmail address, and "
+			+ "will be taken as system email address, whose inbox will be checked to post various comments from "
+			+ "email if <code>Check Incoming Email</code> option is enabled below")
 	@Email
 	@NotEmpty
 	public String getAccountName() {

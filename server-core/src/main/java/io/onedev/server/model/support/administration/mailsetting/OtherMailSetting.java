@@ -67,9 +67,9 @@ public class OtherMailSetting extends MailSetting {
 		this.smtpPassword = smtpPassword;
 	}
 
-	@Editable(order=410, description="This address will be used as sender address of various notifications. "
-			+ "Emails targeting this address and its sub addressing in the IMAP inbox will also be checked if "
-			+ "<code>Check Incoming Email</code> option is enabled below")
+	@Editable(order=410, name="System Email Address", description="This address will be used as sender address of "
+			+ "various notifications. Emails targeting this address and its sub addressing in the IMAP inbox will "
+			+ "also be checked if <code>Check Incoming Email</code> option is enabled below")
 	@Email
 	@NotEmpty
 	public String getEmailAddress() {

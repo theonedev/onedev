@@ -96,9 +96,9 @@ public class Office365Setting extends MailSetting {
 		this.refreshToken = refreshToken;
 	}
 	
-	@Editable(order=410, description="Primary or alias email address of above account to be used as sender address "
-			+ "of various notifications. Emails targeting this address will also be checked to post various "
-			+ "comments if <code>Check Incoming Email</code> option is enabled below")
+	@Editable(order=410, name="System Email Address", description="Primary or alias email address of above account "
+			+ "to be used as sender address of various notifications. Emails targeting this address will also be "
+			+ "checked to post various comments if <code>Check Incoming Email</code> option is enabled below")
 	@Email
 	@NotEmpty
 	public String getEmailAddress() {
