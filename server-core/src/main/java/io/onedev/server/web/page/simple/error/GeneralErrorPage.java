@@ -9,6 +9,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.simple.SimplePage;
@@ -67,7 +70,10 @@ public class GeneralErrorPage extends SimplePage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				container.replace(new MultilineLabel("errorDetail", detailMessage));
+				Fragment fragment = new Fragment("errorDetail", "errorDetailFrag", GeneralErrorPage.this);
+				fragment.add(new MultilineLabel("content", detailMessage));
+				fragment.add(new CopyToClipboardLink("copy", Model.of(detailMessage)));
+				container.replace(fragment);
 				target.add(container);
 				setVisible(false);
 			}

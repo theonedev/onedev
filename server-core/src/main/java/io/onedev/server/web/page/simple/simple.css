@@ -20,6 +20,7 @@
 .SimplePage.GeneralErrorPage .main {
 	width: 900px;
 }
+
 .SimplePage.InUseErrorPage .main {
 	width: auto;
 }
@@ -91,6 +92,11 @@
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.SimplePage .main .error-detail+.copy {
+	right: 1.2rem;
+	top: 1rem;
+	background: var(--light);
 }
 
 .PageNotFoundErrorPage h3 {
