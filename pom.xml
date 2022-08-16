@@ -588,8 +588,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.2.8</commons.version>
-		<agent.version>1.3.23</agent.version>
+		<commons.version>2.2.9</commons.version>
+		<agent.version>1.3.24</agent.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<logback.version>1.2.9</logback.version>
 		<antlr.version>4.7.2</antlr.version>
