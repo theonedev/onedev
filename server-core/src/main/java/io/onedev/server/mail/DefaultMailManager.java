@@ -429,7 +429,8 @@ public class DefaultMailManager implements MailManager {
 								throw new ExplicitException(errorMessage);
 							}
 							checkPermission(from, project, new AccessProject(), user, authorization);
-							issues.add(openIssue(message, project, from, user, authorization));
+							issues.add(openIssue(message, serviceDeskSetting.getPreserveBefore(), 
+									project, from, user, authorization));
 						} else {
 							throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 						}
@@ -514,7 +515,8 @@ public class DefaultMailManager implements MailManager {
 							if (serviceDeskSetting != null) {
 								checkPermission(from, project, new AccessProject(), user, authorization);
 								logger.debug("Creating issue via email (project: {})...", project.getPath());
-								issues.add(openIssue(message, project, from, user, authorization));
+								issues.add(openIssue(message, serviceDeskSetting.getPreserveBefore(), project, 
+										from, user, authorization));
 							} else {
 								throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 							}
@@ -638,6 +640,11 @@ public class DefaultMailManager implements MailManager {
 			}
 		}
 		
+		return getContent(document);
+	}
+	
+	@Nullable
+	private String getContent(Document document) {
 		AtomicReference<Node> lastContentNodeRef = new AtomicReference<>(null);
 		
 		NodeTraversor.traverse(new NodeVisitor() {
@@ -691,7 +698,7 @@ public class DefaultMailManager implements MailManager {
 			user = createUser(author, pullRequest.getProject(), authorization.getAuthorizedRole());
 		logger.trace("Creating pull request comment on behalf of user '" + user.getName() + "'");
 		comment.setUser(user);
-		String content = stripQuotation(sendSetting, readText(pullRequest.getProject(), pullRequest.getUUID(), message));
+		String content = stripQuotation(sendSetting, readText(pullRequest.getProject(), pullRequest.getUUID(), message, null));
 		if (content != null) {
 			comment.setContent("<div class='no-color'>" + content + "</div>");
 			pullRequestCommentManager.save(comment, receiverEmailAddresses);
@@ -707,8 +714,9 @@ public class DefaultMailManager implements MailManager {
 			return null;
 	}
 	
-	private Issue openIssue(Message message, Project project, InternetAddress submitter, 
-			@Nullable User user, @Nullable SenderAuthorization authorization) throws MessagingException, IOException {
+	private Issue openIssue(Message message, @Nullable String preserveBefore, 
+			Project project, InternetAddress submitter, @Nullable User user, 
+			@Nullable SenderAuthorization authorization) throws MessagingException, IOException {
 		Issue issue = new Issue();
 		issue.setProject(project);
 		if (StringUtils.isNotBlank(message.getSubject()))
@@ -721,8 +729,18 @@ public class DefaultMailManager implements MailManager {
 			issue.setThreadingReference(messageId);
 
 		String description = readText(project, issue.getUUID(), message);
-		if (StringUtils.isNotBlank(description))
-			issue.setDescription("<div class='no-color'>" + description + "</div>");
+		if (StringUtils.isNotBlank(description)) {
+			if (preserveBefore != null)
+				description = StringUtils.substringBefore(description, preserveBefore);
+			
+			Document document = HtmlUtils.parse(description);
+			document.outputSettings().prettyPrint(false);
+			
+			description = getContent(document);
+			
+			if (description != null)
+				issue.setDescription("<div class='no-color'>" + description + "</div>");
+		}
 
 		if (user == null)
 			user = createUser(submitter, project, authorization.getAuthorizedRole());
