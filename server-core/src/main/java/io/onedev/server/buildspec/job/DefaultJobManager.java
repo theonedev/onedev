@@ -81,7 +81,6 @@ import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.ProjectCreated;
@@ -168,8 +167,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final BuildParamManager buildParamManager;
 	
-	private final PullRequestManager pullRequestManager;
-	
 	private final AgentManager agentManager;
 	
 	private final TaskScheduler taskScheduler;
@@ -184,8 +181,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
 			SettingManager settingManager, TransactionManager transactionManager, JobLogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
-			PullRequestManager pullRequestManager, ProjectManager projectManager, Validator validator, 
-			TaskScheduler taskScheduler, AgentManager agentManager, CodeIndexManager indexManager) {
+			ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler, AgentManager agentManager, 
+			CodeIndexManager indexManager) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -196,7 +193,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.sessionManager = sessionManager;
 		this.buildParamManager = buildParamManager;
 		this.projectManager = projectManager;
-		this.pullRequestManager = pullRequestManager;
 		this.validator = validator;
 		this.taskScheduler = taskScheduler;
 		this.agentManager = agentManager;
@@ -287,32 +283,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					paramMapToQuery, pipeline);
 			
 			if (builds.isEmpty()) {
-				Long projectId = project.getId();
-				Long pullRequestId;
-				if (reason.getPullRequest() != null)
-					pullRequestId = reason.getPullRequest().getId();
-				else
-					pullRequestId = null;
-				sessionManager.runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						SecurityUtils.bindAsSystem();
-						Project project = projectManager.load(projectId);
-						PullRequest pullRequest;
-						if (pullRequestId != null)
-							pullRequest = pullRequestManager.load(pullRequestId);
-						else
-							pullRequest = null;
-						for (Build unfinished: buildManager.queryUnfinished(project, jobName, reason.getRefName(), 
-								Optional.ofNullable(pullRequest), paramMapToQuery)) {
-							if (GitUtils.isMergedInto(project.getRepository(), null, unfinished.getCommitId(), commitId)) 
-								cancel(unfinished);
-						}
-					}
-					
-				});
-				
 				for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 					ParamSpec paramSpec = Preconditions.checkNotNull(build.getJob().getParamSpecMap().get(entry.getKey()));
 					if (!entry.getValue().isEmpty()) {
