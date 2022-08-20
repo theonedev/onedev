@@ -317,7 +317,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	@Override
 	protected Component newTopbarTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
-		fragment.add(new BookmarkablePageLink<Void>("projects", ProjectListPage.class));
+		fragment.add(new BookmarkablePageLink<Void>("projects", ProjectListPage.class, ProjectListPage.paramsOf(0, 0)));
 
 		fragment.add(new ListView<Project>("pathSegments", new LoadableDetachableModel<List<Project>>() {
 

@@ -1590,7 +1590,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	protected Component newProjectTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("pullRequests", ProjectPullRequestsPage.class, 
-				ProjectPullRequestsPage.paramsOf(getProject())));
+				ProjectPullRequestsPage.paramsOf(getProject(), 0)));
 		fragment.add(new Label("pullRequestNumber", "#" + getPullRequest().getNumber()));
 		return fragment;
 	}

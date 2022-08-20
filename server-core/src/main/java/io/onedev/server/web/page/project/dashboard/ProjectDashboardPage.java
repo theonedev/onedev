@@ -24,7 +24,7 @@ public class ProjectDashboardPage extends ProjectPage {
 		if (getProject().isCodeManagement() && SecurityUtils.canReadCode(getProject()))
 			pageProvider = new PageProvider(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
 		else if (getProject().isIssueManagement()) 
-			pageProvider = new PageProvider(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
+			pageProvider = new PageProvider(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), 0));
 		else
 			pageProvider = new PageProvider(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject()));
 		throw new RestartResponseException(pageProvider, RedirectPolicy.NEVER_REDIRECT);

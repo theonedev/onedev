@@ -302,7 +302,7 @@ public class UserListPage extends AdministrationPage {
 					@Override
 					public void onClick() {
 						SecurityUtils.getSubject().runAs(rowModel.getObject().getPrincipals());
-						setResponsePage(ProjectListPage.class);
+						setResponsePage(ProjectListPage.class, ProjectListPage.paramsOf(0, 0));
 					}
 										
 				});

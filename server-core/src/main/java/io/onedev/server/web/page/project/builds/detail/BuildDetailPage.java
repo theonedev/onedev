@@ -642,7 +642,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	protected Component newProjectTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("builds", ProjectBuildsPage.class, 
-				ProjectBuildsPage.paramsOf(getProject())));
+				ProjectBuildsPage.paramsOf(getProject(), 0)));
 		fragment.add(new Label("buildNumber", "#" + getBuild().getNumber()));
 		return fragment;
 	}

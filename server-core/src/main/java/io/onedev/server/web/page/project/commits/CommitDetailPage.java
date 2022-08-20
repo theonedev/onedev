@@ -756,7 +756,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	protected Component newProjectTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("commits", ProjectCommitsPage.class, 
-				ProjectCommitsPage.paramsOf(getProject())));
+				ProjectCommitsPage.paramsOf(getProject(), null)));
 		fragment.add(new Label("commitHash", GitUtils.abbreviateSHA(getCommit().name())));
 		return fragment;
 	}

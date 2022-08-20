@@ -483,7 +483,7 @@ public abstract class LayoutPage extends BasePage {
 				public void onClick() {
 					SecurityUtils.getSubject().releaseRunAs();
 					Session.get().warn("Exited impersonation");
-					setResponsePage(ProjectListPage.class);
+					setResponsePage(ProjectListPage.class, ProjectListPage.paramsOf(0, 0));
 				}
 				
 			}; 

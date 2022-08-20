@@ -342,7 +342,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 	protected Component newProjectTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, 
-				ProjectIssueListPage.paramsOf(getProject())));
+				ProjectIssueListPage.paramsOf(getProject(), 0)));
 		fragment.add(new Label("issueNumber", "#" + getIssue().getNumber()));
 		return fragment;
 	}
