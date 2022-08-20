@@ -38,8 +38,6 @@ public class ServiceDeskSetting implements Serializable {
 	
 	private List<IssueCreationSetting> issueCreationSettings = new ArrayList<>();
 	
-	private String preserveBefore;
-	
 	@Editable(order=100, description="When sender email address can not be mapped to an existing user, "
 			+ "OneDev will use entries defined here to determine if the sender has permission to "
 			+ "create issues. For a particular sender, the first matching entry will take "
@@ -82,16 +80,6 @@ public class ServiceDeskSetting implements Serializable {
 		this.issueCreationSettings = issueCreationSettings;
 	}
 	
-	@Editable(order=400, name="Marker Line", description="Optionally specify a marker line. Only content before this line "
-			+ "will be preserved when create issue from email")
-	public String getPreserveBefore() {
-		return preserveBefore;
-	}
-
-	public void setPreserveBefore(String preserveBefore) {
-		this.preserveBefore = preserveBefore;
-	}
-
 	@Nullable
 	public SenderAuthorization getSenderAuthorization(String senderAddress) {
 		Matcher matcher = new StringMatcher();
