@@ -912,6 +912,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			} finally {
 				JobSecretAuthorizationContext.pop();
 			}
+			
+			for (BuildDependence dependence: build.getDependencies()) {
+				Build dependency = dependence.getDependency();
+				if (dependence.isRequireSuccessful() && !dependency.isSuccessful()) 
+					resubmit(dependency, dependency.getParamMap(), "Resubmitted by dependent build");
+			}
 		} else {
 			throw new ExplicitException("Build #" + build.getNumber() + " not finished yet");
 		}
@@ -1080,9 +1086,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							
 							@Override
 							public void run(Map<String, List<String>> paramMap) {
-								Build build = submit(project, commitId, job.getName(), paramMap, pipeline, reason); 
-								if (build.isFinished())
-									resubmit(build, paramMap, "Resubmitted by schedule");
+								submit(project, commitId, job.getName(), paramMap, pipeline, reason); 
 							}
 							
 						}.run();
@@ -1221,11 +1225,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(BuildFinished event) {
 		Build build = event.getBuild();
-		for (BuildParam param: build.getParams()) {
-			if (param.getType().equals(ParamSpec.SECRET)) 
-				param.setValue(null);
-		}
-
 		Long buildId = build.getId();
 
 		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {

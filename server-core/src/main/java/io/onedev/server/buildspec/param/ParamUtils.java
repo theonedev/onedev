@@ -191,7 +191,7 @@ public class ParamUtils {
 					ParamSpec paramSpec = Preconditions.checkNotNull(job.getParamSpecMap().get(property.getDisplayName()));
 					List<String> values = new ArrayList<>();
 					for (String value: paramSpec.convertToStrings(typedValue)) {
-						if (paramSpec instanceof SecretParam)
+						if (paramSpec instanceof SecretParam && !value.startsWith(SecretInput.LITERAL_VALUE_PREFIX))
 							value = SecretInput.LITERAL_VALUE_PREFIX + value;
 						values.add(value);
 					}

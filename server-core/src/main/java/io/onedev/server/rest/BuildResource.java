@@ -1,6 +1,8 @@
 package io.onedev.server.rest;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -15,12 +17,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
+import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
@@ -60,7 +65,14 @@ public class BuildResource {
 		Build build = buildManager.load(buildId);
     	if (!SecurityUtils.canAccess(build)) 
 			throw new UnauthorizedException();
-    	return build.getParams();
+    	
+    	List<BuildParam> params = SerializationUtils.clone(new ArrayList<>(build.getParams()));
+    	for (Iterator<BuildParam> it = params.iterator(); it.hasNext();) {
+    		BuildParam param = it.next();
+    		if (param.getType().equals(ParamSpec.SECRET))
+    			param.setValue(SecretInput.MASK);
+    	}
+    	return params;
     }
 	
 	@Api(order=300)

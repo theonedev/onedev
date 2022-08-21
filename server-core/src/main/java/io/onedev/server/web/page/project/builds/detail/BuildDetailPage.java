@@ -58,7 +58,6 @@ import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -75,9 +74,6 @@ import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
@@ -261,33 +257,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Build build = getBuild();
-
-				Serializable paramBean = build.getParamBean();
-
-				Collection<String> secretParamNames = new ArrayList<>();
-				BeanDescriptor descriptor = new BeanDescriptor(paramBean.getClass());
-				for (List<PropertyDescriptor> groupProperties: descriptor.getProperties().values()) {
-					for (PropertyDescriptor property: groupProperties) {
-						if (property.getPropertyGetter().getAnnotation(Password.class) != null 
-								&& build.isParamVisible(property.getDisplayName())) {
-							secretParamNames.add(property.getPropertyName());
-						}
-					}
-				}
-				
-				if (!secretParamNames.isEmpty()) {
-					new BeanEditModalPanel(target, paramBean, secretParamNames, false, "Rebuild #" + build.getNumber()) {
-						
-						@Override
-						protected void onSave(AjaxRequestTarget target, Serializable bean) {
-							resubmit(paramBean);
-						}
-						
-					};
-				} else {
-					resubmit(paramBean);
-				}
+				resubmit(getBuild().getParamBean());
 				target.focusComponent(null);
 			}
 
