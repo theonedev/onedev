@@ -345,6 +345,7 @@ public class Project extends AbstractEntity {
 	private Collection<BuildQueryPersonalization> buildQueryPersonalizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	private boolean codeManagement = true;

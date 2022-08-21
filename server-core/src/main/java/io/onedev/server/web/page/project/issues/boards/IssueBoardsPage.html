@@ -10,7 +10,11 @@
 						<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
 					</a>
 					<a wicket:id="backlog" title="Show issues not scheduled into current milestone" class="bg-white backlog btn btn-outline-secondary btn-hover-primary text-nowrap"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Backlog</a>
-					<a wicket:id="milestone"></a>
+					<a wicket:id="milestone" title="Milestone" class="milestone-selector btn text-nowrap bg-white">
+						<wicket:svg href="milestone" class="icon mr-2"></wicket:svg>
+						<span wicket:id="label"></span>
+						<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
+					</a>
 				</span>
 				<div class="clearable-wrapper w-100 w-auto-md flex-grow-1">
 					<div class="input-group">
@@ -37,13 +41,6 @@
 			<a wicket:id="useDefault"><wicket:svg href="undo" class="icon mr-1"></wicket:svg>Use Default</a>
 		</div>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="hasMilestoneFrag">
-		<a wicket:id="link" title="Milestone" class="milestone-selector btn text-nowrap bg-white">
-			<wicket:svg href="milestone" class="icon mr-2"></wicket:svg>
-			<span wicket:id="label"></span>
-			<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
-		</a>
-	</wicket:fragment>
 	<wicket:fragment wicket:id="boardMenuFrag">
 		<div class="board-menu p-4">
 			<div class="text-muted mb-3"><wicket:svg href="bulb" class="icon"/> The first board will be the primary board</div>
@@ -66,6 +63,7 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneMenuFrag">
 		<div class="milestone-menu p-4">
+			<wicket:enclosure child="milestones">
 			<table class="milestones table">
 				<tr wicket:id="milestones" class="milestone">
 					<td class="name">
@@ -82,8 +80,10 @@
 					</td>
 				</tr>
 			</table>
+			</wicket:enclosure>
 			<a wicket:id="showClosed" class="show-closed btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="double-arrow" class="icon rotate-90 mr-2"></wicket:svg> Show Closed</a>
-			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Add New Milestone</a>
+			<a wicket:id="unscheduled" class="no-milestone btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Unscheduled</a>
+			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Create Milestone</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneActionsFrag">
