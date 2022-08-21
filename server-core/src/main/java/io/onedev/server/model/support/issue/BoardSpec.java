@@ -87,7 +87,7 @@ public class BoardSpec implements Serializable {
 	}
 
 	@Editable(order=250, placeholder="Not specified", description="Optionally specify a base query to filter/order issues in backlog. "
-			+ "Backlog issues are those not associating with any milestones")
+			+ "Backlog issues are those not associating with current milestone")
 	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true)
 	@Nullable
 	public String getBacklogBaseQuery() {
