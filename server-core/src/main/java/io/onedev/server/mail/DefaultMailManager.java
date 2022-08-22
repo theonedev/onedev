@@ -18,7 +18,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -119,6 +118,8 @@ public class DefaultMailManager implements MailManager {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultMailManager.class);
 	
 	private static final int MAX_INBOX_LIFE = 3600;
+	
+	private static final String SENDER_NAME = "~OneDev Notifier";
 	
 	private final SettingManager settingManager;
 	
@@ -305,7 +306,7 @@ public class DefaultMailManager implements MailManager {
 				    	message.addHeader(entry.getKey(), createFoldedHeaderValue(entry.getKey(), entry.getValue()));
 				}
 				
-				message.setFrom(createInetAddress(sendSetting.getSenderAddress(), "OneDev"));
+				message.setFrom(createInetAddress(sendSetting.getSenderAddress(), SENDER_NAME));
 				
 				if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
 					throw new ExplicitException("At least one receiver address should be specified");
@@ -588,55 +589,25 @@ public class DefaultMailManager implements MailManager {
 	
 	@Nullable
 	private String stripQuotation(MailSendSetting sendSetting, String content) {
-		String senderAddress = sendSetting.getSenderAddress();
-		Pattern senderAddressPattern = Pattern.compile(
-				"(^|\\W)" + senderAddress.replace(".", "\\.") + "($|\\W)", 
-				Pattern.CASE_INSENSITIVE);
-		
-		String smtpUser = sendSetting.getSmtpUser();
-		
-		Pattern smtpUserPattern;
-		if (smtpUser != null && smtpUser.contains("@") && !smtpUser.equalsIgnoreCase(senderAddress)) { 
-			smtpUserPattern = Pattern.compile(
-					"(^|\\W)" + smtpUser.replace(".", "\\.") + "($|\\W)", 
-					Pattern.CASE_INSENSITIVE);
-		} else {
-			smtpUserPattern = null;
+		String marker = null;
+		if (content.contains(SENDER_NAME)) {
+			marker = SENDER_NAME;
+		} else if (content.contains(sendSetting.getSenderAddress())) {
+			marker = sendSetting.getSenderAddress();
+		} else if (sendSetting.getSmtpUser() != null 
+				&& sendSetting.getSmtpUser().contains("@") 
+				&& !sendSetting.getSmtpUser().equalsIgnoreCase(sendSetting.getSenderAddress())) {
+			marker = sendSetting.getSmtpUser();
 		}
 		
+		if (marker != null) {
+			content = StringUtils.substringBefore(content, marker);
+			content = StringUtils.substringBeforeLast(content, "\n");
+		}
+				
 		Document document = HtmlUtils.parse(content);
 		document.select(".gmail_quote").remove();
 		document.outputSettings().prettyPrint(false);
-		
-		Element quotedSenderElement = null;
-		for (Element element: document.getElementsContainingOwnText(senderAddress)) {
-			if (senderAddressPattern.matcher(element.text()).find()) {
-				quotedSenderElement = element;
-				break;
-			}
-		}
-		
-		if (quotedSenderElement == null && smtpUserPattern != null) {
-			for (Element element: document.getElementsContainingOwnText(smtpUser)) {
-				if (smtpUserPattern.matcher(element.text()).find()) {
-					quotedSenderElement = element;
-					break;
-				}
-			}
-		}
-		
-		if (quotedSenderElement != null) {
-			Element quotedSenderBlockElement = quotedSenderElement.parent();
-			while (quotedSenderBlockElement != null 
-					&& !quotedSenderBlockElement.tagName().equals("div") 
-					&& !quotedSenderBlockElement.tagName().equals("p")) {
-				quotedSenderBlockElement = quotedSenderBlockElement.parent();
-			}
-			if (quotedSenderBlockElement != null) {
-				removeNodesAfter(quotedSenderBlockElement);
-				quotedSenderBlockElement.remove();
-			}
-		}
 		
 		return getContent(document);
 	}
@@ -649,9 +620,13 @@ public class DefaultMailManager implements MailManager {
 			
 			@Override
 			public void tail(Node node, int depth) {
-				if (node instanceof Element && ((Element) node).tagName().equals("img") 
-						|| node instanceof TextNode && StringUtils.isNotBlank(((TextNode) node).getWholeText())) {  
+				if (node instanceof Element && ((Element) node).tagName().equals("img")) {
 					lastContentNodeRef.set(node);
+				} else if (node instanceof TextNode) {
+					String text = ((TextNode) node).getWholeText();
+					char nbsp = 160;
+					if (StringUtils.isNotBlank(StringUtils.replaceChars(text, nbsp, ' '))) 
+						lastContentNodeRef.set(node);
 				}
 			}
 			
@@ -682,7 +657,7 @@ public class DefaultMailManager implements MailManager {
 		comment.setUser(user);
 		String content = stripQuotation(sendSetting, readText(issue.getProject(), issue.getUUID(), message));
 		if (content != null) {
-			comment.setContent("<div class='no-color'>" + content + "</div>");
+			comment.setContent(String.format("<div class='%s'>" + content + "</div>", INCOMING_CONTENT_MARKER));
 			issueCommentManager.save(comment, receiverEmailAddresses);
 		}
 	}
