@@ -294,8 +294,8 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 	}
 
 	@Override
-	public EmailAddressFacades getCache() {
+	public EmailAddressFacades cloneCache() {
 		return cache.clone();
 	}
-    
+
 }

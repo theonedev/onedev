@@ -29,5 +29,5 @@ public interface EmailAddressManager extends EntityManager<EmailAddress> {
 	
 	void sendVerificationEmail(EmailAddress emailAddress);
 
-	EmailAddressFacades getCache();
+	EmailAddressFacades cloneCache();
 }

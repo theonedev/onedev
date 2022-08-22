@@ -4,6 +4,12 @@
 	}
 }
 
+.gpg-key-list .email-addresses .value {
+	margin-right: 0.5rem;
+}
+.gpg-key-list .email-addresses .value:last-child {
+	margin-right: 0;
+}
 .insert-gpg-key textarea {
 	font-family: monospace;
 	height: 200px !important;

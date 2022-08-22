@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.signature.SignatureUnverified;
@@ -15,6 +16,7 @@ import io.onedev.server.git.signature.SignatureVerificationKey;
 import io.onedev.server.git.signature.SignatureVerified;
 import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.util.GpgUtils;
+import io.onedev.server.web.component.MultilineLabel;
 
 @SuppressWarnings("serial")
 abstract class GitSignatureDetailPanel extends Panel {
@@ -54,7 +56,7 @@ abstract class GitSignatureDetailPanel extends Panel {
 
 		if (key != null) {
 			add(new Label("keyId", GpgUtils.getKeyIDString(key.getPublicKey().getKeyID())));
-			add(new Label("emailAddress", key.getEmailAddress()));
+			add(new MultilineLabel("emailAddresses", StringUtils.join(key.getEmailAddresses(), "\n")));
 		} else {
 			add(new WebMarkupContainer("keyId").setVisible(false));
 			add(new WebMarkupContainer("emailAddress").setVisible(false));

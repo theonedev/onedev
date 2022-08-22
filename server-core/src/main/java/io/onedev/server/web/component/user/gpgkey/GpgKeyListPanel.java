@@ -16,19 +16,24 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
+import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.GpgKey;
 import io.onedev.server.util.GpgUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
@@ -51,16 +56,6 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
         
 		List<IColumn<GpgKey, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<GpgKey, Void>(Model.of("Email Address")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<GpgKey>> cellItem, String componentId,
-					IModel<GpgKey> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getEmailAddress().getValue()));
-			}
-			
-		});
-		
 		columns.add(new AbstractColumn<GpgKey, Void>(Model.of("Key ID")) {
 
 			@Override
@@ -68,6 +63,37 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 					IModel<GpgKey> rowModel) {
 				cellItem.add(new Label(componentId, 
 						GpgUtils.getKeyIDString(rowModel.getObject().getKeyId())));
+			}
+			
+		});
+		
+		columns.add(new AbstractColumn<GpgKey, Void>(Model.of("Email Addresses")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<GpgKey>> cellItem, String componentId,
+					IModel<GpgKey> rowModel) {
+				GpgKey key = rowModel.getObject();
+				Fragment fragment = new Fragment(componentId, "emailAddressesFrag", GpgKeyListPanel.this);
+				RepeatingView valuesView = new RepeatingView("values");
+				EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
+				for (String emailAddressValue: GpgUtils.getEmailAddresses(key.getPublicKeys().get(0))) {
+					WebMarkupContainer container = new WebMarkupContainer(valuesView.newChildId());
+					valuesView.add(container);
+					container.add(new Label("value", emailAddressValue));
+					EmailAddress emailAddress = emailAddressManager.findByValue(emailAddressValue);
+					boolean unverified = emailAddress == null 
+							|| !emailAddress.isVerified() 
+							|| !emailAddress.getOwner().equals(key.getOwner());
+					container.add(new WebMarkupContainer("ineffective").setVisible(unverified));
+				}
+				fragment.add(valuesView);
+
+				cellItem.add(fragment);
+			}
+
+			@Override
+			public String getCssClass() {
+				return "email-addresses";
 			}
 			
 		});
@@ -86,9 +112,9 @@ public class GpgKeyListPanel extends GenericPanel<List<GpgKey>> {
 				String subKeyIds = key.getKeyIds().stream()
 						.filter(it->it!=key.getKeyId())
 						.map(it->GpgUtils.getKeyIDString(it))
-						.collect(Collectors.joining(", "));
+						.collect(Collectors.joining("\n"));
 				if (subKeyIds.length() != 0)
-					cellItem.add(new Label(componentId, subKeyIds));
+					cellItem.add(new MultilineLabel(componentId, subKeyIds));
 				else
 					cellItem.add(new Label(componentId, "<i>None</i>").setEscapeModelStrings(false));
 			}

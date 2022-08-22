@@ -115,8 +115,8 @@ public class GpgSetting implements Serializable {
 						}
 						
 						@Override
-						public String getEmailAddress() {
-							return GpgUtils.getEmailAddress(publicKeys.get(0));
+						public List<String> getEmailAddresses() {
+							return GpgUtils.getEmailAddresses(publicKeys.get(0));
 						}
 						
 					});
@@ -142,8 +142,8 @@ public class GpgSetting implements Serializable {
 				}
 
 				@Override
-				public String getEmailAddress() {
-					return GpgUtils.getEmailAddress(getPublicKey());
+				public List<String> getEmailAddresses() {
+					return GpgUtils.getEmailAddresses(getPublicKey());
 				}
 				
 			};

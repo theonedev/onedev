@@ -20,7 +20,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 @Entity
-@Table(indexes={@Index(columnList="o_emailAddress_id"), @Index(columnList="keyId")})
+@Table(indexes={@Index(columnList="keyId")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class GpgKey extends BaseGpgKey {
     
@@ -38,7 +38,7 @@ public class GpgKey extends BaseGpgKey {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(nullable=false)
-    private EmailAddress emailAddress;
+    private User owner;
     
     public long getKeyId() {
         return keyId;
@@ -48,12 +48,12 @@ public class GpgKey extends BaseGpgKey {
         this.keyId = keyId;
     }
 
-    public EmailAddress getEmailAddress() {
-        return emailAddress;
+    public User getOwner() {
+        return owner;
     }
 
-    public void setEmailAddress(EmailAddress emailAddress) {
-        this.emailAddress = emailAddress;
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     public Date getCreatedAt() {

@@ -1,6 +1,14 @@
 <wicket:panel>		
 	<table wicket:id="keys" class="gpg-key-list table table-hover"></table>
-	<div class="text-muted font-size-sm mt-4"><wicket:svg href="bulb" class="icon"/> Check <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification" target="_blank">GitHub's guide</a> on how to generate and use GPG keys to sign your commits</div>
+	<ul class="text-muted font-size-sm mt-4 ml-n4"> 
+	<li>Check <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#gpg-commit-signature-verification" target="_blank">GitHub's guide</a> on how to generate and use GPG keys to sign your commits</li>
+	<li>Email addresses with <span class="badge badge-warning badge-sm">effective</span> mark are those not belong to or not verified by key owner</li>
+	</ul>
+	<wicket:fragment wicket:id="emailAddressesFrag">
+		<div wicket:id="values" class="value text-nowrap">
+			<span wicket:id="value"></span> <span wicket:id="ineffective" class="badge badge-sm badge-warning">ineffective</span>
+		</div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="actionFrag">
 		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this key"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 	</wicket:fragment>

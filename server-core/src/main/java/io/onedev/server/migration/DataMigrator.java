@@ -4307,4 +4307,27 @@ public class DataMigrator {
 		}		
 	}
 	
+	private void migrate97(File dataDir, Stack<Integer> versions) {
+		Map<String, String> emailOwners = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("EmailAddresss.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					emailOwners.put(element.elementTextTrim("id"), element.elementTextTrim("owner"));
+			}
+		}		
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("GpgKeys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Element emailAddressElement = element.element("emailAddress");
+					element.addElement("owner").setText(emailOwners.get(emailAddressElement.getTextTrim()));
+					emailAddressElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}		
+	}
+	
 }

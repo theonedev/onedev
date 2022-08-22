@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 import org.bouncycastle.openpgp.PGPPublicKey;
 
 import io.onedev.commons.loader.Listen;
+import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -32,12 +33,15 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 
 	private final TransactionManager transactionManager;
 	
+	private final EmailAddressManager emailAddressManager;
+	
 	private final Map<Long, Long> entityIdCache = new ConcurrentHashMap<>();
 	
     @Inject
-    public DefaultGpgKeyManager(Dao dao, TransactionManager transactionManager) {
+    public DefaultGpgKeyManager(Dao dao, TransactionManager transactionManager, EmailAddressManager emailAddressManager) {
         super(dao);
         this.transactionManager = transactionManager;
+        this.emailAddressManager = emailAddressManager;
     }
     
     @Listen
@@ -62,26 +66,11 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 				}
     			
     		});
-    	} else if (event.getEntity() instanceof EmailAddress) {
-    		EmailAddress emailAddress = (EmailAddress) event.getEntity();
-    		Collection<Long> keyIds = new ArrayList<>();
-    		for (GpgKey key: emailAddress.getGpgKeys()) 
-    			keyIds.addAll(key.getKeyIds());
-    		transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					entityIdCache.keySet().removeAll(keyIds);
-				}
-    			
-    		});
     	} else if (event.getEntity() instanceof User) {
     		User user = (User) event.getEntity();
     		Collection<Long> keyIds = new ArrayList<>();
-    		for (EmailAddress emailAddress: user.getEmailAddresses()) {
-        		for (GpgKey key: emailAddress.getGpgKeys()) 
-        			keyIds.addAll(key.getKeyIds());
-    		}
+    		for (GpgKey key: user.getGpgKeys()) 
+    			keyIds.addAll(key.getKeyIds());
     		transactionManager.runAfterCommit(new Runnable() {
 
 				@Override
@@ -119,6 +108,8 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
     	if (entityId != null) {
     		return new SignatureVerificationKey() {
 				
+    			private transient List<String> emailAddresses;
+    			
 				@Override
 				public boolean shouldVerifyDataWriter() {
 					return true;
@@ -134,8 +125,20 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 				}
 
 				@Override
-				public String getEmailAddress() {
-					return GpgUtils.getEmailAddress(load(entityId).getPublicKeys().get(0));
+				public List<String> getEmailAddresses() {
+					if (emailAddresses == null) {
+						emailAddresses = new ArrayList<>();
+						GpgKey gpgKey = load(entityId);
+						for (String value: GpgUtils.getEmailAddresses(gpgKey.getPublicKeys().get(0))) {
+							EmailAddress emailAddress = emailAddressManager.findByValue(value);
+							if (emailAddress != null 
+									&& emailAddress.isVerified() 
+									&& emailAddress.getOwner().equals(gpgKey.getOwner())) {
+								emailAddresses.add(value);
+							}
+						}
+					}
+					return emailAddresses;
 				}
 				
 			};

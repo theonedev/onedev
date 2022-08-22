@@ -51,29 +51,34 @@ public abstract class InsertGpgKeyPanel extends Panel {
         form.add(new AjaxButton("add") {
         	
             @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> myform) {
-                super.onSubmit(target, myform);
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                super.onSubmit(target, form);
                 
                 GpgKeyManager gpgKeyManager = OneDev.getInstance(GpgKeyManager.class);
                 GpgKey gpgKey = (GpgKey) editor.getModelObject();
+                gpgKey.setOwner(getUser());
                 gpgKey.setKeyId(gpgKey.getKeyIds().get(0));
                 
                 if (gpgKey.getKeyIds().stream().anyMatch(it->gpgKeyManager.findSignatureVerificationKey(it)!=null)) { 
 					editor.error(new Path(new PathNode.Named("content")), "This key or one of its subkey is already in use");
 					target.add(form);
                 } else {
-                	String emailAddressValue = GpgUtils.getEmailAddress(gpgKey.getPublicKeys().get(0));
-                	EmailAddress emailAddress = OneDev.getInstance(EmailAddressManager.class).findByValue(emailAddressValue);
-                	if (emailAddress != null && emailAddress.isVerified() && emailAddress.getOwner().equals(getUser())) {
-                		gpgKey.setEmailAddress(emailAddress);
+                	boolean hasErrors = false;
+                	for (String emailAddressValue: GpgUtils.getEmailAddresses(gpgKey.getPublicKeys().get(0))) {
+                    	EmailAddress emailAddress = OneDev.getInstance(EmailAddressManager.class).findByValue(emailAddressValue);
+                    	if (emailAddress == null || !emailAddress.isVerified() || !emailAddress.getOwner().equals(getUser())) {
+                    		String who = (getPage() instanceof MyPage)? "yours": "the user";
+                    		editor.error(new Path(new PathNode.Named("content")), "This key is associated with " + emailAddressValue 
+                    				+ ", however it is NOT a verified email address of " + who);
+                    		target.add(form);
+                    		hasErrors = true;
+                    		break;
+                    	}
+                	}
+                	if (!hasErrors) {
                         gpgKey.setCreatedAt(new Date());
                         gpgKeyManager.save(gpgKey);
                         onSave(target);
-                	} else {
-                		String who = (getPage() instanceof MyPage)? "yours": "the user";
-                		editor.error(new Path(new PathNode.Named("content")), "This key is associated with " + emailAddressValue 
-                				+ ", however it is NOT a verified email address of " + who);
-                		target.add(form);
                 	}
                 }
             }

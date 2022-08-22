@@ -177,6 +177,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<EmailAddress> emailAddresses = new ArrayList<>();
     
+    @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<GpgKey> gpgKeys = new ArrayList<>();
+    
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -604,6 +608,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.emailAddresses = emailAddresses;
 	}
 
+	public Collection<GpgKey> getGpgKeys() {
+		return gpgKeys;
+	}
+
+	public void setGpgKeys(Collection<GpgKey> gpgKeys) {
+		this.gpgKeys = gpgKeys;
+	}
+
 	public boolean isSshKeyExternalManaged() {
     	if (isExternalManaged()) {
     		if (getSsoConnector() != null) {
@@ -812,14 +824,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return gitEmailAddress.orElse(null);
 	}
 	
-	public List<GpgKey> getGpgKeys() {
-		List<GpgKey> gpgKeys = new ArrayList<>();
-		for (EmailAddress emailAddress: getEmailAddresses())
-			gpgKeys.addAll(emailAddress.getGpgKeys());
-		Collections.sort(gpgKeys);
-		return gpgKeys;
-	}
-
 	public UserFacade getFacade() {
 		return new UserFacade(getId(), getName(), getFullName(), getAccessToken());
 	}
