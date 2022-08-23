@@ -59,6 +59,7 @@ import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
+import io.onedev.server.search.entity.issue.MilestoneIsEmptyCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
@@ -89,6 +90,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					criterias.add(boardQuery.getCriteria());
 				if (getMilestone() != null)
 					criterias.add(new MilestoneCriteria(getMilestone().getName()));
+				else
+					criterias.add(new MilestoneIsEmptyCriteria());
 				String identifyField = getBoard().getIdentifyField();
 				if (identifyField.equals(Issue.NAME_STATE)) {
 					criterias.add(new StateCriteria(getColumn(), IssueQueryLexer.Is));
