@@ -22,6 +22,7 @@ import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.ExceptionUtils;
 
 @Singleton
@@ -33,7 +34,8 @@ public class BearerAuthenticationFilter extends PathMatchingFilter {
 	public BearerAuthenticationFilter(UserManager userManager) {
 		this.userManager = userManager;
 	}
-	
+
+	@Sessional
     @Override
 	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
     	Subject subject = SecurityUtils.getSubject();

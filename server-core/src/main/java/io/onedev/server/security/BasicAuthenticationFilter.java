@@ -23,6 +23,7 @@ import com.google.common.net.HttpHeaders;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.ExceptionUtils;
 
 @Singleton
@@ -35,6 +36,7 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
 		this.userManager = userManager;
 	}
 	
+	@Sessional
     @Override
 	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
     	Subject subject = SecurityUtils.getSubject();
