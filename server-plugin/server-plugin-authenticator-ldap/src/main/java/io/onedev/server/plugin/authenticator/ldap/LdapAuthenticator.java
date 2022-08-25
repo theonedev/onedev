@@ -227,7 +227,7 @@ public class LdapAuthenticator extends Authenticator {
             }
             NamingEnumeration<SearchResult> results = ctx.search(userSearchBase, userSearchFilter, searchControls);
             if (results == null || !results.hasMore()) 
-                throw new UnknownAccountException("Unknown account");
+                throw new UnknownAccountException("Invalid credentials");
             
             SearchResult searchResult = (SearchResult) results.next();
             String userDN = searchResult.getNameInNamespace();
@@ -251,10 +251,10 @@ public class LdapAuthenticator extends Authenticator {
             ldapEnv.put(Context.SECURITY_CREDENTIALS, new String(token.getPassword()));
             DirContext userCtx = null;
             try {
-                logger.debug("Authenticating user by binding as '" + userDN + "'...");
                 userCtx = new InitialDirContext(ldapEnv);
             } catch (AuthenticationException e) {
-            	throw new org.apache.shiro.authc.AuthenticationException("Unable to bind as '" + userDN + "'", e);
+                logger.error("Unable to bind as '" + userDN + "'", e);
+            	throw new org.apache.shiro.authc.AuthenticationException("Invalid credentials");
             } finally {
                 if (userCtx != null) {
                     try {
