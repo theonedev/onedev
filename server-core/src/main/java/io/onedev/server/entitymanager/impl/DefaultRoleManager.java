@@ -14,12 +14,13 @@ import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
 
 import io.onedev.server.entitymanager.LinkAuthorizationManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.LinkSpec;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.role.AllIssueFields;
@@ -48,13 +49,16 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	
 	private final LinkAuthorizationManager linkAuthorizationManager;
 	
+	private final ProjectManager projectManager;
+	
 	@Inject
 	public DefaultRoleManager(Dao dao, SettingManager settingManager, IdManager idManager, 
-			LinkAuthorizationManager linkAuthorizationManager) {
+			LinkAuthorizationManager linkAuthorizationManager, ProjectManager projectManager) {
 		super(dao);
 		this.settingManager = settingManager;
 		this.idManager = idManager;
 		this.linkAuthorizationManager = linkAuthorizationManager;
+		this.projectManager = projectManager;
 	}
 
 	@Transactional
@@ -83,9 +87,10 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 
 		usage.checkInUse("Role '" + role.getName() + "'");
 		
-    	Query<?> query = getSession().createQuery("update Project set defaultRole=null where defaultRole=:role");
-    	query.setParameter("role", role);
-    	query.executeUpdate();
+		for (Project project: role.getDefaultProjects()) {
+			project.setDefaultRole(null);
+			projectManager.save(project);
+		}
     	
 		dao.remove(role);
 	}
