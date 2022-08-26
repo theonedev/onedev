@@ -100,10 +100,8 @@ public class LoginPage extends SimplePage {
 					} else {
 						afterLogin(user);
 					}
-				} catch (IncorrectCredentialsException e) {
-					error("Incorrect credentials");
-				} catch (UnknownAccountException e) {
-					error("Unknown user name");
+				} catch (IncorrectCredentialsException|UnknownAccountException e) {
+					error("Invalid credentials");
 				} catch (AuthenticationException ae) {
 					error(ae.getMessage());
 				}

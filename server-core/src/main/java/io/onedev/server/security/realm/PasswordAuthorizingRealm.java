@@ -174,10 +174,10 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		    					return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
 		    				}
 		    			} else {
-		    	            throw new UnknownAccountException("Unknown user");
+		    	            throw new UnknownAccountException("Invalid credentials");
 		    			}
 			    	} else {
-	    	            throw new UnknownAccountException("Unknown user");
+	    	            throw new UnknownAccountException("Invalid credentials");
 			    	}
 				} catch (Exception e) {
 	    			if (e instanceof AuthenticationException) {
