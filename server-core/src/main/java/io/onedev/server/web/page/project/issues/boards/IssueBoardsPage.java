@@ -300,9 +300,15 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						protected void populateItem(ListItem<BoardSpec> item) {
 							item.add(new WebMarkupContainer("dragIndicator").setVisible(SecurityUtils.canManageIssues(getProject())));
 							
-							PageParameters params = IssueBoardsPage.paramsOf(
-									getProject(), item.getModelObject(), getMilestone(), backlog, 
-									backlogQueryString, queryString);
+							PageParameters params;
+							if (Milestone.NONE.equals(getPageParameters().get(PARAM_MILESTONE).toString())) {
+								params = IssueBoardsPage.paramsOfUnscheduled(
+										getProject(), item.getModelObject(), backlog, backlogQueryString, queryString);
+							} else {
+								params = IssueBoardsPage.paramsOf(
+										getProject(), item.getModelObject(), getMilestone(), backlog, 
+										backlogQueryString, queryString);
+							}
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 							link.add(new Label("name", item.getModelObject().getName()));
 							item.add(link);
