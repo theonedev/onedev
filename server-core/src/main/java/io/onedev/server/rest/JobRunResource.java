@@ -1,9 +1,6 @@
 package io.onedev.server.rest;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -155,7 +152,7 @@ public class JobRunResource {
     	Build  build = buildManager.load(jobRerun.buildId);
 		if (!SecurityUtils.canRunJob(build.getProject(), build.getJobName()))		
 			throw new UnauthorizedException();
-		jobManager.resubmit(build, jobRerun.params, jobRerun.reason);
+		jobManager.resubmit(build, jobRerun.reason);
 		return Response.ok().build();
     }
     
@@ -178,11 +175,6 @@ public class JobRunResource {
 		@Api(order=100)
 		private Long buildId;
 		
-		@Api(order=200, description="A map of param name to value list. Normally the value list contains only one "
-				+ "param value. However in case the job param is defined as multi-valued in build spec, "
-				+ "you can add multiple param values")
-		private Map<String, List<String>> params = new HashMap<>();
-		
 		@Api(order=300)
 		private String reason;
 
@@ -193,15 +185,6 @@ public class JobRunResource {
 
 		public void setBuildId(Long buildId) {
 			this.buildId = buildId;
-		}
-
-		@NotNull
-		public Map<String, List<String>> getParams() {
-			return params;
-		}
-
-		public void setParams(Map<String, List<String>> params) {
-			this.params = params;
 		}
 
 		@NotEmpty

@@ -851,7 +851,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Transactional
 	@Override
-	public void resubmit(Build build, Map<String, List<String>> paramMap, String reason) {
+	public void resubmit(Build build, String reason) {
 		if (build.isFinished()) {
 			JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
 			try {
@@ -883,7 +883,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				build.setAgent(null);
 				
 				buildParamManager.deleteParams(build);
-				for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
+				for (Map.Entry<String, List<String>> entry: build.getParamMap().entrySet()) {
 					ParamSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());
 					Preconditions.checkNotNull(paramSpec);
 					String type = paramSpec.getType();
@@ -916,7 +916,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			for (BuildDependence dependence: build.getDependencies()) {
 				Build dependency = dependence.getDependency();
 				if (dependence.isRequireSuccessful() && !dependency.isSuccessful()) 
-					resubmit(dependency, dependency.getParamMap(), "Resubmitted by dependent build");
+					resubmit(dependency, "Resubmitted by dependent build");
 			}
 		} else {
 			throw new ExplicitException("Build #" + build.getNumber() + " not finished yet");

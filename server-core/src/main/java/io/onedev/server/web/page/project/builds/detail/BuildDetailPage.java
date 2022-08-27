@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -37,7 +36,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.job.JobManager;
-import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
@@ -249,9 +247,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			}
 
 			private void resubmit(Serializable paramBean) {
-				Map<String, List<String>> paramMap = ParamUtils.getParamMap(getBuild().getJob(), paramBean, 
-						getBuild().getJob().getParamSpecMap().keySet());
-				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap, "Resubmitted manually");
+				OneDev.getInstance(JobManager.class).resubmit(getBuild(), "Resubmitted manually");
 				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 			}
 			

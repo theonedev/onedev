@@ -31,7 +31,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -344,6 +343,80 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
+						return "Re-run Selected Builds";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								String errorMessage = null;
+								for (IModel<Build> each: selectionColumn.getSelections()) {
+									Build build = each.getObject();
+									if (!build.isFinished()) {
+										errorMessage = "Build #" + build.getNumber() + " not finished yet";
+										break;
+									} 
+								}
+								
+								if (errorMessage != null) {
+									getSession().error(errorMessage);
+								} else {
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											for (IModel<Build> each: selectionColumn.getSelections()) { 
+												Build build = each.getObject();
+												OneDev.getInstance(JobManager.class).resubmit(build, "Resubmitted manually");
+											}
+											Session.get().success("Re-run request submitted");
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to re-run selected builds";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes"; 
+										}
+										
+									};
+								}
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select builds to re-run");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
 						return "Delete Selected Builds";
 					}
 					
@@ -475,6 +548,79 @@ public abstract class BuildListPanel extends Panel {
 					
 				});
 
+				menuItems.add(new MenuItem() {
+					
+					@Override
+					public String getLabel() {
+						return "Re-run All Queried Builds";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								String errorMessage = null;
+								for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) { 
+									Build build = it.next();
+									if (!build.isFinished()) {
+										errorMessage = "Build #" + build.getNumber() + " not finished yet";
+										break;
+									}
+								}
+								
+								if (errorMessage != null) {
+									getSession().error(errorMessage);
+								} else {
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) 
+												OneDev.getInstance(JobManager.class).resubmit(it.next(), "Resubmitted manually");
+											Session.get().success("Re-run request submitted");
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to re-run all queried builds";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+										
+									};
+								}
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(buildsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No builds to re-run");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
 				menuItems.add(new MenuItem() {
 
 					@Override
@@ -1061,14 +1207,6 @@ public abstract class BuildListPanel extends Panel {
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		body.add(new WebMarkupContainer("tips") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				String href = OneDev.getInstance().getDocRoot() + "/pages/concepts.md#build-promotion";
-				add(new ExternalLink("promotion", href));
-			}
 
 			@Override
 			protected void onConfigure() {
