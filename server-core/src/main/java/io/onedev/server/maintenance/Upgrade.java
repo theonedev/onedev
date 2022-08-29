@@ -545,6 +545,19 @@ public class Upgrade extends DefaultPersistManager {
 				}
 			}
 		}
+		
+		FileUtils.createDir(new File(upgradeDir, "site/assets/root"));
+		if (new File(upgradeDir, "site/assets/robots.txt").exists()) {
+			try {
+				FileUtils.copyFile(
+						new File(upgradeDir, "site/assets/robots.txt"), 
+						new File(upgradeDir, "site/assets/root/robots.txt"));
+				FileUtils.deleteFile(new File(upgradeDir, "site/assets/robots.txt"));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
 			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, StandardCharsets.UTF_8);
