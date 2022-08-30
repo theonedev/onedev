@@ -1,6 +1,5 @@
 User-agent: *
 
-Disallow: /*?*
 Disallow: /*/files/
 Disallow: /*/blob/
 Disallow: /*/commits
@@ -18,6 +17,11 @@ Disallow: /*/issues/new
 Disallow: /*/code-comments
 Disallow: /*/boards
 Disallow: /*/changes
+Disallow: /dashboards
 Disallow: /projects/new
 Disallow: /downloads
 Disallow: /login
+Disallow: /wicket
+Disallow: /*?*IBehaviorListener*
+Disallow: /*?*ILinkListener*
+Disallow: /*?*IFormSubmitListener*
