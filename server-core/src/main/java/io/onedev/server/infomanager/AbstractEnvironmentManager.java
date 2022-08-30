@@ -65,6 +65,9 @@ public abstract class AbstractEnvironmentManager {
 		checkVersion(envDir);
 		EnvironmentConfig config = new EnvironmentConfig();
 		config.setEnvCloseForcedly(true);
+		config.setLogAllowRamDisk(true);
+		config.setLogAllowRemote(true);
+		config.setLogAllowRemovable(true);
 		config.setMemoryUsagePercentage(MEMORY_USAGE_PERCENT);
 		config.setLogFileSize(getLogFileSize());
 		return Environments.newInstance(envDir, config);
