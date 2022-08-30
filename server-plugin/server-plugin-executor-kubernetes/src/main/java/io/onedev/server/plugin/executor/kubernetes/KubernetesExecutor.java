@@ -393,7 +393,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		if (!osInfos.isEmpty()) {
 			return OsInfo.getBaseline(osInfos);
 		} else {
-			throw new ExplicitException("No applicable working nodes found");
+			jobLogger.warning("No matching nodes found, assuming baseline os as amd64 linux");
+			return new OsInfo("Linux", "", "amd64");
 		}
 	}
 	
