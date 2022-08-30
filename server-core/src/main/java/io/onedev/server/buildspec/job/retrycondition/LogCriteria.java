@@ -12,7 +12,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.util.criteria.Criteria;
 
-public class LogCriteria extends Criteria<Build> {
+public class LogCriteria extends Criteria<RetryContext> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -23,14 +23,15 @@ public class LogCriteria extends Criteria<Build> {
 	}
 	
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<RetryContext, RetryContext> from, CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-	public boolean matches(Build build) {
+	public boolean matches(RetryContext context) {
 		Pattern pattern = Pattern.compile(value);
-		return OneDev.getInstance(JobLogManager.class).matches(build, pattern);
+		return pattern.matcher(context.getErrorMessage()).find() 
+				|| OneDev.getInstance(JobLogManager.class).matches(context.getBuild(), pattern);
 	}
 
 	@Override

@@ -69,6 +69,7 @@ import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
 import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
+import io.onedev.server.buildspec.job.retrycondition.RetryContext;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.job.trigger.ScheduleTrigger;
@@ -693,7 +694,17 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									@Override
 									public Boolean call() {
 										RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
-										return retryCondition.matches(buildManager.load(buildId));
+										
+										AtomicReference<String> errorMessage = new AtomicReference<>(null);
+										log(e, new TaskLogger() {
+
+											@Override
+											public void log(String message, String sessionId) {
+												errorMessage.set(message);
+											}
+											
+										});
+										return retryCondition.matches(new RetryContext(buildManager.load(buildId), errorMessage.get()));
 									}
 									
 								})) {

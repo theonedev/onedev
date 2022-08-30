@@ -7,10 +7,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
 
-public class ParamCriteria extends Criteria<Build> {
+public class ParamCriteria extends Criteria<RetryContext> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,13 +23,13 @@ public class ParamCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<Build, Build> from, CriteriaBuilder builder) {
+	public Predicate getPredicate(CriteriaQuery<?> query, From<RetryContext, RetryContext> from, CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-	public boolean matches(Build build) {
-		List<String> paramValues = build.getParamMap().get(name);
+	public boolean matches(RetryContext context) {
+		List<String> paramValues = context.getBuild().getParamMap().get(name);
 		return paramValues != null && paramValues.contains(value);
 	}
 
