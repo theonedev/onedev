@@ -129,7 +129,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		ServletHolder rootAssetsServletHolder = new ServletHolder(new FileAssetServlet(rootAssetsDir));
 		for (File file: FileUtils.listFiles(rootAssetsDir, Lists.newArrayList("**"), Lists.newArrayList())) {
 			String path = file.getAbsolutePath().substring(rootAssetsDir.getAbsolutePath().length());
-			context.addServlet(rootAssetsServletHolder, path);
+			context.addServlet(rootAssetsServletHolder, path.replace('\\', '/'));
 		}
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/api/*");	
