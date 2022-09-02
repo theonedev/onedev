@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -31,6 +32,7 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -43,8 +45,29 @@ public class PullRepository extends SyncRepository {
 	
 	private static final int LFS_FETCH_BATCH = 100;
 
+	private String targetProjectName;
+
 	private String refs = "refs/heads/* refs/tags/*";
 	
+	@Editable(order=210, name="Target Project Name", description="Specify the project to synchronize.")
+	@ChoiceProvider("getProjectNameSuggestions")
+	@NotEmpty
+	public String getTargetProjectName() {
+		return targetProjectName;
+	}
+
+	public void setTargetProjectName(String targetProjectName) {
+		this.targetProjectName = targetProjectName;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getProjectNameSuggestions() {
+		List<String> choices = new ArrayList<>(Project.get().getDescendants()
+				.stream().map(pr -> pr.getPath()).collect(Collectors.toList()));
+		choices.add(Project.get().getPath());
+		return choices;
+	}
+
 	@Editable(order=410, description="Specify space separated refs to pull from remote. '*' can be used in ref "
 			+ "name for wildcard match<br>"
 			+ "<b class='text-danger'>NOTE:</b> branch/tag protection rule will be ignored when update "
@@ -65,18 +88,19 @@ public class PullRepository extends SyncRepository {
 	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		Project project = build.getProject();
-		if (!project.isCommitOnBranches(build.getCommitId(), project.getDefaultBranch())) 
+		Project buildProject = build.getProject();
+		if (!buildProject.isCommitOnBranches(build.getCommitId(), buildProject.getDefaultBranch()))
 			throw new ExplicitException("For security reason, this step is only allowed to run from default branch");
 		
 		String remoteUrl = getRemoteUrlWithCredential(build);
+		Project targetProject = getTargetProject(build);
 		
-		Commandline git = newGit(project);
+		Commandline git = newGit(targetProject);
 		
-		String defaultBranch = project.getDefaultBranch();
-		ObjectId baseCommitId = project.getRevCommit(defaultBranch, true).copy();
+		String defaultBranch = targetProject.getDefaultBranch();
+		ObjectId baseCommitId = targetProject.getRevCommit(defaultBranch, true).copy();
 		
-		Map<String, ObjectId> oldCommitIds = getCommitIds(project);
+		Map<String, ObjectId> oldCommitIds = getCommitIds(targetProject);
 		
 		git.addArgs("fetch");
 		
@@ -104,14 +128,14 @@ public class PullRepository extends SyncRepository {
 				
 			}).checkReturnCode();
 		} finally {
-			Map<String, ObjectId> newCommitIds = getCommitIds(project);
+			Map<String, ObjectId> newCommitIds = getCommitIds(targetProject);
 			MapDifference<String, ObjectId> difference = Maps.difference(oldCommitIds, newCommitIds);
 
 			try {
 				if (isWithLfs()) {
 					List<ObjectId> lfsFetchCommitIds = new ArrayList<>();
 					
-					try (RevWalk revWalk = new RevWalk(project.getRepository())) {
+					try (RevWalk revWalk = new RevWalk(targetProject.getRepository())) {
 						if (!difference.entriesOnlyOnRight().isEmpty()) {
 							for (Map.Entry<String, ObjectId> entry: difference.entriesOnlyOnRight().entrySet()) {
 								revWalk.markStart(revWalk.lookupCommit(entry.getValue()));
@@ -155,12 +179,12 @@ public class PullRepository extends SyncRepository {
 				}
 			} finally {
 				ListenerRegistry registry = OneDev.getInstance(ListenerRegistry.class);
-				for (Map.Entry<String, ObjectId> entry: difference.entriesOnlyOnLeft().entrySet()) 
-					registry.post(new RefUpdated(project, entry.getKey(), entry.getValue(), ObjectId.zeroId()));
-				for (Map.Entry<String, ObjectId> entry: difference.entriesOnlyOnRight().entrySet()) 
-					registry.post(new RefUpdated(project, entry.getKey(), ObjectId.zeroId(), entry.getValue()));
+				for (Map.Entry<String, ObjectId> entry: difference.entriesOnlyOnLeft().entrySet())
+					registry.post(new RefUpdated(targetProject, entry.getKey(), entry.getValue(), ObjectId.zeroId()));
+				for (Map.Entry<String, ObjectId> entry: difference.entriesOnlyOnRight().entrySet())
+					registry.post(new RefUpdated(targetProject, entry.getKey(), ObjectId.zeroId(), entry.getValue()));
 				for (Map.Entry<String, ValueDifference<ObjectId>> entry: difference.entriesDiffering().entrySet()) {
-					registry.post(new RefUpdated(project, entry.getKey(), 
+					registry.post(new RefUpdated(targetProject, entry.getKey(),
 							entry.getValue().leftValue(), entry.getValue().rightValue()));
 				}
 			}
@@ -185,4 +209,19 @@ public class PullRepository extends SyncRepository {
 		return commitIds;
 	}
 	
+	private Project getTargetProject(Build build) {
+		Project buildProject = build.getProject();
+		if (buildProject.getPath().equals(targetProjectName))
+			return buildProject;
+
+		List<Project> matches = buildProject.getDescendants()
+				.stream().filter(des -> des.getPath().equals(targetProjectName)).collect(Collectors.toList());
+
+		if (matches.isEmpty())
+			throw new RuntimeException("No descendant project found with specified path.");
+		if (matches.size() > 1)
+			throw new RuntimeException("More than one descendant project found with matching path.");
+
+		return matches.get(0);
+	}
 }
