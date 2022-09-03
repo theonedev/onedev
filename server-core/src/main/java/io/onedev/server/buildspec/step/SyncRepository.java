@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidatorContext;
@@ -14,7 +13,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.OneDev;
@@ -142,10 +140,6 @@ public abstract class SyncRepository extends ServerSideStep implements Validatab
 			remoteUrlWithCredentials += hostAndPath;
 		
 		return remoteUrlWithCredentials;
-	}
-	
-	protected Lock getMirrorLock(Build build) {
-		return LockUtils.getLock("repository-mirror-" + build.getProject().getId());		
 	}
 	
 	protected Commandline newGit(Project project) {
