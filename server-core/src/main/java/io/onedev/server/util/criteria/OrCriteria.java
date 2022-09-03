@@ -134,6 +134,14 @@ public class OrCriteria<T> extends Criteria<T> {
 	}	
 	
 	@Override
+	public String toString(boolean addParensIfNecessary) {
+		if (!withParens() && criterias.size() > 1)
+			return "(" + toString() + ")";
+		else
+			return toString();
+	}
+
+	@Override
 	public String toStringWithoutParens() {
 		return criterias.stream().map(it->it.toString()).collect(Collectors.joining(" or "));
 	}
