@@ -21,8 +21,8 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
-import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.util.editablebean.NewUserBean;
 
@@ -98,7 +98,7 @@ public class SignUpPage extends SimplePage {
 
 			@Override
 			public void onClick() {
-				setResponsePage(ProjectListPage.class);
+				setResponsePage(HomePage.class);
 			}
 			
 		});

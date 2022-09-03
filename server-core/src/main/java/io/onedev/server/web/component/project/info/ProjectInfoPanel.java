@@ -25,6 +25,7 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.project.forkoption.ForkOptionPanel;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
@@ -75,11 +76,6 @@ public abstract class ProjectInfoPanel extends Panel {
 		
         forkInfo.add(new ModalLink("forkNow") {
 			
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				super.onClick(target);

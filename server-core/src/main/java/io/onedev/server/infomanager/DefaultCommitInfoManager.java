@@ -91,7 +91,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final int INFO_VERSION = 14;
+	private static final int INFO_VERSION = 15;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
 	
@@ -145,6 +145,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	
 	private static final ByteIterable FILES_KEY = new StringByteIterable("files");
 	
+	private static final ByteIterable FILE_COUNT_KEY = new StringByteIterable("fileCount");
+	
 	private static final ByteIterable OVERALL_CONTRIBUTIONS_KEY = new StringByteIterable("overallContributions");
 	
 	private static final ByteIterable COMMIT_COUNT_KEY = new StringByteIterable("commitCount");
@@ -162,6 +164,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 	private final EmailAddressManager emailAddressManager;
 	
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
+	
+	private final Map<Long, Integer> fileCountCache = new ConcurrentHashMap<>();
 	
 	private final Map<Long, Integer> totalCommitCountCache = new ConcurrentHashMap<>();
 	
@@ -591,6 +595,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 					
 					byte[] bytesOfFiles = SerializationUtils.serialize((Serializable) files);
 					defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytesOfFiles));
+					writeInt(defaultStore, txn, FILE_COUNT_KEY, files.size());
 					defaultStore.put(txn, LAST_COMMIT_OF_FILES_KEY, new CommitByteIterable(commitId));
 					filesCache.remove(project.getId());
 				}
@@ -624,6 +629,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 					if (filesChanged) {
 						bytesOfFiles = SerializationUtils.serialize((Serializable) files);
 						defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(bytesOfFiles));
+						writeInt(defaultStore, txn, FILE_COUNT_KEY, files.size());
 						defaultStore.put(txn, LAST_COMMIT_OF_FILES_KEY, new CommitByteIterable(commitId));
 						filesCache.remove(project.getId());
 					}
@@ -1122,6 +1128,26 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager im
 		return commitCount;
 	}
 
+	@Override
+	public int getFileCount(Project project) {
+		Integer fileCount = fileCountCache.get(project.getId());
+		if (fileCount == null) {
+			Environment env = getEnv(project.getId().toString());
+			Store store = getStore(env, DEFAULT_STORE);
+
+			fileCount = env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
+
+				@Override
+				public Integer compute(Transaction txn) {
+					return readInt(store, txn, FILE_COUNT_KEY, 0);
+				}
+				
+			});
+			fileCountCache.put(project.getId(), fileCount);
+		}
+		return fileCount;
+	}
+	
 	static class CollectingWork extends Prioritized {
 		
 		private final String refName;

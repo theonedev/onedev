@@ -215,11 +215,6 @@ public abstract class TaskButton extends AjaxButton {
 			}
 
 			@Override
-			protected String getCssClass() {
-				return "modal-lg";
-			}
-
-			@Override
 			protected Component newContent(String id) {
 				return new TaskFeedbackPanel(id, StringUtils.capitalize(title)) {
 

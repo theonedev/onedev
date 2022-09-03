@@ -128,6 +128,18 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<UserAuthorization> projectAuthorizations = new ArrayList<>();
 	
+	@OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Dashboard> dashboards = new ArrayList<>();
+	
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<DashboardVisit> dashboardVisits = new ArrayList<>();
+	
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<DashboardUserShare> dashboardShares = new ArrayList<>();
+	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<IssueAuthorization> issueAuthorizations = new ArrayList<>();
@@ -656,6 +668,39 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			return "Builtin User Store";
 		}
     }
+
+	public Collection<Dashboard> getDashboards() {
+		return dashboards;
+	}
+
+	public void setDashboards(Collection<Dashboard> dashboards) {
+		this.dashboards = dashboards;
+	}
+
+	public Collection<DashboardVisit> getDashboardVisits() {
+		return dashboardVisits;
+	}
+	
+	public void setDashboardVisits(Collection<DashboardVisit> dashboardVisits) {
+		this.dashboardVisits = dashboardVisits;
+	}
+	
+	@Nullable
+	public DashboardVisit getDashboardVisit(Dashboard dashboard) {
+		for (DashboardVisit visit: getDashboardVisits()) {
+			if (visit.getDashboard().equals(dashboard))
+				return visit;
+		}
+		return null;
+	}
+
+	public Collection<DashboardUserShare> getDashboardShares() {
+		return dashboardShares;
+	}
+
+	public void setDashboardShares(Collection<DashboardUserShare> dashboardShares) {
+		this.dashboardShares = dashboardShares;
+	}
 
 	public Collection<PullRequestReview> getPullRequestReviews() {
 		return pullRequestReviews;

@@ -9,11 +9,13 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.EditableUtils;
@@ -44,6 +46,13 @@ abstract class BeanEditContentPanel extends Panel {
 			form.add(new Label("title", getTitle()));
 		else
 			form.add(new Label("title", EditableUtils.getDisplayName(getBean().getClass())));
+		
+		String description = StringUtils.trimToNull(StringUtils.stripStart(
+				EditableUtils.getDescription(getBean().getClass()), "."));
+		if (description != null)
+			form.add(new Label("description", description).setEscapeModelStrings(false));
+		else
+			form.add(new WebMarkupContainer("description").setVisible(false));
 		
 		form.add(new FencedFeedbackPanel("feedback", form));
 		

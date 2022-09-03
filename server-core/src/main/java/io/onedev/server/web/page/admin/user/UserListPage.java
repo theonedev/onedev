@@ -47,10 +47,10 @@ import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.user.UserAvatar;
+import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
-import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 
@@ -302,7 +302,7 @@ public class UserListPage extends AdministrationPage {
 					@Override
 					public void onClick() {
 						SecurityUtils.getSubject().runAs(rowModel.getObject().getPrincipals());
-						setResponsePage(ProjectListPage.class, ProjectListPage.paramsOf(0, 0));
+						setResponsePage(HomePage.class);
 					}
 										
 				});

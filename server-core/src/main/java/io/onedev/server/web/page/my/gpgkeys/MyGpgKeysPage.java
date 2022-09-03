@@ -33,11 +33,6 @@ public class MyGpgKeysPage extends MyPage {
 		
 		add(new ModalLink("newKey") {
             
-            @Override
-			protected String getModalCssClass() {
-            	return "modal-lg";
-			}
-
 			@Override
             protected Component newContent(String id, ModalPanel modal) {
                 return new InsertGpgKeyPanel(id) {

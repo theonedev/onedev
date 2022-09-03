@@ -286,11 +286,6 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		head.add(new ModalLink("addCard") {
 
 			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-			
-			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new NewCardPanel(id) {
 
@@ -438,7 +433,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					if (hasVisibleEditableDependents) {
 						Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(
 								issue.getProject(), fieldBean.getClass(), dependentFields);
-						class DependentFieldsEditor extends BeanEditModalPanel implements ProjectAware, InputContext {
+						class DependentFieldsEditor extends BeanEditModalPanel<Serializable> 
+								implements ProjectAware, InputContext {
 
 							public DependentFieldsEditor(IPartialPageRequestHandler handler, Serializable bean,
 									Collection<String> propertyNames, boolean exclude, String title) {

@@ -24,7 +24,7 @@ import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.simple.SimplePage;
 
 @SuppressWarnings("serial")
@@ -64,7 +64,7 @@ public class GeneralErrorPage extends SimplePage {
 		container.setOutputMarkupId(true);
 		add(container);
 
-		container.add(new ViewStateAwarePageLink<Void>("home", ProjectListPage.class));
+		container.add(new ViewStateAwarePageLink<Void>("home", HomePage.class));
 
 		container.add(new AjaxLink<Void>("showDetail") {
 

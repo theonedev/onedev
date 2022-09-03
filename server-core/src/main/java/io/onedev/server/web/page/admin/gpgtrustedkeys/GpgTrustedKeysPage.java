@@ -61,11 +61,6 @@ public class GpgTrustedKeysPage extends AdministrationPage {
     	add(new ModalLink("newKey") {
 
 			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-
-			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "addKeyFrag", GpgTrustedKeysPage.this);
 				

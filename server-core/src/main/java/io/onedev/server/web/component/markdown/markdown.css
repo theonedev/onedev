@@ -351,21 +351,27 @@
 
 .markdown-rendered h1 .header-link {
 	margin-left: -24px;
+	margin-top: -4px;
 }
 .markdown-rendered h2 .header-link {
 	margin-left: -22px;
+	margin-top: -4px;
 }
 .markdown-rendered h3 .header-link {
 	margin-left: -20px;
+	margin-top: -3px;
 }
 .markdown-rendered h4 .header-link {
 	margin-left: -18px;
+	margin-top: -2px;
 }
 .markdown-rendered h5 .header-link {
 	margin-left: -16px;
+	margin-top: -2px;
 }
 .markdown-rendered h6 .header-link {
 	margin-left: -14px;
+	margin-top: -2px;
 }
 
 .markdown-rendered h1 {
@@ -462,4 +468,8 @@
 .markdown-rendered .no-color * {
 	color: inherit !important;
 	background-color: inherit !important;
+}
+
+.markdown-rendered>p:last-child {
+	margin-bottom: 0;
 }

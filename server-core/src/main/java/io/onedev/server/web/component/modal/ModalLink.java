@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.modal;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -42,9 +40,8 @@ public abstract class ModalLink extends AjaxLink<Void> {
 		}
 	}
 
-	@Nullable
 	protected String getModalCssClass() {
-		return null;
+		return "modal-lg";
 	}
 	
 	protected abstract Component newContent(String id, ModalPanel modal);

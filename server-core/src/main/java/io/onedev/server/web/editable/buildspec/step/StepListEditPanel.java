@@ -37,9 +37,11 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.typeselect.TypeSelectPanel;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -61,40 +63,48 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new ModalLink("addNew") {
+		
+		add(new DropdownLink("addNew", false, AlignPlacement.bottom(0), true) {
 
 			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-			
-			@Override
-			protected Component newContent(String id, ModalPanel modal) {
-				return new StepEditPanel(id, steps, -1) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new TypeSelectPanel<Step>(id) {
 
 					@Override
-					public BuildSpec getBuildSpec() {
-						return StepListEditPanel.this.getBuildSpec();
-					}
+					protected void onSelect(AjaxRequestTarget target, Class<? extends Step> type) {
+						dropdown.close();
+						
+						Step step;
+						try {
+							step = type.newInstance();
+						} catch (InstantiationException | IllegalAccessException e) {
+							throw new RuntimeException(e);
+						}
+						
+						new StepEditPanel(target, step) {
 
-					@Override
-					public List<ParamSpec> getParamSpecs() {
-						return StepListEditPanel.this.getParamSpecs();
+							@Override
+							protected void onSave(AjaxRequestTarget target, Step bean) {
+								steps.add(bean);
+								markFormDirty(target);
+								close();
+								onPropertyUpdating(target);
+								target.add(StepListEditPanel.this);
+							}
+
+							@Override
+							public BuildSpec getBuildSpec() {
+								return StepListEditPanel.this.getBuildSpec();
+							}
+
+							@Override
+							public List<ParamSpec> getParamSpecs() {
+								return StepListEditPanel.this.getParamSpecs();
+							}
+							
+						};
 					}
 					
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						modal.close();
-					}
-
-					@Override
-					protected void onSave(AjaxRequestTarget target) {
-						markFormDirty(target);
-						modal.close();
-						onPropertyUpdating(target);
-						target.add(StepListEditPanel.this);
-					}
-
 				};
 			}
 			
@@ -148,33 +158,24 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 			@Override
 			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StepListEditPanel.this);
-				fragment.add(new ModalLink("edit") {
+				fragment.add(new AjaxLink<Void>("edit") {
 
 					@Override
-					protected String getModalCssClass() {
-						return "modal-lg";
-					}
-					
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new StepEditPanel(id, steps, cellItem.findParent(Item.class).getIndex()) {
+					public void onClick(AjaxRequestTarget target) {
+						Step step = steps.get(cellItem.findParent(Item.class).getIndex());
+						new StepEditPanel(target, step) {
+
+							@Override
+							protected void onSave(AjaxRequestTarget target, Step bean) {
+								markFormDirty(target);
+								close();
+								onPropertyUpdating(target);
+								target.add(StepListEditPanel.this);
+							}
 
 							@Override
 							public BuildSpec getBuildSpec() {
 								return StepListEditPanel.this.getBuildSpec();
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-							@Override
-							protected void onSave(AjaxRequestTarget target) {
-								markFormDirty(target);
-								modal.close();
-								onPropertyUpdating(target);
-								target.add(StepListEditPanel.this);
 							}
 
 							@Override

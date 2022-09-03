@@ -14,22 +14,31 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.component.project.choice.ProjectMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.ProjectChoice;
 
 @SuppressWarnings("serial")
 public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	private final IModel<List<Project>> choicesModel = new LoadableDetachableModel<List<Project>>() {
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected List<Project> load() {
-			ProjectCache cache = getProjectManager().cloneCache();
-			List<Project> projects = new ArrayList<>(cache.getProjects());
-			projects.sort(cache.comparingPath());
-			return projects;
+			ProjectChoice projectChoice = descriptor.getPropertyGetter().getAnnotation(ProjectChoice.class);
+			if (projectChoice.value().length() != 0) {
+				return (List<Project>) ReflectionUtils.invokeStaticMethod(
+						descriptor.getPropertyGetter().getDeclaringClass(), projectChoice.value());
+			} else {
+				ProjectCache cache = getProjectManager().cloneCache();
+				List<Project> projects = new ArrayList<>(cache.getProjects());
+				projects.sort(cache.comparingPath());
+				return projects;
+			}
 		}
 		
 	};

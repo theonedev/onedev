@@ -5,7 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.web.component.createtag.TagBean;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.RevisionPick;
+import io.onedev.server.web.editable.annotation.RevisionChoice;
 
 @Editable
 public class TagBeanWithRevision extends TagBean {
@@ -15,7 +15,7 @@ public class TagBeanWithRevision extends TagBean {
 	private String revision;
 
 	@Editable(order=1000, name="Revision")
-	@RevisionPick
+	@RevisionChoice
 	@NotEmpty(message = "Please select revision to create tag from")
 	@OmitName
 	public String getRevision() {

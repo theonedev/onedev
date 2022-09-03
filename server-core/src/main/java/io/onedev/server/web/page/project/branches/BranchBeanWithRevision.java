@@ -5,7 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.web.component.branch.create.BranchBean;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.RevisionPick;
+import io.onedev.server.web.editable.annotation.RevisionChoice;
 
 @Editable
 public class BranchBeanWithRevision extends BranchBean {
@@ -15,7 +15,7 @@ public class BranchBeanWithRevision extends BranchBean {
 	private String revision;
 
 	@Editable(order=1000)
-	@RevisionPick
+	@RevisionChoice
 	@NotEmpty(message="Please choose revision to create branch from")
 	@OmitName
 	public String getRevision() {

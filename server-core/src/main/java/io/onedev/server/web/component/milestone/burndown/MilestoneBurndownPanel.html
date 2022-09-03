@@ -1,0 +1,9 @@
+<wicket:panel>
+	<div wicket:id="content" class="milestone-burndown"></div>
+	<wicket:fragment wicket:id="chartFrag">
+		<div class="d-flex align-items-center flex-nowrap mb-4">
+			<span class="font-size-lg mr-3">Show States By</span> <div class="flex-shrink-1"><select wicket:id="by" class="form-control" placeholder="Issue Count"></select></div>
+		</div>
+		<div wicket:id="chart" class="border-dashed border-secondary rounded pt-5 px-3"></div>
+	</wicket:fragment>
+</wicket:panel>

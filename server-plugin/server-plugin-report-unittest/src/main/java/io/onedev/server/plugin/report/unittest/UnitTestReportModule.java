@@ -85,7 +85,6 @@ public class UnitTestReportModule extends AbstractPluginModule {
 			
 		});
 		
-		// put your guice bindings here
 		contribute(WebApplicationConfigurator.class, new WebApplicationConfigurator() {
 			
 			@Override

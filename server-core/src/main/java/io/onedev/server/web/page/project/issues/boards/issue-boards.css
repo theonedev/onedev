@@ -28,10 +28,6 @@
 	border-bottom-color: var(--dark-mode-lighter-dark);
 	border-top-color: var(--dark-mode-lighter-dark);
 }
-.issue-boards>.body>.columns>.column {
-	margin-left: 2rem;
-	min-width: 300px;
-}
 .issue-boards>.body>.columns .column:first-child {
 	margin-left: 0;
 }
@@ -48,7 +44,7 @@
 	background: var(--dark-mode-lighter-dark);
 }
 .issue-boards>.body>.columns>.column {
-	margin-left: 2rem;
+	margin-left: 0.5rem;
 	min-width: 256px;
 }
 .issue-boards>.head .milestone-selector.btn-danger {

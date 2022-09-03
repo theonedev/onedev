@@ -100,6 +100,10 @@ import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
+import io.onedev.server.entitymanager.DashboardGroupShareManager;
+import io.onedev.server.entitymanager.DashboardManager;
+import io.onedev.server.entitymanager.DashboardUserShareManager;
+import io.onedev.server.entitymanager.DashboardVisitManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
@@ -148,6 +152,10 @@ import io.onedev.server.entitymanager.impl.DefaultCodeCommentQueryPersonalizatio
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentReplyManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultCommitQueryPersonalizationManager;
+import io.onedev.server.entitymanager.impl.DefaultDashboardGroupShareManager;
+import io.onedev.server.entitymanager.impl.DefaultDashboardManager;
+import io.onedev.server.entitymanager.impl.DefaultDashboardUserShareManager;
+import io.onedev.server.entitymanager.impl.DefaultDashboardVisitManager;
 import io.onedev.server.entitymanager.impl.DefaultEmailAddressManager;
 import io.onedev.server.entitymanager.impl.DefaultGitLfsLockManager;
 import io.onedev.server.entitymanager.impl.DefaultGpgKeyManager;
@@ -456,6 +464,10 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentTextManager.class).to(DefaultCodeCommentTextManager.class);
 		bind(PendingSuggestionApplyManager.class).to(DefaultPendingSuggestionApplyManager.class);
 		bind(IssueAuthorizationManager.class).to(DefaultIssueAuthorizationManager.class);
+		bind(DashboardManager.class).to(DefaultDashboardManager.class);
+		bind(DashboardUserShareManager.class).to(DefaultDashboardUserShareManager.class);
+		bind(DashboardGroupShareManager.class).to(DefaultDashboardGroupShareManager.class);
+		bind(DashboardVisitManager.class).to(DefaultDashboardVisitManager.class);
 		
 		bind(WebHookManager.class);
 		
@@ -694,7 +706,7 @@ public class CoreModule extends AbstractPluginModule {
 		contributeFromPackage(ExceptionHandler.class, UnauthenticatedExceptionHandler.class);
 		contributeFromPackage(ExceptionHandler.class, ConstraintViolationExceptionHandler.class);
 		contributeFromPackage(ExceptionHandler.class, PageExpiredExceptionHandler.class);
-
+		
 		bind(UrlManager.class).to(DefaultUrlManager.class);
 		bind(CodeCommentEventBroadcaster.class);
 		bind(PullRequestEventBroadcaster.class);

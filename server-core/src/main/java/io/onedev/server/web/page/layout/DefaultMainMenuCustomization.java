@@ -3,10 +3,10 @@ package io.onedev.server.web.page.layout;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.core.request.handler.PageProvider;
+
 import com.google.common.collect.Lists;
 
-import io.onedev.server.web.page.DashboardPage;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.project.NewProjectPage;
@@ -18,8 +18,8 @@ public class DefaultMainMenuCustomization implements MainMenuCustomization {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Class<? extends BasePage> getHomePage() {
-		return DashboardPage.class;
+	public PageProvider getHomePage(boolean failsafe) {
+		return new PageProvider(ProjectListPage.class, ProjectListPage.paramsOf(0, 0));
 	}
 
 	@Override

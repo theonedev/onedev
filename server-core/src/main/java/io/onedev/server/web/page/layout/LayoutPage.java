@@ -50,6 +50,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
@@ -97,7 +98,6 @@ import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
-import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.security.LogoutPage;
 import io.onedev.server.web.util.WicketUtils;
@@ -125,7 +125,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		MainMenuCustomization customization = OneDev.getInstance(MainMenuCustomization.class);
 		
-		sidebar.add(new BookmarkablePageLink<Void>("brandLink", customization.getHomePage()) {
+		sidebar.add(new BookmarkablePageLink<Void>("brandLink", HomePage.class) {
 
 			@Override
 			protected void onInitialize() {
@@ -365,11 +365,6 @@ public abstract class LayoutPage extends BasePage {
 				};
 			}
 
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-			
 		});
 		topbar.add(new Link<Void>("darkMode") {
 
@@ -408,7 +403,7 @@ public abstract class LayoutPage extends BasePage {
 			
 		}.setVisible(loginUser == null));
 		
-		topbar.add(new BookmarkablePageLink<Void>("brandLink", customization.getHomePage()) {
+		topbar.add(new BookmarkablePageLink<Void>("brandLink", HomePage.class) {
 
 			@Override
 			protected void onInitialize() {
@@ -483,7 +478,7 @@ public abstract class LayoutPage extends BasePage {
 				public void onClick() {
 					SecurityUtils.getSubject().releaseRunAs();
 					Session.get().warn("Exited impersonation");
-					setResponsePage(ProjectListPage.class, ProjectListPage.paramsOf(0, 0));
+					setResponsePage(HomePage.class);
 				}
 				
 			}; 
@@ -518,11 +513,6 @@ public abstract class LayoutPage extends BasePage {
 							}
 							
 						};
-					}
-					
-					@Override
-					protected String getCssClass() {
-						return "modal-lg";
 					}
 					
 				};

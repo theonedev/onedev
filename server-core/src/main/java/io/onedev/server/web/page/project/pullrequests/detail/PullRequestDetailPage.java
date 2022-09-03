@@ -1204,11 +1204,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		
 		operationsContainer.add(new ModalLink("approve") {
 
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
@@ -1250,11 +1245,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 		
 		operationsContainer.add(new ModalLink("requestForChanges") {
-
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
@@ -1330,11 +1320,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		
 		operationsContainer.add(new ModalLink("discard") {
 
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-
 			private boolean canOperate() {
 				return getPullRequest().isOpen() && SecurityUtils.canModify(getPullRequest());
 			}
@@ -1369,11 +1354,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 		
 		operationsContainer.add(new ModalLink("reopen") {
-
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
@@ -1410,11 +1390,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 		
 		operationsContainer.add(new ModalLink("deleteSourceBranch") {
-
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
@@ -1454,11 +1429,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		});
 		
 		operationsContainer.add(new ModalLink("restoreSourceBranch") {
-
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();

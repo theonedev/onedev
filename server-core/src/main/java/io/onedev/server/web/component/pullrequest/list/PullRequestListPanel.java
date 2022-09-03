@@ -66,7 +66,6 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
-import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
@@ -770,22 +769,6 @@ public abstract class PullRequestListPanel extends Panel {
 				fragment.add(new Label("comments", request.getCommentCount()));
 				
 				fragment.add(new RequestStatusBadge("status", rowModel));
-				
-				fragment.add(new BranchLink("target", request.getTarget()));
-
-				if (request.getSource() != null) { 
-					fragment.add(new BranchLink("source", request.getSource()));
-				} else { 
-					fragment.add(new Label("source", "<i>unknown</i>") {
-
-						@Override
-						protected void onComponentTag(ComponentTag tag) {
-							super.onComponentTag(tag);
-							tag.setName("span");
-						}
-						
-					}.setEscapeModelStrings(false));
-				}
 				
 				LastUpdate lastUpdate = request.getLastUpdate();
 				if (lastUpdate.getUser() != null) 

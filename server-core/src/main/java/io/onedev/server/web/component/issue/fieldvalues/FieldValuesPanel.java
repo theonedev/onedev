@@ -127,7 +127,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 				if (hasVisibleEditableDependents) {
 					Collection<String> propertyNames = FieldUtils.getEditablePropertyNames(
 							getIssue().getProject(), bean.getClass(), dependentFields);
-					class DependentFieldsEditor extends BeanEditModalPanel implements ProjectAware, InputContext {
+					class DependentFieldsEditor extends BeanEditModalPanel<Serializable> 
+							implements ProjectAware, InputContext {
 
 						public DependentFieldsEditor(IPartialPageRequestHandler handler, Serializable bean,
 								Collection<String> propertyNames, boolean exclude, String title) {

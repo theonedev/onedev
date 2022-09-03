@@ -55,7 +55,6 @@ import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
@@ -84,8 +83,6 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -98,8 +95,6 @@ import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -109,6 +104,10 @@ import io.onedev.server.web.util.QuerySaveSupport;
 public abstract class BuildListPanel extends Panel {
 	
 	private final IModel<String> queryStringModel;
+	
+	private final boolean showJob;
+	
+	private final boolean showRef;
 	
 	private final int expectedCount;
 	
@@ -135,9 +134,11 @@ public abstract class BuildListPanel extends Panel {
 	
 	private boolean querySubmitted = true;
 	
-	public BuildListPanel(String id, IModel<String> queryModel, int expectedCount) {
+	public BuildListPanel(String id, IModel<String> queryModel, boolean showJob, boolean showRef, int expectedCount) {
 		super(id);
 		this.queryStringModel = queryModel;
+		this.showJob = showJob;
+		this.showRef = showRef;
 		this.expectedCount = expectedCount;
 	}
 	
@@ -1005,138 +1006,87 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.NAME_JOB)) {
-
-			@Override
-			public String getCssClass() {
-				return "job";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				Build build = rowModel.getObject();
-				if (SecurityUtils.canReadCode(build.getProject())) {
-					Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-					Link<Void> link = new JobDefLink("link", build.getCommitId(), build.getJobName()) {
-
-						@Override
-						protected Project getProject() {
-							return rowModel.getObject().getProject();
-						}
-
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							setEnabled(isEnabled() && build.getJob() != null);
-						}
-						
-					};
-					link.add(new Label("label", build.getJobName()));
-					fragment.add(link);
-					cellItem.add(fragment);
-				} else {
-					cellItem.add(new Label(componentId, build.getJobName()));
+		if (showJob) {
+			columns.add(new AbstractColumn<Build, Void>(Model.of(Build.NAME_JOB)) {
+	
+				@Override
+				public String getCssClass() {
+					return "job";
 				}
-			}
-		});
-		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Branch/Tag")) {
-
-			@Override
-			public String getCssClass() {
-				return "branch-tag d-none d-lg-table-cell";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				Build build = rowModel.getObject();
-				if (SecurityUtils.canReadCode(build.getProject())) {
-					if (build.getBranch() != null) {
-						Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-						PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
-								new BlobIdent(build.getBranch(), null, FileMode.TREE.getBits()));
-						Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
-						link.add(new Label("label", build.getBranch()));
-						fragment.add(link);
-						cellItem.add(fragment);
-					} else if (build.getTag() != null) {
-						Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-						PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
-								new BlobIdent(build.getTag(), null, FileMode.TREE.getBits()));
-						Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
-						link.add(new Label("label", build.getTag()));
-						fragment.add(link);
-						cellItem.add(fragment);
-					} else { 
-						cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
-					}
-				} else {
-					if (build.getBranch() != null) 
-						cellItem.add(new Label(componentId, build.getBranch()));
-					else if (build.getTag() != null)
-						cellItem.add(new Label(componentId, build.getTag()));
-					else 
-						cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
-				}
-			}
-		});
-
-		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.NAME_COMMIT)) {
-
-			@Override
-			public String getCssClass() {
-				return "commit d-none d-lg-table-cell";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				Build build = rowModel.getObject();
-				if (SecurityUtils.canReadCode(build.getProject())) {
-					Fragment fragment = new Fragment(componentId, "commitFrag", BuildListPanel.this);
-					CommitDetailPage.State commitState = new CommitDetailPage.State();
-					commitState.revision = build.getCommitHash();
-					PageParameters params = CommitDetailPage.paramsOf(build.getProject(), commitState);
-					Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
-					fragment.add(hashLink);
-					hashLink.add(new Label("hash", GitUtils.abbreviateSHA(build.getCommitHash())));
-					fragment.add(new CopyToClipboardLink("copyHash", Model.of(build.getCommitHash())));
-					cellItem.add(fragment);
-				} else {
-					cellItem.add(new Label(componentId, GitUtils.abbreviateSHA(build.getCommitHash())));
-				}
-			}
-		});
-
-		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.NAME_PULL_REQUEST)) {
-
-			@Override
-			public String getCssClass() {
-				return "pull-request d-none d-xl-table-cell";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				Build build = rowModel.getObject();
-				if (build.getRequest() != null) {
+	
+				@Override
+				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
+						IModel<Build> rowModel) {
+					Build build = rowModel.getObject();
 					if (SecurityUtils.canReadCode(build.getProject())) {
-						Fragment fragment = new Fragment(componentId, "pullRequestFrag", BuildListPanel.this);
-						Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
-								PullRequestActivitiesPage.paramsOf(build.getRequest()));
-						link.add(new Label("label", "#" + build.getRequest().getNumber()));
+						Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+						Link<Void> link = new JobDefLink("link", build.getCommitId(), build.getJobName()) {
+	
+							@Override
+							protected Project getProject() {
+								return rowModel.getObject().getProject();
+							}
+	
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(isEnabled() && build.getJob() != null);
+							}
+							
+						};
+						link.add(new Label("label", build.getJobName()));
 						fragment.add(link);
 						cellItem.add(fragment);
 					} else {
-						cellItem.add(new Label(componentId, "#" + build.getRequest().getNumber()));
+						cellItem.add(new Label(componentId, build.getJobName()));
 					}
-				} else {
-					cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
 				}
-			}
-		});
+			});
+		}
+		
+		if (showRef) {
+			columns.add(new AbstractColumn<Build, Void>(Model.of("Branch/Tag")) {
+	
+				@Override
+				public String getCssClass() {
+					return "branch-tag d-none d-lg-table-cell";
+				}
+	
+				@Override
+				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
+						IModel<Build> rowModel) {
+					Build build = rowModel.getObject();
+					if (SecurityUtils.canReadCode(build.getProject())) {
+						if (build.getBranch() != null) {
+							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
+									new BlobIdent(build.getBranch(), null, FileMode.TREE.getBits()));
+							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
+							link.add(new Label("label", build.getBranch()));
+							fragment.add(link);
+							cellItem.add(fragment);
+						} else if (build.getTag() != null) {
+							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
+									new BlobIdent(build.getTag(), null, FileMode.TREE.getBits()));
+							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
+							link.add(new Label("label", build.getTag()));
+							fragment.add(link);
+							cellItem.add(fragment);
+						} else { 
+							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
+						}
+					} else {
+						if (build.getBranch() != null) 
+							cellItem.add(new Label(componentId, build.getBranch()));
+						else if (build.getTag() != null)
+							cellItem.add(new Label(componentId, build.getTag()));
+						else 
+							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
+					}
+				}
+			});
+		}
 		
 		for (String paramName: getListParams()) {
 			columns.add(new AbstractColumn<Build, Void>(Model.of(paramName)) {

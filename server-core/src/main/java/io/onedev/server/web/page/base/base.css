@@ -598,7 +598,7 @@ pre>code {
 	height: 100%;
 }
 .side-main>.side {
-	margin-right: 2rem;
+	margin-right: 0.5rem;
 	flex: 0 0 auto;
 	max-width: 300px;
 }

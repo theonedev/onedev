@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.suggestionapply;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -37,19 +36,18 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 
 @SuppressWarnings("serial")
-public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel {
+public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<SuggestionApplyBean> {
 
 	public SuggestionApplyModalPanel(IPartialPageRequestHandler handler, SuggestionApplyBean bean) {
 		super(handler, bean);
 	}
 
 	@Override
-	protected void onSave(AjaxRequestTarget target, Serializable bean) {
-		SuggestionApplyBean suggestionApplyBean = (SuggestionApplyBean) bean;
+	protected void onSave(AjaxRequestTarget target, SuggestionApplyBean bean) {
 		CodeComment comment = getComment();
 		BlobEdits blobEdits = new BlobEdits();
 		
-		String branch = suggestionApplyBean.getBranch();
+		String branch = bean.getBranch();
 		
 		Project project;
 		PullRequest request = getPullRequest();
@@ -62,7 +60,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel {
 			ObjectId commitId = project.getObjectId(branch, true);
 			try {
 				blobEdits.applySuggestion(project, mark, getSuggestion(), commitId);
-				String commitMessage = suggestionApplyBean.getCommitMessage();
+				String commitMessage = bean.getCommitMessage();
 				GpgSetting gpgSetting = OneDev.getInstance(SettingManager.class).getGpgSetting();
 				
 				ObjectId newCommitId = blobEdits.commit(

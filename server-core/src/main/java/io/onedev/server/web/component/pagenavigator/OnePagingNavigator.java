@@ -3,6 +3,10 @@ package io.onedev.server.web.component.pagenavigator;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigation;
+import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationIncrementLink;
+import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigationLink;
+import org.apache.wicket.ajax.markup.html.navigation.paging.AjaxPagingNavigator;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -10,18 +14,16 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.DisabledAttributeLinkBehavior;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.navigation.paging.IPageable;
 import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigationIncrementLink;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigationLink;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public class OnePagingNavigator extends PagingNavigator {
+public class OnePagingNavigator extends AjaxPagingNavigator {
 
 	private final PagingHistorySupport pagingHistorySupport;
 
@@ -52,11 +54,12 @@ public class OnePagingNavigator extends PagingNavigator {
 	@Override
 	protected PagingNavigation newNavigation(String id, IPageable pageable, IPagingLabelProvider labelProvider) {
 
-		return new PagingNavigation(id, pageable, labelProvider) {
+		return new AjaxPagingNavigation(id, pageable, labelProvider) {
+			
 			private final AttributeModifier activeAttribute = AttributeModifier.append("class", "active");
 
 			@Override
-			protected AbstractLink newPagingNavigationLink(String id, IPageable pageable, long pageIndex) {
+			protected Link<?> newPagingNavigationLink(String id, IPageable pageable, long pageIndex) {
 				if (pagingHistorySupport != null) {
 					return new BookmarkablePageLink<Void>(id, getPage().getClass(),
 							pagingHistorySupport.newPageParameters((int) pageIndex));
@@ -92,7 +95,7 @@ public class OnePagingNavigator extends PagingNavigator {
 			};
 			link.add(new DisabledAttributeLinkBehavior());
 		} else {
-			link = new PagingNavigationIncrementLink<Void>(id, pageable, increment);
+			link = new AjaxPagingNavigationIncrementLink(id, pageable, increment);
 		}
 		return link;
 	}
@@ -118,7 +121,7 @@ public class OnePagingNavigator extends PagingNavigator {
 			};
 			link.add(new DisabledAttributeLinkBehavior());
 		} else {
-			link = new PagingNavigationLink<Void>(id, pageable, pageNumber);
+			link = new AjaxPagingNavigationLink(id, pageable, pageNumber);
 		}
 		return link;
 	}

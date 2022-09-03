@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="type-select">
+		<input wicket:id="input" class="form-control" placeholder="Type to filter">
+		<div wicket:id="content" class="content mt-3"></div>
+	</div>
+	<wicket:fragment wicket:id="groupNodeFrag">
+		<a wicket:id="link" class="selectable"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="typeNodeFrag">
+		<a wicket:id="link" class="selectable">
+			<span wicket:id="label"></span>
+			<div wicket:id="description" class="font-size-sm text-muted text-wrap"></div>
+		</a>
+	</wicket:fragment>
+</wicket:panel>

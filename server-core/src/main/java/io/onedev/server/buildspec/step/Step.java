@@ -11,7 +11,6 @@ import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -51,14 +50,6 @@ public abstract class Step implements Serializable {
 	
 	public Action getAction(Build build, String jobToken, ParamCombination paramCombination) {
 		return getAction(name, build, jobToken, paramCombination);
-	}
-	
-	public static String getGroupedType(Class<? extends Step> stepClass) {
-		Editable editable = stepClass.getAnnotation(Editable.class);
-		if (editable != null && editable.group().length() != 0)
-			return editable.group() + " / " + EditableUtils.getDisplayName(stepClass);
-		else
-			return EditableUtils.getDisplayName(stepClass);
 	}
 	
 }

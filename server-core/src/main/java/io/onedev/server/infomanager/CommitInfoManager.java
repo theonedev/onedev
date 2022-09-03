@@ -15,6 +15,8 @@ import io.onedev.server.util.NameAndEmail;
 
 public interface CommitInfoManager {
 	
+	int getFileCount(Project project);
+	
 	List<String> getFiles(Project project);
 	
 	int getCommitCount(Project project, User user, String path);

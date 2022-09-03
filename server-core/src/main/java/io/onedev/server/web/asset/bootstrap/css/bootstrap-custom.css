@@ -357,14 +357,15 @@ pre code {
 }
 
 .card {
-    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
+    box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.1);
     border: none;
 	border-radius: 0.42rem;
 }
 .dark-mode .card {
-	box-shadow: 0 0 30px rgb(0 0 0 / 50%);	
+	box-shadow: 0 0 12px rgb(0 0 0 / 50%);	
     background-color: var(--dark-mode-dark);
 }
+
 .card-header:first-child {
     border-radius: calc(0.42rem - 1px) calc(0.42rem - 1px) 0 0;
 }
@@ -2582,10 +2583,10 @@ h6, .h6 {
 }
 
 .shadow {
-	box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1) !important;
+	box-shadow: 0px 0px 4px 0px rgba(0,0,0,0.1) !important;
 }
 .dark-mode .shadow {
-	box-shadow: 0 0 30px rgb(0 0 0 / 50%) !important;	
+	box-shadow: 0 0 12px rgb(0 0 0 / 50%) !important;	
 }
 
 .popover {

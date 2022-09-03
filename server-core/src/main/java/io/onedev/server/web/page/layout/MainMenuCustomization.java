@@ -3,11 +3,11 @@ package io.onedev.server.web.page.layout;
 import java.io.Serializable;
 import java.util.List;
 
-import io.onedev.server.web.page.base.BasePage;
+import org.apache.wicket.core.request.handler.PageProvider;
 
 public interface MainMenuCustomization extends Serializable {
 	
-	Class<? extends BasePage> getHomePage();
+	PageProvider getHomePage(boolean failsafe);
 	
 	List<SidebarMenuItem> getMainMenuItems();
 	

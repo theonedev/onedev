@@ -183,4 +183,12 @@ public class EditableUtils {
 		annotatedElements.sort((element1, element2) -> getOrder(element1) - getOrder(element2));
 	}
 
+	public static String getGroupedType(Class<?> clazz) {
+		Editable editable = clazz.getAnnotation(Editable.class);
+		if (editable != null && editable.group().length() != 0)
+			return editable.group() + " / " + getDisplayName(clazz);
+		else
+			return getDisplayName(clazz);
+	}
+	
 }

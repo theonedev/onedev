@@ -572,11 +572,6 @@ public abstract class IssueListPanel extends Panel {
 						return new ModalLink(id) {
 
 							@Override
-							protected String getModalCssClass() {
-								return "modal-lg";
-							}
-
-							@Override
 							protected Component newContent(String id, ModalPanel modal) {
 								dropdown.close();
 								
@@ -797,11 +792,6 @@ public abstract class IssueListPanel extends Panel {
 					public WebMarkupContainer newLink(String id) {
 						return new ModalLink(id) {
 
-							@Override
-							protected String getModalCssClass() {
-								return "modal-lg";
-							}
-							
 							@Override
 							protected Component newContent(String id, ModalPanel modal) {
 								dropdown.close();

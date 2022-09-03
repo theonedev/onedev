@@ -20,7 +20,7 @@ import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.wizard.DefaultEndActionsPanel;
 import io.onedev.server.web.component.wizard.WizardPanel;
-import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.simple.SimplePage;
 
 @SuppressWarnings("serial")
@@ -83,7 +83,7 @@ public class ServerInitPage extends SimplePage {
 							WebSession.get().logout();
 							User root = OneDev.getInstance(UserManager.class).getRoot();
 							SecurityUtils.getSubject().runAs(root.getPrincipals());
-							throw new RestartResponseException(ProjectListPage.class);
+							throw new RestartResponseException(HomePage.class);
 						}
 						
 					};

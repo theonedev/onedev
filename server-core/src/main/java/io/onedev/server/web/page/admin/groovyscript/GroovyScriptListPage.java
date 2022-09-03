@@ -78,11 +78,6 @@ public class GroovyScriptListPage extends AdministrationPage {
 				};
 			}
 
-			@Override
-			protected String getModalCssClass() {
-				return "modal-lg";
-			}
-			
 		});
 		
 		List<IColumn<GroovyScript, Void>> columns = new ArrayList<>();
@@ -148,11 +143,6 @@ public class GroovyScriptListPage extends AdministrationPage {
 							}
 
 						};
-					}
-					
-					@Override
-					protected String getModalCssClass() {
-						return "modal-lg";
 					}
 					
 				});

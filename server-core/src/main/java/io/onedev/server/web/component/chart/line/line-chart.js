@@ -97,7 +97,6 @@ onedev.server.lineChart = {
 				let xAxisValue = lineSeries.xAxisValues[i];
 				option.xAxis.data.push(xAxisValue);
 				for (const j in lineSeries.lines) {
-					console.log(lineSeries.lines[j].yAxisValues[xAxisValue]);
 					option.series[j].data.push(lineSeries.lines[j].yAxisValues[xAxisValue]);
 				}
 			};

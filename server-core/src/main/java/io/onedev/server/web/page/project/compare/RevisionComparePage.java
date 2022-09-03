@@ -60,7 +60,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.revisionpicker.AffinalRevisionPicker;
+import io.onedev.server.web.component.revision.AffinalRevisionPicker;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;

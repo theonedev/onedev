@@ -171,7 +171,7 @@ abstract class JobExecutorEditPanel extends Panel {
 				if (editor.isValid()) {
 					if (testData != null) {
 						String title = EditableUtils.getDisplayName(testData.getClass());
-						new BeanEditModalPanel(target, testData, Sets.newHashSet(), true, title) {
+						new BeanEditModalPanel<Serializable>(target, testData, Sets.newHashSet(), true, title) {
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, Serializable bean) {

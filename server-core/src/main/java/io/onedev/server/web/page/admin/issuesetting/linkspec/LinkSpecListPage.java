@@ -53,11 +53,6 @@ public class LinkSpecListPage extends IssueSettingPage {
 		add(new ModalLink("addNew") {
 
 			@Override
-			protected String getModalCssClass() {
-				return "modal-lg"; 
-			}
-
-			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new LinkSpecEditPanel(id, Model.of(new LinkSpec())) {
 
@@ -131,11 +126,6 @@ public class LinkSpecListPage extends IssueSettingPage {
 				Fragment fragment = new Fragment(componentId, "linkActionsFrag", LinkSpecListPage.this);
 				fragment.add(new ModalLink("edit") {
 
-					@Override
-					protected String getModalCssClass() {
-						return "modal-lg"; 
-					}
-					
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
 						return new LinkSpecEditPanel(id, rowModel) {

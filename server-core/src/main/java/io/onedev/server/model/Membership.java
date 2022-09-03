@@ -20,6 +20,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 public class Membership extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PROP_USER = "user";
+	
+	public static final String PROP_GROUP = "group";
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

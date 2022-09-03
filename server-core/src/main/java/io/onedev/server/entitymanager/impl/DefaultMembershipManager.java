@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +8,13 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +26,7 @@ import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -76,6 +84,30 @@ public class DefaultMembershipManager extends BaseEntityManager<Membership> impl
 		
 		diff.entriesOnlyOnLeft().values().forEach(membership -> delete(membership));
 		diff.entriesOnlyOnRight().values().forEach(membership -> save(membership));		
+	}
+
+	@Sessional
+	@Override
+	public List<User> queryMembers(User user) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<User> criteriaQuery = builder.createQuery(User.class);
+		Root<User> root = criteriaQuery.from(User.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		for (Group group: user.getGroups()) {
+			
+			Subquery<Membership> membershipQuery = criteriaQuery.subquery(Membership.class);
+			Root<Membership> membershipRoot = membershipQuery.from(Membership.class);
+			membershipQuery.select(membershipRoot);
+	
+			predicates.add(builder.exists(membershipQuery.where(
+					builder.equal(membershipRoot.get(Membership.PROP_USER), root),
+					builder.equal(membershipRoot.get(Membership.PROP_GROUP), group))));
+		}
+		
+		criteriaQuery.where(builder.or(predicates.toArray(new Predicate[0])));
+		Query<User> query = getSession().createQuery(criteriaQuery);
+		return query.getResultList();
 	}
 
 }

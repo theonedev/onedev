@@ -60,11 +60,6 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 				new ModalPanel(target) {
 					
 					@Override
-					protected String getCssClass() {
-						return "modal-lg";
-					}
-					
-					@Override
 					protected Component newContent(String id) {
 						return new JobSecretEditPanel(id, -1) {
 
@@ -131,11 +126,6 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 					public void onClick(AjaxRequestTarget target) {
 						new ModalPanel(target) {
 							
-							@Override
-							protected String getCssClass() {
-								return "modal-lg";
-							}
-
 							@Override
 							protected Component newContent(String id) {
 								return new JobSecretEditPanel(id, index) {

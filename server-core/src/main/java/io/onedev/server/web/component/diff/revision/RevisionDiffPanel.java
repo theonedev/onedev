@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.diff.revision;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -489,11 +488,11 @@ public abstract class RevisionDiffPanel extends Panel {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										new BeanEditModalPanel(target, new SuggestionBatchApplyBean()) {
+										new BeanEditModalPanel<SuggestionBatchApplyBean>(target, new SuggestionBatchApplyBean()) {
 											
 											@Override
-											protected void onSave(AjaxRequestTarget target, Serializable bean) {
-												String commitMessage = ((SuggestionBatchApplyBean) bean).getCommitMessage(); 
+											protected void onSave(AjaxRequestTarget target, SuggestionBatchApplyBean bean) {
+												String commitMessage = bean.getCommitMessage(); 
 												PullRequest request = getPullRequest();
 												ObjectId commitId = request.getLatestUpdate().getHeadCommit().copy();
 												try {
@@ -587,12 +586,11 @@ public abstract class RevisionDiffPanel extends Panel {
 						DiffOption diffOption = new DiffOption();
 						diffOption.setWhitespaceOption(whitespaceOptionModel.getObject());
 						diffOption.setViewMode(diffMode);
-						new BeanEditModalPanel(target, diffOption) {
+						new BeanEditModalPanel<DiffOption>(target, diffOption) {
 							
 							@Override
-							protected void onSave(AjaxRequestTarget target, Serializable bean) {
-								DiffOption diffOption = (DiffOption) bean;
-								diffMode = diffOption.getViewMode();
+							protected void onSave(AjaxRequestTarget target, DiffOption bean) {
+								diffMode = bean.getViewMode();
 								
 								WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 								Cookie cookie = new Cookie(COOKIE_VIEW_MODE, diffMode.name());
@@ -600,7 +598,7 @@ public abstract class RevisionDiffPanel extends Panel {
 								cookie.setPath("/");
 								response.addCookie(cookie);
 								
-								whitespaceOptionModel.setObject(diffOption.getWhitespaceOption());
+								whitespaceOptionModel.setObject(bean.getWhitespaceOption());
 								
 								target.add(navs);
 								target.add(body);

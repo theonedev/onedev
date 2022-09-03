@@ -19,7 +19,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.page.DashboardPage;
+import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 
@@ -66,7 +66,7 @@ public class SsoProcessPage extends BasePage {
 				if (url != null && url.toString().length() != 0) 
 					redirectUrlAfterLogin = url.toString();
 				else 
-					redirectUrlAfterLogin = RequestCycle.get().urlFor(DashboardPage.class, new PageParameters()).toString(); 
+					redirectUrlAfterLogin = RequestCycle.get().urlFor(HomePage.class, new PageParameters()).toString(); 
 				Session.get().bind();
 				Session.get().setAttribute(SESSION_ATTR_REDIRECT_URL, redirectUrlAfterLogin);
 				connector.initiateLogin();

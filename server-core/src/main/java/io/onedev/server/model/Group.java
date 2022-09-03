@@ -46,6 +46,10 @@ public class Group extends AbstractEntity implements Permission {
 	
 	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<DashboardGroupShare> dashboardShares = new ArrayList<>();
+	
+	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	private transient Collection<User> members;
@@ -110,6 +114,14 @@ public class Group extends AbstractEntity implements Permission {
 
 	public void setAuthorizations(Collection<GroupAuthorization> authorizations) {
 		this.authorizations = authorizations;
+	}
+
+	public Collection<DashboardGroupShare> getDashboardShares() {
+		return dashboardShares;
+	}
+
+	public void setDashboardShares(Collection<DashboardGroupShare> dashboardShares) {
+		this.dashboardShares = dashboardShares;
 	}
 
 	public Collection<Membership> getMemberships() {

@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.codecomment;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -213,7 +212,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			private void changeStatus(AjaxRequestTarget target, 
 					Provider<Collection<CodeComment>> commentsProvider, boolean resolved) {
-				new BeanEditModalPanel(target, new StatusChangeOptionBean()) {
+				new BeanEditModalPanel<StatusChangeOptionBean>(target, new StatusChangeOptionBean()) {
 					
 					@Override
 					protected String getCssClass() {
@@ -221,7 +220,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					}
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, Serializable bean) {
+					protected void onSave(AjaxRequestTarget target, StatusChangeOptionBean bean) {
 						Collection<CodeCommentStatusChange> changes = new ArrayList<>();
 						
 						for (CodeComment comment: commentsProvider.get()) {
@@ -234,7 +233,7 @@ public abstract class CodeCommentListPanel extends Panel {
 							changes.add(change);
 						}
 						
-						String note = ((StatusChangeOptionBean) bean).getNote();
+						String note = bean.getNote();
 						
 						OneDev.getInstance(CodeCommentStatusChangeManager.class).save(changes, note);
 						selectionColumn.getSelections().clear();

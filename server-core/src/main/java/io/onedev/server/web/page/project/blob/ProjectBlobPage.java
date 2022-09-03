@@ -112,7 +112,7 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.revisionpicker.RevisionPicker;
+import io.onedev.server.web.component.revision.RevisionPicker;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNavigator;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -1615,6 +1615,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 
 	@Override
 	public String appendRaw(String url) {
+		return doAppendRaw(url);
+	}
+
+	public static String doAppendRaw(String url) {
 		try {
 			URIBuilder builder;
 			builder = new URIBuilder(url);
@@ -1627,7 +1631,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	@Override
 	protected String getPageTitle() {
 		if (state.blobIdent.revision == null)
