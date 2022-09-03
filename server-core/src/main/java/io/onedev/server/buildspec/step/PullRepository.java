@@ -19,6 +19,7 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExplicitException;
@@ -27,14 +28,17 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Editable(order=60, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
 		+ "This step pulls specified refs from remote. For security reason, it is only allowed "
@@ -45,26 +49,44 @@ public class PullRepository extends SyncRepository {
 	
 	private static final int LFS_FETCH_BATCH = 100;
 
-	private String targetProjectName;
+	private boolean syncToChildProject;
+	
+	private String childProject;
 
 	private String refs = "refs/heads/* refs/tags/*";
 	
-	@Editable(order=210, name="Target Project Name", description="Specify the project to synchronize.")
-	@ChoiceProvider("getProjectNameSuggestions")
-	@NotEmpty
-	public String getTargetProjectName() {
-		return targetProjectName;
+	@Editable(order=205, description="If enabled, sync to child project instead of current project")
+	public boolean isSyncToChildProject() {
+		return syncToChildProject;
 	}
 
-	public void setTargetProjectName(String targetProjectName) {
-		this.targetProjectName = targetProjectName;
+	public void setSyncToChildProject(boolean syncToChildProject) {
+		this.syncToChildProject = syncToChildProject;
+	}
+
+	@Editable(order=210, description="Select child project to sync to")
+	@ShowCondition("isSyncToChildProjectEnabled")
+	@ChoiceProvider("getChildProjects")
+	@NotEmpty
+	public String getChildProject() {
+		return childProject;
+	}
+
+	public void setChildProject(String childProject) {
+		this.childProject = childProject;
 	}
 
 	@SuppressWarnings("unused")
-	private static List<String> getProjectNameSuggestions() {
+	private static boolean isSyncToChildProjectEnabled() {
+		return (boolean) EditContext.get().getInputValue("syncToChildProject");
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<String> getChildProjects() {
+		int prefixLen = Project.get().getPath().length() + 1;
 		List<String> choices = new ArrayList<>(Project.get().getDescendants()
-				.stream().map(pr -> pr.getPath()).collect(Collectors.toList()));
-		choices.add(Project.get().getPath());
+				.stream().map(pr -> pr.getPath().substring(prefixLen)).collect(Collectors.toList()));
+		Collections.sort(choices);
 		return choices;
 	}
 
@@ -98,7 +120,11 @@ public class PullRepository extends SyncRepository {
 		Commandline git = newGit(targetProject);
 		
 		String defaultBranch = targetProject.getDefaultBranch();
-		ObjectId baseCommitId = targetProject.getRevCommit(defaultBranch, true).copy();
+		ObjectId baseCommitId;
+		if (defaultBranch != null)
+			baseCommitId = targetProject.getRevCommit(defaultBranch, true).copy();
+		else
+			baseCommitId = null;
 		
 		Map<String, ObjectId> oldCommitIds = getCommitIds(targetProject);
 		
@@ -135,24 +161,29 @@ public class PullRepository extends SyncRepository {
 				if (isWithLfs()) {
 					List<ObjectId> lfsFetchCommitIds = new ArrayList<>();
 					
-					try (RevWalk revWalk = new RevWalk(targetProject.getRepository())) {
-						if (!difference.entriesOnlyOnRight().isEmpty()) {
-							for (Map.Entry<String, ObjectId> entry: difference.entriesOnlyOnRight().entrySet()) {
-								revWalk.markStart(revWalk.lookupCommit(entry.getValue()));
+					if (baseCommitId != null) {
+						try (RevWalk revWalk = new RevWalk(targetProject.getRepository())) {
+							if (!difference.entriesOnlyOnRight().isEmpty()) {
+								for (Map.Entry<String, ObjectId> entry: difference.entriesOnlyOnRight().entrySet()) {
+									revWalk.markStart(revWalk.lookupCommit(entry.getValue()));
+								}
+								if (baseCommitId != null)
+									revWalk.markUninteresting(revWalk.lookupCommit(baseCommitId));
 							}
-							revWalk.markUninteresting(revWalk.lookupCommit(baseCommitId));
+							
+							for (Map.Entry<String, ValueDifference<ObjectId>> entry: difference.entriesDiffering().entrySet()) {
+								revWalk.markStart(revWalk.lookupCommit(entry.getValue().rightValue()));
+								revWalk.markUninteresting(revWalk.lookupCommit(entry.getValue().leftValue()));
+							}
+							
+							RevCommit commit;
+							while ((commit = revWalk.next()) != null) 
+								lfsFetchCommitIds.add(commit.copy());
+						} catch (IOException e) {
+							throw new RuntimeException(e);
 						}
-						
-						for (Map.Entry<String, ValueDifference<ObjectId>> entry: difference.entriesDiffering().entrySet()) {
-							revWalk.markStart(revWalk.lookupCommit(entry.getValue().rightValue()));
-							revWalk.markUninteresting(revWalk.lookupCommit(entry.getValue().leftValue()));
-						}
-						
-						RevCommit commit;
-						while ((commit = revWalk.next()) != null) 
-							lfsFetchCommitIds.add(commit.copy());
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+					} else {
+						lfsFetchCommitIds.addAll(newCommitIds.values());
 					}
 					
 					for (List<ObjectId> batch: Lists.partition(lfsFetchCommitIds, LFS_FETCH_BATCH)) {
@@ -160,6 +191,8 @@ public class PullRepository extends SyncRepository {
 						git.addArgs("lfs", "fetch", remoteUrl);
 						for (ObjectId commitId: batch)
 							git.addArgs(commitId.name());
+						if (baseCommitId == null)
+							git.addArgs("--all");
 						git.execute(new LineConsumer() {
 
 							@Override
@@ -211,17 +244,14 @@ public class PullRepository extends SyncRepository {
 	
 	private Project getTargetProject(Build build) {
 		Project buildProject = build.getProject();
-		if (buildProject.getPath().equals(targetProjectName))
+		if (isSyncToChildProject()) {
+			String projectPath = buildProject.getPath() + "/" + getChildProject();
+			Project childProject = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+			if (childProject == null)
+				throw new ExplicitException("Unable to find child project: " + getChildProject());
+			return childProject;
+		} else {
 			return buildProject;
-
-		List<Project> matches = buildProject.getDescendants()
-				.stream().filter(des -> des.getPath().equals(targetProjectName)).collect(Collectors.toList());
-
-		if (matches.isEmpty())
-			throw new RuntimeException("No descendant project found with specified path.");
-		if (matches.size() > 1)
-			throw new RuntimeException("More than one descendant project found with matching path.");
-
-		return matches.get(0);
+		}
 	}
 }
