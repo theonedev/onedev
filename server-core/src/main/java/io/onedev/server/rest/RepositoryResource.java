@@ -295,7 +295,7 @@ public class RepositoryResource {
 
     	CommitQuery parsedQuery;
 		try {
-			parsedQuery = CommitQuery.parse(project, query);
+			parsedQuery = CommitQuery.parse(project, query, true);
 		} catch (Exception e) {
 			throw new InvalidParamException("Error parsing query", e);
 		}

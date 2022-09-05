@@ -12,7 +12,7 @@ public interface MailManager {
 	
 	public static final String TEST_SUB_ADDRESS = "test~subaddressing";
 	
-	public static final String INCOMING_CONTENT_MARKER = "no-color";
+	public static final String COMMENT_MARKER = "no-color";
 	
 	void sendMail(Collection<String> toList, Collection<String> ccList, 
 			Collection<String> bccList, String subject, String htmlBody, 
@@ -37,6 +37,10 @@ public interface MailManager {
 
 	@Nullable
 	public String getUnsubscribeAddress(PullRequest request);
+	
+	boolean isMailContent(String comment);
+	
+	String toPlainText(String mailContent);
 	
 	Future<?> monitorInbox(MailCheckSetting mailCheckSetting, MessageListener listener, MailPosition MailPosition);
 

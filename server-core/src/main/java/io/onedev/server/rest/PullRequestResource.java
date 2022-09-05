@@ -187,7 +187,7 @@ public class PullRequestResource {
 
     	PullRequestQuery parsedQuery;
 		try {
-			parsedQuery = PullRequestQuery.parse(null, query);
+			parsedQuery = PullRequestQuery.parse(null, query, true);
 		} catch (Exception e) {
 			throw new InvalidParamException("Error parsing query", e);
 		}

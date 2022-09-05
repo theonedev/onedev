@@ -23,7 +23,7 @@ public class PullRequestQueryValidator implements ConstraintValidator<PullReques
 		} else {
 			Project project = Project.get();
 			try {
-				io.onedev.server.search.entity.pullrequest.PullRequestQuery.parse(project, value);
+				io.onedev.server.search.entity.pullrequest.PullRequestQuery.parse(project, value, true);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

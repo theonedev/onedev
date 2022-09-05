@@ -150,7 +150,7 @@ public abstract class PullRequestListPanel extends Panel {
 	@Nullable
 	private Object parse(@Nullable String queryString, PullRequestQuery baseQuery) {
 		try {
-			return PullRequestQuery.merge(baseQuery, PullRequestQuery.parse(getProject(), queryString));
+			return PullRequestQuery.merge(baseQuery, PullRequestQuery.parse(getProject(), queryString, true));
 		} catch (ExplicitException e) {
 			error(e.getMessage());
 			return null;
@@ -581,7 +581,7 @@ public abstract class PullRequestListPanel extends Panel {
 				return getProject();
 			}
 			
-		}) {
+		}, true, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

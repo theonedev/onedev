@@ -4,10 +4,11 @@ import java.util.Date;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
@@ -38,6 +39,9 @@ public abstract class BuildEvent extends ProjectEvent implements CommitAware {
 		return build.getStatus().toString();
 	}
 
-	public abstract BuildEvent cloneIn(Dao dao);
+	@Override
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(build);
+	}
 	
 }

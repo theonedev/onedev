@@ -107,7 +107,7 @@ public abstract class CommitListPanel extends Panel {
 			getFeedbackMessages().clear();
 			String queryString = queryStringModel.getObject();
 			try {
-				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), queryString));
+				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), queryString, true));
 			} catch (ExplicitException e) {
 				error(e.getMessage());
 				return null;
@@ -345,7 +345,7 @@ public abstract class CommitListPanel extends Panel {
 				return getProject();
 			}
 			
-		}) {
+		}, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

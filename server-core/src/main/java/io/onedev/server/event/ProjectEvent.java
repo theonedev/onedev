@@ -5,20 +5,15 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document.OutputSettings;
-import org.jsoup.safety.Safelist;
-
-import com.google.common.base.Joiner;
-import com.ibm.icu.impl.locale.XCldrStub.Splitter;
-
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.notification.ActivityDetail;
+import io.onedev.server.persistence.dao.Dao;
 
 public abstract class ProjectEvent extends Event {
 
@@ -85,18 +80,12 @@ public abstract class ProjectEvent extends Event {
 	
 	@Nullable
 	public String getTextBody() {
-		ActivityDetail activityDetail = getActivityDetail();
 		String markdown = getMarkdown();
+		MailManager mailManager = OneDev.getInstance(MailManager.class);
+		if (markdown != null && mailManager.isMailContent(markdown))  
+			markdown = mailManager.toPlainText(markdown);
 		
-		String htmlMarker = String.format("<div class='%s'>", MailManager.INCOMING_CONTENT_MARKER);
-		if (markdown != null && markdown.contains(htmlMarker)) { 
-			OutputSettings outputSettings = new OutputSettings();
-			outputSettings.prettyPrint(false);
-			markdown = Jsoup.clean(markdown, "", Safelist.none(), outputSettings);
-			markdown = Joiner.on('\n').join(Splitter.on('\n').trimResults().split(markdown));
-			markdown = markdown.replaceAll("\n\n(\n)+", "\n\n").trim();
-		}
-		
+		ActivityDetail activityDetail = getActivityDetail();
 		if (activityDetail != null && markdown != null)
 			return activityDetail.getTextVersion() + "\n\n" + markdown;
 		else if (activityDetail != null)
@@ -122,4 +111,9 @@ public abstract class ProjectEvent extends Event {
 			return null;
 	}
 	
+	public abstract ProjectEvent cloneIn(Dao dao);
+	
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(project);
+	}
 }

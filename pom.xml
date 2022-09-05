@@ -340,11 +340,6 @@
 				<version>1.6.2</version>
 			</dependency>
 			<dependency>
-				<groupId>commons-httpclient</groupId>
-				<artifactId>commons-httpclient</artifactId>
-				<version>3.1</version>
-			</dependency>
-			<dependency>
 				<groupId>joda-time</groupId>
 				<artifactId>joda-time</artifactId>
 				<version>2.2</version>
@@ -568,6 +563,11 @@
 				<groupId>io.onedev</groupId>
 				<artifactId>agent</artifactId>
 				<version>${agent.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slack.api</groupId>
+				<artifactId>slack-api-client</artifactId>
+				<version>1.25.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

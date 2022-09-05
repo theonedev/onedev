@@ -25,7 +25,8 @@ public class PullRequestQueryEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(PullRequestQuery.class) != null) {
+		PullRequestQuery pullRequestQuery = propertyGetter.getAnnotation(PullRequestQuery.class);
+        if (pullRequestQuery != null) {
         	if (propertyGetter.getReturnType() != String.class) {
 	    		throw new RuntimeException("Annotation 'PullRequestQuery' should be applied to property "
 	    				+ "with type 'String'");
@@ -66,8 +67,9 @@ public class PullRequestQueryEditSupport implements EditSupport {
 						}
 			    		
 			    	};
-		        	return new StringPropertyEditor(componentId, descriptor, model)
-		        			.setInputAssist(new PullRequestQueryBehavior(projectModel));
+			    	PullRequestQueryBehavior behavior = new PullRequestQueryBehavior(
+			    			projectModel, pullRequestQuery.withCurrentUserCriteria(), pullRequestQuery.withOrder());
+		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(behavior);
 				}
     			
     		};

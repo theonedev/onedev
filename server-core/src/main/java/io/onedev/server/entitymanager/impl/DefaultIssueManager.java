@@ -263,18 +263,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		authorizationManager.save(authorization);
 		
 		Long issueId = issue.getId();
-		transactionManager.runAfterCommit(new Runnable() {
+		sessionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				sessionManager.runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						listenerRegistry.post(new IssueOpened(load(issueId)));
-					}
-					
-				});
+				listenerRegistry.post(new IssueOpened(load(issueId)));
 			}
 			
 		});

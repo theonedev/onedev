@@ -85,7 +85,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
@@ -503,21 +502,14 @@ public abstract class RevisionDiffPanel extends Panel {
 													
 													Long projectId = request.getSourceProject().getId();
 													String refName = GitUtils.branch2ref(request.getSourceBranch());
-													OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+													OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
 
 														@Override
 														public void run() {
-															OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-																@Override
-																public void run() {
-																	Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-																	project.cacheObjectId(request.getSourceBranch(), newCommitId);
-																	RefUpdated refUpdated = new RefUpdated(project, refName, commitId, newCommitId);
-																	OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-																}
-																
-															});
+															Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+															project.cacheObjectId(request.getSourceBranch(), newCommitId);
+															RefUpdated refUpdated = new RefUpdated(project, refName, commitId, newCommitId);
+															OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
 														}
 														
 													});

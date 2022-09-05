@@ -27,7 +27,6 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.administration.GpgSetting;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -87,21 +86,14 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 				
 				Long projectId = project.getId();
 				String refName = GitUtils.branch2ref(branch);
-				OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+				OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
 
 					@Override
 					public void run() {
-						OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-							@Override
-							public void run() {
-								Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-								project.cacheObjectId(branch, newCommitId);
-								RefUpdated refUpdated = new RefUpdated(project, refName, commitId, newCommitId);
-								OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-							}
-							
-						});
+						Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+						project.cacheObjectId(branch, newCommitId);
+						RefUpdated refUpdated = new RefUpdated(project, refName, commitId, newCommitId);
+						OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
 					}
 					
 				});

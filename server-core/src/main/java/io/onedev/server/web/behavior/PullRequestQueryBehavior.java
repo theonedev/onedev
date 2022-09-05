@@ -1,6 +1,6 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.model.Issue.NAME_NUMBER;
+import static io.onedev.server.model.PullRequest.NAME_NUMBER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +24,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.project.ProjectQuery;
-import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.*;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.*;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
@@ -37,9 +37,15 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	public PullRequestQueryBehavior(IModel<Project> projectModel) {
+	private final boolean withCurrentUserCriteria;
+	
+	private final boolean withOrder;
+	
+	public PullRequestQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, boolean withOrder) {
 		super(PullRequestQueryParser.class, "query", false);
 		this.projectModel = projectModel;
+		this.withCurrentUserCriteria = withCurrentUserCriteria;
+		this.withOrder = withOrder;
 	}
 
 	@Override
@@ -77,18 +83,18 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-							int operator = PullRequestQuery.getOperator(operatorName);							
+							int operator = getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == PullRequestQueryLexer.IncludesIssue)
+								if (operator == IncludesIssue)
 									return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-								else if (operator != PullRequestQueryLexer.IncludesCommit)
+								else if (operator != IncludesCommit)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else
 									return null;
 							} else {
-								String fieldName = PullRequestQuery.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = getValue(fieldElements.get(0).getMatchedText());
 								try {
-									PullRequestQuery.checkField(fieldName, operator);
+									checkField(fieldName, operator);
 									if (fieldName.equals(PullRequest.NAME_SUBMIT_DATE) 
 											|| fieldName.equals(PullRequest.NAME_UPDATE_DATE)
 											|| fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {
@@ -144,13 +150,22 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
+				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) 
+						|| suggestedLiteral.equals(getRuleName(ToBeReviewedByMe))
+						|| suggestedLiteral.equals(getRuleName(RequestedForChangesByMe))
+						|| suggestedLiteral.equals(getRuleName(ApprovedByMe))
+						|| suggestedLiteral.equals(getRuleName(AssignedToMe)))) {
+			return null;
+		}
+		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = PullRequestQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					PullRequestQuery.checkField(fieldName, PullRequestQuery.getOperator(suggestedLiteral));
+					checkField(fieldName, getOperator(suggestedLiteral));
 				} catch (ExplicitException e) {
 					return null;
 				}

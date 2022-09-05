@@ -34,7 +34,7 @@ public class NamedCodeCommentQuery implements NamedQuery {
 	}
 
 	@Editable(placeholder="All")
-	@CodeCommentQuery
+	@CodeCommentQuery(withCurrentUserCriteria=true)
 	@Override
 	public String getQuery() {
 		return query;

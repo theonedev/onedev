@@ -98,7 +98,7 @@ public abstract class CodeCommentListPanel extends Panel {
 		protected Object load() {
 			String queryString = queryStringModel.getObject();
 			try {
-				return CodeCommentQuery.parse(getProject(), queryString);
+				return CodeCommentQuery.parse(getProject(), queryString, true);
 			} catch (ExplicitException e) {
 				error(e.getMessage());
 				return null;
@@ -632,7 +632,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				return getProject();
 			}
 			
-		}) {
+		}, true, true) {
 			
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {

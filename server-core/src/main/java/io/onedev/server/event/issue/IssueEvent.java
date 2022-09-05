@@ -5,11 +5,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
 
 public abstract class IssueEvent extends ProjectEvent {
 
@@ -34,6 +35,9 @@ public abstract class IssueEvent extends ProjectEvent {
 		return new HashMap<>();
 	}
 	
-	public abstract IssueEvent cloneIn(Dao dao);
+	@Override
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(issue);
+	}
 	
 }

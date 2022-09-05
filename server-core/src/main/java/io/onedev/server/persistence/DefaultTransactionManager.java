@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.Lock;
 
+import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import javax.persistence.FlushModeType;
 import javax.transaction.Status;
@@ -108,12 +110,39 @@ public class DefaultTransactionManager implements TransactionManager {
 	}
 
 	@Override
-	public void runAsync(Runnable runnable) {
+	public void runAsync(Runnable runnable, @Nullable Lock lock) {
 		executorService.execute(new Runnable() {
 
 			@Override
 			public void run() {
-				DefaultTransactionManager.this.run(runnable);
+				try {
+					if (lock != null) {
+						try {
+							lock.lockInterruptibly();
+							DefaultTransactionManager.this.run(runnable);
+						} catch (InterruptedException e) {
+							throw new RuntimeException(e);
+						} finally {
+							lock.unlock();
+						}
+					} else {
+						DefaultTransactionManager.this.run(runnable);
+					}
+				} catch (Exception e) {
+					logger.error("Error executing in transaction", e);
+				}
+			}
+			
+		});
+	}
+	
+	@Override
+	public void runAsyncAfterCommit(Runnable runnable, @Nullable Lock lock) {
+		runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				runAsync(runnable, lock);
 			}
 			
 		});
@@ -134,7 +163,7 @@ public class DefaultTransactionManager implements TransactionManager {
 						try {
 							runnable.run();
 						} catch (Exception e) {
-							logger.error("Error running", e);
+							logger.error("Error executing after commit", e);
 						}
 					}
 				}
@@ -165,6 +194,16 @@ public class DefaultTransactionManager implements TransactionManager {
 			completionRunnables.put(transaction, runnables);
 		}
 		runnables.add(runnable);
+	}
+
+	@Override
+	public void runAsync(Runnable runnable) {
+		runAsync(runnable, null);
+	}
+
+	@Override
+	public void runAsyncAfterCommit(Runnable runnable) {
+		runAsyncAfterCommit(runnable, null);
 	}
 	
 }

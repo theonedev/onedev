@@ -1,5 +1,8 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.search.entity.codecomment.CodeCommentQuery.*;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +35,15 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	public CodeCommentQueryBehavior(IModel<Project> projectModel) {
+	private final boolean withCurrentUserCriteria;
+	
+	private final boolean withOrder;
+	
+	public CodeCommentQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, boolean withOrder) {
 		super(CodeCommentQueryParser.class, "query", false);
 		this.projectModel = projectModel;
+		this.withCurrentUserCriteria = withCurrentUserCriteria;
+		this.withOrder = withOrder;
 	}
 
 	@Override
@@ -105,6 +114,11 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
+				|| !withCurrentUserCriteria && suggestedLiteral.equals(getRuleName(CreatedByMe))) {
+			return null;
+		}
+		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);

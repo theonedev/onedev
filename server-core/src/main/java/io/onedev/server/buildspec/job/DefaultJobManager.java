@@ -814,34 +814,27 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								Long projectId = event.getProject().getId();
 								
 								// run asynchrously as session may get closed due to exception
-								transactionManager.runAfterCommit(new Runnable() {
+								sessionManager.runAsyncAfterCommit(new Runnable() {
 
 									@Override
 									public void run() {
-										sessionManager.runAsync(new Runnable() {
-											
-											@Override
-											public void run() {
-												SecurityUtils.bindAsSystem();
-												Project project = projectManager.load(projectId);
-												try {
-													new MatrixRunner<List<String>>(paramMatrix) {
-														
-														@Override
-														public void run(Map<String, List<String>> paramMap) {
-															submit(project, commitId, job.getName(), paramMap, 
-																	pipeline, match.getReason()); 
-														}
-														
-													}.run();
-												} catch (Throwable e) {
-													String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
-															project.getPath(), commitId.name(), job.getName());
-													logger.error(message, e);
+										SecurityUtils.bindAsSystem();
+										Project project = projectManager.load(projectId);
+										try {
+											new MatrixRunner<List<String>>(paramMatrix) {
+												
+												@Override
+												public void run(Map<String, List<String>> paramMap) {
+													submit(project, commitId, job.getName(), paramMap, 
+															pipeline, match.getReason()); 
 												}
-											}
-											
-										});
+												
+											}.run();
+										} catch (Throwable e) {
+											String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
+													project.getPath(), commitId.name(), job.getName());
+											logger.error(message, e);
+										}
 									}
 									
 								});
@@ -1016,19 +1009,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(ProjectCreated event) {
 		Long projectId = event.getProject().getId();
-		transactionManager.runAfterCommit(new Runnable() {
+		sessionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				sessionManager.runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						Project project = projectManager.load(projectId);
-						schedule(project);
-					}
-					
-				});
+				Project project = projectManager.load(projectId);
+				schedule(project);
 			}
 			
 		});
@@ -1238,40 +1224,34 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Build build = event.getBuild();
 		Long buildId = build.getId();
 
-		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+		sessionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
-						JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
-						Build.push(build);
-						try {
-							VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
-							Map<String, String> placeholderValues = new HashMap<>();
-							placeholderValues.put(BUILD_VERSION, build.getVersion());
-							if (build.getJob() != null) {
-								for (PostBuildAction action: build.getJob().getPostBuildActions()) {
-									action = interpolator.interpolateProperties(action); 
-									if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
-										action.execute(build);
-								}
-							} else {
-								throw new ExplicitException("Job not found");
-							}
-						} catch (Throwable e) {
-							String message = String.format("Error processing post build actions (project: %s, commit: %s, job: %s)", 
-									build.getProject().getPath(), build.getCommitHash(), build.getJobName());
-							logger.error(message, e);
-						} finally {
-							Build.pop();
-							JobSecretAuthorizationContext.pop();
+				Build build = OneDev.getInstance(BuildManager.class).load(buildId);
+				JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
+				Build.push(build);
+				try {
+					VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+					Map<String, String> placeholderValues = new HashMap<>();
+					placeholderValues.put(BUILD_VERSION, build.getVersion());
+					if (build.getJob() != null) {
+						for (PostBuildAction action: build.getJob().getPostBuildActions()) {
+							action = interpolator.interpolateProperties(action); 
+							if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
+								action.execute(build);
 						}
+					} else {
+						throw new ExplicitException("Job not found");
 					}
-				});
+				} catch (Throwable e) {
+					String message = String.format("Error processing post build actions (project: %s, commit: %s, job: %s)", 
+							build.getProject().getPath(), build.getCommitHash(), build.getJobName());
+					logger.error(message, e);
+				} finally {
+					Build.pop();
+					JobSecretAuthorizationContext.pop();
+				}
 			}
 			
 		});

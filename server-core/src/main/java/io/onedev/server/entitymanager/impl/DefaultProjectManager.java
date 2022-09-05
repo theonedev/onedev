@@ -532,34 +532,27 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         
         Long projectId = project.getId();
         
-        transactionManager.runAfterCommit(new Runnable() {
+        sessionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-		        sessionManager.runAsync(new Runnable() {
+		        try {
+		            Project project = load(projectId);
 
-					@Override
-					public void run() {
-				        try {
-				            Project project = load(projectId);
-
-				            for (ImmutableTriple<String, ObjectId, ObjectId> each: refUpdatedEventData) {
-				            	String refName = each.getLeft();
-				            	ObjectId oldObjectId = each.getMiddle();
-				            	ObjectId newObjectId = each.getRight();
-					        	if (!newObjectId.equals(ObjectId.zeroId()))
-					        		project.cacheObjectId(refName, newObjectId);
-					        	else 
-					        		project.cacheObjectId(refName, null);
-				            	
-					        	listenerRegistry.post(new RefUpdated(project, refName, oldObjectId, newObjectId));
-				            }
-				        } catch (Exception e) {
-				        	logger.error("Error posting ref updated event", e);
-						}
-					}
-		        	
-		        });
+		            for (ImmutableTriple<String, ObjectId, ObjectId> each: refUpdatedEventData) {
+		            	String refName = each.getLeft();
+		            	ObjectId oldObjectId = each.getMiddle();
+		            	ObjectId newObjectId = each.getRight();
+			        	if (!newObjectId.equals(ObjectId.zeroId()))
+			        		project.cacheObjectId(refName, newObjectId);
+			        	else 
+			        		project.cacheObjectId(refName, null);
+		            	
+			        	listenerRegistry.post(new RefUpdated(project, refName, oldObjectId, newObjectId));
+		            }
+		        } catch (Exception e) {
+		        	logger.error("Error posting ref updated event", e);
+				}
 			}
         	
         });
@@ -697,19 +690,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
     	
     	Long projectId = project.getId();
-    	transactionManager.runAfterCommit(new Runnable() {
+    	sessionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-		    	sessionManager.runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						Project project = load(projectId);
-						listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-					}
-		    		
-		    	});
+				Project project = load(projectId);
+				listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
 			}
     		
     	});
@@ -744,19 +730,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 
     	Long projectId = project.getId();
-    	transactionManager.runAfterCommit(new Runnable() {
+    	sessionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-		    	sessionManager.runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						Project project = load(projectId);
-						listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-					}
-		    		
-		    	});
+				Project project = load(projectId);
+				listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
 			}
     		
     	});

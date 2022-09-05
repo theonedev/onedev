@@ -391,22 +391,16 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		
 		Long requestId = request.getId();
 		ObjectId newTargetHeadId = mergeCommitId;
-		transactionManager.runAfterCommit(new Runnable() {
+		sessionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				dao.getSessionManager().runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						PullRequest request = load(requestId);
-						request.getTargetProject().cacheObjectId(request.getTargetRef(), newTargetHeadId);
-						listenerRegistry.post(new RefUpdated(request.getTargetProject(), targetRef, 
-									targetHeadCommitId, newTargetHeadId));
-					}
-					
-				});
+				PullRequest request = load(requestId);
+				request.getTargetProject().cacheObjectId(request.getTargetRef(), newTargetHeadId);
+				listenerRegistry.post(new RefUpdated(request.getTargetProject(), targetRef, 
+							targetHeadCommitId, newTargetHeadId));
 			}
+			
 		});
 	}
 	

@@ -34,7 +34,7 @@ public class NamedCommitQuery implements NamedQuery {
 	}
 
 	@Editable(placeholder="All")
-	@CommitQuery
+	@CommitQuery(withCurrentUserCriteria=true)
 	@Override
 	public String getQuery() {
 		return query;

@@ -17,6 +17,9 @@
 package io.onedev.server.persistence;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
+
+import javax.annotation.Nullable;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -31,7 +34,13 @@ public interface TransactionManager {
 	
 	void run(Runnable runnable);
 	
+	void runAsync(Runnable runnable, @Nullable Lock lock);
+	
+	void runAsyncAfterCommit(Runnable runnable, @Nullable Lock lock);
+	
 	void runAsync(Runnable runnable);
+	
+	void runAsyncAfterCommit(Runnable runnable);
 	
 	/**
 	 * Do some work after commit if there is an active transaction, or do the work immediately if there is no active 

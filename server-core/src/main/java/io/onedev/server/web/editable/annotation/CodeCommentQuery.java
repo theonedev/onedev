@@ -15,6 +15,10 @@ import io.onedev.server.util.validation.CodeCommentQueryValidator;
 @Constraint(validatedBy=CodeCommentQueryValidator.class) 
 public @interface CodeCommentQuery {
 	
+	boolean withCurrentUserCriteria() default false;
+	
+	boolean withOrder() default true;
+	
     String message() default "";
 
     Class<?>[] groups() default {};

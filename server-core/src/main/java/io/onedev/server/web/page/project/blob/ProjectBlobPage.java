@@ -86,7 +86,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.CommitIndexed;
@@ -1414,21 +1413,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			OneDev.getInstance(PullRequestUpdateManager.class).checkUpdate(request);
 		}
 		
-		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+		OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-						project.cacheObjectId(branch, newCommitId);
-						RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
-						OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-					}
-					
-				});
+				Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+				project.cacheObjectId(branch, newCommitId);
+				RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
+				OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
 			}
 			
 		});

@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
@@ -67,4 +69,9 @@ public class IssueChanged extends IssueEvent {
 		return new IssueChanged(dao.load(IssueChange.class, change.getId()), comment);		
 	}
 
+	@Override
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(change);
+	}
+	
 }

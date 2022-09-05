@@ -67,7 +67,8 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 		this(null);
 	}
 	
-	public static CodeCommentQuery parse(Project project, @Nullable String queryString) {
+	public static CodeCommentQuery parse(Project project, @Nullable String queryString, 
+			boolean withCurrentUserCriteria) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			CodeCommentQueryLexer lexer = new CodeCommentQueryLexer(is);
@@ -99,6 +100,8 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						case CodeCommentQueryLexer.Unresolved:
 							return new UnresolvedCriteria();
 						default:
+							if (!withCurrentUserCriteria)
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new CreatedByMeCriteria();
 						}
 					}

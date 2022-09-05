@@ -49,9 +49,11 @@ import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Document.OutputSettings;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
+import org.jsoup.safety.Safelist;
 import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
 import org.slf4j.Logger;
@@ -59,6 +61,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.ibm.icu.impl.locale.XCldrStub.Splitter;
 import com.sun.mail.imap.IMAPFolder;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -657,7 +660,7 @@ public class DefaultMailManager implements MailManager {
 		comment.setUser(user);
 		String content = stripQuotation(sendSetting, readText(issue.getProject(), issue.getUUID(), message));
 		if (content != null) {
-			comment.setContent(String.format("<div class='%s'>" + content + "</div>", INCOMING_CONTENT_MARKER));
+			comment.setContent(String.format("<div class='%s'>" + content + "</div>", COMMENT_MARKER));
 			issueCommentManager.save(comment, receiverEmailAddresses);
 		}
 	}
@@ -1099,6 +1102,21 @@ public class DefaultMailManager implements MailManager {
 		
 	}
 	
+	@Override
+	public String toPlainText(String mailContent) {
+		OutputSettings outputSettings = new OutputSettings();
+		outputSettings.prettyPrint(false);
+		String plainText = Jsoup.clean(mailContent, "", Safelist.none(), outputSettings);
+		plainText = Joiner.on('\n').join(Splitter.on('\n').trimResults().split(plainText));
+		plainText = plainText.replaceAll("\n\n(\n)+", "\n\n").trim();
+		return plainText;
+	}
+
+	@Override
+	public boolean isMailContent(String comment) {
+		return comment.contains(String.format("<div class='%s'>", COMMENT_MARKER));
+	}
+
 	private static class ImageAttachment extends Attachment {
 
 		public ImageAttachment(String url, String fileName) {

@@ -2,10 +2,11 @@ package io.onedev.server.event.pullrequest;
 
 import java.util.Date;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
 
 public abstract class PullRequestEvent extends ProjectEvent {
 
@@ -20,6 +21,9 @@ public abstract class PullRequestEvent extends ProjectEvent {
 		return request;
 	}
 
-	public abstract PullRequestEvent cloneIn(Dao dao);
+	@Override
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(request);
+	}
 	
 }

@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -53,21 +51,18 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	
 	private final TransactionManager transactionManager;
 	
-	private final ExecutorService executorService;
-	
 	private final Dao dao;
 	
 	@Inject
 	public BuildNotificationManager(MailManager mailManager, UrlManager urlManager, 
 			UserManager userManager, SettingManager settingManager, 
 			MarkdownManager markdownManager, TransactionManager transactionManager, 
-			ExecutorService executorService, Dao dao) {
+			Dao dao) {
 		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.userManager = userManager;
 		this.transactionManager = transactionManager;
-		this.executorService = executorService;
 		this.dao = dao;
 	}
 
@@ -102,127 +97,102 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	@Sessional
 	@Listen
 	public void on(BuildEvent event) {
-		Long buildId = event.getBuild().getId();
-		
-		transactionManager.runAfterCommit(new Runnable() {
+		transactionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				executorService.execute(new Runnable() {
-
-					@Override
-					public void run() {
-						LockUtils.call(Build.getSerialLockName(buildId), true, new Callable<Void>() {
-
-							@Override
-							public Void call() {
-								transactionManager.run(new Runnable() {
-
-									@Override
-									public void run() {
-										BuildEvent clone = event.cloneIn(dao);
-										if (!(clone instanceof BuildUpdated)) {
-											Project project = clone.getProject();
-											Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
-											for (BuildQueryPersonalization personalization: project.getBuildQueryPersonalizations()) {
-												for (String name: personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
-													String commonName = NamedQuery.getCommonName(name);
-													if (commonName != null) {
-														fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
-																NamedQuery.find(project.getNamedBuildQueries(), commonName));
-													}
-													String personalName = NamedQuery.getPersonalName(name);
-													if (personalName != null) {
-														fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
-																NamedQuery.find(personalization.getQueries(), personalName));
-													}
-												}
-											}
-
-											Build build = clone.getBuild();
-											Collection<String> notifyEmails = new HashSet<>();
-											for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
-												User user = entry.getKey();
-												Permission permission = new ProjectPermission(build.getProject(), 
-														new JobPermission(build.getJobName(), new AccessBuild()));
-												if (user.asSubject().isPermitted(permission)) {
-													for (String queryString: entry.getValue()) {
-														User.push(user);
-														try {
-															if (BuildQuery.parse(clone.getProject(), queryString, true, true).matches(build)) {
-																EmailAddress emailAddress = user.getPrimaryEmailAddress();
-																if (emailAddress != null && emailAddress.isVerified())
-																	notifyEmails.add(emailAddress.getValue());
-																break;
-															}
-														} catch (Exception e) {
-															String message = String.format("Error processing build subscription (user: %s, build: %s, query: %s)", 
-																	user.getName(), build.getFQN(), queryString);
-															logger.error(message, e);
-														} finally {
-															User.pop();
-														}
-													}
-												}
-											}
-											
-											subscribedQueryStrings.clear();
-											for (User user: userManager.query()) {
-												for (String name: user.getBuildQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
-													String globalName = NamedQuery.getCommonName(name);
-													if (globalName != null) {
-														fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-																NamedQuery.find(settingManager.getBuildSetting().getNamedQueries(), globalName));
-													}
-													String personalName = NamedQuery.getPersonalName(name);
-													if (personalName != null) {
-														fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-																NamedQuery.find(user.getBuildQueryPersonalization().getQueries(), personalName));
-													}
-												}
-											}
-
-											for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
-												User user = entry.getKey();
-												Permission permission = new ProjectPermission(build.getProject(), 
-														new JobPermission(build.getJobName(), new AccessBuild()));
-												if (user.asSubject().isPermitted(permission)) {
-													for (String queryString: entry.getValue()) {
-														User.push(user);
-														try {
-															if (BuildQuery.parse(null, queryString, true, true).matches(build)) {
-																EmailAddress emailAddress = user.getPrimaryEmailAddress();
-																if (emailAddress != null && emailAddress.isVerified())
-																	notifyEmails.add(emailAddress.getValue());
-																break;
-															}
-														} catch (Exception e) {
-															String message = String.format("Error processing build subscription (user: %s, build: %s, query: %s)", 
-																	user.getName(), build.getFQN(), queryString);
-															logger.error(message, e);
-														} finally {
-															User.pop();
-														}
-													}
-												}
-											}
-											
-											BuildNotificationManager.this.notify(clone, notifyEmails);
-										}
-									}
-									
-								});		
-								return null;
+				BuildEvent clone = (BuildEvent) event.cloneIn(dao);
+				if (!(clone instanceof BuildUpdated)) {
+					Project project = clone.getProject();
+					Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
+					for (BuildQueryPersonalization personalization: project.getBuildQueryPersonalizations()) {
+						for (String name: personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
+							String commonName = NamedQuery.getCommonName(name);
+							if (commonName != null) {
+								fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
+										NamedQuery.find(project.getNamedBuildQueries(), commonName));
 							}
-							
-						});
+							String personalName = NamedQuery.getPersonalName(name);
+							if (personalName != null) {
+								fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
+										NamedQuery.find(personalization.getQueries(), personalName));
+							}
+						}
+					}
+
+					Build build = clone.getBuild();
+					Collection<String> notifyEmails = new HashSet<>();
+					for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
+						User user = entry.getKey();
+						Permission permission = new ProjectPermission(build.getProject(), 
+								new JobPermission(build.getJobName(), new AccessBuild()));
+						if (user.asSubject().isPermitted(permission)) {
+							for (String queryString: entry.getValue()) {
+								User.push(user);
+								try {
+									if (BuildQuery.parse(clone.getProject(), queryString, true, true).matches(build)) {
+										EmailAddress emailAddress = user.getPrimaryEmailAddress();
+										if (emailAddress != null && emailAddress.isVerified())
+											notifyEmails.add(emailAddress.getValue());
+										break;
+									}
+								} catch (Exception e) {
+									String message = String.format("Error processing build subscription (user: %s, build: %s, query: %s)", 
+											user.getName(), build.getFQN(), queryString);
+									logger.error(message, e);
+								} finally {
+									User.pop();
+								}
+							}
+						}
 					}
 					
-				});
+					subscribedQueryStrings.clear();
+					for (User user: userManager.query()) {
+						for (String name: user.getBuildQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
+							String globalName = NamedQuery.getCommonName(name);
+							if (globalName != null) {
+								fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+										NamedQuery.find(settingManager.getBuildSetting().getNamedQueries(), globalName));
+							}
+							String personalName = NamedQuery.getPersonalName(name);
+							if (personalName != null) {
+								fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+										NamedQuery.find(user.getBuildQueryPersonalization().getQueries(), personalName));
+							}
+						}
+					}
 
+					for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
+						User user = entry.getKey();
+						Permission permission = new ProjectPermission(build.getProject(), 
+								new JobPermission(build.getJobName(), new AccessBuild()));
+						if (user.asSubject().isPermitted(permission)) {
+							for (String queryString: entry.getValue()) {
+								User.push(user);
+								try {
+									if (BuildQuery.parse(null, queryString, true, true).matches(build)) {
+										EmailAddress emailAddress = user.getPrimaryEmailAddress();
+										if (emailAddress != null && emailAddress.isVerified())
+											notifyEmails.add(emailAddress.getValue());
+										break;
+									}
+								} catch (Exception e) {
+									String message = String.format("Error processing build subscription (user: %s, build: %s, query: %s)", 
+											user.getName(), build.getFQN(), queryString);
+									logger.error(message, e);
+								} finally {
+									User.pop();
+								}
+							}
+						}
+					}
+					
+					BuildNotificationManager.this.notify(clone, notifyEmails);
+				}				
 			}
 			
-		});
+		}, LockUtils.getLock(Build.getSerialLockName(event.getBuild().getId()), true));
 	}
 
 }

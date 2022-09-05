@@ -141,7 +141,6 @@ import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageManager;
@@ -1113,20 +1112,13 @@ public class Project extends AbstractEntity {
 			cacheObjectId(refName, commit);
 			
 	    	ObjectId commitId = commit.copy();
-	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+	    	OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-			    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-						@Override
-						public void run() {
-							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-							OneDev.getInstance(ListenerRegistry.class).post(
-									new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
-						}
-			    		
-			    	});
+					Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+					OneDev.getInstance(ListenerRegistry.class).post(
+							new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 				}
 	    		
 	    	});			
@@ -1165,20 +1157,13 @@ public class Project extends AbstractEntity {
 			cacheObjectId(refName, commit);
 			
 	    	ObjectId commitId = commit.copy();
-	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+	    	OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-			    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-						@Override
-						public void run() {
-							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-							OneDev.getInstance(ListenerRegistry.class).post(
-									new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
-						}
-			    		
-			    	});
+					Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+					OneDev.getInstance(ListenerRegistry.class).post(
+							new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 				}
 	    		
 	    	});			

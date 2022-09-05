@@ -35,14 +35,17 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
+	private final boolean withCurrentUserCriteria;
+	
 	private static final List<String> DATE_EXAMPLES = Lists.newArrayList(
 			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
 			"yesterday midnight", "3 days ago", "last week", "last Monday", 
 			"4 weeks ago", "1 month 2 days ago", "1 year ago"); 
 	
-	public CommitQueryBehavior(IModel<Project> projectModel) {
+	public CommitQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria) {
 		super(CommitQueryParser.class, "query", false);
 		this.projectModel = projectModel;
+		this.withCurrentUserCriteria = withCurrentUserCriteria;
 	}
 
 	@Override
@@ -136,6 +139,10 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		if (!withCurrentUserCriteria 
+				&& (suggestedLiteral.equals("authored-by-me") || suggestedLiteral.equals("committed-by-me"))) { 
+			return null;
+		}
 		String description;
 		switch (suggestedLiteral) {
 		case "committer":

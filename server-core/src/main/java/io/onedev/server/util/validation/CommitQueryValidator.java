@@ -22,7 +22,7 @@ public class CommitQueryValidator implements ConstraintValidator<CommitQuery, St
 			return true;
 		} else {
 			try {
-				io.onedev.server.search.commit.CommitQuery.parse(Project.get(), value);
+				io.onedev.server.search.commit.CommitQuery.parse(Project.get(), value, true);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

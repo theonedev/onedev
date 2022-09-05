@@ -2,6 +2,8 @@ package io.onedev.server.event.pullrequest;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.Dao;
@@ -42,6 +44,11 @@ public class PullRequestCodeCommentStatusChanged extends PullRequestCodeCommentE
 				dao.load(PullRequest.class, getRequest().getId()), 
 				dao.load(CodeCommentStatusChange.class, change.getId()), 
 				note);
+	}
+
+	@Override
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(getChange());
 	}
 
 }

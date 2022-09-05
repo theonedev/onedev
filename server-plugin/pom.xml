@@ -49,5 +49,6 @@
 		<module>server-plugin-report-pmd</module>
 		<module>server-plugin-report-cpd</module>
 		<module>server-plugin-sso-discord</module>
+		<module>server-plugin-notification-slack</module>
 	</modules>
 </project>

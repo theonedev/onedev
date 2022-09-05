@@ -2,6 +2,8 @@ package io.onedev.server.event.pullrequest;
 
 import java.util.Collection;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.persistence.dao.Dao;
 
@@ -40,6 +42,11 @@ public class PullRequestCommented extends PullRequestEvent {
 		return new PullRequestCommented(
 				dao.load(PullRequestComment.class, comment.getId()), 
 				notifiedEmailAddresses);
+	}
+
+	@Override
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(comment);
 	}
 
 }

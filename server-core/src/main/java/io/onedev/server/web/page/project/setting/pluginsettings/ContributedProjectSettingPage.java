@@ -8,6 +8,7 @@ import javax.validation.Validator;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -136,6 +137,8 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 		
 		Serializable setting = getProject().getContributedSetting(settingClass);
 		form.add(newBeanEditor(setting));
+		
+		form.add(new FencedFeedbackPanel("feedback", form));
 		
 		add(form);
 	}

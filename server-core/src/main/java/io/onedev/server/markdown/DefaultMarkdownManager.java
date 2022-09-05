@@ -76,9 +76,8 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	
 	@Override
 	public String render(String markdown) {
-		MutableDataHolder options = setupOptions();
 		Node node = parse(markdown);
-		return HtmlRenderer.builder(options).softBreak("<br>").build().render(node);
+		return HtmlRenderer.builder(setupOptions()).softBreak("<br>").build().render(node);
 	}
 
 	@Override

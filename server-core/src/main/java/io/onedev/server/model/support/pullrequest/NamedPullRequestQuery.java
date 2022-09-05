@@ -35,7 +35,7 @@ public class NamedPullRequestQuery implements NamedQuery {
 	}
 
 	@Editable(placeholder="All")
-	@PullRequestQuery
+	@PullRequestQuery(withCurrentUserCriteria=true)
 	@Override
 	public String getQuery() {
 		return query;

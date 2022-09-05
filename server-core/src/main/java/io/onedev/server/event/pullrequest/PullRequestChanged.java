@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
@@ -63,6 +65,11 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 	@Override
 	public PullRequestEvent cloneIn(Dao dao) {
 		return new PullRequestChanged(dao.load(PullRequestChange.class, change.getId()), note);
+	}
+
+	@Override
+	public String getUrl() {
+		return OneDev.getInstance(UrlManager.class).urlFor(change);
 	}
 
 }

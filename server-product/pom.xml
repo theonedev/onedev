@@ -150,6 +150,11 @@
 			<artifactId>server-plugin-sso-discord</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-notification-slack</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		
 		<!-- Add explicit dependencies to make sure standalone plugins use expected lib version -->
 		<dependency>

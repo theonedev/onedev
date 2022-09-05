@@ -962,7 +962,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected EntityQuery<PullRequest> parse(String queryString, Project project) {
-						return PullRequestQuery.parse(project, queryString);
+						return PullRequestQuery.parse(project, queryString, true);
 					}
 
 					@Override

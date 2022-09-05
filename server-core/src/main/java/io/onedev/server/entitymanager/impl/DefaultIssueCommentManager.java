@@ -12,7 +12,6 @@ import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -23,16 +22,12 @@ public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment>
 
 	private final ListenerRegistry listenerRegistry;
 	
-	private final TransactionManager transactionManager;
-	
 	private final SessionManager sessionManager;
 	
 	@Inject
-	public DefaultIssueCommentManager(Dao dao, ListenerRegistry listenerRegistry, 
-			TransactionManager transactionManager, SessionManager sessionManager) {
+	public DefaultIssueCommentManager(Dao dao, ListenerRegistry listenerRegistry, SessionManager sessionManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
-		this.transactionManager = transactionManager;
 		this.sessionManager = sessionManager;
 	}
 
@@ -58,18 +53,11 @@ public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment>
 			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
 			
 			Long commentId = comment.getId();
-			transactionManager.runAfterCommit(new Runnable() {
+			sessionManager.runAsyncAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-					sessionManager.runAsync(new Runnable() {
-
-						@Override
-						public void run() {
-							listenerRegistry.post(new IssueCommented(load(commentId), notifiedEmailAddresses));
-						}
-						
-					});
+					listenerRegistry.post(new IssueCommented(load(commentId), notifiedEmailAddresses));
 				}
 				
 			});
