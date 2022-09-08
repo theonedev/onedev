@@ -152,8 +152,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_LAST_MERGE_PREVIEW = "lastMergePreview";
 	
-	public static final String PROP_ID = "id";
-	
 	public static final String PROP_REVIEWS = "reviews";
 	
 	public static final String PROP_BUILDS = "builds";

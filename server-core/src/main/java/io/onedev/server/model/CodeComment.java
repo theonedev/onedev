@@ -84,9 +84,9 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	public static final String PROP_REPLIES = "replies";
 	
 	public static final String PROP_CHANGES = "changes";
-
-	public static final String PROP_ID = "id";
 	
+	public static final String PROP_UUID = "uuid";
+
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_CONTENT, NAME_REPLY, NAME_PATH, NAME_CREATE_DATE, NAME_UPDATE_DATE, NAME_REPLY_COUNT);
 

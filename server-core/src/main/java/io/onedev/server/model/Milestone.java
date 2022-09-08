@@ -39,8 +39,6 @@ public class Milestone extends AbstractEntity {
 
 	public static final int MAX_DESCRIPTION_LEN = 15000;
 	
-	public static final String PROP_ID = "id";
-	
 	public static final String PROP_PROJECT = "project";
 	
 	public static final String PROP_NAME = "name";

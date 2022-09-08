@@ -201,8 +201,6 @@ public class Project extends AbstractEntity {
 	
 	public static final String PROP_DESCRIPTION = "description";
 	
-	public static final String PROP_ID = "id";
-	
 	public static final String PROP_FORKED_FROM = "forkedFrom";
 	
 	public static final String PROP_PARENT = "parent";

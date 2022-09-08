@@ -16,10 +16,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.CryptoUtils;
@@ -50,11 +54,21 @@ public class AttachmentResource extends AbstractResource {
 		String authorization = params.get(PARAM_AUTHORIZATION).toOptionalString();
 		if (authorization == null 
 				|| !new String(CryptoUtils.decrypt(Base64.decodeBase64(authorization)), StandardCharsets.UTF_8).equals(group)) {
-			PullRequest request = OneDev.getInstance(PullRequestManager.class).findByUUID(group);
-			if (request != null && !SecurityUtils.canReadCode(project))
+			Issue issue;
+			Build build;
+			if (OneDev.getInstance(PullRequestManager.class).findByUUID(group) != null 
+					|| OneDev.getInstance(CodeCommentManager.class).findByUUID(group) != null) {
+				if (!SecurityUtils.canReadCode(project))
+					throw new UnauthorizedException();
+			} else if ((issue = OneDev.getInstance(IssueManager.class).findByUUID(group)) != null) {
+				if (!SecurityUtils.canAccess(issue))
+					throw new UnauthorizedException();
+			} else if ((build = OneDev.getInstance(BuildManager.class).findByUUID(group)) != null) {
+				if (!SecurityUtils.canAccess(build))
+					throw new UnauthorizedException();
+			} else if (!SecurityUtils.canAccess(project)) {
 				throw new UnauthorizedException();
-			else if (!SecurityUtils.canAccess(project))
-				throw new UnauthorizedException();
+			}
 		}
 
 		String attachment = params.get(PARAM_ATTACHMENT).toString();

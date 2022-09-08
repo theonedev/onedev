@@ -156,8 +156,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static final String PROP_UUID = "uuid";
 	
-	public static final String PROP_ID = "id";
-	
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
 	
 	public static final String PROP_CONFIDENTIAL = "confidential";

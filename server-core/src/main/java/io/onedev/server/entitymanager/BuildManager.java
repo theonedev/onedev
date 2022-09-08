@@ -27,6 +27,9 @@ public interface BuildManager extends EntityManager<Build> {
 
 	@Nullable
 	Build find(String buildFQN);
+	
+    @Nullable
+    Build findByUUID(String uuid);
 
 	@Nullable
 	Build find(ProjectScopedNumber buildFQN);

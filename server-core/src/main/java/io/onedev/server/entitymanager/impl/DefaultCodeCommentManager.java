@@ -303,4 +303,12 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 			delete(comment);
 	}
 
+	@Override
+	public CodeComment findByUUID(String uuid) {
+		EntityCriteria<CodeComment> criteria = newCriteria();
+		criteria.add(Restrictions.eq(CodeComment.PROP_UUID, uuid));
+		criteria.setCacheable(true);
+		return find(criteria);
+	}
+
 }
