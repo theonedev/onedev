@@ -8,6 +8,8 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final String name;
 	
+	private final String path;
+	
 	private final String serviceDeskName;
 	
 	private final boolean issueManagement;
@@ -16,10 +18,12 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final Long parentId;
 	
-	public ProjectFacade(Long id, String name, @Nullable String serviceDeskName, 
-			boolean issueManagement, @Nullable Long roleId, @Nullable Long parentId) {
+	public ProjectFacade(Long id, String name, String path, 
+			@Nullable String serviceDeskName, boolean issueManagement, 
+			@Nullable Long roleId, @Nullable Long parentId) {
 		super(id);
 		this.name = name;
+		this.path = path;
 		this.serviceDeskName = serviceDeskName;
 		this.issueManagement = issueManagement;
 		this.roleId = roleId;
@@ -28,6 +32,11 @@ public class ProjectFacade extends EntityFacade {
 
 	public String getName() {
 		return name;
+	}
+
+	@Nullable
+	public String getPath() {
+		return path;
 	}
 
 	public boolean isIssueManagement() {

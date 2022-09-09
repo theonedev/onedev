@@ -102,8 +102,8 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
@@ -209,12 +209,15 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Transactional
     @Override
     public void save(Project project) {
-    	save(project, null);
-    }
-    
-    @Transactional
-    @Override
-    public void save(Project project, String oldPath) {
+    	String oldPath = project.getPath();
+		String newPath = project.calcPath();
+		if (!newPath.equals(oldPath)) {
+			project.setPath(newPath);
+			for (Project descendant: project.getDescendants()) {
+				descendant.setPath(descendant.calcPath());
+				dao.persist(descendant);
+			}
+		}
     	dao.persist(project);
     	if (oldPath != null && !oldPath.equals(project.getPath())) {
     		Collection<Milestone> milestones = new ArrayList<>();
@@ -248,6 +251,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	Project parent = project.getParent();
     	if (parent != null && parent.isNew())
     		create(parent);
+    	project.setPath(project.calcPath());
     	dao.persist(project);
        	checkSanity(project);
        	UserAuthorization authorization = new UserAuthorization();
@@ -284,7 +288,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Listen
     public void on(EntityPersisted event) {
     	if (event.getEntity() instanceof Project) {
-    		ProjectFacade facade = ((Project) event.getEntity()).getFacade();
+    		ProjectFacade facade = ((Project)event.getEntity()).getFacade();
     		transactionManager.runAfterCommit(new Runnable() {
 
 				@Override
@@ -653,6 +657,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		cacheLock.writeLock().lock();
 		try {
 			for (Project project: query()) {
+				String path = project.getPath();
+				if (!path.equals(project.calcPath())) { 
+					System.out.println("shit");
+					project.setPath(path);
+				}
 				cache.put(project.getId(), project.getFacade());
 				checkSanity(project);
 			}
@@ -835,7 +844,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(ProjectQuery.getPath(root, Project.PROP_UPDATE_DATE)));
+			orders.add(builder.asc(ProjectQuery.getPath(root, Project.PROP_PATH)));
 		query.orderBy(orders);
 		
 		return query;
@@ -946,9 +955,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public void move(Collection<Project> projects, Project parent) {
 		for (Project project: projects) { 
-			String oldPath = project.getPath();
 			project.setParent(parent);
-			save(project, oldPath);
+			save(project);
 		}
 	}
 

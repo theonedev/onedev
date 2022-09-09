@@ -63,7 +63,7 @@ public class ProjectDependency implements Serializable {
 		ProjectCache cache = projectManager.cloneCache();
 		for (Project project: projectManager.getPermittedProjects(new AccessProject())) {
 			if (!project.equals(currentProject))
-				choices.add(cache.getPath(project.getId()));
+				choices.add(cache.get(project.getId()).getPath());
 		}
 		
 		Collections.sort(choices);

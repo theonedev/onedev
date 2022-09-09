@@ -47,7 +47,7 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
 				ProjectCache cache = projectManager.cloneCache();
 				for (Project project: projectManager.getPermittedProjects(new CreateChildren())) {
 					if (currentProject == null || !cache.isSelfOrAncestorOf(currentProject.getId(), project.getId())) {
-						String projectPath = cache.getPath(project.getId());
+						String projectPath = cache.get(project.getId()).getPath();
 						listOfProjectPath.add(projectPath);
 					}
 				}

@@ -275,10 +275,7 @@ public class ProjectResource {
     	} else if (!SecurityUtils.canManage(project)) {
 			throw new UnauthorizedException();
     	} else {
-    		String oldPath = customData;
-    		if (oldPath.contains(":"))
-    			oldPath = StringUtils.substringAfter(oldPath, ":");
-    		projectManager.save(project, oldPath);
+    		projectManager.save(project);
     	}
     	
     	return project.getId();

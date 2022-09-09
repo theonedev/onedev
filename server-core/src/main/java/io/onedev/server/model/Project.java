@@ -193,6 +193,8 @@ public class Project extends AbstractEntity {
 	
 	public static final String NAME_PATH = "Path";
 	
+	public static final String PROP_PATH = "path";
+	
 	public static final String NAME_UPDATE_DATE = "Update Date";
 	
 	public static final String PROP_UPDATE_DATE = "updateDate";
@@ -223,6 +225,7 @@ public class Project extends AbstractEntity {
 			Lists.newArrayList(NAME_NAME, NAME_PATH, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			NAME_PATH, PROP_PATH,
 			NAME_NAME, PROP_NAME, 
 			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,
 			NAME_UPDATE_DATE, PROP_UPDATE_DATE);
@@ -262,6 +265,9 @@ public class Project extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String name;
+	
+	@Column(nullable=false)
+	private String path;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
@@ -422,6 +428,14 @@ public class Project extends AbstractEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 	@Editable(order=200)
@@ -699,8 +713,8 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ProjectFacade getFacade() {
-		return new ProjectFacade(getId(), getName(), getServiceDeskName(), isIssueManagement(), 
-				Role.idOf(getDefaultRole()), Project.idOf(getParent()));
+		return new ProjectFacade(getId(), getName(), getPath(), getServiceDeskName(), 
+				isIssueManagement(), Role.idOf(getDefaultRole()), Project.idOf(getParent()));
 	}
 	
 	/**
@@ -1879,9 +1893,9 @@ public class Project extends AbstractEntity {
 			return blob.getMediaType();
 	}
 
-	public String getPath() {
+	public String calcPath() {
 		if (getParent() != null)
-			return getParent().getPath() + "/" + getName();
+			return getParent().calcPath() + "/" + getName();
 		else
 			return getName();
 	}

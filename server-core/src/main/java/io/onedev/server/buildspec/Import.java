@@ -92,7 +92,7 @@ public class Import implements Serializable, Validatable {
 		
 		ProjectCache cache = projectManager.cloneCache();
 
-		List<String> choices = projects.stream().map(it->cache.getPath(it.getId())).collect(Collectors.toList());
+		List<String> choices = projects.stream().map(it->cache.get(it.getId()).getPath()).collect(Collectors.toList());
 		Collections.sort(choices);
 		
 		return choices;

@@ -15,8 +15,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.util.facade.ProjectFacade;
 
 public interface ProjectManager extends EntityManager<Project> {
 	
@@ -32,21 +32,6 @@ public interface ProjectManager extends EntityManager<Project> {
 	Project find(@Nullable Project parent, String name);
 
 	void fork(Project from, Project to);
-	
-	/**
-	 * Save specified project. Note that oldName and oldUserId should not be 
-	 * specified together, meaning that you should not rename and transfer 
-	 * a project in a single call
-	 * 
-	 * @param project
-	 * 			project to save
-	 * @param oldName
-	 * 			in case of rename, this parameter should hold the original name 
-	 * 			when above project object is initially loaded to ensure database 
-	 * 			integrity. Use <tt>null</tt> if original name does not exist, 
-	 * 			or the name is not changed
-	 */
-	void save(Project project, @Nullable String oldName);
 	
 	void create(Project project);
 	

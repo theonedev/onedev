@@ -163,7 +163,7 @@ public class SuggestionUtils {
 		ProjectCache cache = getProjectManager().cloneCache();
 		
 		List<String> projectPaths = projects.stream()
-				.map(it->cache.getPath(it.getId()))
+				.map(it->cache.get(it.getId()).getPath())
 				.sorted()
 				.collect(Collectors.toList());
 		return suggest(projectPaths, matchWith);
@@ -399,7 +399,7 @@ public class SuggestionUtils {
 				List<InputSuggestion> suggestions = new ArrayList<>();
 				ProjectCache cache = getProjectManager().cloneCache();
 				List<String> projectPaths = getProjectManager().getPermittedProjects(new AccessProject()).stream()
-						.map(it->cache.getPath(it.getId()))
+						.map(it->cache.get(it.getId()).getPath())
 						.collect(Collectors.toList());
 				Collections.sort(projectPaths);
 				

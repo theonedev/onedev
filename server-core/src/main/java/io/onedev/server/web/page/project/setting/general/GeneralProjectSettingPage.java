@@ -38,8 +38,6 @@ import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 @SuppressWarnings("serial")
 public class GeneralProjectSettingPage extends ProjectSettingPage {
 
-	private String oldPath;
-	
 	private BeanEditor editor;
 	
 	public GeneralProjectSettingPage(PageParameters params) {
@@ -73,8 +71,6 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 			@Override
 			public void setObject(Serializable object) {
-				// check contract of projectManager.save on why we assign oldPath here
-				oldPath = getProject().getPath();
 				editor.getDescriptor().copyProperties(object, getProject());
 			}
 			
@@ -129,7 +125,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 								"This name has already been used by another project");
 					} else {
 						project.setDefaultRole(defaultRoleBean.getRole());
-						getProjectManager().save(project, oldPath);
+						getProjectManager().save(project);
 						Session.get().success("General setting has been updated");
 						setResponsePage(GeneralProjectSettingPage.class, paramsOf(project));
 					}

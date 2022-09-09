@@ -37,30 +37,11 @@ public class ProjectCache extends HashMap<Long, ProjectFacade> {
 		}
 	}
 	
-	@Nullable
-	public String getPath(Long id) {
-		ProjectFacade project = get(id);
-		if (project != null) {
-			if (project.getParentId() != null) {
-				String parentPath = getPath(project.getParentId());
-				if (parentPath != null)
-					return parentPath + "/" + project.getName();
-				else
-					return null;
-			} else {
-				return project.getName();
-			}
-		} else {
-			return null;
-		}
-	}
-	
 	public Collection<Long> getMatchingIds(String pathPattern) {
 		Collection<Long> ids = new HashSet<>();
-		for (Long id: keySet()) {
-			String path = getPath(id);
-			if (path != null && WildcardUtils.matchPath(pathPattern, path))
-				ids.add(id);
+		for (ProjectFacade project: values()) {
+			if (WildcardUtils.matchPath(pathPattern, project.getPath()))
+				ids.add(project.getId());
 		}
 		return ids;
 	}
@@ -119,7 +100,7 @@ public class ProjectCache extends HashMap<Long, ProjectFacade> {
 	}
 
 	public double getSimilarScore(Project project, @Nullable String term) {
-		String path = getPath(project.getId());
+		String path = get(project.getId()).getPath();
 		return Similarities.getSimilarScore(path, term);
 	}
 
@@ -133,7 +114,7 @@ public class ProjectCache extends HashMap<Long, ProjectFacade> {
 
 			@Override
 			public int compare(Project o1, Project o2) {
-				return getPath(o1.getId()).compareTo(getPath(o2.getId()));
+				return get(o1.getId()).getPath().compareTo(get(o2.getId()).getPath());
 			}
 			
 		};		

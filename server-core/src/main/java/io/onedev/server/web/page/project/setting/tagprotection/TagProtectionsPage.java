@@ -51,14 +51,14 @@ public class TagProtectionsPage extends ProjectSettingPage {
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
 						getProject().getTagProtections().remove(item.getIndex());
-						OneDev.getInstance(ProjectManager.class).save(getProject(), null);
+						OneDev.getInstance(ProjectManager.class).save(getProject());
 						target.add(container);
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {
 						getProject().getTagProtections().set(item.getIndex(), protection);
-						OneDev.getInstance(ProjectManager.class).save(getProject(), null);
+						OneDev.getInstance(ProjectManager.class).save(getProject());
 					}
 					
 				});
@@ -73,7 +73,7 @@ public class TagProtectionsPage extends ProjectSettingPage {
 				List<TagProtection> protections = getProject().getTagProtections();
 				TagProtection protection = protections.get(from.getItemIndex());
 				protections.set(from.getItemIndex(), protections.set(to.getItemIndex(), protection));
-				OneDev.getInstance(ProjectManager.class).save(getProject(), null);
+				OneDev.getInstance(ProjectManager.class).save(getProject());
 				
 				target.add(container);
 			}
@@ -96,7 +96,7 @@ public class TagProtectionsPage extends ProjectSettingPage {
 					@Override
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {
 						getProject().getTagProtections().add(protection);
-						OneDev.getInstance(ProjectManager.class).save(getProject(), null);
+						OneDev.getInstance(ProjectManager.class).save(getProject());
 						container.replace(newAddNewFrag());
 						target.add(container);
 					}

@@ -4333,4 +4333,45 @@ public class DataMigrator {
 	private void migrate98(File dataDir, Stack<Integer> versions) {
 	}
 	
+	private void migrate99(File dataDir, Stack<Integer> versions) {
+		Map<String, String> names = new HashMap<>();
+		Map<String, String> parentIds = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					String id = element.elementText("id").trim();
+					String name = element.elementText("name").trim();
+					String parentId;
+					Element parentElement = element.element("parent");
+					if (parentElement != null)
+						parentId = parentElement.getText().trim();
+					else
+						parentId = null;
+					names.put(id, name);
+					parentIds.put(id, parentId);
+				}
+			}
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					String id = element.elementText("id").trim();
+					List<String> pathSegments = new ArrayList<>();
+					
+					do {
+						pathSegments.add(names.get(id));
+						id = parentIds.get(id);
+					} while (id != null);
+					
+					Collections.reverse(pathSegments);
+					element.addElement("path").setText(StringUtils.join(pathSegments, "/"));
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }
