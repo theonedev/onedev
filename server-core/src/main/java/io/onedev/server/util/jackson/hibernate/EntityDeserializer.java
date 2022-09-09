@@ -60,9 +60,7 @@ public class EntityDeserializer extends BeanDeserializer {
         			if (entity instanceof Project) { 
         				Project project = (Project) entity;
         				if (project.getParent() != null)
-        					entity.setCustomData(project.getParent().getId() + ":" + project.getPath());
-        				else
-        					entity.setCustomData(project.getPath());
+        					entity.setCustomData(project.getParent().getId());
         			} else if (entity instanceof User) { 
         				entity.setCustomData(((User) entity).getName());
         			} else if (entity instanceof Group) { 
