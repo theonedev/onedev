@@ -49,7 +49,7 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 			String oppositeName = link.getOpposite()!=null?link.getOpposite().getName():null;
 			if (oppositeName != null)
 				ids.put(oppositeName, link.getId());
-			cache.put(link.getId(), new LinkSpecFacade(link.getId(), link.getName(), oppositeName));
+			cache.put(link.getId(), link.getFacade());
 		}
 	}
 	

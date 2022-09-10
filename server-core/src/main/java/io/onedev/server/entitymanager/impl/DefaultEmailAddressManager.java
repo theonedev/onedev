@@ -30,7 +30,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.facade.EmailAddressFacade;
-import io.onedev.server.util.facade.EmailAddressFacades;
+import io.onedev.server.util.facade.EmailAddressCache;
 
 @Singleton
 public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> implements EmailAddressManager {
@@ -43,7 +43,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 	
 	private final SessionManager sessionManager;
 	
-	private final EmailAddressFacades cache = new EmailAddressFacades();
+	private final EmailAddressCache cache = new EmailAddressCache();
 	
 	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
 	
@@ -287,7 +287,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 	}
 
 	@Override
-	public EmailAddressFacades cloneCache() {
+	public EmailAddressCache cloneCache() {
 		return cache.clone();
 	}
 

@@ -30,6 +30,7 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.GroupFacade;
 
 @Api(order=6000)
 @Path("/groups")
@@ -95,7 +96,7 @@ public class GroupResource {
     public Long createOrUpdate(@NotNull Group group) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-	    groupManager.save(group, (String) group.getCustomData());
+	    groupManager.save(group, ((GroupFacade) group.getOldVersion()).getName());
     	return group.getId();
     }
 	

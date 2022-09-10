@@ -2,7 +2,9 @@
 	<div class="issue-fields">
 		<div class="text-muted mb-4">
 			<wicket:svg href="bulb" class="icon"/> Define all custom issue fields here. Each project can 
-			decide to use all or a subset of these fields via its issue transition setting.
+			decide to use all or a subset of these fields via its issue transition setting. 
+			<b class="text-warning">NOTE: </b> Newly defined fields by default only appear in new issues. 
+			Batch edit existing issues from issue list page if you want them to have these new fields  
 		</div>
 		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add custom field"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 		<table wicket:id="issueFields" class="table table-hover"></table>

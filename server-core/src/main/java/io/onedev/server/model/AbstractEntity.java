@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.util.facade.EntityFacade;
 
 @MappedSuperclass
 @JsonIgnoreProperties("handler")
@@ -33,7 +34,7 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	
 	public static final String PROP_NUMBER = "number";
 	
-	private transient Object customData;
+	private transient EntityFacade oldVersion;
 	
 	@Api(order=1)
 	@Id
@@ -112,12 +113,13 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 		}
 	}
 
-	public Object getCustomData() {
-		return customData;
+	@Nullable
+	public EntityFacade getOldVersion() {
+		return oldVersion;
 	}
 
-	public void setCustomData(Object customData) {
-		this.customData = customData;
+	public void setOldVersion(@Nullable EntityFacade oldVersion) {
+		this.oldVersion = oldVersion;
 	}
 
 	public boolean isNew() {
@@ -140,6 +142,11 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 		} else {
 			return entity.getId();
 		}
+	}
+	
+	@Nullable
+	public EntityFacade getFacade() {
+		return null;
 	}
 	
 }

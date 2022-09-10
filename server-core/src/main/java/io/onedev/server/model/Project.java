@@ -266,6 +266,7 @@ public class Project extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 	
+	@JsonIgnore
 	@Column(nullable=false)
 	private String path;
 	
@@ -712,6 +713,7 @@ public class Project extends AbstractEntity {
 		return blobCache;
 	}
 	
+	@Override
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getPath(), getServiceDeskName(), 
 				isIssueManagement(), Role.idOf(getDefaultRole()), Project.idOf(getParent()));

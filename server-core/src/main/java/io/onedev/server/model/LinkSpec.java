@@ -18,6 +18,7 @@ import io.onedev.server.model.support.issue.LinkSpecOpposite;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
+import io.onedev.server.util.facade.LinkSpecFacade;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -161,6 +162,11 @@ public class LinkSpec extends AbstractEntity {
 			});
 		}
 		return updaters;
+	}
+
+	@Override
+	public LinkSpecFacade getFacade() {
+		return new LinkSpecFacade(getId(), getName(), getOpposite()!=null?getOpposite().getName():null);
 	}
 
 }

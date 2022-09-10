@@ -7,7 +7,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.util.facade.EmailAddressFacades;
+import io.onedev.server.util.facade.EmailAddressCache;
 
 public interface EmailAddressManager extends EntityManager<EmailAddress> {
 
@@ -29,5 +29,5 @@ public interface EmailAddressManager extends EntityManager<EmailAddress> {
 	
 	void sendVerificationEmail(EmailAddress emailAddress);
 
-	EmailAddressFacades cloneCache();
+	EmailAddressCache cloneCache();
 }

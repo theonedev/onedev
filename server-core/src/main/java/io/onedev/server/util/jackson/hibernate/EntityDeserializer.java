@@ -15,10 +15,6 @@ import com.fasterxml.jackson.databind.deser.impl.PropertyValue;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.Role;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
 
 @SuppressWarnings("serial")
@@ -57,17 +53,7 @@ public class EntityDeserializer extends BeanDeserializer {
             	if (property.getName().equals("id") && value != null) {
         			jp.nextToken();
         			AbstractEntity entity = dao.load(entityClass, (Long)value);
-        			if (entity instanceof Project) { 
-        				Project project = (Project) entity;
-        				if (project.getParent() != null)
-        					entity.setCustomData(project.getParent().getId());
-        			} else if (entity instanceof User) { 
-        				entity.setCustomData(((User) entity).getName());
-        			} else if (entity instanceof Group) { 
-        				entity.setCustomData(((Group) entity).getName());
-        			} else if (entity instanceof Role) { 
-        				entity.setCustomData(((Role) entity).getName());
-        			}
+        			entity.setOldVersion(entity.getFacade());
         			
         			Object bean;
         			if (entity instanceof HibernateProxy) 

@@ -324,9 +324,10 @@ public class UserResource {
 			if (existingUser != null && !existingUser.equals(user))
 				throw new ExplicitException("Login name is already used by another user");
 			
+			String oldName = user.getName();
 			user.setName(data.getName());
 			user.setFullName(data.getFullName());
-			userManager.save(user);
+			userManager.save(user, oldName);
 			return user.getId();
 		} else { 
 			throw new UnauthenticatedException();

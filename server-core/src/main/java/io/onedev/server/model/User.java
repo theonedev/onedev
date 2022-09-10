@@ -869,6 +869,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return gitEmailAddress.orElse(null);
 	}
 	
+	@Override
 	public UserFacade getFacade() {
 		return new UserFacade(getId(), getName(), getFullName(), getAccessToken());
 	}

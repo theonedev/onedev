@@ -727,6 +727,7 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 		return commitsCache.get(sincePrevStatus);
 	}
 	
+	@Override
 	public BuildFacade getFacade() {
 		return new BuildFacade(getId(), getProject().getId(), getNumber(), getCommitHash());
 	}

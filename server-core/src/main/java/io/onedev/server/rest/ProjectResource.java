@@ -54,6 +54,7 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Day;
+import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 
 @Api(order=1000)
@@ -103,6 +104,17 @@ public class ProjectResource {
     	cloneUrl.setSsh(urlManager.cloneUrlFor(project, true));
     	
     	return cloneUrl;
+    }
+	
+	@Api(order=150)
+	@Path("/{projectId}/path")
+    @GET
+    public String getPath(@PathParam("projectId") Long projectId) {
+    	Project project = projectManager.load(projectId);
+    	if (!SecurityUtils.canAccess(project))
+			throw new UnauthorizedException();
+
+    	return project.getPath();
     }
 	
 	@Api(order=200)
@@ -241,9 +253,9 @@ public class ProjectResource {
     @POST
     public Long createOrUpdate(@NotNull Project project) {
 		Project parent = project.getParent();
-		Long prevParentId = (Long) project.getCustomData();
+		Long oldParentId = ((ProjectFacade) project.getOldVersion()).getParentId();
 		
-		if (project.isNew() || !Objects.equals(prevParentId, Project.idOf(parent))) {
+		if (project.isNew() || !Objects.equals(oldParentId, Project.idOf(parent))) {
 			if (parent != null && !SecurityUtils.canCreateChildren(parent))
 				throw new UnauthorizedException("Not authorized to create project under '" + parent.getPath() + "'");
 			if (parent == null && !SecurityUtils.canCreateRootProjects()) 

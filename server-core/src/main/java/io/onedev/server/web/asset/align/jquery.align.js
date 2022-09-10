@@ -30,10 +30,13 @@
         		$this.css("position", "absolute");
         	}
 
+			var thisOldWidth = $this.outerWidth();
+			var thisOldHeight = $this.outerHeight();
+			
         	var $autosuit = $this.find(".autosuit:visible:not(:has('.autosuit:visible'))");
         	if ($autosuit.length == 0)
         		$autosuit = $this;
-        	
+
         	var scrollTop = $autosuit.scrollTop();
         	var scrollLeft = $autosuit.scrollLeft();
         	
@@ -50,6 +53,13 @@
 
         	var thisWidth = $this.outerWidth();
         	var thisHeight = $this.outerHeight();
+
+			// Do not reduce original dimension as otherwise the popup may flip while filtering its content
+			// and this will make the typing experience bad
+			if (thisWidth < thisOldWidth) 
+				thisWidth = thisOldWidth;
+			if (thisHeight < thisOldHeight) 
+				thisHeight = thisOldHeight;
 
         	var width = thisWidth;
         	var height = thisHeight;
@@ -203,16 +213,11 @@
         	
         	$this.css({left:left-$parent.offset().left, top:top-$parent.offset().top});	
         	
-        	if (height < thisHeight)
-        		$autosuit.outerHeight($autosuit.outerHeight()+height-thisHeight);
-        	$autosuit.outerHeight($autosuit.outerHeight()+2);
-        	
-        	if (width < thisWidth)
-        		$autosuit.outerWidth($autosuit.outerWidth()+width-thisWidth);
+        	$autosuit.outerWidth($autosuit.outerWidth()+width-thisWidth);
+        	$autosuit.outerHeight($autosuit.outerHeight()+height-thisHeight);
+			$this.outerWidth(width);
+			$this.outerHeight(height);
 
-        	if ($autosuit.height() < $autosuit[0].scrollHeight)
-        		$autosuit.outerWidth($autosuit.outerWidth()+scrollbarWidth);
-        	
         	$autosuit.scrollTop(scrollTop);
         	$autosuit.scrollLeft(scrollLeft);    		
     	});

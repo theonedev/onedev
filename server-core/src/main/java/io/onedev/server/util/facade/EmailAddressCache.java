@@ -9,13 +9,13 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.model.User;
 
-public class EmailAddressFacades extends HashMap<Long, EmailAddressFacade> {
+public class EmailAddressCache extends HashMap<Long, EmailAddressFacade> {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public EmailAddressFacades clone() {
-		EmailAddressFacades clone = new EmailAddressFacades();
+	public EmailAddressCache clone() {
+		EmailAddressCache clone = new EmailAddressCache();
 		clone.putAll(this);
 		return clone;
 	}

@@ -28,6 +28,7 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.RoleFacade;
 
 @Api(order=7000)
 @Path("/roles")
@@ -75,7 +76,7 @@ public class RoleResource {
     public Long createOrUpdate(@NotNull Role role) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-	    roleManager.save(role, new ArrayList<>(), (String) role.getCustomData());
+	    roleManager.save(role, new ArrayList<>(), ((RoleFacade) role.getOldVersion()).getName());
     	return role.getId();
     }
 	
