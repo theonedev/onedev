@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2008, http://www.snakeyaml.org
+ * Copyright (c) 2008, SnakeYAML
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,12 @@ import io.onedev.server.util.BeanUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
 public abstract class BaseConstructor {
+
+    /**
+     * An instance returned by newInstance methods when instantiation has not been performed.
+     */
+    protected static final Object NOT_INSTANTIATED_OBJECT = new Object();
+
     /**
      * It maps the node kind to the the Construct implementation. When the
      * runtime class is known then the implicit tag is ignored.
@@ -83,8 +89,9 @@ public abstract class BaseConstructor {
     private PropertyUtils propertyUtils;
     private boolean explicitPropertyUtils;
     private boolean allowDuplicateKeys = true;
-
     private boolean wrappedToRootException = false;
+
+    private boolean enumCaseSensitive = false;
 
     protected final Map<Class<? extends Object>, TypeDescription> typeDefinitions;
     protected final Map<Tag, Class<? extends Object>> typeTags;
@@ -301,34 +308,42 @@ public abstract class BaseConstructor {
 
     // >>>> NEW instance
     protected Object newInstance(Node node) {
-        try {
-            return newInstance(Object.class, node);
-        } catch (InstantiationException e) {
-            throw new YAMLException(e);
-        }
+        return newInstance(Object.class, node);
     }
 
-    final protected Object newInstance(Class<?> ancestor, Node node) throws InstantiationException {
+    final protected Object newInstance(Class<?> ancestor, Node node) {
         return newInstance(ancestor, node, true);
     }
 
-    protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault)
-            throws InstantiationException {
-        final Class<? extends Object> type = node.getType();
-        if (typeDefinitions.containsKey(type)) {
-            TypeDescription td = typeDefinitions.get(type);
-            final Object instance = td.newInstance(node);
-            if (instance != null) {
-                return instance;
+    /**
+     * Tries to create a new object for the node.
+     *
+     * @param ancestor expected ancestor of the {@code node.getType()}
+     * @param node for which to create a corresponding java object
+     * @param tryDefault should default constructor to be tried when there is no corresponding
+     * {@code TypeDescription} or {@code TypeDescription.newInstance(node)} returns {@code null}.
+     *
+     * @return - a new object created for {@code node.getType()} by using corresponding
+     *           TypeDescription.newInstance or default constructor.
+     *         - {@code NOT_INSTANTIATED_OBJECT} in case no object has been created
+     */
+    protected Object newInstance(Class<?> ancestor, Node node, boolean tryDefault) {
+        try {
+            final Class<? extends Object> type = node.getType();
+            if (typeDefinitions.containsKey(type)) {
+                TypeDescription td = typeDefinitions.get(type);
+                final Object instance = td.newInstance(node);
+                if (instance != null) {
+                    return instance;
+                }
             }
-        }
-        if (tryDefault) {
-            /*
-             * Removed <code> have InstantiationException in case of abstract
-             * type
-             */
-            if (ancestor.isAssignableFrom(type) && !Modifier.isAbstract(type.getModifiers())) {
-                try {
+
+            if (tryDefault) {
+                /*
+                 * Removed <code> have InstantiationException in case of
+                 * abstract type
+                 */
+                if (ancestor.isAssignableFrom(type) && !Modifier.isAbstract(type.getModifiers())) {
                     java.lang.reflect.Constructor<?> c = type.getDeclaredConstructor();
                     c.setAccessible(true);
                     Object instance = c.newInstance();
@@ -348,40 +363,41 @@ public abstract class BaseConstructor {
         				}
         			}
         			return instance;
-                } catch (NoSuchMethodException e) {
-                    throw new InstantiationException("NoSuchMethodException:"
-                            + e.getLocalizedMessage());
-                } catch (Exception e) {
-                    throw new YAMLException(e);
                 }
             }
+        } catch (Exception e) {
+            throw new YAMLException(e);
         }
-        throw new InstantiationException();
+
+        return NOT_INSTANTIATED_OBJECT;
     }
 
     @SuppressWarnings("unchecked")
     protected Set<Object> newSet(CollectionNode<?> node) {
-        try {
-            return (Set<Object>) newInstance(Set.class, node);
-        } catch (InstantiationException e) {
+        Object instance = newInstance(Set.class, node);
+        if (instance != NOT_INSTANTIATED_OBJECT) {
+            return (Set<Object>) instance;
+        } else {
             return createDefaultSet(node.getValue().size());
         }
     }
 
     @SuppressWarnings("unchecked")
     protected List<Object> newList(SequenceNode node) {
-        try {
-            return (List<Object>) newInstance(List.class, node);
-        } catch (InstantiationException e) {
+        Object instance = newInstance(List.class, node);
+        if (instance != NOT_INSTANTIATED_OBJECT) {
+            return (List<Object>) instance;
+        } else {
             return createDefaultList(node.getValue().size());
         }
     }
 
     @SuppressWarnings("unchecked")
     protected Map<Object, Object> newMap(MappingNode node) {
-        try {
-            return (Map<Object, Object>) newInstance(Map.class, node);
-        } catch (InstantiationException e) {
+        Object instance = newInstance(Map.class, node);
+        if (instance != NOT_INSTANTIATED_OBJECT) {
+            return (Map<Object, Object>) instance;
+        } else {
             return createDefaultMap(node.getValue().size());
         }
     }
@@ -515,7 +531,7 @@ public abstract class BaseConstructor {
      * initialization compared to clean just created one. And map of
      * course does not observe key hashCode changes.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void postponeMapFilling(Map<Object, Object> mapping, Object key, Object value) {
         maps2fill.add(0, new RecursiveTuple(mapping, new RecursiveTuple(key, value)));
     }
@@ -551,20 +567,6 @@ public abstract class BaseConstructor {
         sets2fill.add(0, new RecursiveTuple<Set<Object>, Object>(set, key));
     }
 
-    // <<<< Costruct => NEW, 2ndStep(filling)
-
-    // TODO protected List<Object[]> constructPairs(MappingNode node) {
-    // List<Object[]> pairs = new LinkedList<Object[]>();
-    // List<Node[]> nodeValue = (List<Node[]>) node.getValue();
-    // for (Iterator<Node[]> iter = nodeValue.iterator(); iter.hasNext();) {
-    // Node[] tuple = iter.next();
-    // Object key = constructObject(Object.class, tuple[0]);
-    // Object value = constructObject(Object.class, tuple[1]);
-    // pairs.add(new Object[] { key, value });
-    // }
-    // return pairs;
-    // }
-
     public void setPropertyUtils(PropertyUtils propertyUtils) {
         this.propertyUtils = propertyUtils;
         explicitPropertyUtils = true;
@@ -587,8 +589,8 @@ public abstract class BaseConstructor {
      * respected.
      *
      * @param definition to be added to the Constructor
-     * @return the previous value associated with <tt>definition</tt>, or
-     * <tt>null</tt> if there was no mapping for <tt>definition</tt>.
+     * @return the previous value associated with <code>definition</code>, or
+     * <code>null</code> if there was no mapping for <code>definition</code>.
      */
     public TypeDescription addTypeDescription(TypeDescription definition) {
         if (definition == null) {
@@ -636,5 +638,13 @@ public abstract class BaseConstructor {
 
     public void setWrappedToRootException(boolean wrappedToRootException) {
         this.wrappedToRootException = wrappedToRootException;
+    }
+
+    public boolean isEnumCaseSensitive() {
+        return enumCaseSensitive;
+    }
+
+    public void setEnumCaseSensitive(boolean enumCaseSensitive) {
+        this.enumCaseSensitive = enumCaseSensitive;
     }
 }
