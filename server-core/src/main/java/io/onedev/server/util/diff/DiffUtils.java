@@ -21,8 +21,6 @@ import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 
 public class DiffUtils {
 
-	private static final int CHANGE_CALC_TIMEOUT = 100;
-	
 	public static final int MAX_DIFF_SIZE = 65535;
 	
 	private static final Pattern WORD_PATTERN = Pattern.compile("\\w+");
@@ -113,26 +111,16 @@ public class DiffUtils {
 		});
 	}
 	
-	/**
-	 * This method checks deleted lines and inserted lines, and position them so that 
-	 * similar delete line and insert line (indicates they are the same line with 
-	 * modification) will be displayed on same row
-	 * @param deleteLines
-	 * @param insertLines
-	 * @return
-	 */
-	public static LinkedHashMap<Integer, LineDiff> align(List<String> deleteLines, List<String> insertLines) {
-		LinkedHashMap<Integer, LineDiff> lineDiffs = new LinkedHashMap<>();
+	public static LinkedHashMap<Integer, List<DiffBlock<String>>> diffLines(List<String> deleteLines, List<String> insertLines) {
+		LinkedHashMap<Integer, List<DiffBlock<String>>> lineDiffs = new LinkedHashMap<>();
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		
-		long time = System.currentTimeMillis();
-		int nextInsert = 0;
 		for (int i=0; i<deleteLines.size(); i++) {
 			String deleteLine = deleteLines.get(i);
 			List<String> deleteTokens = getTokens(deleteLine);
-			for (int j=nextInsert; j<insertLines.size(); j++) {
-				String insertLine = insertLines.get(j);
+			if (i < insertLines.size()) {
+				String insertLine = insertLines.get(i);
 				List<String> insertTokens = getTokens(insertLine);
 				
 				TokensToCharsResult<String> result = DiffUtils.tokensToChars(deleteTokens, insertTokens);						
@@ -177,15 +165,7 @@ public class DiffUtils {
 						}
 					}
 
-					LineDiff lineDiff = new LineDiff(j, diffBlocks);
-					lineDiffs.put(i, lineDiff);
-					nextInsert = j+1;
-					break;
-				} else {
-					if (System.currentTimeMillis()-time > CHANGE_CALC_TIMEOUT) {
-						nextInsert = insertLines.size();
-						break;
-					}
+					lineDiffs.put(i, diffBlocks);
 				}
 			}
 		}

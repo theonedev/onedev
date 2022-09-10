@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.diff.blob.text;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import static io.onedev.server.util.diff.DiffRenderer.toHtml;
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -60,7 +60,6 @@ import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.util.diff.LineDiff;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -583,49 +582,39 @@ public class BlobTextDiffPanel extends Panel {
 				if (i+1<change.getDiffBlocks().size()) {
 					DiffBlock<String> nextBlock = change.getDiffBlocks().get(i+1);
 					if (nextBlock.getOperation() == Operation.INSERT) {
-						LinkedHashMap<Integer, LineDiff> lineChanges = 
-								DiffUtils.align(block.getElements(), nextBlock.getElements());
-						if (blameInfo != null && diffMode == DiffViewMode.UNIFIED) {
+						LinkedHashMap<Integer, List<DiffBlock<String>>> lineDiffs = 
+								DiffUtils.diffLines(block.getElements(), nextBlock.getElements());
+						if (diffMode == DiffViewMode.UNIFIED) {
 							for (int j=0; j<block.getElements().size(); j++) { 
-								LineDiff lineDiff = lineChanges.get(j);
-								if (lineDiff != null) {
-									appendDelete(builder, block, j, lineDiff.getDiffBlocks());
-								} else {
+								List<DiffBlock<String>> lineDiff = lineDiffs.get(j);
+								if (lineDiff != null) 
+									appendDelete(builder, block, j, lineDiff);
+								else 
 									appendDelete(builder, block, j, null);
-								}
-							}
-							Map<Integer, LineDiff> lineChangesByInsert = new HashMap<>();
-							for (LineDiff diff: lineChanges.values()) {
-								lineChangesByInsert.put(diff.getCompareLine(), diff);
 							}
 							for (int j=0; j<nextBlock.getElements().size(); j++) {
-								LineDiff lineDiff = lineChangesByInsert.get(j);
-								if (lineDiff != null) {
-									appendInsert(builder, nextBlock, j, lineDiff.getDiffBlocks());
-								} else {
+								List<DiffBlock<String>> lineDiff = lineDiffs.get(j);
+								if (lineDiff != null) 
+									appendInsert(builder, nextBlock, j, lineDiff);
+								else 
 									appendInsert(builder, nextBlock, j, null);
-								}
 							}
 						} else {
-							int prevDeleteLineIndex = 0;
-							int prevInsertLineIndex = 0;
-							for (Map.Entry<Integer, LineDiff> entry: lineChanges.entrySet()) {
-								int deleteLineIndex = entry.getKey();
-								LineDiff lineChange = entry.getValue();
-								int insertLineIndex = lineChange.getCompareLine();
+							int prevLineIndex = 0;
+							for (Map.Entry<Integer, List<DiffBlock<String>>> entry: lineDiffs.entrySet()) {
+								int lineIndex = entry.getKey();
+								List<DiffBlock<String>> lineDiff = entry.getValue();
 								
-								appendDeletesAndInserts(builder, block, nextBlock, prevDeleteLineIndex, deleteLineIndex, 
-										prevInsertLineIndex, insertLineIndex);
+								appendDeletesAndInserts(builder, block, nextBlock, prevLineIndex, lineIndex, 
+										prevLineIndex, lineIndex);
 								
-								appendModification(builder, block, nextBlock, deleteLineIndex, insertLineIndex, 
-										lineChange.getDiffBlocks()); 
+								appendModification(builder, block, nextBlock, lineIndex, lineIndex, lineDiff); 
 								
-								prevDeleteLineIndex = deleteLineIndex+1;
-								prevInsertLineIndex = insertLineIndex+1;
+								prevLineIndex = lineIndex+1;
 							}
 							appendDeletesAndInserts(builder, block, nextBlock, 
-									prevDeleteLineIndex, block.getElements().size(), 
-									prevInsertLineIndex, nextBlock.getElements().size());
+									prevLineIndex, block.getElements().size(), 
+									prevLineIndex, nextBlock.getElements().size());
 						}
 						i++;
 					} else {

@@ -2,7 +2,6 @@ package io.onedev.server.util.diff;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -33,27 +32,22 @@ public class DiffRenderer {
 				if (i+1<diffBlocks.size()) {
 					DiffBlock<String> nextBlock = diffBlocks.get(i+1);
 					if (nextBlock.getOperation() == Operation.INSERT) {
-						LinkedHashMap<Integer, LineDiff> lineChanges = 
-								DiffUtils.align(block.getElements(), nextBlock.getElements());
-						int prevDeleteLineIndex = 0;
-						int prevInsertLineIndex = 0;
-						for (Map.Entry<Integer, LineDiff> entry: lineChanges.entrySet()) {
-							int deleteLineIndex = entry.getKey();
-							LineDiff lineChange = entry.getValue();
-							int insertLineIndex = lineChange.getCompareLine();
-							
-							appendDeletesAndInserts(builder, block, nextBlock, prevDeleteLineIndex, deleteLineIndex, 
-									prevInsertLineIndex, insertLineIndex);
-							
-							appendModification(builder, block, nextBlock, deleteLineIndex, insertLineIndex, 
-									lineChange.getDiffBlocks()); 
-							
-							prevDeleteLineIndex = deleteLineIndex+1;
-							prevInsertLineIndex = insertLineIndex+1;
+						LinkedHashMap<Integer, List<DiffBlock<String>>> lineDiffs = 
+								DiffUtils.diffLines(block.getElements(), nextBlock.getElements());
+						for (int j=0; j<block.getElements().size(); j++) { 
+							List<DiffBlock<String>> lineDiff = lineDiffs.get(j);
+							if (lineDiff != null) 
+								appendDelete(builder, block, j, lineDiff);
+							else 
+								appendDelete(builder, block, j, null);
 						}
-						appendDeletesAndInserts(builder, block, nextBlock, 
-								prevDeleteLineIndex, block.getElements().size(), 
-								prevInsertLineIndex, nextBlock.getElements().size());
+						for (int j=0; j<nextBlock.getElements().size(); j++) {
+							List<DiffBlock<String>> lineDiff = lineDiffs.get(j);
+							if (lineDiff != null) 
+								appendInsert(builder, nextBlock, j, lineDiff);
+							else 
+								appendInsert(builder, nextBlock, j, null);
+						}
 						i++;
 					} else {
 						for (int j=0; j<block.getElements().size(); j++) 
@@ -72,15 +66,6 @@ public class DiffRenderer {
 		return builder.toString();
 	}
 
-	private void appendDeletesAndInserts(StringBuilder builder, DiffBlock<String> deleteBlock, 
-		DiffBlock<String> insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
-		int fromInsertLineIndex, int toInsertLineIndex) {
-		for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
-			appendDelete(builder, deleteBlock, i, null);
-		for (int i=fromInsertLineIndex; i<toInsertLineIndex; i++)
-			appendInsert(builder, insertBlock, i, null);
-	}
-	
 	private String getOperationClass(Operation operation) {
 		if (operation == Operation.INSERT)
 			return "insert";
@@ -182,25 +167,4 @@ public class DiffRenderer {
 		builder.append("</tr>");
 	}
 	
-	private void appendModification(StringBuilder builder, DiffBlock<String> deleteBlock, 
-			DiffBlock<String> insertBlock, int deleteLineIndex, int insertLineIndex, 
-			List<DiffBlock<String>> tokenDiffs) {
-		builder.append("<tr class='code original'>");
-
-		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
-		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
-		builder.append("<td class='operation old new'>*</td>");
-		builder.append("<td class='content old new' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-		if (tokenDiffs.isEmpty()) {
-			builder.append("&nbsp;");
-		} else {
-			for (DiffBlock<String> tokenBlock: tokenDiffs) { 
-				for (String token: tokenBlock.getElements()) 
-					builder.append(toHtml(token, getOperationClass(tokenBlock.getOperation())));
-			}
-		}
-		builder.append("</td>");
-		builder.append("</tr>");
-	}	
-		
 }
