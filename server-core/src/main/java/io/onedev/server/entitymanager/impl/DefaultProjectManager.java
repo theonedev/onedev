@@ -88,6 +88,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -995,6 +996,19 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		} finally {
 			cacheLock.readLock().unlock();
 		}
+	}
+
+	@Override
+	public String getFavoriteQuery() {
+		User user = SecurityUtils.getUser();
+		if (user != null && !user.getProjectQueryPersonalization().getQueries().isEmpty()) {
+			return user.getProjectQueryPersonalization().getQueries().iterator().next().getQuery();
+		} else {
+			GlobalProjectSetting projectSetting = settingManager.getProjectSetting();
+			if (!projectSetting.getNamedQueries().isEmpty())
+				return projectSetting.getNamedQueries().iterator().next().getQuery();
+		}
+		return null;
 	}
     
 }

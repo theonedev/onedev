@@ -67,4 +67,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	ProjectCache cloneCache();
 	
+	@Nullable
+	String getFavoriteQuery();
+	
 }

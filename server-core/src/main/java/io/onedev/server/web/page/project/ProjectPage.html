@@ -8,7 +8,7 @@
 	</div>
 	<wicket:fragment wicket:id="topbarTitleFrag">
 		<a wicket:id="projects" class="d-none d-sm-inline">Projects</a>
-		<span class="dot d-none d-sm-inline"></span>
+		<a wicket:id="favorites" class="dropdown-triangle-indicator mx-1 d-inline-flex flex-shrink-0 align-items-center justify-content-center"><span></span></a>
 		<span class="project-path d-inline-flex align-items-center text-truncate">
 			<wicket:container wicket:id="pathSegments">
 				<a wicket:id="link" class="text-truncate"><span wicket:id="label"></span></a>
@@ -23,5 +23,15 @@
 			<img wicket:id="avatar">
 			<span wicket:id="name"></span>
 		</a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="favoritesFrag">
+		<ul class="favorite-projects mb-0 list-unstyled p-4">
+			<li wicket:id="projects">
+				<a wicket:id="link" class="text-nowrap">
+					<img wicket:id="avatar">
+					<span wicket:id="label"></span>
+				</a>
+			</li>
+		</ul>
 	</wicket:fragment>
 </wicket:extend>

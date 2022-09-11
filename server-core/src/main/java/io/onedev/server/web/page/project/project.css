@@ -1,0 +1,6 @@
+.favorite-projects li {
+	margin-bottom: 0.75rem;
+}
+.favorite-projects li:last-child {
+	margin-bottom: 0;
+}

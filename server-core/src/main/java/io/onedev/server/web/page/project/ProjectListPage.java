@@ -15,18 +15,17 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
-import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
@@ -225,16 +224,7 @@ public class ProjectListPage extends LayoutPage {
 	}
 	
 	public static PageParameters paramsOf(int page, int expectedCount) {
-		String query = null;
-		
-		User user = SecurityUtils.getUser();
-		if (user != null && !user.getProjectQueryPersonalization().getQueries().isEmpty()) {
-			query = user.getProjectQueryPersonalization().getQueries().iterator().next().getQuery();
-		} else {
-			if (!getProjectSetting().getNamedQueries().isEmpty())
-				query = getProjectSetting().getNamedQueries().iterator().next().getQuery();
-		}
-		return paramsOf(query, page, expectedCount);
+		return paramsOf(OneDev.getInstance(ProjectManager.class).getFavoriteQuery(), page, expectedCount);
 	}
 
 	@Override

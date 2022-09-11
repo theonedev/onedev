@@ -90,11 +90,9 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 		
 		// Run onload script as the container size might be adjusted in window resize event (which 
 		// happens before onload). An example is the issue board columns
-		BasePage page = (BasePage) WicketUtils.getPage();
-		
-		String script = String.format("onedev.server.infiniteScroll.onLoad('%s', %s, %s, %s, %b);", 
+		String script = String.format("onedev.server.infiniteScroll.onLoad('%s', %s, %s, %s);", 
 				component.getMarkupId(true), getCallbackFunction(explicit("offset"), explicit("count")), 
-				pageSize, itemSelector, page.isDarkMode());
+				pageSize, itemSelector);
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
