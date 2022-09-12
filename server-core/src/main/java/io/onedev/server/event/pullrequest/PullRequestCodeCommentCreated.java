@@ -5,6 +5,8 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.commenttext.CommentText;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent {
 
@@ -13,8 +15,8 @@ public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent {
 	}
 
 	@Override
-	public String getMarkdown() {
-		return getComment().getContent();
+	protected CommentText newCommentText() {
+		return new MarkdownText(getProject(), getComment().getContent());
 	}
 
 	@Override

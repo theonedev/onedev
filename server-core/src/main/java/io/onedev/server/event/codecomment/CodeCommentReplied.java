@@ -4,6 +4,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.commenttext.CommentText;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 public class CodeCommentReplied extends CodeCommentEvent {
 
@@ -19,8 +21,8 @@ public class CodeCommentReplied extends CodeCommentEvent {
 	}
 
 	@Override
-	public String getMarkdown() {
-		return reply.getContent();
+	protected CommentText newCommentText() {
+		return new MarkdownText(getProject(), reply.getContent());
 	}
 
 	@Override

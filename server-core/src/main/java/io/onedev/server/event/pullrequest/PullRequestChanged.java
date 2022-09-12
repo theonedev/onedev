@@ -13,6 +13,8 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeDat
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.commenttext.CommentText;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 public class PullRequestChanged extends PullRequestEvent implements CommitAware {
 
@@ -31,8 +33,8 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 	}
 
 	@Override
-	public String getMarkdown() {
-		return note;
+	protected CommentText newCommentText() {
+		return note!=null? new MarkdownText(getProject(), note): null;
 	}
 	
 	@Nullable

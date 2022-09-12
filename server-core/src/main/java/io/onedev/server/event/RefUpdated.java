@@ -3,13 +3,17 @@ package io.onedev.server.event;
 import java.util.Date;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.commenttext.CommentText;
+import io.onedev.server.util.commenttext.PlainText;
 
 public class RefUpdated extends ProjectEvent implements CommitAware {
 	
@@ -50,6 +54,19 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 	@Override
 	public String getActivity() {
 		return "Git ref updated";
+	}
+
+	@Override
+	protected CommentText newCommentText() {
+		if (!newCommitId.equals(ObjectId.zeroId())) { 
+			RevCommit commit = getProject().getRevCommit(newCommitId, false);
+			if (commit != null) {
+				String detailMessage = GitUtils.getDetailMessage(commit);
+				if (detailMessage != null)
+					return new PlainText(detailMessage);
+			}
+		}
+		return null;
 	}
 
 	@Override

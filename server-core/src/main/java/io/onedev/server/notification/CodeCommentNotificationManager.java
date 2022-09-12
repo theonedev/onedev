@@ -23,6 +23,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 @Singleton
 public class CodeCommentNotificationManager extends AbstractNotificationManager {
@@ -56,20 +57,20 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 				CodeCommentEvent clone = (CodeCommentEvent) event.cloneIn(dao);
 				CodeComment comment = clone.getComment();
 				if (comment.getCompareContext().getPullRequest() == null) {
-					String markdown = clone.getMarkdown();
-					String renderedMarkdown = markdownManager.render(markdown);
-					String processedMarkdown = markdownManager.process(renderedMarkdown, clone.getProject(), null, null, true);
+					MarkdownText markdown = (MarkdownText) clone.getCommentText();
 					
 					Collection<User> notifyUsers = new HashSet<>(); 
 					
 					notifyUsers.add(comment.getUser());
 					notifyUsers.addAll(comment.getReplies().stream().map(it->it.getUser()).collect(Collectors.toSet()));
 					notifyUsers.addAll(comment.getChanges().stream().map(it->it.getUser()).collect(Collectors.toSet()));
-					
-					for (String userName: new MentionParser().parseMentions(renderedMarkdown)) {
-						User user = userManager.findByName(userName);
-						if (user != null) 
-							notifyUsers.add(user);
+
+					if (markdown != null) {
+						for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
+							User user = userManager.findByName(userName);
+							if (user != null) 
+								notifyUsers.add(user);
+						}
 					}
 				
 					Set<String> emailAddresses = notifyUsers.stream()
@@ -93,8 +94,8 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 
 						mailManager.sendMailAsync(emailAddresses, Lists.newArrayList(), 
 								Lists.newArrayList(), subject, 
-								getHtmlBody(clone, summary, processedMarkdown, url, false, null), 
-								getTextBody(clone, summary, markdown, url, false, null), 
+								getHtmlBody(clone, summary, markdown!=null?markdown.getProcessed():null, url, false, null), 
+								getTextBody(clone, summary, markdown!=null?markdown.getContent():null, url, false, null), 
 								null, threadingReferences);
 					}
 				}				

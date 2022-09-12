@@ -45,6 +45,7 @@ import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 @Singleton
 public class IssueNotificationManager extends AbstractNotificationManager {
@@ -219,8 +220,9 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 				else
 					notifiedEmailAddresses = new ArrayList<>();
 				
-				if (clone.getRenderedMarkdown() != null) {
-					for (String userName: new MentionParser().parseMentions(clone.getRenderedMarkdown())) {
+				if (clone.getCommentText() instanceof MarkdownText) {
+					MarkdownText markdown = (MarkdownText) clone.getCommentText();
+					for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
 						User mentionedUser = userManager.findByName(userName);
 						if (mentionedUser != null) {
 							watchManager.watch(issue, mentionedUser, true);

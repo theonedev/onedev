@@ -61,6 +61,7 @@ import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 @Singleton
 public class PullRequestNotificationManager extends AbstractNotificationManager {
@@ -277,8 +278,9 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				else
 					notifiedEmailAddresses = new ArrayList<>();
 				
-				if (clone.getRenderedMarkdown() != null) {
-					for (String userName: new MentionParser().parseMentions(clone.getRenderedMarkdown())) {
+				if (clone.getCommentText() instanceof MarkdownText) {
+					MarkdownText markdown = (MarkdownText) clone.getCommentText();
+					for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
 						User mentionedUser = userManager.findByName(userName);
 						if (mentionedUser != null) { 
 							pullRequestWatchManager.watch(request, mentionedUser, true);

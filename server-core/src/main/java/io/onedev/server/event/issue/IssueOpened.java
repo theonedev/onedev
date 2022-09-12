@@ -15,6 +15,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.commenttext.CommentText;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 public class IssueOpened extends IssueEvent {
 
@@ -23,8 +25,8 @@ public class IssueOpened extends IssueEvent {
 	}
 
 	@Override
-	public String getMarkdown() {
-		return getIssue().getDescription();
+	protected CommentText newCommentText() {
+		return getIssue().getDescription()!=null? new MarkdownText(getProject(), getIssue().getDescription()): null;
 	}
 
 	@Override

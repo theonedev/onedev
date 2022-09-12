@@ -1,6 +1,7 @@
 package io.onedev.server.markdown;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -8,6 +9,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -17,13 +19,20 @@ import com.vladsch.flexmark.ext.definition.DefinitionExtension;
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.ext.toc.TocExtension;
+import com.vladsch.flexmark.formatter.Formatter;
+import com.vladsch.flexmark.formatter.Formatter.Builder;
+import com.vladsch.flexmark.formatter.Formatter.FormatterExtension;
+import com.vladsch.flexmark.formatter.NodeFormatter;
+import com.vladsch.flexmark.formatter.NodeFormatterFactory;
+import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.parser.ParserEmulationProfile;
-import com.vladsch.flexmark.util.misc.Extension;
 import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import com.vladsch.flexmark.util.misc.Extension;
 
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
@@ -89,24 +98,15 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		
 		if (forExternal) {
 			for (Element element: document.body().getElementsByTag("img")) {
-				String src = element.attr("src");
-				if (src.startsWith("/")) {
-					src = settingManager.getSystemSetting().getServerUrl() + src;
-					element.attr("src", AttachmentResource.authorizeGroup(src));
-				}
+				element.attr("src", toExternalUrl(element.attr("src")));
 				String style = element.attr("style");
 				if (!style.endsWith(";"))
 					style += ";";
 				style += "max-width:100%";
 				element.attr("style", style);
 			}
-			for (Element element: document.body().getElementsByTag("a")) {
-				String href = element.attr("href");
-				if (href.startsWith("/")) {
-					href = settingManager.getSystemSetting().getServerUrl() + href;
-					element.attr("href", AttachmentResource.authorizeGroup(href));
-				}
-			}
+			for (Element element: document.body().getElementsByTag("a")) 
+				element.attr("href", toExternalUrl(element.attr("href")));
 		}
 		
 		return document;
@@ -127,4 +127,52 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		return parser.parse(markdown);
 	}
 
+	@Override
+	public String toExternalUrl(String url) {
+		if (url.startsWith("/")) 
+			return AttachmentResource.authorizeGroup(settingManager.getSystemSetting().getServerUrl() + url);
+		else
+			return url;
+	}
+
+	@Override
+	public String format(String markdown, Set<NodeFormattingHandler<?>> handlers) {
+		Parser parser = Parser.builder().build();
+		Node node = parser.parse(markdown);
+
+		Collection<FormatterExtension> extensions = new ArrayList<>();
+		extensions.add(new FormatterExtension() {
+
+			@Override
+			public void rendererOptions(MutableDataHolder options) {
+			}
+
+			@Override
+			public void extend(Builder formatterBuilder) {
+				formatterBuilder.nodeFormatterFactory(new NodeFormatterFactory() {
+
+					@Override
+					public @NotNull NodeFormatter create(@NotNull DataHolder options) {
+						return new NodeFormatter() {
+
+							@Override
+							public @Nullable Set<NodeFormattingHandler<?>> getNodeFormattingHandlers() {
+								return handlers;
+							}
+
+							@Override
+							public @Nullable Set<Class<?>> getNodeClasses() {
+								return null;
+							}
+							
+						};
+					}
+					
+				});
+			}
+			
+		});		
+		return Formatter.builder().extensions(extensions).build().render(node);	
+	}
+	
 }

@@ -546,7 +546,7 @@ public abstract class CodeCommentPanel extends Panel {
 				super.onSubmit(target, form);
 				
 				String content = contentInput.getModelObject();
-				if (content.length() > CodeCommentReply.MAX_CONTENT_LEN) {
+				if (content != null && content.length() > CodeCommentReply.MAX_CONTENT_LEN) {
 					error("Comment too long");
 					target.add(feedback);
 				} else {

@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.notification.slack;
+package io.onedev.server.util.channelnotification;
 
 import java.io.Serializable;
 

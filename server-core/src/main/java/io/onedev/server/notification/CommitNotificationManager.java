@@ -13,7 +13,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
 
@@ -124,16 +123,11 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 				String url = urlManager.urlFor(project, commit);
 				String summary = String.format("Authored by %s", commit.getAuthorIdent().getName());
 
-				String textMessage = GitUtils.getDetailMessage(commit);
-				String htmlMessage = null;
-				if (textMessage != null) 
-					htmlMessage = "<pre>" + HtmlEscape.escapeHtml5(textMessage) + "</pre>";
-				
 				String threadingReferences = "<commit-" + commit.name() + "@onedev>";
 				
 				mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), notifyEmails, subject, 
-						getHtmlBody(event, summary, htmlMessage, url, false, null), 
-						getTextBody(event, summary, textMessage, url, false, null), 
+						getHtmlBody(event, summary, event.getHtmlBody(), url, false, null), 
+						getTextBody(event, summary, event.getTextBody(), url, false, null), 
 						null, threadingReferences);
 			}
 		}

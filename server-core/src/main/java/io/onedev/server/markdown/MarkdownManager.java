@@ -1,9 +1,12 @@
 package io.onedev.server.markdown;
 
+import java.util.Set;
+
 import javax.annotation.Nullable;
 
 import org.jsoup.nodes.Document;
 
+import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import com.vladsch.flexmark.util.ast.Node;
 
 import io.onedev.server.model.Project;
@@ -34,5 +37,9 @@ public interface MarkdownManager {
 			@Nullable BlobRenderContext blobRenderContext, 
 			@Nullable SuggestionSupport suggestionSupport, 
 			boolean forExternal);
+	
+	String toExternalUrl(String url);
+	
+	String format(String markdown, Set<NodeFormattingHandler<?>> handlers);
 	
 }

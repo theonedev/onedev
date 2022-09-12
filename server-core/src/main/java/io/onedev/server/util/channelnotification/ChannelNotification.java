@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.notification.slack;
+package io.onedev.server.util.channelnotification;
 
 import java.io.Serializable;
 
@@ -47,7 +47,7 @@ public class ChannelNotification implements Serializable {
 	
 	private String codeCommentQuery;
 
-	@Editable(order=50, description="Specify Slack webhook url to post events")
+	@Editable(order=50, description="Specify webhook url to post events")
 	@NotEmpty
 	public String getWebhookUrl() {
 		return webhookUrl;

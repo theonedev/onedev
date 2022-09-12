@@ -5,6 +5,8 @@ import java.util.Date;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.commenttext.CommentText;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 public class CodeCommentUpdated extends CodeCommentEvent {
 
@@ -13,8 +15,8 @@ public class CodeCommentUpdated extends CodeCommentEvent {
 	}
 
 	@Override
-	public String getMarkdown() {
-		return getComment().getContent();
+	protected CommentText newCommentText() {
+		return new MarkdownText(getProject(), getComment().getContent());
 	}
 
 	@Override

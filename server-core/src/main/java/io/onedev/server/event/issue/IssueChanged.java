@@ -12,6 +12,8 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.commenttext.CommentText;
+import io.onedev.server.util.commenttext.MarkdownText;
 
 public class IssueChanged extends IssueEvent {
 
@@ -30,8 +32,8 @@ public class IssueChanged extends IssueEvent {
 	}
 
 	@Override
-	public String getMarkdown() {
-		return comment;
+	protected CommentText newCommentText() {
+		return comment!=null? new MarkdownText(getProject(), comment): null;
 	}
 
 	@Nullable
