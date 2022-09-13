@@ -78,7 +78,7 @@ public abstract class ArtifactUploadPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				if (directory.contains("..")) {
+				if (directory != null && directory.contains("..")) {
 					error("'..' is not allowed in the directory");
 					target.add(feedback);
 				} else {
