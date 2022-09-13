@@ -50,6 +50,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
     # cert-manager.io/issuer: ""
     # cert-manager.io/cluster-issuer: ""
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
 
 letsencrypt:
   ## Specify an email here to enable LetsEncrypt.
