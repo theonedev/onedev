@@ -44,7 +44,13 @@ import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.SelectByTypingBehavior;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
+import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
+import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
+import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
+import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 
 @SuppressWarnings("serial")
 public abstract class CommandPalettePanel extends Panel {
@@ -84,13 +90,36 @@ public abstract class CommandPalettePanel extends Panel {
 				Preconditions.checkNotNull(field);
 				field.setAccessible(true);
 				String[] mountSegments = (String[]) field.get(mapper);
-				if (Arrays.equals(mountSegments, new String[] {"projects", "${project}", "files"}))
-					mountSegments = new String[] {"projects", "${project}", "files", "#{revision-and-path}"};
 				List<String[]> mountedPaths = new ArrayList<>();
 				if (mountSegments != null && mountSegments.length != 0) {
-					String url = Joiner.on("/").join(mountSegments);
-					if (!excludedUrlPatterns.matches(new PathMatcher(), url)) 
-						mountedPaths.add(mountSegments);
+					int index = -1;
+					if (Arrays.equals(mountSegments, new String[] {"projects", "${project}", "files"})) {
+						mountedPaths.add(new String[] {"projects", "${project}", "files", "#{revision-and-path}"});
+					} else if ((index = Arrays.asList(mountSegments).indexOf("${" + ContributedAdministrationSettingPage.PARAM_SETTING + "}")) != -1) {
+						for (AdministrationSettingContribution contribution: OneDev.getExtensions(AdministrationSettingContribution.class)) {
+							for (Class<? extends ContributedAdministrationSetting> settingClass: contribution.getSettingClasses()) {
+								String settingName = ContributedAdministrationSettingPage.getSettingName(settingClass);
+								String[] mountSegmentsCopy = new String[mountSegments.length];
+								System.arraycopy(mountSegments, 0, mountSegmentsCopy, 0, mountSegments.length);
+								mountSegmentsCopy[index] = settingName;
+								mountedPaths.add(mountSegmentsCopy);
+							}
+						}
+					} else if ((index = Arrays.asList(mountSegments).indexOf("${" + ContributedProjectSettingPage.PARAM_SETTING + "}")) != -1) {
+						for (ProjectSettingContribution contribution: OneDev.getExtensions(ProjectSettingContribution.class)) {
+							for (Class<? extends ContributedProjectSetting> settingClass: contribution.getSettingClasses()) {
+								String settingName = ContributedAdministrationSettingPage.getSettingName(settingClass);
+								String[] mountSegmentsCopy = new String[mountSegments.length];
+								System.arraycopy(mountSegments, 0, mountSegmentsCopy, 0, mountSegments.length);
+								mountSegmentsCopy[index] = settingName;
+								mountedPaths.add(mountSegmentsCopy);
+							}
+						}
+					} else {
+						String url = Joiner.on("/").join(mountSegments);
+						if (!excludedUrlPatterns.matches(new PathMatcher(), url)) 
+							mountedPaths.add(mountSegments);
+					}
 				}
 				return mountedPaths;
 			} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {

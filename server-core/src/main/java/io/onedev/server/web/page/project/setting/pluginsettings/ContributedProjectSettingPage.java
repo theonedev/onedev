@@ -32,7 +32,7 @@ import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 @SuppressWarnings("serial")
 public class ContributedProjectSettingPage extends ProjectSettingPage {
 
-	public static final String PARAM_SETTING = "setting";
+	public static final String PARAM_SETTING = "projectSetting";
 	
 	private Class<? extends ContributedProjectSetting> settingClass;
 	
@@ -56,7 +56,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 		if (settingClass == null)
 			throw new RuntimeException("Unexpected setting: " + settingName);
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -153,7 +153,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 		return beanEditor;
 	}
 
-	private static String getSettingName(Class<?> settingClass) {
+	public static String getSettingName(Class<?> settingClass) {
 		return EditableUtils.getDisplayName(settingClass).replace(' ', '-').toLowerCase();
 	}
 	

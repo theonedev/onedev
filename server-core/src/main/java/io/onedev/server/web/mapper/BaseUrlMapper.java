@@ -284,7 +284,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		
 		add(new BasePageMapper("administration/settings/branding", BrandingSettingPage.class));
 		
-		add(new BasePageMapper("administration/settings/${setting}", ContributedAdministrationSettingPage.class));
+		add(new BasePageMapper("administration/settings/${" + ContributedAdministrationSettingPage.PARAM_SETTING + "}", 
+				ContributedAdministrationSettingPage.class));
 		
 		add(new BasePageMapper("administration/server-log", ServerLogPage.class));
 		add(new BasePageMapper("administration/server-information", ServerInformationPage.class));
@@ -356,7 +357,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("projects/${project}/settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));
 		add(new BasePageMapper("projects/${project}/settings/service-desk", ProjectServiceDeskSettingPage.class));
 		add(new BasePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
-		add(new BasePageMapper("projects/${project}/settings/${setting}", ContributedProjectSettingPage.class));
+		add(new BasePageMapper("projects/${project}/settings/${" + ContributedProjectSettingPage.PARAM_SETTING + "}", 
+				ContributedProjectSettingPage.class));
 	}
 
 }

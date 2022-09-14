@@ -27,7 +27,7 @@ import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 @SuppressWarnings("serial")
 public class ContributedAdministrationSettingPage extends AdministrationPage {
 
-	public static final String PARAM_SETTING = "setting";
+	public static final String PARAM_SETTING = "administrationSetting";
 	
 	private Class<? extends ContributedAdministrationSetting> settingClass;
 	
@@ -153,7 +153,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 		return new Label(componentId, EditableUtils.getDisplayName(settingClass));
 	}
 
-	private static String getSettingName(Class<?> settingClass) {
+	public static String getSettingName(Class<?> settingClass) {
 		return EditableUtils.getDisplayName(settingClass).replace(' ', '-').toLowerCase();
 	}
 	

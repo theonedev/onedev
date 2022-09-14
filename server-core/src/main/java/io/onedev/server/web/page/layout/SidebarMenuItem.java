@@ -10,6 +10,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
+import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.util.WicketUtils;
 
 public abstract class SidebarMenuItem implements Serializable {
@@ -89,8 +91,14 @@ public abstract class SidebarMenuItem implements Serializable {
 		@Override
 		public boolean isActive() {
 			org.apache.wicket.Page currentPage = WicketUtils.getPage();
-			if (pageClass.isAssignableFrom(currentPage.getClass()))
-				return true;
+			if (pageClass.isAssignableFrom(currentPage.getClass())) { 
+				if (pageClass.isAssignableFrom(ContributedAdministrationSettingPage.class) 
+						|| pageClass.isAssignableFrom(ContributedProjectSettingPage.class)) { 
+					return currentPage.getPageParameters().equals(pageParams);
+				} else { 
+					return true;
+				}
+			}
 			
 			for (Class<?> pageClass: additionalPageClasses) {
 				if (pageClass.isAssignableFrom(currentPage.getClass())) 
