@@ -1392,7 +1392,7 @@ public class BuildSpec implements Serializable, Validatable {
 	private void migrate18_steps(SequenceNode stepsNode) {
 		for (Node stepsNodeItem: stepsNode.getValue()) {
 			MappingNode stepNode = (MappingNode) stepsNodeItem;
-			if (stepNode.getTag().getValue().equals("!PushRepository")) {
+			if (stepNode.getTag().getValue().equals("!PullRepository")) {
 				stepNode.getValue().add(new NodeTuple(
 						new ScalarNode(Tag.STR, "syncToChildProject"), new ScalarNode(Tag.STR, "false")));
 			}
