@@ -435,7 +435,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		parent.setIssueManagement(false);
     		parent = parent.getParent();
     	}
-    	
+    	project.setPath(path);
     	return project;
     }
     
