@@ -114,7 +114,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						}
 
 						@Override
-						protected void clean(File cacheDir) {
+						protected void delete(File cacheDir) {
 							FileUtils.cleanDir(cacheDir);							
 						}
 						

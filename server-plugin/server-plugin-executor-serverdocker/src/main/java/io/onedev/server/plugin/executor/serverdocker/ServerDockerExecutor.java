@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
-import static io.onedev.agent.DockerExecutorUtils.cleanDirAsRoot;
+import static io.onedev.agent.DockerExecutorUtils.deleteDir;
 import static io.onedev.agent.DockerExecutorUtils.createNetwork;
 import static io.onedev.agent.DockerExecutorUtils.deleteNetwork;
 import static io.onedev.agent.DockerExecutorUtils.isUseProcessIsolation;
@@ -190,8 +190,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						}
 
 						@Override
-						protected void clean(File cacheDir) {
-							cleanDirAsRoot(cacheDir, newDocker(), Bootstrap.isInDocker());							
+						protected void delete(File cacheDir) {
+							deleteDir(cacheDir, newDocker(), Bootstrap.isInDocker());							
 						}
 						
 					};
@@ -433,8 +433,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				
 			}, jobContext.getResourceRequirements(), jobLogger);
 		} finally {
-			cleanDirAsRoot(hostBuildHome, newDocker(), Bootstrap.isInDocker());
-			FileUtils.deleteDir(hostBuildHome);
+			deleteDir(hostBuildHome, newDocker(), Bootstrap.isInDocker());
 		}
 	}
 
