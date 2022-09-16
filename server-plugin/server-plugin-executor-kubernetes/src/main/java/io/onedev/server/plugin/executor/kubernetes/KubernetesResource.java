@@ -68,6 +68,7 @@ public class KubernetesResource {
 			context.reportJobWorkspace(jobWorkspace);	
 		JobData jobData = new JobData(
 				context.getJobExecutor().getName(), 
+				context.getRefName(),
 				context.getCommitId().name(), 
 				context.getActions());
 		return SerializationUtils.serialize(jobData);

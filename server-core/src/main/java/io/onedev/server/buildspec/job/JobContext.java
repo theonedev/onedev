@@ -36,6 +36,8 @@ public abstract class JobContext {
 	
 	private final int memoryRequirement;
 	
+	private final String refName;
+	
 	private final ObjectId commitId;
 	
 	private final Collection<CacheSpec> cacheSpecs; 
@@ -52,8 +54,8 @@ public abstract class JobContext {
 	
 	public JobContext(JobExecutor jobExecutor, String projectPath, Long projectId, Long buildNumber, 
 			File projectGitDir, List<Action> actions, int cpuRequirement, int memoryRequirement, 
-			ObjectId commitId, Collection<CacheSpec> caches, int retried, List<Service> services, 
-			TaskLogger logger) {
+			String refName, ObjectId commitId, Collection<CacheSpec> caches, int retried, 
+			List<Service> services, TaskLogger logger) {
 		this.jobExecutor = jobExecutor;
 		this.projectPath = projectPath;
 		this.projectId = projectId;
@@ -62,6 +64,7 @@ public abstract class JobContext {
 		this.actions = actions;
 		this.cpuRequirement = cpuRequirement;
 		this.memoryRequirement = memoryRequirement;
+		this.refName = refName;
 		this.commitId = commitId;
 		this.cacheSpecs = caches;
 		this.retried = retried;
@@ -91,6 +94,10 @@ public abstract class JobContext {
 
 	public List<Action> getActions() {
 		return actions;
+	}
+
+	public String getRefName() {
+		return refName;
 	}
 
 	public ObjectId getCommitId() {

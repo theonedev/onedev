@@ -199,7 +199,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									int cloneDepth = checkoutFacade.getCloneDepth();
 									
 									cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
-											cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), 
+											cloneInfo.getCloneUrl(), jobContext.getRefName(), jobContext.getCommitId().name(), 
 											checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
 											cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 								} catch (Exception e) {

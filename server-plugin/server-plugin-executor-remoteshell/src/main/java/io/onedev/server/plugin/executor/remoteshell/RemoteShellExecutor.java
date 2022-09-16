@@ -75,8 +75,8 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				
 				List<String> trustCertContent = getTrustCertContent();
 				ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectPath(), 
-						jobContext.getProjectId(), jobContext.getCommitId().name(), jobContext.getBuildNumber(), 
-						jobContext.getActions(), trustCertContent);
+						jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(), 
+						jobContext.getBuildNumber(), jobContext.getActions(), trustCertContent);
 				
 				try {
 					WebsocketUtils.call(agentSession, jobData, 0);

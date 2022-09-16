@@ -88,9 +88,9 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				
 				List<String> trustCertContent = getTrustCertContent();
 				DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(), 
-						jobContext.getProjectId(), jobContext.getCommitId().name(), jobContext.getBuildNumber(), 
-						jobContext.getActions(), jobContext.getRetried(), services, registryLogins,
-						mountDockerSock, trustCertContent, getRunOptions());
+						jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(), 
+						jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(), 
+						services, registryLogins, mountDockerSock, trustCertContent, getRunOptions());
 				
 				try {
 					WebsocketUtils.call(agentSession, jobData, 0);

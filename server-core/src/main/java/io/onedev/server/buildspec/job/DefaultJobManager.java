@@ -450,6 +450,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private JobExecution execute(Build build) {
 		Long buildId = build.getId();
+		String refName = build.getRefName();
 		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 		Long buildNumber = build.getNumber();
 		String projectPath = build.getProject().getPath();
@@ -542,8 +543,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
 								try {
 									return new JobContext(executor, projectPath, projectId, buildNumber, projectGitDir, 
-											actions, job.getCpuRequirement(), job.getMemoryRequirement(), commitId, 
-											caches, retried.get(), services, jobLogger) {
+											actions, job.getCpuRequirement(), job.getMemoryRequirement(), refName, 
+											commitId, caches, retried.get(), services, jobLogger) {
 										
 										@Override
 										public void notifyJobRunning(Long agentId) {
