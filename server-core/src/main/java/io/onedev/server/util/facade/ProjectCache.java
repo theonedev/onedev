@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
@@ -57,19 +56,17 @@ public class ProjectCache extends HashMap<Long, ProjectFacade> {
 	
     @Nullable
     public Long findId(String path) {
-    	Long projectId = null;
-    	for (String name: Splitter.on("/").omitEmptyStrings().trimResults().split(path)) {
-    		projectId = findId(projectId, name);
-    		if (projectId == null)
-    			break;
+    	for (ProjectFacade project: values()) {
+    		if (project.getPath().equals(path))
+    			return project.getId();
     	}
-    	return projectId;
+    	return null;
     }
     
 	@Nullable
     public Long findId(@Nullable Long parentId, String name) {
 		for (ProjectFacade project: values()) {
-			if (project.getName().equalsIgnoreCase(name) && Objects.equals(parentId, project.getParentId())) 
+			if (project.getName().equals(name) && Objects.equals(parentId, project.getParentId())) 
 				return project.getId();
 		}
 		return null;

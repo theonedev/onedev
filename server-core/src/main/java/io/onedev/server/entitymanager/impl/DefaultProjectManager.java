@@ -41,6 +41,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
@@ -95,6 +96,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -411,7 +413,15 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	for (String name: names) { 
     		Project child;
     		if (project == null || !project.isNew()) {
-    			child = find(project, name);
+    			// Query database directly instead of calling findByName to fix issue 
+    			// #923 - Multi level projects after import and 1dev upgrade are mingled
+    			EntityCriteria<Project> criteria = EntityCriteria.of(Project.class);
+    			if (project != null)
+    				criteria.add(Restrictions.eq(Project.PROP_PARENT, project));
+    			else
+    				criteria.add(Restrictions.isNull(Project.PROP_PARENT));
+    			criteria.add(Restrictions.eq(Project.PROP_NAME, name));
+    			child = find(criteria);
     			if (child == null) {
 	    			if (project == null && !SecurityUtils.canCreateRootProjects())
 	    				throw new UnauthorizedException("Not authorized to create root project");
