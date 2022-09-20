@@ -119,7 +119,7 @@ public class RunContainerStep extends Step {
 	}
 
 	static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false);
+		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 	
 }

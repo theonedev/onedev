@@ -1,14 +1,10 @@
 package io.onedev.server.buildspec.step;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
@@ -82,10 +78,6 @@ public class CommandStep extends Step {
 		this.useTTY = useTTY;
 	}
 
-	static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false);
-	}
-	
 	@Override
 	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
 		return getInterpreter().getExecutable(isRunInContainer()?getImage():null, isUseTTY());

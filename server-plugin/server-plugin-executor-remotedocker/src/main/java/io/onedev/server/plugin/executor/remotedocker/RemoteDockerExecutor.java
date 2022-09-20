@@ -38,6 +38,10 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	
 	private boolean mountDockerSock;
 	
+	private transient volatile Session agentSession;
+	
+	private transient volatile String jobToken;
+	
 	@Editable(order=390, name="Agent Selector", placeholder="Any agent", 
 			description="Specify agents applicable for this executor")
 	@io.onedev.server.web.editable.annotation.AgentQuery(forExecutor=true)
@@ -92,11 +96,13 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 						jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(), 
 						services, registryLogins, mountDockerSock, trustCertContent, getRunOptions());
 				
+				RemoteDockerExecutor.this.jobToken = jobToken;
+				RemoteDockerExecutor.this.agentSession = agentSession;
 				try {
 					WebsocketUtils.call(agentSession, jobData, 0);
 				} catch (InterruptedException | TimeoutException e) {
 					new Message(MessageType.CANCEL_JOB, jobToken).sendBy(agentSession);
-				} 
+				}
 				
 			}
 			
@@ -141,6 +147,12 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		} finally {
 			logManager.deregisterLogger(jobToken);
 		}
+	}
+
+	@Override
+	public void resume() {
+		if (agentSession != null && jobToken != null) 
+			new Message(MessageType.RESUME_JOB, jobToken).sendBy(agentSession);
 	}
 
 	@Override

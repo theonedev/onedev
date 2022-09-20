@@ -991,7 +991,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public Collection<Build> query(Agent agent, Status status) {
 		EntityCriteria<Build> criteria = EntityCriteria.of(Build.class);
 		EntityCriteria<Build> agentCriteria = criteria.createCriteria(Build.PROP_AGENT, org.hibernate.sql.JoinType.INNER_JOIN);
-		if (status != null)
+		if (status != null) 
 			agentCriteria.add(Restrictions.eq(Build.PROP_STATUS, status));
 		return query(criteria);
 	}
@@ -1025,5 +1025,5 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		criteria.setCacheable(true);
 		return find(criteria);
 	}
-	
+
 }

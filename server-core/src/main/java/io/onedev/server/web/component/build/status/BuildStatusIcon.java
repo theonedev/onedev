@@ -96,9 +96,9 @@ public class BuildStatusIcon extends SpriteImage {
 				case RUNNING:
 					return "spin";
 				case TIMED_OUT:
-					return "clock";
+					return "timeout";
 				case WAITING:
-					return "pause-circle";
+					return "clock";
 				default:
 					throw new RuntimeException("Unexpected build status: " + status);
 			}

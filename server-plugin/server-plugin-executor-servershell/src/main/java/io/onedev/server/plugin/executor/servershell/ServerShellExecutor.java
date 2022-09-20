@@ -67,6 +67,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	
 	private static final Object cacheHomeCreationLock = new Object();
 	
+	private transient volatile File buildDir;
+	
 	private File getCacheHome(JobExecutor jobExecutor) {
 		File file = new File(Bootstrap.getSiteDir(), "cache/" + jobExecutor.getName());
 		if (!file.exists()) synchronized (cacheHomeCreationLock) {
@@ -91,7 +93,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 			@Override
 			public void run() {
-				File buildDir = FileUtils.createTempDir("onedev-build");
+				buildDir = FileUtils.createTempDir("onedev-build");
 				File workspaceDir = new File(buildDir, "workspace");
 				try {
 					jobLogger.log(String.format("Executing job with executor '%s'...", getName()));
@@ -150,6 +152,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											+ "remote docker executor, or kubernetes executor");
 								}
 								
+								commandFacade.generatePauseCommand(buildDir);
+								
 								File jobScriptFile = new File(buildDir, "job-commands" + commandFacade.getScriptExtension());
 								try {
 									FileUtils.writeLines(
@@ -163,6 +167,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								Commandline interpreter = commandFacade.getInterpreter();
 								Map<String, String> environments = new HashMap<>();
 								environments.put("GIT_HOME", userDir.getAbsolutePath());
+								environments.put("ONEDEV_WORKSPACE", workspaceDir.getAbsolutePath());
 								interpreter.workingDir(workspaceDir).environments(environments);
 								interpreter.addArgs(jobScriptFile.getAbsolutePath());
 								
@@ -239,11 +244,21 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					// Fix https://code.onedev.io/projects/160/issues/597
 					if (SystemUtils.IS_OS_WINDOWS && workspaceDir.exists())
 						FileUtils.deleteDir(workspaceDir);
-					FileUtils.deleteDir(buildDir);
+					synchronized (buildDir) {
+						FileUtils.deleteDir(buildDir);
+					}
 				}
 			}
 			
 		}, jobContext.getResourceRequirements(), jobLogger);
+	}
+
+	@Override
+	public void resume() {
+		if (buildDir != null) synchronized (buildDir) {
+			if (buildDir.exists())
+				FileUtils.touchFile(new File(buildDir, "continue"));
+		}
 	}
 
 	@Override

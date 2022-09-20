@@ -119,6 +119,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private boolean mountContainerSock;
 	
+	private transient volatile String namespace;
+	
+	private transient volatile OsInfo osInfo;
+	
 	@Editable(order=20, description="Optionally specify node selector of the job pods")
 	public List<NodeSelectorEntry> getNodeSelector() {
 		return nodeSelector;
@@ -203,6 +207,33 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		execute(jobToken, jobContext.getLogger(), jobContext);
 	}
 	
+	@Override
+	public void resume() {
+		if (namespace != null && osInfo != null) {
+			Commandline kubectl = newKubeCtl();
+			kubectl.addArgs("exec", "job", "--container", "sidecar", "--namespace", namespace, "--");
+			if (osInfo.isLinux())
+				kubectl.addArgs("touch", "/onedev-build/continue");
+			else
+				kubectl.addArgs("cmd", "-c", "copy", "NUL", "C:\\onedev-build\\continue");
+			kubectl.execute(new LineConsumer() {
+				
+				@Override
+				public void consume(String line) {
+					logger.debug(line);
+				}
+				
+			}, new LineConsumer() {
+	
+				@Override
+				public void consume(String line) {
+					logger.error("Kubernetes: " + line);
+				}
+				
+			}).checkReturnCode();		
+		}
+	}
+
 	@Override
 	public boolean isPlaceholderAllowed() {
 		return false;
@@ -696,7 +727,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 		}).checkReturnCode();
 		
-		String namespace ;
 		if (jobContext != null) {
 			namespace = getName() + "-" + jobContext.getProjectId() + "-" 
 					+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
@@ -723,7 +753,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				String trustCertsConfigMapName = createTrustCertsConfigMap(namespace, jobLogger);
 				
-				OsInfo osInfo = getBaselineOsInfo(getNodeSelector(), jobLogger);
+				osInfo = getBaselineOsInfo(getNodeSelector(), jobLogger);
 				
 				Map<String, Object> podSpec = new LinkedHashMap<>();
 

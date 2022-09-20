@@ -45,7 +45,7 @@ public class EnvVar implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false);
+		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 
 }

@@ -81,7 +81,7 @@ public interface BuildManager extends EntityManager<Build> {
 	Map<Project, Collection<String>> getAccessibleJobNames();
 	
 	void populateBuilds(Collection<PullRequest> requests);
-
+	
 	void delete(Collection<Build> builds);
 	
 	Collection<Build> query(Agent agent, @Nullable Build.Status status);

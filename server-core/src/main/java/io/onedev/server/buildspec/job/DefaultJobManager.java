@@ -69,8 +69,8 @@ import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
 import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
-import io.onedev.server.buildspec.job.retrycondition.RetryContext;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
+import io.onedev.server.buildspec.job.retrycondition.RetryContext;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.job.trigger.ScheduleTrigger;
 import io.onedev.server.buildspec.param.ParamUtils;
@@ -94,6 +94,7 @@ import io.onedev.server.event.build.BuildPending;
 import io.onedev.server.event.build.BuildRetrying;
 import io.onedev.server.event.build.BuildRunning;
 import io.onedev.server.event.build.BuildSubmitted;
+import io.onedev.server.event.build.BuildUpdated;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
@@ -928,6 +929,19 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 
+	@Transactional
+	public void resume(Build build) {
+		for (Map.Entry<String, JobContext> entry: jobContexts.entrySet()) {
+			JobContext jobContext = entry.getValue();
+			if (jobContext.getProjectId().equals(build.getProject().getId()) 
+					&& jobContext.getBuildNumber().equals(build.getNumber())) {
+				jobContext.getJobExecutor().resume();
+			}
+		}
+		build.setPaused(false);
+		listenerRegistry.post(new BuildUpdated(build));
+	}
+	
 	@Sessional
 	@Override
 	public void cancel(Build build) {
@@ -1120,7 +1134,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		boolean waitingForJobFinishLogged = false;
 		while (!jobExecutions.isEmpty() || thread != null) {
 			if (thread == null && !waitingForJobFinishLogged) {
-				logger.info("Waiting for running jobs to finish...");
+				logger.info("Waiting for unfnished jobs...");
 				waitingForJobFinishLogged = true;
 			}
 			try {
@@ -1130,7 +1144,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						@Override
 						public void run() {
 							for (Build build: buildManager.queryUnfinished()) {
-								if (build.getStatus() == Build.Status.RUNNING || build.getStatus() == Build.Status.PENDING) {
+								if (build.getStatus() == Build.Status.RUNNING 
+										|| build.getStatus() == Build.Status.PENDING) {
 									JobExecution execution = jobExecutions.get(build.getId());
 									if (execution != null) {
 										if (execution.isTimedout())

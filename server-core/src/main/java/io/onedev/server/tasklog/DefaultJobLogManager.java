@@ -162,8 +162,6 @@ public class DefaultJobLogManager implements JobLogManager {
 						styleBuilder = new StyleBuilder();
 					}
 					if (message.startsWith(LogInstruction.PREFIX)) {
-						doLog(message, styleBuilder);
-						
 						InstructionContext instructionContext = LogInstruction.parse(message);
 						String name = instructionContext.Identifier().getText();
 						
@@ -188,8 +186,7 @@ public class DefaultJobLogManager implements JobLogManager {
 									paramValues.add(LogInstruction.getValue(terminalNode));
 								params.put(paramName, paramValues);
 							}
-							doLog("Executing log instruction '" + name + "'...", new StyleBuilder());
-							doInSession(instruction, buildId, params);
+							doInSession(instruction, buildId, params, this);
 						} else {
 							doLog("Unsupported log instruction: " + name, new StyleBuilder());
 						}
@@ -205,8 +202,9 @@ public class DefaultJobLogManager implements JobLogManager {
 	}
 	
 	@Sessional
-	protected void doInSession(LogInstruction instruction, Long buildId, Map<String, List<String>> params) {
-		instruction.execute(buildManager.load(buildId), params);
+	protected void doInSession(LogInstruction instruction, Long buildId, 
+			Map<String, List<String>> params, TaskLogger logger) {
+		instruction.execute(buildManager.load(buildId), params, logger);
 	}
 
 	private String getLockKey(Long buildId) {

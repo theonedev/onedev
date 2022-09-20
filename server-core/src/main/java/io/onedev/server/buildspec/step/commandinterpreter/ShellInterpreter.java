@@ -12,7 +12,7 @@ import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(order=200, name="Linux Shell")
+@Editable(order=200, name="Custom Linux Shell")
 public class ShellInterpreter extends Interpreter {
 
 	private static final long serialVersionUID = 1L;

@@ -96,6 +96,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private boolean mountDockerSock;
 	
+	private transient volatile File hostBuildHome;
+	
 	private static transient volatile String hostInstallPath;
 
 	@Editable(order=400, description="Specify login information for docker registries if necessary")
@@ -165,7 +167,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					+ "OneDev running inside kubernetes cluster does not support server docker executor. "
 					+ "Please use kubernetes executor instead");
 		}
-		File hostBuildHome = FileUtils.createTempDir("onedev-build");
+		
+		hostBuildHome = FileUtils.createTempDir("onedev-build");
 		try {
 			TaskLogger jobLogger = jobContext.getLogger();
 			OneDev.getInstance(ResourceManager.class).run(new Runnable() {
@@ -433,7 +436,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				
 			}, jobContext.getResourceRequirements(), jobLogger);
 		} finally {
-			deleteDir(hostBuildHome, newDocker(), Bootstrap.isInDocker());
+			synchronized (hostBuildHome) {
+				deleteDir(hostBuildHome, newDocker(), Bootstrap.isInDocker());
+			}
+		}
+	}
+
+	@Override
+	public void resume() {
+		if (hostBuildHome != null) synchronized (hostBuildHome) {
+			if (hostBuildHome.exists()) 
+				FileUtils.touchFile(new File(hostBuildHome, "continue"));
 		}
 	}
 

@@ -88,6 +88,8 @@ public abstract class JobExecutor implements Serializable {
 	
 	public abstract void execute(String jobToken, JobContext context);
 	
+	public abstract void resume();
+	
 	public boolean isPlaceholderAllowed() {
 		return true;
 	}

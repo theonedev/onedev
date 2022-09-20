@@ -122,7 +122,7 @@ public class Import implements Serializable, Validatable {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false);
+		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 	
 	@SuppressWarnings("unused")

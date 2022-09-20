@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobVariable;
@@ -191,7 +192,7 @@ public class SuggestionUtils {
 	
 	public static List<InputSuggestion> suggestVariables(Project project, BuildSpec buildSpec, 
 			@Nullable List<ParamSpec> paramSpecs, String matchWith, boolean withBuildVersion, 
-			boolean withDynamicVariables) {
+			boolean withDynamicVariables, boolean withPauseCommand) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
@@ -232,6 +233,9 @@ public class SuggestionUtils {
 			if (!variables.containsKey(varName))
 				variables.put(varName, null);
 		}
+		
+		if (withPauseCommand)
+			variables.put(KubernetesHelper.PAUSE, "Pause execution of the script");
 		
 		for (Map.Entry<String, String> entry: variables.entrySet()) {
 			int index = entry.getKey().toLowerCase().indexOf(lowerCaseMatchWith);

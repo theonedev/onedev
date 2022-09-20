@@ -36,14 +36,6 @@ HasRunningBuilds
     : 'has' WS+ 'running' WS+ 'builds'
     ;
 
-HasRunningJobsOfProject
-    : 'has' WS+ 'running' WS+ 'jobs' WS+ 'of' WS+ 'project'
-    ;
-    
-HasRunningJobsOfBranch
-    : 'has' WS+ 'running' WS+ 'jobs' WS+ 'of' WS+ 'branch'
-    ;
-    
 HasAttribute
     : 'has' WS+ 'attribute'
     ;

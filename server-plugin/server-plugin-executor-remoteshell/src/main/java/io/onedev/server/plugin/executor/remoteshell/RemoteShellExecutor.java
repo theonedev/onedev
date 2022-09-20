@@ -39,6 +39,10 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	
 	private String agentQuery;
 	
+	private transient volatile Session agentSession;
+	
+	private transient volatile String jobToken;
+	
 	@Editable(order=390, name="Agent Selector", placeholder="Any agent", 
 			description="Specify agents applicable for this executor")
 	@io.onedev.server.web.editable.annotation.AgentQuery(forExecutor=true)
@@ -78,6 +82,8 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 						jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(), 
 						jobContext.getBuildNumber(), jobContext.getActions(), trustCertContent);
 				
+				RemoteShellExecutor.this.agentSession = agentSession;
+				RemoteShellExecutor.this.jobToken = jobData.getJobToken();
 				try {
 					WebsocketUtils.call(agentSession, jobData, 0);
 				} catch (InterruptedException | TimeoutException e) {
@@ -118,6 +124,12 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 		} finally {
 			logManager.deregisterLogger(jobToken);
 		}
+	}
+
+	@Override
+	public void resume() {
+		if (agentSession != null && jobToken != null) 
+			new Message(MessageType.RESUME_JOB, jobToken).sendBy(agentSession);
 	}
 
 }

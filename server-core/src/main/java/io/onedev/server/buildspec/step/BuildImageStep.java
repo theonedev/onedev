@@ -76,7 +76,7 @@ public class BuildImageStep extends Step {
 	}
 
 	static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, true, true);
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 	
 	@Override

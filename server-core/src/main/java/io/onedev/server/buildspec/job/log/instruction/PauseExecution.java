@@ -6,8 +6,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
-
 import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.event.build.BuildUpdated;
@@ -15,28 +13,24 @@ import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Transactional;
 
 @Singleton
-public class SetBuildVersion extends LogInstruction {
+public class PauseExecution extends LogInstruction {
 
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public SetBuildVersion(ListenerRegistry listenerRegistry) {
+	public PauseExecution(ListenerRegistry listenerRegistry) {
 		this.listenerRegistry = listenerRegistry;
 	}
 	
 	@Override
 	public String getName() {
-		return "SetBuildVersion";
+		return "PauseExecution";
 	}
 
 	@Transactional
 	@Override
 	public void execute(Build build, Map<String, List<String>> params, TaskLogger taskLogger) {
-		String version = params.values().iterator().next().iterator().next();
-		if (StringUtils.isNotBlank(version))
-			build.setVersion(version);
-		else
-			build.setVersion(null);
+		build.setPaused(true);
 		listenerRegistry.post(new BuildUpdated(build));
 	}
 

@@ -61,7 +61,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, true, true);
+		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 	
 	@Override

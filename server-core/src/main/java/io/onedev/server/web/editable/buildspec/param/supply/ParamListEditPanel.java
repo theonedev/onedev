@@ -310,7 +310,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 
 					@Override
 					protected List<InputSuggestion> suggestVariables(String matchWith) {
-						return BuildSpec.suggestVariables(matchWith, withBuildVersion, withDynamicVariables);
+						return BuildSpec.suggestVariables(matchWith, withBuildVersion, withDynamicVariables, false);
 					}
 					
 					@Override

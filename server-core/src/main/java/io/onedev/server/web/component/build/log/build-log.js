@@ -1,5 +1,5 @@
 onedev.server.buildLog = {
-    appendLogEntries: function(containerId, logEntries, maxNumOfEntries) {
+    appendLogEntries: function(containerId, logEntries) {
         var $buildLog = $("#" + containerId + ">.build-log");
 
         for (var i=0; i<logEntries.length; i++)
@@ -7,6 +7,7 @@ onedev.server.buildLog = {
         
         var $entries = $buildLog.children(".log-entry");
         
+		var maxNumOfEntries = $buildLog.data("maxNumOfEntries");
         var numOfEntriesToRemove = $entries.length - maxNumOfEntries;
         if (numOfEntriesToRemove > 0) {
             $entries.slice(0, numOfEntriesToRemove).remove();
@@ -21,7 +22,27 @@ onedev.server.buildLog = {
         }
 		$buildLog.trigger("resized");
         $buildLog.scrollTop($buildLog[0].scrollHeight);
-    }
-
+    }, 
+	buildUpdated: function(containerId, paused) {
+		var $buildLog = $("#" + containerId + ">.build-log");
+		$buildLog.find(".script-paused").remove();
+		if (paused) {
+			var $paused = $("<div class='script-paused font-weight-bolder border rounded px-2 py-1 mt-2 border-warning text-warning'>Script execution paused</div>");		
+			$buildLog.append($paused);
+			var resumeCallback = $buildLog.data("resumeCallback");
+			if (resumeCallback) {
+				var $resumeLink = $("<a class='ml-2'>Resume</a>");
+				$paused.append($resumeLink);
+				$resumeLink.click(resumeCallback);
+			}
+		}
+	},
+	onDomReady: function(containerId, logEntries, maxNumOfEntries, buildPaused, resumeCallback) {
+        var $buildLog = $("#" + containerId + ">.build-log");
+		$buildLog.data("resumeCallback", resumeCallback);		
+		$buildLog.data("maxNumOfEntries", maxNumOfEntries);
+		onedev.server.buildLog.appendLogEntries(containerId, logEntries);
+		onedev.server.buildLog.buildUpdated(containerId, buildPaused);
+	}
 }
 

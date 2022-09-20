@@ -119,7 +119,7 @@ public class ProjectDependency implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false);
+		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 	
 	@Editable(order=500, placeholder="Access Anonymously", description="Specify a secret to be used as "

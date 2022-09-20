@@ -56,7 +56,7 @@ public abstract class SyncRepository extends ServerSideStep implements Validatab
 	}
 
 	static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith, false, false);
+		return BuildSpec.suggestVariables(matchWith, false, false, false);
 	}
 	
 	@Editable(order=300, description="Optionally specify user name to access above repository")

@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser.InstructionContext;
 import io.onedev.server.model.Build;
 
@@ -25,7 +26,7 @@ public abstract class LogInstruction {
 	
 	public abstract String getName();
 	
-	public abstract void execute(Build build, Map<String, List<String>> params);
+	public abstract void execute(Build build, Map<String, List<String>> params, TaskLogger logger);
 	
 	public static String getValue(TerminalNode valueNode) {
 		return StringUtils.unescape(FenceAware.unfence(valueNode.getText()));

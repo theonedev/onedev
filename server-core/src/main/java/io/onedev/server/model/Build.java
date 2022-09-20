@@ -310,13 +310,15 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 	@Column(nullable=false)
 	private Status status; 
 	
+	private boolean paused;
+	
 	@Column(nullable=false)
 	private Date submitDate;
 	
 	private Date pendingDate;
 	
 	private Date runningDate;
-
+	
 	private Date finishDate;
 	
 	private Date retryDate;
@@ -486,8 +488,17 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public void setStatus(Status status) {
 		this.status = status;
+		paused = false;
 	}
 	
+	public boolean isPaused() {
+		return paused;
+	}
+
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+	}
+
 	public String getPipeline() {
 		return pipeline;
 	}

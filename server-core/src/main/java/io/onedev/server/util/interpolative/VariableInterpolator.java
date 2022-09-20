@@ -1,6 +1,7 @@
 package io.onedev.server.util.interpolative;
 
 import static io.onedev.k8shelper.KubernetesHelper.ATTRIBUTES;
+import static io.onedev.k8shelper.KubernetesHelper.PAUSE;
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_PREFIX;
 import static io.onedev.k8shelper.KubernetesHelper.PLACEHOLDER_SUFFIX;
 import static io.onedev.k8shelper.KubernetesHelper.WORKSPACE;
@@ -120,6 +121,8 @@ public class VariableInterpolator {
 					return PLACEHOLDER_PREFIX + WORKSPACE + "/" + t.substring(PREFIX_FILE.length()) + PLACEHOLDER_SUFFIX;
 				} else if (t.startsWith(PREFIX_ATTRIBUTE)) {
 					return PLACEHOLDER_PREFIX + ATTRIBUTES + "/" + t.substring(PREFIX_ATTRIBUTE.length()) + PLACEHOLDER_SUFFIX;
+				} else if (t.equals(PAUSE)) {
+					return PLACEHOLDER_PREFIX + PAUSE + PLACEHOLDER_SUFFIX;
 				} else {
 					throw new ExplicitException("Unrecognized interpolation variable: " + t);
 				}

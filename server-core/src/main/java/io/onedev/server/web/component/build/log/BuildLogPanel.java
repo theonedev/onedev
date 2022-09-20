@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -16,12 +17,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.buildspec.job.log.Message;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.tasklog.LogSnippet;
 import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 
 @SuppressWarnings("serial")
@@ -30,6 +35,8 @@ public class BuildLogPanel extends GenericPanel<Build> {
 	private static final int MAX_LOG_ENTRIES = 1000;
 	
 	private int nextOffset;
+	
+	private AbstractPostAjaxBehavior resumeBehavior;
 	
 	public BuildLogPanel(String id, IModel<Build> model) {
 		super(id, model);
@@ -47,8 +54,8 @@ public class BuildLogPanel extends GenericPanel<Build> {
 				if (!logEntries.isEmpty()) {
 					nextOffset += logEntries.size();
 					
-					String script = String.format("onedev.server.buildLog.appendLogEntries('%s', %s, %d);", 
-							getMarkupId(), asJSON(logEntries), MAX_LOG_ENTRIES);
+					String script = String.format("onedev.server.buildLog.appendLogEntries('%s', %s);", 
+							getMarkupId(), asJSON(logEntries));
 					handler.appendJavaScript(script);
 				}
 			}
@@ -64,6 +71,34 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			}
 			
 		});
+		
+		add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.appendJavaScript(String.format(
+						"onedev.server.buildLog.buildUpdated('%s', %b)",
+						getMarkupId(), getBuild().isPaused()));
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(Build.getWebSocketObservable(getBuild().getId()));
+			}
+			
+		});
+		
+		if (SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName())) {
+			resumeBehavior = new AbstractPostAjaxBehavior() {
+				
+				@Override
+				protected void respond(AjaxRequestTarget target) {
+					OneDev.getInstance(JobManager.class).resume(getBuild());
+				}
+				
+			};
+			add(resumeBehavior);
+		}
 		
 		setOutputMarkupId(true);
 	}
@@ -98,10 +133,16 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		
 		nextOffset = snippet.offset + snippet.entries.size();
 		
-		String script = String.format("onedev.server.buildLog.appendLogEntries('%s', %s, %d);", 
-				getMarkupId(), asJSON(snippet.entries), MAX_LOG_ENTRIES);
-		
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		String resumeCallback;
+		if (resumeBehavior != null)
+			resumeCallback = resumeBehavior.getCallbackFunction().toString();
+		else
+			resumeCallback = "undefined";
+		response.render(OnDomReadyHeaderItem.forScript(String.format(
+				"onedev.server.buildLog.onDomReady('%s', %s, %d, %b, %s);", 
+				getMarkupId(), asJSON(snippet.entries), MAX_LOG_ENTRIES, 
+				getBuild().getStatus() == Status.RUNNING && getBuild().isPaused(), 
+				resumeCallback)));
 	}
 
 	private Build getBuild() {

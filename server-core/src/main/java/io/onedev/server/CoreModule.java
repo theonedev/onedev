@@ -556,6 +556,9 @@ public class CoreModule extends AbstractPluginModule {
 
 	    });
 	    
+	    contributeFromPackage(LogInstruction.class, LogInstruction.class);
+	    
+	    
 		contribute(CodeProblemContribution.class, new CodeProblemContribution() {
 			
 			@Override
@@ -785,8 +788,6 @@ public class CoreModule extends AbstractPluginModule {
 			}
 	    	
 	    }, sessionInterceptor);
-	    
-	    contributeFromPackage(LogInstruction.class, LogInstruction.class);
 	    
 	    contribute(PersistListener.class, new PersistListener() {
 			

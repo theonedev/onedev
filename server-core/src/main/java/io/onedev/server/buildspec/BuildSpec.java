@@ -555,14 +555,14 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 	
 	public static List<InputSuggestion> suggestVariables(String matchWith, 
-			boolean withBuildVersion, boolean withFiles) {
+			boolean withBuildVersion, boolean withDynamicVariables, boolean withPauseCommand) {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		BuildSpec buildSpec = get();
 		if (buildSpec != null) {
 			ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
 			suggestions.addAll(SuggestionUtils.suggestVariables(
 					page.getProject(), buildSpec, ParamSpec.list(), 
-					matchWith, withBuildVersion, withFiles));
+					matchWith, withBuildVersion, withDynamicVariables, withPauseCommand));
 		}
 		return suggestions;
 	}

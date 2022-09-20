@@ -1,7 +1,7 @@
 grammar LogInstruction;
 
 instruction
-    : PREFIX '[' Identifier param+ ']' EOF
+    : PREFIX '[' Identifier param* ']' EOF
     ;
 
 param

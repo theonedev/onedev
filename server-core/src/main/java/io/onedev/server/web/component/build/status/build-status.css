@@ -4,7 +4,7 @@
 .build-status-failed, .build-status-in_error, .build-status-cancelled, .build-status-timed_out {
 	color: var(--danger) !important;
 }
-.build-status-running, .build-status-waiting, .build-status-pending {
+.build-status-running, .build-status-paused, .build-status-waiting, .build-status-pending {
 	color: var(--warning) !important;
 }
 .build-status-none {
