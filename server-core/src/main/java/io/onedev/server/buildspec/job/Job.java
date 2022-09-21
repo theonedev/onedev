@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.Size;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.wicket.Component;
@@ -176,7 +175,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 	}
 	
 	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>")
-	@Size(min=1, max=1000, message="At least one step needs to be configured")
 	public List<Step> getSteps() {
 		return steps;
 	}

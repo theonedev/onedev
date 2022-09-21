@@ -22,9 +22,20 @@
 	vertical-align: top;
 	font-weight: 600;
 }
+.issue-side>.fields>.body>table>tbody>tr>td.name>span {
+	max-width: 120px;
+	display: inline-block;
+	word-break: break-all;
+}
 .issue-side>.fields>.body>table>tbody>tr>td.values {
 	padding-bottom: 0.6rem;
 	vertical-align: top;
+}
+.issue-side .field-values .value>span {
+	white-space: normal !important;
+	display: inline-block;
+	word-break: break-all;
+	max-width: 150px;
 }
 .issue-side>.fields>.body>table>tbody>tr:last-child>td {
 	padding-bottom: 0;

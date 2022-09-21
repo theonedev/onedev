@@ -28,6 +28,10 @@
     display: table-cell;
 	padding: 0 0 1.5rem 1rem;
 }
+.build-side>.params.properties>div>div.name,
+.build-side>.params.properties>div>div.value {
+	max-width: 150px;
+}
 .build-side>.properties>div:last-child>div {
 	padding-bottom: 0;
 }

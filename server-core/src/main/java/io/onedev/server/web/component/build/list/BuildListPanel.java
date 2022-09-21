@@ -748,7 +748,6 @@ public abstract class BuildListPanel extends Panel {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						modal.close();
 						if (getProject() != null) {
 							getProject().getBuildSetting().setListParams(listParams);
 							OneDev.getInstance(ProjectManager.class).save(getProject());
@@ -756,7 +755,7 @@ public abstract class BuildListPanel extends Panel {
 							getGlobalBuildSetting().setListParams(listParams);
 							OneDev.getInstance(SettingManager.class).saveBuildSetting(getGlobalBuildSetting());
 						}
-						target.add(body);
+						setResponsePage(getPage().getClass(), getPage().getPageParameters());
 					}
 					
 				});
@@ -1093,7 +1092,7 @@ public abstract class BuildListPanel extends Panel {
 
 				@Override
 				public String getCssClass() {
-					return "param d-none d-xl-table-cell";
+					return "param d-none d-xl-table-cell text-break";
 				}
 
 				@Override
