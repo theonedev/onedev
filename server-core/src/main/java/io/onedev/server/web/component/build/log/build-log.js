@@ -35,6 +35,7 @@ onedev.server.buildLog = {
 				$paused.append($resumeLink);
 				$resumeLink.click(resumeCallback);
 			}
+			$paused[0].scrollIntoViewIfNeeded();
 		}
 	},
 	onDomReady: function(containerId, logEntries, maxNumOfEntries, buildPaused, resumeCallback) {
