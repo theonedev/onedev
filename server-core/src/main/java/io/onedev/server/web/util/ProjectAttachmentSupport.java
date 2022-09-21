@@ -10,14 +10,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.resource.AttachmentResource;
@@ -85,7 +83,6 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 
 	@Override
 	public String saveAttachment(String suggestedAttachmentName, InputStream attachmentStream) {
-		Preconditions.checkState(SecurityUtils.canReadCode(getProject()));
 		return getProject().saveAttachment(attachmentGroup, suggestedAttachmentName, attachmentStream);
 	}
 
