@@ -68,6 +68,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.web.websocket.WebSocketMessages;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 /**
@@ -271,7 +272,7 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 			catch (Exception x)
 			{
 				try {
-					connection.sendMessage(WebSocketManager.ERROR_MESSAGE);
+					connection.sendMessage(WebSocketMessages.ERROR_MESSAGE);
 				} catch (IOException e1) {
 				}
 				LOG.error("An error occurred during processing of a WebSocket message", x);

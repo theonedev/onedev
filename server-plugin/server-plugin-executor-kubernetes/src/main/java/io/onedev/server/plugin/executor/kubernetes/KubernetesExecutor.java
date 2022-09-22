@@ -1486,5 +1486,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 		
 	}
+
+	@Override
+	public Commandline openShell() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

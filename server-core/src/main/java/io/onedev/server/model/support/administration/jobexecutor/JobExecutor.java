@@ -19,6 +19,7 @@ import com.google.common.base.Throwables;
 
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.util.ExceptionUtils;
@@ -41,6 +42,8 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String jobAuthorization;
 	
+	private boolean shellAccess;
+	
 	private int cacheTTL = 7;
 	
 	public boolean isEnabled() {
@@ -60,6 +63,18 @@ public abstract class JobExecutor implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Editable(order=20, description="If enabled, for jobs executing with this executor, project managers can open web shell to "
+			+ "debug builds. <b class='text-danger'>WARNING</b>: Users with shell access can take control of the node used "
+			+ "by the executor. You should configure job authorization below to make sure the executor can only be used by "
+			+ "trusted jobs if this option is enabled")
+	public boolean isShellAccess() {
+		return shellAccess;
+	}
+
+	public void setShellAccess(boolean shellAccess) {
+		this.shellAccess = shellAccess;
 	}
 
 	@Editable(order=10000, placeholder="Can be used by any jobs", 
@@ -89,6 +104,8 @@ public abstract class JobExecutor implements Serializable {
 	public abstract void execute(String jobToken, JobContext context);
 	
 	public abstract void resume();
+	
+	public abstract Commandline openShell();
 	
 	public boolean isPlaceholderAllowed() {
 		return true;

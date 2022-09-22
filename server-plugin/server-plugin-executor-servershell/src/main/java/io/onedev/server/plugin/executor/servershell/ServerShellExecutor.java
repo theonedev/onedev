@@ -296,4 +296,10 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 		
 	}
 
+	@Override
+	public Commandline openShell() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -28,6 +28,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
@@ -54,6 +55,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.commons.utils.command.Commandline;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
@@ -931,15 +933,23 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Transactional
 	public void resume(Build build) {
+		JobExecutor jobExecutor = getJobExecutor(build);
+		if (jobExecutor != null)
+			jobExecutor.resume();
+		build.setPaused(false);
+		listenerRegistry.post(new BuildUpdated(build));
+	}
+
+	@Nullable
+	private JobExecutor getJobExecutor(Build build) {
 		for (Map.Entry<String, JobContext> entry: jobContexts.entrySet()) {
 			JobContext jobContext = entry.getValue();
 			if (jobContext.getProjectId().equals(build.getProject().getId()) 
 					&& jobContext.getBuildNumber().equals(build.getNumber())) {
-				jobContext.getJobExecutor().resume();
+				return jobContext.getJobExecutor();
 			}
 		}
-		build.setPaused(false);
-		listenerRegistry.post(new BuildUpdated(build));
+		return null;
 	}
 	
 	@Sessional
@@ -1346,6 +1356,19 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
 			File inputDir, Map<String, String> placeholderValues, TaskLogger logger) {
 		return getJobContext(jobToken, true).runServerStep(stepPosition, inputDir, placeholderValues, logger);
+	}
+
+	@Override
+	public Commandline openShell(Build build) {
+		JobExecutor jobExecutor = getJobExecutor(build);
+		if (jobExecutor != null) {
+			if (jobExecutor.isShellAccess()) 
+				return jobExecutor.openShell();
+			else 
+				throw new ExplicitException("Not authorized for shell access of current build");
+		} else {
+			throw new ExplicitException("Can only access shell of running build");
+		}
 	}
 	
 }

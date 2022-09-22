@@ -6,12 +6,6 @@ import io.onedev.server.web.page.base.BasePage;
 
 public interface WebSocketManager {
 	
-	static final String ERROR_MESSAGE = "ErrorMessage";
-	
-	static final String OBSERVABLE_CHANGED = "ObservableChanged";
-	
-	static final String KEEP_ALIVE = "KeepAlive";
-	
 	void observe(BasePage page);
 	
 	void onDestroySession(String sessionId);

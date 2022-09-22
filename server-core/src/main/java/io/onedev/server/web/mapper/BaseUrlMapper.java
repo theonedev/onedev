@@ -137,6 +137,7 @@ import io.onedev.server.web.page.simple.security.OAuthCallbackPage;
 import io.onedev.server.web.page.simple.security.PasswordResetPage;
 import io.onedev.server.web.page.simple.security.SignUpPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
+import io.onedev.server.web.page.terminal.TerminalPage;
 import io.onedev.server.web.resource.AgentLibResourceReference;
 import io.onedev.server.web.resource.AgentLogResourceReference;
 import io.onedev.server.web.resource.AgentResourceReference;
@@ -160,6 +161,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	public BaseUrlMapper(WebApplication app) {
 		add(new BasePageMapper("init", ServerInitPage.class));
 		add(new BasePageMapper("loading", BrowserInfoPage.class));
+		add(new BasePageMapper("terminal/${build}", TerminalPage.class));
 		addProjectPages();
 		add(new BasePageMapper("issues", IssueListPage.class));
 		add(new BasePageMapper("pull-requests", PullRequestListPage.class));
