@@ -1,6 +1,6 @@
 package io.onedev.server.buildspec.job.trigger;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.SubmitReason;

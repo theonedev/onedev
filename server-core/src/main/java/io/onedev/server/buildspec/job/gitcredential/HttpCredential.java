@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidatorContext;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.HttpCloneInfo;

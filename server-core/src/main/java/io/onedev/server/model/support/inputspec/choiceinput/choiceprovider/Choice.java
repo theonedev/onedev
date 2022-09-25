@@ -3,7 +3,7 @@ package io.onedev.server.model.support.inputspec.choiceinput.choiceprovider;
 import java.io.Serializable;
 import java.util.List;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.web.editable.annotation.Color;

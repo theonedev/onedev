@@ -2,7 +2,7 @@ package io.onedev.server.plugin.imports.gitea;
 
 import java.io.Serializable;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.validation.annotation.ProjectPath;
 import io.onedev.server.util.validation.annotation.UrlPath;

@@ -1,7 +1,7 @@
 package io.onedev.server.model.support.administration.mailsetting;
 
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.mail.BasicAuthPassword;
 import io.onedev.server.mail.MailCheckSetting;

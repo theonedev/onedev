@@ -10,7 +10,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.validation.Validatable;

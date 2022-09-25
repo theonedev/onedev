@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.validation.Validator;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
 

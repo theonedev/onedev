@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.job;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -93,8 +94,10 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 			if (refNames.size() > 1 || !job.getParamSpecs().isEmpty()) {
 				Serializable paramBean;
 				try {
-					paramBean = ParamUtils.defineBeanClass(job.getParamSpecs()).newInstance();
-				} catch (InstantiationException | IllegalAccessException e) {
+					paramBean = ParamUtils.defineBeanClass(job.getParamSpecs())
+							.getDeclaredConstructor().newInstance();
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 					throw new RuntimeException(e);
 				}
 				

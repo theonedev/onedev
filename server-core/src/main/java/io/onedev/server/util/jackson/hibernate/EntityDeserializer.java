@@ -1,6 +1,7 @@
 package io.onedev.server.util.jackson.hibernate;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import org.hibernate.proxy.HibernateProxy;
 
@@ -84,8 +85,9 @@ public class EntityDeserializer extends BeanDeserializer {
         // reach end of object
         AbstractEntity entity;
     	try {
-			entity = entityClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			entity = entityClass.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
         for (PropertyValue pv = buffer; pv != null; pv = pv.next)

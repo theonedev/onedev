@@ -12,7 +12,7 @@ import javax.persistence.OneToMany;
 import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.ProjectPermission;

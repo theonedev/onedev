@@ -27,7 +27,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;

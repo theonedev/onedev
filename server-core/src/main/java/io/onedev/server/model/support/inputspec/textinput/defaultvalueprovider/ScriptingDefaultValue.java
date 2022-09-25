@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.inputspec.textinput.defaultvalueprovider;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;

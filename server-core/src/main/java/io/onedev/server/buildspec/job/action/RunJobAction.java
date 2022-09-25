@@ -8,7 +8,7 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 
 import org.apache.wicket.Component;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;

@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.validation.Valid;
 
 import org.apache.wicket.MarkupContainer;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;

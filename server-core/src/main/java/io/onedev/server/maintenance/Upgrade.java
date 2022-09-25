@@ -572,6 +572,8 @@ public class Upgrade extends DefaultPersistManager {
 			wrapperConf = StringUtils.replace(wrapperConf, "io.onedev.commons.launcher.bootstrap.Bootstrap", 
 					"io.onedev.commons.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "wrapper.pidfile=../status/onedev.pid", "");
+			wrapperConf = StringUtils.replace(wrapperConf, "-XX:+IgnoreUnrecognizedVMOptions", 
+					"--add-opens=java.base/sun.nio.ch=ALL-UNNAMED");
 			
 			if (!wrapperConf.contains("wrapper.disable_console_input")) 
 				wrapperConf += "\r\nwrapper.disable_console_input=TRUE";

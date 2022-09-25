@@ -70,7 +70,7 @@ public class AvatarGenerator {
 			ig2.setColor(background);
 			ig2.fillRect(0, 0, width, height);
 
-			int fontSize = new Double(height * 0.5d).intValue();
+			int fontSize = Double.valueOf(height * 0.5d).intValue();
 			Font font = new Font(fontFamily, Font.PLAIN, fontSize);
 			Map<TextAttribute, Object> map = new Hashtable<TextAttribute, Object>();
 			map.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);

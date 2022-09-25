@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.project.tags;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.web.component.createtag.TagBean;
 import io.onedev.server.web.editable.annotation.Editable;

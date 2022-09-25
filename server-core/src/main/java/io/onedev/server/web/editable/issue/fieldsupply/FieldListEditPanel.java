@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.issue.fieldsupply;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -91,8 +92,9 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 		if (defaultFieldBean == null) {
 			Class<?> fieldBeanClass = FieldUtils.getFieldBeanClass();
 			try {
-				defaultFieldBean = (Serializable) fieldBeanClass.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
+				defaultFieldBean = (Serializable) fieldBeanClass.getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -232,8 +234,9 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 			Serializable fieldBean;
 			try {
-				fieldBean = getDefaultFieldBean().getClass().newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
+				fieldBean = getDefaultFieldBean().getClass().getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 			

@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.buildspec.step;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -76,8 +77,9 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 						
 						Step step;
 						try {
-							step = type.newInstance();
-						} catch (InstantiationException | IllegalAccessException e) {
+							step = type.getDeclaredConstructor().newInstance();
+						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+								| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 							throw new RuntimeException(e);
 						}
 						

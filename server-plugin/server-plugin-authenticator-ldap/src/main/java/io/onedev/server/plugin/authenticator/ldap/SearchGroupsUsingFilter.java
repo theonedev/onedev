@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
 

@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import javax.validation.Valid;
 
 import org.eclipse.jgit.lib.ObjectId;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;

@@ -1,3 +1,12 @@
+# 7.7.0
+
+OneDev server and agent now requires Java 11 or higher. Follow below steps to upgrade agent manually:
+
+1. If agent is running as bare metal mode with Java 8, re-download agent package from server and run it 
+with Java 11 or higher following the instructions
+1. If agent is running as bare metal mode with Java 11 or higher, it will be updated automatically
+1. If agent is running in container mode, re-pull the image and start the container
+
 # 7.4.0
 
 ### RESTful api

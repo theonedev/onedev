@@ -147,7 +147,7 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 		
 		for (Object[] fields: dao.getSession().createQuery(criteriaQuery).list()) {
 			try {
-				T metric = metricClass.newInstance();
+				T metric = metricClass.getDeclaredConstructor().newInstance();
 				int index = 0;
 				for (Method setter: setters) {
 					double value = (double)fields[index++];

@@ -3,7 +3,7 @@ package io.onedev.server.plugin.imports.bitbucketcloud;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.BeanEditor;

@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.issue.list;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -211,8 +212,9 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			customFieldsBean = issue.getFieldBean(fieldBeanClass, false);
 		} else {
 			try {
-				customFieldsBean = fieldBeanClass.newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
+				customFieldsBean = fieldBeanClass.getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 			FieldUtils.clearFields(customFieldsBean);

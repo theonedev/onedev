@@ -4,6 +4,7 @@ import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.
 import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1083,8 +1084,9 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					super.onSubmit(target, form);
 					T newElement;
 					try {
-						newElement = elementClass.newInstance();
-					} catch (InstantiationException | IllegalAccessException e) {
+						newElement = elementClass.getDeclaredConstructor().newInstance();
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						throw new RuntimeException(e);
 					}
 					

@@ -80,7 +80,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 		Class<? extends SearchOption> activeTab = WebSession.get().getMetaData(ACTIVE_TAB);
 		if (activeTab != null) {
 			try {
-				option = activeTab.newInstance();
+				option = activeTab.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
