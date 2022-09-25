@@ -2,7 +2,7 @@ package io.onedev.server.util.channelnotification;
 
 import java.io.Serializable;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;

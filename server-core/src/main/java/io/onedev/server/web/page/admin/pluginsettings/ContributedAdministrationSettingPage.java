@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.admin.pluginsettings;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.annotation.Nullable;
 import javax.validation.Validator;
@@ -104,8 +105,9 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 					beanEditor.setVisible(object);
 				} else {
 					try {
-						form.replace(newBeanEditor(settingClass.newInstance()));
-					} catch (InstantiationException | IllegalAccessException e) {
+						form.replace(newBeanEditor(settingClass.getDeclaredConstructor().newInstance()));
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						throw new RuntimeException(e);
 					}
 				}
@@ -117,8 +119,11 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				try {
-					setVisible(!OneDev.getInstance(Validator.class).validate(settingClass.newInstance()).isEmpty());
-				} catch (InstantiationException | IllegalAccessException e) {
+					setVisible(!OneDev.getInstance(Validator.class)
+							.validate(settingClass.getDeclaredConstructor().newInstance())
+							.isEmpty());
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 					throw new RuntimeException(e);
 				}
 			}

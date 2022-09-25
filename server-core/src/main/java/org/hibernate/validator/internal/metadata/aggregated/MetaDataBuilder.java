@@ -6,23 +6,17 @@
  */
 package org.hibernate.validator.internal.metadata.aggregated;
 
-import static org.hibernate.validator.internal.util.CollectionHelper.newHashMap;
 import static org.hibernate.validator.internal.util.CollectionHelper.newHashSet;
 
 import java.lang.annotation.Annotation;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import org.hibernate.validator.internal.engine.valuehandling.UnwrapMode;
-import org.hibernate.validator.internal.metadata.core.ConstraintHelper;
+import org.hibernate.validator.internal.engine.ConstraintCreationContext;
 import org.hibernate.validator.internal.metadata.core.ConstraintOrigin;
 import org.hibernate.validator.internal.metadata.core.MetaConstraint;
+import org.hibernate.validator.internal.metadata.core.MetaConstraints;
 import org.hibernate.validator.internal.metadata.descriptor.ConstraintDescriptorImpl;
 import org.hibernate.validator.internal.metadata.raw.ConstrainedElement;
-import org.hibernate.validator.internal.util.CollectionHelper;
-import org.hibernate.validator.internal.util.logging.Log;
-import org.hibernate.validator.internal.util.logging.LoggerFactory;
 
 /**
  * Builds {@link ConstraintMetaData} instances for the
@@ -33,19 +27,16 @@ import org.hibernate.validator.internal.util.logging.LoggerFactory;
  */
 public abstract class MetaDataBuilder {
 
-	private static final Log log = LoggerFactory.make();
-
-	protected final ConstraintHelper constraintHelper;
+	protected final ConstraintCreationContext constraintCreationContext;
 
 	private final Class<?> beanClass;
-	private final Set<MetaConstraint<?>> constraints = newHashSet();
-	private final Map<Class<?>, Class<?>> groupConversions = newHashMap();
+	private final Set<MetaConstraint<?>> directConstraints = newHashSet();
+	private final Set<MetaConstraint<?>> containerElementsConstraints = newHashSet();
 	private boolean isCascading = false;
-	private UnwrapMode unwrapMode = UnwrapMode.AUTOMATIC;
 
-	protected MetaDataBuilder(Class<?> beanClass, ConstraintHelper constraintHelper) {
+	protected MetaDataBuilder(Class<?> beanClass, ConstraintCreationContext constraintCreationContext) {
 		this.beanClass = beanClass;
-		this.constraintHelper = constraintHelper;
+		this.constraintCreationContext = constraintCreationContext;
 	}
 
 	/**
@@ -55,8 +46,8 @@ public abstract class MetaDataBuilder {
 	 *
 	 * @param constrainedElement The element to check.
 	 *
-	 * @return <code>true</code> if the given element can be added to this
-	 *         builder, <code>false</code> otherwise.
+	 * @return {@code true} if the given element can be added to this
+	 *         builder, {@code false} otherwise.
 	 */
 	public abstract boolean accepts(ConstrainedElement constrainedElement);
 
@@ -71,19 +62,16 @@ public abstract class MetaDataBuilder {
 		/*
 		 * Make sure child annotation can override parent annotation with same type
 		 */
-		for (MetaConstraint<?> constraint: constrainedElement.getConstraints()) {
-			if (!constraints.stream()
+		for (MetaConstraint<?> constraint: adaptConstraints(constrainedElement, constrainedElement.getConstraints())) {
+			if (!directConstraints.stream()
 					.filter(it->it.getDescriptor().getAnnotationType() == constraint.getDescriptor().getAnnotationType())
 					.findAny().isPresent()) {
-				constraints.add(constraint);
+				directConstraints.add(constraint);
 			}
 		}
-//		constraints.addAll( constrainedElement.getConstraints() );
-		
-		isCascading = isCascading || constrainedElement.isCascading();
-		unwrapMode = constrainedElement.unwrapMode();
-
-		addGroupConversions( constrainedElement.getGroupConversions() );
+//		directConstraints.addAll( adaptConstraints( constrainedElement, constrainedElement.getConstraints() ) );
+		containerElementsConstraints.addAll( adaptConstraints( constrainedElement, constrainedElement.getTypeArgumentConstraints() ) );
+		isCascading = isCascading || constrainedElement.getCascadingMetaDataBuilder().isMarkedForCascadingOnAnnotatedObjectOrContainerElements();
 	}
 
 	/**
@@ -95,29 +83,12 @@ public abstract class MetaDataBuilder {
 	 */
 	public abstract ConstraintMetaData build();
 
-	private void addGroupConversions(Map<Class<?>, Class<?>> groupConversions) {
-		for ( Entry<Class<?>, Class<?>> oneConversion : groupConversions.entrySet() ) {
-			if ( this.groupConversions.containsKey( oneConversion.getKey() ) ) {
-				throw log.getMultipleGroupConversionsForSameSourceException(
-						oneConversion.getKey(),
-						CollectionHelper.<Class<?>>asSet(
-								groupConversions.get( oneConversion.getKey() ),
-								oneConversion.getValue()
-						)
-				);
-			}
-			else {
-				this.groupConversions.put( oneConversion.getKey(), oneConversion.getValue() );
-			}
-		}
+	protected Set<MetaConstraint<?>> getDirectConstraints() {
+		return directConstraints;
 	}
 
-	protected Map<Class<?>, Class<?>> getGroupConversions() {
-		return groupConversions;
-	}
-
-	protected Set<MetaConstraint<?>> getConstraints() {
-		return constraints;
+	public Set<MetaConstraint<?>> getContainerElementConstraints() {
+		return containerElementsConstraints;
 	}
 
 	protected boolean isCascading() {
@@ -126,10 +97,6 @@ public abstract class MetaDataBuilder {
 
 	protected Class<?> getBeanClass() {
 		return beanClass;
-	}
-
-	public UnwrapMode unwrapMode() {
-		return unwrapMode;
 	}
 
 	/**
@@ -164,20 +131,26 @@ public abstract class MetaDataBuilder {
 
 		Class<?> constraintClass = constraint.getLocation().getDeclaringClass();
 
-		ConstraintDescriptorImpl<A> descriptor = new ConstraintDescriptorImpl<A>(
-				constraintHelper,
-				constraint.getLocation().getMember(),
-				constraint.getDescriptor().getAnnotation(),
-				constraint.getElementType(),
+		ConstraintDescriptorImpl<A> descriptor = new ConstraintDescriptorImpl<>(
+				constraintCreationContext.getConstraintHelper(),
+				constraint.getLocation().getConstrainable(),
+				constraint.getDescriptor().getAnnotationDescriptor(),
+				constraint.getConstraintLocationKind(),
 				constraintClass.isInterface() ? constraintClass : null,
 				definedIn,
 				constraint.getDescriptor().getConstraintType()
 		);
 
-		return new MetaConstraint<A>(
-				descriptor,
-				constraint.getLocation()
-		);
+		return MetaConstraints.create( constraintCreationContext.getTypeResolutionHelper(),
+				constraintCreationContext.getValueExtractorManager(),
+				constraintCreationContext.getConstraintValidatorManager(), descriptor, constraint.getLocation() );
+	}
+
+	/**
+	 * Allows specific sub-classes to customize the retrieved constraints.
+	 */
+	protected Set<MetaConstraint<?>> adaptConstraints(ConstrainedElement constrainedElement, Set<MetaConstraint<?>> constraints) {
+		return constraints;
 	}
 
 	/**
@@ -197,4 +170,5 @@ public abstract class MetaDataBuilder {
 			return ConstraintOrigin.DEFINED_IN_HIERARCHY;
 		}
 	}
+
 }

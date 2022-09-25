@@ -2,7 +2,7 @@ package io.onedev.server.rest.support;
 
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.rest.annotation.Api;

@@ -18,7 +18,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.beanlist;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -80,8 +81,9 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	private List<Serializable> newList() {
 		if (ClassUtils.isConcrete(getDescriptor().getPropertyClass())) {
 			try {
-				return (List<Serializable>) getDescriptor().getPropertyClass().newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
+				return (List<Serializable>) getDescriptor().getPropertyClass().getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
@@ -91,8 +93,9 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	
 	private Serializable newElement() {
 		try {
-			return (Serializable) elementClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return (Serializable) elementClass.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}

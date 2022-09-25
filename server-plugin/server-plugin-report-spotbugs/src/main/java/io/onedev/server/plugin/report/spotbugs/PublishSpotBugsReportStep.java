@@ -16,7 +16,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.codeassist.InputSuggestion;

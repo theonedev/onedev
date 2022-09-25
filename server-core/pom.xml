@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>7.6.0</version>
+		<version>7.7.0</version>
 	</parent>
 	<build>
 		<plugins>
@@ -241,7 +241,7 @@
 			<artifactId>oauth2-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 		<dependency>

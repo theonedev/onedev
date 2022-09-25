@@ -3,7 +3,7 @@ package io.onedev.server.model.support.inputspec.userchoiceinput.defaultvaluepro
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import com.google.common.collect.Sets;
 

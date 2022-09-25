@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import javax.validation.Valid;
 
 import org.apache.wicket.Component;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.ParamSpecAware;
 import io.onedev.server.model.support.inputspec.InputSpec;

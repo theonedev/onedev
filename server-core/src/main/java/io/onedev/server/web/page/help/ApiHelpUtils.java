@@ -2,6 +2,7 @@ package io.onedev.server.web.page.help;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -75,8 +76,9 @@ public class ApiHelpUtils {
 					collection = new HashSet<>();
 				} else {
 					try {
-						collection = (Collection<Object>) valueClass.newInstance();
-					} catch (InstantiationException | IllegalAccessException e) {
+						collection = (Collection<Object>) valueClass.getDeclaredConstructor().newInstance();
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						throw new RuntimeException(e);
 					}
 				}
@@ -95,8 +97,9 @@ public class ApiHelpUtils {
 					map = new HashMap<>();
 				} else {
 					try {
-						map = (Map<Object, Object>) valueClass.newInstance();
-					} catch (InstantiationException | IllegalAccessException e) {
+						map = (Map<Object, Object>) valueClass.getDeclaredConstructor().newInstance();
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						throw new RuntimeException(e);
 					}
 				}
@@ -120,7 +123,7 @@ public class ApiHelpUtils {
 							Object fieldValue = new ExampleProvider(valueClass, field.getAnnotation(Api.class)).getExample();
 							if (fieldValue == null) {
 								if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null) {
-									fieldValue = field.getType().newInstance();
+									fieldValue = field.getType().getDeclaredConstructor().newInstance();
 									Field idField = AbstractEntity.class.getDeclaredField("id");
 									Object id = new ExampleProvider(idField.getType(), idField.getAnnotation(Api.class)).getExample();
 									if (id == null) 
@@ -135,7 +138,8 @@ public class ApiHelpUtils {
 							field.set(value, fieldValue);
 						}
 					} 
-				} catch (InstantiationException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+				} catch (InstantiationException | IllegalAccessException | NoSuchFieldException | SecurityException 
+						| IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
 					throw new RuntimeException(e);
 				}
 			}

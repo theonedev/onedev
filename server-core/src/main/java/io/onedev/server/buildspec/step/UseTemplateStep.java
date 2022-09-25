@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.validation.Valid;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.k8shelper.Action;

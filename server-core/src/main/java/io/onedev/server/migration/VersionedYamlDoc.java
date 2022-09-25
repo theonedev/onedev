@@ -5,6 +5,7 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,9 +59,10 @@ public class VersionedYamlDoc extends MappingNode {
         setTag(new Tag(beanClass));
 		if (getVersion() != null) {
 			try {
-				MigrationHelper.migrate(getVersion(), beanClass.newInstance(), this);
+				MigrationHelper.migrate(getVersion(), beanClass.getDeclaredConstructor().newInstance(), this);
 				removeVersion();
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		}

@@ -3,7 +3,7 @@ package io.onedev.server.model.support.administration.sso;
 import java.io.Serializable;
 import java.net.URI;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;

@@ -20,7 +20,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.JobManager;

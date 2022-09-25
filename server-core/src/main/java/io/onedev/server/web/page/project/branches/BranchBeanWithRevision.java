@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.project.branches;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.web.component.branch.create.BranchBean;
 import io.onedev.server.web.editable.annotation.Editable;

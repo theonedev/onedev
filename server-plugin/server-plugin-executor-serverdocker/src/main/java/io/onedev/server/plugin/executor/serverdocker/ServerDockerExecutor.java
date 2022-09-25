@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;

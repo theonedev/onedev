@@ -230,7 +230,7 @@ public class DefaultPersistManager implements PersistManager {
 	protected Connection getConnection() {
 		try {
 			Driver driver = (Driver) Class.forName(properties.getDriver(), true, 
-					Thread.currentThread().getContextClassLoader()).newInstance();
+					Thread.currentThread().getContextClassLoader()).getDeclaredConstructor().newInstance();
 			Properties connectProps = new Properties();
 			String user = properties.getUser();
 			String password = properties.getPassword();

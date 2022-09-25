@@ -25,8 +25,9 @@ public class EditableStringTransformer {
 		
 		T transformed;
 		try {
-			transformed = clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			transformed = clazz.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 

@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.buildspec.param.supply;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -118,8 +119,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	private Serializable getDefaultParamBean() {
 		if (defaultParamBean == null) {
 			try {
-				defaultParamBean = ParamUtils.defineBeanClass(new ArrayList<>(getParamSpecs().values())).newInstance();
-			} catch (InstantiationException | IllegalAccessException e) {
+				defaultParamBean = ParamUtils.defineBeanClass(new ArrayList<>(getParamSpecs().values()))
+						.getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -290,8 +293,9 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		
 		Serializable paramBean;
 		try {
-			paramBean = getDefaultParamBean().getClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			paramBean = getDefaultParamBean().getClass().getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 		

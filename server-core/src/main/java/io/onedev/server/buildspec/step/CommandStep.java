@@ -2,7 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.param.ParamCombination;

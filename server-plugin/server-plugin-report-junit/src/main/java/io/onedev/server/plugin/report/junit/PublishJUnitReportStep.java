@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import com.google.common.collect.Lists;
 

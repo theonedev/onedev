@@ -7,7 +7,7 @@ import java.util.List;
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.event.Event;
 import io.onedev.server.event.RefUpdated;

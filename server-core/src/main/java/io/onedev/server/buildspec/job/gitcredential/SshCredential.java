@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.sshd.common.config.keys.PublicKeyEntry;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.SshCloneInfo;
