@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.commons.utils.command.Commandline;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.model.Build;
@@ -30,12 +29,13 @@ public interface JobManager {
 	
 	JobContext getJobContext(String jobToken, boolean mustExist);
 	
+	@Nullable
+	JobContext getJobContext(Build build);
+	
 	Map<CacheInstance, String> allocateJobCaches(String jobToken, CacheAllocationRequest request);
 	
 	@Nullable
 	Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
 			File inputDir, Map<String, String> placeholderValues, TaskLogger logger);
-	
-	Commandline openShell(Build build);
 	
 }

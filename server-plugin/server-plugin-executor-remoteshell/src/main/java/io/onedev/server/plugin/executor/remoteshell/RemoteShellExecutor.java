@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.eclipse.jetty.websocket.api.Session;
 
 import io.onedev.agent.AgentData;
 import io.onedev.agent.Message;
-import io.onedev.agent.MessageType;
+import io.onedev.agent.MessageTypes;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.agent.job.ShellJobData;
 import io.onedev.agent.job.TestShellJobData;
@@ -24,6 +25,8 @@ import io.onedev.server.job.resource.ResourceManager;
 import io.onedev.server.plugin.executor.servershell.ServerShellExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.tasklog.JobLogManager;
+import io.onedev.server.terminal.RemoteSession;
+import io.onedev.server.terminal.ShellSession;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 
@@ -41,8 +44,6 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	
 	private transient volatile Session agentSession;
 	
-	private transient volatile String jobToken;
-	
 	@Editable(order=390, name="Agent Selector", placeholder="Any agent", 
 			description="Specify agents applicable for this executor")
 	@io.onedev.server.web.editable.annotation.AgentQuery(forExecutor=true)
@@ -55,7 +56,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	}
 
 	@Override
-	public void execute(String jobToken, JobContext jobContext) {
+	public void execute(JobContext jobContext) {
 		AgentQuery parsedQeury = AgentQuery.parse(agentQuery, true);
 		TaskLogger jobLogger = jobContext.getLogger();
 		OneDev.getInstance(ResourceManager.class).run(new AgentAwareRunnable() {
@@ -77,17 +78,17 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 					}
 				}
 				
+				String jobToken = jobContext.getJobToken();
 				List<String> trustCertContent = getTrustCertContent();
 				ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectPath(), 
 						jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(), 
 						jobContext.getBuildNumber(), jobContext.getActions(), trustCertContent);
 				
 				RemoteShellExecutor.this.agentSession = agentSession;
-				RemoteShellExecutor.this.jobToken = jobData.getJobToken();
 				try {
 					WebsocketUtils.call(agentSession, jobData, 0);
 				} catch (InterruptedException | TimeoutException e) {
-					new Message(MessageType.CANCEL_JOB, jobToken).sendBy(agentSession);
+					new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
 				} 
 				
 			}
@@ -115,7 +116,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 					try {
 						WebsocketUtils.call(agentSession, jobData, 0);
 					} catch (InterruptedException | TimeoutException e) {
-						new Message(MessageType.CANCEL_JOB, jobToken).sendBy(agentSession);
+						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
 					} 
 					
 				}
@@ -127,9 +128,17 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	}
 
 	@Override
-	public void resume() {
-		if (agentSession != null && jobToken != null) 
-			new Message(MessageType.RESUME_JOB, jobToken).sendBy(agentSession);
+	public void resume(JobContext jobContext) {
+		if (agentSession != null) 
+			new Message(MessageTypes.RESUME_JOB, jobContext.getJobToken()).sendBy(agentSession);
+	}
+
+	@Override
+	public ShellSession openShell(IWebSocketConnection connection, JobContext jobContext) {
+		if (agentSession != null) 
+			return new RemoteSession(connection, agentSession, jobContext.getJobToken());
+		else
+			throw new ExplicitException("Shell not ready");
 	}
 
 }

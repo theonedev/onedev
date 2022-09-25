@@ -6,6 +6,10 @@ import io.onedev.server.model.Build;
 
 public interface TerminalManager {
 		
+	boolean isTerminalSupported();
+	
+	String getTerminalUrl(Build build);
+	
 	void onOpen(IWebSocketConnection connection, Build build);
 	
 	void onClose(IWebSocketConnection connection);

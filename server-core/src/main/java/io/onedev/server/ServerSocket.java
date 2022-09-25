@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import io.onedev.agent.AgentData;
 import io.onedev.agent.CallData;
 import io.onedev.agent.Message;
-import io.onedev.agent.MessageType;
+import io.onedev.agent.MessageTypes;
 import io.onedev.agent.WaitingForAgentResourceToBeReleased;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -30,6 +30,7 @@ import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.exception.SystemNotReadyException;
 import io.onedev.server.job.resource.ResourceManager;
 import io.onedev.server.tasklog.JobLogManager;
+import io.onedev.server.terminal.RemoteSession;
 
 @WebSocket
 public class ServerSocket {
@@ -79,7 +80,7 @@ public class ServerSocket {
     public void onConnect(Session session) {
     	this.session = session;
     	try {
-    		new Message(MessageType.UPDATE, getAgentManager().getAgentVersion()).sendBy(session);
+    		new Message(MessageTypes.UPDATE, getAgentManager().getAgentVersion()).sendBy(session);
 		} catch (Exception e) {
 			logger.error("Error sending websocket message", e);
 			try {
@@ -102,7 +103,7 @@ public class ServerSocket {
 	    		try {
 	    			agentId = getAgentManager().agentConnected(data, session);
 	    		} catch (ExplicitException e) {
-	    			new Message(MessageType.ERROR, e.getMessage()).sendBy(session);
+	    			new Message(MessageTypes.ERROR, e.getMessage()).sendBy(session);
 	    		}
 	    		break;
 	    	case REQUEST:
@@ -113,7 +114,7 @@ public class ServerSocket {
 						try {
 				    		CallData request = SerializationUtils.deserialize(messageData);
 				    		CallData response = new CallData(request.getUuid(), service(request.getPayload()));
-				    		new Message(MessageType.RESPONSE, response).sendBy(session);
+				    		new Message(MessageTypes.RESPONSE, response).sendBy(session);
 						} catch (Exception e) {
 							logger.error("Error processing websocket request", e);
 						}
@@ -147,6 +148,21 @@ public class ServerSocket {
 	    		JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(jobToken, false);
 	    		if (jobContext != null)
 	    			jobContext.reportJobWorkspace(jobWorkspace);
+	    		break;
+	    	case SHELL_OUTPUT: 
+	    		dataString = new String(messageData, StandardCharsets.UTF_8);
+	    		String sessionId = StringUtils.substringBefore(dataString, ":");
+	    		String output = StringUtils.substringAfter(dataString, ":");
+	    		RemoteSession.sendOutput(sessionId, output);
+	    		break;
+	    	case SHELL_ERROR: 
+	    		dataString = new String(messageData, StandardCharsets.UTF_8);
+	    		sessionId = StringUtils.substringBefore(dataString, ":");
+	    		String error = StringUtils.substringAfter(dataString, ":");
+	    		RemoteSession.sendError(sessionId, error);
+	    		break;
+	    	case SHELL_CLOSED:
+	    		RemoteSession.onRemoteClosed(new String(messageData, StandardCharsets.UTF_8));
 	    		break;
 	    	default: 
 			}

@@ -8,7 +8,7 @@ import static io.onedev.agent.DockerExecutorUtils.newDockerKiller;
 import static io.onedev.agent.DockerExecutorUtils.startService;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
-import static io.onedev.k8shelper.KubernetesHelper.stringifyPosition;
+import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
 
 import java.io.File;
 import java.io.Serializable;
@@ -24,9 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.SystemUtils;
-import javax.validation.constraints.NotEmpty;
+import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -69,6 +70,8 @@ import io.onedev.server.job.resource.ResourceManager;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
+import io.onedev.server.terminal.CommandlineSession;
+import io.onedev.server.terminal.ShellSession;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -165,7 +168,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 	
 	@Override
-	public void execute(String jobToken, JobContext jobContext) {
+	public void execute(JobContext jobContext) {
 		if (OneDev.getK8sService() != null) {
 			throw new ExplicitException(""
 					+ "OneDev running inside kubernetes cluster does not support server docker executor. "
@@ -193,7 +196,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 						@Override
 						protected Map<CacheInstance, String> allocate(CacheAllocationRequest request) {
-							return jobManager.allocateJobCaches(jobToken, request);
+							return jobManager.allocateJobCaches(jobContext.getJobToken(), request);
 						}
 
 						@Override
@@ -243,16 +246,15 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										List<String> arguments, Map<String, String> environments, 
 										@Nullable String workingDir, Map<String, String> volumeMounts, 
 										List<Integer> position, boolean useTTY) {
-									containerName = network + "-step-" + stringifyPosition(position);
-									Commandline docker = newDocker();
-									docker.addArgs("run", "--name=" + containerName, "--network=" + network);
-									if (getRunOptions() != null)
-										docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
-									
 									// Uninstall symbol links as docker can not process it well
 									cache.uninstallSymbolinks(hostWorkspace);
-										
+									containerName = network + "-step-" + stringifyStepPosition(position);
 									try {
+										Commandline docker = newDocker();
+										docker.addArgs("run", "--name=" + containerName, "--network=" + network);
+										if (getRunOptions() != null)
+											docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+										
 										docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
 										
 										for (Map.Entry<String, String> entry: volumeMounts.entrySet()) {
@@ -315,8 +317,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												containerName, jobLogger));
 										return result.getReturnCode();
 									} finally {
-										cache.installSymbolinks(hostWorkspace);
 										containerName = null;
+										cache.installSymbolinks(hostWorkspace);
 									}
 								}
 								
@@ -454,7 +456,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public void resume() {
+	public void resume(JobContext jobContext) {
 		if (hostBuildHome != null) synchronized (hostBuildHome) {
 			if (hostBuildHome.exists()) 
 				FileUtils.touchFile(new File(hostBuildHome, "continue"));
@@ -644,31 +646,30 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public Commandline openShell() {
+	public ShellSession openShell(IWebSocketConnection connection, JobContext jobContext) {
 		String containerNameCopy = containerName;
 		if (containerNameCopy != null) {
 			Commandline docker = newDocker();
-			if (SystemUtils.IS_OS_WINDOWS)
-				docker.workingDir(new File("C:\\onedev-build\\workspace"));
-			else
-				docker.workingDir(new File("/onedev-build/workspace"));
 			docker.addArgs("exec", "-it", containerNameCopy);
 			if (runningStep instanceof CommandFacade) {
 				CommandFacade commandStep = (CommandFacade) runningStep;
-				docker.addArgs(commandStep.getShellExecutable());
+				docker.addArgs(commandStep.getShell(SystemUtils.IS_OS_WINDOWS, null));
 			} else if (SystemUtils.IS_OS_WINDOWS) {
 				docker.addArgs("cmd");
 			} else {
 				docker.addArgs("sh");
 			}
-			return docker;
-		} else {
+			return new CommandlineSession(connection, docker);
+		} else if (hostBuildHome != null) {
 			Commandline shell;
 			if (SystemUtils.IS_OS_WINDOWS)
 				shell = new Commandline("cmd");
 			else
 				shell = new Commandline("sh");
-			return shell.workingDir(new File(hostBuildHome, "workspace"));
+			shell.workingDir(new File(hostBuildHome, "workspace"));
+			return new CommandlineSession(connection, shell);
+		} else {
+			throw new ExplicitException("Shell not ready");
 		}
 	}
 

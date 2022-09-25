@@ -75,7 +75,8 @@ public class RunContainerStep extends Step {
 		this.args = args;
 	}
 
-	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container")
+	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container. "
+			+ "Leave empty to use default working directory of the container")
 	@SafePath
 	@Interpolative(variableSuggester="suggestVariables")
 	@Nullable

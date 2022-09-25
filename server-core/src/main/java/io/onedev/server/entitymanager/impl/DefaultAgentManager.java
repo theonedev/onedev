@@ -31,7 +31,7 @@ import com.google.common.base.Splitter;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.agent.AgentData;
 import io.onedev.agent.Message;
-import io.onedev.agent.MessageType;
+import io.onedev.agent.MessageTypes;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.agent.job.LogRequest;
 import io.onedev.commons.loader.Listen;
@@ -324,7 +324,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	public void restart(Agent agent) {
 		Session session = agentSessions.get(agent.getId());
 		if (session != null)
-			new Message(MessageType.RESTART, new byte[0]).sendBy(session);
+			new Message(MessageTypes.RESTART, new byte[0]).sendBy(session);
 	}
 
 	@Transactional
@@ -388,7 +388,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		Session session = agentSessions.get(agent.getId());
 		if (session != null) {
 			byte[] attributeBytes = SerializationUtils.serialize((Serializable) agent.getAttributeMap());
-			new Message(MessageType.UPDATE_ATTRIBUTES, attributeBytes).sendBy(session);
+			new Message(MessageTypes.UPDATE_ATTRIBUTES, attributeBytes).sendBy(session);
 		}
 	}
 
