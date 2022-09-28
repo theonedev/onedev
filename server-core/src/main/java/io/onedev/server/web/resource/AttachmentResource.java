@@ -50,6 +50,8 @@ public class AttachmentResource extends AbstractResource {
 		String group = params.get(PARAM_GROUP).toString();
 		if (StringUtils.isBlank(group))
 			throw new IllegalArgumentException("group parameter has to be specified");
+		else if (group.contains(".."))
+			throw new IllegalArgumentException("Invalid group parameter");
 		
 		String authorization = params.get(PARAM_AUTHORIZATION).toOptionalString();
 		if (authorization == null 
@@ -74,6 +76,8 @@ public class AttachmentResource extends AbstractResource {
 		String attachment = params.get(PARAM_ATTACHMENT).toString();
 		if (StringUtils.isBlank(attachment))
 			throw new IllegalArgumentException("attachment parameter has to be specified");
+		else if (attachment.contains(".."))
+			throw new IllegalArgumentException("Invalid attachment parameter");
 
 		File attachmentFile = new File(getGroupDir(project, group), attachment);
 		if (!attachmentFile.exists()) 
