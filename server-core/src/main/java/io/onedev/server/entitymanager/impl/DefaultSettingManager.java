@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -589,10 +590,11 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		T contributedSetting = (T) getContributedSettings().get(settingClass.getName());
 		if (contributedSetting == null) {
 			try {
-				T value = settingClass.newInstance();
+				T value = settingClass.getDeclaredConstructor().newInstance();
 				if (OneDev.getInstance(Validator.class).validate(value).isEmpty()) 
 					contributedSetting = value;
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		}

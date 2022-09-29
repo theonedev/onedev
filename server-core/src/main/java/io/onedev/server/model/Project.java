@@ -11,6 +11,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,7 +76,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1816,10 +1817,11 @@ public class Project extends AbstractEntity {
 		T contributedSetting = (T) contributedSettings.get(settingClass.getName());
 		if (contributedSetting == null) {
 			try {
-				T value = settingClass.newInstance();
+				T value = settingClass.getDeclaredConstructor().newInstance();
 				if (OneDev.getInstance(Validator.class).validate(value).isEmpty()) 
 					contributedSetting = value;
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		}

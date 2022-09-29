@@ -5,7 +5,8 @@ import static io.onedev.k8shelper.KubernetesHelper.ENV_OS_INFO;
 import static io.onedev.k8shelper.KubernetesHelper.ENV_SERVER_URL;
 import static io.onedev.k8shelper.KubernetesHelper.IMAGE_REPO_PREFIX;
 import static io.onedev.k8shelper.KubernetesHelper.LOG_END_MESSAGE;
-import static io.onedev.k8shelper.KubernetesHelper.stringifyPosition;
+import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
+import static io.onedev.k8shelper.KubernetesHelper.parseStepPosition;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,13 +29,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.text.WordUtils;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -80,6 +82,8 @@ import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEnt
 import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
+import io.onedev.server.terminal.CommandlineSession;
+import io.onedev.server.terminal.ShellSession;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
@@ -105,6 +109,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private static final long NAMESPACE_DELETION_TIMEOUT = 120;
 	
+	private static final String POD_NAME = "job";
+	
 	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
 	
 	private String clusterRole;
@@ -119,9 +125,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private boolean mountContainerSock;
 	
-	private transient volatile String namespace;
-	
 	private transient volatile OsInfo osInfo;
+	
+	private transient volatile String containerName;
 	
 	@Editable(order=20, description="Optionally specify node selector of the job pods")
 	public List<NodeSelectorEntry> getNodeSelector() {
@@ -203,15 +209,24 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 
 	@Override
-	public void execute(String jobToken, JobContext jobContext) {
-		execute(jobToken, jobContext.getLogger(), jobContext);
+	public void execute(JobContext jobContext) {
+		execute(jobContext.getLogger(), jobContext);
+	}
+	
+	private String getNamespace(@Nullable JobContext jobContext) {
+		if (jobContext != null) {
+			return getName() + "-" + jobContext.getProjectId() + "-" 
+					+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
+		} else {
+			return getName() + "-executor-test";
+		}
 	}
 	
 	@Override
-	public void resume() {
-		if (namespace != null && osInfo != null) {
+	public void resume(JobContext jobContext) {
+		if (osInfo != null) {
 			Commandline kubectl = newKubeCtl();
-			kubectl.addArgs("exec", "job", "--container", "sidecar", "--namespace", namespace, "--");
+			kubectl.addArgs("exec", "job", "--container", "sidecar", "--namespace", getNamespace(jobContext), "--");
 			if (osInfo.isLinux())
 				kubectl.addArgs("touch", "/onedev-build/continue");
 			else
@@ -233,7 +248,57 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}).checkReturnCode();		
 		}
 	}
-
+	
+	@Override
+	public ShellSession openShell(IWebSocketConnection connection, JobContext jobContext) {
+		String containerNameCopy = containerName;
+		if (osInfo != null && containerNameCopy != null) {
+			Commandline kubectl = newKubeCtl();
+			kubectl.addArgs("exec", "-it", POD_NAME, "-c", containerNameCopy, 
+					"--namespace", getNamespace(jobContext), "--");
+			
+			String workingDir;
+			if (containerNameCopy.startsWith("step-")) {
+				List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
+				LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
+				if (step instanceof RunContainerFacade) 
+					workingDir = ((RunContainerFacade)step).getContainer(osInfo).getWorkingDir();
+				else if (osInfo.isLinux()) 
+					workingDir = "/onedev-build/workspace";
+				else 
+					workingDir = "C:\\onedev-build\\workspace";
+			} else if (osInfo.isLinux()) { 
+				workingDir = "/onedev-build/workspace";
+			} else { 
+				workingDir = "C:\\onedev-build\\workspace";
+			}
+			
+			String[] shell = null;
+			if (containerNameCopy.startsWith("step-")) {
+				List<Integer> stepPosition = parseStepPosition(containerNameCopy.substring("step-".length()));
+				LeafFacade step = Preconditions.checkNotNull(jobContext.getStep(stepPosition));
+				if (step instanceof CommandFacade)
+					shell = ((CommandFacade)step).getShell(osInfo.isWindows(), workingDir);
+			}
+			if (shell == null) {
+				if (workingDir != null) {
+					if (osInfo.isLinux())
+						shell = new String[]{"sh", "-c", String.format("cd '%s' && sh", workingDir)};
+					else
+						shell = new String[]{"cmd", "/c", String.format("cd %s && cmd", workingDir)};
+				} else if (osInfo.isLinux()) {
+					shell = new String[]{"sh"};
+				} else {
+					shell = new String[]{"cmd"};
+				}
+			}
+			kubectl.addArgs(shell);
+			return new CommandlineSession(connection, kubectl);
+		} else {
+			throw new ExplicitException("Shell not ready");
+		}
+	}
+	
 	@Override
 	public boolean isPlaceholderAllowed() {
 		return false;
@@ -241,7 +306,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
-		execute(UUID.randomUUID().toString(), jobLogger, testData.getDockerImage());
+		execute(jobLogger, testData.getDockerImage());
 	}
 	
 	private Commandline newKubeCtl() {
@@ -701,13 +766,17 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return map;
 	}
 	
-	private void execute(String jobToken, TaskLogger jobLogger, Object executionContext) {
+	private void execute(TaskLogger jobLogger, Object executionContext) {
 		jobLogger.log("Checking cluster access...");
 		JobContext jobContext;
-		if (executionContext instanceof JobContext)
+		String jobToken;
+		if (executionContext instanceof JobContext) {
 			jobContext = (JobContext) executionContext;
-		else
+			jobToken = jobContext.getJobToken();
+		} else {
 			jobContext = null;
+			jobToken = UUID.randomUUID().toString();
+		}
 		
 		Commandline kubectl = newKubeCtl();
 		kubectl.addArgs("cluster-info");
@@ -727,13 +796,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 		}).checkReturnCode();
 		
-		if (jobContext != null) {
-			namespace = getName() + "-" + jobContext.getProjectId() + "-" 
-					+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
-		} else {
-			namespace = getName() + "-executor-test";
-		}
-		
+
+		String namespace = getNamespace(jobContext);
 		if (getClusterRole() != null)
 			createClusterRoleBinding(namespace, jobLogger);
 		
@@ -933,7 +997,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							stepContainerSpec.put("env", commonEnvs);
 						}
 						
-						String positionStr = stringifyPosition(position);
+						String positionStr = stringifyStepPosition(position);
 						if (osInfo.isLinux()) {
 							stepContainerSpec.put("command", Lists.newArrayList("sh"));
 							stepContainerSpec.put("args", Lists.newArrayList(containerCommandHome + "/" + positionStr + ".sh"));
@@ -1041,22 +1105,20 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				}
 				podSpec.put("volumes", volumes);
 
-				String podName = "job";
-				
 				Map<Object, Object> podDef = CollectionUtils.newLinkedHashMap(
 						"apiVersion", "v1", 
 						"kind", "Pod", 
 						"metadata", CollectionUtils.newLinkedHashMap(
-								"name", podName, 
+								"name", POD_NAME, 
 								"namespace", namespace), 
 						"spec", podSpec);
 				
 				createResource(podDef, Sets.newHashSet(), jobLogger);
-				String podFQN = namespace + "/" + podName;
+				String podFQN = namespace + "/" + POD_NAME;
 				
 				AtomicReference<String> nodeNameRef = new AtomicReference<>(null);
 				
-				watchPod(namespace, podName, new AbortChecker() {
+				watchPod(namespace, POD_NAME, new AbortChecker() {
 
 					@Override
 					public Abort check(String nodeName, Collection<JsonNode> containerStatusNodes) {
@@ -1084,7 +1146,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					logger.debug("Waiting for start of container (pod: {}, container: {})...", 
 							podFQN, containerName);
 					
-					watchPod(namespace, podName, new AbortChecker() {
+					watchPod(namespace, POD_NAME, new AbortChecker() {
 
 						@Override
 						public Abort check(String nodeName, Collection<JsonNode> containerStatusNodes) {
@@ -1098,7 +1160,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 								if (error.isFatal()) {
 									String errorMessage;
 									if (containerName.startsWith("step-")) {
-										List<Integer> position = KubernetesHelper.parsePosition(containerName.substring("step-".length()));
+										List<Integer> position = KubernetesHelper.parseStepPosition(containerName.substring("step-".length()));
 										errorMessage = "Step \"" + entryFacade.getNamesAsString(position) 
 												+ ": " + error.getMessage();
 									} else {
@@ -1117,52 +1179,57 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						
 					}, jobLogger);
 					
-					logger.debug("Collecting log of container (pod: {}, container: {})...", 
-							podFQN, containerName);
-					
-					collectContainerLog(namespace, podName, containerName, LOG_END_MESSAGE, jobLogger);
-					
-					logger.debug("Waiting for stop of container (pod: {})...", 
-							podFQN, containerName);
-					
-					watchPod(namespace, podName, new AbortChecker() {
-
-						@Override
-						public Abort check(String nodeName, Collection<JsonNode> containerStatusNodes) {
-							ContainerError error = getContainerErrors(containerStatusNodes).get(containerName);
-							if (error != null) {
-								String errorMessage;
-								if (containerName.startsWith("step-")) {
-									List<Integer> position = KubernetesHelper.parsePosition(containerName.substring("step-".length()));
-									errorMessage = "Step \"" + entryFacade.getNamesAsString(position) 
-											+ " is failed: " + error.getMessage();
-								} else {
-									errorMessage = containerName + ": " + error.getMessage();
-								}
-								
-								/*
-								 * We abort the watch with an exception for two reasons:
-								 * 
-								 * 1. Init container error will prevent other containers to start. 
-								 * 2. Step containers may not run command in case of fatal error and sidecar 
-								 *    container will wait indefinitely on the successful/failed mark file in 
-								 *    this case, causing log following last indefinitely 
-								 */
-								if (error.isFatal() || containerName.equals("init")) {
-									return new Abort(errorMessage);
-								} else { 
-									jobLogger.error(errorMessage);
-									failed.set(true);
-									return new Abort(null);
-								} 
-							} else if (getStoppedContainers(containerStatusNodes).contains(containerName)) {
-								return new Abort(null);
-							} else {
-								return null;
-							}
-						}
+					KubernetesExecutor.this.containerName = containerName; 
+					try {
+						logger.debug("Collecting log of container (pod: {}, container: {})...", 
+								podFQN, containerName);
 						
-					}, jobLogger);
+						collectContainerLog(namespace, POD_NAME, containerName, LOG_END_MESSAGE, jobLogger);
+						
+						logger.debug("Waiting for stop of container (pod: {})...", 
+								podFQN, containerName);
+						
+						watchPod(namespace, POD_NAME, new AbortChecker() {
+	
+							@Override
+							public Abort check(String nodeName, Collection<JsonNode> containerStatusNodes) {
+								ContainerError error = getContainerErrors(containerStatusNodes).get(containerName);
+								if (error != null) {
+									String errorMessage;
+									if (containerName.startsWith("step-")) {
+										List<Integer> position = KubernetesHelper.parseStepPosition(containerName.substring("step-".length()));
+										errorMessage = "Step \"" + entryFacade.getNamesAsString(position) 
+												+ " is failed: " + error.getMessage();
+									} else {
+										errorMessage = containerName + ": " + error.getMessage();
+									}
+									
+									/*
+									 * We abort the watch with an exception for two reasons:
+									 * 
+									 * 1. Init container error will prevent other containers to start. 
+									 * 2. Step containers may not run command in case of fatal error and sidecar 
+									 *    container will wait indefinitely on the successful/failed mark file in 
+									 *    this case, causing log following last indefinitely 
+									 */
+									if (error.isFatal() || containerName.equals("init")) {
+										return new Abort(errorMessage);
+									} else { 
+										jobLogger.error(errorMessage);
+										failed.set(true);
+										return new Abort(null);
+									} 
+								} else if (getStoppedContainers(containerStatusNodes).contains(containerName)) {
+									return new Abort(null);
+								} else {
+									return null;
+								}
+							}
+							
+						}, jobLogger);
+					} finally {
+						KubernetesExecutor.this.containerName = null;
+					}
 				}
 				
 				if (failed.get())
@@ -1177,7 +1244,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private String getContainerName(List<Integer> stepPosition) {
-		return "step-" + stringifyPosition(stepPosition);
+		return "step-" + stringifyStepPosition(stepPosition);
 	}
 	
 	private Map<String, ContainerError> getContainerErrors(Collection<JsonNode> containerStatusNodes) {
@@ -1486,5 +1553,5 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 		
 	}
-	
+
 }

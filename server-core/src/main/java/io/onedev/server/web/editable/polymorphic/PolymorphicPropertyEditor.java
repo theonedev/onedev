@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.polymorphic;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +122,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 				for (Class<?> each: implementations) {
 					if (getDisplayName(each).equals(object)) {
 						try {
-							propertyValue = (Serializable) each.newInstance();
+							propertyValue = (Serializable) each.getDeclaredConstructor().newInstance();
 							Serializable prevPropertyValue = PolymorphicPropertyEditor.this.getConvertedInput();
 							if (prevPropertyValue != null) {
 								BeanDescriptor prevDescriptor = new BeanDescriptor(prevPropertyValue.getClass());
@@ -134,7 +135,8 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 									}
 								}
 							}
-						} catch (InstantiationException | IllegalAccessException e) {
+						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+								| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 							throw new RuntimeException(e);
 						}
 						break;

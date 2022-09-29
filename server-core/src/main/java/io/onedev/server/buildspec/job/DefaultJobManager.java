@@ -57,11 +57,7 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
-import io.onedev.k8shelper.CompositeFacade;
-import io.onedev.k8shelper.LeafFacade;
-import io.onedev.k8shelper.LeafVisitor;
 import io.onedev.k8shelper.ServerSideFacade;
-import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecParseException;
@@ -543,9 +539,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								Build.push(build);
 								JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
 								try {
-									return new JobContext(executor, projectPath, projectId, buildNumber, projectGitDir, 
-											actions, job.getCpuRequirement(), job.getMemoryRequirement(), refName, 
-											commitId, caches, retried.get(), services, jobLogger) {
+									return new JobContext(jobToken, executor, projectPath, projectId, buildNumber, 
+											projectGitDir, actions, job.getCpuRequirement(), job.getMemoryRequirement(), 
+											refName, commitId, caches, retried.get(), services, jobLogger) {
 										
 										@Override
 										public void notifyJobRunning(Long agentId) {
@@ -586,21 +582,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 												@Override
 												public Map<String, byte[]> call() {
-													StepFacade entryExecutable = new CompositeFacade(getActions());
-													
-													LeafVisitor<LeafFacade> visitor = new LeafVisitor<LeafFacade>() {
-
-														@Override
-														public LeafFacade visit(LeafFacade executable, List<Integer> position) {
-															if (position.equals(stepPosition))
-																return executable;
-															else
-																return null;
-														}
-														
-													};															
-													
-													ServerSideFacade serverExecutable = (ServerSideFacade) entryExecutable.traverse(visitor, new ArrayList<>());
+													ServerSideFacade serverExecutable = (ServerSideFacade) getStep(stepPosition);
 													ServerSideStep serverStep = (ServerSideStep) serverExecutable.getStep();
 													
 													serverStep = new EditableStringTransformer(new Function<String, String>() {
@@ -685,7 +667,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						logManager.registerLogger(jobToken, jobLogger);
 						
 						try {
-							executor.execute(jobToken, jobContext);
+							executor.execute(jobContext);
 							break;
 						} catch (Throwable e) {
 							if (e != null && ExceptionUtils.find(e, InterruptedException.class) != null) {
@@ -931,17 +913,25 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Transactional
 	public void resume(Build build) {
+		JobContext jobContext = getJobContext(build);
+		if (jobContext != null)
+			jobContext.getJobExecutor().resume(jobContext);
+		build.setPaused(false);
+		listenerRegistry.post(new BuildUpdated(build));
+	}
+
+	@Override
+	public JobContext getJobContext(Build build) {
 		for (Map.Entry<String, JobContext> entry: jobContexts.entrySet()) {
 			JobContext jobContext = entry.getValue();
 			if (jobContext.getProjectId().equals(build.getProject().getId()) 
 					&& jobContext.getBuildNumber().equals(build.getNumber())) {
-				jobContext.getJobExecutor().resume();
+				return jobContext;
 			}
 		}
-		build.setPaused(false);
-		listenerRegistry.post(new BuildUpdated(build));
+		return null;
 	}
-	
+
 	@Sessional
 	@Override
 	public void cancel(Build build) {
@@ -1347,5 +1337,5 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			File inputDir, Map<String, String> placeholderValues, TaskLogger logger) {
 		return getJobContext(jobToken, true).runServerStep(stepPosition, inputDir, placeholderValues, logger);
 	}
-	
+
 }

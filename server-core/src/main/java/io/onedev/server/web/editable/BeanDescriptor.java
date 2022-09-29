@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -100,8 +101,9 @@ public class BeanDescriptor implements Serializable {
 
 	public Object newBeanInstance() {
 		try {
-			return getBeanClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return getBeanClass().getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}

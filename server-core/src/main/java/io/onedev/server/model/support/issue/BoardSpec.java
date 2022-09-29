@@ -13,7 +13,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.validation.constraints.Size;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;

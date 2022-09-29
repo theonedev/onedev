@@ -16,6 +16,7 @@ import static io.onedev.server.model.Build.PROP_VERSION;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -790,8 +791,10 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 	public Serializable getParamBean() {
 		Serializable paramBean;
 		try {
-			paramBean = (Serializable) ParamUtils.defineBeanClass(getJob().getParamSpecs()).newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			paramBean = (Serializable) ParamUtils.defineBeanClass(getJob().getParamSpecs())
+					.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		} 
 		BeanDescriptor descriptor = new BeanDescriptor(paramBean.getClass());

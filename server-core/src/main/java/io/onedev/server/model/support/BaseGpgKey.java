@@ -10,7 +10,7 @@ import javax.persistence.MappedSuperclass;
 import javax.validation.ConstraintValidatorContext;
 
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.util.GpgUtils;

@@ -73,6 +73,7 @@ import io.onedev.server.web.resource.SpriteResourceReference;
 import io.onedev.server.web.resource.SpriteResourceStream;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
+import io.onedev.server.web.websocket.WebSocketMessages;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
@@ -182,7 +183,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 					@Override
 					public void sendError(int sc, String msg) {
 						try {
-							connection.sendMessage(WebSocketManager.ERROR_MESSAGE);
+							connection.sendMessage(WebSocketMessages.ERROR_MESSAGE);
 						} catch (IOException e) {
 						}
 					}

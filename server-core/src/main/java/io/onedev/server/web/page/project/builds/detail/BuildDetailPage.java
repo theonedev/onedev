@@ -17,8 +17,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -34,6 +34,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
@@ -46,6 +47,7 @@ import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.ProjectScope;
@@ -232,13 +234,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		}));
 		
-		WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
-		actionsContainer.setOutputMarkupId(true);
-		add(actionsContainer);
-		
-		actionsContainer.add(newBuildObserver(getBuild().getId()));
-		
-		actionsContainer.add(new AjaxLink<Void>("rebuild") {
+		add(new AjaxLink<Void>("rebuild") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -264,12 +260,18 @@ public abstract class BuildDetailPage extends ProjectPage
 						&& SecurityUtils.canRunJob(getProject(), getBuild().getJobName()));
 			}
 			
-		});
+		}.add(newBuildObserver(getBuild().getId())).setOutputMarkupPlaceholderTag(true));
 		
-		actionsContainer.add(new Link<Void>("cancel") {
+		add(new AjaxLink<Void>("cancel") {
 
 			@Override
-			public void onClick() {
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to cancel this build?"));
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
 				OneDev.getInstance(JobManager.class).cancel(getBuild());
 				getSession().success("Cancel request submitted");
 			}
@@ -280,7 +282,38 @@ public abstract class BuildDetailPage extends ProjectPage
 				setVisible(!getBuild().isFinished() && SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()));
 			}
 			
-		}.add(new ConfirmClickModifier("Do you really want to cancel this build?")));
+		}.add(newBuildObserver(getBuild().getId())).setOutputMarkupPlaceholderTag(true));
+		
+		add(new AjaxLink<Void>("terminal") {
+
+			private TerminalManager getTerminalManager() {
+				return OneDev.getInstance(TerminalManager.class);
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				target.appendJavaScript(String.format("onedev.server.buildDetail.openTerminal('%s');", 
+						getTerminalManager().getTerminalUrl(getBuild())));
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				if (getTerminalManager().isTerminalSupported()) {
+					JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(getBuild());
+					if (jobContext!= null) {
+						setVisible(SecurityUtils.isAdministrator() 
+								|| SecurityUtils.canManage(getProject()) && jobContext.getJobExecutor().isShellAccessEnabled());
+					} else {
+						setVisible(false);
+					}
+				} else {
+					setVisible(false);
+				}
+			}
+			
+		}.add(newBuildObserver(getBuild().getId())).setOutputMarkupPlaceholderTag(true));
 		
 		add(new DropdownLink("promotions") {
 
@@ -564,7 +597,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new BuildDetailCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new BuildDetailResourceReference()));
 	}
 
 	@Override

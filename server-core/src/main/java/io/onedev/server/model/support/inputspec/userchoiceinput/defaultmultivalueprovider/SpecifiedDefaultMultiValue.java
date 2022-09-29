@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.validation.Validator;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.User;

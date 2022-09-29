@@ -73,6 +73,7 @@ import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
+import io.onedev.server.web.websocket.WebSocketMessages;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -247,9 +248,9 @@ public abstract class BasePage extends WebPage {
 			protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
 				super.onMessage(handler, message);
 				
-				if (message.getText().startsWith(WebSocketManager.OBSERVABLE_CHANGED)) {
+				if (message.getText().startsWith(WebSocketMessages.OBSERVABLE_CHANGED)) {
 					List<String> observables = Splitter.on('\n').splitToList(
-							message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1));
+							message.getText().substring(WebSocketMessages.OBSERVABLE_CHANGED.length()+1));
 					for (WebSocketObserver observer: findWebSocketObservers()) {
 						if (CollectionUtils.containsAny(observer.getObservables(), observables))
 							observer.onObservableChanged(handler);

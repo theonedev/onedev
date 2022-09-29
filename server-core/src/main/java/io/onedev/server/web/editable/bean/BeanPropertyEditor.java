@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.bean;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -121,8 +122,9 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 	
 	private Serializable newProperty() {
 		try {
-			return (Serializable) getDescriptor().getPropertyClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return (Serializable) getDescriptor().getPropertyClass().getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 	}

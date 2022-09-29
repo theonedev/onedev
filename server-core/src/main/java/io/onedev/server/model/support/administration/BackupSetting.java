@@ -5,7 +5,7 @@ import java.text.ParseException;
 
 import javax.validation.ConstraintValidatorContext;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.quartz.CronExpression;
 
 import io.onedev.server.util.validation.Validatable;

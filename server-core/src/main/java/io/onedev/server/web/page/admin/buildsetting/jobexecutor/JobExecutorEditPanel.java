@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.admin.buildsetting.jobexecutor;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -152,8 +153,9 @@ abstract class JobExecutorEditPanel extends Panel {
 					if (testDataClass != null) {
 						if (testData == null || testData.getClass() != testDataClass) {
 							try {
-								testData = testDataClass.newInstance();
-							} catch (InstantiationException | IllegalAccessException e) {
+								testData = testDataClass.getDeclaredConstructor().newInstance();
+							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 								throw new RuntimeException(e);
 							}
 						}

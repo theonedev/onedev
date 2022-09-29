@@ -29,6 +29,9 @@ public interface JobManager {
 	
 	JobContext getJobContext(String jobToken, boolean mustExist);
 	
+	@Nullable
+	JobContext getJobContext(Build build);
+	
 	Map<CacheInstance, String> allocateJobCaches(String jobToken, CacheAllocationRequest request);
 	
 	@Nullable

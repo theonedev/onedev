@@ -2,7 +2,7 @@ package io.onedev.server.plugin.imports.gitlab;
 
 import java.util.List;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;

@@ -15,7 +15,7 @@ import javax.validation.Validator;
 
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;

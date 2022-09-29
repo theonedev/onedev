@@ -1,9 +1,10 @@
 package io.onedev.server.web.page.test;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.web.page.base.BasePage;
@@ -19,10 +20,10 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Link<Void>("test") {
+		add(new AjaxLink<Void>("test") {
 
 			@Override
-			public void onClick() {
+			public void onClick(AjaxRequestTarget target) {
 			}
 
 		});

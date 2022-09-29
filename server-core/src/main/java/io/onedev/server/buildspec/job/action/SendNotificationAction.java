@@ -1,6 +1,6 @@
 package io.onedev.server.buildspec.job.action;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.event.build.BuildFinished;

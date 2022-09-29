@@ -1,6 +1,7 @@
 package io.onedev.server.util;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,12 +106,12 @@ public class GroovyUtils {
 	    	Class<?> scriptClass = compile(scriptContent);
 			Script script;
 			try {
-				Object instance = scriptClass.newInstance();
+				Object instance = scriptClass.getDeclaredConstructor().newInstance();
 				if (!(instance instanceof Script))
 					return scriptClass;
 				else 
 					script = (Script) instance;					
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				throw new RuntimeException(e);
 			}
 			script.setBinding(getBinding(variables));

@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.issue;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.web.editable.annotation.Editable;

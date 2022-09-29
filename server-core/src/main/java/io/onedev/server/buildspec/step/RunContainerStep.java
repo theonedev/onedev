@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.RunContainerFacade;
@@ -75,7 +75,8 @@ public class RunContainerStep extends Step {
 		this.args = args;
 	}
 
-	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container")
+	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container. "
+			+ "Leave empty to use default working directory of the container")
 	@SafePath
 	@Interpolative(variableSuggester="suggestVariables")
 	@Nullable

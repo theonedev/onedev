@@ -1,6 +1,6 @@
 package io.onedev.server.plugin.report.clover;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.web.editable.annotation.Editable;

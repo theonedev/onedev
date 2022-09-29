@@ -14,11 +14,17 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
+import io.onedev.k8shelper.CompositeFacade;
+import io.onedev.k8shelper.LeafFacade;
+import io.onedev.k8shelper.LeafVisitor;
+import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.job.resource.ResourceHolder;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 public abstract class JobContext {
+	
+	private final String jobToken;
 	
 	private final JobExecutor jobExecutor;
 	
@@ -52,10 +58,11 @@ public abstract class JobContext {
 	
 	protected final Collection<Thread> serverStepThreads = new ArrayList<>();
 	
-	public JobContext(JobExecutor jobExecutor, String projectPath, Long projectId, Long buildNumber, 
-			File projectGitDir, List<Action> actions, int cpuRequirement, int memoryRequirement, 
-			String refName, ObjectId commitId, Collection<CacheSpec> caches, int retried, 
-			List<Service> services, TaskLogger logger) {
+	public JobContext(String jobToken, JobExecutor jobExecutor, String projectPath, Long projectId, 
+			Long buildNumber, File projectGitDir, List<Action> actions, int cpuRequirement, 
+			int memoryRequirement, String refName, ObjectId commitId, Collection<CacheSpec> caches, 
+			int retried, List<Service> services, TaskLogger logger) {
+		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
 		this.projectPath = projectPath;
 		this.projectId = projectId;
@@ -72,6 +79,10 @@ public abstract class JobContext {
 		this.logger = logger;
 	}
 	
+	public String getJobToken() {
+		return jobToken;
+	}
+
 	public JobExecutor getJobExecutor() {
 		return jobExecutor;
 	}
@@ -176,6 +187,25 @@ public abstract class JobContext {
 		resourceRequirements.put(ResourceHolder.MEMORY, memory);
 		
 		return resourceRequirements;
+	}
+
+	@Nullable
+	public LeafFacade getStep(List<Integer> stepPosition) {
+		StepFacade entryExecutable = new CompositeFacade(getActions());
+		
+		LeafVisitor<LeafFacade> visitor = new LeafVisitor<LeafFacade>() {
+
+			@Override
+			public LeafFacade visit(LeafFacade executable, List<Integer> position) {
+				if (position.equals(stepPosition))
+					return executable;
+				else
+					return null;
+			}
+			
+		};															
+		
+		return entryExecutable.traverse(visitor, new ArrayList<>());
 	}
 	
 }

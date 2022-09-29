@@ -292,6 +292,8 @@ import io.onedev.server.storage.DefaultStorageManager;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.tasklog.DefaultJobLogManager;
 import io.onedev.server.tasklog.JobLogManager;
+import io.onedev.server.terminal.DefaultTerminalManager;
+import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.DefaultBatchWorkManager;
 import io.onedev.server.util.concurrent.DefaultWorkExecutor;
@@ -716,6 +718,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueEventBroadcaster.class);
 		bind(BuildEventBroadcaster.class);
 		bind(UploadItemManager.class).to(DefaultUploadItemManager.class);
+		bind(TerminalManager.class).to(DefaultTerminalManager.class);
 		
 		bind(TaskButton.TaskFutureManager.class);
 		

@@ -30,7 +30,7 @@ import javax.ws.rs.core.Response;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.MetaDataKey;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;

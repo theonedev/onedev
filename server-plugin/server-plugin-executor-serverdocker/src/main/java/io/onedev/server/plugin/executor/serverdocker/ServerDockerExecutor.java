@@ -1,14 +1,14 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
-import static io.onedev.agent.DockerExecutorUtils.deleteDir;
 import static io.onedev.agent.DockerExecutorUtils.createNetwork;
+import static io.onedev.agent.DockerExecutorUtils.deleteDir;
 import static io.onedev.agent.DockerExecutorUtils.deleteNetwork;
 import static io.onedev.agent.DockerExecutorUtils.isUseProcessIsolation;
 import static io.onedev.agent.DockerExecutorUtils.newDockerKiller;
 import static io.onedev.agent.DockerExecutorUtils.startService;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
-import static io.onedev.k8shelper.KubernetesHelper.stringifyPosition;
+import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
 
 import java.io.File;
 import java.io.Serializable;
@@ -24,9 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -69,6 +70,8 @@ import io.onedev.server.job.resource.ResourceManager;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
+import io.onedev.server.terminal.CommandlineSession;
+import io.onedev.server.terminal.ShellSession;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -98,8 +101,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private transient volatile File hostBuildHome;
 	
+	private transient volatile LeafFacade runningStep;
+	
+	private transient volatile String containerName;
+	
 	private static transient volatile String hostInstallPath;
-
+	
 	@Editable(order=400, description="Specify login information for docker registries if necessary")
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
@@ -161,7 +168,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 	
 	@Override
-	public void execute(String jobToken, JobContext jobContext) {
+	public void execute(JobContext jobContext) {
 		if (OneDev.getK8sService() != null) {
 			throw new ExplicitException(""
 					+ "OneDev running inside kubernetes cluster does not support server docker executor. "
@@ -189,7 +196,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 						@Override
 						protected Map<CacheInstance, String> allocate(CacheAllocationRequest request) {
-							return jobManager.allocateJobCaches(jobToken, request);
+							return jobManager.allocateJobCaches(jobContext.getJobToken(), request);
 						}
 
 						@Override
@@ -239,15 +246,15 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										List<String> arguments, Map<String, String> environments, 
 										@Nullable String workingDir, Map<String, String> volumeMounts, 
 										List<Integer> position, boolean useTTY) {
-									String containerName = network + "-step-" + stringifyPosition(position);
-									Commandline docker = newDocker();
-									docker.addArgs("run", "--name=" + containerName, "--network=" + network);
-									if (getRunOptions() != null)
-										docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
-									
 									// Uninstall symbol links as docker can not process it well
 									cache.uninstallSymbolinks(hostWorkspace);
+									containerName = network + "-step-" + stringifyStepPosition(position);
 									try {
+										Commandline docker = newDocker();
+										docker.addArgs("run", "--name=" + containerName, "--network=" + network);
+										if (getRunOptions() != null)
+											docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+										
 										docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
 										
 										for (Map.Entry<String, String> entry: volumeMounts.entrySet()) {
@@ -310,106 +317,112 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												containerName, jobLogger));
 										return result.getReturnCode();
 									} finally {
+										containerName = null;
 										cache.installSymbolinks(hostWorkspace);
 									}
 								}
 								
 								@Override
 								public boolean execute(LeafFacade facade, List<Integer> position) {
-									String stepNames = entryFacade.getNamesAsString(position);
-									jobLogger.notice("Running step \"" + stepNames + "\"...");
-									
-									if (facade instanceof CommandFacade) {
-										CommandFacade commandFacade = (CommandFacade) facade;
-
-										OsExecution execution = commandFacade.getExecution(osInfo);
-										if (execution.getImage() == null) {
-											throw new ExplicitException("This step can only be executed by server shell "
-													+ "executor or remote shell executor");
-										}
+									runningStep = facade;
+									try {
+										String stepNames = entryFacade.getNamesAsString(position);
+										jobLogger.notice("Running step \"" + stepNames + "\"...");
 										
-										Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
-												hostBuildHome, commandFacade, osInfo, hostAuthInfoHome.get() != null);
-										
-										int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(), 
-												entrypoint.arguments(), new HashMap<>(), null, new HashMap<>(), 
-												position, commandFacade.isUseTTY());
-										
-										if (exitCode != 0) {
-											jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + exitCode);
-											return false;
-										}
-									} else if (facade instanceof BuildImageFacade || facade instanceof BuildImageFacade) {
-										DockerExecutorUtils.buildImage(newDocker(), (BuildImageFacade) facade, 
-												hostBuildHome, jobLogger);
-									} else if (facade instanceof RunContainerFacade) {
-										RunContainerFacade rubContainerFacade = (RunContainerFacade) facade;
-										OsContainer container = rubContainerFacade.getContainer(osInfo);
-										List<String> arguments = new ArrayList<>();
-										if (container.getArgs() != null)
-											arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
-										int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(), 
-												container.getWorkingDir(), container.getVolumeMounts(), position, rubContainerFacade.isUseTTY());
-										if (exitCode != 0) {
-											jobLogger.error("Step \"" + stepNames + "\" is failed: Container exited with code " + exitCode);
-											return false;
-										} 
-									} else if (facade instanceof CheckoutFacade) {
-										try {
-											CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
-											jobLogger.log("Checking out code...");
-											if (hostAuthInfoHome.get() == null)
-												hostAuthInfoHome.set(FileUtils.createTempDir());
-											Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
-											
-											checkoutFacade.setupWorkingDir(git, hostWorkspace);
-											git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
+										if (facade instanceof CommandFacade) {
+											CommandFacade commandFacade = (CommandFacade) facade;
 	
-											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-											
-											cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-											try {
-												List<String> trustCertContent = getTrustCertContent();
-												if (!trustCertContent.isEmpty()) {
-													installGitCert(new File(hostAuthInfoHome.get(), "trust-cert.pem"), trustCertContent, 
-															git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-												}
-		
-												int cloneDepth = checkoutFacade.getCloneDepth();
-												
-												cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
-														cloneInfo.getCloneUrl(), jobContext.getRefName(), jobContext.getCommitId().name(), 
-														checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
-														cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-											} finally {
-												git.clearArgs();
-												git.addArgs("config", "--global", "--unset", "core.sshCommand");
-												ExecutionResult result = git.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-												if (result.getReturnCode() != 5 && result.getReturnCode() != 0)
-													result.checkReturnCode();
+											OsExecution execution = commandFacade.getExecution(osInfo);
+											if (execution.getImage() == null) {
+												throw new ExplicitException("This step can only be executed by server shell "
+														+ "executor or remote shell executor");
 											}
-										} catch (Exception e) {
-											jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
-											return false;
-										}
-									} else {
-										ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
-										try {
-											serverSideFacade.execute(hostBuildHome, new ServerSideFacade.Runner() {
+											
+											Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
+													hostBuildHome, commandFacade, osInfo, hostAuthInfoHome.get() != null);
+											
+											int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(), 
+													entrypoint.arguments(), new HashMap<>(), null, new HashMap<>(), 
+													position, commandFacade.isUseTTY());
+											
+											if (exitCode != 0) {
+												jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + exitCode);
+												return false;
+											}
+										} else if (facade instanceof BuildImageFacade || facade instanceof BuildImageFacade) {
+											DockerExecutorUtils.buildImage(newDocker(), (BuildImageFacade) facade, 
+													hostBuildHome, jobLogger);
+										} else if (facade instanceof RunContainerFacade) {
+											RunContainerFacade rubContainerFacade = (RunContainerFacade) facade;
+											OsContainer container = rubContainerFacade.getContainer(osInfo);
+											List<String> arguments = new ArrayList<>();
+											if (container.getArgs() != null)
+												arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
+											int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(), 
+													container.getWorkingDir(), container.getVolumeMounts(), position, rubContainerFacade.isUseTTY());
+											if (exitCode != 0) {
+												jobLogger.error("Step \"" + stepNames + "\" is failed: Container exited with code " + exitCode);
+												return false;
+											} 
+										} else if (facade instanceof CheckoutFacade) {
+											try {
+												CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
+												jobLogger.log("Checking out code...");
+												if (hostAuthInfoHome.get() == null)
+													hostAuthInfoHome.set(FileUtils.createTempDir());
+												Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
 												
-												@Override
-												public Map<String, byte[]> run(File inputDir, Map<String, String> placeholderValues) {
-													return jobContext.runServerStep(position, inputDir, placeholderValues, jobLogger);
+												checkoutFacade.setupWorkingDir(git, hostWorkspace);
+												git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
+		
+												CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
+												
+												cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
+												try {
+													List<String> trustCertContent = getTrustCertContent();
+													if (!trustCertContent.isEmpty()) {
+														installGitCert(new File(hostAuthInfoHome.get(), "trust-cert.pem"), trustCertContent, 
+																git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
+													}
+			
+													int cloneDepth = checkoutFacade.getCloneDepth();
+													
+													cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
+															cloneInfo.getCloneUrl(), jobContext.getRefName(), jobContext.getCommitId().name(), 
+															checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
+															cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
+												} finally {
+													git.clearArgs();
+													git.addArgs("config", "--global", "--unset", "core.sshCommand");
+													ExecutionResult result = git.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
+													if (result.getReturnCode() != 5 && result.getReturnCode() != 0)
+														result.checkReturnCode();
 												}
-												
-											});
-										} catch (Exception e) {
-											jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
-											return false;
+											} catch (Exception e) {
+												jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+												return false;
+											}
+										} else {
+											ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
+											try {
+												serverSideFacade.execute(hostBuildHome, new ServerSideFacade.Runner() {
+													
+													@Override
+													public Map<String, byte[]> run(File inputDir, Map<String, String> placeholderValues) {
+														return jobContext.runServerStep(position, inputDir, placeholderValues, jobLogger);
+													}
+													
+												});
+											} catch (Exception e) {
+												jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+												return false;
+											}
 										}
+										jobLogger.success("Step \"" + stepNames + "\" is successful");
+										return true;
+									} finally {
+										runningStep = null;
 									}
-									jobLogger.success("Step \"" + stepNames + "\" is successful");
-									return true;
 								}
 
 								@Override
@@ -443,7 +456,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public void resume() {
+	public void resume(JobContext jobContext) {
 		if (hostBuildHome != null) synchronized (hostBuildHome) {
 			if (hostBuildHome.exists()) 
 				FileUtils.touchFile(new File(hostBuildHome, "continue"));
@@ -630,6 +643,34 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			this.dockerImage = dockerImage;
 		}
 		
+	}
+
+	@Override
+	public ShellSession openShell(IWebSocketConnection connection, JobContext jobContext) {
+		String containerNameCopy = containerName;
+		if (containerNameCopy != null) {
+			Commandline docker = newDocker();
+			docker.addArgs("exec", "-it", containerNameCopy);
+			if (runningStep instanceof CommandFacade) {
+				CommandFacade commandStep = (CommandFacade) runningStep;
+				docker.addArgs(commandStep.getShell(SystemUtils.IS_OS_WINDOWS, null));
+			} else if (SystemUtils.IS_OS_WINDOWS) {
+				docker.addArgs("cmd");
+			} else {
+				docker.addArgs("sh");
+			}
+			return new CommandlineSession(connection, docker);
+		} else if (hostBuildHome != null) {
+			Commandline shell;
+			if (SystemUtils.IS_OS_WINDOWS)
+				shell = new Commandline("cmd");
+			else
+				shell = new Commandline("sh");
+			shell.workingDir(new File(hostBuildHome, "workspace"));
+			return new CommandlineSession(connection, shell);
+		} else {
+			throw new ExplicitException("Shell not ready");
+		}
 	}
 
 }

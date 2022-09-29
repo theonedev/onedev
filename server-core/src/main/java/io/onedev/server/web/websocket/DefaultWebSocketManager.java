@@ -111,7 +111,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	}
 	
 	private void notifyObservables(IWebSocketConnection connection, Collection<String> observables) {
-		String message = OBSERVABLE_CHANGED + ":" + StringUtils.join(observables, "\n"); 
+		String message = WebSocketMessages.OBSERVABLE_CHANGED + ":" + StringUtils.join(observables, "\n"); 
 		try {
 			connection.sendMessage(message);
 		} catch (Exception e) {
@@ -158,7 +158,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 				for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
 					if (connection.isOpen()) {
 						try {
-							connection.sendMessage(WebSocketManager.KEEP_ALIVE);
+							connection.sendMessage(WebSocketMessages.KEEP_ALIVE);
 						} catch (Exception e) {
 							logger.error("Error sending websocket keep alive message", e);
 						}

@@ -2,7 +2,7 @@ package io.onedev.server.web.component.suggestionapply;
 
 import java.io.Serializable;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.BranchChoice;
 import io.onedev.server.web.editable.annotation.Editable;

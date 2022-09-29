@@ -10,6 +10,7 @@ import java.io.ObjectOutput;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
@@ -474,7 +475,7 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 			getRootElement().setName(xstream.getMapper().serializedClass(beanClass));
 		if (getVersion() != null) {
 			try {
-				Object migrator = beanClass.newInstance();
+				Object migrator = beanClass.getDeclaredConstructor().newInstance();
 				if (MigrationHelper.migrate(getVersion(), migrator, this)) {
 					setVersion(MigrationHelper.getVersion(migrator.getClass()));
 					Object bean = xstream.unmarshal(domReader);
@@ -482,7 +483,8 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 				} else {
 					return (T) xstream.unmarshal(domReader);
 				}
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException 
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
