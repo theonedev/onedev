@@ -5,13 +5,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.io.IOUtils;
+import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
@@ -85,12 +85,9 @@ public class AttachmentResource extends AbstractResource {
 		
 		ResourceResponse response = new ResourceResponse();
 		response.setContentLength(attachmentFile.length());
-		try {
-			response.setContentType(Files.probeContentType(attachmentFile.toPath()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
+		
+		response.getHeaders().addHeader("X-Content-Type-Options", "nosniff");
+		response.setContentType(MimeTypes.OCTET_STREAM);
 		response.setFileName(attachment);
 		
 		response.setWriteCallback(new WriteCallback() {

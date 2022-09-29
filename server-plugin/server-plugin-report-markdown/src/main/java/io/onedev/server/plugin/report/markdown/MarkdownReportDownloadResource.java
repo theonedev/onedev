@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -16,6 +15,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.io.IOUtils;
+import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
@@ -89,11 +89,8 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		}
 			
 		ResourceResponse response = new ResourceResponse();
-	    try {
-			response.setContentType(Files.probeContentType(markdownFile.toPath()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}		
+		response.getHeaders().addHeader("X-Content-Type-Options", "nosniff");
+		response.setContentType(MimeTypes.OCTET_STREAM);
 		
 		response.disableCaching();
 		
