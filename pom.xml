@@ -620,7 +620,7 @@
 		<lucene.version>8.7.0</lucene.version>
 		<shiro.version>1.8.0</shiro.version>
 		<jgit.version>5.13.0.202109080827-r</jgit.version>
-		<flexmark.version>0.62.2</flexmark.version>
+		<flexmark.version>0.64.0</flexmark.version>
 		<groovy.version>3.0.10</groovy.version>
 		<servlet.version>3.1.0</servlet.version>
 		<jackson.version>2.13.2</jackson.version>
