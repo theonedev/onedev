@@ -1755,6 +1755,8 @@ public class Project extends AbstractEntity {
 	}
 	
 	public String saveAttachment(String attachmentGroup, String suggestedAttachmentName, InputStream attachmentStream) {
+		suggestedAttachmentName = suggestedAttachmentName.replace("..", "-");
+		
 		String attachmentName = suggestedAttachmentName;
 		File attachmentDir = OneDev.getInstance(AttachmentStorageManager.class).getGroupDir(this, attachmentGroup);
 
