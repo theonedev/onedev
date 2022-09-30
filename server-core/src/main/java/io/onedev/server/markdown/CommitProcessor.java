@@ -29,7 +29,7 @@ public class CommitProcessor implements MarkdownProcessor {
 	private static final Pattern PATTERN_COMMIT = Pattern.compile("(^|\\s)([a-z0-9]{40})($|\\s)");
 	
 	@Override
-	public void process(Document rendered, @Nullable Project project, 
+	public void process(Document document, @Nullable Project project, 
 			@Nullable BlobRenderContext blobRenderContext, 
 			@Nullable SuggestionSupport suggestionSupport) {
 		if (RequestCycle.get() != null) {
@@ -41,7 +41,7 @@ public class CommitProcessor implements MarkdownProcessor {
 				}
 			};
 			
-			NodeTraversor.traverse(visitor, rendered);
+			NodeTraversor.traverse(visitor, document);
 			
 			for (TextNode node : visitor.getMatchedNodes()) {
 				Matcher matcher = PATTERN_COMMIT.matcher(node.getWholeText());

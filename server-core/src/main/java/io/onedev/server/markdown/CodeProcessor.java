@@ -26,7 +26,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 public class CodeProcessor implements MarkdownProcessor {
 	
 	@Override
-	public void process(Document rendered, @Nullable Project project, 
+	public void process(Document document, @Nullable Project project, 
 			@Nullable BlobRenderContext blobRenderContext, 
 			@Nullable SuggestionSupport suggestionSupport) {
 		Collection<Element> codeElements = new ArrayList<>();
@@ -48,7 +48,7 @@ public class CodeProcessor implements MarkdownProcessor {
 				}
 			}
 			
-		}, rendered);
+		}, document);
 		
 		for (Element codeElement: codeElements) {
 			String language = null;

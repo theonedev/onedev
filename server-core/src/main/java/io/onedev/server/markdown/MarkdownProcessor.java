@@ -12,7 +12,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 @ExtensionPoint
 public interface MarkdownProcessor {
 	
-	void process(Document rendered, @Nullable Project project, 
+	void process(Document document, @Nullable Project project, 
 			@Nullable BlobRenderContext blobRenderContext, 
 			@Nullable SuggestionSupport suggestionSupport);
 	

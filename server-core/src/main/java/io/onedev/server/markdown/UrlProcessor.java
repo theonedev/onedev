@@ -38,7 +38,7 @@ public class UrlProcessor implements MarkdownProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(UrlProcessor.class);
 	
 	@Override
-	public void process(Document rendered, Project project, 
+	public void process(Document document, Project project, 
 			@Nullable BlobRenderContext blobRenderContext, 
 			@Nullable SuggestionSupport suggestionSupport) {
 		if (RequestCycle.get() != null && blobRenderContext != null && project != null) {
@@ -118,7 +118,7 @@ public class UrlProcessor implements MarkdownProcessor {
 							throw ExceptionUtils.unchecked(e);
 					}
 				}
-			}, rendered);
+			}, document);
 		}
 	}
 
