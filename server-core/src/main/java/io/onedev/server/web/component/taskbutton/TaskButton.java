@@ -265,7 +265,7 @@ public abstract class TaskButton extends AjaxButton {
 	 * @param logger
 	 * @return html display to user showing task execution result
 	 */
-	protected abstract String runTask(TaskLogger logger);
+	protected abstract String runTask(TaskLogger logger) throws InterruptedException;
 
 	@Singleton
 	public static class TaskFutureManager implements SchedulableTask {

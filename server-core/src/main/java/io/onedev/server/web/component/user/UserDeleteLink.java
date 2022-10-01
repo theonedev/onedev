@@ -8,7 +8,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.page.admin.user.UserListPage;
+import io.onedev.server.web.page.admin.usermanagement.UserListPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")

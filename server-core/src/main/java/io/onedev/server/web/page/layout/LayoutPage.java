@@ -60,9 +60,9 @@ import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
-import io.onedev.server.web.page.admin.group.GroupListPage;
-import io.onedev.server.web.page.admin.group.GroupPage;
-import io.onedev.server.web.page.admin.group.create.NewGroupPage;
+import io.onedev.server.web.page.admin.groupmanagement.GroupListPage;
+import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
+import io.onedev.server.web.page.admin.groupmanagement.create.NewGroupPage;
 import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardListPage;
 import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
@@ -74,9 +74,9 @@ import io.onedev.server.web.page.admin.notificationtemplatesetting.IssueNotifica
 import io.onedev.server.web.page.admin.notificationtemplatesetting.PullRequestNotificationTemplatePage;
 import io.onedev.server.web.page.admin.performancesetting.PerformanceSettingPage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
-import io.onedev.server.web.page.admin.role.NewRolePage;
-import io.onedev.server.web.page.admin.role.RoleDetailPage;
-import io.onedev.server.web.page.admin.role.RoleListPage;
+import io.onedev.server.web.page.admin.rolemanagement.NewRolePage;
+import io.onedev.server.web.page.admin.rolemanagement.RoleDetailPage;
+import io.onedev.server.web.page.admin.rolemanagement.RoleListPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
@@ -84,9 +84,11 @@ import io.onedev.server.web.page.admin.servicedesk.ServiceDeskSettingPage;
 import io.onedev.server.web.page.admin.sshserverkey.SshServerKeyPage;
 import io.onedev.server.web.page.admin.ssosetting.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
-import io.onedev.server.web.page.admin.user.UserListPage;
-import io.onedev.server.web.page.admin.user.UserPage;
-import io.onedev.server.web.page.admin.user.create.NewUserPage;
+import io.onedev.server.web.page.admin.usermanagement.InvitationListPage;
+import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
+import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
+import io.onedev.server.web.page.admin.usermanagement.UserListPage;
+import io.onedev.server.web.page.admin.usermanagement.UserPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
@@ -155,8 +157,12 @@ public abstract class LayoutPage extends BasePage {
 							SystemSettingPage.class, new PageParameters()));
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Security Setting", 
 							SecuritySettingPage.class, new PageParameters()));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "User Management", UserListPage.class, 
+					List<SidebarMenuItem> userManagementMenuItems = new ArrayList<>();
+					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Accounts", UserListPage.class, 
 							new PageParameters(), Lists.newArrayList(NewUserPage.class, UserPage.class)));
+					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Invitations", InvitationListPage.class, 
+							new PageParameters(), Lists.newArrayList(NewInvitationPage.class)));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "User Management", userManagementMenuItems));
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Role Management", RoleListPage.class, 
 							new PageParameters(), Lists.newArrayList(NewRolePage.class, RoleDetailPage.class)));
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Group Management", GroupListPage.class, 

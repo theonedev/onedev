@@ -1,0 +1,17 @@
+<wicket:extend>
+	<div class="card">
+		<div class="card-body">
+			<div class="d-flex align-items-center mb-4">
+				<div class="clearable-wrapper mr-3 flex-grow-1">
+					<input wicket:id="filterInvitations" class="form-control search" placeholder="Filter">
+				</div>
+				<a wicket:id="addNew" class="btn btn-icon btn-primary flex-shrink-0"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			</div>
+			<table wicket:id="invitations" class="invitations table table-hover"></table>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="actionFrag">
+		<a wicket:id="resend" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Resend invitation"><wicket:svg href="mail" class="icon align-middle"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Cancel invitation"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
+	</wicket:fragment>
+</wicket:extend>

@@ -1,49 +1,63 @@
 package io.onedev.server.web.page.simple.security;
 
 import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.SubmitLink;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserInvitationManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
+import io.onedev.server.model.UserInvitation;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.HomePage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.simple.SimplePage;
-import io.onedev.server.web.util.editablebean.NewUserBean;
 
 @SuppressWarnings("serial")
-public class SignUpPage extends SimplePage {
+public class CreateUserFromInvitationPage extends SimplePage {
+
+	private final String PARAM_INVITATION_CODE = "invitationCode";
 	
-	public SignUpPage(PageParameters params) {
+	private final IModel<UserInvitation> invitationModel;
+	
+	public CreateUserFromInvitationPage(PageParameters params) {
 		super(params);
 		
-		if (!OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister())
-			throw new UnauthenticatedException("User sign-up is disabled");
-		if (getLoginUser() != null)
-			throw new IllegalStateException("Can not sign up a user while signed in");
+		String invitationCode = params.get(PARAM_INVITATION_CODE).toString();
+		invitationModel = new LoadableDetachableModel<UserInvitation>() {
+
+			@Override
+			protected UserInvitation load() {
+				UserInvitation invitation = getInvitationManager().findByInvitationCode(invitationCode);
+				if (invitation == null)
+					throw new ExplicitException("Invalid invitation code");
+				else if (getEmailAddressManager().findByValue(invitation.getEmailAddress()) != null)
+					throw new ExplicitException("Email address already used: " + invitation.getEmailAddress());
+				else
+					return invitation;
+			}
+			
+		};
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-	
-		NewUserBean newUserBean = new NewUserBean();
-		BeanEditor editor = BeanContext.edit("editor", newUserBean);
+
+		User newUser = new User();
+		BeanEditor editor = BeanContext.edit("editor", newUser);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -51,25 +65,22 @@ public class SignUpPage extends SimplePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				User userWithSameName = getUserManager().findByName(newUserBean.getName());
+				User userWithSameName = getUserManager().findByName(newUser.getName());
 				if (userWithSameName != null) {
 					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
 							"Login name already used by another account");
 				} 
 				
-				if (getEmailAddressManager().findByValue(newUserBean.getEmailAddress()) != null) {
-					editor.error(new Path(new PathNode.Named(NewUserBean.PROP_EMAIL_ADDRESS)),
-							"Email address already used by another user");
-				} 
-				if (editor.isValid()) {
+				if (editor.isValid()){
 					User user = new User();
-					user.setName(newUserBean.getName());
-					user.setFullName(newUserBean.getFullName());
-					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(newUserBean.getPassword()));
+					user.setName(newUser.getName());
+					user.setFullName(newUser.getFullName());
+					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(newUser.getPassword()));
 					
 					EmailAddress emailAddress = new EmailAddress();
-					emailAddress.setValue(newUserBean.getEmailAddress());
+					emailAddress.setValue(invitationModel.getObject().getEmailAddress());
 					emailAddress.setOwner(user);
+					emailAddress.setVerificationCode(null);
 					
 					OneDev.getInstance(TransactionManager.class).run(new Runnable() {
 
@@ -77,11 +88,12 @@ public class SignUpPage extends SimplePage {
 						public void run() {
 							getUserManager().save(user);
 							getEmailAddressManager().save(emailAddress);
+							getInvitationManager().delete(invitationModel.getObject());
 						}
 						
 					});
 					
-					Session.get().success("Account sign up successfully");
+					Session.get().success("Account set up successfully");
 					SecurityUtils.getSubject().runAs(user.getPrincipals());
 					setResponsePage(MyAvatarPage.class);
 				}
@@ -89,19 +101,9 @@ public class SignUpPage extends SimplePage {
 			
 		};
 		form.add(editor);
-		
-		form.add(new SubmitLink("save"));
-		form.add(new Link<Void>("cancel") {
-
-			@Override
-			public void onClick() {
-				setResponsePage(HomePage.class);
-			}
-			
-		});
 		add(form);
 	}
-	
+
 	private UserManager getUserManager() {
 		return OneDev.getInstance(UserManager.class);
 	}
@@ -109,15 +111,25 @@ public class SignUpPage extends SimplePage {
 	private EmailAddressManager getEmailAddressManager() {
 		return OneDev.getInstance(EmailAddressManager.class);
 	}
+	
+	private UserInvitationManager getInvitationManager() {
+		return OneDev.getInstance(UserInvitationManager.class);
+	}
+
+	@Override
+	protected void onDetach() {
+		invitationModel.detach();
+		super.onDetach();
+	}
 
 	@Override
 	protected String getTitle() {
-		return "Sign Up";
+		return "Set Up Your Account";
 	}
 
 	@Override
 	protected String getSubTitle() {
-		return "Enter your details to create your account";
+		return invitationModel.getObject().getEmailAddress();
 	}
 
 }

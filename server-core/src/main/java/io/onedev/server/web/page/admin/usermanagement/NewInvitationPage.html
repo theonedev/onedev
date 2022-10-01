@@ -1,0 +1,19 @@
+<wicket:extend>
+	<div class="card">
+		<div class="card-body">
+			<div wicket:id="content"></div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="inviteFrag">
+		<form wicket:id="form">
+			<div wicket:id="editor" class="mb-4"></div>
+			<div wicket:id="feedback"></div>
+			<div class="d-flex align-items-center">
+				<a wicket:id="invite" class="dirty-aware btn btn-primary">Invite</a>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noMailSettingFrag">
+		<div class="text-warning font-weight-bolder">Please configure <a wicket:id="mailSetting">mail setting</a> first</div>
+	</wicket:fragment>
+</wicket:extend>

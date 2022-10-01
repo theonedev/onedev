@@ -1,5 +1,7 @@
 package io.onedev.server.web.ajaxlistener;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.request.IRequestHandler;
@@ -27,7 +29,7 @@ public class AttachAjaxIndicatorListener implements IAjaxCallListener {
 	private static final ResourceReference DARK_INDICATOR = new PackageResourceReference(
 			ImageScope.class, "dark-ajax-indicator.gif");
 	
-	public AttachAjaxIndicatorListener(Component attachTo, AttachMode attachMode, boolean indicateSuccessful) {
+	public AttachAjaxIndicatorListener(@Nullable Component attachTo, AttachMode attachMode, boolean indicateSuccessful) {
 		this.attachTo = attachTo;
 		this.attachMode = attachMode;
 		this.indicateSuccessful = indicateSuccessful;

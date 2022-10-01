@@ -6,7 +6,7 @@ import java.util.Map;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.web.page.admin.group.GroupPage;
+import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 
 public class GroupParam extends ParamSegment {
 

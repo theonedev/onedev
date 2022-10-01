@@ -6,7 +6,7 @@ import java.util.Map;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
-import io.onedev.server.web.page.admin.role.RoleDetailPage;
+import io.onedev.server.web.page.admin.rolemanagement.RoleDetailPage;
 
 public class RoleParam extends ParamSegment {
 
