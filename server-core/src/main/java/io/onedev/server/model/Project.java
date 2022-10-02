@@ -45,6 +45,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Validator;
+import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
@@ -76,7 +77,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
-import javax.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,6 +126,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
+import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.TagProtection;
@@ -178,7 +179,7 @@ import io.onedev.server.web.util.WicketUtils;
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate 
 @Editable
-public class Project extends AbstractEntity {
+public class Project extends AbstractEntity implements LabelSupport<ProjectLabel> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -206,6 +207,8 @@ public class Project extends AbstractEntity {
 	
 	public static final String PROP_FORKED_FROM = "forkedFrom";
 	
+	public static final String NAME_LABEL = "Label";
+	
 	public static final String PROP_PARENT = "parent";
 	
 	public static final String PROP_USER_AUTHORIZATIONS = "userAuthorizations";
@@ -222,8 +225,8 @@ public class Project extends AbstractEntity {
 	
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
-	public static final List<String> QUERY_FIELDS = 
-			Lists.newArrayList(NAME_NAME, NAME_PATH, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
+	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
+			NAME_NAME, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_PATH, PROP_PATH,
@@ -308,6 +311,10 @@ public class Project extends AbstractEntity {
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Issue> issues = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<ProjectLabel> labels = new ArrayList<>();
 	
     @OneToMany(mappedBy="parent")
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -544,6 +551,14 @@ public class Project extends AbstractEntity {
 
 	public void setForkedFrom(Project forkedFrom) {
 		this.forkedFrom = forkedFrom;
+	}
+
+	public Collection<ProjectLabel> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(Collection<ProjectLabel> labels) {
+		this.labels = labels;
 	}
 
 	@Nullable

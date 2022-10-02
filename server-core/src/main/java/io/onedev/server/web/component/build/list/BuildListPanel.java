@@ -57,6 +57,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.BuildLabel;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.EntityQuery;
@@ -79,6 +80,7 @@ import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ActionablePageLink;
@@ -979,7 +981,7 @@ public abstract class BuildListPanel extends Panel {
 					}
 					
 				}));
-				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
+				link.add(new Label("text", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
@@ -999,6 +1001,9 @@ public abstract class BuildListPanel extends Panel {
 					
 				}));
 				fragment.add(link);
+				
+				fragment.add(new EntityLabelsPanel<BuildLabel>("labels", rowModel));
+				
 				fragment.add(newBuildObserver(buildId));
 				fragment.setOutputMarkupId(true);
 				cellItem.add(fragment);

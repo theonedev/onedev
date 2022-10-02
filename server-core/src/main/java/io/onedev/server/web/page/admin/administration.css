@@ -22,3 +22,9 @@
 .dark-mode .logo-preview svg {
 	color: var(--light);
 }
+
+.label-management .drag-indicator, 
+.label-management th.property-id, 
+.label-management td.property-id {
+	display: none;
+}

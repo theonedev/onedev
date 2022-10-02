@@ -57,6 +57,7 @@ import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectLabel;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntitySort;
@@ -77,6 +78,7 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -1043,10 +1045,12 @@ public class ProjectListPanel extends Panel {
 				
 				projectLink.add(new ProjectAvatar("avatar", projectId));
 				if (getParentProject() != null)
-					projectLink.add(new Label("label", project.getPath().substring(getParentProject().getPath().length()+1)));
+					projectLink.add(new Label("text", project.getPath().substring(getParentProject().getPath().length()+1)));
 				else
-					projectLink.add(new Label("label", project.getPath()));
+					projectLink.add(new Label("text", project.getPath()));
 				fragment.add(projectLink);
+
+				fragment.add(new EntityLabelsPanel<ProjectLabel>("labels", rowModel));
 				
 				fragment.add(new Label("lastUpdate", "Updated " + DateUtils.formatAge(project.getUpdateDate())));
 				

@@ -91,6 +91,9 @@ ul>li>a.code-comments.new .icon {
 .pull-request-detail .more-info .assignments .right {
 	margin-left: auto;
 }
+.pull-request-detail .more-info .labels>div .icon {
+	display: none;
+}
 .pull-request-detail .more-info .submission td.name {
 	padding-left: 0;
 }

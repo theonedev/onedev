@@ -23,8 +23,10 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -34,6 +36,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import io.onedev.server.web.util.editablebean.LabelsBean;
 
 @SuppressWarnings("serial")
 public class GeneralProjectSettingPage extends ProjectSettingPage {
@@ -53,6 +56,8 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());
+		
+		LabelsBean labelsBean = LabelsBean.of(getProject());
 		
 		ParentBean parentBean = new ParentBean();
 		if (getProject().getParent() != null)
@@ -77,6 +82,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		}, properties, false);
 		
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);		
+		BeanEditor labelsEditor = BeanContext.edit("labelsEditor", labelsBean);
 		BeanEditor parentEditor = BeanContext.edit("parentEditor", parentBean);
 		
 		Form<?> form = new Form<Void>("form") {
@@ -125,7 +131,15 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 								"This name has already been used by another project");
 					} else {
 						project.setDefaultRole(defaultRoleBean.getRole());
-						getProjectManager().save(project);
+						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+
+							@Override
+							public void run() {
+								getProjectManager().save(project);
+								OneDev.getInstance(ProjectLabelManager.class).sync(getProject(), labelsBean.getLabels());
+							}
+							
+						});
 						Session.get().success("General setting has been updated");
 						setResponsePage(GeneralProjectSettingPage.class, paramsOf(project));
 					}
@@ -136,6 +150,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		};
 		form.add(editor);
 		form.add(defaultRoleEditor);
+		form.add(labelsEditor);
 		form.add(parentEditor);
 		
 		form.add(new AjaxLink<Void>("delete") {

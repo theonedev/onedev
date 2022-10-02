@@ -69,6 +69,7 @@ import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateL
 import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
+import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.notificationtemplatesetting.IssueNotificationTemplatePage;
 import io.onedev.server.web.page.admin.notificationtemplatesetting.PullRequestNotificationTemplatePage;
@@ -221,6 +222,9 @@ public abstract class LayoutPage extends BasePage {
 					
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Notification Templates", 
 							notificationTemplateSettingMenuItems));
+					
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Label Management", 
+							LabelManagementPage.class, new PageParameters()));
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Performance Setting", 
 							PerformanceSettingPage.class, new PageParameters()));

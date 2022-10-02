@@ -95,6 +95,8 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestProjectPaths(matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(Project.NAME_LABEL)) {
+										return SuggestionUtils.suggestLabels(matchWith);
 									} else if (fieldName.equals(Project.NAME_SERVICE_DESK_NAME)) {
 										if (!matchWith.contains("*")) {
 											ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);

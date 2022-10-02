@@ -18,8 +18,10 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -28,6 +30,7 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
+import io.onedev.server.web.util.editablebean.LabelsBean;
 
 @SuppressWarnings("serial")
 public abstract class ForkOptionPanel extends Panel {
@@ -65,10 +68,13 @@ public abstract class ForkOptionPanel extends Panel {
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());
 		
+		LabelsBean labelsBean = LabelsBean.of(getProject());
+		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_ISSUE_MANAGEMENT);
 		
 		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);
+		BeanEditor labelsEditor = BeanContext.edit("labelsEditor", labelsBean);
 		BeanEditor parentEditor = BeanContext.edit("parentEditor", parentBean);
 		
 		Form<?> form = new Form<Void>("form");
@@ -76,6 +82,7 @@ public abstract class ForkOptionPanel extends Panel {
 		
 		form.add(editor);
 		form.add(defaultRoleEditor);
+		form.add(labelsEditor);
 		form.add(parentEditor);
 		
 		form.add(new AjaxButton("save") {
@@ -98,7 +105,16 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setDescription(editProject.getDescription());
 						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setDefaultRole(defaultRoleBean.getRole());
-						getProjectManager().fork(getProject(), newProject);
+						
+						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+
+							@Override
+							public void run() {
+								getProjectManager().fork(getProject(), newProject);
+								OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
+							}
+							
+						});
 						Session.get().success("Project forked");
 						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
 					}

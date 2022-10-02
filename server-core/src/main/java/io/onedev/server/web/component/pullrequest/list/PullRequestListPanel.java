@@ -52,6 +52,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.LastUpdate;
@@ -67,6 +68,7 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -740,6 +742,8 @@ public abstract class PullRequestListPanel extends Panel {
 					}
 					
 				}.setEscapeModelStrings(false).setOutputMarkupId(true));
+				
+				fragment.add(new EntityLabelsPanel<PullRequestLabel>("labels", rowModel));
 
 				RepeatingView reviewsView = new RepeatingView("reviews");
 				for (PullRequestReview review: request.getSortedReviews()) {

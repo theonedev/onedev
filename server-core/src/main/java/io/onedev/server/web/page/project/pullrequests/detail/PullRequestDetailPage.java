@@ -5,6 +5,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_ME
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -59,6 +60,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestLabelManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
@@ -70,6 +72,7 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestWatch;
@@ -90,6 +93,7 @@ import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.branch.BranchLink;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
@@ -112,6 +116,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -127,6 +132,7 @@ import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.ReferenceTransformer;
+import io.onedev.server.web.util.editablebean.LabelsBean;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
@@ -862,6 +868,55 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 					
 				});
+				
+				WebMarkupContainer labelsContainer = new WebMarkupContainer("labels") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!getPullRequest().getLabels().isEmpty() || SecurityUtils.canModify(getPullRequest()));
+					}
+					
+				};
+				labelsContainer.setOutputMarkupId(true);
+				
+				if (SecurityUtils.canModify(getPullRequest())) {
+					labelsContainer.add(new InplacePropertyEditLink("head") {
+						
+						@Override
+						protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName) {
+							LabelsBean labelsBean = (LabelsBean) bean;
+							OneDev.getInstance(PullRequestLabelManager.class).sync(getPullRequest(), labelsBean.getLabels());
+							handler.add(labelsContainer);
+						}
+						
+						@Override
+						protected String getPropertyName() {
+							return "labels";
+						}
+						
+						@Override
+						protected Project getProject() {
+							return getProject();
+						}
+						
+						@Override
+						protected Serializable getBean() {
+							return LabelsBean.of(getPullRequest());
+						}
+
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							tag.setName("a");
+						}
+						
+					});
+				} else {
+					labelsContainer.add(new WebMarkupContainer("head"));
+				}
+				labelsContainer.add(new EntityLabelsPanel<PullRequestLabel>("body", requestModel));
+				fragment.add(labelsContainer);				
 				
 				fragment.add(new ReferencePanel("reference") {
 

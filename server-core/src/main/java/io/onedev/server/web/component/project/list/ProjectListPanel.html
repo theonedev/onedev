@@ -36,9 +36,13 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="projectFrag">
-		<div class="d-flex flex-wrap font-size-h5">
-			<a wicket:id="path" class="mr-auto text-nowrap"><img wicket:id="avatar"> <span wicket:id="label" class="mr-3"></span></a> 
-			<span wicket:id="lastUpdate" class="text-muted font-size-sm"></span>
+		<div class="d-flex align-items-center flex-wrap row-gap-2 font-size-h5">
+			<a wicket:id="path" class="text-nowrap mr-3">
+				<img wicket:id="avatar"> 
+				<span wicket:id="text"></span>
+			</a> 
+			<span wicket:id="labels" class="mr-2"></span>
+			<span wicket:id="lastUpdate" class="text-muted font-size-sm ml-auto"></span>
 		</div>
 		<div class="d-flex flex-wrap project-summary">
 			<div wicket:id="codeStats" class="code-stats mt-2 d-flex align-items-center flex-wrap mr-3"></div>

@@ -17,11 +17,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectLabel;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -52,6 +54,8 @@ public abstract class ProjectInfoPanel extends Panel {
 			}
 			
 		});
+		
+		add(new EntityLabelsPanel<ProjectLabel>("labels", projectModel));
 		
 		WebMarkupContainer forkInfo = new WebMarkupContainer("forkInfo");
 		forkInfo.setVisible(getProject().isCodeManagement());

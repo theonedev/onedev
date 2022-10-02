@@ -35,10 +35,13 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="buildFrag">
-		<a wicket:id="link" class="flex-nowrap">
-			<svg wicket:id="icon" class="icon mr-1"></svg> 
-			<span wicket:id="label"></span>
-		</a>
+		<div class="d-flex flex-wrap row-gap-2">
+			<a wicket:id="link" class="text-nowrap mr-3">
+				<svg wicket:id="icon" class="icon mr-1"></svg> 
+				<span wicket:id="text"></span>
+			</a>
+			<span wicket:id="labels"></span>
+		</div>
     </wicket:fragment>	
 	<wicket:fragment wicket:id="linkFrag">
 		<a wicket:id="link">

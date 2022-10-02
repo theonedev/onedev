@@ -768,3 +768,18 @@ span.keycap {
 	background: var(--dark-mode-dark);
 }
 
+.row-gap-1 {
+	row-gap: 0.25rem;
+}
+.row-gap-2 {
+	row-gap: 0.5rem;
+}
+.row-gap-3 {
+	row-gap: 1rem;
+}
+.row-gap-4 {
+	row-gap: 1.5rem;
+}
+.row-gap-5 {
+	row-gap: 2rem;
+}

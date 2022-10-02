@@ -202,6 +202,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								return new TargetBranchCriteria(value);
 							case PullRequest.NAME_TARGET_PROJECT:
 								return new TargetProjectCriteria(value);
+							case PullRequest.NAME_LABEL:
+								return new LabelCriteria(getLabelSpec(value));
 							case PullRequest.NAME_COMMENT_COUNT:
 								return new CommentCountCriteria(getIntValue(value), operator);
 							default: 
@@ -296,6 +298,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 					&& !fieldName.equals(PullRequest.NAME_TARGET_BRANCH)
 					&& !fieldName.equals(PullRequest.NAME_SOURCE_PROJECT)
 					&& !fieldName.equals(PullRequest.NAME_SOURCE_BRANCH)
+					&& !fieldName.equals(PullRequest.NAME_LABEL)
 					&& !fieldName.equals(PullRequest.NAME_COMMENT_COUNT)) {
 				throw newOperatorException(fieldName, operator);
 			}

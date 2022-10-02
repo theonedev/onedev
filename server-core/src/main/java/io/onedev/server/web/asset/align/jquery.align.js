@@ -51,8 +51,8 @@
         	var borderLeft = jQuery(window).scrollLeft() + pageMargin;
         	var borderRight = borderLeft + jQuery(window).width() - 2*pageMargin;
 
-        	var thisWidth = $this.outerWidth();
-        	var thisHeight = $this.outerHeight();
+        	var thisWidth = $this.outerWidth() + $autosuit[0].scrollWidth - $autosuit.width();
+        	var thisHeight = $this.outerHeight() + $autosuit[0].scrollHeight - $autosuit.height();
 
 			// Do not reduce original dimension as otherwise the popup may flip while filtering its content
 			// and this will make the typing experience bad

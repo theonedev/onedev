@@ -148,6 +148,8 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestTags(project, matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(Build.NAME_LABEL)) {
+										return SuggestionUtils.suggestLabels(matchWith);
 									} else if (fieldName.equals(Build.NAME_PULL_REQUEST)) {
 										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else {

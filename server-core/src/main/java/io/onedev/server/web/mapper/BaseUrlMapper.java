@@ -30,6 +30,7 @@ import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateL
 import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
+import io.onedev.server.web.page.admin.labelmanagement.LabelManagementPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.notificationtemplatesetting.IssueNotificationTemplatePage;
 import io.onedev.server.web.page.admin.notificationtemplatesetting.PullRequestNotificationTemplatePage;
@@ -267,6 +268,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 				IssueNotificationTemplatePage.class));
 		add(new BasePageMapper("administration/settings/pull-request-notification-template", 
 				PullRequestNotificationTemplatePage.class));
+		add(new BasePageMapper("administration/labels", LabelManagementPage.class));
 		add(new BasePageMapper("administration/settings/performance", PerformanceSettingPage.class));
 		add(new BasePageMapper("administration/settings/backup", DatabaseBackupPage.class));
 		add(new BasePageMapper("administration/settings/authenticator", AuthenticatorPage.class));

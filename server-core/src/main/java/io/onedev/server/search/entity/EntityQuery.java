@@ -17,6 +17,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.LabelManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -25,6 +26,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -56,6 +58,14 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		} catch (NumberFormatException e) {
 			throw new ExplicitException("Invalid number: " + value);
 		}
+	}
+	
+	public static LabelSpec getLabelSpec(String labelName) {
+		var labelSpec = OneDev.getInstance(LabelManager.class).find(labelName);
+		if (labelSpec != null) 
+			return labelSpec;
+		else
+			throw new ExplicitException("Undefined label: " + labelName);
 	}
 	
 	public static long getLongValue(String value) {

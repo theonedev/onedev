@@ -61,6 +61,7 @@ import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -86,7 +87,8 @@ import io.onedev.server.web.util.WicketUtils;
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
-public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
+public class PullRequest extends AbstractEntity 
+		implements Referenceable, AttachmentStorageSupport, LabelSupport<PullRequestLabel> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -115,6 +117,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public static final String NAME_TITLE = "Title";
 	
 	public static final String PROP_TITLE = "title";
+	
+	public static final String NAME_LABEL = "Label";
 	
 	public static final String NAME_DESCRIPTION = "Description";
 	
@@ -170,9 +174,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_NUMBER, NAME_STATUS, NAME_TITLE, NAME_TARGET_PROJECT, NAME_TARGET_BRANCH, 
-			NAME_SOURCE_PROJECT, NAME_SOURCE_BRANCH, NAME_DESCRIPTION, 
-			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, 
-			NAME_CLOSE_DATE, NAME_MERGE_STRATEGY, NAME_COMMENT_COUNT);
+			NAME_SOURCE_PROJECT, NAME_SOURCE_BRANCH, NAME_LABEL, NAME_DESCRIPTION, 
+			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, NAME_CLOSE_DATE, 
+			NAME_MERGE_STRATEGY, NAME_COMMENT_COUNT);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
@@ -283,6 +287,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Version
 	@JsonIgnore
 	private int revision;
+	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestLabel> labels = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
@@ -449,6 +456,15 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()), true);
 	}
 	
+	@Override
+	public Collection<PullRequestLabel> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(Collection<PullRequestLabel> labels) {
+		this.labels = labels;
+	}
+
 	public Collection<PullRequestUpdate> getUpdates() {
 		return updates;
 	}

@@ -17,8 +17,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -30,6 +32,7 @@ import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
+import io.onedev.server.web.util.editablebean.LabelsBean;
 
 @SuppressWarnings("serial")
 public class NewProjectPage extends LayoutPage {
@@ -53,11 +56,13 @@ public class NewProjectPage extends LayoutPage {
 				PROP_CODE_MANAGEMENT, PROP_ISSUE_MANAGEMENT);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
+		LabelsBean labelsBean = new LabelsBean();
 		ParentBean parentBean = new ParentBean();
 		if (parentId != null)
 			parentBean.setParentPath(getProjectManager().load(parentId).getPath());
 		
 		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
+		BeanEditor labelsEditor = BeanContext.edit("labelsEditor", labelsBean);
 		BeanEditor parentEditor = BeanContext.edit("parentEditor", parentBean);
 		if (parentId != null)
 			parentEditor.setVisible(false);
@@ -82,7 +87,15 @@ public class NewProjectPage extends LayoutPage {
 						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setDefaultRole(defaultRoleBean.getRole());
 						
-						getProjectManager().create(newProject);
+						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
+
+							@Override
+							public void run() {
+								getProjectManager().create(newProject);
+								OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
+							}
+							
+						});
 						
 						Session.get().success("New project created");
 						if (newProject.isCodeManagement())
@@ -102,6 +115,7 @@ public class NewProjectPage extends LayoutPage {
 			
 		};
 		form.add(editor);
+		form.add(labelsEditor);
 		form.add(BeanContext.edit("defaultRoleEditor", defaultRoleBean));
 		form.add(parentEditor);
 		

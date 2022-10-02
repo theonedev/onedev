@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.build.side;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,12 +27,15 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.entitymanager.BuildLabelManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.BuildLabel;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
@@ -41,12 +45,14 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
 import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -54,6 +60,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.util.editablebean.LabelsBean;
 
 @SuppressWarnings("serial")
 public abstract class BuildSidePanel extends Panel {
@@ -304,7 +311,7 @@ public abstract class BuildSidePanel extends Panel {
 			}
 			
 		});
-		
+
 		general.add(new WebSocketObserver() {
 				
 			@Override
@@ -318,6 +325,62 @@ public abstract class BuildSidePanel extends Panel {
 			}
 			
 		});
+		
+		WebMarkupContainer labelsContainer = new WebMarkupContainer("labels") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getBuild().getLabels().isEmpty() || SecurityUtils.canManage(getBuild()));
+			}
+			
+		};
+		labelsContainer.setOutputMarkupId(true);
+		
+		if (SecurityUtils.canManage(getBuild())) {
+			labelsContainer.add(new InplacePropertyEditLink("head") {
+				
+				@Override
+				protected void onUpdated(IPartialPageRequestHandler handler, Serializable bean, String propertyName) {
+					LabelsBean labelsBean = (LabelsBean) bean;
+					OneDev.getInstance(BuildLabelManager.class).sync(getBuild(), labelsBean.getLabels());
+					handler.add(labelsContainer);
+				}
+				
+				@Override
+				protected String getPropertyName() {
+					return "labels";
+				}
+				
+				@Override
+				protected Project getProject() {
+					return getBuild().getProject();
+				}
+				
+				@Override
+				protected Serializable getBean() {
+					return LabelsBean.of(getBuild());
+				}
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("a");
+				}
+				
+			});
+		} else {
+			labelsContainer.add(new WebMarkupContainer("head"));
+		}
+		labelsContainer.add(new EntityLabelsPanel<BuildLabel>("body", new AbstractReadOnlyModel<Build>() {
+
+			@Override
+			public Build getObject() {
+				return getBuild();
+			}
+			
+		}));
+		add(labelsContainer);
 		
 		add(new ListView<Input>("params", new LoadableDetachableModel<List<Input>>() {
 

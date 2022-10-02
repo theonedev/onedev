@@ -31,6 +31,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.LabelManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -64,13 +65,21 @@ public class SuggestionUtils {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
-		for (String candidate: candidates) {
-			LinearRange match = LinearRange.match(candidate, matchWith);
+		for (var candidate: candidates) {
+			var match = LinearRange.match(candidate, matchWith);
 			if (match != null) 
 				suggestions.add(new InputSuggestion(candidate, null, match));
 		}
 		
 		return sortAndTruncate(suggestions, matchWith);
+	}
+	
+	public static List<InputSuggestion> suggestLabels(String matchWith) {
+		var labelNames = OneDev.getInstance(LabelManager.class).query().stream()
+				.map(it->it.getName())
+				.sorted()
+				.collect(Collectors.toList());
+		return suggest(labelNames, matchWith);
 	}
 	
 	private static List<InputSuggestion> sortAndTruncate(List<InputSuggestion> suggestions, String matchWith) {

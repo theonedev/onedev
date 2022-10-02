@@ -1,6 +1,6 @@
 <wicket:panel>
 	<div class="project-info p-4">
-		<div class="d-flex align-items-center justify-content-between">
+		<div class="d-flex justify-content-between">
 			<div class="mr-4">
 				<a wicket:id="path" class="mb-0 h5"></a>
 				<wicket:enclosure child="forkedFrom">
@@ -8,11 +8,16 @@
 						Forked from <a wicket:id="forkedFrom"></a>			
 					</div>
 				</wicket:enclosure>
+				<div wicket:id="labels" class="mt-2"></div>
 			</div>
-			<div wicket:id="forkInfo" class="btn-group">
-			    <a wicket:id="forks" class="btn btn-sm btn-light btn-hover-primary"><span wicket:id="label"></span></a>
-				<a wicket:id="forkNow" class="btn btn-sm btn-light btn-hover-primary btn-icon" title="Fork now"><wicket:svg href="fork" class="icon"/></a>
-			</div>			
+			<wicket:enclosure child="forkInfo">
+			<div>
+				<span wicket:id="forkInfo" class="btn-group">
+				    <a wicket:id="forks" class="btn btn-sm btn-light btn-hover-primary"><span wicket:id="label"></span></a>
+					<a wicket:id="forkNow" class="btn btn-sm btn-light btn-hover-primary btn-icon" title="Fork now"><wicket:svg href="fork" class="icon"/></a>
+				</span>			
+			</div>
+			</wicket:enclosure>
 		</div>
 		<wicket:enclosure child="serviceDesk">
 		<div class="mt-2">

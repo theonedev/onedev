@@ -124,6 +124,8 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 										for (MergeStrategy strategy: MergeStrategy.values())
 											candidates.add(strategy.toString());
 										return SuggestionUtils.suggest(candidates, matchWith);
+									} else if (fieldName.equals(PullRequest.NAME_LABEL)) {
+										return SuggestionUtils.suggestLabels(matchWith);
 									} else if (fieldName.equals(PullRequest.NAME_TITLE) 
 											|| fieldName.equals(PullRequest.NAME_DESCRIPTION) 
 											|| fieldName.equals(PullRequest.NAME_COMMENT_COUNT)

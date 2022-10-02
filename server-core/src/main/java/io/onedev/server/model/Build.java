@@ -76,6 +76,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.support.BuildMetric;
+import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
 import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
@@ -116,7 +117,8 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
-public class Build extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
+public class Build extends AbstractEntity 
+		implements Referenceable, AttachmentStorageSupport, LabelSupport<BuildLabel> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -133,6 +135,8 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 	public static final String PROP_PROJECT = "project";
 	
 	public static final String NAME_JOB = "Job";
+	
+	public static final String NAME_LABEL = "Label";
 	
 	public static final String PROP_JOB = "jobName";
 	
@@ -197,15 +201,15 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 	public static final String PROP_TRIGGER_ID = "triggerId";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
-			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_STATUS, NAME_SUBMITTER, NAME_CANCELLER, 
-			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE,
-			NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, NAME_VERSION, 
-			NAME_LOG, BuildMetric.NAME_REPORT);
+			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_LABEL, NAME_STATUS, NAME_SUBMITTER, 
+			NAME_CANCELLER, NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, 
+			NAME_FINISH_DATE, NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, 
+			NAME_VERSION, NAME_LOG, BuildMetric.NAME_REPORT);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_JOB, NAME_STATUS, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, 
-			NAME_PULL_REQUEST, NAME_COMMIT, NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, 
-			NAME_FINISH_DATE);
+			NAME_LABEL, NAME_PULL_REQUEST, NAME_COMMIT, NAME_SUBMIT_DATE, NAME_PENDING_DATE, 
+			NAME_RUNNING_DATE, NAME_FINISH_DATE);
 
 	public static final List<String> METRIC_QUERY_FIELDS = Lists.newArrayList(
 			NAME_JOB, NAME_BRANCH, NAME_PULL_REQUEST, BuildMetric.NAME_REPORT);
@@ -332,6 +336,9 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	@Column(nullable=false, length=1000)
 	private String submitReason;
+	
+	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
+	private Collection<BuildLabel> labels = new ArrayList<>();
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<BuildParam> params = new ArrayList<>();
@@ -603,6 +610,14 @@ public class Build extends AbstractEntity implements Referenceable, AttachmentSt
 		this.params = params;
 	}
 	
+	public Collection<BuildLabel> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(Collection<BuildLabel> labels) {
+		this.labels = labels;
+	}
+
 	public Collection<BuildDependence> getDependencies() {
 		return dependencies;
 	}

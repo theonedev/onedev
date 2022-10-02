@@ -35,6 +35,9 @@
 .build-side>.properties>div:last-child>div {
 	padding-bottom: 0;
 }
+.build-side>.labels>div>.icon {
+	display: none;
+}
 
 .build-side>div>.head {
 	font-weight: 600;

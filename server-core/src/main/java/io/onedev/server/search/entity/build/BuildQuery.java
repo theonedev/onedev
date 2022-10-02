@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.build;
 
 import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
 import static io.onedev.server.model.Build.NAME_BRANCH;
+import static io.onedev.server.model.Build.NAME_LABEL;
 import static io.onedev.server.model.Build.NAME_COMMIT;
 import static io.onedev.server.model.Build.NAME_FINISH_DATE;
 import static io.onedev.server.model.Build.NAME_JOB;
@@ -228,6 +229,8 @@ public class BuildQuery extends EntityQuery<Build> {
 								return new BranchCriteria(value);
 							case NAME_TAG:
 								return new TagCriteria(value);
+							case NAME_LABEL:
+								return new LabelCriteria(getLabelSpec(value));
 							case NAME_PULL_REQUEST:
 								return new PullRequestCriteria(project, value);
 							default: 
@@ -306,7 +309,8 @@ public class BuildQuery extends EntityQuery<Build> {
 					&& !fieldName.equals(NAME_JOB) && !fieldName.equals(NAME_NUMBER) 
 					&& !fieldName.equals(NAME_PULL_REQUEST) && !fieldName.equals(NAME_VERSION) 
 					&& !fieldName.equals(NAME_BRANCH) && !fieldName.equals(NAME_TAG)
-					&& !fieldName.equals(NAME_STATUS) && !paramNames.contains(fieldName)) {
+					&& !fieldName.equals(NAME_LABEL) && !fieldName.equals(NAME_STATUS) 
+					&& !paramNames.contains(fieldName)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
