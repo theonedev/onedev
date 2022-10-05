@@ -542,7 +542,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>${jacksondatabind.version}</version>
+				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -609,7 +609,7 @@
 	</repositories>
 	<properties>
 		<commons.version>2.5.2</commons.version>
-		<agent.version>1.6.3</agent.version>
+		<agent.version>1.6.4</agent.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<logback.version>1.2.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>
@@ -623,8 +623,7 @@
 		<flexmark.version>0.64.0</flexmark.version>
 		<groovy.version>3.0.10</groovy.version>
 		<servlet.version>3.1.0</servlet.version>
-		<jackson.version>2.13.2</jackson.version>
-		<jacksondatabind.version>2.13.2.1</jacksondatabind.version>
+		<jackson.version>2.14.0-rc1</jackson.version>
 		<tika.version>1.24.1</tika.version>
 	</properties>
 </project>
