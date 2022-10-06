@@ -6,10 +6,11 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
+import io.onedev.server.web.page.base.BaseDependentResourceReference;
 import io.onedev.server.web.resourcebundle.ResourceBundle;
 
 @ResourceBundle
-public class MermaidResourceReference extends JavaScriptResourceReference {
+public class MermaidResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
