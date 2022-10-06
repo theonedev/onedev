@@ -103,6 +103,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		SecurityUtils.bindAsSystem();
 
 		System.setProperty("hsqldb.reconfig_logging", "false");
+		System.setProperty("hsqldb.method_class_names", "java.lang.Math");
 		
 		if (Bootstrap.command == null) {
 			jettyLauncherProvider.get().start();
