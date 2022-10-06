@@ -37,7 +37,6 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -281,14 +280,9 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 
 		if (initialSplit) {
 			container.add(AttributeAppender.append("class", "split-mode"));
-			preview.add(new Label("rendered", new LoadableDetachableModel<String>() {
 
-				@Override
-				protected String load() {
-					return renderInput(input.getConvertedInput());
-				}
-				
-			}) {
+			String rendered = renderInput(input.getConvertedInput());
+			preview.add(new Label("rendered", rendered) {
 
 				@Override
 				public void renderHead(IHeaderResponse response) {
@@ -299,11 +293,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				}
 				
 			}.setEscapeModelStrings(false));
+			
+			container.add(new LazyResourceLoader("lazyResourceLoader", Model.of(rendered)));
 			splitLink.add(AttributeAppender.append("class", "active"));
 		} else {
 			container.add(AttributeAppender.append("class", "edit-mode"));
 			preview.add(new WebMarkupContainer("rendered"));
 			editLink.add(AttributeAppender.append("class", "active"));
+			container.add(new LazyResourceLoader("lazyResourceLoader", Model.of((String)null)));
 		}
 		
 		container.add(new WebMarkupContainer("canAttachFile").setVisible(getAttachmentSupport()!=null));
@@ -324,6 +321,9 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				case "render":
 					String markdown = params.getParameterValue("param1").toString();
 					String rendered = renderInput(markdown);
+					LazyResourceLoader lazyResourceLoader = new LazyResourceLoader("lazyResourceLoader", Model.of(rendered));
+					container.replace(lazyResourceLoader);
+					target.add(lazyResourceLoader);
 					String script = String.format(
 							"onedev.server.markdown.onRendered('%s', '%s');", 
 							container.getMarkupId(), 

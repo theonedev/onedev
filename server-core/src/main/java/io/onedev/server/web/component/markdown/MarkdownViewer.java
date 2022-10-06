@@ -74,6 +74,22 @@ public class MarkdownViewer extends GenericPanel<String> {
 	
 	private AbstractPostAjaxBehavior suggestionBehavior;
 	
+	private final IModel<String> renderedModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			String markdown = getModelObject();
+			if (markdown != null) {
+				MarkdownManager manager = AppLoader.getInstance(MarkdownManager.class);
+				return manager.process(manager.render(markdown), getProject(), 
+						getRenderContext(), getSuggestionSupport(), false);
+			} else {
+				return null;
+			}
+		}
+		
+	};
+	
 	public MarkdownViewer(String id, IModel<String> model, @Nullable ContentVersionSupport contentVersionSupport) {
 		super(id, model);
 		this.contentVersionSupport = contentVersionSupport;
@@ -95,18 +111,12 @@ public class MarkdownViewer extends GenericPanel<String> {
 			return null;
 	}
 	
-	@Nullable
-	private String renderMarkdown() {
-		String markdown = getModelObject();
-		if (markdown != null) {
-			MarkdownManager manager = AppLoader.getInstance(MarkdownManager.class);
-			return manager.process(manager.render(markdown), getProject(), 
-					getRenderContext(), getSuggestionSupport(), false);
-		} else {
-			return null;
-		}
+	@Override
+	protected void onDetach() {
+		renderedModel.detach();
+		super.onDetach();
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -128,22 +138,17 @@ public class MarkdownViewer extends GenericPanel<String> {
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
-					String rendered = renderMarkdown();
+					String rendered = renderedModel.getObject();
 					if (rendered != null)
 						tag.put("data-content", rendered);
 				}
 				
 			});
 		} else {
-			add(new Label("content", new LoadableDetachableModel<String>() {
-
-				@Override
-				protected String load() {
-					return renderMarkdown();
-				}
-				
-			}).setEscapeModelStrings(false));
+			add(new Label("content", renderedModel).setEscapeModelStrings(false));
 		}
+		
+		add(new LazyResourceLoader("lazyResourceLoader", renderedModel));
 		
 		add(taskBehavior = new AbstractPostAjaxBehavior() {
 			

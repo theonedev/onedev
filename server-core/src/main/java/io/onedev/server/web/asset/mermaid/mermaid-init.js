@@ -1,0 +1,1 @@
+mermaid.mermaidAPI.initialize({ startOnLoad:false })

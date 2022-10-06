@@ -993,6 +993,9 @@ onedev.server.markdown = {
 				}
 			}
 		});
+		var $mermaid = $container.find(".mermaid");
+		if ($mermaid.length != 0) 
+			mermaid.init(undefined, $mermaid);
 	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback, 
 			suggestionCallback) {

@@ -17,6 +17,7 @@ import com.vladsch.flexmark.ext.anchorlink.AnchorLinkExtension;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.definition.DefinitionExtension;
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
+import com.vladsch.flexmark.ext.gitlab.GitLabExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.ext.toc.TocExtension;
 import com.vladsch.flexmark.formatter.Formatter;
@@ -66,6 +67,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		extensions.add(DefinitionExtension.create());
 		extensions.add(TocExtension.create());
 		extensions.add(AutolinkExtension.create());
+		extensions.add(GitLabExtension.create());
 		extensions.addAll(contributedExtensions);
 
 		return new MutableDataSet()
@@ -108,7 +110,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 			for (Element element: document.body().getElementsByTag("a")) 
 				element.attr("href", toExternalUrl(element.attr("href")));
 		}
-		
+		document.outputSettings().prettyPrint(false);
 		return document;
 	}
 	
