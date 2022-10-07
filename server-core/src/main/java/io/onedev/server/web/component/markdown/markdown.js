@@ -996,6 +996,13 @@ onedev.server.markdown = {
 		var $mermaid = $container.find(".mermaid");
 		if ($mermaid.length != 0) 
 			mermaid.init(undefined, $mermaid);
+			
+		var $katex = $container.find(".katex");
+		if ($katex.legnth != 0) {
+			$katex.each(function() {
+	            katex.render($(this).text(), this, {throwOnError: false, displayMode: this.nodeName !== 'SPAN'});
+			});
+		}
 	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback, 
 			suggestionCallback) {

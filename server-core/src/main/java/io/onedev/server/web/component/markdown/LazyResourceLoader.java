@@ -5,6 +5,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.web.asset.katex.KatexResourceReference;
 import io.onedev.server.web.asset.mermaid.MermaidResourceReference;
 
 @SuppressWarnings("serial")
@@ -37,6 +38,8 @@ class LazyResourceLoader extends WebMarkupContainer {
 		if (rendered != null) {
 			if (rendered.contains("class=\"mermaid\"")) 
 				response.render(JavaScriptHeaderItem.forReference(new MermaidResourceReference()));
+			else if (rendered.contains("class=\"katex\""))
+				response.render(JavaScriptHeaderItem.forReference(new KatexResourceReference()));
 		}
 	}
 	
