@@ -266,7 +266,7 @@ public class SuggestionUtils {
 
 			@Override
 			public int compare(UserFacade o1, UserFacade o2) {
-				return o1.getName().compareTo(o2.getName());
+				return o1.getDisplayName().compareTo(o2.getDisplayName());
 			}
 			
 		});
@@ -279,6 +279,10 @@ public class SuggestionUtils {
 				else
 					description = null;
 				suggestions.add(new InputSuggestion(user.getName(), description, match));
+			} else if (user.getFullName() != null) {
+				match = LinearRange.match(user.getFullName(), matchWith);
+				if (match != null) 
+					suggestions.add(new InputSuggestion(user.getName(), user.getFullName(), null));
 			}
 		}
 		
