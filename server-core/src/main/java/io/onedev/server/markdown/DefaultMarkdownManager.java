@@ -96,7 +96,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 			@Nullable SuggestionSupport suggestionSupport, boolean forExternal) {
 		document = HtmlUtils.sanitize(document);
 		for (MarkdownProcessor htmlTransformer: htmlTransformers)
-			htmlTransformer.process(document, project, blobRenderContext, suggestionSupport);
+			htmlTransformer.process(document, project, blobRenderContext, suggestionSupport, forExternal);
 		
 		if (forExternal) {
 			for (Element element: document.body().getElementsByTag("img")) {

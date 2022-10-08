@@ -57,7 +57,7 @@ import io.onedev.server.web.component.NoRecordsPlaceholder;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -271,7 +271,7 @@ public class ProblemReportPage extends BuildReportPage {
 						state.blobIdent = new BlobIdent(getBuild().getCommitHash(), 
 								filePath, FileMode.REGULAR_FILE.getBits());
 						state.problemReport = getReportName();
-						state.position = BlobRendererer.getSourcePosition(problem.getRange());
+						state.position = BlobRenderer.getSourcePosition(problem.getRange());
 						PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 						BookmarkablePageLink<Void> rangeLink = new BookmarkablePageLink<Void>("range", 
 								ProjectBlobPage.class, params);

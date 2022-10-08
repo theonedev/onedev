@@ -26,7 +26,7 @@ import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.StringTransformer;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 public class JestReportParser {
 
@@ -125,7 +125,7 @@ public class JestReportParser {
 							ProjectBlobPage.State state = new ProjectBlobPage.State();
 							state.blobIdent = blobIdent;
 							PlanarRange range = new PlanarRange(line-1, col-1, line-1, col); 
-							state.position = BlobRendererer.getSourcePosition(range);
+							state.position = BlobRenderer.getSourcePosition(range);
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), state);
 							String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
 							return String.format("(<a href='%s'>%s:%d:%d</a>)", url, HtmlEscape.escapeHtml5(file), line, col);

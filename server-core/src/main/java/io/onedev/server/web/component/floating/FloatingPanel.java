@@ -25,14 +25,17 @@ public abstract class FloatingPanel extends Panel {
 	
 	private final boolean noNarrowThanTarget;
 	
+	private final boolean neverShrink;
+	
 	private final Animation animation;
 	
 	public FloatingPanel(AjaxRequestTarget target, @Nullable Alignment alignment, 
-			boolean noNarrowThanTarget, @Nullable Animation animation) {
+			boolean noNarrowThanTarget, boolean neverShrink, @Nullable Animation animation) {
 		super(((BasePage)target.getPage()).getRootComponents().newChildId());
 		
 		this.alignment = alignment;
 		this.noNarrowThanTarget = noNarrowThanTarget;
+		this.neverShrink = neverShrink;
 		this.animation = animation;
 		
 		BasePage page = (BasePage) target.getPage(); 
@@ -54,7 +57,7 @@ public abstract class FloatingPanel extends Panel {
 	}
 
 	public FloatingPanel(AjaxRequestTarget target, @Nullable Alignment alignment) {
-		this(target, alignment, false, null);
+		this(target, alignment, false, false, null);
 	}
 	
 	@Override
@@ -86,9 +89,10 @@ public abstract class FloatingPanel extends Panel {
 				} else {
 					jsonOfAlignment = "undefined";
 				}
-				String script = String.format("onedev.server.floating.init('%s', %s, %b, %s, %s);", 
+				String script = String.format("onedev.server.floating.init('%s', %s, %b, %b, %s, %s);", 
 						getMarkupId(true), jsonOfAlignment, 
 						noNarrowThanTarget,
+						neverShrink,
 						animation!=null?"'" + animation + "'":"undefined", 
 						getCallbackFunction());
 				response.render(OnDomReadyHeaderItem.forScript(script));

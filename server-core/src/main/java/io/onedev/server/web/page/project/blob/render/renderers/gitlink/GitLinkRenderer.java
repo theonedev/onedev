@@ -4,9 +4,9 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
-public class GitLinkRenderer implements BlobRendererer {
+public class GitLinkRenderer implements BlobRenderer {
 
 	private static final long serialVersionUID = 1L;
 

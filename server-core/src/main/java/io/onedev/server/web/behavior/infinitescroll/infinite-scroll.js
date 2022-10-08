@@ -67,7 +67,7 @@ onedev.server.infiniteScroll = {
 						else
 							$container.removeData("scrollTop");
 					} 
-					if (showIndicator)
+					if (showIndicator && $container.find(".loading-indicator").length != 0)
 						$container.find(".loading-indicator")[0].scrollIntoViewIfNeeded(false);					
 				} else if (scrollTop) {
 					$container.removeData("scrollTop");

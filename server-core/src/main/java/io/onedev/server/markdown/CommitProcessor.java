@@ -31,7 +31,8 @@ public class CommitProcessor implements MarkdownProcessor {
 	@Override
 	public void process(Document document, @Nullable Project project, 
 			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport) {
+			@Nullable SuggestionSupport suggestionSupport, 
+			boolean forExternal) {
 		if (RequestCycle.get() != null) {
 			TextNodeVisitor visitor = new TextNodeVisitor() {
 				

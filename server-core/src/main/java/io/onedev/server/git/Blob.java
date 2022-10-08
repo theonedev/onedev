@@ -20,7 +20,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.ContentDetector;
-import io.onedev.server.web.component.markdown.SuggestionSupport.SuggestFor;
+import io.onedev.server.web.component.markdown.SuggestionSupport.Selection;
 
 public class Blob {
 	
@@ -198,7 +198,7 @@ public class Blob {
 			return lines;
 		}
 		
-		public SuggestFor getSuggestFor(String fileName, PlanarRange range) {
+		public Selection getSelection(PlanarRange range) {
 			List<String> editLines = new ArrayList<>();
 			
 			for (int i=range.getFromRow(); i<=range.getToRow(); i++) 
@@ -209,8 +209,7 @@ public class Blob {
 				to += editLines.get(i).length() + 1;
 			to += range.getToColumn();
 			
-			return new SuggestFor(fileName, editLines, 
-					new LinearRange(range.getFromColumn(), to));
+			return new Selection(editLines, new LinearRange(range.getFromColumn(), to));
 		}
 		
 	}

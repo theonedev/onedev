@@ -37,7 +37,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 @Editable(order=8030, group=StepGroup.PUBLISH_REPORTS, name="CPD")
 public class PublishCPDReportStep extends PublishProblemReportStep {
@@ -112,7 +112,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 							ProjectBlobPage.State state = new ProjectBlobPage.State();
 							state.blobIdent = new BlobIdent();
 							state.problemReport = getReportName();
-							state.position = BlobRendererer.getSourcePosition(duplicateWith.range); 
+							state.position = BlobRenderer.getSourcePosition(duplicateWith.range); 
 							
 							params.set(0, build.getCommitHash());
 							List<String> pathSegments = Splitter.on("/").splitToList(duplicateWith.blobPath);

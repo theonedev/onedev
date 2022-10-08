@@ -27,7 +27,8 @@ public class StrikeThroughProcessor implements MarkdownProcessor {
 	@Override
 	public void process(Document document, Project project, 
 			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport) {
+			@Nullable SuggestionSupport suggestionSupport, 
+			boolean forExternal) {
 		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
 			@Override

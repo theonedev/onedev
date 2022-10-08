@@ -350,7 +350,7 @@ import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.test.TestPage;
@@ -705,7 +705,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CommitIndexedBroadcaster.class);
 		
 		contributeFromPackage(DiffRenderer.class, DiffRenderer.class);
-		contributeFromPackage(BlobRendererer.class, BlobRendererer.class);
+		contributeFromPackage(BlobRenderer.class, BlobRenderer.class);
 
 		contribute(Extension.class, new EmojiExtension());
 		contribute(Extension.class, new SourcePositionTrackExtension());

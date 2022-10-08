@@ -67,7 +67,7 @@ import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.markdown.SuggestionSupport.SuggestFor;
+import io.onedev.server.web.component.markdown.SuggestionSupport.Selection;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -152,8 +152,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		SuggestionSupport suggestionSupport = new SuggestionSupport() {
 
 			@Override
-			public SuggestFor getSuggestFor() {
-				return MarkdownEditor.this.getSuggestionSupport().getSuggestFor();
+			public Selection getSelection() {
+				return MarkdownEditor.this.getSuggestionSupport().getSelection();
 			}
 
 			@Override
@@ -164,6 +164,11 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			@Override
 			public ApplySupport getApplySupport() {
 				return null;
+			}
+
+			@Override
+			public String getFileName() {
+				return MarkdownEditor.this.getSuggestionSupport().getFileName();
 			}
 			
 		};
@@ -250,7 +255,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				SuggestFor suggestFor = getSuggestionSupport().getSuggestFor();
+				Selection suggestFor = getSuggestionSupport().getSelection();
 				tag.put("data-content", Joiner.on('\n').join(suggestFor.getContent()));
 				tag.put("data-from", suggestFor.getRange().getFrom());
 				tag.put("data-to", suggestFor.getRange().getTo());
@@ -303,6 +308,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			container.add(new LazyResourceLoader("lazyResourceLoader", Model.of((String)null)));
 		}
 		
+		container.add(new WebMarkupContainer("syntaxHelp")
+				.add(AttributeAppender.append("href", OneDev.getInstance().getDocRoot() + "/pages/markdown-syntax.md")));
 		container.add(new WebMarkupContainer("canAttachFile").setVisible(getAttachmentSupport()!=null));
 		
 		container.add(actionBehavior = new AbstractPostAjaxBehavior() {

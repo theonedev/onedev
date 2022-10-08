@@ -38,7 +38,7 @@ class LazyResourceLoader extends WebMarkupContainer {
 		if (rendered != null) {
 			if (rendered.contains("class=\"mermaid\"")) 
 				response.render(JavaScriptHeaderItem.forReference(new MermaidResourceReference()));
-			else if (rendered.contains("class=\"katex\""))
+			if (rendered.contains("class=\"katex\""))
 				response.render(JavaScriptHeaderItem.forReference(new KatexResourceReference()));
 		}
 	}

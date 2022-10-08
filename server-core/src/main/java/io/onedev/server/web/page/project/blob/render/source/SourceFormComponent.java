@@ -20,7 +20,7 @@ import io.onedev.server.util.ContentDetector;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 @SuppressWarnings("serial")
 abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
@@ -69,7 +69,7 @@ abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		PlanarRange mark = BlobRendererer.getSourceRange(getContext().getPosition());
+		PlanarRange mark = BlobRenderer.getSourceRange(getContext().getPosition());
 		String jsonOfMark;
 		if (mark != null) {
 			try {

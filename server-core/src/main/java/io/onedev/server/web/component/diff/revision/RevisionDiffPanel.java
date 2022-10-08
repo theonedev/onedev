@@ -1708,9 +1708,9 @@ public abstract class RevisionDiffPanel extends Panel {
 		return new SuggestionSupport() {
 			
 			@Override
-			public SuggestFor getSuggestFor() {
+			public Selection getSelection() {
 				return getProject().getBlob(mark.getBlobIdent(), true).getText()
-						.getSuggestFor(mark.getPath(), mark.getRange());
+						.getSelection(mark.getRange());
 			}
 			
 			@Override
@@ -1856,6 +1856,11 @@ public abstract class RevisionDiffPanel extends Panel {
 				} else {
 					return false;
 				}
+			}
+
+			@Override
+			public String getFileName() {
+				return mark.getPath();
 			}
 			
 		};

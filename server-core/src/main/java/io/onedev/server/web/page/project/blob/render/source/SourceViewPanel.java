@@ -115,7 +115,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 import io.onedev.server.web.page.project.blob.render.view.Positionable;
 import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
@@ -342,7 +342,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				PlanarRange range = (PlanarRange) commentContainer.getDefaultModelObject();
-				String position = BlobRendererer.getSourcePosition(range);
+				String position = BlobRenderer.getSourcePosition(range);
 				position(target, position);
 				context.onPosition(target, position);
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
@@ -483,7 +483,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				case "openSelectionPopover": 
 					PlanarRange range = getRange(params, "param1", "param2", "param3", "param4");
 							
-					String position = BlobRendererer.getSourcePosition(range);
+					String position = BlobRenderer.getSourcePosition(range);
 					String script = String.format("onedev.server.sourceView.openSelectionPopover(%s, '%s', %s);", 
 							convertToJson(range), context.getPositionUrl(position), SecurityUtils.getUser()!=null);
 					target.appendJavaScript(script);
@@ -792,7 +792,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						context.onSelect(target, context.getBlobIdent(),
-								BlobRendererer.getSourcePosition(symbol.getPosition()));
+								BlobRenderer.getSourcePosition(symbol.getPosition()));
 					}
 					
 				};
@@ -819,7 +819,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent blobIdent = new BlobIdent(
 						getRevision(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
-				context.onSelect(target, blobIdent, BlobRendererer.getSourcePosition(hit.getTokenPos()));
+				context.onSelect(target, blobIdent, BlobRenderer.getSourcePosition(hit.getTokenPos()));
 			}
 
 			@Override
@@ -971,7 +971,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"), explicit("param5"));
 		
-		PlanarRange markRange = BlobRendererer.getSourceRange(context.getPosition());
+		PlanarRange markRange = BlobRenderer.getSourceRange(context.getPosition());
 		if (markRange == null)
 			markRange = (PlanarRange) commentContainer.getDefaultModelObject();
 		else
@@ -1027,7 +1027,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	@Override
 	public void position(AjaxRequestTarget target, String position) {
 		String script;
-		PlanarRange mark = BlobRendererer.getSourceRange(position);
+		PlanarRange mark = BlobRenderer.getSourceRange(position);
 		if (mark != null) 
 			script = String.format("onedev.server.sourceView.mark(%s, true);", convertToJson(mark));
 		else 
@@ -1091,7 +1091,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						modal.close();
-						context.onSelect(target, context.getBlobIdent(), BlobRendererer.getSourcePosition(symbol.getPosition()));
+						context.onSelect(target, context.getBlobIdent(), BlobRenderer.getSourcePosition(symbol.getPosition()));
 					}
 					
 				};
@@ -1258,9 +1258,9 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		return new SuggestionSupport() {
 			
 			@Override
-			public SuggestFor getSuggestFor() {
+			public Selection getSelection() {
 				return context.getProject().getBlob(mark.getBlobIdent(), true).getText()
-						.getSuggestFor(mark.getPath(), mark.getRange());
+						.getSelection(mark.getRange());
 			}
 			
 			@Override
@@ -1306,6 +1306,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			@Override
 			public boolean isOutdated() {
 				return false;
+			}
+
+			@Override
+			public String getFileName() {
+				return mark.getPath();
 			}
 			
 		};

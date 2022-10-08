@@ -15,7 +15,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
 import io.onedev.server.web.page.project.blob.render.view.Positionable;
 
@@ -82,7 +82,7 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new SourceEditResourceReference()));
 		
-		PlanarRange mark = BlobRendererer.getSourceRange(context.getPosition());
+		PlanarRange mark = BlobRenderer.getSourceRange(context.getPosition());
 		
 		String script = String.format("onedev.server.sourceEdit.onWindowLoad('%s', %s);", 
 				getEditor().getMarkupId(), mark != null? getJson(mark): "undefined");
@@ -100,7 +100,7 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 	@Override
 	public void position(AjaxRequestTarget target, String position) {
 		String script;
-		PlanarRange mark = BlobRendererer.getSourceRange(position);
+		PlanarRange mark = BlobRenderer.getSourceRange(position);
 		if (mark != null) 
 			script = String.format("onedev.server.sourceEdit.mark(%s);", getJson(mark));
 		else 

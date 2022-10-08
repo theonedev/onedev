@@ -65,7 +65,7 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new DropdownLink("addNew", false, AlignPlacement.bottom(0), true) {
+		add(new DropdownLink("addNew", false, AlignPlacement.bottom(0), true, true) {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {

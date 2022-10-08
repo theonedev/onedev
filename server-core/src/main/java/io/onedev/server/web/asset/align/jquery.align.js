@@ -1,7 +1,6 @@
 (function ( $ ) {
  
 	var pageMargin = 8;
-	var scrollbarWidth = 20;
 	var textHeight = 25;
 	
 	/**
@@ -12,7 +11,7 @@
 	 * 			the target may also includes a index property to denote which character to align with in target 
 	 *          input/textarea element
 	 */
-    $.fn.align = function(alignment, noNarrowThanTarget) {
+    $.fn.align = function(alignment, noNarrowThanTarget, neverShrink) {
     	this.each(function() {
     		var $this = jQuery(this);
 
@@ -30,8 +29,8 @@
         		$this.css("position", "absolute");
         	}
 
-			var thisOldWidth = $this.outerWidth();
-			var thisOldHeight = $this.outerHeight();
+			var thisOldWidth = $this[0].offsetWidth;
+			var thisOldHeight = $this[0].offsetHeight;
 			
         	var $autosuit = $this.find(".autosuit:visible:not(:has('.autosuit:visible'))");
         	if ($autosuit.length == 0)
@@ -44,6 +43,9 @@
         	// even if enclosed content changes
         	$this.find(".autosuit").addBack(this).css("width", "auto").css("height", "auto").css("overflow", "hidden");
 
+        	var thisWidth = Math.max($this[0].offsetWidth, $this.outerWidth());
+        	var thisHeight = Math.max($this[0].offsetHeight, $this.outerHeight());
+			
         	$autosuit.css("overflow", "auto");
 
         	var borderTop = jQuery(window).scrollTop() + pageMargin;
@@ -51,15 +53,14 @@
         	var borderLeft = jQuery(window).scrollLeft() + pageMargin;
         	var borderRight = borderLeft + jQuery(window).width() - 2*pageMargin;
 
-        	var thisWidth = $this.outerWidth() + $autosuit[0].scrollWidth - $autosuit.width();
-        	var thisHeight = $this.outerHeight() + $autosuit[0].scrollHeight - $autosuit.height();
-
-			// Do not reduce original dimension as otherwise the popup may flip while filtering its content
-			// and this will make the typing experience bad
-			if (thisWidth < thisOldWidth) 
-				thisWidth = thisOldWidth;
-			if (thisHeight < thisOldHeight) 
-				thisHeight = thisOldHeight;
+			if (neverShrink) {
+				// Do not reduce original dimension as otherwise the popup may flip while filtering its content
+				// and this will make the typing experience bad
+				if (thisWidth < thisOldWidth) 
+					thisWidth = thisOldWidth;
+				if (thisHeight < thisOldHeight) 
+					thisHeight = thisOldHeight;
+			}
 
         	var width = thisWidth;
         	var height = thisHeight;
@@ -75,7 +76,7 @@
         	if (alignment.target.element) {
         		var $targetEl = jQuery(alignment.target.element);
 				if (noNarrowThanTarget)
-					$this.css("minWidth", $targetEl.outerWidth());
+					$this.css("minWidth", $targetEl[0].offsetWidth);
 					
         		if (alignment.target.index != undefined) {
     				var coord = getCaretCoordinates(alignment.target.element, alignment.target.index);
@@ -91,8 +92,8 @@
         		} else {
             		targetLeft = $targetEl.offset().left;
             		targetTop = $targetEl.offset().top;
-            		targetWidth = $targetEl.outerWidth();
-            		targetHeight = $targetEl.outerHeight();
+            		targetWidth = $targetEl[0].offsetWidth;
+            		targetHeight = $targetEl[0].offsetHeight;
         		}
         	} else {
         		targetLeft = alignment.target.left;
@@ -213,13 +214,14 @@
         	
         	$this.css({left:left-$parent.offset().left, top:top-$parent.offset().top});	
         	
-        	$autosuit.outerWidth($autosuit.outerWidth()+width-thisWidth);
-        	$autosuit.outerHeight($autosuit.outerHeight()+height-thisHeight);
+        	$autosuit.outerWidth($autosuit[0].offsetWidth+width-thisWidth);
+        	$autosuit.outerHeight($autosuit[0].offsetHeight+height-thisHeight);
+
 			$this.outerWidth(width);
 			$this.outerHeight(height);
 
         	$autosuit.scrollTop(scrollTop);
-        	$autosuit.scrollLeft(scrollLeft);    		
+        	$autosuit.scrollLeft(scrollLeft);    				
     	});
     	return this;
     };

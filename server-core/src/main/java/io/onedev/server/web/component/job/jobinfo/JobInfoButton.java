@@ -51,7 +51,7 @@ public abstract class JobInfoButton extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DropdownLink detailLink = new DropdownLink("detail", false, AlignPlacement.bottom(0), true) {
+		DropdownLink detailLink = new DropdownLink("detail", false, AlignPlacement.bottom(0), true, false) {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {

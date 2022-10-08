@@ -20,7 +20,7 @@ import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffRenderer;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
-import io.onedev.server.web.component.markdown.SuggestionSupport.SuggestFor;
+import io.onedev.server.web.component.markdown.SuggestionSupport.Selection;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
 public class CodeProcessor implements MarkdownProcessor {
@@ -28,7 +28,8 @@ public class CodeProcessor implements MarkdownProcessor {
 	@Override
 	public void process(Document document, @Nullable Project project, 
 			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport) {
+			@Nullable SuggestionSupport suggestionSupport, 
+			boolean forExternal) {
 		Collection<Element> codeElements = new ArrayList<>();
 		NodeTraversor.traverse(new NodeVisitor() {
 
@@ -62,32 +63,36 @@ public class CodeProcessor implements MarkdownProcessor {
 
 			if (language != null) {
 				codeElement.attr("data-language", language);
-				if (suggestionSupport != null && language.equals("suggestion")) {
-					String suggestionContent = codeElement.wholeText();
-					if (suggestionContent.endsWith("\n"))
-						suggestionContent = suggestionContent.substring(0, suggestionContent.length()-1);
-					List<String> suggestion = StringUtils.splitToLines(suggestionContent);
-					SuggestFor suggestFor = suggestionSupport.getSuggestFor();
-					List<String> content = suggestFor.getContent();
-					List<DiffBlock<String>> diffBlocks = DiffUtils.diff(content, suggestion);
-					codeElement.html("<div class='pb-2 mb-2 head font-size-xs mx-n2 px-2'>Suggested change</div>" 
-								+ new DiffRenderer(diffBlocks).renderDiffs());
-					codeElement.attr("data-suggestion", suggestionContent);
-					codeElement.attr("data-suggestionfile", suggestFor.getFileName());
-					codeElement.parent().addClass("suggestion");
-					if (suggestionSupport.isOutdated()) 
-						codeElement.attr("data-suggestionoutdated", "true");
-					if (suggestionSupport.getApplySupport() != null) {
-						codeElement.attr("data-suggestionappliable", "true");
-						if (suggestionSupport.getApplySupport().getBatchSupport() != null) {
-							codeElement.attr("data-suggestionbatchappliable", "true");
-							if (suggestionSupport.getApplySupport().getBatchSupport().getInBatch() != null) {
-								if (suggestionSupport.getApplySupport().getBatchSupport().getInBatch().equals(suggestion))
-									codeElement.attr("data-suggestionapplyinbatch", "true");
-								else
-									codeElement.attr("data-suggestionoutdated", "true");
+				if (language.equals("suggestion")) {
+					if (suggestionSupport != null) {
+						String suggestionContent = codeElement.wholeText();
+						if (suggestionContent.endsWith("\n"))
+							suggestionContent = suggestionContent.substring(0, suggestionContent.length()-1);
+						List<String> suggestion = StringUtils.splitToLines(suggestionContent);
+						Selection selection = suggestionSupport.getSelection();
+						List<String> content = selection.getContent();
+						List<DiffBlock<String>> diffBlocks = DiffUtils.diff(content, suggestion);
+						codeElement.html("<div class='pb-2 mb-2 head font-size-xs mx-n2 px-2'>Suggested change</div>" 
+									+ new DiffRenderer(diffBlocks).renderDiffs());
+						codeElement.attr("data-suggestion", suggestionContent);
+						codeElement.attr("data-suggestionfile", suggestionSupport.getFileName());
+						codeElement.parent().addClass("suggestion");
+						if (suggestionSupport.isOutdated()) 
+							codeElement.attr("data-suggestionoutdated", "true");
+						if (suggestionSupport.getApplySupport() != null) {
+							codeElement.attr("data-suggestionappliable", "true");
+							if (suggestionSupport.getApplySupport().getBatchSupport() != null) {
+								codeElement.attr("data-suggestionbatchappliable", "true");
+								if (suggestionSupport.getApplySupport().getBatchSupport().getInBatch() != null) {
+									if (suggestionSupport.getApplySupport().getBatchSupport().getInBatch().equals(suggestion))
+										codeElement.attr("data-suggestionapplyinbatch", "true");
+									else
+										codeElement.attr("data-suggestionoutdated", "true");
+								}
 							}
 						}
+					} else {
+						codeElement.prepend("<p><i>Suggested change</i></p>");
 					}
 				}
 			}

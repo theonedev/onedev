@@ -115,7 +115,7 @@ import io.onedev.server.web.component.revision.RevisionPicker;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNavigator;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.blob.render.commitoption.CommitOptionPanel;
 import io.onedev.server.web.page.project.blob.render.folder.FolderViewPanel;
 import io.onedev.server.web.page.project.blob.render.nocommits.NoCommitsPanel;
@@ -155,7 +155,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private static final String PARAM_POSITION = "position";
+	public static final String PARAM_POSITION = "position";
 	
 	private static final String PARAM_COVERAGE_REPORT = "coverage-report";
 	
@@ -682,7 +682,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent selected = new BlobIdent(state.blobIdent.revision, hit.getBlobPath(), 
 						FileMode.REGULAR_FILE.getBits()); 
-				ProjectBlobPage.this.onSelect(target, selected, BlobRendererer.getSourcePosition(hit.getTokenPos()));
+				ProjectBlobPage.this.onSelect(target, selected, BlobRenderer.getSourcePosition(hit.getTokenPos()));
 				modal.close();
 			}
 			
@@ -760,7 +760,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			}
 			
 			if (blobContent == null) {
-				for (BlobRendererer contribution: OneDev.getExtensions(BlobRendererer.class)) {
+				for (BlobRenderer contribution: OneDev.getExtensions(BlobRenderer.class)) {
 					blobContent = contribution.render(BLOB_CONTENT_ID, this);
 					if (blobContent != null) 
 						break;
@@ -1050,7 +1050,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				FileMode.REGULAR_FILE.getBits());
 		State state = new State(blobIdent);
 		state.commentId = comment.getId();
-		state.position = BlobRendererer.getSourcePosition(comment.getMark().getRange());
+		state.position = BlobRenderer.getSourcePosition(comment.getMark().getRange());
 		return state;
 	}	
 	
@@ -1276,7 +1276,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, PlanarRange range) {
 		state.commentId = comment.getId();
-		state.position = BlobRendererer.getSourcePosition(range);
+		state.position = BlobRenderer.getSourcePosition(range);
 		pushState(target);
 	}
 
@@ -1290,7 +1290,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	@Override
 	public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
 		state.commentId = null;
-		state.position = BlobRendererer.getSourcePosition(range);
+		state.position = BlobRenderer.getSourcePosition(range);
 		pushState(target);
 	}
 	

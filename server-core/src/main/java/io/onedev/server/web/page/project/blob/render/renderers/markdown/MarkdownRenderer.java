@@ -9,10 +9,10 @@ import io.onedev.server.util.FileExtension;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.source.SourceViewPanel;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 @SuppressWarnings("serial")
-public class MarkdownRenderer implements BlobRendererer {
+public class MarkdownRenderer implements BlobRenderer {
 
 	private boolean isMarkdown(@Nullable String blobPath) {
 		String language = ProgrammingLanguageDetector.getLanguageForExtension(FileExtension.getExtension(blobPath));

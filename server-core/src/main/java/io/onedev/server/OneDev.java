@@ -295,7 +295,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		}
 		executorService.shutdown();
 	}
-		
+	
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(OneDev.class);
 	}	

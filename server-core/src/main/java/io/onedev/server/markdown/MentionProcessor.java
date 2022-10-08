@@ -16,7 +16,8 @@ public class MentionProcessor extends MentionParser implements MarkdownProcessor
 	@Override
 	public void process(Document document, Project project, 
 			@Nullable BlobRenderContext blobRenderContext, 
-			@Nullable SuggestionSupport suggestionSupport) {
+			@Nullable SuggestionSupport suggestionSupport, 
+			boolean forExternal) {
 		parseMentions(document);
 	}
 

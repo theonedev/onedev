@@ -10,9 +10,9 @@ import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.PlanarRange;
 
 @ExtensionPoint
-public interface BlobRendererer extends Serializable {
+public interface BlobRenderer extends Serializable {
 
-	static final String SOURCE_POSITION_PREFIX = "source-";
+	public static final String SOURCE_POSITION_PREFIX = "source-";
 	
 	@Nullable
 	public static PlanarRange getSourceRange(@Nullable String position) {

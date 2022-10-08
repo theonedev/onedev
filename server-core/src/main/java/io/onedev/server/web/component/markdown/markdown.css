@@ -473,3 +473,7 @@
 .markdown-rendered>p:last-child {
 	margin-bottom: 0;
 }
+
+.markdown-rendered div.paragraph {
+	margin-bottom: 1.2rem;
+}

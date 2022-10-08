@@ -14,9 +14,9 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.source.SourceEditPanel;
 import io.onedev.server.web.page.project.blob.render.source.SourceViewPanel;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
-public class BuildSpecRenderer implements BlobRendererer {
+public class BuildSpecRenderer implements BlobRenderer {
 
 	private static final long serialVersionUID = 1L;
 
@@ -63,14 +63,14 @@ public class BuildSpecRenderer implements BlobRendererer {
 	public Component render(String componentId, BlobRenderContext context) {
 		if (context.getMode() == Mode.ADD && isBuildSpec(context.getNewPath()) 
 				|| context.getMode() == Mode.EDIT && isBuildSpec(context.getBlobIdent().path)) {
-			if (BlobRendererer.getSourceRange(context.getPosition()) != null)
+			if (BlobRenderer.getSourceRange(context.getPosition()) != null)
 				return new SourceEditPanel(componentId, context);
 			else
 				return new BuildSpecBlobEditPanel(componentId, context);
 		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.BLAME) 
 				&& context.getBlobIdent().isFile() 
 				&& isBuildSpec(context.getBlobIdent().path)) {
-			if (BlobRendererer.getSourceRange(context.getPosition()) != null || context.getMode() == Mode.BLAME)
+			if (BlobRenderer.getSourceRange(context.getPosition()) != null || context.getMode() == Mode.BLAME)
 				return new SourceViewPanel(componentId, context, false);
 			else if (context.isViewPlain()) 
 				return new SourceViewPanel(componentId, context, true);

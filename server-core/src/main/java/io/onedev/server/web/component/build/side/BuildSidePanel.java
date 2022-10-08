@@ -380,6 +380,8 @@ public abstract class BuildSidePanel extends Panel {
 			}
 			
 		}));
+		labelsContainer.add(new WebMarkupContainer("labelsHelp")
+				.setVisible(SecurityUtils.canManage(getBuild())));
 		add(labelsContainer);
 		
 		add(new ListView<Input>("params", new LoadableDetachableModel<List<Input>>() {

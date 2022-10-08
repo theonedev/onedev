@@ -11,7 +11,9 @@ import io.onedev.commons.utils.LinearRange;
 
 public interface SuggestionSupport extends Serializable {
 
-	SuggestFor getSuggestFor();
+	String getFileName();
+	
+	Selection getSelection();
 	
 	boolean isOutdated();
 	
@@ -37,22 +39,15 @@ public interface SuggestionSupport extends Serializable {
 		
 	}
 	
-	class SuggestFor {
-		
-		private final String fileName;
+	class Selection {
 		
 		private final List<String> content;
 		
 		private final LinearRange range;
 		
-		public SuggestFor(String fileName, List<String> content, LinearRange range) {
-			this.fileName = fileName;
+		public Selection(List<String> content, LinearRange range) {
 			this.content = content;
 			this.range = range;
-		}
-
-		public String getFileName() {
-			return fileName;
 		}
 
 		public List<String> getContent() {

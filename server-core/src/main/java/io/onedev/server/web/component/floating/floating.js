@@ -1,5 +1,5 @@
 onedev.server.floating = {
-	init: function(floatingId, alignment, noNarrowThanTarget, animation, closeCallback) {
+	init: function(floatingId, alignment, noNarrowThanTarget, neverShrink, animation, closeCallback) {
 		var $floating = $("#" + floatingId);
 		$floating.data("closeCallback", closeCallback);
 		$floating.data("animation", animation);
@@ -56,11 +56,11 @@ onedev.server.floating = {
 				$floating.data("closeCallback")();
 			} else {
 				if (alignment) {
-					$floating.align(alignment, noNarrowThanTarget);
-					setTimeout(function() {
-						$floating.align(alignment, noNarrowThanTarget);
-						$floating.trigger("resized");
-					}, 0);
+					$floating.align(alignment, noNarrowThanTarget, neverShrink);
+					
+					// align again to fix some position/dimension calculation issues
+					$floating.align(alignment, noNarrowThanTarget, neverShrink);
+					$floating.trigger("resized");
 				}
 				if (!openTriggered) {
 					$floating.trigger("open");

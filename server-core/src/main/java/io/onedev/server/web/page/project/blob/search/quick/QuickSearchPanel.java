@@ -48,7 +48,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 
 @SuppressWarnings("serial")
 public abstract class QuickSearchPanel extends Panel {
@@ -261,7 +261,7 @@ public abstract class QuickSearchPanel extends Panel {
 				BlobIdent blobIdent = new BlobIdent(revisionModel.getObject(), hit.getBlobPath(), 
 						FileMode.REGULAR_FILE.getBits());
 				ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-				state.position = BlobRendererer.getSourcePosition(hit.getTokenPos());
+				state.position = BlobRenderer.getSourcePosition(hit.getTokenPos());
 				PageParameters params = ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 				CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, params);
 				link.add(AttributeAppender.replace("href", url.toString()));

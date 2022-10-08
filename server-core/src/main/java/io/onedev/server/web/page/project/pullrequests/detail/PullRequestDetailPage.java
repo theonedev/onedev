@@ -916,6 +916,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					labelsContainer.add(new WebMarkupContainer("head"));
 				}
 				labelsContainer.add(new EntityLabelsPanel<PullRequestLabel>("body", requestModel));
+				labelsContainer.add(new WebMarkupContainer("labelsHelp")
+						.setVisible(SecurityUtils.canModify(getPullRequest())));
 				fragment.add(labelsContainer);				
 				
 				fragment.add(new ReferencePanel("reference") {
