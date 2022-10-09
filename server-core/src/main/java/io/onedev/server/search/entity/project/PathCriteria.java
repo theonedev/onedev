@@ -28,7 +28,7 @@ public class PathCriteria extends Criteria<Project> {
 
 	@Override
 	public boolean matches(Project project) {
-		return WildcardUtils.matchPath(value, project.getPath());
+		return WildcardUtils.matchPath(value.toLowerCase(), project.getPath().toLowerCase());
 	}
 
 	@Override

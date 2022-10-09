@@ -39,7 +39,7 @@ public class ProjectCache extends HashMap<Long, ProjectFacade> {
 	public Collection<Long> getMatchingIds(String pathPattern) {
 		Collection<Long> ids = new HashSet<>();
 		for (ProjectFacade project: values()) {
-			if (WildcardUtils.matchPath(pathPattern, project.getPath()))
+			if (WildcardUtils.matchPath(pathPattern.toLowerCase(), project.getPath().toLowerCase()))
 				ids.add(project.getId());
 		}
 		return ids;

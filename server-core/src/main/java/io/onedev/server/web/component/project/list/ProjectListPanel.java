@@ -1189,10 +1189,13 @@ public class ProjectListPanel extends Panel {
 			return null;
 		} catch (Exception e) {
 			info("Performing fuzzy query");
-			if (getParentProject() != null)
-				return ProjectQuery.merge(baseQuery, new ProjectQuery(new NameCriteria("*" + queryString + "*")));
-			else
-				return ProjectQuery.merge(baseQuery, new ProjectQuery(new PathCriteria("**/*" + queryString + "*/**")));
+			if (getParentProject() != null) {
+				queryString = "*" + queryString.replace(" ", "*") + "*";
+				return ProjectQuery.merge(baseQuery, new ProjectQuery(new NameCriteria(queryString)));
+			} else {
+				queryString = "**/*" + queryString.replace(" ", "*/**/*") + "*/**";
+				return ProjectQuery.merge(baseQuery, new ProjectQuery(new PathCriteria(queryString)));
+			}
 		}
 	}
 	

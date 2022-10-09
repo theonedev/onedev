@@ -23,12 +23,12 @@ public class NameCriteria extends Criteria<Project> {
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
 		Path<String> attribute = from.get(Project.PROP_NAME);
-		return builder.like(builder.lower(attribute), value.replace("*", "%"));
+		return builder.like(builder.lower(attribute), value.toLowerCase().replace("*", "%"));
 	}
 
 	@Override
 	public boolean matches(Project project) {
-		return WildcardUtils.matchString(value, project.getName());
+		return WildcardUtils.matchString(value.toLowerCase(), project.getName().toLowerCase());
 	}
 
 	@Override
