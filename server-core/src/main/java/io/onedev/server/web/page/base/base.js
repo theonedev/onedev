@@ -12,19 +12,19 @@ String.prototype.escapeHtml = function() {
 };
 
 if (!Element.prototype.scrollIntoViewIfNeeded) {
-    Element.prototype.scrollIntoViewIfNeeded = function ( centerIfNeeded = false) {
+    Element.prototype.scrollIntoViewIfNeeded = function (centerIfNeeded = false) {
         const el = this;
-        new IntersectionObserver( function( [entry] ) {
+        new IntersectionObserver(function([entry]) {
             const ratio = entry.intersectionRatio;
             if (ratio < 1) {
                 let place = ratio <= 0 && centerIfNeeded ? 'center' : 'nearest';
-                el.scrollIntoView( {
+                el.scrollIntoView({
                     block: place,
                     inline: place
-                } );
+                });
             }
             this.disconnect();
-        } ).observe(this);
+        }).observe(this);
     };
 }
  
