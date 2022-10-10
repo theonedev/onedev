@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.pullrequest.referencedfrom;
 
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -12,7 +10,6 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.asset.titleandstatus.TitleAndStatusCssResourceReference;
 import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -65,12 +62,6 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 				title = request.getTargetProject().getPath() + "#" + request.getNumber() + " " + transformed;
 			add(new Label("title", title).setEscapeModelStrings(false));
 		}
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new TitleAndStatusCssResourceReference()));
 	}
 
 }

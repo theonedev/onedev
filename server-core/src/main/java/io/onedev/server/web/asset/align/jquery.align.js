@@ -29,8 +29,8 @@
         		$this.css("position", "absolute");
         	}
 
-			var thisOldWidth = $this[0].offsetWidth;
-			var thisOldHeight = $this[0].offsetHeight;
+			var thisOldWidth = $this.outerWidth();
+			var thisOldHeight = $this.outerHeight();
 			
         	var $autosuit = $this.find(".autosuit:visible:not(:has('.autosuit:visible'))");
         	if ($autosuit.length == 0)
@@ -76,7 +76,7 @@
         	if (alignment.target.element) {
         		var $targetEl = jQuery(alignment.target.element);
 				if (noNarrowThanTarget)
-					$this.css("minWidth", $targetEl[0].offsetWidth);
+					$this.css("minWidth", $targetEl.outerWidth());
 					
         		if (alignment.target.index != undefined) {
     				var coord = getCaretCoordinates(alignment.target.element, alignment.target.index);
@@ -92,8 +92,8 @@
         		} else {
             		targetLeft = $targetEl.offset().left;
             		targetTop = $targetEl.offset().top;
-            		targetWidth = $targetEl[0].offsetWidth;
-            		targetHeight = $targetEl[0].offsetHeight;
+            		targetWidth = $targetEl.outerWidth();
+            		targetHeight = $targetEl.outerHeight();
         		}
         	} else {
         		targetLeft = alignment.target.left;
@@ -214,8 +214,8 @@
         	
         	$this.css({left:left-$parent.offset().left, top:top-$parent.offset().top});	
         	
-        	$autosuit.outerWidth($autosuit[0].offsetWidth+width-thisWidth);
-        	$autosuit.outerHeight($autosuit[0].offsetHeight+height-thisHeight);
+        	$autosuit.outerWidth($autosuit.outerWidth()+width-thisWidth);
+        	$autosuit.outerHeight($autosuit.outerHeight()+height-thisHeight);
 
 			$this.outerWidth(width);
 			$this.outerHeight(height);
