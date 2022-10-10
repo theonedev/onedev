@@ -1,4 +1,4 @@
-version: 15
+version: 18
 jobs:
 - name: CI
   steps:
@@ -192,7 +192,7 @@ jobs:
     interpreter: !DefaultInterpreter
       commands:
       - git config --global --unset http.extraHeader
-      - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/server
+      - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev.git
         HEAD:main
     useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
