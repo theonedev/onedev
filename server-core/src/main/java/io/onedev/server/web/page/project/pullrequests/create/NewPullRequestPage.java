@@ -60,10 +60,8 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -75,6 +73,7 @@ import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.MergePreview;
@@ -84,7 +83,6 @@ import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -188,10 +186,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 		return OneDev.getInstance(PullRequestManager.class);
 	}
 	
-	private UserManager getUserManager() {
-		return OneDev.getInstance(UserManager.class);
-	}
-	
 	public NewPullRequestPage(PageParameters params) {
 		super(params);
 		
@@ -272,14 +266,13 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 					assignment.setUser(SecurityUtils.getUser());
 					request.getAssignments().add(assignment);
 				} else {
-					List<User> users = new ArrayList<>(getUserManager().getAuthorizedUsers(target.getProject(), new WriteCode()));
-					OneDev.getInstance(CommitInfoManager.class).sortUsersByContribution(
-							users, target.getProject(), update.getChangedFiles());
-					if (!users.isEmpty()) {
-						PullRequestAssignment assignment = new PullRequestAssignment();
-						assignment.setRequest(request);
-						assignment.setUser(users.iterator().next());
-						request.getAssignments().add(assignment);
+					for (UserAuthorization authorization: target.getProject().getUserAuthorizations()) {
+						if (authorization.getRole().isOwner()) {
+							PullRequestAssignment assignment = new PullRequestAssignment();
+							assignment.setRequest(request);
+							assignment.setUser(authorization.getUser());
+							request.getAssignments().add(assignment);
+						}
 					}
 				}
 				request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT);
