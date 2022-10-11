@@ -11,6 +11,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -45,6 +50,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Splitter;
+
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -63,7 +70,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.project.ChildrenOfCriteria;
 import io.onedev.server.search.entity.project.NameCriteria;
-import io.onedev.server.search.entity.project.PathCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
@@ -71,6 +77,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectPullRequestStats;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
@@ -1193,8 +1200,30 @@ public class ProjectListPanel extends Panel {
 				queryString = "*" + queryString.replace(" ", "*") + "*";
 				return ProjectQuery.merge(baseQuery, new ProjectQuery(new NameCriteria(queryString)));
 			} else {
-				queryString = "**/*" + queryString.replace(" ", "*/**/*") + "*/**";
-				return ProjectQuery.merge(baseQuery, new ProjectQuery(new PathCriteria(queryString)));
+				ProjectQuery query = baseQuery;
+				for (String field: Splitter.on(' ').omitEmptyStrings().trimResults().split(queryString)) {
+					query = ProjectQuery.merge(query, new ProjectQuery(new Criteria<Project>() {
+
+						@Override
+						public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from,
+								CriteriaBuilder builder) {
+							Expression<String> attribute = from.get(Project.PROP_PATH);
+							return builder.like(builder.lower(attribute), "%" + field.toLowerCase().replace('*', '%') + "%");
+						}
+
+						@Override
+						public boolean matches(Project project) {
+							return project.getPath().toLowerCase().contains(field.toLowerCase());
+						}
+
+						@Override
+						public String toStringWithoutParens() {
+							throw new UnsupportedOperationException();
+						}
+						
+					}));
+				}
+				return query;
 			}
 		}
 	}
