@@ -729,7 +729,7 @@ public abstract class BuildListPanel extends Panel {
 					@Override
 					protected Map<String, String> load() {
 						Map<String, String> choices = new LinkedHashMap<>();
-						for (String fieldName: OneDev.getInstance(BuildParamManager.class).getParamNames(null))
+						for (String fieldName: OneDev.getInstance(BuildParamManager.class).getParamNames(getProject()))
 							choices.put(fieldName, fieldName);
 						return choices;
 					}
