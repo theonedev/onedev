@@ -65,6 +65,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
+import io.onedev.server.event.CodeStorageInitialized;
 import io.onedev.server.event.ProjectCreated;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
@@ -487,6 +488,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
        	userAuthorizationManager.save(authorization);
     	
         FileUtils.cleanDir(to.getGitDir());
+        listenerRegistry.post(new CodeStorageInitialized(to));
         new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
         checkSanity(to);
         commitInfoManager.cloneInfo(from, to);
@@ -529,6 +531,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
        	userAuthorizationManager.save(authorization);
     	
         FileUtils.cleanDir(project.getGitDir());
+        listenerRegistry.post(new CodeStorageInitialized(project));
         new CloneCommand(project.getGitDir()).mirror(true).from(repositoryUrl).call();
         checkSanity(project);
         
@@ -596,6 +599,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	private void checkSanity(Project project) {
 		File gitDir = project.getGitDir();
 		if (gitDir.listFiles().length == 0) {
+            listenerRegistry.post(new CodeStorageInitialized(project));
         	logger.info("Initializing git repository in '" + gitDir + "'...");
             try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
@@ -604,6 +608,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		} else if (!GitUtils.isValid(gitDir)) {
         	logger.warn("Directory '" + gitDir + "' is not a valid git repository, reinitializing...");
         	FileUtils.cleanDir(gitDir);
+            listenerRegistry.post(new CodeStorageInitialized(project));
             try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
@@ -669,10 +674,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		try {
 			for (Project project: query()) {
 				String path = project.getPath();
-				if (!path.equals(project.calcPath())) { 
-					System.out.println("shit");
+				if (!path.equals(project.calcPath()))
 					project.setPath(path);
-				}
 				cache.put(project.getId(), project.getFacade());
 				checkSanity(project);
 			}
