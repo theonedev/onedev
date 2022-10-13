@@ -36,7 +36,8 @@ jobs:
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
-  - !PullRequestUpdateTrigger {}
+  - !PullRequestUpdateTrigger
+    projects: onedev/server
   - !BranchUpdateTrigger
     projects: onedev/server
   retryCondition: never
