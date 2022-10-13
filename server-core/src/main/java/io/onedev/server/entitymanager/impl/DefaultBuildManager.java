@@ -47,12 +47,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.event.BuildDeleted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -118,6 +120,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final SettingManager settingManager;
 	
+	private final ListenerRegistry listenerRegistry;
+	
 	private final Map<Long, BuildFacade> builds = new HashMap<>();
 	
 	private final ReadWriteLock buildsLock = new ReentrantReadWriteLock();
@@ -133,7 +137,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
 			StorageManager storageManager, ProjectManager projectManager, 
 			SessionManager sessionManager, TransactionManager transactionManager, 
-			SettingManager settingManager) {
+			SettingManager settingManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
@@ -143,6 +147,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 		this.settingManager = settingManager;
+		this.listenerRegistry = listenerRegistry;
 	}
 
 	@Transactional
@@ -151,6 +156,9 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
     	super.delete(build);
     	
 		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
+		
+		listenerRegistry.post(new BuildDeleted(build));
+		
 		Long buildId = build.getId();
 		transactionManager.runAfterCommit(new Runnable() {
 

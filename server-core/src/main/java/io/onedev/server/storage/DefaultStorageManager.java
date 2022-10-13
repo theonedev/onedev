@@ -14,6 +14,7 @@ import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.TransactionManager;
@@ -183,6 +184,17 @@ public class DefaultStorageManager implements StorageManager {
 		File buildDir = new File(getBuildsDir(projectId), String.valueOf(buildNumber));
 		FileUtils.createDir(buildDir);
 		return buildDir;
+	}
+
+	@Override
+	public void initLfsDir(Long projectId) {
+		FileUtils.createDir(new File(getProjectGitDir(projectId), "lfs"));
+	}
+
+	@Override
+	public void initArtifactsDir(Long projectId, Long buildNumber) {
+		File buildDir = getBuildDir(projectId, buildNumber);
+		FileUtils.createDir(new File(buildDir, Build.ARTIFACTS_DIR));
 	}
 
 }

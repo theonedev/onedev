@@ -6,6 +6,7 @@ import java.util.StringTokenizer;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.jgit.util.QuotedString;
 
 import io.onedev.agent.Agent;
@@ -49,6 +50,12 @@ public abstract class GitCommand<V> {
 	public Commandline cmd() {
 		String gitExe = getGitExe();
 		Commandline cmd = new Commandline(gitExe);
+		
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			String path = System.getenv("PATH") + ":/usr/local/bin";
+			cmd.environments().put("PATH", path);
+		}
+		
 		if (gitDir != null)
 			cmd.workingDir(gitDir);
 		if (environments != null)

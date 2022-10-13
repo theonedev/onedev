@@ -25,6 +25,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.util.FileUpload;
@@ -87,6 +88,8 @@ public abstract class ArtifactUploadPanel extends Panel {
 						@Override
 						public Void call() throws Exception {
 							File artifactsDir = getBuild().getArtifactsDir();
+							OneDev.getInstance(StorageManager.class).initArtifactsDir(
+									getBuild().getProject().getId(), getBuild().getNumber());
 							for (FileUpload upload: uploads) {
 								String filePath = FilenameUtils.sanitizeFilename(upload.getFileName());
 								if (directory != null)

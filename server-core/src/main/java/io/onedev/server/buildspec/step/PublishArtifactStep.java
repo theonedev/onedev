@@ -11,8 +11,10 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.Build;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.SafePath;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -72,7 +74,7 @@ public class PublishArtifactStep extends ServerSideStep {
 			@Override
 			public Void call() throws Exception {
 				File artifactsDir = build.getArtifactsDir();
-				FileUtils.createDir(artifactsDir);
+				OneDev.getInstance(StorageManager.class).initArtifactsDir(build.getProject().getId(), build.getNumber());
 				FileUtils.copyDirectory(inputDir, artifactsDir);
 				return null;
 			}

@@ -24,6 +24,8 @@ public class CloneCommand extends GitCommand<Void> {
 	
 	private boolean noCheckout;
 	
+	private boolean noLfs;
+	
 	private String branch;
 	
 	public CloneCommand(File gitDir) {
@@ -55,6 +57,11 @@ public class CloneCommand extends GitCommand<Void> {
 		return this;
 	}
 	
+	public CloneCommand noLfs(boolean noLfs) {
+		this.noLfs = noLfs;
+		return this;
+	}
+	
 	public CloneCommand branch(String branch) {
 		this.branch = branch;
 		return this;
@@ -75,6 +82,9 @@ public class CloneCommand extends GitCommand<Void> {
 			cmd.addArgs("--no-checkout");
 		if (branch != null)
 			cmd.addArgs("-b", branch);
+		
+		if (noLfs)
+			cmd.environments().put("GIT_LFS_SKIP_SMUDGE", "1");
 		
 		cmd.addArgs(from);
 		cmd.addArgs(".");

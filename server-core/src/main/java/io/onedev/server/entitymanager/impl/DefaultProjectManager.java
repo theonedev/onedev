@@ -66,6 +66,7 @@ import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.event.ProjectCreated;
+import io.onedev.server.event.ProjectDeleted;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -75,6 +76,7 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.command.CloneCommand;
+import io.onedev.server.git.command.LfsFetchAllCommand;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
@@ -104,6 +106,7 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -143,6 +146,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final RoleManager roleManager;
     
+    private final StorageManager storageManager;
+    
     private final UserAuthorizationManager userAuthorizationManager;
     
     private final String gitReceiveHook;
@@ -164,7 +169,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
     		TaskScheduler taskScheduler, UserAuthorizationManager userAuthorizationManager, 
     		RoleManager roleManager, JobManager jobManager, IssueManager issueManager, 
-    		LinkSpecManager linkSpecManager) {
+    		LinkSpecManager linkSpecManager, StorageManager storageManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -180,6 +185,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         this.jobManager = jobManager;
         this.issueManager = issueManager;
         this.linkSpecManager = linkSpecManager;
+        this.storageManager = storageManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -256,7 +262,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		create(parent);
     	project.setPath(project.calcPath());
     	dao.persist(project);
-       	checkSanity(project);
+       	checkGitDir(project);
+       	checkGitHooksAndConfig(project);
        	UserAuthorization authorization = new UserAuthorization();
        	authorization.setProject(project);
        	authorization.setUser(SecurityUtils.getUser());
@@ -362,6 +369,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		buildManager.delete(build);
     	
     	dao.remove(project);
+    	listenerRegistry.post(new ProjectDeleted(project));
     	
     	synchronized (repositoryCache) {
 			Repository repository = repositoryCache.remove(project.getId());
@@ -487,8 +495,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
        	userAuthorizationManager.save(authorization);
     	
         FileUtils.cleanDir(to.getGitDir());
-        new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
-        checkSanity(to);
+        new CloneCommand(to.getGitDir()).noLfs(true).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
+        storageManager.initLfsDir(to.getId());
+        new LfsFetchAllCommand(to.getGitDir()).call();
+        
+        checkGitHooksAndConfig(to);
         commitInfoManager.cloneInfo(from, to);
         avatarManager.copyAvatar(from, to);
         
@@ -529,8 +540,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
        	userAuthorizationManager.save(authorization);
     	
         FileUtils.cleanDir(project.getGitDir());
-        new CloneCommand(project.getGitDir()).mirror(true).from(repositoryUrl).call();
-        checkSanity(project);
+        new CloneCommand(project.getGitDir()).mirror(true).noLfs(true).from(repositoryUrl).call();
+        storageManager.initLfsDir(project.getId());
+        new LfsFetchAllCommand(project.getGitDir()).call();
+
+        checkGitHooksAndConfig(project);
         
         listenerRegistry.post(new ProjectCreated(project));
         
@@ -593,7 +607,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         return true;
 	}
 	
-	private void checkSanity(Project project) {
+	private void checkGitDir(Project project) {
 		File gitDir = project.getGitDir();
 		if (gitDir.listFiles().length == 0) {
         	logger.info("Initializing git repository in '" + gitDir + "'...");
@@ -601,15 +615,21 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
+            storageManager.initLfsDir(project.getId());
 		} else if (!GitUtils.isValid(gitDir)) {
         	logger.warn("Directory '" + gitDir + "' is not a valid git repository, reinitializing...");
         	FileUtils.cleanDir(gitDir);
+            storageManager.initLfsDir(project.getId());
             try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
+            storageManager.initLfsDir(project.getId());
         } 
-
+	}
+	
+	private void checkGitHooksAndConfig(Project project) {
+		File gitDir = project.getGitDir();
 		if (!isGitHookValid(gitDir, "pre-receive") || !isGitHookValid(gitDir, "post-receive")) {
             File hooksDir = new File(gitDir, "hooks");
 
@@ -669,12 +689,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		try {
 			for (Project project: query()) {
 				String path = project.getPath();
-				if (!path.equals(project.calcPath())) { 
-					System.out.println("shit");
+				if (!path.equals(project.calcPath()))
 					project.setPath(path);
-				}
 				cache.put(project.getId(), project.getFacade());
-				checkSanity(project);
+				checkGitDir(project);
+				checkGitHooksAndConfig(project);
 			}
 		} finally {
 			cacheLock.writeLock().unlock();

@@ -28,6 +28,10 @@ public interface StorageManager {
      */
     File getProjectInfoDir(Long projectId);
     
+    void initLfsDir(Long projectId);
+    
+    void initArtifactsDir(Long projectId, Long buildNumber);
+    
     File getInfoDir();
     
     File getIndexDir();

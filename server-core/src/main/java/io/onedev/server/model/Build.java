@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
@@ -59,8 +58,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
@@ -94,7 +91,6 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -830,28 +826,6 @@ public class Build extends AbstractEntity
 	
 	public File getArtifactsDir() {
 		return new File(getPublishDir(), ARTIFACTS_DIR);
-	}
-	
-	public void publishArtifacts(File workspaceDir, String artifacts) {
-		LockUtils.write(getArtifactsLockKey(), new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				File artifactsDir = getArtifactsDir();
-				FileUtils.createDir(artifactsDir);
-				PatternSet patternSet = PatternSet.parse(artifacts);
-				int baseLen = workspaceDir.getAbsolutePath().length() + 1;
-				for (File file: patternSet.listFiles(workspaceDir)) {
-					try {
-						FileUtils.copyFile(file, new File(artifactsDir, file.getAbsolutePath().substring(baseLen)));
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-				return null;
-			}
-			
-		});
 	}
 	
 	@Nullable
