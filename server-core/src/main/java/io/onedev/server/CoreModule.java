@@ -38,6 +38,7 @@ import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.realm.Realm;
+import org.apache.shiro.web.config.ShiroFilterConfiguration;
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
@@ -287,6 +288,7 @@ import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.DefaultFilterChainResolver;
 import io.onedev.server.security.DefaultPasswordService;
 import io.onedev.server.security.DefaultRememberMeManager;
+import io.onedev.server.security.DefaultShiroFilterConfiguration;
 import io.onedev.server.security.DefaultWebSecurityManager;
 import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.SecurityUtils;
@@ -620,7 +622,8 @@ public class CoreModule extends AbstractPluginModule {
 	
 	private void configureSecurity() {
 		contributeFromPackage(Realm.class, AbstractAuthorizingRealm.class);
-		
+
+		bind(ShiroFilterConfiguration.class).to(DefaultShiroFilterConfiguration.class);
 		bind(RememberMeManager.class).to(DefaultRememberMeManager.class);
 		bind(WebSecurityManager.class).to(DefaultWebSecurityManager.class);
 		bind(FilterChainResolver.class).to(DefaultFilterChainResolver.class);
