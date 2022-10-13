@@ -37,7 +37,8 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !PullRequestUpdateTrigger {}
-  - !BranchUpdateTrigger {}
+  - !BranchUpdateTrigger
+    projects: onedev/server
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
