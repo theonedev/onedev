@@ -253,7 +253,11 @@ public class ProjectResource {
     @POST
     public Long createOrUpdate(@NotNull Project project) {
 		Project parent = project.getParent();
-		Long oldParentId = ((ProjectFacade) project.getOldVersion()).getParentId();
+		Long oldParentId;
+		if (project.getOldVersion() != null)
+			oldParentId = ((ProjectFacade) project.getOldVersion()).getParentId();
+		else
+			oldParentId = null;
 		
 		if (project.isNew() || !Objects.equals(oldParentId, Project.idOf(parent))) {
 			if (parent != null && !SecurityUtils.canCreateChildren(parent))

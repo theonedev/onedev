@@ -76,7 +76,11 @@ public class RoleResource {
     public Long createOrUpdate(@NotNull Role role) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-	    roleManager.save(role, new ArrayList<>(), ((RoleFacade) role.getOldVersion()).getName());
+    	if (role.getOldVersion() != null)
+    		roleManager.save(role, new ArrayList<>(), ((RoleFacade) role.getOldVersion()).getName());
+    	else
+    		roleManager.save(role, new ArrayList<>(), null);
+    		
     	return role.getId();
     }
 	

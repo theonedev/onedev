@@ -96,7 +96,11 @@ public class GroupResource {
     public Long createOrUpdate(@NotNull Group group) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-	    groupManager.save(group, ((GroupFacade) group.getOldVersion()).getName());
+    	if (group.getOldVersion() != null)
+    		groupManager.save(group, ((GroupFacade) group.getOldVersion()).getName());
+    	else
+    		groupManager.save(group, null);
+    		
     	return group.getId();
     }
 	
