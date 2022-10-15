@@ -29,6 +29,11 @@ onedev.server.markdown = {
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
 			projectPathPattern) {
 		var $container = $("#" + containerId);
+		var useFixedWidthFontCookieName = "markdownEditor.useFixedWidthFont";
+		var useFixedWidthFont = Cookies.get(useFixedWidthFontCookieName);
+		if (useFixedWidthFont && useFixedWidthFont == "true")	
+			$container.addClass("fixed-width");
+		
 		$container.data("callback", callback);
 		
 		var $head = $container.children(".head");
@@ -310,6 +315,14 @@ onedev.server.markdown = {
 			}
 		});
 
+		var $doFixedWidth = $head.find(".do-fixedwidth");
+		if ($container.hasClass("fixed-width"))
+			$doFixedWidth.addClass("active");
+		$doFixedWidth.click(function() {
+			$container.toggleClass("fixed-width");
+			$(this).toggleClass("active");
+			Cookies.set(useFixedWidthFontCookieName, $container.hasClass("fixed-width"), {expires: Infinity});
+		});
 		$head.find(".do-help").click(function() {
 			$(this).toggleClass("active");
 			$help.toggle();

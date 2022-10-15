@@ -4,6 +4,9 @@
 		display: none !important;
 	}
 }
+.markdown-editor.fixed-width {
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;	
+}
 .markdown-editor.fullscreen {
 	position: fixed;
 	left: 0;
