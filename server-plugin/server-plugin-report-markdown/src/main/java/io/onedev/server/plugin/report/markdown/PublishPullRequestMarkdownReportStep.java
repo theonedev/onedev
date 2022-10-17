@@ -31,7 +31,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	private String file;
 	
-	@Editable(order=1100, description="Specify markdown file relative to repository workspace to publish")
+	@Editable(order=1100, description="Specify markdown file under job workspace to be published")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getFile() {
@@ -61,7 +61,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 				public Void call() throws Exception {
 					File file = new File(workspace, getFile()); 
 					if (file.exists()) {
-						File reportDir = new File(build.getPublishDir(), CATEGORY + "/" + getReportName());
+						File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 						String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 						FileUtils.createDir(reportDir);
 						FileUtils.writeFile(new File(reportDir, FILE), markdown, StandardCharsets.UTF_8.name());

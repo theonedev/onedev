@@ -24,11 +24,11 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.TransactionManager;

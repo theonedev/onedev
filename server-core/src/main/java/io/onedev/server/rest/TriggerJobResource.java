@@ -23,11 +23,11 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;

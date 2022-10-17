@@ -14,11 +14,9 @@ import javax.validation.Validator;
 
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.AgentSetting;
@@ -40,6 +38,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.persistence.DataManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -56,534 +55,273 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	
 	private final DataManager dataManager;
 	
-	private volatile Long systemSettingId;
+	private final ClusterManager clusterManager;
 	
-	private volatile Long mailSettingId;
+	private volatile Map<Key, Serializable> settingValues;
 	
-	private volatile Long backupSettingId;
-	
-	private volatile Long securitySettingId;
-	
-	private volatile Long issueSettingId;
-	
-	private volatile Long authenticatorId;
-	
-	private volatile Long jobExecutorsId;
-	
-	private volatile Long notificationTemplateSettingId;
-	
-	private volatile Long serviceDeskSettingId;
-	
-	private volatile Long jobScriptsId;
-	
-	private volatile Long pullRequestSettingId;
-	
-	private volatile Long buildSettingId;
-	
-	private volatile Long projectSettingId;
-
-	private volatile Long agentSettingId;
-	
-    private volatile Long sshSettingId;
-    
-    private volatile Long gpgSettingId;
-    
-    private volatile Long ssoConnectorsId;
-    
-    private volatile Long contributedSettingsId;
-	
-    private volatile Long performanceSettingId;
-    
-    private volatile Long brandingSettingId;
-    
 	@Inject
-	public DefaultSettingManager(Dao dao, DataManager dataManager) {
+	public DefaultSettingManager(Dao dao, DataManager dataManager, ClusterManager clusterManager) {
 		super(dao);
 		this.dataManager = dataManager;
+		this.clusterManager = clusterManager;
+	}
+	
+	@Override
+	@Sessional
+	public void init() {
+		settingValues = clusterManager.getHazelcastInstance().getReplicatedMap("settingValues");
+		for (Setting setting: query()) {
+			if (setting.getValue() != null)
+				settingValues.put(setting.getKey(), setting.getValue());
+		}
+	}
+	
+	@Override
+	public SystemSetting getSystemSetting() {
+		return (SystemSetting) settingValues.get(Key.SYSTEM);
 	}
 
 	@Sessional
 	@Override
-	public SystemSetting getSystemSetting() {
-        Setting setting;
-        if (systemSettingId == null) {
-    		setting = getSetting(Key.SYSTEM);
-    		Preconditions.checkNotNull(setting);
-            systemSettingId = setting.getId();
-        } else {
-            setting = load(systemSettingId);
-        }
-        SystemSetting value = (SystemSetting) setting.getValue();
-        Preconditions.checkNotNull(value);
-        return value;
+	public Setting findSetting(Key key) {
+		return find(EntityCriteria.of(Setting.class).add(Restrictions.eq("key", key)));
 	}
+
+	private void saveSetting(Key key, Serializable value) {
+		Setting setting = findSetting(key);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(key);
+		}
+		setting.setValue(value);
+		dao.persist(setting);
+		
+		if (value != null)
+			settingValues.put(key, value);
+		else
+			settingValues.remove(key);
+	}
+	
+	@Override
+	public MailSetting getMailSetting() {
+		return (MailSetting) settingValues.get(Key.MAIL);
+	}
+
+	@Override
+	public BackupSetting getBackupSetting() {
+		return (BackupSetting) settingValues.get(Key.BACKUP);
+	}
+
+	@Override
+	public BrandingSetting getBrandingSetting() {
+        return (BrandingSetting) settingValues.get(Key.BRANDING);
+	}
+
+	@Override
+	public SecuritySetting getSecuritySetting() {
+		return (SecuritySetting) settingValues.get(Key.SECURITY);
+	}
+
+	@Override
+	public GlobalIssueSetting getIssueSetting() {
+		return (GlobalIssueSetting) settingValues.get(Key.ISSUE);
+	}
+
+	@Override
+	public Authenticator getAuthenticator() {
+		return (Authenticator) settingValues.get(Key.AUTHENTICATOR);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<JobExecutor> getJobExecutors() {
+		return (List<JobExecutor>) settingValues.get(Key.JOB_EXECUTORS);
+	}
+
+	@Override
+	public NotificationTemplateSetting getNotificationTemplateSetting() {
+		return (NotificationTemplateSetting) settingValues.get(Key.NOTIFICATION_TEMPLATE_SETTING);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<GroovyScript> getGroovyScripts() {
+		return (List<GroovyScript>) settingValues.get(Key.GROOVY_SCRIPTS);
+	}
+
+	@Override
+	public GlobalPullRequestSetting getPullRequestSetting() {
+		return (GlobalPullRequestSetting) settingValues.get(Key.PULL_REQUEST);
+	}
+
+	@Override
+	public GlobalBuildSetting getBuildSetting() {
+		return (GlobalBuildSetting) settingValues.get(Key.BUILD);
+	}
+
+	@Override
+	public GlobalProjectSetting getProjectSetting() {
+		return (GlobalProjectSetting) settingValues.get(Key.PROJECT);
+	}
+
+	@Override
+	public AgentSetting getAgentSetting() {
+		return (AgentSetting) settingValues.get(Key.AGENT);
+	}
+
+    @Override
+    public SshSetting getSshSetting() {
+    	return (SshSetting) settingValues.get(Key.SSH);
+    }
+
+    @Override
+    public PerformanceSetting getPerformanceSetting() {
+    	return (PerformanceSetting) settingValues.get(Key.PERFORMANCE);
+    }
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<SsoConnector> getSsoConnectors() {
+		return (List<SsoConnector>) settingValues.get(Key.SSO_CONNECTORS);
+	}
+
+	@Override
+	public ServiceDeskSetting getServiceDeskSetting() {
+		return (ServiceDeskSetting) settingValues.get(Key.SERVICE_DESK_SETTING); 
+	}
+
+    @Override
+    public GpgSetting getGpgSetting() {
+    	return (GpgSetting) settingValues.get(Key.GPG);
+    }
 
 	@Transactional
 	@Override
 	public void saveSystemSetting(SystemSetting systemSetting) {
-		Preconditions.checkNotNull(systemSetting);
-		
-		Setting setting = getSetting(Key.SYSTEM);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.SYSTEM);
-		}
-		setting.setValue(systemSetting);
-		dao.persist(setting);
-	}
-
-	@Sessional
-	@Override
-	public Setting getSetting(Key key) {
-		return find(EntityCriteria.of(Setting.class).add(Restrictions.eq("key", key)));
+		saveSetting(Key.SYSTEM, systemSetting);
 	}
 	
-	@Sessional
-	@Override
-	public MailSetting getMailSetting() {
-        Setting setting;
-        if (mailSettingId == null) {
-    		setting = getSetting(Key.MAIL);
-    		Preconditions.checkNotNull(setting);
-    		mailSettingId = setting.getId();
-        } else {
-            setting = load(mailSettingId);
-        }
-        return (MailSetting) setting.getValue();
-	}
-
 	@Transactional
 	@Override
 	public void saveMailSetting(MailSetting mailSetting) {
-		Setting setting = getSetting(Key.MAIL);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.MAIL);
-		}
-		setting.setValue(mailSetting);
-		dao.persist(setting);
-	}
-
-	@Sessional
-	@Override
-	public BackupSetting getBackupSetting() {
-        Setting setting;
-        if (backupSettingId == null) {
-    		setting = getSetting(Key.BACKUP);
-    		Preconditions.checkNotNull(setting);
-    		backupSettingId = setting.getId();
-        } else {
-            setting = load(backupSettingId);
-        }
-        return (BackupSetting) setting.getValue();
+		saveSetting(Key.MAIL, mailSetting);
 	}
 
 	@Transactional
 	@Override
 	public void saveBackupSetting(BackupSetting backupSetting) {
-		Setting setting = getSetting(Key.BACKUP);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.BACKUP);
-		}
-		setting.setValue(backupSetting);
-		dao.persist(setting);
+		saveSetting(Key.BACKUP, backupSetting);
 		dataManager.scheduleBackup(backupSetting);
-	}
-
-	@Sessional
-	@Override
-	public BrandingSetting getBrandingSetting() {
-        Setting setting;
-        if (brandingSettingId == null) {
-    		setting = getSetting(Key.BRANDING);
-    		Preconditions.checkNotNull(setting);
-    		brandingSettingId = setting.getId();
-        } else {
-            setting = load(brandingSettingId);
-        }
-        return (BrandingSetting) setting.getValue();
 	}
 
 	@Transactional
 	@Override
 	public void saveBrandingSetting(BrandingSetting brandingSetting) {
-		Setting setting = getSetting(Key.BRANDING);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.BRANDING);
-		}
-		setting.setValue(brandingSetting);
-		dao.persist(setting);
-	}
-	
-	@Sessional
-	@Override
-	public SecuritySetting getSecuritySetting() {
-        Setting setting;
-        if (securitySettingId == null) {
-    		setting = getSetting(Key.SECURITY);
-    		Preconditions.checkNotNull(setting);
-    		securitySettingId = setting.getId();
-        } else {
-            setting = load(securitySettingId);
-        }
-        return (SecuritySetting) setting.getValue();
-	}
-
-	@Transactional
-	@Override
-	public void saveIssueSetting(GlobalIssueSetting issueSetting) {
-		Setting setting = getSetting(Key.ISSUE);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.ISSUE);
-		}
-		setting.setValue(issueSetting);
-		dao.persist(setting);
-	}
-	
-	@Sessional
-	@Override
-	public GlobalIssueSetting getIssueSetting() {
-        Setting setting;
-        if (issueSettingId == null) {
-    		setting = getSetting(Key.ISSUE);
-    		Preconditions.checkNotNull(setting);
-    		issueSettingId = setting.getId();
-        } else {
-            setting = load(issueSettingId);
-        }
-        return (GlobalIssueSetting) setting.getValue();
+		saveSetting(Key.BRANDING, brandingSetting);
 	}
 
 	@Transactional
 	@Override
 	public void saveSecuritySetting(SecuritySetting securitySetting) {
-		Setting setting = getSetting(Key.SECURITY);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.SECURITY);
-		}
-		setting.setValue(securitySetting);
-		dao.persist(setting);
+		saveSetting(Key.SECURITY, securitySetting);
 	}
-	
-	@Sessional
+
+	@Transactional
 	@Override
-	public Authenticator getAuthenticator() {
-        Setting setting;
-        if (authenticatorId == null) {
-    		setting = getSetting(Key.AUTHENTICATOR);
-    		Preconditions.checkNotNull(setting);
-    		authenticatorId = setting.getId();
-        } else {
-            setting = load(authenticatorId);
-        }
-        return (Authenticator) setting.getValue();
+	public void saveIssueSetting(GlobalIssueSetting issueSetting) {
+		saveSetting(Key.ISSUE, issueSetting);
 	}
 
 	@Transactional
 	@Override
 	public void saveAuthenticator(Authenticator authenticator) {
-		Setting setting = getSetting(Key.AUTHENTICATOR);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.AUTHENTICATOR);
-		}
-		setting.setValue(authenticator);
-		dao.persist(setting);
-	}
-
-	@Sessional
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<JobExecutor> getJobExecutors() {
-        Setting setting;
-        if (jobExecutorsId == null) {
-    		setting = getSetting(Key.JOB_EXECUTORS);
-    		Preconditions.checkNotNull(setting);
-    		jobExecutorsId = setting.getId();
-        } else {
-            setting = load(jobExecutorsId);
-        }
-        return (List<JobExecutor>) setting.getValue();
+		saveSetting(Key.AUTHENTICATOR, authenticator);
 	}
 
 	@Transactional
 	@Override
 	public void saveJobExecutors(List<JobExecutor> jobExecutors) {
-		Setting setting = getSetting(Key.JOB_EXECUTORS);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.JOB_EXECUTORS);
-		}
-		setting.setValue((Serializable) jobExecutors);
-		dao.persist(setting);
-	}
-
-	@Sessional
-	@Override
-	public NotificationTemplateSetting getNotificationTemplateSetting() {
-        Setting setting;
-        if (notificationTemplateSettingId == null) {
-    		setting = getSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
-    		Preconditions.checkNotNull(setting);
-    		notificationTemplateSettingId = setting.getId();
-        } else {
-            setting = load(notificationTemplateSettingId);
-        }
-        return (NotificationTemplateSetting) setting.getValue();
+		saveSetting(Key.JOB_EXECUTORS, (Serializable) jobExecutors);
 	}
 
 	@Transactional
 	@Override
 	public void saveNotificationTemplateSetting(NotificationTemplateSetting notificationTemplateSetting) {
-		Setting setting = getSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.NOTIFICATION_TEMPLATE_SETTING);
-		}
-		setting.setValue((Serializable) notificationTemplateSetting);
-		dao.persist(setting);
-	}
-
-	@Sessional
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<GroovyScript> getGroovyScripts() {
-        Setting setting;
-        if (jobScriptsId == null) {
-    		setting = getSetting(Key.GROOVY_SCRIPTS);
-    		Preconditions.checkNotNull(setting);
-    		jobScriptsId = setting.getId();
-        } else {
-            setting = load(jobScriptsId);
-        }
-        return (List<GroovyScript>) setting.getValue();
+		saveSetting(Key.NOTIFICATION_TEMPLATE_SETTING, notificationTemplateSetting);
 	}
 
 	@Transactional
 	@Override
-	public void saveGroovyScripts(List<GroovyScript> jobScripts) {
-		Setting setting = getSetting(Key.GROOVY_SCRIPTS);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.GROOVY_SCRIPTS);
-		}
-		setting.setValue((Serializable) jobScripts);
-		dao.persist(setting);
+	public void saveServiceDeskSetting(ServiceDeskSetting serviceDeskSetting) {
+		saveSetting(Key.SERVICE_DESK_SETTING, serviceDeskSetting);
 	}
-	
-	@Sessional
+
+	@Transactional
 	@Override
-	public GlobalPullRequestSetting getPullRequestSetting() {
-        Setting setting;
-        if (pullRequestSettingId == null) {
-    		setting = getSetting(Key.PULL_REQUEST);
-    		Preconditions.checkNotNull(setting);
-    		pullRequestSettingId = setting.getId();
-        } else {
-            setting = load(pullRequestSettingId);
-        }
-        return (GlobalPullRequestSetting)setting.getValue();
+	public void saveGroovyScripts(List<GroovyScript> groovyScripts) {
+		saveSetting(Key.GROOVY_SCRIPTS, (Serializable) groovyScripts);
 	}
 
 	@Transactional
 	@Override
 	public void savePullRequestSetting(GlobalPullRequestSetting pullRequestSetting) {
-		Setting setting = getSetting(Key.PULL_REQUEST);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.PULL_REQUEST);
-		}
-		setting.setValue(pullRequestSetting);
-		dao.persist(setting);
-	}
-	
-	@Sessional
-	@Override
-	public GlobalBuildSetting getBuildSetting() {
-        Setting setting;
-        if (buildSettingId == null) {
-    		setting = getSetting(Key.BUILD);
-    		Preconditions.checkNotNull(setting);
-    		buildSettingId = setting.getId();
-        } else {
-            setting = load(buildSettingId);
-        }
-        return (GlobalBuildSetting)setting.getValue();
+		saveSetting(Key.PULL_REQUEST, pullRequestSetting);
 	}
 
 	@Transactional
 	@Override
 	public void saveBuildSetting(GlobalBuildSetting buildSetting) {
-		Setting setting = getSetting(Key.BUILD);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.BUILD);
-		}
-		setting.setValue(buildSetting);
-		dao.persist(setting);
-	}
-	
-	@Sessional
-	@Override
-	public GlobalProjectSetting getProjectSetting() {
-        Setting setting;
-        if (projectSettingId == null) {
-    		setting = getSetting(Key.PROJECT);
-    		Preconditions.checkNotNull(setting);
-    		projectSettingId = setting.getId();
-        } else {
-            setting = load(projectSettingId);
-        }
-        return (GlobalProjectSetting)setting.getValue();
+		saveSetting(Key.BUILD, buildSetting);
 	}
 
 	@Transactional
 	@Override
 	public void saveProjectSetting(GlobalProjectSetting projectSetting) {
-		Setting setting = getSetting(Key.PROJECT);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.PROJECT);
-		}
-		setting.setValue(projectSetting);
-		dao.persist(setting);
-	}
-	
-	@Sessional
-	@Override
-	public AgentSetting getAgentSetting() {
-        Setting setting;
-        if (agentSettingId == null) {
-    		setting = getSetting(Key.AGENT);
-    		Preconditions.checkNotNull(setting);
-    		agentSettingId = setting.getId();
-        } else {
-            setting = load(agentSettingId);
-        }
-        return (AgentSetting)setting.getValue();
+		saveSetting(Key.PROJECT, projectSetting);
 	}
 
 	@Transactional
 	@Override
 	public void saveAgentSetting(AgentSetting agentSetting) {
-		Setting setting = getSetting(Key.AGENT);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.AGENT);
-		}
-		setting.setValue(agentSetting);
-		dao.persist(setting);
-	}
-	
-	@Sessional
-    @Override
-    public SshSetting getSshSetting() {
-        Setting setting;
-        if (sshSettingId == null) {
-            setting = getSetting(Key.SSH);
-            Preconditions.checkNotNull(setting);
-            sshSettingId = setting.getId();
-        } else {
-            setting = load(sshSettingId);
-        }
-        return (SshSetting)setting.getValue();
-    }
-
-    @Transactional
-    @Override
-    public void saveSshSetting(SshSetting sshSetting) {
-        Setting setting = getSetting(Key.SSH);
-        if (setting == null) {
-            setting = new Setting();
-            setting.setKey(Key.SSH);
-        }
-        setting.setValue(sshSetting);
-        dao.persist(setting);
-    }
-
-	@Sessional
-    @Override
-    public PerformanceSetting getPerformanceSetting() {
-        Setting setting;
-        if (performanceSettingId == null) {
-            setting = getSetting(Key.PERFORMANCE);
-            Preconditions.checkNotNull(setting);
-            performanceSettingId = setting.getId();
-        } else {
-            setting = load(performanceSettingId);
-        }
-        return (PerformanceSetting)setting.getValue();
-    }
-
-    @Transactional
-    @Override
-    public void savePerformanceSetting(PerformanceSetting performanceSetting) {
-        Setting setting = getSetting(Key.PERFORMANCE);
-        if (setting == null) {
-            setting = new Setting();
-            setting.setKey(Key.PERFORMANCE);
-        }
-        setting.setValue(performanceSetting);
-        dao.persist(setting);
-    }
-    
-	@Sessional
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<SsoConnector> getSsoConnectors() {
-        Setting setting;
-        if (ssoConnectorsId == null) {
-    		setting = getSetting(Key.SSO_CONNECTORS);
-    		Preconditions.checkNotNull(setting);
-    		ssoConnectorsId = setting.getId();
-        } else {
-            setting = load(ssoConnectorsId);
-        }
-        return (List<SsoConnector>) setting.getValue();
+		saveSetting(Key.AGENT, agentSetting);
 	}
 
 	@Transactional
 	@Override
-	public void saveSsoConnectors(List<SsoConnector> ssoProviders) {
-		Setting setting = getSetting(Key.SSO_CONNECTORS);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.SSO_CONNECTORS);
-		}
-		setting.setValue((Serializable) ssoProviders);
-		dao.persist(setting);
+	public void savePerformanceSetting(PerformanceSetting performanceSetting) {
+		saveSetting(Key.PERFORMANCE, performanceSetting);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Transactional
 	@Override
-	public Map<String, ContributedAdministrationSetting> getContributedSettings() {
-        Setting setting;
-        if (contributedSettingsId == null) {
-    		setting = getSetting(Key.CONTRIBUTED_SETTINGS);
-    		Preconditions.checkNotNull(setting);
-    		contributedSettingsId = setting.getId();
-        } else {
-            setting = load(contributedSettingsId);
-        }
-        return (Map<String, ContributedAdministrationSetting>) setting.getValue();
+	public void saveSshSetting(SshSetting sshSetting) {
+		saveSetting(Key.SSH, sshSetting);
+	}
+
+	@Transactional
+	@Override
+	public void saveGpgSetting(GpgSetting gpgSetting) {
+		saveSetting(Key.GPG, gpgSetting);
+	}
+
+	@Transactional
+	@Override
+	public void saveSsoConnectors(List<SsoConnector> ssoConnectors) {
+		saveSetting(Key.SSO_CONNECTORS, (Serializable) ssoConnectors);
 	}
 
 	@Transactional
 	@Override
 	public void saveContributedSettings(Map<String, ContributedAdministrationSetting> contributedSettings) {
-		Setting setting = getSetting(Key.CONTRIBUTED_SETTINGS);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.CONTRIBUTED_SETTINGS);
-		}
-		setting.setValue((Serializable) contributedSettings);
-		dao.persist(setting);
+		saveSetting(Key.CONTRIBUTED_SETTINGS, (Serializable) contributedSettings);
 	}
- 
+    
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, ContributedAdministrationSetting> getContributedSettings() {
+		return (Map<String, ContributedAdministrationSetting>) settingValues.get(Key.CONTRIBUTED_SETTINGS);
+	}
+
 	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T extends ContributedAdministrationSetting> T getContributedSetting(Class<T> settingClass) {
@@ -606,33 +344,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 			@Nullable ContributedAdministrationSetting setting) {
 		Map<String, ContributedAdministrationSetting> contributedSettings = getContributedSettings();
 		contributedSettings.put(settingClass.getName(), setting);
-		saveContributedSettings(contributedSettings);
-	}
-
-	@Sessional
-	@Override
-	public ServiceDeskSetting getServiceDeskSetting() {
-        Setting setting;
-        if (serviceDeskSettingId == null) {
-    		setting = getSetting(Key.SERVICE_DESK_SETTING);
-    		Preconditions.checkNotNull(setting);
-    		serviceDeskSettingId = setting.getId();
-        } else {
-            setting = load(serviceDeskSettingId);
-        }
-        return (ServiceDeskSetting) setting.getValue();
-	}
-
-	@Transactional
-	@Override
-	public void saveServiceDeskSetting(ServiceDeskSetting serviceDeskSetting) {
-		Setting setting = getSetting(Key.SERVICE_DESK_SETTING);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.SERVICE_DESK_SETTING);
-		}
-		setting.setValue((Serializable) serviceDeskSetting);
-		dao.persist(setting);
+		saveSetting(Key.CONTRIBUTED_SETTINGS, (Serializable) contributedSettings);
 	}
 
 	@Override
@@ -659,6 +371,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		deletedFields.addAll(getIssueSetting().fixUndefinedFields(resolutions));
 		if (getServiceDeskSetting() != null)
 			getServiceDeskSetting().fixUndefinedIssueFields(resolutions);
+		saveSetting(Key.ISSUE, getIssueSetting());
+		saveSetting(Key.SERVICE_DESK_SETTING, getServiceDeskSetting());
 		return deletedFields;
 	}
 	
@@ -668,6 +382,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		deletedFields.addAll(getIssueSetting().fixUndefinedFieldValues(resolutions));
 		if (getServiceDeskSetting() != null)
 			getServiceDeskSetting().fixUndefinedIssueFieldValues(resolutions);
+		saveSetting(Key.ISSUE, getIssueSetting());
+		saveSetting(Key.SERVICE_DESK_SETTING, getServiceDeskSetting());
 		return deletedFields;
 	}
 
@@ -676,6 +392,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		getIssueSetting().onRenameRole(oldName, newName);
 		if (getServiceDeskSetting() != null)
 			getServiceDeskSetting().onRenameRole(oldName, newName);
+		saveSetting(Key.ISSUE, getIssueSetting());
+		saveSetting(Key.SERVICE_DESK_SETTING, getServiceDeskSetting());
 	}
 
 	@Override
@@ -698,6 +416,11 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     	if (getServiceDeskSetting() != null)
     		getServiceDeskSetting().onMoveProject(oldPath, newPath);
     	getIssueSetting().onMoveProject(oldPath, newPath);
+    	
+		saveSetting(Key.JOB_EXECUTORS, (Serializable) getJobExecutors());
+		saveSetting(Key.GROOVY_SCRIPTS, (Serializable) getGroovyScripts());
+		saveSetting(Key.SERVICE_DESK_SETTING, getServiceDeskSetting());
+		saveSetting(Key.ISSUE, getIssueSetting());
 	}
 
 	@Override
@@ -728,6 +451,10 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 			authenticator.onRenameGroup(oldName, newName);
 		getIssueSetting().onRenameGroup(oldName, newName);
 		getSecuritySetting().onRenameGroup(oldName, newName);
+		
+		saveSetting(Key.AUTHENTICATOR, getAuthenticator());
+		saveSetting(Key.ISSUE, getIssueSetting());
+		saveSetting(Key.SECURITY, getSecuritySetting());
 	}
 
 	@Override
@@ -749,6 +476,9 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     	for (JobExecutor jobExecutor: getJobExecutors())
     		jobExecutor.onRenameUser(oldName, newName);
 		getIssueSetting().onRenameUser(oldName, newName);
+		
+		saveSetting(Key.JOB_EXECUTORS, (Serializable) getJobExecutors());
+		saveSetting(Key.ISSUE, getIssueSetting());
 	}
 
 	@Override
@@ -769,6 +499,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	@Override
 	public void onRenameLink(String oldName, String newName) {
 		getIssueSetting().onRenameLink(oldName, newName);
+		saveSetting(Key.ISSUE, getIssueSetting());
 	}
 
 	@Override
@@ -777,31 +508,5 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		usage.add(getIssueSetting().onDeleteLink(linkName));
 		return usage.prefix("administration");
 	}
-
-	@Sessional
-    @Override
-    public GpgSetting getGpgSetting() {
-        Setting setting;
-        if (gpgSettingId == null) {
-            setting = getSetting(Key.GPG);
-            Preconditions.checkNotNull(setting);
-            gpgSettingId = setting.getId();
-        } else {
-            setting = load(gpgSettingId);
-        }
-        return (GpgSetting)setting.getValue();
-    }
-
-    @Transactional
-    @Override
-    public void saveGpgSetting(GpgSetting gpgSetting) {
-        Setting setting = getSetting(Key.GPG);
-        if (setting == null) {
-            setting = new Setting();
-            setting.setKey(Key.GPG);
-        }
-        setting.setValue(gpgSetting);
-        dao.persist(setting);
-    }
 
 }

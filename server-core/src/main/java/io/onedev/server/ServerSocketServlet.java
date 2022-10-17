@@ -7,14 +7,13 @@ import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.HttpHeaders;
 
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 import io.onedev.agent.Agent;
 import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.model.AgentToken;
+import io.onedev.server.security.SecurityUtils;
 
 @Singleton
 public class ServerSocketServlet extends WebSocketServlet {
@@ -39,17 +38,11 @@ public class ServerSocketServlet extends WebSocketServlet {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (bearer != null && bearer.startsWith(Agent.BEARER + " ")) {
-			String tokenValue = bearer.substring(Agent.BEARER.length() + 1);
-			AgentToken token = tokenManager.find(tokenValue);
-			if (token != null) 
-				super.service(request, response);
-			else 
-				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid agent token");
-		} else {
-			response.sendError(HttpServletResponse.SC_FORBIDDEN, "No agent token");
-		}
+		String bearerToken = SecurityUtils.getBearerToken(request);
+		if (bearerToken != null && tokenManager.find(bearerToken) != null)  
+			super.service(request, response);
+		else
+			response.sendError(HttpServletResponse.SC_FORBIDDEN, "A valid agent token is expected");
 	}
 	
 }

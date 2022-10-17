@@ -10,45 +10,42 @@ import org.eclipse.jgit.util.QuotedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
+public class ListChangedFilesCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(ListChangedFilesCommand.class);
 	
-	private String fromRev;
+	private final File workingDir;
 	
-	private String toRev;
+	private final String fromRev;
 	
-	public ListChangedFilesCommand(File gitDir, Map<String, String> gitEnvs) {
-		super(gitDir, gitEnvs);
-	}
+	private final String toRev;
 	
-	public ListChangedFilesCommand fromRev(String fromRev) {
+	private final Map<String, String> envs;
+	
+	public ListChangedFilesCommand(File workingDir, String fromRev, String toRev, Map<String, String> envs) {
+		this.workingDir = workingDir;
 		this.fromRev = fromRev;
-		return this;
-	}
-	
-	public ListChangedFilesCommand toRev(String toRev) {
 		this.toRev = toRev;
-		return this;
+		this.envs = envs;
 	}
 	
-	@Override
-	public Collection<String> call() {
-		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
-		Preconditions.checkNotNull(fromRev, "fromRev has to be specified.");
-		
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
+	
+	public Collection<String> run() {
 		final Set<String> changedFiles = new HashSet<String>();
 		
-		Commandline cmd = cmd();
+		Commandline git = newGit().workingDir(workingDir);
+		git.environments().putAll(envs);
 		
-		cmd.addArgs("diff", "--name-only", "--no-renames", fromRev + ".." + toRev);
+		git.addArgs("diff", "--name-only", "--no-renames", fromRev + ".." + toRev);
 		
-		cmd.execute(new LineConsumer() {
+		git.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {

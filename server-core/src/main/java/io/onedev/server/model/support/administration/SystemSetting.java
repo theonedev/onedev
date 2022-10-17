@@ -15,12 +15,12 @@ import javax.validation.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.ServerConfig;
 import io.onedev.server.git.config.CurlConfig;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.git.config.SystemCurl;
 import io.onedev.server.git.config.SystemGit;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;

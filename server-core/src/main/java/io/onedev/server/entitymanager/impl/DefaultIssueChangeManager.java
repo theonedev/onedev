@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.joda.time.DateTime;
@@ -24,22 +25,19 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.loader.Listen;
-import io.onedev.commons.loader.ListenerRegistry;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.issue.IssueChanged;
+import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.system.SystemStarted;
@@ -77,8 +75,6 @@ import io.onedev.server.model.support.issue.transitiontrigger.StateTransitionTri
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -112,15 +108,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	private final IssueFieldManager issueFieldManager;
 	
-	private final TransactionManager transactionManager;
-	
-	private final SessionManager sessionManager;
-	
 	private final ProjectManager projectManager;
-	
-	private final PullRequestManager pullRequestManager;
-	
-	private final BuildManager buildManager;
 	
 	private final IssueScheduleManager issueScheduleManager;
 	
@@ -133,24 +121,17 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	private String taskId;
 	
 	@Inject
-	public DefaultIssueChangeManager(Dao dao, TransactionManager transactionManager, 
-			IssueManager issueManager,  IssueFieldManager issueFieldManager,
-			ProjectManager projectManager, BuildManager buildManager, 
-			PullRequestManager pullRequestManager, ListenerRegistry listenerRegistry, 
-			TaskScheduler taskScheduler, IssueScheduleManager issueScheduleManager, 
-			IssueLinkManager issueLinkManager, SessionManager sessionManager) {
+	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager, IssueFieldManager issueFieldManager,
+			ProjectManager projectManager,  ListenerRegistry listenerRegistry, TaskScheduler taskScheduler, 
+			IssueScheduleManager issueScheduleManager, IssueLinkManager issueLinkManager) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
-		this.transactionManager = transactionManager;
 		this.projectManager = projectManager;
-		this.pullRequestManager = pullRequestManager;
-		this.buildManager = buildManager;
 		this.listenerRegistry = listenerRegistry;
 		this.taskScheduler = taskScheduler;
 		this.issueScheduleManager = issueScheduleManager;
 		this.issueLinkManager = issueLinkManager;
-		this.sessionManager = sessionManager;
 	}
 
 	@Transactional
@@ -167,15 +148,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
 		}
 
-		Long changeId = change.getId();
-		sessionManager.runAsyncAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				listenerRegistry.post(new IssueChanged(load(changeId), note));
-			}
-			
-		});
+		listenerRegistry.post(new IssueChanged(change, note));
 	}
 	
 	@Override
@@ -328,163 +301,135 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Listen
 	public void on(IssueChanged event) {
 		if (event.getChange().getData() instanceof IssueStateChangeData) {
-			Long issueId = event.getIssue().getId();
-			Long projectId = event.getIssue().getProject().getId();
-			
-			transactionManager.runAsyncAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						SecurityUtils.bindAsSystem();
-						Issue issue = issueManager.load(issueId);
-						
-						IssueQueryParseOption option = new IssueQueryParseOption().withCurrentIssueCriteria(true);
-						for (TransitionSpec transition: getTransitionSpecs()) {
-							if (transition.getTrigger() instanceof StateTransitionTrigger) {
-								Project project = issue.getProject();
-								ProjectScope projectScope = new ProjectScope(project, true, true);
-								StateTransitionTrigger trigger = (StateTransitionTrigger) transition.getTrigger();
-								if (trigger.getStates().contains(issue.getState())) {
-									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
-									List<Criteria<Issue>> criterias = new ArrayList<>();
-									
-									List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-									for (String fromState: transition.getFromStates()) 
-										fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-									
-									criterias.add(Criteria.orCriterias(fromStateCriterias));
-									if (query.getCriteria() != null)
-										criterias.add(query.getCriteria());
-									query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
-									Issue.push(issue);
-									try {
-										for (Issue each: issueManager.query(
-												projectScope, query, true, 0, Integer.MAX_VALUE)) {
-											String message = "State changed as issue #" + issue.getNumber() 
-													+ " transited to '" + issue.getState() + "'";
-											changeState(each, transition.getToState(), new HashMap<>(), 
-													transition.getRemoveFields(), message);
-										}
-									} finally {
-										Issue.pop();
-									}
-								}
-							}      												
-						}
-					} catch (Exception e) {
-						logger.error("Error changing issue state", e);
-					}
-				}
+			try {
+				SecurityUtils.bindAsSystem();
+				Issue issue = event.getIssue();
 				
-			}, LockUtils.getLock(getLockKey(projectId)));				
+				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentIssueCriteria(true);
+				for (TransitionSpec transition: getTransitionSpecs()) {
+					if (transition.getTrigger() instanceof StateTransitionTrigger) {
+						Project project = issue.getProject();
+						ProjectScope projectScope = new ProjectScope(project, true, true);
+						StateTransitionTrigger trigger = (StateTransitionTrigger) transition.getTrigger();
+						if (trigger.getStates().contains(issue.getState())) {
+							IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
+							List<Criteria<Issue>> criterias = new ArrayList<>();
+							
+							List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
+							for (String fromState: transition.getFromStates()) 
+								fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
+							
+							criterias.add(Criteria.orCriterias(fromStateCriterias));
+							if (query.getCriteria() != null)
+								criterias.add(query.getCriteria());
+							query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+							Issue.push(issue);
+							try {
+								for (Issue each: issueManager.query(
+										projectScope, query, true, 0, Integer.MAX_VALUE)) {
+									String message = "State changed as issue #" + issue.getNumber() 
+											+ " transited to '" + issue.getState() + "'";
+									changeState(each, transition.getToState(), new HashMap<>(), 
+											transition.getRemoveFields(), message);
+								}
+							} finally {
+								Issue.pop();
+							}
+						}
+					}      												
+				}
+			} catch (Exception e) {
+				logger.error("Error changing issue state", e);
+			}
 		}
 	}
 	
 	@Transactional
 	@Listen
 	public void on(BuildFinished event) {
-		Long buildId = event.getBuild().getId();
-		Long projectId = event.getBuild().getProject().getId();
-		transactionManager.runAsyncAfterCommit(new Runnable() {
+		try {
+			SecurityUtils.bindAsSystem();
+			Build build = event.getBuild();
 
-			@Override
-			public void run() {
-				try {
-					SecurityUtils.bindAsSystem();
-					Build build = buildManager.load(buildId);
-
-					IssueQueryParseOption option = new IssueQueryParseOption().withCurrentBuildCriteria(true);
-					for (TransitionSpec transition: getTransitionSpecs()) {
-						if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
-							Project project = build.getProject();
-							ProjectScope projectScope = new ProjectScope(project, true, true);
-							BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
-							String branches = trigger.getBranches();
-							ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-							if ((trigger.getJobNames() == null || PatternSet.parse(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
-									&& build.getStatus() == Build.Status.SUCCESSFUL
-									&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-								IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
-								List<Criteria<Issue>> criterias = new ArrayList<>();
-								
-								List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-								for (String fromState: transition.getFromStates()) 
-									fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-								
-								criterias.add(Criteria.orCriterias(fromStateCriterias));
-								if (query.getCriteria() != null)
-									criterias.add(query.getCriteria());
-								query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
-								Build.push(build);
-								try {
-									for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
-										String message = "State changed as build #" + build.getNumber() + " is successful";
-										changeState(issue, transition.getToState(), new HashMap<>(), 
-												transition.getRemoveFields(), message);
-									}
-								} finally {
-									Build.pop();
-								}
+			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentBuildCriteria(true);
+			for (TransitionSpec transition: getTransitionSpecs()) {
+				if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
+					Project project = build.getProject();
+					ProjectScope projectScope = new ProjectScope(project, true, true);
+					BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
+					String branches = trigger.getBranches();
+					ObjectId commitId = ObjectId.fromString(build.getCommitHash());
+					if ((trigger.getJobNames() == null || PatternSet.parse(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
+							&& build.getStatus() == Build.Status.SUCCESSFUL
+							&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
+						IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
+						List<Criteria<Issue>> criterias = new ArrayList<>();
+						
+						List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
+						for (String fromState: transition.getFromStates()) 
+							fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
+						
+						criterias.add(Criteria.orCriterias(fromStateCriterias));
+						if (query.getCriteria() != null)
+							criterias.add(query.getCriteria());
+						query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+						Build.push(build);
+						try {
+							for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
+								String message = "State changed as build #" + build.getNumber() + " is successful";
+								changeState(issue, transition.getToState(), new HashMap<>(), 
+										transition.getRemoveFields(), message);
 							}
-						}      												
+						} finally {
+							Build.pop();
+						}
 					}
-				} catch (Exception e) {
-					logger.error("Error changing issue state", e);
-				}
+				}      												
 			}
-			
-		}, LockUtils.getLock(getLockKey(projectId)));
+		} catch (Exception e) {
+			logger.error("Error changing issue state", e);
+		}
 	}
 	
 	private void on(PullRequest request, Class<? extends PullRequestTrigger> triggerClass) {
-		Long requestId = request.getId();
-		Long projectId = request.getTargetProject().getId();
-		transactionManager.runAsyncAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					SecurityUtils.bindAsSystem();
-					Matcher matcher = new PathMatcher();
-					PullRequest request = pullRequestManager.load(requestId);
-					Project project = request.getTargetProject();
-					ProjectScope projectScope = new ProjectScope(project, true, true);
-					IssueQueryParseOption option = new IssueQueryParseOption().withCurrentPullRequestCriteria(true);
-					for (TransitionSpec transition: getTransitionSpecs()) {
-						if (transition.getTrigger().getClass() == triggerClass) {
-							PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
-							if (trigger.getBranches() == null || PatternSet.parse(trigger.getBranches()).matches(matcher, request.getTargetBranch())) {
-								IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
-								List<Criteria<Issue>> criterias = new ArrayList<>();
-								
-								List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-								for (String fromState: transition.getFromStates()) 
-									fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-								
-								criterias.add(Criteria.orCriterias(fromStateCriterias));
-								if (query.getCriteria() != null)
-									criterias.add(query.getCriteria());
-								query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
-								PullRequest.push(request);
-								try {
-									for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
-										String statusName = request.getStatus().toString().toLowerCase();
-										changeState(issue, transition.getToState(), new HashMap<>(), 
-												transition.getRemoveFields(), 
-												"State changed as pull request #" + request.getNumber() + " is " + statusName);
-									}
-								} finally {
-									PullRequest.pop();
-								}
+		try {
+			SecurityUtils.bindAsSystem();
+			Matcher matcher = new PathMatcher();
+			Project project = request.getTargetProject();
+			ProjectScope projectScope = new ProjectScope(project, true, true);
+			IssueQueryParseOption option = new IssueQueryParseOption().withCurrentPullRequestCriteria(true);
+			for (TransitionSpec transition: getTransitionSpecs()) {
+				if (transition.getTrigger().getClass() == triggerClass) {
+					PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
+					if (trigger.getBranches() == null || PatternSet.parse(trigger.getBranches()).matches(matcher, request.getTargetBranch())) {
+						IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
+						List<Criteria<Issue>> criterias = new ArrayList<>();
+						
+						List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
+						for (String fromState: transition.getFromStates()) 
+							fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
+						
+						criterias.add(Criteria.orCriterias(fromStateCriterias));
+						if (query.getCriteria() != null)
+							criterias.add(query.getCriteria());
+						query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+						PullRequest.push(request);
+						try {
+							for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
+								String statusName = request.getStatus().toString().toLowerCase();
+								changeState(issue, transition.getToState(), new HashMap<>(), 
+										transition.getRemoveFields(), 
+										"State changed as pull request #" + request.getNumber() + " is " + statusName);
 							}
+						} finally {
+							PullRequest.pop();
 						}
 					}
-				} catch (Exception e) {
-					logger.error("Error changing issue state", e);
 				}
 			}
-		}, LockUtils.getLock(getLockKey(projectId)));
+		} catch (Exception e) {
+			logger.error("Error changing issue state", e);
+		}
 	}
 	
 	@Transactional
@@ -504,10 +449,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		on(event.getRequest(), OpenPullRequestTrigger.class);
 	}
 	
-	private String getLockKey(Long projectId) {
-		return "change-issue-state-" + projectId;
-	}
-
 	@Transactional
 	@Listen
 	public void on(RefUpdated event) {
@@ -525,83 +466,76 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			Long projectId = project.getId();
 			ObjectId oldCommitId = event.getOldCommitId();
 			
-			transactionManager.runAsyncAfterCommit(new Runnable() {
+			try {
+				SecurityUtils.bindAsSystem();
+				ProjectScope projectScope = new ProjectScope(project, true, true);
+				Set<Long> fixedIssueIds = new HashSet<>();
+				Repository repository = projectManager.getRepository(projectId);
+				try (RevWalk revWalk = new RevWalk(repository)) {
+					revWalk.markStart(revWalk.lookupCommit(newCommitId));
+					if (oldCommitId.equals(ObjectId.zeroId())) {
+						/*
+						 * In case a new branch is pushed, we only process new commits not in any existing branches
+						 * for performance reason. This is reasonable as state of fixed issues by commits in 
+						 * existing branches most probably is already transited        
+						 */
+						for (Ref ref: repository.getRefDatabase().getRefsByPrefix(Constants.R_HEADS)) {
+							if (!ref.getName().equals(refName))
+								revWalk.markUninteresting(revWalk.lookupCommit(ref.getObjectId()));
+						}
+					} else {
+						revWalk.markUninteresting(revWalk.lookupCommit(oldCommitId));
+					}
+					RevCommit commit;
+					while ((commit = revWalk.next()) != null) {
+						fixedIssueIds.addAll(project.parseFixedIssueIds(commit.getFullMessage()));
+						if (fixedIssueIds.size() > MAX_FIXED_ISSUES)
+							break;
+					}
+				} 
+				
+				IssueQueryParseOption option = new IssueQueryParseOption().withCurrentCommitCriteria(true);
+				for (TransitionSpec transition: getTransitionSpecs()) {
+					if (transition.getTrigger() instanceof BranchUpdateTrigger) {
+						BranchUpdateTrigger trigger = (BranchUpdateTrigger) transition.getTrigger();
+						String branches = trigger.getBranches();
+						Matcher matcher = new PathMatcher();
+						if (branches == null || PatternSet.parse(branches).matches(matcher, branchName)) {
+							IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
+							List<Criteria<Issue>> criterias = new ArrayList<>();
+							
+							List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
+							for (String fromState: transition.getFromStates()) 
+								fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
+							
+							criterias.add(Criteria.orCriterias(fromStateCriterias));
+							if (query.getCriteria() != null)
+								criterias.add(query.getCriteria());
+							query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+							ProjectScopedCommit.push(new ProjectScopedCommit(project, newCommitId) {
 
-				@Override
-				public void run() {
-					try {
-						SecurityUtils.bindAsSystem();
-						Project project = projectManager.load(projectId);
-						ProjectScope projectScope = new ProjectScope(project, true, true);
-						Set<Long> fixedIssueIds = new HashSet<>();
-						try (RevWalk revWalk = new RevWalk(project.getRepository())) {
-							revWalk.markStart(revWalk.lookupCommit(newCommitId));
-							if (oldCommitId.equals(ObjectId.zeroId())) {
-								/*
-								 * In case a new branch is pushed, we only process new commits not in any existing branches
-								 * for performance reason. This is reasonable as state of fixed issues by commits in 
-								 * existing branches most probably is already transited        
-								 */
-								for (Ref ref: project.getRepository().getRefDatabase().getRefsByPrefix(Constants.R_HEADS)) {
-									if (!ref.getName().equals(refName))
-										revWalk.markUninteresting(revWalk.lookupCommit(ref.getObjectId()));
+								private static final long serialVersionUID = 1L;
+
+								@Override
+								public Collection<Long> getFixedIssueIds() {
+									return fixedIssueIds;
 								}
-							} else {
-								revWalk.markUninteresting(revWalk.lookupCommit(oldCommitId));
-							}
-							RevCommit commit;
-							while ((commit = revWalk.next()) != null) {
-								fixedIssueIds.addAll(project.parseFixedIssueIds(commit.getFullMessage()));
-								if (fixedIssueIds.size() > MAX_FIXED_ISSUES)
-									break;
-							}
-						} 
-						
-						IssueQueryParseOption option = new IssueQueryParseOption().withCurrentCommitCriteria(true);
-						for (TransitionSpec transition: getTransitionSpecs()) {
-							if (transition.getTrigger() instanceof BranchUpdateTrigger) {
-								BranchUpdateTrigger trigger = (BranchUpdateTrigger) transition.getTrigger();
-								String branches = trigger.getBranches();
-								Matcher matcher = new PathMatcher();
-								if (branches == null || PatternSet.parse(branches).matches(matcher, branchName)) {
-									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
-									List<Criteria<Issue>> criterias = new ArrayList<>();
-									
-									List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-									for (String fromState: transition.getFromStates()) 
-										fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-									
-									criterias.add(Criteria.orCriterias(fromStateCriterias));
-									if (query.getCriteria() != null)
-										criterias.add(query.getCriteria());
-									query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
-									ProjectScopedCommit.push(new ProjectScopedCommit(project, newCommitId) {
-
-										private static final long serialVersionUID = 1L;
-
-										@Override
-										public Collection<Long> getFixedIssueIds() {
-											return fixedIssueIds;
-										}
-										
-									});
-									try {
-										for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
-											changeState(issue, transition.getToState(), new HashMap<>(), 
-													transition.getRemoveFields(), "State changed as code fixing the issue is committed");
-										}
-									} finally {
-										ProjectScopedCommit.pop();
-									}
+								
+							});
+							try {
+								for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
+									changeState(issue, transition.getToState(), new HashMap<>(), 
+											transition.getRemoveFields(), "State changed as code fixing the issue is committed");
 								}
+							} finally {
+								ProjectScopedCommit.pop();
 							}
 						}
-					} catch (Exception e) {
-						logger.error("Error changing issue state", e);
 					}
 				}
-				
-			}, LockUtils.getLock(getLockKey(projectId)));
+			} catch (Exception e) {
+				logger.error("Error changing issue state", e);
+			}
 		}
 	}
 
@@ -655,7 +589,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
+		if (taskId != null)
+			taskScheduler.unschedule(taskId);
 	}
 
 	@Transactional

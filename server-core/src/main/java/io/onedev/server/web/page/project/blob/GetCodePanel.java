@@ -56,7 +56,7 @@ public abstract class GetCodePanel extends Panel {
 		
 		
 		add(new ResourceLink<Void>("downloadAsZip", new ArchiveResourceReference(), 
-				ArchiveResource.paramsOf(getProject(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
+				ArchiveResource.paramsOf(getProject().getId(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
 
 			@Override
 			protected CharSequence getOnClickScript(CharSequence url) {
@@ -66,7 +66,7 @@ public abstract class GetCodePanel extends Panel {
 		});
 		
 		add(new ResourceLink<Void>("downloadAsTgz", new ArchiveResourceReference(), 
-				ArchiveResource.paramsOf(getProject(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
+				ArchiveResource.paramsOf(getProject().getId(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
 
 			@Override
 			protected CharSequence getOnClickScript(CharSequence url) {

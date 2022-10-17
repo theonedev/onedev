@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
@@ -48,7 +50,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     void reopen(PullRequest request, @Nullable String note);
 
-    void check(PullRequest request, boolean sourceUpdated);
+    void checkAsync(PullRequest request, boolean sourceUpdated);
     
     void merge(PullRequest request, @Nullable String commitMessage);
     
@@ -75,5 +77,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	void saveDescription(PullRequest request, @Nullable String description);
 	
 	List<ProjectPullRequestStats> queryStats(Collection<Project> projects);
+	
+	ObjectId getComparisonBase(PullRequest request, ObjectId oldCommitId, ObjectId newCommitId);
 	
 }

@@ -9,7 +9,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.DateUtils;
 
@@ -25,9 +25,9 @@ public class AfterCriteria extends CommitCriteria {
 	}
 	
 	@Override
-	public void fill(Project project, RevListCommand command) {
+	public void fill(Project project, RevListOptions options) {
 		for (String value: values)
-			command.after(value);
+			options.after(value);
 	}
 
 	@Override

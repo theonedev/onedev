@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.io.IOException;
+import static org.apache.commons.lang3.time.DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,7 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -22,12 +23,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
@@ -37,16 +36,18 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.loader.Listen;
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentUpdated;
+import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
@@ -138,13 +139,17 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		return query(criteria);
 	}
 	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+	
 	@Override
 	public Map<CodeComment, PlanarRange> queryInHistory(Project project, ObjectId commitId, String path) {
 		Map<CodeComment, PlanarRange> comments = new HashMap<>();
 		
 		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();
 		Collection<String> possiblePaths = Sets.newHashSet(path);
-		possiblePaths.addAll(commitInfoManager.getHistoryPaths(project, path));
+		possiblePaths.addAll(commitInfoManager.getHistoryPaths(project.getId(), path));
 		
 		EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
 		criteria.add(Restrictions.eq(CodeComment.PROP_PROJECT, project));
@@ -170,71 +175,66 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 			}
 		}
 
-		try (RevWalk revWalk = new RevWalk(project.getRepository())) {
-			Date oldestDate = null;
-			List<RevCommit> historyCommits = new ArrayList<>();
-			for (Map.Entry<String, Map<String, List<CodeComment>>> entry: possibleComments.entrySet()) {
-				try {
-					RevCommit commit = revWalk.parseCommit(ObjectId.fromString(entry.getKey()));
-					historyCommits.add(commit);
-					PersonIdent committer = commit.getCommitterIdent();
-					if (committer != null && committer.getWhen() != null 
-							&& (oldestDate == null || committer.getWhen().before(oldestDate))) {
-						oldestDate = committer.getWhen();
-					}
-				} catch (MissingObjectException e) {
-				}
+		var possibleCommitIds = possibleComments.keySet().stream()
+				.map(it->ObjectId.fromString(it)).collect(Collectors.toSet());
+		List<RevCommit> historyCommits = getGitService().sortValidCommits(
+				project, possibleCommitIds);
+
+		Date oldestDate = null;
+		for (RevCommit commit: historyCommits) {
+			PersonIdent committer = commit.getCommitterIdent();
+			if (committer != null && committer.getWhen() != null 
+					&& (oldestDate == null || committer.getWhen().before(oldestDate))) {
+				oldestDate = committer.getWhen();
 			}
+		}
+		
+		if (oldestDate != null) {
+			RevListOptions options = new RevListOptions();
+			options.revisions(Lists.newArrayList(commitId.name()))
+					.after(ISO_8601_EXTENDED_DATE_FORMAT.format(DateUtils.addDays(oldestDate, -1)))
+					.ignoreCase(false).skip(0).count(MAX_HISTORY_COMMITS_TO_CHECK);
 			
-			if (oldestDate != null) {
-				RevListCommand command = new RevListCommand(project.getRepository().getDirectory());
-				command.after(DateUtils.addDays(oldestDate, -1));
-				command.revisions(Lists.newArrayList(commitId.name()));
-				command.count(MAX_HISTORY_COMMITS_TO_CHECK);
-				Set<String> revisions = new HashSet<>(command.call());
+			var revisions = new HashSet<>(getGitService().revList(project, options));
+			
+			List<String> newLines = Preconditions.checkNotNull(project.readLines(
+					new BlobIdent(commitId.name(), path, FileMode.REGULAR_FILE.getBits()), 
+					WhitespaceOption.DEFAULT, true));
+
+			Collections.sort(historyCommits, new Comparator<RevCommit>() {
+
+				@Override
+				public int compare(RevCommit o1, RevCommit o2) {
+					return o2.getCommitTime() - o1.getCommitTime();
+				}
 				
-				List<String> newLines = Preconditions.checkNotNull(project.readLines(
-						new BlobIdent(commitId.name(), path, FileMode.REGULAR_FILE.getBits()), 
-						WhitespaceOption.DEFAULT, true));
-
-				Collections.sort(historyCommits, new Comparator<RevCommit>() {
-
-					@Override
-					public int compare(RevCommit o1, RevCommit o2) {
-						return o2.getCommitTime() - o1.getCommitTime();
-					}
-					
-				});
-				int checkedHistoryFiles = 0;
-				for (RevCommit historyCommit: historyCommits) {
-					if (revisions.contains(historyCommit.name())) {
-						Map<String, List<CodeComment>> commentsOnCommit = 
-								Preconditions.checkNotNull(possibleComments.get(historyCommit.name()));
-						for (Map.Entry<String, List<CodeComment>> pathEntry: commentsOnCommit.entrySet()) {
-							List<String> oldLines = project.readLines( 
-									new BlobIdent(historyCommit.name(), pathEntry.getKey(), FileMode.REGULAR_FILE.getBits()), 
-									WhitespaceOption.DEFAULT, false);
-							if (oldLines != null) {
-								Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
-								for (CodeComment comment: pathEntry.getValue()) {
-									PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
-									if (newRange != null) 
-										comments.put(comment, newRange);
-								}
-								if (++checkedHistoryFiles == MAX_HISTORY_FILES_TO_CHECK) {
-									return comments;
-								}
+			});
+			int checkedHistoryFiles = 0;
+			for (RevCommit historyCommit: historyCommits) {
+				if (revisions.contains(historyCommit.name())) {
+					Map<String, List<CodeComment>> commentsOnCommit = 
+							Preconditions.checkNotNull(possibleComments.get(historyCommit.name()));
+					for (Map.Entry<String, List<CodeComment>> pathEntry: commentsOnCommit.entrySet()) {
+						List<String> oldLines = project.readLines( 
+								new BlobIdent(historyCommit.name(), pathEntry.getKey(), FileMode.REGULAR_FILE.getBits()), 
+								WhitespaceOption.DEFAULT, false);
+						if (oldLines != null) {
+							Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
+							for (CodeComment comment: pathEntry.getValue()) {
+								PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
+								if (newRange != null) 
+									comments.put(comment, newRange);
+							}
+							if (++checkedHistoryFiles == MAX_HISTORY_FILES_TO_CHECK) {
+								return comments;
 							}
 						}
 					}
 				}
-			} 
-			
-			return comments;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			}
 		} 
-
+		
+		return comments;
 	}
 
 	private Predicate[] getPredicates(Project project, @Nullable Criteria<CodeComment> criteria, @Nullable PullRequest request, 

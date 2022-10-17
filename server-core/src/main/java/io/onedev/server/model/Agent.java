@@ -38,7 +38,7 @@ import io.onedev.agent.AgentData;
 import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.job.resource.ResourceHolder;
+import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.util.CollectionUtils;
 
 @Entity
@@ -246,14 +246,14 @@ public class Agent extends AbstractEntity {
 	
 	public boolean isOnline() {
 		if (online == null)
-			online = OneDev.getInstance(AgentManager.class).getOnlineAgentIds().contains(getId());
+			online = OneDev.getInstance(AgentManager.class).getAgentServers().containsKey(getId());
 		return online;
 	}
 	
 	public Map<String, Integer> getResources() {
 		Map<String, Integer> resources = new HashMap<>();
-		resources.put(ResourceHolder.CPU, cpu);
-		resources.put(ResourceHolder.MEMORY, memory);
+		resources.put(ResourceAllocator.CPU, cpu);
+		resources.put(ResourceAllocator.MEMORY, memory);
 		return resources;
 	}
 	

@@ -20,7 +20,7 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
+
 		add(new AjaxLink<Void>("test") {
 
 			@Override

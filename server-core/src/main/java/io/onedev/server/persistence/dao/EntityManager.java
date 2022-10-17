@@ -6,7 +6,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.criterion.DetachedCriteria;
 
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Project;
 
 public interface EntityManager<T extends AbstractEntity> {
 	
@@ -99,9 +98,5 @@ public interface EntityManager<T extends AbstractEntity> {
 	 * 			number of entities matching specified {@link DetachedCriteria}
 	 */
 	int count(EntityCriteria<T> entityCriteria);
-	
-	void resetNextNumber(Project numberScope);
-
-	Long getNextNumber(Project numberScope);
 	
 }

@@ -2,17 +2,20 @@ package io.onedev.server.event.pullrequest;
 
 import java.util.Date;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestReviewRequested extends PullRequestEvent {
 
-	private final User reviewer;
+	private static final long serialVersionUID = 1L;
+	
+	private final Long reviewerId;
 	
 	public PullRequestReviewRequested(User user, Date date, PullRequest request, User reviewer) {
 		super(user, date, request);
-		this.reviewer = reviewer;
+		reviewerId = reviewer.getId();
 	}
 	
 	@Override
@@ -21,16 +24,7 @@ public class PullRequestReviewRequested extends PullRequestEvent {
 	}
 
 	public User getReviewer() {
-		return reviewer;
-	}
-	
-	@Override
-	public PullRequestEvent cloneIn(Dao dao) {
-		return new PullRequestReviewRequested(
-				dao.load(User.class, getUser().getId()), 
-				getDate(), 
-				dao.load(PullRequest.class, getRequest().getId()), 
-				dao.load(User.class, reviewer.getId()));
+		return OneDev.getInstance(UserManager.class).load(reviewerId);
 	}
 	
 }

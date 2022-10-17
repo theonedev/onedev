@@ -3,8 +3,8 @@ package io.onedev.server.web.websocket;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.loader.Listen;
-import io.onedev.server.search.code.CommitIndexed;
+import io.onedev.server.event.CommitIndexed;
+import io.onedev.server.event.pubsub.Listen;
 
 @Singleton
 public class CommitIndexedBroadcaster {

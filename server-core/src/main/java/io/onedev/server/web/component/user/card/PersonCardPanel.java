@@ -48,7 +48,7 @@ public class PersonCardPanel extends Panel {
 		
 		builder.append("<div>" + HtmlEscape.escapeHtml5(displayName) + " <i>(" + gitRole + ")</i></div>");
 		
-		if (personIdent.getName().equals(User.ONEDEV_NAME)) 
+		if (personIdent.getName().equals(User.SYSTEM_NAME)) 
 			builder.append("<i>System Account</i>");
 		else if (emailAddress != null && emailAddress.isVerified()) 
 			builder.append("<i>@" + HtmlEscape.escapeHtml5(emailAddress.getOwner().getName()) + "</i>"); 

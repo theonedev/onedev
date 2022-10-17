@@ -5,9 +5,9 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.event.codecomment.CodeCommentStatusChanged;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentStatusChanged;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;

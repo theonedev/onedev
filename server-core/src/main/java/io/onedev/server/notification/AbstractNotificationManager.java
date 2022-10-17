@@ -13,7 +13,6 @@ import org.unbescape.html.HtmlEscape;
 import groovy.text.SimpleTemplateEngine;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.Event;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.markdown.MarkdownManager;
@@ -32,7 +31,7 @@ public abstract class AbstractNotificationManager {
 		this.settingManager = settingManager;
 	}
 	
-	protected String getHtmlBody(Event event, String eventSummary, @Nullable String eventBody, 
+	protected String getHtmlBody(Object event, String eventSummary, @Nullable String eventBody, 
 			String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
 		String template = null;
 		
@@ -65,7 +64,7 @@ public abstract class AbstractNotificationManager {
 		}
 	}
 	
-	protected String getTextBody(Event event, String eventSummary, @Nullable String eventBody, 
+	protected String getTextBody(Object event, String eventSummary, @Nullable String eventBody, 
 			String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
 		StringBuilder textBody = new StringBuilder();
 		textBody.append(eventSummary).append("\n\n");

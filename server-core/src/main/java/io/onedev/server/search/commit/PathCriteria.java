@@ -11,13 +11,13 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
-
 
 public class PathCriteria extends CommitCriteria {
 
@@ -35,9 +35,9 @@ public class PathCriteria extends CommitCriteria {
 	}
 
 	@Override
-	public void fill(Project project, RevListCommand command) {
+	public void fill(Project project, RevListOptions options) {
 		for (String value: values)
-			command.paths().add(value);
+			options.paths().add(value);
 	}
 
 	@Override
@@ -45,11 +45,12 @@ public class PathCriteria extends CommitCriteria {
 		Project project = event.getProject();
 		RevCommit commit = project.getRevCommit(event.getNewCommitId(), true);
 		
+		GitService gitService = OneDev.getInstance(GitService.class);
 		Collection<String> changedFiles;
-		if (!event.getOldCommitId().equals(ObjectId.zeroId()))
-			changedFiles = GitUtils.getChangedFiles(project.getRepository(), event.getOldCommitId(), event.getNewCommitId());
+		if (!event.getOldCommitId().equals(ObjectId.zeroId())) 
+			changedFiles = gitService.getChangedFiles(project, event.getOldCommitId(), event.getNewCommitId(), null);
 		else if (commit.getParentCount() != 0)
-			changedFiles = GitUtils.getChangedFiles(project.getRepository(), commit.getParent(0), event.getNewCommitId());
+			changedFiles = gitService.getChangedFiles(project, commit.getParent(0), event.getNewCommitId(), null);
 		else
 			changedFiles = new HashSet<>();
 		

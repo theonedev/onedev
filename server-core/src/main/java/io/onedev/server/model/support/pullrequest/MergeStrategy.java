@@ -4,10 +4,11 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Repository;
 
 import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 
@@ -17,12 +18,11 @@ public enum MergeStrategy {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {
-			PersonIdent user = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
-			Repository repository = request.getTargetProject().getRepository();
+			PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			return GitUtils.merge(repository, targetHead, requestHead, false, user, user,
-						commitMessage, false);
+			return getGitService().merge(request.getTargetProject(), targetHead, requestHead, 
+					false, user, user, commitMessage, false);
 		}
 		
 	}, 
@@ -30,14 +30,14 @@ public enum MergeStrategy {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {
-			Repository repository = request.getTargetProject().getRepository();
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			if (GitUtils.isMergedInto(repository, null, targetHead, requestHead)) {
+			Project project = request.getTargetProject();
+			if (getGitService().isMergedInto(project, null, targetHead, requestHead)) {
 				return requestHead;
 			} else {
-				PersonIdent user = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
-				return GitUtils.merge(repository, targetHead, requestHead, false, user, user,
+				PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
+				return getGitService().merge(project, targetHead, requestHead, false, user, user,
 							commitMessage, false);
 			}
 		}
@@ -47,12 +47,11 @@ public enum MergeStrategy {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {
-			Repository repository = request.getTargetProject().getRepository();
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			PersonIdent committer = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
-			return GitUtils.merge(repository, targetHead, requestHead, true, committer, 
-					request.getSubmitter().asPerson(), commitMessage, false);
+			PersonIdent committer = new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
+			return getGitService().merge(request.getTargetProject(), targetHead, requestHead, true, 
+					committer, request.getSubmitter().asPerson(), commitMessage, false);
 		}
 		
 	},
@@ -60,11 +59,10 @@ public enum MergeStrategy {
 
 		@Override
 		public ObjectId merge(PullRequest request, String commitMessage) {
-			Repository repository = request.getTargetProject().getRepository();
 			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			PersonIdent user = new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
-			return GitUtils.rebase(repository, requestHead, targetHead, user);
+			PersonIdent user = new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
+			return getGitService().rebase(request.getTargetProject(), requestHead, targetHead, user);
 		}
 		
 	};
@@ -77,6 +75,10 @@ public enum MergeStrategy {
 	
 	public String getDescription() {
 		return description;
+	}
+	
+	private static GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	@Override

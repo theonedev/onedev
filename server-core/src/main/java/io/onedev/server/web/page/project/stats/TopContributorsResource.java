@@ -55,7 +55,8 @@ class TopContributorsResource extends AbstractResource {
 				if (!SecurityUtils.canReadCode(project))
 					throw new UnauthorizedException();
 
-				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoManager.class).getTopContributors(project, TOP_CONTRIBUTORS, type, fromDay, toDay);
+				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoManager.class)
+						.getTopContributors(project.getId(), TOP_CONTRIBUTORS, type, fromDay, toDay);
 				
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 

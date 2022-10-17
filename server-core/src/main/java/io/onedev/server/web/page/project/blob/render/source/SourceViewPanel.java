@@ -66,6 +66,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
@@ -78,7 +79,7 @@ import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.BlameCommand;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -122,7 +123,6 @@ import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.AnnotationInfo;
 import io.onedev.server.web.util.CodeCommentInfo;
-import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.WicketUtils;
 
 /**
@@ -915,16 +915,17 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		return children;
 	}
 	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+	
 	private String getJsonOfBlameInfos(boolean blamed) {
 		String jsonOfBlameInfos;
 		if (blamed) {
 			List<BlameInfo> blameInfos = new ArrayList<>();
 			
-			String commitHash = context.getCommit().name();
-			
-			BlameCommand cmd = new BlameCommand(context.getProject().getGitDir());
-			cmd.commitHash(commitHash).file(context.getBlobIdent().path);
-			for (BlameBlock blame: cmd.call()) {
+			for (BlameBlock blame: getGitService().blame(
+					context.getProject(), context.getCommit().copy(), context.getBlobIdent().path, null)) {
 				BlameInfo blameInfo = new BlameInfo();
 				blameInfo.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
 				blameInfo.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());

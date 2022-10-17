@@ -2,7 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 
-import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,12 +13,13 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
+
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -74,6 +75,10 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 			return EntityQuery.getCommitId(project, value);
 		}
 	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Issue, Issue> from, CriteriaBuilder builder) {
@@ -82,20 +87,13 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 		Project project = getProjectAndCommitIds().project;
 		ObjectId firstCommitId = getProjectAndCommitIds().firstCommitId;
 		ObjectId secondCommitId = getProjectAndCommitIds().secondCommitId;
-		Repository repository = getProjectAndCommitIds().project.getRepository();
-		ObjectId mergeBaseId = GitUtils.getMergeBase(repository, firstCommitId, secondCommitId);
+		
+		ObjectId mergeBaseId = getGitService().getMergeBase(project, firstCommitId, project, secondCommitId);
 		if (mergeBaseId != null) {
-			try (RevWalk revWalk = new RevWalk(repository)) {
-				revWalk.markStart(revWalk.parseCommit(secondCommitId));
-				revWalk.markStart(revWalk.parseCommit(firstCommitId));
-				revWalk.markUninteresting(revWalk.parseCommit(mergeBaseId));
-
-				RevCommit commit;
-				while ((commit = revWalk.next()) != null) 
-					fixedIssueIds.addAll(project.parseFixedIssueIds(commit.getFullMessage()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			Collection<ObjectId> startCommitIds = Lists.newArrayList(secondCommitId, firstCommitId);
+			Collection<ObjectId> uninterestingCommitIds = Lists.newArrayList(mergeBaseId);
+			for (RevCommit commit: getGitService().getReachableCommits(project, startCommitIds, uninterestingCommitIds))
+				fixedIssueIds.addAll(project.parseFixedIssueIds(commit.getFullMessage()));
 		}
 
 		Predicate issuePredicate;
@@ -114,24 +112,15 @@ public class FixedBetweenCriteria extends Criteria<Issue> {
 		ObjectId firstCommitId = getProjectAndCommitIds().firstCommitId;
 		ObjectId secondCommitId = getProjectAndCommitIds().secondCommitId;
 		if (project.equals(issue.getProject())) {
-			Repository repository = issue.getProject().getRepository();
-			ObjectId mergeBaseId = GitUtils.getMergeBase(repository, firstCommitId, secondCommitId);
+			ObjectId mergeBaseId = getGitService().getMergeBase(project, firstCommitId, project, secondCommitId);
 			if (mergeBaseId != null) {
-				try (RevWalk revWalk = new RevWalk(repository)) {
-					revWalk.markStart(revWalk.parseCommit(secondCommitId));
-					revWalk.markStart(revWalk.parseCommit(firstCommitId));
-					revWalk.markUninteresting(revWalk.parseCommit(mergeBaseId));
-
-					RevCommit commit;
-					while ((commit = revWalk.next()) != null) { 
-						if (issue.getProject().parseFixedIssueIds(commit.getFullMessage()).contains(issue.getId()))
-							return true;
-					}
-					return false;
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				Collection<ObjectId> startCommitIds = Lists.newArrayList(secondCommitId, firstCommitId);
+				Collection<ObjectId> uninterestingCommitIds = Lists.newArrayList(mergeBaseId);
+				for (RevCommit commit: getGitService().getReachableCommits(project, startCommitIds, uninterestingCommitIds)) {
+					if (project.parseFixedIssueIds(commit.getFullMessage()).contains(issue.getId()))
+						return true;
 				}
-			}			
+			}
 		}
 		return false;
 	}

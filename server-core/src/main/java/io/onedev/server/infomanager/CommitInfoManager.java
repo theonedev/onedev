@@ -1,5 +1,6 @@
 package io.onedev.server.infomanager;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -8,22 +9,21 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.NameAndEmail;
+import io.onedev.server.util.facade.EmailAddressFacade;
 
 public interface CommitInfoManager {
 	
-	int getFileCount(Project project);
+	int getFileCount(Long projectId);
 	
-	List<String> getFiles(Project project);
+	List<String> getFiles(Long projectId);
 	
-	int getCommitCount(Project project, User user, String path);
+	int getCommitCount(Long projectId);
 	
-	int getCommitCount(Project project);
+	void export(Long projectId, File targetDir);
 	
-	List<NameAndEmail> getUsers(Project project);
+	List<NameAndEmail> getUsers(Long projectId);
 	
 	/**
 	 * Given an ancestor commit, get all its descendant commits including the ancestor commit itself. 
@@ -36,11 +36,11 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			descendant commits
 	 */
-	Collection<ObjectId> getDescendants(Project project, Collection<ObjectId> ancestors);
+	Collection<ObjectId> getDescendants(Long projectId, Collection<ObjectId> ancestors);
 	
-	void cloneInfo(Project from, Project to);
+	void cloneInfo(Long sourceProjectId, Long targetProjectId);
 	
-	Collection<String> getHistoryPaths(Project project, String path);
+	Collection<String> getHistoryPaths(Long projectId, String path);
 	
 	/**
 	 * Get overall contributions
@@ -50,7 +50,7 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			map of day to contribution
 	 */
-	Map<Day, GitContribution> getOverallContributions(Project project);
+	Map<Day, GitContribution> getOverallContributions(Long projectId);
 	
 	/**
 	 * Get list of top contributors
@@ -68,7 +68,8 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			list of top user contributors, reversely ordered by number of contributions 
 	 */
-	List<GitContributor> getTopContributors(Project project, int top, GitContribution.Type type, int fromDay, int toDay);
+	List<GitContributor> getTopContributors(Long projectId, int top, 
+			GitContribution.Type type, int fromDay, int toDay);
 
 	/**
 	 * Get source code line statistics over time
@@ -78,10 +79,11 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			line statistics data
 	 */
-	Map<Day, Map<String, Integer>> getLineIncrements(Project project);
+	Map<Day, Map<String, Integer>> getLineIncrements(Long projectId);
 
-	Collection<ObjectId> getFixCommits(Project project, Long issueId);
+	Collection<ObjectId> getFixCommits(Long projectId, Long issueId);
 	
-	void sortUsersByContribution(List<User> users, Project project, Collection<String> files);
+	List<Long> sortUsersByContribution(Map<Long, Collection<EmailAddressFacade>> userEmails, 
+			Long projectId, Collection<String> files);
 	
 }

@@ -1,13 +1,9 @@
 package io.onedev.server.entitymanager.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,8 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.loader.Listen;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentAttributeManager;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;
@@ -35,14 +32,15 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 	
 	private final TransactionManager transactionManager;
 	
-	private final Collection<String> attributeNames = new HashSet<>();
+	private final ClusterManager clusterManager;
 	
-	private final ReadWriteLock attributeNamesLock = new ReentrantReadWriteLock();
+	private volatile Map<String, String> attributeNames;
 	
 	@Inject
-	public DefaultAgentAttributeManager(Dao dao, TransactionManager transactionManager) {
+	public DefaultAgentAttributeManager(Dao dao, TransactionManager transactionManager, ClusterManager clusterManager) {
 		super(dao);
 		this.transactionManager = transactionManager;
+		this.clusterManager = clusterManager;
 	}
 
 	@Sessional
@@ -50,9 +48,13 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 	public void on(SystemStarted event) {
 		logger.info("Caching agent attribute info...");
 
-		Query<?> query = dao.getSession().createQuery("select name from AgentAttribute");
-		for (Object name: query.list()) 
-			attributeNames.add((String) name);
+		attributeNames = clusterManager.getHazelcastInstance().getReplicatedMap("agentAttributeNames");
+		
+		if (clusterManager.isLeaderServer()) {
+			Query<?> query = dao.getSession().createQuery("select name from AgentAttribute");
+			for (Object name: query.list()) 
+				attributeNames.put((String) name, (String) name);
+		}
 	}
 
 	@Transactional
@@ -64,12 +66,7 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 
 			@Override
 			public void run() {
-				attributeNamesLock.writeLock().lock();
-				try {
-					attributeNames.add(attribute.getName());
-				} finally {
-					attributeNamesLock.writeLock().unlock();
-				}
+				attributeNames.put(attribute.getName(), attribute.getName());
 			}
 			
 		});
@@ -77,14 +74,9 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 
 	@Override
 	public List<String> getAttributeNames() {
-		attributeNamesLock.readLock().lock();
-		try {
-			List<String> copy = new ArrayList<>(attributeNames);
-			Collections.sort(copy);
-			return copy;
-		} finally {
-			attributeNamesLock.readLock().unlock();
-		}
+		List<String> copy = new ArrayList<>(attributeNames.keySet());
+		Collections.sort(copy);
+		return copy;
 	}
 
 	@Transactional

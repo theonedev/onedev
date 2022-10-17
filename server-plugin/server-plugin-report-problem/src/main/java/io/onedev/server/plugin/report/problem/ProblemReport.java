@@ -86,8 +86,12 @@ public class ProblemReport implements Serializable {
 		};
 	}
 	
-	public static String getReportLockKey(Build build) {
-		return ProblemReport.class.getName() + ":" + build.getId();
+	public static String getReportLockName(Build build) {
+		return getReportLockName(build.getProject().getId(), build.getNumber());
 	}
 
+	public static String getReportLockName(Long projectId, Long buildNumber) {
+		return ProblemReport.class.getName() + ":" + projectId + ":" +  buildNumber;
+	}
+	
 }

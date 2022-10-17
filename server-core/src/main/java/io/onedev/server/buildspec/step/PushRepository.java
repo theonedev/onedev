@@ -7,10 +7,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -57,7 +60,9 @@ public class PushRepository extends SyncRepository {
 				git.clearArgs();
 				git.addArgs("fetch", remoteUrl, remoteCommitId.get());
 				
-				String mergeBaseId = GitUtils.getMergeBase(project.getRepository(), 
+				Repository repository = OneDev.getInstance(ProjectManager.class)
+						.getRepository(project.getId());
+				String mergeBaseId = GitUtils.getMergeBase(repository, 
 						ObjectId.fromString(remoteCommitId.get()), build.getCommitId()).name();
 				
 				if (!mergeBaseId.equals(build.getCommitHash())) {

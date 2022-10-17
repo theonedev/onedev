@@ -165,7 +165,7 @@ public class BlobNavigator extends Panel {
 							@Override
 							public Iterator<? extends BlobIdent> getRoots() {
 								if (blobIdent.revision != null)
-									return context.getProject().getChildren(blobIdent, BlobIdentFilter.ALL).iterator();
+									return context.getProject().getBlobChildren(blobIdent, BlobIdentFilter.ALL).iterator();
 								else
 									return new ArrayList<BlobIdent>().iterator();
 							}
@@ -177,7 +177,7 @@ public class BlobNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getChildren(BlobIdent blobIdent) {
-								return context.getProject().getChildren(blobIdent, BlobIdentFilter.ALL).iterator();
+								return context.getProject().getBlobChildren(blobIdent, BlobIdentFilter.ALL).iterator();
 							}
 
 							@Override
@@ -197,7 +197,7 @@ public class BlobNavigator extends Panel {
 							public void expand(BlobIdent blobIdent) {
 								super.expand(blobIdent);
 								
-								List<BlobIdent> children = context.getProject().getChildren(blobIdent, BlobIdentFilter.ALL);
+								List<BlobIdent> children = context.getProject().getBlobChildren(blobIdent, BlobIdentFilter.ALL);
 								if (children.size() == 1 && children.get(0).isTree()) 
 									expand(children.get(0));
 							}

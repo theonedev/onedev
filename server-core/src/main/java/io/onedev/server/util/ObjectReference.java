@@ -2,8 +2,6 @@ package io.onedev.server.util;
 
 import java.io.Closeable;
 
-import io.onedev.server.exception.SystemNotReadyException;
-
 public abstract class ObjectReference<T> implements Closeable {
 	
 	private int count;
@@ -31,10 +29,7 @@ public abstract class ObjectReference<T> implements Closeable {
 	}
 	
 	public synchronized T get() {
-		if (object == null)
-			throw new SystemNotReadyException();
-		else
-			return object;
+		return object;
 	}
 	
 }

@@ -15,7 +15,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.branch.choice.BranchMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -37,8 +37,8 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 		
 		Map<String, String> choices = new LinkedHashMap<>();
 		if (Project.get() != null) {
-			for (RefInfo ref: Project.get().getBranchRefInfos()) {
-				String branch = GitUtils.ref2branch(ref.getRef().getName());
+			for (RefFacade ref: Project.get().getBranchRefs()) {
+				String branch = GitUtils.ref2branch(ref.getName());
 				choices.put(branch, branch);
 			}
 		}

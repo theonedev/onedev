@@ -42,7 +42,6 @@
 				<span wicket:id="text"></span>
 			</a> 
 			<span wicket:id="labels" class="mr-2"></span>
-			<span wicket:id="lastUpdate" class="text-muted font-size-sm ml-auto"></span>
 		</div>
 		<div class="d-flex flex-wrap project-summary">
 			<div wicket:id="codeStats" class="code-stats mt-2 d-flex align-items-center flex-wrap mr-3"></div>
@@ -52,6 +51,7 @@
 			<div wicket:id="issueStats" class="issue-stats mt-2 d-flex align-items-center flex-wrap mr-3"></div>
 			<div wicket:id="buildStats" class="build-stats mt-2 d-flex align-items-center flex-wrap"></div>
 		</div>
+		<div wicket:id="noStorage" class="mt-2 font-italic">Storage not found</div>
 		<div wicket:id="children" class="project-summary"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="childrenFrag">

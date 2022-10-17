@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
 
 import io.onedev.commons.utils.LinearRange;
@@ -27,13 +28,11 @@ public class BlameCommandTest extends AbstractGitTest {
 				+ "9th line\n", 
 				"initial commit");
 		
-		String commitHash = git.getRepository().resolve("master").name();
-		Collection<BlameBlock> blames = new BlameCommand(git.getRepository().getDirectory())
-				.commitHash(commitHash)
-				.file("file")
-				.call();
+		ObjectId commitId = git.getRepository().resolve("master");
+		Collection<BlameBlock> blames = new BlameCommand(git.getRepository().getDirectory(), commitId, "file")
+				.run();
 		assertEquals(1, blames.size());
-		assertEquals(commitHash + ": 0-8", blames.iterator().next().toString());
+		assertEquals(commitId.name() + ": 0-8", blames.iterator().next().toString());
 		
 		addFileAndCommit(
 				"file", 
@@ -48,33 +47,29 @@ public class BlameCommandTest extends AbstractGitTest {
 				+ "nineth line\n",
 				"second commit");
 		
-		commitHash = git.getRepository().resolve("master").name();
-		blames = new BlameCommand(git.getRepository().getDirectory())
-				.commitHash(commitHash)
-				.file("file")
+		commitId = git.getRepository().resolve("master");
+		blames = new BlameCommand(git.getRepository().getDirectory(), commitId, "file")
 				.range(new LinearRange(5, 8))
-				.call();
+				.run();
 		assertEquals(2, blames.size());
 		
-		assertEquals(commitHash + ": 8-8", getBlock(blames, commitHash).toString());
-		commitHash = git.getRepository().resolve("master~1").name();
-		assertEquals(commitHash + ": 5-7", getBlock(blames, commitHash).toString());
+		assertEquals(commitId.name() + ": 8-8", getBlock(blames, commitId.name()).toString());
+		commitId = git.getRepository().resolve("master~1");
+		assertEquals(commitId.name() + ": 5-7", getBlock(blames, commitId.name()).toString());
 		
 		addFileAndCommit(
 				"file", 
 				"first line\n"
 				+ "nineth line\n", 
 				"third commit");
-		commitHash = git.getRepository().resolve("master").name();
-		blames = new BlameCommand(git.getRepository().getDirectory())
-				.commitHash(commitHash)
-				.file("file")
-				.call();
+		commitId = git.getRepository().resolve("master");
+		blames = new BlameCommand(git.getRepository().getDirectory(), commitId, "file")
+				.run();
 		
-		commitHash = git.getRepository().resolve("master~1").name();
+		commitId = git.getRepository().resolve("master~1");
 		
 		assertEquals(1, blames.size());
-		assertEquals(commitHash + ": 0-1", getBlock(blames, commitHash).toString());
+		assertEquals(commitId.name() + ": 0-1", getBlock(blames, commitId.name()).toString());
 	}
 
 	private BlameBlock getBlock(Collection<BlameBlock> blameBlocks, String commitHash) {

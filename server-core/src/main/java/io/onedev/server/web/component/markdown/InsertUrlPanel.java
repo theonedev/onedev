@@ -50,10 +50,12 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.exception.GitException;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.UrlUtils;
@@ -160,6 +162,7 @@ abstract class InsertUrlPanel extends Panel {
 		return fragment;
 	}
 	
+	@Nullable
 	private ObjectId resolveCommitId(BlobRenderContext context) {
 		/*
 		 * We resolve revision to get latest commit id so that we can select to insert newly 
@@ -168,11 +171,8 @@ abstract class InsertUrlPanel extends Panel {
 		String revision = context.getBlobIdent().revision;
 		if (revision == null)
 			revision = "master";
-		try {
-			return context.getProject().getRepository().resolve(revision);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		GitService gitService = OneDev.getInstance(GitService.class);
+		return gitService.resolve(context.getProject(), revision, false);
 	}
 	
 	private Set<BlobIdent> getPickerState(@Nullable ObjectId commitId, BlobIdent currentBlobIdent, 

@@ -57,8 +57,8 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.maintenance.Upgrade;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
@@ -73,14 +73,14 @@ import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
-import io.onedev.server.web.websocket.WebSocketMessages;
 import io.onedev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketMessages;
 
 @SuppressWarnings("serial")
 public abstract class BasePage extends WebPage {
 
 	private static final String COOKIE_DARK_MODE = "darkMode";
-
+	
 	private boolean darkMode;
 	
 	private FeedbackPanel sessionFeedback;

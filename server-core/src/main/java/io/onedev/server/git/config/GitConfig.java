@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.git.command.GitCommand;
+import io.onedev.server.git.CommandUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -32,7 +32,7 @@ public abstract class GitConfig implements Serializable, Validatable {
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		if (getExecutable() != null) {
-			String error = GitCommand.checkError(getExecutable());
+			String error = CommandUtils.checkError(getExecutable());
 			if (error != null) {
 				context.disableDefaultConstraintViolation();
 				context.buildConstraintViolationWithTemplate(error).addConstraintViolation();

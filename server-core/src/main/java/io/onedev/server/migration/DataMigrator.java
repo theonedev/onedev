@@ -4407,4 +4407,15 @@ public class DataMigrator {
 	private void migrate102(File dataDir, Stack<Integer> versions) {
 	}
 	
+	private void migrate103(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())  
+					element.element("updateDate").detach();
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

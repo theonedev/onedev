@@ -1,11 +1,12 @@
 package io.onedev.server.event.codecomment;
 
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
 public class CodeCommentCreated extends CodeCommentEvent {
+
+	private static final long serialVersionUID = 1L;
 
 	public CodeCommentCreated(CodeComment comment) {
 		super(comment.getUser(), comment.getCreateDate(), comment);
@@ -19,11 +20,6 @@ public class CodeCommentCreated extends CodeCommentEvent {
 	@Override
 	public String getActivity() {
 		return "added";
-	}
-
-	@Override
-	public CodeCommentEvent cloneIn(Dao dao) {
-		return new CodeCommentCreated(dao.load(CodeComment.class, getComment().getId()));
 	}
 
 }

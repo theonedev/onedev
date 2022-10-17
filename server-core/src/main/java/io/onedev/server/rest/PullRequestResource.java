@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -22,24 +23,23 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
-import javax.validation.constraints.NotEmpty;
 import org.joda.time.DateTime;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
-import io.onedev.server.model.PullRequestReview.Status;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
@@ -65,12 +65,16 @@ public class PullRequestResource {
 	
 	private final UserManager userManager;
 	
+	private final GitService gitService;
+	
 	@Inject
 	public PullRequestResource(PullRequestManager pullRequestManager, 
-			PullRequestChangeManager pullRequestChangeManager, UserManager userManager) {
+			PullRequestChangeManager pullRequestChangeManager, 
+			UserManager userManager, GitService gitService) {
 		this.pullRequestManager = pullRequestManager;
 		this.pullRequestChangeManager = pullRequestChangeManager;
 		this.userManager = userManager;
+		this.gitService = gitService;
 	}
 
 	@Api(order=100)
@@ -222,9 +226,9 @@ public class PullRequestResource {
 		}
 
 		request = new PullRequest();
-		ObjectId baseCommitId = GitUtils.getMergeBase(
-				target.getProject().getRepository(), target.getObjectId(), 
-				source.getProject().getRepository(), source.getObjectId());
+		ObjectId baseCommitId = gitService.getMergeBase(
+				target.getProject(), target.getObjectId(), 
+				source.getProject(), source.getObjectId());
 		
 		if (baseCommitId == null)
 			throw new InvalidParamException("No common base for target and source");

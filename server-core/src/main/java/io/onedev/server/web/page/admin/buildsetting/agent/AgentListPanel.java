@@ -363,10 +363,8 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Agent> agents = new ArrayList<>();
-										for (IModel<Agent> each: selectionColumn.getSelections())
-											agents.add(each.getObject());
-										OneDev.getInstance(AgentManager.class).restart(agents);
+										for (IModel<Agent> each: selectionColumn.getSelections()) 
+											OneDev.getInstance(AgentManager.class).restart(each.getObject());
 										target.add(body);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Restart command issued to selected agents");
@@ -689,11 +687,8 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Agent> agents = new ArrayList<>();
-										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
-											agents.add(it.next());
-										}
-										OneDev.getInstance(AgentManager.class).restart(agents);
+										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
+											OneDev.getInstance(AgentManager.class).restart(it.next());
 										target.add(body);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Restart command issued to all queried agents");

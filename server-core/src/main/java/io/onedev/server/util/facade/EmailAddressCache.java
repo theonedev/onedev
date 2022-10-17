@@ -39,9 +39,9 @@ public class EmailAddressCache extends HashMap<Long, EmailAddressFacade> {
     }
 	
 	@Nullable
-	public EmailAddressFacade findPrimary(User user) {
+	public EmailAddressFacade findPrimary(Long userId) {
 		for (EmailAddressFacade facade: values()) {
-			if (facade.isPrimary() && facade.getOwnerId().equals(user.getId())) 
+			if (facade.isPrimary() && facade.getOwnerId().equals(userId)) 
 				return facade;
 		}
 		return null;

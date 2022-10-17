@@ -78,7 +78,7 @@ public abstract class ProjectInfoPanel extends Panel {
 		forksLink.setVisible(getProject().isCodeManagement());
 		forkInfo.add(forksLink);
 		
-        forkInfo.add(new ModalLink("forkNow") {
+		ModalLink forkNow = new ModalLink("forkNow") {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -98,7 +98,11 @@ public abstract class ProjectInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(SecurityUtils.canReadCode(getProject()) && SecurityUtils.canCreateProjects()));
+		};
+		forkNow.setVisible(SecurityUtils.canReadCode(getProject()) 
+				&& SecurityUtils.canCreateProjects() 
+				&& getProject().getStorageServerUUID(false) != null);
+		forkInfo.add(forkNow);
         
         SettingManager settingManager = OneDev.getInstance(SettingManager.class);
         if (settingManager.getServiceDeskSetting() != null

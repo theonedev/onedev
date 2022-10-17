@@ -70,7 +70,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	@Sessional
 	@Override
 	public String getAvatarUrl(PersonIdent personIdent) {
-		if (personIdent.getName().equals(User.ONEDEV_NAME)) { 
+		if (personIdent.getName().equals(User.SYSTEM_NAME)) { 
 			return AVATARS_BASE_URL + "onedev.png";
 		} else {
 			EmailAddress emailAddress = emailAddressManager.findByValue(personIdent.getEmailAddress());
@@ -157,7 +157,7 @@ public class DefaultAvatarManager implements AvatarManager {
 
 	@Override
 	public void useAvatar(Project project, String avatarData) {
-		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + project.getId());
+		Lock avatarLock = getProjectUploadedAvatarLock(project);
 		avatarLock.lock();
 		try {
 			File avatarFile = getUploaded(project.getId());
@@ -172,10 +172,14 @@ public class DefaultAvatarManager implements AvatarManager {
 	public File getUploaded(Long projectId) {
 		return new File(Bootstrap.getSiteDir(), "assets/avatars/uploaded/projects/" + projectId + ".jpg");
 	}
+	
+	private Lock getProjectUploadedAvatarLock(Project project) {
+		return LockUtils.getLock("uploaded-project-avatar:" + project.getId());
+	}
 
 	@Override
 	public void copyAvatar(Project from, Project to) {
-		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + from.getId());
+		Lock avatarLock = getProjectUploadedAvatarLock(from);
 		avatarLock.lock();
 		try {
 			File uploaded = getUploaded(from.getId());

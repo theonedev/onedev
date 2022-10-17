@@ -13,6 +13,8 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.IssueComment;
@@ -21,11 +23,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.project.comment.CommentPanel;
 import io.onedev.server.web.util.DeleteCallback;
-import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
 class IssueCommentedPanel extends GenericPanel<IssueComment> {

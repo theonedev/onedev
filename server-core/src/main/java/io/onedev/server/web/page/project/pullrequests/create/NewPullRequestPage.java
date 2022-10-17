@@ -52,6 +52,8 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.codequality.CoverageStatus;
@@ -61,7 +63,8 @@ import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -93,7 +96,6 @@ import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.pullrequest.assignment.AssignmentListPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
@@ -109,7 +111,6 @@ import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.RevisionDiff;
 
 @SuppressWarnings("serial")
@@ -170,10 +171,10 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 				.map(it->it.getValue())
 				.collect(Collectors.toSet());
 		List<Pair<String, Integer>> branchUpdates = new ArrayList<>(); 
-		for (RefInfo refInfo: getProject().getBranchRefInfos()) {
-			RevCommit commit = (RevCommit) refInfo.getPeeledObj();
+		for (RefFacade ref: getProject().getBranchRefs()) {
+			RevCommit commit = (RevCommit) ref.getPeeledObj();
 			if (verifiedEmailAddresses.contains(commit.getAuthorIdent().getEmailAddress().toLowerCase()))
-				branchUpdates.add(new Pair<>(GitUtils.ref2branch(refInfo.getRef().getName()), commit.getCommitTime()));
+				branchUpdates.add(new Pair<>(GitUtils.ref2branch(ref.getName()), commit.getCommitTime()));
 		}
 		branchUpdates.sort(Comparator.comparing(Pair::getSecond));
 		if (!branchUpdates.isEmpty())
@@ -232,9 +233,9 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 		if (pullRequestRef.get() == null) {
 			ObjectId baseCommitId;
 			if (target.getBranch() != null && source.getBranch() != null) {
-				baseCommitId = GitUtils.getMergeBase(
-						target.getProject().getRepository(), target.getObjectId(), 
-						source.getProject().getRepository(), source.getObjectId());
+				baseCommitId = getGitService().getMergeBase(
+						target.getProject(), target.getObjectId(), 
+						source.getProject(), source.getObjectId());
 			} else {
 				baseCommitId = null;
 			}
@@ -308,6 +309,10 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 	
 	private PullRequest getPullRequest() {
 		return requestModel.getObject();
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	@Override

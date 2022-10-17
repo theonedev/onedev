@@ -7,20 +7,26 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class LfsFetchAllCommand extends GitCommand<Void> {
+public class LfsFetchAllCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(LfsFetchAllCommand.class);
 	
-	public LfsFetchAllCommand(File gitDir) {
-		super(gitDir);
+	private final File workingDir;
+	
+	public LfsFetchAllCommand(File workingDir) {
+		this.workingDir = workingDir;
 	}
 
-	@Override
-	public Void call() {
-		Commandline cmd = cmd().addArgs("lfs", "fetch", "--all");
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
+	
+	public void run() {
+		Commandline git = newGit().workingDir(workingDir).addArgs("lfs", "fetch", "--all");
 		
-		cmd.execute(new LineConsumer() {
+		git.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -35,8 +41,6 @@ public class LfsFetchAllCommand extends GitCommand<Void> {
 			}
 			
 		}).checkReturnCode();
-		
-		return null;
 	}
 
 }

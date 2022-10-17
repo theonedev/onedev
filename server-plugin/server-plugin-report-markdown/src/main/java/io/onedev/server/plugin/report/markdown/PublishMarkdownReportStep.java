@@ -30,7 +30,7 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	
 	private String startPage;
 	
-	@Editable(order=1100, description="Specify start page of the report relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>")
+	@Editable(order=1100, description="Specify start page of the report under <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getStartPage() {
@@ -46,15 +46,23 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 
+	public static String getReportLockName(Build build) {
+		return getReportLockName(build.getProject().getId(), build.getNumber());
+	}
+	
+	public static String getReportLockName(Long projectId, Long buildNumber) {
+		return PublishMarkdownReportStep.class.getName() + ":" + projectId + ":" + buildNumber;
+	}
+	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		LockUtils.write(getReportLockKey(build), new Callable<Void>() {
+		LockUtils.write(getReportLockName(build), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
 				File startPage = new File(inputDir, getStartPage()); 
 				if (startPage.exists()) {
-					File reportDir = new File(build.getPublishDir(), CATEGORY + "/" + getReportName());
+					File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
 
 					FileUtils.createDir(reportDir);
 					File startPageFile = new File(reportDir, START_PAGE);
@@ -80,8 +88,4 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 		return null;
 	}
 
-	public static String getReportLockKey(Build build) {
-		return PublishMarkdownReportStep.class.getName() + ":" + build.getId();
-	}
-	
 }

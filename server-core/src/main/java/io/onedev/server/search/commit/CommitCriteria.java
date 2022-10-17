@@ -7,7 +7,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.WildcardUtils;
 
@@ -20,7 +20,7 @@ public abstract class CommitCriteria implements Serializable {
 		return WildcardUtils.matchString(value, formatted);
 	}
 	
-	public abstract void fill(Project project, RevListCommand command);
+	public abstract void fill(Project project, RevListOptions options);
 	
 	public abstract boolean matches(RefUpdated event);
 	

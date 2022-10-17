@@ -14,11 +14,11 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.EmailAddress;
@@ -29,8 +29,8 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.facade.EmailAddressCache;
+import io.onedev.server.util.facade.EmailAddressFacade;
 
 @Singleton
 public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> implements EmailAddressManager {
@@ -84,6 +84,17 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
     	}
     }
 
+    @Sessional
+    @Override
+    public EmailAddressFacade findFacadeByValue(String value) {
+    	cacheLock.readLock().lock();
+    	try {
+    		return cache.findByValue(value);
+    	} finally {
+    		cacheLock.readLock().unlock();
+    	}
+    }
+    
     @Sessional
     @Override
     public EmailAddress findByPersonIdent(PersonIdent personIdent) {
@@ -262,7 +273,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 	public EmailAddress findPrimary(User user) {
     	cacheLock.readLock().lock();
     	try {
-    		EmailAddressFacade facade = cache.findPrimary(user);
+    		EmailAddressFacade facade = cache.findPrimary(user.getId());
     		if (facade != null)
     			return load(facade.getId());
     		else
@@ -272,6 +283,16 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
     	}
 	}
 
+	@Override
+	public EmailAddressFacade findPrimaryFacade(Long userId) {
+    	cacheLock.readLock().lock();
+    	try {
+    		return cache.findPrimary(userId);
+    	} finally {
+    		cacheLock.readLock().unlock();
+    	}
+	}
+	
 	@Override
 	public EmailAddress findGit(User user) {
     	cacheLock.readLock().lock();

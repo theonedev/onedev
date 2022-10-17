@@ -1,28 +1,30 @@
 package io.onedev.server.event.codecomment;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
 public class CodeCommentReplied extends CodeCommentEvent {
 
-	private final CodeCommentReply reply;
+	private static final long serialVersionUID = 1L;
+	
+	private final Long replyId;
 	
 	public CodeCommentReplied(CodeCommentReply reply) {
 		super(reply.getUser(), reply.getDate(), reply.getComment());
-		this.reply = reply;
+		replyId = reply.getId();
 	}
 
 	public CodeCommentReply getReply() {
-		return reply;
+		return OneDev.getInstance(CodeCommentReplyManager.class).load(replyId);
 	}
 
 	@Override
 	protected CommentText newCommentText() {
-		return new MarkdownText(getProject(), reply.getContent());
+		return new MarkdownText(getProject(), getReply().getContent());
 	}
 
 	@Override
@@ -31,13 +33,8 @@ public class CodeCommentReplied extends CodeCommentEvent {
 	}
 
 	@Override
-	public CodeCommentEvent cloneIn(Dao dao) {
-		return new CodeCommentReplied(dao.load(CodeCommentReply.class, reply.getId()));
-	}
-	
-	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(reply);
+		return OneDev.getInstance(UrlManager.class).urlFor(getReply());
 	}
 	
 }

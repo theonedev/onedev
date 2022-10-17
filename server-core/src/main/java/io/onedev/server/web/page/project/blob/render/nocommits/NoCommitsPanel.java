@@ -15,9 +15,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -102,8 +102,8 @@ public class NoCommitsPanel extends Panel {
 										}
 
 										@Override
-										public void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
-											context.onCommitted(target, refUpdated);
+										public void onCommitted(AjaxRequestTarget target, ObjectId commitId) {
+											context.onCommitted(target, commitId);
 											modal.close();
 										}
 										

@@ -20,13 +20,16 @@ import com.google.common.base.Throwables;
 
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.JobContext;
+import io.onedev.server.ServerConfig;
+import io.onedev.server.job.AgentInfo;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.terminal.ShellSession;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
-import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -110,7 +113,10 @@ public abstract class JobExecutor implements Serializable {
 		this.cacheTTL = cacheTTL;
 	}
 	
-	public abstract void execute(JobContext jobContext);
+	@Nullable
+	public abstract AgentQuery getAgentRequirement();
+	
+	public abstract void execute(JobContext jobContext, TaskLogger jobLogger, @Nullable AgentInfo agentInfo);
 	
 	public abstract void resume(JobContext jobContext);
 	

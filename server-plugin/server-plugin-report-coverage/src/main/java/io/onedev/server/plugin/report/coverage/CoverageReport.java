@@ -60,8 +60,12 @@ public class CoverageReport implements Serializable {
 		};
 	}
 
-	public static String getReportLockKey(Build build) {
-		return CoverageReport.class.getName() + ":"	+ build.getId();
+	public static String getReportLockName(Build build) {
+		return getReportLockName(build.getProject().getId(), build.getNumber());
 	}
 	
+	public static String getReportLockName(Long projectId, Long buildNumber) {
+		return CoverageReport.class.getName() + ":"	+ projectId + ":" + buildNumber;
+	}
+
 }

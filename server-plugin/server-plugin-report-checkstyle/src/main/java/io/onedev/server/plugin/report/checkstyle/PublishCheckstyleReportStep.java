@@ -40,7 +40,7 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 	
 	public static final String HH = "hh";
 	
-	@Editable(order=100, description="Specify checkstyle result xml file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
+	@Editable(order=100, description="Specify checkstyle result xml file under <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/checkstyle-result.xml</tt>. "
 			+ "Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> "
 			+ "on how to generate the result xml file. Use * or ? for pattern match")

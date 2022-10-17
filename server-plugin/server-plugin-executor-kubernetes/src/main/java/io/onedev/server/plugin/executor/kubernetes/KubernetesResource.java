@@ -36,12 +36,13 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheAllocationRequest;
-import io.onedev.k8shelper.JobData;
+import io.onedev.k8shelper.K8sJobData;
 import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobContext;
-import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.security.SecurityUtils;
 
 @Api(internal=true)
 @Path("/k8s")
@@ -51,91 +52,102 @@ public class KubernetesResource {
 
 	private final JobManager jobManager;
 	
+	private final SessionManager sessionManager;
+	
     @Context
     private HttpServletRequest request;
     
     @Inject
-    public KubernetesResource(JobManager jobManager) {
+    public KubernetesResource(JobManager jobManager, SessionManager sessionManager) {
     	this.jobManager = jobManager;
+    	this.sessionManager = sessionManager;
 	}
     
 	@Path("/job-data")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
     @POST
     public byte[] getJobData(@Nullable String jobWorkspace) {
-		JobContext context = jobManager.getJobContext(getJobToken(), true);
+		JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
 		if (StringUtils.isNotBlank(jobWorkspace))
-			context.reportJobWorkspace(jobWorkspace);	
-		JobData jobData = new JobData(
-				context.getJobExecutor().getName(), 
-				context.getRefName(),
-				context.getCommitId().name(), 
-				context.getActions());
-		return SerializationUtils.serialize(jobData);
+			jobManager.reportJobWorkspace(jobContext, jobWorkspace);	
+		K8sJobData k8sJobData = new K8sJobData(
+				jobContext.getJobExecutor().getName(), 
+				jobContext.getRefName(),
+				jobContext.getCommitId().name(), 
+				jobContext.getActions());
+		return SerializationUtils.serialize(k8sJobData);
     }
 	
-	@Path("/allocate-job-caches")
+	@Path("/allocate-caches")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
     @POST
-    public byte[] allocateJobCaches(String requestString) {
+    public byte[] allocateCaches(String requestString) {
 		CacheAllocationRequest request = CacheAllocationRequest.fromString(requestString);
-		return SerializationUtils.serialize((Serializable) jobManager.allocateJobCaches(
-				getJobToken(), request));
+		return SerializationUtils.serialize((Serializable) jobManager.allocateCaches(
+				jobManager.getJobContext(getJobToken(), true), request));
     }
 	
 	@Path("/run-server-step")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@POST
 	public Response runServerStep(InputStream is) {
-		StreamingOutput os = new StreamingOutput() {
+		// Make sure we are not occupying a database connection here as we will occupy 
+		// database connection when running step at project server side
+		sessionManager.closeSession(); 
+		try {
+			StreamingOutput os = new StreamingOutput() {
 
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				File filesDir = FileUtils.createTempDir();
-				try {
-					int length = readInt(is);
-					List<Integer> stepPosition = new ArrayList<>();
-					for (int i=0; i<length; i++) 
-						stepPosition.add(readInt(is));
-					
-					Map<String, String> placeholderValues = new HashMap<>();
-					length = readInt(is);
-					for (int i=0; i<length; i++) 
-						placeholderValues.put(readString(is), readString(is));
-					
-					FileUtils.untar(is, filesDir, false);
-					
-					Map<String, byte[]> outputFiles = jobManager.runServerStep(getJobToken(), stepPosition, 
-							filesDir, placeholderValues, new TaskLogger() {
-
-						@Override
-						public void log(String message, String sessionId) {
-							// While testing, ngrok.io buffers response and build can not get log entries 
-							// timely. This won't happen on pagekite however
-							KubernetesHelper.writeInt(output, 1);
-							KubernetesHelper.writeString(output, message);
-							try {
-								output.flush();
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						}
+				@Override
+			   public void write(OutputStream output) throws IOException {
+					File filesDir = FileUtils.createTempDir();
+					try {
+						int length = readInt(is);
+						List<Integer> stepPosition = new ArrayList<>();
+						for (int i=0; i<length; i++) 
+							stepPosition.add(readInt(is));
 						
-					});
-					if (outputFiles == null)
-						outputFiles = new HashMap<>();
-					byte[] bytes = SerializationUtils.serialize((Serializable) outputFiles); 
-					KubernetesHelper.writeInt(output, 2);
-					KubernetesHelper.writeInt(output, bytes.length);
-					output.write(bytes);
-				} finally {
-					FileUtils.deleteDir(filesDir);
-				}						
-		   }				   
-		   
-		};
-		return Response.ok(os).build();
+						Map<String, String> placeholderValues = new HashMap<>();
+						length = readInt(is);
+						for (int i=0; i<length; i++) 
+							placeholderValues.put(readString(is), readString(is));
+						
+						FileUtils.untar(is, filesDir, false);
+						
+						JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
+						Map<String, byte[]> outputFiles = jobManager.runServerStep(jobContext, 
+								stepPosition, filesDir, placeholderValues, new TaskLogger() {
+
+							@Override
+							public void log(String message, String sessionId) {
+								// While testing, ngrok.io buffers response and build can not get log entries 
+								// timely. This won't happen on pagekite however
+								KubernetesHelper.writeInt(output, 1);
+								KubernetesHelper.writeString(output, message);
+								try {
+									output.flush();
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
+							
+						});
+						if (outputFiles == null)
+							outputFiles = new HashMap<>();
+						byte[] bytes = SerializationUtils.serialize((Serializable) outputFiles); 
+						KubernetesHelper.writeInt(output, 2);
+						KubernetesHelper.writeInt(output, bytes.length);
+						output.write(bytes);
+					} finally {
+						FileUtils.deleteDir(filesDir);
+					}						
+			   }				   
+			   
+			};
+			return Response.ok(os).build();
+		} finally {
+			sessionManager.openSession();
+		}
 	}
 	
 	@Path("/download-dependencies")
@@ -146,10 +158,10 @@ public class KubernetesResource {
 
 			@Override
 		   public void write(OutputStream output) throws IOException {
-				JobContext context = jobManager.getJobContext(getJobToken(), true);
+				JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
 				File tempDir = FileUtils.createTempDir();
 				try {
-					context.copyDependencies(tempDir);
+					jobManager.copyDependencies(jobContext, tempDir);
 					FileUtils.tar(tempDir, Lists.newArrayList("**"), new ArrayList<>(), output, false);
 					output.flush();
 				} finally {
@@ -164,7 +176,7 @@ public class KubernetesResource {
 	@GET
 	@Path("/test")
 	public Response test() {
-		String jobToken = Job.getToken(request);
+		String jobToken = SecurityUtils.getBearerToken(request);
 		if (jobToken != null) 
 			return Response.ok().build();
 		else 
@@ -172,7 +184,7 @@ public class KubernetesResource {
 	}
 	
 	private String getJobToken() {
-		String jobToken = Job.getToken(request);
+		String jobToken = SecurityUtils.getBearerToken(request);
 		if (jobToken != null)
 			return jobToken;
 		else

@@ -7,13 +7,14 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.web.util.FileUpload;
 
@@ -27,6 +28,9 @@ public interface BlobRenderContext extends Serializable {
 		DELETE}
 	
 	Project getProject();
+	
+	@Nullable
+	PullRequest getPullRequest();
 	
 	BlobIdent getBlobIdent();
 	
@@ -91,7 +95,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, @Nullable String newPath);
 	
-	void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated);
+	void onCommitted(@Nullable AjaxRequestTarget target, ObjectId commitId);
 	
 	void onCommentOpened(AjaxRequestTarget target, CodeComment comment, PlanarRange range);
 
@@ -99,7 +103,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onAddComment(AjaxRequestTarget target, PlanarRange range);
 	
-	RefUpdated uploadFiles(Collection<FileUpload> uploads, @Nullable String directory, String commitMessage);
+	ObjectId uploadFiles(Collection<FileUpload> uploads, @Nullable String directory, String commitMessage);
 	
 	@Nullable
 	CodeComment getOpenComment();

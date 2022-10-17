@@ -19,17 +19,16 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
+import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 
-public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
+public class BlameCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(BlameCommand.class);
 	
@@ -38,26 +37,20 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 	
 	private static final int CACHE_THRESHOLD = 1000;
 	
-	private String commitHash;
+	private final File workingDir;
 	
-	private String file;
+	private final ObjectId commitId;
+	
+	private final String file;
 	
 	private LinearRange range;
 	
-	public BlameCommand(File gitDir) {
-		super(gitDir);
+	public BlameCommand(File workingDir, ObjectId commitId, String file) {
+		this.workingDir = workingDir;
+		this.commitId = commitId;
+		this.file = file;
 	}
 
-	public BlameCommand commitHash(String commitHash) {
-		this.commitHash = commitHash;
-		return this;
-	}
-	
-	public BlameCommand file(String file) {
-		this.file = file;
-		return this;
-	}
-	
 	/**
 	 * Calculate blames of specified range
 	 * @param range
@@ -69,29 +62,25 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 		return this;
 	}
 	
-	private Commandline buildCmd() {
-		Commandline cmd = cmd().addArgs("blame", "--porcelain");
-		if (range != null)
-			cmd.addArgs("-L" + (range.getFrom()+1) + "," + (range.getTo()+1));
-		cmd.addArgs(commitHash, "--", file);
-		return cmd;
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
 	}
 	
-	@Override
-	public Collection<BlameBlock> call() {
-		Preconditions.checkArgument(commitHash!=null && ObjectId.isId(commitHash), "commit hash has to be specified.");
-		Preconditions.checkNotNull(file, "file parameter has to be specified.");
-
-		String cacheKey = commitHash + ":" + file + ":" + (range!=null?range.toString():"");
+	public Collection<BlameBlock> run() {
+		String cacheKey = commitId.name() + ":" + file + ":" + (range!=null?range.toString():"");
 		
 		Collection<BlameBlock> cached;
 		synchronized (cache) {
 			cached = cache.get(cacheKey);
 		}
+		
 		if (cached != null)
 			return cached;
 		
-		Commandline cmd = buildCmd();
+		Commandline git = newGit().workingDir(workingDir).addArgs("blame", "--porcelain");
+		if (range != null)
+			git.addArgs("-L" + (range.getFrom()+1) + "," + (range.getTo()+1));
+		git.addArgs(commitId.name(), "--", file);
 		
 		Map<String, BlameBlock> blocks = new HashMap<>();
 		Map<String, BlameCommit> commitMap = new HashMap<>();
@@ -114,8 +103,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 		
 		long time = System.currentTimeMillis();
 		
-		Logger effectiveLogger = logger!=null?logger:BlameCommand.logger;
-		ExecutionResult result = cmd.execute(new LineConsumer() {
+		ExecutionResult result = git.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -163,9 +151,9 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 			public void consume(String line) {
 				if (line.startsWith("fatal: file ") && line.contains("has only ")) {
 					endOfFile.set(true);
-					effectiveLogger.trace(line.substring("fatal: ".length()));
+					logger.trace(line.substring("fatal: ".length()));
 				} else {
-					effectiveLogger.error(line);
+					logger.error(line);
 				}
 			}
 			

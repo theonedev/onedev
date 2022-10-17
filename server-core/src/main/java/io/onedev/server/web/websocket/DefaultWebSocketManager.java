@@ -1,5 +1,7 @@
 package io.onedev.server.web.websocket;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -7,7 +9,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -27,8 +28,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.TransactionManager;
@@ -38,7 +43,9 @@ import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.page.base.BasePage;
 
 @Singleton
-public class DefaultWebSocketManager implements WebSocketManager {
+public class DefaultWebSocketManager implements WebSocketManager, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultWebSocketManager.class);
 	
@@ -50,7 +57,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	
 	private final TaskScheduler taskScheduler;
 	
-	private final ExecutorService executorService;
+	private final ClusterManager clusterManager;
 	
 	private final Map<String, Map<IKey, Collection<String>>> registeredObservables = new ConcurrentHashMap<>();
 	
@@ -64,11 +71,15 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	
 	@Inject
 	public DefaultWebSocketManager(Application application, TransactionManager transactionManager, 
-			TaskScheduler taskScheduler, ExecutorService executorService) {
+			TaskScheduler taskScheduler, ClusterManager clusterManager) {
 		this.application = application;
 		this.transactionManager = transactionManager;
 		this.taskScheduler = taskScheduler;
-		this.executorService = executorService;
+		this.clusterManager = clusterManager;
+	}
+	
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(WebSocketManager.class);
 	}
 	
 	@Override
@@ -122,20 +133,25 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	@Sessional
 	@Override
 	public void notifyObservableChange(String observable) {
-		transactionManager.runAfterCommit(new Runnable() {
+		transactionManager.runAfterCommit(new ClusterRunnable() {
+
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void run() {
-				executorService.execute(new Runnable() {
+				clusterManager.submitToAllServers(new ClusterTask<Void>() {
+
+					private static final long serialVersionUID = 1L;
 
 					@Override
-					public void run() {
+					public Void call() throws Exception {
 						notifiedObservables.put(observable, new Date());
 						for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
 							Collection<String> registeredObservables = getRegisteredObservables(connection); 
 							if (registeredObservables != null && registeredObservables.contains(observable))
 								notifyObservables(connection, Sets.newHashSet(observable));
 						}
+						return null;
 					}
 					
 				});
@@ -167,6 +183,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 			}
 			
 		});
+		
 		notifiedObservableCleanupTaskId = taskScheduler.schedule(new SchedulableTask() {
 			
 			private static final int TOLERATE_SECONDS = 10;
@@ -190,8 +207,10 @@ public class DefaultWebSocketManager implements WebSocketManager {
 
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(keepAliveTaskId);
-		taskScheduler.unschedule(notifiedObservableCleanupTaskId);
+		if (keepAliveTaskId != null)
+			taskScheduler.unschedule(keepAliveTaskId);
+		if (notifiedObservableCleanupTaskId != null)
+			taskScheduler.unschedule(notifiedObservableCleanupTaskId);
 	}
 	
 	/**

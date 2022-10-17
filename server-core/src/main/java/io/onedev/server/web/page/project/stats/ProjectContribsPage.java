@@ -75,7 +75,8 @@ public class ProjectContribsPage extends ProjectStatsPage {
 
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
 		Map<Integer, Integer[]> data = new HashMap<>();
-		Map<Day, GitContribution> overallContributions = commitInfoManager.getOverallContributions(getProject());
+		Map<Day, GitContribution> overallContributions = 
+				commitInfoManager.getOverallContributions(getProject().getId());
 		for (Map.Entry<Day, GitContribution> entry: overallContributions.entrySet()) {
 			GitContribution contribution = entry.getValue();
 			Integer[] dataValue = new Integer[] {contribution.getCommits(), contribution.getAdditions(), contribution.getDeletions()};

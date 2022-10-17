@@ -2,20 +2,20 @@ package io.onedev.server.entitymanager.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -28,12 +28,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -43,21 +41,30 @@ import org.eclipse.jgit.lib.StoredConfig;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.quartz.ScheduleBuilder;
-import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
+import com.hazelcast.cluster.Member;
+import com.hazelcast.cluster.MembershipEvent;
+import com.hazelcast.cluster.MembershipListener;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.cp.IAtomicLong;
+import com.hazelcast.map.IMap;
+import com.hazelcast.map.listener.EntryAddedListener;
+import com.hazelcast.map.listener.EntryRemovedListener;
+import com.hazelcast.map.listener.EntryUpdatedListener;
 
-import io.onedev.commons.loader.Listen;
-import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.cluster.ProjectServer;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
@@ -66,18 +73,23 @@ import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.event.ProjectCreated;
-import io.onedev.server.event.ProjectDeleted;
-import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.git.CommandUtils;
+import io.onedev.server.git.GitTask;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.git.command.LfsFetchAllCommand;
+import io.onedev.server.git.hook.HookUtils;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
@@ -111,14 +123,12 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarManager;
 
 @Singleton
 public class DefaultProjectManager extends BaseEntityManager<Project> 
-		implements ProjectManager, SchedulableTask {
+		implements ProjectManager, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 	
@@ -140,8 +150,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final JobManager jobManager;
     
-    private final TaskScheduler taskScheduler;
-    
     private final ListenerRegistry listenerRegistry;
     
     private final RoleManager roleManager;
@@ -150,26 +158,24 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final UserAuthorizationManager userAuthorizationManager;
     
-    private final String gitReceiveHook;
+    private final ClusterManager clusterManager;
+    
+    private final GitService gitService;
     
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
+
+	private volatile IMap<Long, ProjectServer> storageServers;
 	
-	private final Map<Long, Date> updateDates = new ConcurrentHashMap<>();
-	
-	private final ProjectCache cache = new ProjectCache();
-	
-	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
-	
-	private String taskId;
+	private volatile ProjectCache cache;
 	
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager,  
     		BuildManager buildManager, AvatarManager avatarManager, 
     		SettingManager settingManager, TransactionManager transactionManager, 
     		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
-    		TaskScheduler taskScheduler, UserAuthorizationManager userAuthorizationManager, 
-    		RoleManager roleManager, JobManager jobManager, IssueManager issueManager, 
-    		LinkSpecManager linkSpecManager, StorageManager storageManager) {
+    		UserAuthorizationManager userAuthorizationManager, RoleManager roleManager, 
+    		JobManager jobManager, IssueManager issueManager, LinkSpecManager linkSpecManager, 
+    		StorageManager storageManager, ClusterManager clusterManager, GitService gitService) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -179,36 +185,33 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         this.transactionManager = transactionManager;
         this.sessionManager = sessionManager;
         this.listenerRegistry = listenerRegistry;
-        this.taskScheduler = taskScheduler;
         this.userAuthorizationManager = userAuthorizationManager;
         this.roleManager = roleManager;
         this.jobManager = jobManager;
         this.issueManager = issueManager;
         this.linkSpecManager = linkSpecManager;
         this.storageManager = storageManager;
-        
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
-        	Preconditions.checkNotNull(is);
-            gitReceiveHook = StringUtils.join(IOUtils.readLines(is, Charset.defaultCharset()), "\n");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        this.clusterManager = clusterManager;
+        this.gitService = gitService;
     }
     
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(ProjectManager.class);
+	}
+
     @Override
-    public Repository getRepository(Project project) {
-    	Repository repository = repositoryCache.get(project.getId());
+    public Repository getRepository(Long projectId) {
+    	Repository repository = repositoryCache.get(projectId);
     	if (repository == null) {
     		synchronized (repositoryCache) {
-    			repository = repositoryCache.get(project.getId());
+    			repository = repositoryCache.get(projectId);
     			if (repository == null) {
     				try {
-						repository = new FileRepository(project.getGitDir());
+						repository = new FileRepository(storageManager.getProjectGitDir(projectId));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
-    				repositoryCache.put(project.getId(), repository);
+    				repositoryCache.put(projectId, repository);
     			}
     		}
     	}
@@ -244,12 +247,37 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     				updater.onMoveProject(oldPath, project.getPath());
     		}
     			
-    		scheduleTree(project);
+    		transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+		    		scheduleTree(project);
+				}
+    			
+    		});
     	}
     }
     
     private void scheduleTree(Project project) {
-    	jobManager.schedule(project);
+    	Long projectId = project.getId();
+    	submitToProjectServer(projectId, new ClusterTask<Void>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Void call() throws Exception {
+				sessionManager.run(new Runnable() {
+
+					@Override
+					public void run() {
+				    	jobManager.schedule(load(projectId));
+					}
+					
+				});
+				return null;
+			}
+    		
+    	});
     	for (Project child: project.getChildren()) 
     		scheduleTree(child);
     }
@@ -262,13 +290,16 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		create(parent);
     	project.setPath(project.calcPath());
     	dao.persist(project);
-       	checkGitDir(project);
-       	checkGitHooksAndConfig(project);
+    	FileUtils.createDir(storageManager.getProjectDir(project.getId()));
+       	checkGitDir(project.getId());
+       	checkGitHooksAndConfig(project.getId());
        	UserAuthorization authorization = new UserAuthorization();
        	authorization.setProject(project);
        	authorization.setUser(SecurityUtils.getUser());
        	authorization.setRole(roleManager.getOwner());
        	userAuthorizationManager.save(authorization);
+       	
+       	updateStorageServer(project);
        	listenerRegistry.post(new ProjectCreated(project));
     }
     
@@ -278,16 +309,13 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	if (event.getEntity() instanceof Project) {
     		Project project = (Project) event.getEntity();
     		Long projectId = project.getId();
+    		
     		transactionManager.runAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-					cacheLock.writeLock().lock();
-					try {
-						cache.remove(projectId);
-					} finally {
-						cacheLock.writeLock().unlock();
-					}
+					cache.remove(projectId);
+					storageServers.remove(projectId);
 				}
     			
     		});
@@ -303,12 +331,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 				@Override
 				public void run() {
-					cacheLock.writeLock().lock();
-					try {
-						cache.put(facade.getId(), facade);
-					} finally {
-						cacheLock.writeLock().unlock();
-					}
+					cache.put(facade.getId(), facade);
 				}
     			
     		});
@@ -369,7 +392,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		buildManager.delete(build);
     	
     	dao.remove(project);
-    	listenerRegistry.post(new ProjectDeleted(project));
     	
     	synchronized (repositoryCache) {
 			Repository repository = repositoryCache.remove(project.getId());
@@ -380,37 +402,27 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     @Override
     public Project findByPath(String path) {
-		cacheLock.readLock().lock();
-		try {
-			Long projectId = cache.findId(path);
-			if (projectId != null)
-				return load(projectId);
-			else
-				return null;
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		ProjectFacade project = cache.find(path);
+		if (project != null)
+			return load(project.getId());
+		else
+			return null;
     }
     
     @Sessional
     @Override
     public Project findByServiceDeskName(String serviceDeskName) {
-		cacheLock.readLock().lock();
-		try {
-			Long projectId = null;
-			for (ProjectFacade facade: cache.values()) {
-				if (serviceDeskName.equals(facade.getServiceDeskName())) {
-					projectId = facade.getId();
-					break;
-				}
+		Long projectId = null;
+		for (ProjectFacade facade: cache.values()) {
+			if (serviceDeskName.equals(facade.getServiceDeskName())) {
+				projectId = facade.getId();
+				break;
 			}
-			if (projectId != null)
-				return load(projectId);
-			else
-				return null;
-		} finally {
-			cacheLock.readLock().unlock();
 		}
+		if (projectId != null)
+			return load(projectId);
+		else
+			return null;
     }
     
     @Sessional
@@ -460,23 +472,18 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Sessional
     @Override
     public Project find(Project parent, String name) {
-		cacheLock.readLock().lock();
-		try {
-			Long projectId = null;
-			for (ProjectFacade facade: cache.values()) {
-				if (facade.getName().equalsIgnoreCase(name) 
-						&& Objects.equals(Project.idOf(parent), facade.getParentId())) {
-					projectId = facade.getId();
-					break;
-				}
+		Long projectId = null;
+		for (ProjectFacade facade: cache.values()) {
+			if (facade.getName().equalsIgnoreCase(name) 
+					&& Objects.equals(Project.idOf(parent), facade.getParentId())) {
+				projectId = facade.getId();
+				break;
 			}
-			if (projectId != null)
-				return load(projectId);
-			else
-				return null;
-		} finally {
-			cacheLock.readLock().unlock();
 		}
+		if (projectId != null)
+			return load(projectId);
+		else
+			return null;
     }
     
     @Transactional
@@ -487,6 +494,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		create(parent);
     	
     	dao.persist(to);
+    	FileUtils.createDir(storageManager.getProjectDir(to.getId()));
     	
        	UserAuthorization authorization = new UserAuthorization();
        	authorization.setProject(to);
@@ -494,32 +502,59 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
        	authorization.setRole(roleManager.getOwner());
        	userAuthorizationManager.save(authorization);
     	
-        FileUtils.cleanDir(to.getGitDir());
-        new CloneCommand(to.getGitDir()).noLfs(true).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
-        storageManager.initLfsDir(to.getId());
-        new LfsFetchAllCommand(to.getGitDir()).call();
-        
-        checkGitHooksAndConfig(to);
-        commitInfoManager.cloneInfo(from, to);
-        avatarManager.copyAvatar(from, to);
-        
-        if (from.getLfsObjectsDir().exists()) {
-            for (File file: FileUtils.listFiles(from.getLfsObjectsDir(), Sets.newHashSet("**"), Sets.newHashSet())) {
-            	String objectId = file.getName();
-            	Lock lock = from.getLfsObjectLock(objectId).readLock();
-            	lock.lock();
-            	try {
-            		FileUtils.copyFile(file, to.getLfsObjectFile(objectId));
-            	} catch (IOException e) {
-            		throw new RuntimeException(e);
-    			} finally {
-            		lock.unlock();
-            	}
-            }
+       	File toGitDir = storageManager.getProjectGitDir(to.getId());       	
+        FileUtils.cleanDir(toGitDir);
+
+        UUID fromStorageServerUUID = getStorageServerUUID(from.getId(), true);
+        if (fromStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+        	File fromGitDir = storageManager.getProjectGitDir(from.getId());
+	        new CloneCommand(toGitDir, fromGitDir.getAbsolutePath()).noLfs(true).mirror(true).run();
+	        storageManager.initLfsDir(to.getId());
+	        new LfsFetchAllCommand(toGitDir).run();
+        } else {
+        	CommandUtils.callWithClusterCredential(new GitTask<Void>() {
+
+				@Override
+				public Void call(Commandline git) {
+					String remoteUrl = clusterManager.getServerUrl(fromStorageServerUUID) + "/" + from.getPath();
+			        new CloneCommand(toGitDir, remoteUrl) {
+
+						@Override
+						protected Commandline newGit() {
+							return git;
+						}
+			        	
+			        }.noLfs(true).mirror(true).run();
+			        
+			        storageManager.initLfsDir(to.getId());
+			        new LfsFetchAllCommand(toGitDir) {
+			        	
+						@Override
+						protected Commandline newGit() {
+							return git;
+						}
+						
+			        }.run();
+					return null;
+				}
+        		
+        	});
         }
+        
+        checkGitHooksAndConfig(to.getId());
+        commitInfoManager.cloneInfo(from.getId(), to.getId());
+        avatarManager.copyAvatar(from, to);
+            
+       	updateStorageServer(to);
         
         listenerRegistry.post(new ProjectCreated(to));
 	}
+    
+    private void updateStorageServer(Project project) {
+       	ProjectServer storageServer = new ProjectServer(
+       			clusterManager.getLocalServerUUID(), Lists.newArrayList());
+       	storageServers.put(project.getId(), storageServer);
+    }
     
     @Transactional
     @Override
@@ -529,6 +564,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		create(parent);
     	
     	dao.persist(project);
+    	FileUtils.createDir(storageManager.getProjectDir(project.getId()));
     	
     	User user = SecurityUtils.getUser();
        	UserAuthorization authorization = new UserAuthorization();
@@ -539,24 +575,28 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
        	user.getProjectAuthorizations().add(authorization);
        	userAuthorizationManager.save(authorization);
     	
-        FileUtils.cleanDir(project.getGitDir());
-        new CloneCommand(project.getGitDir()).mirror(true).noLfs(true).from(repositoryUrl).call();
+       	File gitDir = storageManager.getProjectGitDir(project.getId());
+        FileUtils.cleanDir(gitDir);
+        
+        new CloneCommand(gitDir, repositoryUrl).mirror(true).noLfs(true).run();
         storageManager.initLfsDir(project.getId());
-        new LfsFetchAllCommand(project.getGitDir()).call();
+        new LfsFetchAllCommand(gitDir).run();
 
-        checkGitHooksAndConfig(project);
+        checkGitHooksAndConfig(project.getId());
+        
+       	updateStorageServer(project);
         
         listenerRegistry.post(new ProjectCreated(project));
         
         List<ImmutableTriple<String, ObjectId, ObjectId>> refUpdatedEventData = new ArrayList<>();
         
-        for (RefInfo refInfo: project.getBranchRefInfos()) {
-        	refUpdatedEventData.add(new ImmutableTriple<>(refInfo.getRef().getName(), 
-        			ObjectId.zeroId(), refInfo.getObj().getId().copy()));
+        for (RefFacade ref: project.getBranchRefs()) {
+        	refUpdatedEventData.add(new ImmutableTriple<>(ref.getName(), 
+        			ObjectId.zeroId(), ref.getObjectId()));
         }
-        for (RefInfo refInfo: project.getTagRefInfos()) {
-        	refUpdatedEventData.add(new ImmutableTriple<>(refInfo.getRef().getName(), 
-        			ObjectId.zeroId(), refInfo.getPeeledObj().getId().copy()));
+        for (RefFacade ref: project.getTagRefs()) {
+        	refUpdatedEventData.add(new ImmutableTriple<>(ref.getName(), 
+        			ObjectId.zeroId(), ref.getPeeledObj().getId().copy()));
         }
         
         Long projectId = project.getId();
@@ -588,62 +628,33 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         
     }
     
-	private boolean isGitHookValid(File gitDir, String hookName) {
-        File hookFile = new File(gitDir, "hooks/" + hookName);
-        if (!hookFile.exists()) 
-        	return false;
-        
-        try {
-			String content = FileUtils.readFileToString(hookFile, Charset.defaultCharset());
-			if (!content.contains("ONEDEV_HOOK_TOKEN"))
-				return false;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		
-        if (!hookFile.canExecute())
-        	return false;
-        
-        return true;
-	}
-	
-	private void checkGitDir(Project project) {
-		File gitDir = project.getGitDir();
+	private void checkGitDir(Long projectId) {
+		File gitDir = storageManager.getProjectGitDir(projectId);
 		if (gitDir.listFiles().length == 0) {
         	logger.info("Initializing git repository in '" + gitDir + "'...");
             try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
-            storageManager.initLfsDir(project.getId());
+            storageManager.initLfsDir(projectId);
 		} else if (!GitUtils.isValid(gitDir)) {
         	logger.warn("Directory '" + gitDir + "' is not a valid git repository, reinitializing...");
         	FileUtils.cleanDir(gitDir);
-            storageManager.initLfsDir(project.getId());
+            storageManager.initLfsDir(projectId);
             try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
-            storageManager.initLfsDir(project.getId());
+            storageManager.initLfsDir(projectId);
         } 
 	}
 	
-	private void checkGitHooksAndConfig(Project project) {
-		File gitDir = project.getGitDir();
-		if (!isGitHookValid(gitDir, "pre-receive") || !isGitHookValid(gitDir, "post-receive")) {
-            File hooksDir = new File(gitDir, "hooks");
-
-            File gitPreReceiveHookFile = new File(hooksDir, "pre-receive");
-            FileUtils.writeFile(gitPreReceiveHookFile, String.format(gitReceiveHook, "git-prereceive-callback"));
-            gitPreReceiveHookFile.setExecutable(true);
-            
-            File gitPostReceiveHookFile = new File(hooksDir, "post-receive");
-            FileUtils.writeFile(gitPostReceiveHookFile, String.format(gitReceiveHook, "git-postreceive-callback"));
-            gitPostReceiveHookFile.setExecutable(true);
-        }
+	private void checkGitHooksAndConfig(Long projectId) {
+		File gitDir = storageManager.getProjectGitDir(projectId);
+		HookUtils.checkHooks(gitDir);
 
 		try {
-			StoredConfig config = project.getRepository().getConfig();
+			StoredConfig config = getRepository(projectId).getConfig();
 			boolean changed = false;
 			if (config.getEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, ConfigConstants.CONFIG_KEY_ALGORITHM, 
 					SupportedAlgorithm.MYERS) != SupportedAlgorithm.HISTOGRAM) {
@@ -664,7 +675,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
 		synchronized(repositoryCache) {
 			for (Repository repository: repositoryCache.values()) {
 				repository.close();
@@ -673,32 +683,74 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Transactional
-	@Listen
-	public void on(ProjectEvent event) {
-		/*
-		 * Update asynchronously to avoid deadlock 
-		 */
-		updateDates.put(event.getProject().getId(), event.getDate());
-	}
-	
-	@Transactional
 	@Listen(1)
 	public void on(SystemStarted event) {
-		logger.info("Checking projects...");
-		cacheLock.writeLock().lock();
-		try {
-			for (Project project: query()) {
-				String path = project.getPath();
-				if (!path.equals(project.calcPath()))
-					project.setPath(path);
-				cache.put(project.getId(), project.getFacade());
-				checkGitDir(project);
-				checkGitHooksAndConfig(project);
+		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
+        cache = new ProjectCache(hazelcastInstance.getMap("projectCache"));
+        IAtomicLong projectCacheLoaded = hazelcastInstance.getCPSubsystem().getAtomicLong("projectCacheLoaded");
+        clusterManager.init(projectCacheLoaded, new Callable<Long>() {
+
+			@Override
+			public Long call() throws Exception {
+				for (Project project: query()) {
+					String path = project.getPath();
+					if (!path.equals(project.calcPath()))
+						project.setPath(path);
+					cache.put(project.getId(), project.getFacade());
+				}
+				return 1L;
 			}
-		} finally {
-			cacheLock.writeLock().unlock();
+        	
+        });
+
+		logger.info("Checking projects...");
+		
+		storageServers = hazelcastInstance.getMap("projectStorageServers");
+		
+		storageServers.addEntryListener(new StorageEntryListener(), true);
+		UUID localServerUUID = clusterManager.getLocalServerUUID();
+		for (File file: storageManager.getProjectsDir().listFiles()) {
+			Long projectId = Long.valueOf(file.getName());
+			if (cache.get(projectId) != null) {
+				checkGitDir(projectId);
+				checkGitHooksAndConfig(projectId);
+				storageServers.put(projectId, new ProjectServer(localServerUUID, Lists.newArrayList()));
+			}
 		}
-		taskId = taskScheduler.schedule(this);
+		
+		hazelcastInstance.getCluster().addMembershipListener(new MembershipListener() {
+			
+			@Override
+			public void memberRemoved(MembershipEvent membershipEvent) {
+				if (clusterManager.isLeaderServer()) {
+					UUID serverUUID = membershipEvent.getMember().getUuid();
+					Set<Long> projectsToRemove = new HashSet<>();
+					for (Map.Entry<Long, ProjectServer> entry: storageServers.entrySet()) {
+						ProjectServer server = entry.getValue();
+						if (server.getBackups().contains(serverUUID)) {
+							List<UUID> backups = new ArrayList<>(server.getBackups());
+							backups.remove(serverUUID);
+							entry.setValue(new ProjectServer(server.getPrimary(), backups));
+						} else if (server.getPrimary().equals(serverUUID)) {
+							if (server.getBackups().isEmpty()) {
+								projectsToRemove.add(entry.getKey());
+							} else {
+								List<UUID> backups = new ArrayList<>(server.getBackups());
+								entry.setValue(new ProjectServer(backups.remove(0), backups));
+							}
+						}
+					}
+					
+					for (Long projectId: projectsToRemove)
+						storageServers.remove(projectId);
+				}
+			}
+			
+			@Override
+			public void memberAdded(MembershipEvent membershipEvent) {
+			}
+			
+		});
 	}
 
 	@Transactional
@@ -719,26 +771,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public void deleteBranch(Project project, String branchName) {
 		onDeleteBranch(project, branchName);
-
-		String refName = GitUtils.branch2ref(branchName);
-    	ObjectId commitId = project.getObjectId(refName, true);
-    	try {
-			project.git().branchDelete().setForce(true).setBranchNames(branchName).call();
-		} catch (Exception e) {
-			throw ExceptionUtils.unchecked(e);
-		}
-    	
-    	Long projectId = project.getId();
-    	sessionManager.runAsyncAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				Project project = load(projectId);
-				listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-			}
-    		
-    	});
-		
+    	gitService.deleteBranch(project, branchName);
 	}
 
 	@Transactional
@@ -759,25 +792,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public void deleteTag(Project project, String tagName) {
     	onDeleteTag(project, tagName);
-    	
-    	String refName = GitUtils.tag2ref(tagName);
-    	ObjectId commitId = project.getRevCommit(refName, true).getId();
-    	try {
-			project.git().tagDelete().setTags(tagName).call();
-		} catch (GitAPIException e) {
-			throw new RuntimeException(e);
-		}
-
-    	Long projectId = project.getId();
-    	sessionManager.runAsyncAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				Project project = load(projectId);
-				listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-			}
-    		
-    	});
+    	gitService.deleteTag(project, tagName);
 	}
 	
 	@Override
@@ -798,13 +813,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	@Override
 	public Collection<Project> getPermittedProjects(Permission permission) {
-		ProjectCache cacheClone;
-		cacheLock.readLock().lock();
-		try {
-			cacheClone = cache.clone();
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		ProjectCache cacheClone = cache.clone();
 		
 		Collection<Long> permittedProjectIds;
 		User user = SecurityUtils.getUser();
@@ -921,64 +930,19 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
-	public void execute() {
-		try {
-			transactionManager.run(new Runnable() {
-	
-				@Override
-				public void run() {
-					Date now = new Date();
-					for (Iterator<Map.Entry<Long, Date>> it = updateDates.entrySet().iterator(); it.hasNext();) {
-						Map.Entry<Long, Date> entry = it.next();
-						if (now.getTime() - entry.getValue().getTime() > 60000) {
-							Project project = get(entry.getKey());
-							if (project != null)
-								project.setUpdateDate(entry.getValue());
-							it.remove();
-						}
-					}
-				}
-				
-			});
-		} catch (Exception e) {
-			logger.error("Error flushing project update dates", e);
-		}
-	}
-	
-	@Override
-	public ScheduleBuilder<?> getScheduleBuilder() {
-		return SimpleScheduleBuilder.repeatMinutelyForever();
-	}
-	
-	@Override
 	public Collection<Long> getSubtreeIds(Long projectId) {
-		cacheLock.readLock().lock();
-		try {
-			return cache.getSubtreeIds(projectId);
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		return cache.getSubtreeIds(projectId);
 	}
 	
 	@Override
 	public Collection<Long> getIds() {
-		cacheLock.readLock().lock();
-		try {
-			return new HashSet<>(cache.keySet());
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		return new HashSet<>(cache.keySet());
 	}
 	
 	@Override
 	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> path, String pathPattern) {
-		cacheLock.readLock().lock();
-		try {
-			return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
-					cache.getMatchingIds(pathPattern), cache.keySet());		
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		return Criteria.forManyValues(builder, path.get(Project.PROP_ID), 
+				cache.getMatchingIds(pathPattern), cache.keySet());		
 	}
 	
 	@Transactional
@@ -1009,22 +973,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
 	@Override
 	public List<ProjectFacade> getChildren(Long projectId) {
-		cacheLock.readLock().lock();
-		try {
-			return cache.getChildren(projectId);
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		return cache.getChildren(projectId);
 	}
 
 	@Override
 	public ProjectCache cloneCache() {
-		cacheLock.readLock().lock();
-		try {
-			return cache.clone();
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		return cache.clone();
 	}
 
 	@Override
@@ -1039,5 +993,137 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 		return null;
 	}
-    
+	
+	@Override
+	public UUID getStorageServerUUID(Long projectId, boolean mustExist) {
+		ProjectServer server = storageServers.get(projectId);
+		if (server != null) 
+			return server.getPrimary();
+		else if (mustExist) 
+			throw new ExplicitException("Storage not found for project id: " + projectId);
+		else
+			return null;
+	}
+
+	@Override
+	public <T> T runOnProjectServer(Long projectId, ClusterTask<T> task) {
+		return clusterManager.runOnServer(getStorageServerUUID(projectId, true), task);
+	}
+
+	@Override
+	public <T> Future<T> submitToProjectServer(Long projectId, ClusterTask<T> task) {
+		return clusterManager.submitToServer(getStorageServerUUID(projectId, true), task);
+	}
+
+	@Override
+	public ProjectFacade findFacadeByPath(String path) {
+		return cache.find(path);
+	}
+
+	@Override
+	public File getLfsObjectsDir(Long projectId) {
+		return new File(storageManager.getProjectGitDir(projectId), "lfs/objects");
+	}
+
+	private class StorageEntryListener implements EntryAddedListener<Long, ProjectServer>, 
+			EntryRemovedListener<Long, ProjectServer>, EntryUpdatedListener<Long, ProjectServer>, Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void entryUpdated(EntryEvent<Long, ProjectServer> event) {
+			Long projectId = event.getKey();
+			UUID oldServerUUID = event.getOldValue().getPrimary();
+			Member oldServer = clusterManager.getServer(oldServerUUID, false);
+			if (oldServer != null) {
+				clusterManager.submitToServer(oldServer, new ClusterTask<Void>() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Void call() throws Exception {
+						sessionManager.run(new Runnable() {
+
+							@Override
+							public void run() {
+								jobManager.unschedule(load(projectId));
+							}
+							
+						});
+						return null;
+					}
+					
+				});
+			}
+			clusterManager.submitToServer(event.getValue().getPrimary(), new ClusterTask<Void>() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Void call() throws Exception {
+					sessionManager.run(new Runnable() {
+
+						@Override
+						public void run() {
+							jobManager.schedule(load(projectId));
+						}
+						
+					});
+					return null;
+				}
+				
+			});
+		}
+
+		@Override
+		public void entryRemoved(EntryEvent<Long, ProjectServer> event) {
+			Long projectId = event.getKey();			
+			UUID oldServerUUID = event.getOldValue().getPrimary();
+			Member oldServer = clusterManager.getServer(oldServerUUID, false);
+			if (oldServer != null) {
+				clusterManager.submitToServer(oldServer, new ClusterTask<Void>() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Void call() throws Exception {
+						sessionManager.run(new Runnable() {
+
+							@Override
+							public void run() {
+								jobManager.unschedule(load(projectId));
+							}
+							
+						});
+						return null;
+					}
+					
+				});
+			}
+		}
+
+		@Override
+		public void entryAdded(EntryEvent<Long, ProjectServer> event) {
+			Long projectId = event.getKey();
+			clusterManager.submitToServer(event.getValue().getPrimary(), new ClusterTask<Void>() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Void call() throws Exception {
+					sessionManager.run(new Runnable() {
+
+						@Override
+						public void run() {
+							jobManager.schedule(load(projectId));
+						}
+						
+					});
+					return null;
+				}
+				
+			});
+		}
+		
+	}
 }

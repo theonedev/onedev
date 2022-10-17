@@ -5,11 +5,13 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
@@ -21,12 +23,14 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.util.collections.ConcurrentHashSet;
 import org.eclipse.jetty.websocket.api.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import com.google.common.base.Splitter;
+import com.hazelcast.cluster.MembershipEvent;
+import com.hazelcast.cluster.MembershipListener;
+import com.hazelcast.core.HazelcastInstance;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.agent.AgentData;
@@ -34,14 +38,17 @@ import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.agent.job.LogRequest;
-import io.onedev.commons.loader.Listen;
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.event.agent.AgentConnected;
 import io.onedev.server.event.agent.AgentDisconnected;
+import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;
@@ -70,25 +77,31 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	
 	private final TransactionManager transactionManager;
 	
+	private final ClusterManager clusterManager;
+	
 	private final String agentVersion;
 	
 	private final Collection<String> agentLibs;
 	
 	private final Map<Long, Session> agentSessions = new ConcurrentHashMap<>();
 	
-	private final Set<String> osNames = new ConcurrentHashSet<>();
+	private volatile Map<Long, UUID> agentServers;
 	
-	private final Set<String> osArchs = new ConcurrentHashSet<>();
+	private volatile Map<String, String> osNames;
+	
+	private volatile Map<String, String> osArchs;
 	
 	@Inject
 	public DefaultAgentManager(Dao dao, AgentAttributeManager attributeManager, AgentTokenManager tokenManager, 
-			ListenerRegistry listenerRegistry, TransactionManager transactionManager) {
+			ListenerRegistry listenerRegistry, TransactionManager transactionManager, 
+			ClusterManager clusterManager) {
 		super(dao);
 		
 		this.attributeManager = attributeManager;
 		this.tokenManager = tokenManager;
 		this.listenerRegistry = listenerRegistry;
 		this.transactionManager = transactionManager;
+		this.clusterManager = clusterManager;
 	
 		Properties props = new Properties();
 		agentLibs = new HashSet<>();
@@ -108,11 +121,40 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		Query<Object[]> query = dao.getSession().createQuery(String.format("select %s, %s from Agent", 
-				Agent.PROP_OS_NAME, Agent.PROP_OS_ARCH));
-		for (Object[] row: query.list()) { 
-			osNames.add((String) row[0]);
-			osArchs.add((String) row[1]);
+		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance(); 
+		
+		agentServers = hazelcastInstance.getReplicatedMap("agentServers");
+		osNames = hazelcastInstance.getReplicatedMap("agentOsNames");
+		osArchs = hazelcastInstance.getReplicatedMap("agentOsArchs");
+		
+		hazelcastInstance.getCluster().addMembershipListener(new MembershipListener() {
+
+			@Override
+			public void memberAdded(MembershipEvent membershipEvent) {
+			}
+
+			@Override
+			public void memberRemoved(MembershipEvent membershipEvent) {
+				if (clusterManager.isLeaderServer()) {
+					Set<Long> agentsToRemove = new HashSet<>();
+					for (var entry: agentServers.entrySet()) {
+						if (entry.getValue().equals(membershipEvent.getMember().getUuid()))
+							agentsToRemove.add(entry.getKey());
+					}
+					for (Long agentId: agentsToRemove)
+						agentServers.remove(agentId);
+				}
+			}
+			
+		});
+		
+		if (clusterManager.isLeaderServer()) {
+			Query<Object[]> query = dao.getSession().createQuery(String.format("select %s, %s from Agent", 
+					Agent.PROP_OS_NAME, Agent.PROP_OS_ARCH));
+			for (Object[] row: query.list()) { 
+				osNames.put((String) row[0], (String) row[0]);
+				osArchs.put((String) row[1], (String) row[1]);
+			}
 		}
 	}
 	
@@ -129,6 +171,9 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Transactional
 	@Override
 	public Long agentConnected(AgentData data, Session session) {
+		if (!OneDev.getInstance().isReady()) 
+			throw new ExplicitException("Server not ready");
+		
 		for (String attributeName: data.getAttributes().keySet()) {
 			if (!AttributeNameValidator.PATTERN.matcher(attributeName).matches()) {
 				throw new ExplicitException("Attribute '" + attributeName + "' should start and end with "
@@ -179,6 +224,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				attributeManager.syncAttributes(agent, data.getAttributes());
 			}
 
+			agentServers.put(agent.getId(), clusterManager.getLocalServerUUID());
 			Session prevSession = agentSessions.put(agent.getId(), session);
 			if (prevSession != null) {
 				try {
@@ -196,6 +242,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Transactional
 	@Override
 	public void agentDisconnected(Long agentId) {
+		agentServers.remove(agentId);
 		agentSessions.remove(agentId);
 		Agent agent = load(agentId);
 		if (agent.isTemporal()) {
@@ -213,8 +260,8 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 
 			@Override
 			public void run() {
-				osNames.add(agent.getOsName());
-				osArchs.add(agent.getOsArch());
+				osNames.put(agent.getOsName(), agent.getOsName());
+				osArchs.put(agent.getOsArch(), agent.getOsArch());
 			}
     		
     	});
@@ -232,6 +279,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		removeReferences(agent);
 		dao.remove(agent);
 
+		agentServers.remove(agent.getId());
 		Session prevSession = agentSessions.remove(agent.getId());
 		if (prevSession != null) {
 			try {
@@ -251,14 +299,14 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	}
 
 	@Override
-	public Collection<Long> getOnlineAgentIds() {
-		return agentSessions.keySet();
+	public Map<Long, UUID> getAgentServers() {
+		return new HashMap<>(agentServers);
 	}
 
 	@Sessional
 	@Override
 	public List<String> getOsNames() {
-		List<String> osNames = new ArrayList<>(this.osNames);
+		List<String> osNames = new ArrayList<>(this.osNames.keySet());
 		Collections.sort(osNames);
 		return osNames;
 	}
@@ -266,7 +314,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Sessional
 	@Override
 	public List<String> getOsArchs() {
-		List<String> osArchs = new ArrayList<>(this.osArchs);
+		List<String> osArchs = new ArrayList<>(this.osArchs.keySet());
 		Collections.sort(osArchs);
 		return osArchs;
 	}
@@ -319,12 +367,19 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
+	@Override
+	public void restartLocal(Long agentId) {
+		Session session = agentSessions.get(agentId);
+		if (session != null)
+			new Message(MessageTypes.RESTART, new byte[0]).sendBy(session);
+	}
+	
 	@Sessional
 	@Override
 	public void restart(Agent agent) {
-		Session session = agentSessions.get(agent.getId());
-		if (session != null)
-			new Message(MessageTypes.RESTART, new byte[0]).sendBy(session);
+		UUID serverUUID = agentServers.get(agent.getId());
+		if (serverUUID != null) 
+			clusterManager.submitToServer(serverUUID, new RestartTask(agent.getId()));
 	}
 
 	@Transactional
@@ -334,6 +389,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 			removeReferences(agent);
 			dao.remove(agent);
 			
+			agentServers.remove(agent.getId());
 			Session prevSession = agentSessions.remove(agent.getId());
 			if (prevSession != null) {
 				try {
@@ -358,13 +414,6 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		}
 	}
 	
-	@Transactional
-	@Override
-	public void restart(Collection<Agent> agents) {
-		for (Agent agent: agents) 
-			restart(agent);
-	}
-
 	@Transactional
 	@Override
 	public void pause(Collection<Agent> agents) {
@@ -411,4 +460,21 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		return agentSessions.get(agentId);
 	}
 
+	private static class RestartTask implements ClusterTask<Void> {
+
+		private static final long serialVersionUID = 1L;
+		
+		private final Long agentId;
+		
+		public RestartTask(Long agentId) {
+			this.agentId = agentId;
+		}
+		
+		@Override
+		public Void call() throws Exception {
+			OneDev.getInstance(AgentManager.class).restartLocal(agentId);
+			return null;
+		}
+		
+	}
 }

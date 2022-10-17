@@ -24,7 +24,7 @@ import io.onedev.server.buildspec.job.action.condition.ActionConditionLexer;
 import io.onedev.server.buildspec.job.action.condition.ActionConditionParser;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
@@ -59,8 +59,8 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 							int operator = AntlrUtils.getLexerRule(ActionConditionLexer.ruleNames, operatorName);							
 							if (operator == ActionConditionLexer.OnBranch) {
 								List<String> branchNames = new ArrayList<>();
-								for (RefInfo refInfo: Project.get().getBranchRefInfos())
-									branchNames.add(GitUtils.ref2branch(refInfo.getRef().getName()));
+								for (RefFacade ref: Project.get().getBranchRefs())
+									branchNames.add(GitUtils.ref2branch(ref.getName()));
 								return SuggestionUtils.suggest(branchNames, matchWith);
 							} else if (operator == ActionConditionLexer.Is) {
 								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);

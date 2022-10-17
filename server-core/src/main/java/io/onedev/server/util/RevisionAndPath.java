@@ -45,7 +45,7 @@ public class RevisionAndPath implements Serializable {
 			}
 		}
 		if (revisionBuilder.length() != 0) {
-			throw new ObjectNotFoundException("Revision not found: " + revisionBuilder.toString());
+			throw new ObjectNotFoundException("Revision/path not found: " + revisionBuilder.toString());
 		} else {
 			revision = project.getDefaultBranch();
 			return new RevisionAndPath(revision, path);

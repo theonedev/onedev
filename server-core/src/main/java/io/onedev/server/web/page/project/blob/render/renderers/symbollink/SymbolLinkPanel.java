@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.blob.render.renderers.symbollink;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -9,14 +8,12 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 import io.onedev.commons.utils.PathUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -41,19 +38,13 @@ public class SymbolLinkPanel extends BlobViewPanel {
 
 		BlobIdent targetBlobIdent;
 		if (targetPath != null) {
-			Repository repository = context.getProject().getRepository();				
-			try (RevWalk revWalk = new RevWalk(repository)) {
-				ObjectId commitId = context.getProject().getObjectId(context.getBlobIdent().revision, true);
-				RevTree revTree = revWalk.parseCommit(commitId).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(repository, targetPath, revTree);
-				if (treeWalk != null) {
-					targetBlobIdent = new BlobIdent(context.getBlobIdent().revision, targetPath, treeWalk.getRawMode(0));
-				} else {
-					targetBlobIdent = null;
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			GitService gitService = OneDev.getInstance(GitService.class);
+			ObjectId commitId = context.getProject().getObjectId(context.getBlobIdent().revision, true);
+			int mode = gitService.getMode(context.getProject(), commitId, targetPath);
+			if (mode != 0) 
+				targetBlobIdent = new BlobIdent(context.getBlobIdent().revision, targetPath, mode);
+			else
+				targetBlobIdent = null;
 		} else {
 			targetBlobIdent = null;
 		}

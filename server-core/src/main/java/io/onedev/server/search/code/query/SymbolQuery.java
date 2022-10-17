@@ -29,6 +29,8 @@ import com.google.common.base.Splitter;
 
 public class SymbolQuery extends BlobQuery {
 
+	private static final long serialVersionUID = 1L;
+
 	private final String term;
 
 	private final String excludeTerm;

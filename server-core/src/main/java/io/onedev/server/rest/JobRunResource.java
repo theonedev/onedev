@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -21,14 +22,13 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -54,13 +54,17 @@ public class JobRunResource {
 	
 	private final PullRequestManager pullRequestManager;
 	
+	private final GitService gitService;
+	
 	@Inject
 	public JobRunResource(JobManager jobManager, BuildManager buildManager, 
-			ProjectManager projectManager, PullRequestManager pullRequestManager) {
+			ProjectManager projectManager, PullRequestManager pullRequestManager, 
+			GitService gitService) {
 		this.jobManager = jobManager;
 		this.buildManager = buildManager;
 		this.projectManager = projectManager;
 		this.pullRequestManager = pullRequestManager;
+		this.gitService = gitService;
 	}
 
 	@Api(order=100)
@@ -84,7 +88,7 @@ public class JobRunResource {
 			
 			commitId = ObjectId.fromString(jobRunOnCommit.getCommitHash());
 			
-			if (!GitUtils.isMergedInto(project.getRepository(), null, commitId, refCommit)) 
+			if (!gitService.isMergedInto(project, null, commitId, refCommit)) 
 				throw new ValidationException("Specified commit is not reachable from specified ref");
 			
 			reason = new SubmitReason() {

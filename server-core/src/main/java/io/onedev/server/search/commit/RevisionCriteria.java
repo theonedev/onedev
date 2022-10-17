@@ -1,17 +1,16 @@
 package io.onedev.server.search.commit;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.Revision.Scope;
 
@@ -27,24 +26,24 @@ public class RevisionCriteria extends CommitCriteria {
 	}
 	
 	@Override
-	public void fill(Project project, RevListCommand command) {
+	public void fill(Project project, RevListOptions options) {
 		boolean ranged = false;
 		for (Revision revision: revisions) {
 			if (revision.getScope() == Scope.SINCE) {
-				command.revisions().add("^" + revision.getValue());
+				options.revisions().add("^" + revision.getValue());
 				ranged = true;
 			} else if (revision.getScope() == Scope.UNTIL) {
-				command.revisions().add(revision.getValue());
+				options.revisions().add(revision.getValue());
 				ranged = true;
 			} else if (project.getBranchRef(revision.getValue()) != null) {
 				ranged = true;
-				command.revisions().add(revision.getValue());
+				options.revisions().add(revision.getValue());
 			} else {
-				command.revisions().add(revision.getValue());
+				options.revisions().add(revision.getValue());
 			}
 		}
-		if (command.revisions().size() == 1 && !ranged)
-			command.count(1);
+		if (options.revisions().size() == 1 && !ranged)
+			options.count(1);
 	}
 
 	@Override
@@ -52,13 +51,9 @@ public class RevisionCriteria extends CommitCriteria {
 		List<Revision> untilRevisions = revisions.stream().filter(it->it.getScope() != Scope.SINCE).collect(Collectors.toList());
 		if (!untilRevisions.isEmpty()) {
 			for (Revision revision: untilRevisions) {
-				try {
-					Ref ref = event.getProject().getRepository().findRef(revision.getValue());
-					if (ref != null && ref.getName().equals(event.getRefName())) 
-						return true;
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				RefFacade ref = event.getProject().getRef(revision.getValue());
+				if (ref != null && ref.getName().equals(event.getRefName())) 
+					return true;
 			}
 			return false;
 		} else {

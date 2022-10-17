@@ -11,11 +11,11 @@ import javax.inject.Singleton;
 
 import org.bouncycastle.openpgp.PGPPublicKey;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.signature.SignatureVerificationKey;
 import io.onedev.server.model.EmailAddress;

@@ -38,7 +38,7 @@ public class PublishPMDReportStep extends PublishProblemReportStep {
 	
 	private static final int TAB_WIDTH = 8;
 	
-	@Editable(order=100, description="Specify PMD result xml file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
+	@Editable(order=100, description="Specify PMD result xml file under <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

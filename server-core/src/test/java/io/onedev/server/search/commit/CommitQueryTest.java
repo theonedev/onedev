@@ -3,17 +3,29 @@ package io.onedev.server.search.commit;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.util.Collection;
+
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import static org.mockito.Mockito.*;
+
+import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.AbstractGitTest;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-
 
 public class CommitQueryTest extends AbstractGitTest {
 
@@ -25,24 +37,61 @@ public class CommitQueryTest extends AbstractGitTest {
 		addFileAndCommit("dev/file2", "", "dev2");
 		git.checkout().setName("master").call();
 		
-		CommitQueryTest.this.user = new PersonIdent("bar", "bar@example.com");
+		user = new PersonIdent("bar", "bar@example.com");
 		
 		addFileAndCommit("master/file1", "", "master1");
 		addFileAndCommit("master/file2", "", "master2");
+		
+		GitService gitService = mock(GitService.class);
+		when(OneDev.getInstance(GitService.class)).thenReturn(gitService);
+		when(gitService.getChangedFiles(any(), any(), any(), any())).thenAnswer(new Answer<Collection<String>>() {
+
+			@Override
+			public Collection<String> answer(InvocationOnMock invocation) throws Throwable {
+				return GitUtils.getChangedFiles(git.getRepository(), invocation.getArgument(1), invocation.getArgument(2));
+			}
+			
+		});
 		
 		Project project = new Project() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Repository getRepository() {
-				return git.getRepository();
+			public String getDefaultBranch() {
+				return "master";
 			}
 
+			@Override
+			public RefFacade getRef(String revision) {
+				try (RevWalk revWalk = new RevWalk(git.getRepository())) {
+					Ref ref = git.getRepository().getRefDatabase().findRef(revision);
+					return new RefFacade(revWalk, ref);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public RevCommit getRevCommit(ObjectId revId, boolean mustExist) {
+				try (RevWalk revWalk = new RevWalk(git.getRepository())) {
+					return GitUtils.parseCommit(revWalk, revId);
+				}
+			}
+			
 		};
 		ObjectId newCommitId = git.getRepository().resolve("master");
 		ObjectId oldCommitId = git.getRepository().resolve("master~1");
-		RefUpdated event = new RefUpdated(project, "refs/heads/master", oldCommitId, newCommitId);
+		RefUpdated event = new RefUpdated(project, "refs/heads/master", oldCommitId, newCommitId) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Project getProject() {
+				return project;
+			}
+			
+		};
 		
 		User user = new User();
 		EmailAddress emailAddress = new EmailAddress();

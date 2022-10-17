@@ -76,7 +76,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 						case CommitQueryParser.COMMITTER:
 							Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
 							CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-							List<NameAndEmail> users = commitInfoManager.getUsers(project);
+							List<NameAndEmail> users = commitInfoManager.getUsers(project.getId());
 							for (NameAndEmail user: users) {
 								String content;
 								if (StringUtils.isNotBlank(user.getEmailAddress()))

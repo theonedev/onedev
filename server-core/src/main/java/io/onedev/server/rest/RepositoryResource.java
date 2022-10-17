@@ -1,6 +1,5 @@
 package io.onedev.server.rest;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,10 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -26,40 +27,28 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import javax.validation.constraints.NotEmpty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.FileCreateOrUpdateRequest;
@@ -78,22 +67,13 @@ public class RepositoryResource {
 	private static final int MAX_COMMITS = 10000;
 	
 	private final ProjectManager projectManager;
-	
-	private final SettingManager settingManager;
-	
-    private final ListenerRegistry listenerRegistry;
-    
-    private final SessionManager sessionManager;
-    
-    private static final Logger logger = LoggerFactory.getLogger(RepositoryResource.class);
 
+	private final GitService gitService;
+	
 	@Inject
-	public RepositoryResource(ProjectManager projectManager, SessionManager sessionManager, 
-			ListenerRegistry listenerRegistry, SettingManager settingManager) {
+	public RepositoryResource(ProjectManager projectManager, GitService gitService) {
 		this.projectManager = projectManager;
-		this.settingManager = settingManager;
-		this.sessionManager = sessionManager;
-		this.listenerRegistry = listenerRegistry;
+		this.gitService = gitService;
 	}
 
 	@Api(order=10, description="List all branches")
@@ -101,18 +81,12 @@ public class RepositoryResource {
 	@GET
 	public List<String> getBranches(@PathParam("projectId") Long projectId) {
 		Project project = projectManager.load(projectId);
-		if (!SecurityUtils.canReadCode(project)) {
+		if (!SecurityUtils.canReadCode(project)) 
 			throw new UnauthorizedException();
-		}
 
-		List<String> branchNames = new ArrayList<>();
-		try {
-			for (Ref ref: project.getRepository().getRefDatabase().getRefsByPrefix(Constants.R_HEADS))
-				branchNames.add(GitUtils.ref2branch(ref.getName()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		return branchNames;
+		return project.getBranchRefs().stream()
+				.map(it->GitUtils.ref2branch(it.getName()))
+				.collect(Collectors.toList());
 	}
 	
 	@Api(order=15, description="Get default branch. Return status code 204 if no default branch "
@@ -140,7 +114,7 @@ public class RepositoryResource {
 			throw new UnauthorizedException();
 		}
 
-		Ref ref = project.getBranchRef(branchName);
+		RefFacade ref = project.getBranchRef(branchName);
 		if (ref == null)
 			throw new ObjectNotFoundException("Branch not found: " + branchName);
 
@@ -172,7 +146,7 @@ public class RepositoryResource {
 					+ "requires valid signature on head commit");
 		}
 		
-		project.createBranch(request.getBranchName(), request.getRevision());
+		gitService.createBranch(project, request.getBranchName(), request.getRevision());
 
 		return Response.ok().build();
 	}
@@ -201,14 +175,9 @@ public class RepositoryResource {
 			throw new UnauthorizedException();
 		}
 
-		List<String> tagNames = new ArrayList<>();
-		try {
-			for (Ref ref: project.getRepository().getRefDatabase().getRefsByPrefix(Constants.R_TAGS))
-				tagNames.add(GitUtils.ref2tag(ref.getName()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		return tagNames;
+		return project.getTagRefs().stream()
+				.map(it->GitUtils.ref2tag(it.getName()))
+				.collect(Collectors.toList());
 	}
 	
 	@Api(order=60, description="Get specified tag")
@@ -223,7 +192,7 @@ public class RepositoryResource {
 			throw new UnauthorizedException();
 		}
 
-		Ref ref = project.getTagRef(tagName);
+		RefFacade ref = project.getTagRef(tagName);
 		if (ref == null)
 			throw new ObjectNotFoundException("Tag not found: " + tagName);
 
@@ -247,16 +216,9 @@ public class RepositoryResource {
 		if (project.getTagRef(request.getTagName()) != null) {
 			throw new InvalidParamException("Tag '" + request.getTagName() + "' already exists");
 		} else {
-			PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
-			
 			User user = SecurityUtils.getUser();
-			if (project.isTagSignatureRequired(user, request.getTagName()) && signingKey == null) {
-				throw new ExplicitException("Tag signature required per tag protection rule, "
-						+ "please generate system GPG signing key first");
-			}
-			
-			project.createTag(request.getTagName(), request.getRevision(), 
-					SecurityUtils.getUser().asPerson(), request.getTagMessage(), signingKey);
+			gitService.createTag(project, request.getTagName(), request.getRevision(), user.asPerson(), 
+					request.getTagMessage(), project.isTagSignatureRequired(user, request.getTagName()));
 		}
 
 		return Response.ok().build();
@@ -300,13 +262,12 @@ public class RepositoryResource {
 			throw new InvalidParamException("Error parsing query", e);
 		}
     	
-		RevListCommand command = new RevListCommand(project.getGitDir());
-		command.ignoreCase(true);
+		RevListOptions options = new RevListOptions();
+		options.ignoreCase(true);
+		options.count(count);
+		parsedQuery.fill(project, options);
 		
-		command.count(count);
-		parsedQuery.fill(project, command);
-		
-		return command.call();
+		return gitService.revList(project, options);
     }
 	
 	@Api(order=86, description="Get specified commit")
@@ -348,30 +309,16 @@ public class RepositoryResource {
 			throw new InvalidParamException("Specified path is not a directory: " + blobIdent.path);
 		}
 
-		ObjectId commitId = project.getRevCommit(blobIdent.revision, true);
+		ObjectId revId = project.getObjectId(blobIdent.revision, true);
 		
 		List<DirectoryChild> children = new ArrayList<>();
-		
-		Repository repository = project.getRepository();			
-		try (RevWalk revWalk = new RevWalk(repository)) {
-			RevTree revTree = revWalk.parseCommit(commitId).getTree();
-			TreeWalk treeWalk;
-			if (blobIdent.path != null) {
-				treeWalk = Preconditions.checkNotNull(TreeWalk.forPath(repository, blobIdent.path, revTree));
-				treeWalk.enterSubtree();
-			} else {
-				treeWalk = new TreeWalk(repository);
-				treeWalk.addTree(revTree);
-			}
-			while (treeWalk.next()) {
-				DirectoryChild child = new DirectoryChild();
-				child.path = treeWalk.getPathString();
-				child.isFile = (FileMode.TYPE_MASK & treeWalk.getRawMode(0)) == FileMode.TYPE_FILE;
-				children.add(child);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} 
+		for (BlobIdent childIdent: gitService.getChildren(
+				project, revId, blobIdent.path, BlobIdentFilter.ALL, false)) {
+			DirectoryChild child = new DirectoryChild();
+			child.path = childIdent.path;
+			child.isFile = (FileMode.TYPE_MASK & childIdent.mode) == FileMode.TYPE_FILE;
+			children.add(child);
+		}
 		
 		return children;
 	}
@@ -421,7 +368,7 @@ public class RepositoryResource {
 		ObjectId oldCommitId;
 		if (project.getDefaultBranch() != null) {
 			revisionAndPath = RevisionAndPath.parse(project, revisionAndPathSegments);
-			Ref ref = project.getBranchRef(revisionAndPath.getRevision());
+			RefFacade ref = project.getBranchRef(revisionAndPath.getRevision());
 			if (ref == null) 
 				throw new InvalidParamException("Not a branch: " + revisionAndPath.getRevision());
 			refName = ref.getName();
@@ -441,62 +388,29 @@ public class RepositoryResource {
 		if (!SecurityUtils.canModify(project, revisionAndPath.getRevision(), revisionAndPath.getPath())) 
 			throw new UnauthorizedException();
 
-		Repository repository = project.getRepository();
-		
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
 		Set<String> oldPaths = new HashSet<>();
-		if (!oldCommitId.equals(ObjectId.zeroId())) {
-			RevCommit revCommit = project.getRevCommit(oldCommitId, true);
-			try (TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), revisionAndPath.getPath(), revCommit.getTree())) {
-				if (treeWalk != null) {
-					oldPaths.add(revisionAndPath.getPath());
-				}
-			} catch (IOException e) {
-				// ignore
-			}
+		if (!oldCommitId.equals(ObjectId.zeroId()) 
+				&& gitService.getMode(project, oldCommitId, revisionAndPath.getPath()) != 0) {
+			oldPaths.add(revisionAndPath.getPath());
 		}
 		
 		if (request instanceof FileCreateOrUpdateRequest) {
-			newBlobs.put(revisionAndPath.getPath(), new BlobContent.Immutable(
+			newBlobs.put(revisionAndPath.getPath(), new BlobContent(
 					Base64.decodeBase64(((FileCreateOrUpdateRequest)request).getBase64Content()),
-					FileMode.REGULAR_FILE
+					FileMode.REGULAR_FILE.getBits()
 				));
 		}
 
 		User user = SecurityUtils.getUser();
-		PGPSecretKeyRing signingKey = settingManager.getGpgSetting().getSigningKey();
 		
-		if (project.isCommitSignatureRequired(user, revisionAndPath.getRevision()) && signingKey == null) {
-			throw new ExplicitException("Signature required per branch protection rule, "
-					+ "please generate system GPG signing key first");
-		}
-		
-		ObjectId newCommitId = new BlobEdits(oldPaths, newBlobs).commit(
-				repository, refName, oldCommitId, oldCommitId,
-				user.asPerson(), request.getCommitMessage(), signingKey);
+		ObjectId newCommitId = gitService.commit(project, new BlobEdits(oldPaths, newBlobs), 
+				refName, oldCommitId, oldCommitId, user.asPerson(), request.getCommitMessage(), 
+				project.isCommitSignatureRequired(user, revisionAndPath.getRevision()));
 
 		if (project.getDefaultBranch() == null)
 			project.setDefaultBranch(revisionAndPath.getRevision());
-		
-        sessionManager.runAsync(new Runnable() {
-
-			@Override
-			public void run() {
-		        try {
-		            Project project = projectManager.load(projectId);
-
-		        	if (!newCommitId.equals(ObjectId.zeroId()))
-		        		project.cacheObjectId(refName, newCommitId);
-		        	else 
-		        		project.cacheObjectId(refName, null);
-		        	listenerRegistry.post(new RefUpdated(project, refName, oldCommitId, newCommitId));
-		        } catch (Exception e) {
-		        	logger.error("Error posting ref updated event", e);
-				}
-			}
-        	
-        });
 		
 		FileEditResponse response = new FileEditResponse();
 		response.commitHash = newCommitId.name();

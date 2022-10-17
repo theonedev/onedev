@@ -17,14 +17,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.buildspec.job.log.Message;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.job.log.LogManager;
+import io.onedev.server.job.log.LogSnippet;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.tasklog.JobLogManager;
-import io.onedev.server.tasklog.LogSnippet;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -103,8 +103,8 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		setOutputMarkupId(true);
 	}
 
-	private JobLogManager getLogManager() {
-		return OneDev.getInstance(JobLogManager.class);
+	private LogManager getLogManager() {
+		return OneDev.getInstance(LogManager.class);
 	}
 	
 	private String asJSON(List<JobLogEntryEx> entries) {

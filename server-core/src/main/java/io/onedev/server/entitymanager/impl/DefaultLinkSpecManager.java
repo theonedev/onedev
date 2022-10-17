@@ -8,9 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.persistence.TransactionManager;

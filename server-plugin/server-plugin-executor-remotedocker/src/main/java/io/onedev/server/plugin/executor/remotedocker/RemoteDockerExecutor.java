@@ -21,13 +21,16 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
-import io.onedev.server.buildspec.job.JobContext;
-import io.onedev.server.job.resource.AgentAwareRunnable;
-import io.onedev.server.job.resource.ResourceManager;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.job.AgentInfo;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.ResourceAllocator;
+import io.onedev.server.job.ResourceRunnable;
+import io.onedev.server.job.log.LogManager;
+import io.onedev.server.job.log.LogTask;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.terminal.RemoteSession;
 import io.onedev.server.terminal.ShellSession;
 import io.onedev.server.util.CollectionUtils;
@@ -70,87 +73,92 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	}
 	
 	@Override
-	public void execute(JobContext jobContext) {
-		AgentQuery parsedQeury = AgentQuery.parse(agentQuery, true);
-		TaskLogger jobLogger = jobContext.getLogger();
-		OneDev.getInstance(ResourceManager.class).run(new AgentAwareRunnable() {
-
-			@Override
-			public void runOn(Long agentId, Session agentSession, AgentData agentData) {
-				jobLogger.log(String.format("Executing job (executor: %s, agent: %s)...", getName(), agentData.getName()));
-				jobContext.notifyJobRunning(agentId);
-
-				List<Map<String, String>> registryLogins = new ArrayList<>();
-				for (RegistryLogin login: getRegistryLogins()) {
-					registryLogins.add(CollectionUtils.newHashMap(
-							"url", login.getRegistryUrl(), 
-							"userName", login.getUserName(), 
-							"password", login.getPassword()));
-				}
-				
-				List<Map<String, Serializable>> services = new ArrayList<>();
-				for (Service service: jobContext.getServices())
-					services.add(service.toMap());
-
-				String jobToken = jobContext.getJobToken();
-				List<String> trustCertContent = getTrustCertContent();
-				DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(), 
-						jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(), 
-						jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(), 
-						services, registryLogins, mountDockerSock, trustCertContent, getRunOptions());
-				
-				RemoteDockerExecutor.this.agentSession = agentSession;
-				try {
-					WebsocketUtils.call(agentSession, jobData, 0);
-				} catch (InterruptedException | TimeoutException e) {
-					new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
-				}
-				
-			}
-			
-		}, new HashMap<>(), parsedQeury, jobContext.getResourceRequirements(), jobLogger);
-		
+	public AgentQuery getAgentRequirement() {
+		return AgentQuery.parse(agentQuery, true);
 	}
+	
+	@Override
+	public void execute(JobContext jobContext, TaskLogger jobLogger, AgentInfo agentInfo) {
+		jobLogger.log(String.format("Executing job (executor: %s, agent: %s)...", 
+				getName(), agentInfo.getData().getName()));
 
+		List<Map<String, String>> registryLogins = new ArrayList<>();
+		for (RegistryLogin login: getRegistryLogins()) {
+			registryLogins.add(CollectionUtils.newHashMap(
+					"url", login.getRegistryUrl(), 
+					"userName", login.getUserName(), 
+					"password", login.getPassword()));
+		}
+		
+		List<Map<String, Serializable>> services = new ArrayList<>();
+		for (Service service: jobContext.getServices())
+			services.add(service.toMap());
+
+		String jobToken = jobContext.getJobToken();
+		List<String> trustCertContent = getTrustCertContent();
+		DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(), 
+				jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(), 
+				jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(), 
+				services, registryLogins, mountDockerSock, trustCertContent, getRunOptions());
+		
+		agentSession = agentInfo.getSession();
+		try {
+			WebsocketUtils.call(agentSession, jobData, 0);
+		} catch (InterruptedException | TimeoutException e) {
+			new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+		}
+	}
+	
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
-		JobLogManager logManager = OneDev.getInstance(JobLogManager.class);
 		String jobToken = UUID.randomUUID().toString();
-		logManager.registerLogger(jobToken, jobLogger);
+		UUID localServerUUID = OneDev.getInstance(ClusterManager.class).getLocalServerUUID();
+		LogManager logManager = OneDev.getInstance(LogManager.class);
+		logManager.addJobLogger(jobToken, jobLogger);
 		try {
-			AgentQuery parsedQeury = AgentQuery.parse(agentQuery, true);
-			
-			OneDev.getInstance(ResourceManager.class).run(new AgentAwareRunnable() {
-	
-				@Override
-				public void runOn(Long agentId, Session agentSession, AgentData agentData) {
-					jobLogger.log(String.format("Testing on agent '%s'...", agentData.getName()));
-	
-					List<Map<String, String>> registryLogins = new ArrayList<>();
-					for (RegistryLogin login: getRegistryLogins()) {
-						registryLogins.add(CollectionUtils.newHashMap(
-								"url", login.getRegistryUrl(), 
-								"userName", login.getUserName(), 
-								"password", login.getPassword()));
-					}
-					
-					TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken, 
-							testData.getDockerImage(), registryLogins, getRunOptions());
-					
-					try {
-						WebsocketUtils.call(agentSession, jobData, 0);
-					} catch (InterruptedException | TimeoutException e) {
-						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
-					} 
-					
-				}
-				
-			}, new HashMap<>(), parsedQeury, new HashMap<>(), jobLogger);
+			OneDev.getInstance(ResourceAllocator.class).run(
+					new TestRunnable(jobToken, this, testData, localServerUUID), 
+					getAgentRequirement(), new HashMap<>());
 		} finally {
-			logManager.deregisterLogger(jobToken);
+			logManager.removeJobLogger(jobToken);
 		}
 	}
 
+	private void testLocal(String jobToken, AgentInfo agentInfo, 
+			TestData testData, UUID dispatcherMemberUUID) {
+		TaskLogger jobLogger = new TaskLogger() {
+
+			@Override
+			public void log(String message, String sessionId) {
+				OneDev.getInstance(ClusterManager.class).runOnServer(
+						dispatcherMemberUUID, new LogTask(jobToken, message, sessionId));
+			}
+			
+		};
+		
+		AgentData agentData = agentInfo.getData();
+		Session agentSession = agentInfo.getSession();
+		
+		jobLogger.log(String.format("Testing on agent '%s'...", agentData.getName()));
+
+		List<Map<String, String>> registryLogins = new ArrayList<>();
+		for (RegistryLogin login: getRegistryLogins()) {
+			registryLogins.add(CollectionUtils.newHashMap(
+					"url", login.getRegistryUrl(), 
+					"userName", login.getUserName(), 
+					"password", login.getPassword()));
+		}
+		
+		TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken, 
+				testData.getDockerImage(), registryLogins, getRunOptions());
+		
+		try {
+			WebsocketUtils.call(agentSession, jobData, 0);
+		} catch (InterruptedException | TimeoutException e) {
+			new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+		} 
+	}
+	
 	@Override
 	public void resume(JobContext jobContext) {
 		if (agentSession != null ) 
@@ -170,4 +178,31 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		return super.getDockerExecutable();
 	}
 
+	private static class TestRunnable implements ResourceRunnable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final String jobToken;
+		
+		private final RemoteDockerExecutor jobExecutor;
+		
+		private final TestData testData;
+		
+		private final UUID dispatcherServerUUID;
+		
+		public TestRunnable(String jobToken, RemoteDockerExecutor jobExecutor, 
+				TestData testData, UUID dispatcherServerUUID) {
+			this.jobToken = jobToken;
+			this.jobExecutor = jobExecutor;
+			this.testData = testData;
+			this.dispatcherServerUUID = dispatcherServerUUID;
+		}
+		
+		@Override
+		public void run(AgentInfo agentInfo) {
+			jobExecutor.testLocal(jobToken, agentInfo, testData, dispatcherServerUUID);
+		}
+		
+	}
+	
 }

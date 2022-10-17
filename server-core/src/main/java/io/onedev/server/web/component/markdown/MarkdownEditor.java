@@ -52,6 +52,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;

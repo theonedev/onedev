@@ -45,6 +45,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -298,7 +299,7 @@ public class ImportServer implements Serializable, Validatable {
 				});
 				try {
 					if (dryRun) { 
-						new LsRemoteCommand().remote(builder.build().toString()).refs("HEAD").quiet(true).call();
+						new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 					} else {
 						projectManager.clone(project, builder.build().toString());
 						projectIds.add(project.getId());
@@ -400,7 +401,9 @@ public class ImportServer implements Serializable, Validatable {
 								errorAttachments.add(attachmentUrl);
 							} else {
 								try (InputStream is = response.readEntity(InputStream.class)) {
-									String oneDevAttachmentName = oneDevProject.saveAttachment(issueUUID, attachmentName, is);
+									AttachmentManager attachmentManager = OneDev.getInstance(AttachmentManager.class);
+									String oneDevAttachmentName = attachmentManager.saveAttachment(
+											oneDevProject.getId(), issueUUID, attachmentName, is);
 									String oneDevAttachmentUrl = oneDevProject.getAttachmentUrlPath(issueUUID, oneDevAttachmentName);
 							    	matcher.appendReplacement(buffer, 
 							    			Matcher.quoteReplacement("[" + matcher.group(1) + "](" + oneDevAttachmentUrl + ")"));  

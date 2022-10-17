@@ -3,8 +3,8 @@ package io.onedev.server.web.websocket;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.model.CodeComment;
 
 @Singleton

@@ -22,7 +22,6 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.HomePage;
-import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.util.editablebean.NewUserBean;
 
@@ -83,7 +82,7 @@ public class SignUpPage extends SimplePage {
 					
 					Session.get().success("Account sign up successfully");
 					SecurityUtils.getSubject().runAs(user.getPrincipals());
-					setResponsePage(MyAvatarPage.class);
+					setResponsePage(HomePage.class);
 				}
 			}
 			

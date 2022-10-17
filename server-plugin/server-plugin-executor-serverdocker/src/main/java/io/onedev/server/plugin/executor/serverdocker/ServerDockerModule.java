@@ -10,7 +10,6 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.OneDev;
@@ -47,9 +46,7 @@ public class ServerDockerModule extends AbstractPluginModule {
 			contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
 
 				@Override
-				public JobExecutor discover(TaskLogger jobLogger) {
-					jobLogger.log("Checking if there is docker facility...");
-					
+				public JobExecutor discover() {
 					Commandline docker;
 					if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/docker").exists())
 						docker = new Commandline("/usr/local/bin/docker");

@@ -1,23 +1,21 @@
 package io.onedev.server.git.command;
 
 import java.io.File;
-import java.util.Map;
-
-import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class FetchCommand extends GitCommand<Void> {
+public class FetchCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(FetchCommand.class);
 	
-    private String from;
+	private final File workingDir;
+	
+    private final String from;
     
     private boolean force;
     
@@ -25,13 +23,9 @@ public class FetchCommand extends GitCommand<Void> {
     
     private String[] refspec = new String[0];
     
-	public FetchCommand(File gitDir, @Nullable Map<String, String> environments) {
-		super(gitDir, environments);
-	}
-
-	public FetchCommand from(String from) {
-	    this.from = from;
-	    return this;
+	public FetchCommand(File workingDir, String from) {
+		this.workingDir = workingDir;
+		this.from = from;
 	}
 	
 	public FetchCommand refspec(String... refspec) {
@@ -49,21 +43,21 @@ public class FetchCommand extends GitCommand<Void> {
 		return this;
 	}
 	
-	@Override
-	public Void call() {
-	    Preconditions.checkNotNull(from, "from param has to be specified.");
-	    
-		Commandline cmd = cmd().addArgs("fetch");
-		cmd.addArgs(from);
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
+	
+	public void run() {
+		Commandline git = newGit().workingDir(workingDir).addArgs("fetch", from);
 		if (force)
-			cmd.addArgs("--force");
+			git.addArgs("--force");
 		if (quiet)
-			cmd.addArgs("--quiet");
+			git.addArgs("--quiet");
 		
 		for (String each: refspec)
-			cmd.addArgs(each);
+			git.addArgs(each);
 		
-		cmd.execute(new LineConsumer() {
+		git.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -78,8 +72,6 @@ public class FetchCommand extends GitCommand<Void> {
 			}
 			
 		}).checkReturnCode();
-		
-		return null;
 	}
 
 }

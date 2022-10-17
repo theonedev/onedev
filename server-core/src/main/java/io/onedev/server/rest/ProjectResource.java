@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -25,7 +26,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
-import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.MilestoneManager;
@@ -80,7 +80,7 @@ public class ProjectResource {
 		this.commitInfoManager = commitInfoManager;
 		this.urlManager = urlManager;
 	}
-
+	
 	@Api(order=100)
 	@Path("/{projectId}")
     @GET
@@ -240,10 +240,10 @@ public class ProjectResource {
     	Day sinceDay = new Day(LocalDate.parse(since));
     	Day untilDay = new Day(LocalDate.parse(until));
     	
-    	return commitInfoManager.getTopContributors(project, count, type, sinceDay.getValue(), untilDay.getValue());
+    	return commitInfoManager.getTopContributors(project.getId(), 
+    			count, type, sinceDay.getValue(), untilDay.getValue());
     }
 	
-
 	@SuppressWarnings("unused")
 	private static String getDateExample() {
 		return DateUtils.formatISO8601Date(new Date());

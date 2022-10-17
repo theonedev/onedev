@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
@@ -59,22 +55,23 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestUpdateManager;
-import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.CommitIndexed;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.git.service.DiffEntryFacade;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
@@ -84,9 +81,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.search.code.CodeIndexManager;
-import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.PathComparator;
@@ -116,7 +111,6 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.DiffPlanarRange;
-import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.RevisionDiff;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -149,13 +143,13 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 	private final IModel<String> currentFileModel;
 	
-	private final IModel<List<DiffEntry>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntry>>() {
+	private final IModel<List<DiffEntryFacade>> diffEntriesModel = new LoadableDetachableModel<List<DiffEntryFacade>>() {
 
 		@Override
-		protected List<DiffEntry> load() {
+		protected List<DiffEntryFacade> load() {
 			AnyObjectId oldRevId = getProject().getObjectId(oldRev, true);
 			AnyObjectId newRevId = getProject().getObjectId(newRev, true);
-			return GitUtils.diff(getProject().getRepository(), oldRevId, newRevId);
+			return getGitService().diff(getProject(), oldRevId, newRevId);
 		}
 		
 	};
@@ -164,10 +158,10 @@ public abstract class RevisionDiffPanel extends Panel {
 
 		@Override
 		protected List<BlobChange> load() {
-			List<DiffEntry> diffEntries = diffEntriesModel.getObject();
+			List<DiffEntryFacade> diffEntries = diffEntriesModel.getObject();
 			
 			List<BlobChange> changes = new ArrayList<>();
-			for (DiffEntry entry: diffEntries) { 
+			for (DiffEntryFacade entry: diffEntries) { 
 				ChangeType changeType;
 				if (entry.getChangeType() == ChangeType.RENAME 
 						&& entry.getOldPath().equals(entry.getNewPath())) {
@@ -258,29 +252,6 @@ public abstract class RevisionDiffPanel extends Panel {
 				diffChanges = getTotalChanges();
 			}
 			
-	    	// Diff calculation can be slow, so we pre-load diffs of each change 
-	    	// concurrently
-	    	Collection<Callable<Void>> tasks = new ArrayList<>();
-	    	for (BlobChange change: diffChanges) {
-	    		tasks.add(new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						change.getDiffBlocks();
-						return null;
-					}
-	    			
-	    		});
-	    	}
-	    	for (Future<Void> future: OneDev.getInstance(ForkJoinPool.class).invokeAll(tasks)) {
-	    		try {
-	    			// call get in order to throw exception if there is any during task execution
-					future.get();
-				} catch (InterruptedException|ExecutionException e) {
-					throw new RuntimeException(e);
-				}
-	    	}
-	    	
 	    	List<BlobChange> displayChanges = new ArrayList<>();
 	    	int totalChangedLines = 0;
 	    	for (BlobChange change: diffChanges) {
@@ -426,16 +397,16 @@ public abstract class RevisionDiffPanel extends Panel {
 				ObjectId oldCommit = getOldCommitId();
 				ObjectId newCommit = getNewCommitId();
 				boolean oldCommitIndexed = oldCommit.equals(ObjectId.zeroId()) 
-						|| indexManager.isIndexed(getProject(), oldCommit);
+						|| indexManager.isIndexed(getProject().getId(), oldCommit);
 				boolean newCommitIndexed = newCommit.equals(ObjectId.zeroId()) 
-						|| indexManager.isIndexed(getProject(), newCommit);
+						|| indexManager.isIndexed(getProject().getId(), newCommit);
 				if (oldCommitIndexed && newCommitIndexed) {
 					setVisible(false);
 				} else {
 					if (!oldCommitIndexed)
-						indexManager.indexAsync(getProject(), oldCommit);
+						indexManager.indexAsync(getProject().getId(), oldCommit);
 					if (!newCommitIndexed)
-						indexManager.indexAsync(getProject(), newCommit);
+						indexManager.indexAsync(getProject().getId(), newCommit);
 					setVisible(true);
 				}
 			}
@@ -498,33 +469,25 @@ public abstract class RevisionDiffPanel extends Panel {
 													ObjectId newCommitId = OneDev.getInstance(PendingSuggestionApplyManager.class)
 															.apply(SecurityUtils.getUser(), request, commitMessage);
 													
-													OneDev.getInstance(PullRequestUpdateManager.class).checkUpdate(request);
-													
-													Long projectId = request.getSourceProject().getId();
-													String refName = GitUtils.branch2ref(request.getSourceBranch());
-													OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
-
-														@Override
-														public void run() {
-															Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-															project.cacheObjectId(request.getSourceBranch(), newCommitId);
-															RefUpdated refUpdated = new RefUpdated(project, refName, commitId, newCommitId);
-															OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-														}
-														
-													});
-													
 													PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 													state.oldCommitHash = commitId.name();
 													state.newCommitHash = newCommitId.name();
 													setResponsePage(
 															PullRequestChangesPage.class, 
 															PullRequestChangesPage.paramsOf(request, state));
-												} catch (ObsoleteCommitException e) {
-													Session.get().error("Pull request was updated by some others just now, please try again");
-												} catch (OutdatedSuggestionException e) {
-													Session.get().error("Please remove outdated suggestion on: " + e.getMark());
-													close();
+												} catch (Exception e) {
+													ObsoleteCommitException obsoleteCommitException = 
+															ExceptionUtils.find(e, ObsoleteCommitException.class);
+													OutdatedSuggestionException outdatedSuggestionException = 
+															ExceptionUtils.find(e, OutdatedSuggestionException.class);
+													if (obsoleteCommitException != null) {
+														Session.get().error("Pull request was updated by some others just now, please try again");
+													} else if (outdatedSuggestionException != null) {
+														Session.get().error("Please remove outdated suggestion on: " + outdatedSuggestionException.getMark());
+														close();
+													} else {
+														throw ExceptionUtils.unchecked(e);
+													}
 												}
 											}
 										};
@@ -627,7 +590,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		pathFilterForm.add(filterInput = new TextField<String>("input", pathFilterModel));
 		
 		Set<String> setOfInvolvedPaths = new HashSet<>();
-		for (DiffEntry diffEntry: diffEntriesModel.getObject()) {
+		for (DiffEntryFacade diffEntry: diffEntriesModel.getObject()) {
 			if (diffEntry.getChangeType() == DiffEntry.ChangeType.ADD) {
 				setOfInvolvedPaths.add(diffEntry.getNewPath());
 			} else if (diffEntry.getChangeType() == DiffEntry.ChangeType.COPY) {
@@ -1397,6 +1360,10 @@ public abstract class RevisionDiffPanel extends Panel {
 		} else {
 			return null;
 		}
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	private WebMarkupContainer newCommentContainer() {

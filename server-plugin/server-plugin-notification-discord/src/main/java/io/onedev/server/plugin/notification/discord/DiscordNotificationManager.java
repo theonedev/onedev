@@ -18,8 +18,6 @@ import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.markdown.ExternalLinkFormatter;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.channelnotification.ChannelNotificationManager;
 import io.onedev.server.util.commenttext.CommentText;
@@ -32,9 +30,8 @@ public class DiscordNotificationManager extends ChannelNotificationManager<Disco
 	private final MarkdownManager markdownManager;
 	
 	@Inject
-	public DiscordNotificationManager(Dao dao, SessionManager sessionManager, ObjectMapper objectMapper, 
-			MarkdownManager markdownManager) {
-		super(dao, sessionManager, objectMapper);
+	public DiscordNotificationManager(ObjectMapper objectMapper, MarkdownManager markdownManager) {
+		super(objectMapper);
 		this.markdownManager = markdownManager;
 	}
 

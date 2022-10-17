@@ -25,12 +25,12 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -69,12 +69,12 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 		BuildSpec buildSpec = Preconditions.checkNotNull(getProject().getBuildSpec(commitId));
 		
 		Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
-				.getDescendants(getProject(), Sets.newHashSet(commitId));
+				.getDescendants(getProject().getId(), Sets.newHashSet(commitId));
 		descendants.add(commitId);
 	
-		List<RefInfo> refs = new ArrayList<>();
-		refs.addAll(getProject().getBranchRefInfos());
-		refs.addAll(getProject().getTagRefInfos());
+		List<RefFacade> refs = new ArrayList<>();
+		refs.addAll(getProject().getBranchRefs());
+		refs.addAll(getProject().getTagRefs());
 		
 		List<String> refNames;
 		
@@ -85,7 +85,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 		} else {
 			refNames = refs.stream()
 					.filter(it->descendants.contains(it.getPeeledObj()))
-					.map(it->it.getRef().getName())
+					.map(it->it.getName())
 					.collect(Collectors.toList());
 		}
 

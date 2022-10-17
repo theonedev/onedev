@@ -14,6 +14,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
+import io.onedev.server.git.LfsObject;
 import io.onedev.server.git.LfsPointer;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
@@ -65,7 +66,7 @@ public class BlobDiffPanel extends Panel {
 		Component diffPanel = null;
 		for (DiffRenderer renderer: OneDev.getExtensions(DiffRenderer.class)) {
 			if (blob.getLfsPointer() != null 
-					&& !change.getProject().isLfsObjectExists(blob.getLfsPointer().getObjectId())) {
+					&& !new LfsObject(change.getProject().getId(), blob.getLfsPointer().getObjectId()).exists()) {
 				diffPanel = newFragment("Storage file missing", true);
 				break;
 			}
@@ -113,8 +114,8 @@ public class BlobDiffPanel extends Panel {
 		} else {
 			LfsPointer oldLfsPointer = change.getOldBlob().getLfsPointer();
 			LfsPointer newLfsPointer = change.getNewBlob().getLfsPointer();
-			if (oldLfsPointer != null && !change.getProject().isLfsObjectExists(oldLfsPointer.getObjectId())
-					|| newLfsPointer != null && !change.getProject().isLfsObjectExists(newLfsPointer.getObjectId())) {
+			if (oldLfsPointer != null && !new LfsObject(change.getProject().getId(), oldLfsPointer.getObjectId()).exists()
+					|| newLfsPointer != null && !new LfsObject(change.getProject().getId(), newLfsPointer.getObjectId()).exists()) {
 				add(newFragment("Storage file missing", true));
 			} else {
 				MediaType oldMediaType = change.getProject().detectMediaType(change.getOldBlobIdent());

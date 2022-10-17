@@ -10,7 +10,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.codec.Base64;
@@ -30,7 +29,7 @@ import io.onedev.server.util.ExceptionUtils;
 public class BasicAuthenticationFilter extends PathMatchingFilter {
 	
 	private final UserManager userManager;
-
+	
 	@Inject
 	public BasicAuthenticationFilter(UserManager userManager) {
 		this.userManager = userManager;
@@ -57,7 +56,7 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
                 		token = new UsernamePasswordToken(userName, password);
                     subject.login(token);
                 }
-	        } 
+	        }
 		} 
 		
 		return true;

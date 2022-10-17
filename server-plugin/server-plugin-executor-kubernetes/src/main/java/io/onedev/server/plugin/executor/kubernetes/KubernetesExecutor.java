@@ -5,8 +5,8 @@ import static io.onedev.k8shelper.KubernetesHelper.ENV_OS_INFO;
 import static io.onedev.k8shelper.KubernetesHelper.ENV_SERVER_URL;
 import static io.onedev.k8shelper.KubernetesHelper.IMAGE_REPO_PREFIX;
 import static io.onedev.k8shelper.KubernetesHelper.LOG_END_MESSAGE;
-import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
 import static io.onedev.k8shelper.KubernetesHelper.parseStepPosition;
+import static io.onedev.k8shelper.KubernetesHelper.stringifyStepPosition;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -72,21 +72,24 @@ import io.onedev.k8shelper.OsInfo;
 import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.server.OneDev;
+import io.onedev.server.ServerConfig;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.EnvVar;
-import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.job.AgentInfo;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
 import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
+import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.terminal.CommandlineSession;
 import io.onedev.server.terminal.ShellSession;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
-import io.onedev.server.util.ServerConfig;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -209,8 +212,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 
 	@Override
-	public void execute(JobContext jobContext) {
-		execute(jobContext.getLogger(), jobContext);
+	public AgentQuery getAgentRequirement() {
+		return null;
+	}
+
+	@Override
+	public void execute(JobContext jobContext, TaskLogger jobLogger, AgentInfo agentInfo) {
+		execute(jobLogger, jobContext);
 	}
 	
 	private String getNamespace(@Nullable JobContext jobContext) {
@@ -1057,8 +1065,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				if (jobContext != null) {
 					sidecarContainerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
-							"cpu", jobContext.getCpuRequirement() + "m", 
-							"memory", jobContext.getMemoryRequirement() + "Mi")));
+							"cpu", jobContext.getResourceRequirements().get(ResourceAllocator.CPU) + "m", 
+							"memory", jobContext.getResourceRequirements().get(ResourceAllocator.MEMORY) + "Mi")));
 				}
 				
 				containerSpecs.add(sidecarContainerSpec);
@@ -1132,9 +1140,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, jobLogger);
 				
-				if (jobContext != null)
-					jobContext.notifyJobRunning(null);
-
 				String nodeName = Preconditions.checkNotNull(nodeNameRef.get());
 				jobLogger.log("Running job on node " + nodeName + "...");
 				

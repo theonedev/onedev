@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>io.onedev</groupId>
@@ -253,9 +255,9 @@
 				<version>${hibernate.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.ehcache</groupId>
-				<artifactId>ehcache</artifactId>
-				<version>3.8.0</version>
+				<groupId>com.hazelcast</groupId>
+				<artifactId>hazelcast-hibernate53</artifactId>
+				<version>2.2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
@@ -295,7 +297,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.6</version>
+				<version>1.10.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -592,6 +594,11 @@
 				<artifactId>javassist</artifactId>
 				<version>3.29.1-GA</version>
 			</dependency>
+			<dependency>
+				<groupId>com.hazelcast</groupId>
+				<artifactId>hazelcast</artifactId>
+				<version>5.1.4</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<repositories>
@@ -611,8 +618,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.5.2</commons.version>
-		<agent.version>1.6.6</agent.version>
+		<commons.version>2.6.0</commons.version>
+		<agent.version>1.7.0</agent.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<logback.version>1.2.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>

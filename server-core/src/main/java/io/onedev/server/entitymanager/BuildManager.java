@@ -15,10 +15,12 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.FileInfo;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.facade.BuildFacade;
 
 public interface BuildManager extends EntityManager<Build> {
 
@@ -39,6 +41,12 @@ public interface BuildManager extends EntityManager<Build> {
 
 	@Nullable
 	Build findStreamPrevious(Build build, @Nullable Build.Status status);
+	
+	@Nullable
+	BuildFacade findFacade(Long buildId);
+	
+	@Nullable
+	Long findId(Long projectId, Long buildNumber);
 
 	Collection<Long> queryStreamPreviousNumbers(Build build, @Nullable Build.Status status, int limit);
 
@@ -55,10 +63,7 @@ public interface BuildManager extends EntityManager<Build> {
 
 	void create(Build build);
 
-	Collection<Build> queryUnfinished();
-	
-	Collection<Build> queryUnfinished(Project project, String jobName, @Nullable String refName, 
-			@Nullable Optional<PullRequest> request, Map<String, List<String>> params);
+	Map<Long, Long> queryUnfinished();
 	
 	List<Build> query(Project project, String term, int count);
 
@@ -87,5 +92,11 @@ public interface BuildManager extends EntityManager<Build> {
 	Collection<Build> query(Agent agent, @Nullable Build.Status status);
 	
 	List<ProjectBuildStats> queryStats(Collection<Project> projects);
+	
+	long getArtifactSize(Build build, String artifactPath);
+	
+	void deleteArtifact(Build build, String artifactPath);
+	
+	List<FileInfo> listArtifacts(Build build, @Nullable String artifactPath);
 	
 }

@@ -7,7 +7,7 @@ public class SystemNotReadyException extends ExplicitException {
 	private static final long serialVersionUID = 1L;
 
 	public SystemNotReadyException() {
-		super("System is not ready");
+		super("System not ready");
 	}
 
 }

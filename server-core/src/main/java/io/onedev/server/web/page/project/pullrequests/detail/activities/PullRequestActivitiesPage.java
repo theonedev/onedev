@@ -41,6 +41,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -56,7 +58,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -68,7 +69,6 @@ import io.onedev.server.web.page.project.pullrequests.detail.activities.activity
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdatedActivity;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
-import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
 public class PullRequestActivitiesPage extends PullRequestDetailPage {

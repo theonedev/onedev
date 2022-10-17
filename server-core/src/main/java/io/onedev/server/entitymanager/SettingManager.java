@@ -35,6 +35,8 @@ import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
 public interface SettingManager extends EntityManager<Setting> {
 	
+	void init();
+	
 	/**
 	 * Retrieve setting by key.
 	 * <p>
@@ -44,7 +46,8 @@ public interface SettingManager extends EntityManager<Setting> {
 	 * 			setting associated with specified key, or <tt>null</tt> if 
 	 * 			no setting record found for the key
 	 */
-	Setting getSetting(Setting.Key key);
+	@Nullable
+	Setting findSetting(Setting.Key key);
 	
 	/**
 	 * Get system setting.

@@ -1,16 +1,7 @@
 package io.onedev.server.model;
 
 import static io.onedev.server.model.Project.PROP_NAME;
-import static io.onedev.server.model.Project.PROP_UPDATE_DATE;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -28,8 +19,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -49,36 +38,17 @@ import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.Permission;
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.util.encoding.UrlEncoder;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.eclipse.jgit.api.CreateBranchCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectInserter;
-import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.RefUpdate;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.TagBuilder;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren.Value;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Optional;
@@ -86,16 +56,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.loader.ListenerRegistry;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
@@ -106,20 +72,16 @@ import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.RefUpdated;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
-import io.onedev.server.git.Submodule;
-import io.onedev.server.git.command.BlameCommand;
-import io.onedev.server.git.command.GetRawCommitCommand;
-import io.onedev.server.git.command.GetRawTagCommand;
-import io.onedev.server.git.command.ListChangedFilesCommand;
-import io.onedev.server.git.exception.NotFileException;
+import io.onedev.server.git.LfsObject;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
 import io.onedev.server.git.signature.SignatureVerified;
 import io.onedev.server.infomanager.CommitInfoManager;
@@ -142,15 +104,10 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.storage.AttachmentStorageManager;
-import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -171,7 +128,7 @@ import io.onedev.server.web.util.WicketUtils;
 @Table(
 		indexes={
 				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"), 
-				@Index(columnList=PROP_NAME), @Index(columnList=PROP_UPDATE_DATE)
+				@Index(columnList=PROP_NAME)
 		}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
 )
@@ -183,11 +140,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final Logger logger = LoggerFactory.getLogger(Project.class);
-	
 	public static final int MAX_DESCRIPTION_LEN = 15000;
-	
-	private static final int BUFFER_SIZE = 1024*64;
 	
 	public static final String NAME_NAME = "Name";
 	
@@ -196,10 +149,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NAME_PATH = "Path";
 	
 	public static final String PROP_PATH = "path";
-	
-	public static final String NAME_UPDATE_DATE = "Update Date";
-	
-	public static final String PROP_UPDATE_DATE = "updateDate";
 	
 	public static final String NAME_DESCRIPTION = "Description";
 	
@@ -226,15 +175,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NAME, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
+			NAME_NAME, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_PATH, PROP_PATH,
 			NAME_NAME, PROP_NAME, 
-			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,
-			NAME_UPDATE_DATE, PROP_UPDATE_DATE);
-	
-	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
+			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME);
 	
 	static ThreadLocal<Stack<Project>> stack =  new ThreadLocal<Stack<Project>>() {
 
@@ -299,10 +245,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Api(readOnly=true)
 	private Date createDate = new Date();
 	
-	@Column(nullable=false)
-	@Api(readOnly=true)
-	private Date updateDate = new Date();
-
 	@OneToMany(mappedBy="targetProject", cascade=CascadeType.REMOVE)
 	private Collection<PullRequest> incomingRequests = new ArrayList<>();
 	
@@ -400,8 +342,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Column(length=65535, nullable=false)
 	private ArrayList<WebHook> webHooks = new ArrayList<>();
 	
-	private transient Repository repository;
-	
     private transient Map<BlobIdent, Optional<Blob>> blobCache;
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
@@ -410,9 +350,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     
     private transient Map<ObjectId, Optional<RevCommit>> commitCache;
     
-    private transient Map<String, Optional<Ref>> refCache;
+    private transient Map<String, Optional<RefFacade>> refCache;
     
-    private transient Optional<String> defaultBranchOptional;
+    private transient Optional<String> defaultBranch;
     
     private transient Optional<IssueQueryPersonalization> issueQueryPersonalizationOfCurrentUserHolder;
     
@@ -424,9 +364,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     
     private transient Optional<CommitQueryPersonalization> commitQueryPersonalizationOfCurrentUserHolder;
     
-    private transient Optional<RevCommit> lastCommitHolder;
-    
 	private transient List<Milestone> sortedMilestones;
+	
+	private transient Optional<UUID> storageServerUUID;
 	
 	@Editable(order=100)
 	@ProjectName
@@ -493,14 +433,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
-	}
-
-	public Date getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
 	}
 
 	public Collection<PullRequest> getIncomingRequests() {
@@ -602,47 +534,28 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.forks = forks;
 	}
 	
-	public List<RefInfo> getBranchRefInfos() {
-		List<RefInfo> refInfos = getRefInfos(Constants.R_HEADS);
-		for (Iterator<RefInfo> it = refInfos.iterator(); it.hasNext();) {
-			RefInfo refInfo = it.next();
-			if (refInfo.getRef().getName().equals(GitUtils.branch2ref(getDefaultBranch()))) {
+	public List<RefFacade> getBranchRefs() {
+		List<RefFacade> refs = getRefs(Constants.R_HEADS);
+		for (Iterator<RefFacade> it = refs.iterator(); it.hasNext();) {
+			RefFacade ref = it.next();
+			if (ref.getName().equals(GitUtils.branch2ref(getDefaultBranch()))) {
 				it.remove();
-				refInfos.add(0, refInfo);
+				refs.add(0, ref);
 				break;
 			}
 		}
 		
-		return refInfos;
+		return refs;
     }
 	
-	public List<RefInfo> getTagRefInfos() {
-		return getRefInfos(Constants.R_TAGS);
+	public List<RefFacade> getTagRefs() {
+		return getRefs(Constants.R_TAGS);
     }
 	
-	public List<RefInfo> getRefInfos(String prefix) {
-		try (RevWalk revWalk = new RevWalk(getRepository())) {
-			List<Ref> refs = new ArrayList<Ref>(getRepository().getRefDatabase().getRefsByPrefix(prefix));
-			List<RefInfo> refInfos = refs.stream()
-					.map(ref->new RefInfo(revWalk, ref))
-					.filter(refInfo->refInfo.getPeeledObj() instanceof RevCommit)
-					.collect(Collectors.toList());
-			Collections.sort(refInfos);
-			Collections.reverse(refInfos);
-			return refInfos;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+	public List<RefFacade> getRefs(String prefix) {
+		return getGitService().getRefs(this, prefix);
     }
 
-	public Git git() {
-		return Git.wrap(getRepository()); 
-	}
-	
-	public File getGitDir() {
-		return OneDev.getInstance(StorageManager.class).getProjectGitDir(getId());
-	}
-	
 	/**
 	 * Find fork root of this project. 
 	 * 
@@ -681,42 +594,32 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return forkParents;
 	}
 	
-	public Repository getRepository() {
-		if (repository == null) 
-			repository = OneDev.getInstance(ProjectManager.class).getRepository(this);
-		return repository;
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
 	}
 	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+	
+	private SettingManager getSettingManager() {
+		return OneDev.getInstance(SettingManager.class);
+	}
+
 	public String getUrl() {
-		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl() + "/projects/" + getId();
+		return OneDev.getInstance(UrlManager.class).urlFor(this);
 	}
 	
 	@Nullable
 	public String getDefaultBranch() {
-		if (defaultBranchOptional == null) {
-			try {
-				Ref headRef = getRepository().findRef("HEAD");
-				if (headRef != null 
-						&& headRef.isSymbolic() 
-						&& headRef.getTarget().getName().startsWith(Constants.R_HEADS) 
-						&& headRef.getObjectId() != null) {
-					defaultBranchOptional = Optional.of(Repository.shortenRefName(headRef.getTarget().getName()));
-				} else {
-					defaultBranchOptional = Optional.absent();
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return defaultBranchOptional.orNull();
+		if (defaultBranch == null) 
+			defaultBranch = Optional.fromNullable(getGitService().getDefaultBranch(this));
+		return defaultBranch.orNull();
 	}
 	
-	public void setDefaultBranch(String defaultBranchName) {
-		RefUpdate refUpdate = GitUtils.getRefUpdate(getRepository(), "HEAD");
-		GitUtils.linkRef(refUpdate, GitUtils.branch2ref(defaultBranchName));
-		defaultBranchOptional = null;
-		
-		OneDev.getInstance(JobManager.class).schedule(this);
+	public void setDefaultBranch(String defaultBranch) {
+		getGitService().setDefaultBranch(this, defaultBranch);
+		this.defaultBranch = Optional.of(defaultBranch);
 	}
 	
 	private Map<BlobIdent, Optional<Blob>> getBlobCache() {
@@ -756,63 +659,23 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		Preconditions.checkArgument(blobIdent.revision!=null && blobIdent.path!=null && blobIdent.mode!=null, 
 				"Revision, path and mode of ident param should be specified");
 		
-		Optional<Blob> blob = getBlobCache().get(blobIdent);
-		if (blob == null) {
-			try (RevWalk revWalk = new RevWalk(getRepository())) {
-				ObjectId revId = getObjectId(blobIdent.revision, mustExist);		
-				if (revId != null) {
-					RevCommit commit = GitUtils.parseCommit(revWalk, revId);
-					if (commit != null) {
-						RevTree revTree = commit.getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
-						if (treeWalk != null) {
-							ObjectId blobId = treeWalk.getObjectId(0);
-							if (blobIdent.isGitLink()) {
-								String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
-								if (url == null) {
-									logger.error("Unable to find submodule (project: {}, revision: {}, path: {})", 
-											getPath(), blobIdent.revision, blobIdent.path);
-									blob = Optional.of(new Blob(blobIdent, blobId, treeWalk.getObjectReader()));
-								} else {
-									String hash = blobId.name();
-									blob = Optional.of(new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes()));
-								}
-							} else if (blobIdent.isTree()) {
-								throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
-							} else {
-								blob = Optional.of(new Blob(blobIdent, blobId, treeWalk.getObjectReader()));
-							}
-						} 
-					} 				
-				} 
-				if (blob == null) {
-					if (mustExist)
-						throw new ObjectNotFoundException("Unable to find blob ident: " + blobIdent);
-					else 
-						blob = Optional.absent();
-				}
-				getBlobCache().put(blobIdent, blob);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return blob.orNull();
-	}
-	
-	public InputStream getInputStream(BlobIdent ident) {
-		try (RevWalk revWalk = new RevWalk(getRepository())) {
-			ObjectId commitId = getObjectId(ident.revision, true);
-			RevTree revTree = revWalk.parseCommit(commitId).getTree();
-			TreeWalk treeWalk = TreeWalk.forPath(getRepository(), ident.path, revTree);
-			if (treeWalk != null) {
-				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
-				return objectLoader.openStream();
+		Optional<Blob> blobOptional = getBlobCache().get(blobIdent);
+		if (blobOptional == null) {
+			ObjectId revId = getObjectId(blobIdent.revision, mustExist);		
+			if (revId != null) { 
+				Blob blob = getGitService().getBlob(this, revId, blobIdent.path);
+				if (blob != null)
+					blob = new Blob(blobIdent, blob.getBlobId(), blob.getBytes(), blob.getSize());
+				blobOptional = Optional.fromNullable(blob);
 			} else {
-				throw new ObjectNotFoundException("Unable to find blob path '" + ident.path + "' in revision '" + ident.revision + "'");
+				blobOptional = Optional.absent();
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			getBlobCache().put(blobIdent, blobOptional);
 		}
+		if (mustExist && !blobOptional.isPresent())
+			throw new ObjectNotFoundException("Unable to find blob ident: " + blobIdent);
+		else 
+			return blobOptional.orNull();
 	}
 	
 	/**
@@ -834,7 +697,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		
 		Optional<ObjectId> optional = objectIdCache.get(revision);
 		if (optional == null) {
-			optional = Optional.fromNullable(GitUtils.resolve(getRepository(), revision));
+			optional = Optional.fromNullable(getGitService().resolve(this, revision, false));
 			objectIdCache.put(revision, optional);
 		}
 		if (mustExist && !optional.isPresent())
@@ -925,130 +788,32 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return jobNames;
 	}
 	
-	public RevCommit getLastCommit() {
-		if (lastCommitHolder == null) {
-			RevCommit lastCommit = null;
-			try {
-				for (Ref ref: getRepository().getRefDatabase().getRefsByPrefix(Constants.R_HEADS)) {
-					RevCommit commit = getRevCommit(ref.getObjectId(), false);
-					if (commit != null) {
-						if (lastCommit != null) {
-							if (commit.getCommitTime() > lastCommit.getCommitTime())
-								lastCommit = commit;
-						} else {
-							lastCommit = commit;
-						}
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			lastCommitHolder = Optional.fromNullable(lastCommit);
-		}
-		return lastCommitHolder.orNull();
-	}
-	
 	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {
-		if (path == null)
-			path = "";
-		
-		final File cacheDir = new File(
-				OneDev.getInstance(StorageManager.class).getProjectInfoDir(getId()), 
-				"last_commits/" + path + "/onedev_last_commits");
-		
-		final ReadWriteLock lock;
-		try {
-			lock = LockUtils.getReadWriteLock(cacheDir.getCanonicalPath());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		
-		final Set<ObjectId> commitIds = new HashSet<>(); 
-		
-		lock.readLock().lock();
-		try {
-			if (cacheDir.exists()) {
-				for (String each: cacheDir.list()) 
-					commitIds.add(ObjectId.fromString(each));
-			} 	
-		} finally {
-			lock.readLock().unlock();
-		}
-		
-		org.eclipse.jgit.revwalk.LastCommitsOfChildren.Cache cache;
-		if (!commitIds.isEmpty()) {
-			cache = new org.eclipse.jgit.revwalk.LastCommitsOfChildren.Cache() {
-	
-				@SuppressWarnings("unchecked")
-				@Override
-				public Map<String, Value> getLastCommitsOfChildren(ObjectId commitId) {
-					if (commitIds.contains(commitId)) {
-						lock.readLock().lock();
-						try {
-							byte[] bytes = FileUtils.readFileToByteArray(new File(cacheDir, commitId.name()));
-							return (Map<String, Value>) SerializationUtils.deserialize(bytes);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						} finally {
-							lock.readLock().unlock();
-						}
-					} else {
-						return null;
-					}
-				}
-				
-			};
-		} else {
-			cache = null;
-		}
-
-		final AnyObjectId commitId = getObjectId(revision, true);
-		
-		long time = System.currentTimeMillis();
-		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(getRepository(), commitId, path, cache);
-		long elapsed = System.currentTimeMillis()-time;
-		if (elapsed > LAST_COMMITS_CACHE_THRESHOLD) {
-			lock.writeLock().lock();
-			try {
-				if (!cacheDir.exists())
-					FileUtils.createDir(cacheDir);
-				FileUtils.writeByteArrayToFile(
-						new File(cacheDir, commitId.name()), 
-						SerializationUtils.serialize(lastCommits));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			} finally {
-				lock.writeLock().unlock();
-			}
-		}
-		return lastCommits;
+		ObjectId revId = getObjectId(revision, true);
+		return getGitService().getLastCommitsOfChildren(this, revId, path);
 	}
 
 	@Nullable
-	public Ref getRef(String revision) {
+	public RefFacade getRef(String revision) {
 		if (refCache == null)
 			refCache = new HashMap<>();
-		Optional<Ref> optional = refCache.get(revision);
-		if (optional == null) {
-			try {
-				optional = Optional.fromNullable(getRepository().findRef(revision));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			refCache.put(revision, optional);
+		Optional<RefFacade> ref = refCache.get(revision);
+		if (ref == null) {
+			ref = Optional.fromNullable(getGitService().getRef(this, revision));
+			refCache.put(revision, ref);
 		}
-		return optional.orNull();
+		return ref.orNull();
 	}
 	
 	@Nullable
 	public String getRefName(String revision) {
-		Ref ref = getRef(revision);
+		RefFacade ref = getRef(revision);
 		return ref != null? ref.getName(): null;
 	}
 	
 	@Nullable
-	public Ref getBranchRef(String revision) {
-		Ref ref = getRef(revision);
+	public RefFacade getBranchRef(String revision) {
+		RefFacade ref = getRef(revision);
 		if (ref != null && ref.getName().startsWith(Constants.R_HEADS))
 			return ref;
 		else
@@ -1056,8 +821,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	@Nullable
-	public Ref getTagRef(String revision) {
-		Ref ref = getRef(revision);
+	public RefFacade getTagRef(String revision) {
+		RefFacade ref = getRef(revision);
 		if (ref != null && ref.getName().startsWith(Constants.R_TAGS))
 			return ref;
 		else
@@ -1078,130 +843,17 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public RevCommit getRevCommit(ObjectId revId, boolean mustExist) {
 		if (commitCache == null)
 			commitCache = new HashMap<>();
-		RevCommit commit;
-		Optional<RevCommit> optional = commitCache.get(revId);
-		if (optional == null) {
-			try (RevWalk revWalk = new RevWalk(getRepository())) {
-				optional = Optional.fromNullable(GitUtils.parseCommit(revWalk, revId));
-			}
-			commitCache.put(revId, optional);
+		Optional<RevCommit> commit = commitCache.get(revId);
+		if (commit == null) {
+			commit = Optional.fromNullable(getGitService().getCommit(this, revId));
+			commitCache.put(revId, commit);
 		}
-		commit = optional.orNull();
-		
-		if (mustExist && commit == null)
+		if (mustExist && !commit.isPresent())
 			throw new ObjectNotFoundException("Unable to find commit associated with object id: " + revId);
 		else
-			return commit;
+			return commit.orNull();
 	}
 	
-	public List<Ref> getRefs(String prefix) {
-		try {
-			return getRepository().getRefDatabase().getRefsByPrefix(prefix);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} 
-	}
-	
-	public Map<String, String> getSubmodules(String revision) {
-		Map<String, String> submodules = new HashMap<>();
-		
-		Blob blob = getBlob(new BlobIdent(revision, ".gitmodules", FileMode.REGULAR_FILE.getBits()), false);
-		if (blob != null) {
-			String content = new String(blob.getBytes());
-			
-			String path = null;
-			String url = null;
-			
-			for (String line: StringUtils.splitAndTrim(content, "\r\n")) {
-				if (line.startsWith("[") && line.endsWith("]")) {
-					if (path != null && url != null)
-						submodules.put(path, url);
-					
-					path = url = null;
-				} else if (line.startsWith("path")) {
-					path = StringUtils.substringAfter(line, "=").trim();
-				} else if (line.startsWith("url")) {
-					url = StringUtils.substringAfter(line, "=").trim();
-				}
-			}
-			if (path != null && url != null)
-				submodules.put(path, url);
-		}
-		
-		return submodules;
-	}
-    
-    public void createBranch(String branchName, String branchRevision) {
-		try {
-			CreateBranchCommand command = git().branchCreate();
-			command.setName(branchName);
-			RevCommit commit = getRevCommit(branchRevision, true);
-			command.setStartPoint(getRevCommit(branchRevision, true));
-			command.call();
-			String refName = GitUtils.branch2ref(branchName); 
-			cacheObjectId(refName, commit);
-			
-	    	ObjectId commitId = commit.copy();
-	    	OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-					OneDev.getInstance(ListenerRegistry.class).post(
-							new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
-				}
-	    		
-	    	});			
-		} catch (GitAPIException e) {
-			throw new RuntimeException(e);
-		}
-    }
-    
-    public void createTag(String tagName, String tagRevision, PersonIdent taggerIdent, 
-    		@Nullable String tagMessage, @Nullable PGPSecretKeyRing signingKey) {
-		try (	RevWalk revWalk = new RevWalk(getRepository()); 
-				ObjectInserter inserter = getRepository().newObjectInserter();) {
-			TagBuilder tagBuilder = new TagBuilder();
-			tagBuilder.setTag(tagName);
-			if (tagMessage != null) {
-				if (!tagMessage.endsWith("\n"))
-					tagMessage += "\n";
-				tagBuilder.setMessage(tagMessage);
-			}
-			tagBuilder.setTagger(taggerIdent);
-			
-			RevCommit commit = getRevCommit(tagRevision, true);
-			tagBuilder.setObjectId(commit);
-
-			if (signingKey != null) 
-				GitUtils.sign(tagBuilder, signingKey);
-
-			ObjectId tagId = inserter.insert(tagBuilder);
-			inserter.flush();
-
-			String refName = GitUtils.tag2ref(tagName);
-			RefUpdate refUpdate = getRepository().updateRef(refName);
-			refUpdate.setNewObjectId(tagId);
-			GitUtils.updateRef(refUpdate);
-
-			cacheObjectId(refName, commit);
-			
-	    	ObjectId commitId = commit.copy();
-	    	OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-					OneDev.getInstance(ListenerRegistry.class).post(
-							new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
-				}
-	    		
-	    	});			
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-    }
-    
 	public Collection<CodeComment> getCodeComments() {
 		return codeComments;
 	}
@@ -1391,54 +1043,21 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.builds = builds;
 	}
 
-	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter) {
-		return getChildren(blobIdent, blobIdentFilter, getObjectId(blobIdent.revision, true));
+	public List<BlobIdent> getBlobChildren(BlobIdent blobIdent, BlobIdentFilter filter) {
+		return getBlobChildren(blobIdent, filter, getObjectId(blobIdent.revision, true));
 	}
 	
-	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter, ObjectId commitId) {
-		Repository repository = getRepository();
-		try (RevWalk revWalk = new RevWalk(repository)) {
-			RevTree revTree = revWalk.parseCommit(commitId).getTree();
-			
-			TreeWalk treeWalk;
-			if (blobIdent.path != null) {
-				treeWalk = TreeWalk.forPath(repository, blobIdent.path, revTree);
-				treeWalk.enterSubtree();
-			} else {
-				treeWalk = new TreeWalk(repository);
-				treeWalk.addTree(revTree);
-			}
-			
-			List<BlobIdent> children = new ArrayList<>();
-			while (treeWalk.next()) { 
-				BlobIdent child = new BlobIdent(blobIdent.revision, treeWalk.getPathString(), treeWalk.getRawMode(0)); 
-				if (blobIdentFilter.filter(child))
-					children.add(child);
-			}
-			Collections.sort(children);
-			return children;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+	public List<BlobIdent> getBlobChildren(BlobIdent blobIdent, BlobIdentFilter filter, 
+			ObjectId commitId) {
+		List<BlobIdent> children = getGitService().getChildren(
+				this, commitId, blobIdent.path, filter, false);
+		for (BlobIdent child: children)
+			child.revision = blobIdent.revision;
+		return children;
 	}
 
-	public int getMode(String revision, @Nullable String path) {
-		if (path != null) {
-			RevCommit commit = getRevCommit(revision, true);
-			try {
-				TreeWalk treeWalk = TreeWalk.forPath(getRepository(), path, commit.getTree());
-				if (treeWalk != null) {
-					return treeWalk.getRawMode(0);
-				} else {
-					throw new ObjectNotFoundException("Unable to find blob path '" + path
-							+ "' in revision '" + revision + "'");
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			return FileMode.TREE.getBits();
-		}
+	public int getMode(String revision, String path) {
+		return getGitService().getMode(this, getObjectId(revision, true), path);
 	}
 
 	public Collection<Milestone> getMilestones() {
@@ -1546,14 +1165,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 
 	public List<User> getAuthors(String filePath, ObjectId commitId, @Nullable LinearRange range) {
-		BlameCommand cmd = new BlameCommand(getGitDir());
-		cmd.commitHash(commitId.name());
-		cmd.file(filePath);
-		cmd.range(range);
-
 		List<User> authors = new ArrayList<>();
 		EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
-		for (BlameBlock block: cmd.call()) {
+		for (BlameBlock block: getGitService().blame(this, commitId, filePath, range)) {
 			EmailAddress emailAddress = emailAddressManager.findByPersonIdent(block.getCommit().getAuthor());
 			if (emailAddress != null && emailAddress.isVerified() && !authors.contains(emailAddress.getOwner()))
 				authors.add(emailAddress.getOwner());
@@ -1673,12 +1287,13 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		Matcher matcher = new PathMatcher();
 		if (commitId != null) {
 			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-			Collection<ObjectId> descendants = commitInfoManager.getDescendants(this, Sets.newHashSet(commitId));
+			Collection<ObjectId> descendants = commitInfoManager.getDescendants(
+					getId(), Sets.newHashSet(commitId));
 			descendants.add(commitId);
 		
 			PatternSet branchPatterns = PatternSet.parse(branches);
-			for (RefInfo ref: getBranchRefInfos()) {
-				String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
+			for (RefFacade ref: getBranchRefs()) {
+				String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName()));
 				if (descendants.contains(ref.getPeeledObj()) && branchPatterns.matches(matcher, branchName))
 					return true;
 			}
@@ -1688,24 +1303,13 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		}
 	}
 	
-	public Collection<String> getChangedFiles(ObjectId oldObjectId, ObjectId newObjectId, 
-			Map<String, String> gitEnvs) {
-		if (gitEnvs != null && !gitEnvs.isEmpty()) {
-			ListChangedFilesCommand cmd = new ListChangedFilesCommand(getGitDir(), gitEnvs);
-			cmd.fromRev(oldObjectId.name()).toRev(newObjectId.name());
-			return cmd.call();
-		} else {
-			return GitUtils.getChangedFiles(getRepository(), oldObjectId, newObjectId);
-		}
-	}
-	
 	public boolean isReviewRequiredForModification(User user, String branch, @Nullable String file) {
 		return getHierarchyBranchProtection(branch, user).isReviewRequiredForModification(user, this, branch, file);
 	}
 
 	public boolean isCommitSignatureRequiredButNoSigningKey(User user, String branch) {
 		return getHierarchyBranchProtection(branch, user).isSignatureRequired()
-				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null;
+				&& getSettingManager().getGpgSetting().getSigningKey() == null;
 	}
 	
 	public boolean isCommitSignatureRequired(User user, String branch) {
@@ -1718,7 +1322,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public boolean isTagSignatureRequiredButNoSigningKey(User user, String tag) {
 		return getHierarchyTagProtection(tag, user).isSignatureRequired()
-				&& OneDev.getInstance(SettingManager.class).getGpgSetting().getSigningKey() == null;
+				&& getSettingManager().getGpgSetting().getSigningKey() == null;
 	}
 	
 	public boolean isReviewRequiredForPush(User user, String branch, ObjectId oldObjectId, 
@@ -1770,54 +1374,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 				UrlEncoder.PATH_INSTANCE.encode(attachmentName, StandardCharsets.UTF_8));
 	}
 	
-	public String saveAttachment(String attachmentGroup, String suggestedAttachmentName, InputStream attachmentStream) {
-		suggestedAttachmentName = suggestedAttachmentName.replace("..", "-");
-		
-		String attachmentName = suggestedAttachmentName;
-		File attachmentDir = OneDev.getInstance(AttachmentStorageManager.class).getGroupDir(this, attachmentGroup);
-
-		FileUtils.createDir(attachmentDir);
-		int index = 2;
-		while (new File(attachmentDir, attachmentName).exists()) {
-			if (suggestedAttachmentName.contains(".")) {
-				String nameBeforeExt = StringUtils.substringBeforeLast(suggestedAttachmentName, ".");
-				String ext = StringUtils.substringAfterLast(suggestedAttachmentName, ".");
-				attachmentName = nameBeforeExt + "_" + index + "." + ext;
-			} else {
-				attachmentName = suggestedAttachmentName + "_" + index;
-			}
-			index++;
-		}
-		
-		long maxUploadFileSize = OneDev.getInstance(SettingManager.class)
-				.getPerformanceSetting().getMaxUploadFileSize()*1L*1024*1024; 
-				
-		Exception ex = null;
-		File file = new File(attachmentDir, attachmentName);
-		try (OutputStream os = new FileOutputStream(file)) {
-			byte[] buffer = new byte[BUFFER_SIZE];
-	        long count = 0;
-	        int n = 0;
-	        while (-1 != (n = attachmentStream.read(buffer))) {
-	            count += n;
-		        if (count > maxUploadFileSize) {
-		        	throw new AttachmentTooLargeException("Upload must be less than " 
-		        			+ FileUtils.byteCountToDisplaySize(maxUploadFileSize));
-		        }
-	            os.write(buffer, 0, n);
-	        }
-		} catch (Exception e) {
-			ex = e;
-		} 
-		if (ex != null) {
-			if (file.exists())
-				FileUtils.deleteFile(file);
-			throw ExceptionUtils.unchecked(ex);
-		} else {
-			return file.getName();
-		}
-	}
-	
 	public boolean isPermittedByLoginUser(Permission permission) {
 		return getDefaultRole() != null && getDefaultRole().implies(permission);
 	}
@@ -1849,71 +1405,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		contributedSettings.put(settingClass.getName(), setting);
 	}
 	
-	public File getLfsObjectsDir() {
-		return new File(getGitDir(), "lfs/objects");
-	}
-	
-	public File getLfsObjectFile(String objectId) {
-		File objectDir = new File(getLfsObjectsDir(), objectId.substring(0, 2) + "/" + objectId.substring(2, 4));
-		Lock lock = LockUtils.getLock("lfs-storage:" + getGitDir().getAbsolutePath());
-		lock.lock();
-		try {
-			FileUtils.createDir(objectDir);
-		} finally {
-			lock.unlock();
-		}
-		return new File(objectDir, objectId);
-	}
-	
-	public ReadWriteLock getLfsObjectLock(String objectId) {
-		return LockUtils.getReadWriteLock("lfs-objects:" + objectId);
-	}
-
-	public boolean isLfsObjectExists(String objectId) {
-		Lock readLock = getLfsObjectLock(objectId).readLock();
-		readLock.lock();
-		try {
-			return getLfsObjectFile(objectId).exists();
-		} finally {
-			readLock.unlock();
-		}
-	}
-	
-	public InputStream getLfsObjectInputStream(String objectId) {
-		Lock readLock = getLfsObjectLock(objectId).readLock();
-		readLock.lock();
-		try {
-			return new FilterInputStream(new FileInputStream(getLfsObjectFile(objectId))) {
-
-				@Override
-				public void close() throws IOException {
-					super.close();
-					readLock.unlock();
-				}
-				
-			};
-		} catch (FileNotFoundException e) {
-			readLock.unlock();
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public MediaType detectLfsObjectMediaType(String objectId, String fileName) {
-		try (InputStream is = getLfsObjectInputStream(objectId)) {
-			return ContentDetector.detectMediaType(is, fileName);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public MediaType detectMediaType(BlobIdent blobIdent) {
-		Blob blob = getBlob(blobIdent, true);
-		if (blob.getLfsPointer() != null)
-			return detectLfsObjectMediaType(blob.getLfsPointer().getObjectId(), blobIdent.getName());
-		else
-			return blob.getMediaType();
-	}
-
 	public String calcPath() {
 		if (getParent() != null)
 			return getParent().calcPath() + "/" + getName();
@@ -1956,22 +1447,19 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public boolean hasValidCommitSignature(RevCommit commit) {
-		SignatureVerificationKeyLoader keyLoader = OneDev.getInstance(SignatureVerificationKeyLoader.class);
+		SignatureVerificationKeyLoader keyLoader = 
+				OneDev.getInstance(SignatureVerificationKeyLoader.class);
 		return GitUtils.verifySignature(commit, keyLoader) instanceof SignatureVerified;
 	}
 	
 	public boolean hasValidCommitSignature(ObjectId commitId, Map<String, String> gitEnvs) {
-		GetRawCommitCommand cmd = new GetRawCommitCommand(getGitDir(), gitEnvs);
-		cmd.revision(commitId.name());
-		byte[] commitRawData = cmd.call();
+		byte[] commitRawData = getGitService().getRawCommit(this, commitId, gitEnvs);
 		SignatureVerificationKeyLoader keyLoader = OneDev.getInstance(SignatureVerificationKeyLoader.class);
 		return GitUtils.verifyCommitSignature(commitRawData, keyLoader) instanceof SignatureVerified;
 	}
 	
 	public boolean hasValidTagSignature(ObjectId tagId, Map<String, String> gitEnvs) {
-		GetRawTagCommand cmd = new GetRawTagCommand(getGitDir(), gitEnvs);
-		cmd.revision(tagId.name());
-		byte[] tagRawData = cmd.call();
+		byte[] tagRawData = getGitService().getRawTag(this, tagId, gitEnvs);
 		SignatureVerificationKeyLoader keyLoader = OneDev.getInstance(SignatureVerificationKeyLoader.class);
 		return tagRawData != null && GitUtils.verifyTagSignature(tagRawData, keyLoader) instanceof SignatureVerified;
 	}
@@ -2022,7 +1510,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedIssueQuery>) OneDev.getInstance(SettingManager.class).getIssueSetting().getNamedQueries();
+		return (ArrayList<NamedIssueQuery>) getSettingManager().getIssueSetting().getNamedQueries();
 	}
 	
 	public List<NamedBuildQuery> getNamedBuildQueries() {
@@ -2034,7 +1522,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedBuildQuery>) OneDev.getInstance(SettingManager.class).getBuildSetting().getNamedQueries();
+		return (ArrayList<NamedBuildQuery>) getSettingManager().getBuildSetting().getNamedQueries();
 	}
 	
 	public List<NamedPullRequestQuery> getNamedPullRequestQueries() {
@@ -2046,8 +1534,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			current = current.getParent();
 		} while (current != null); 
 		
-		return (ArrayList<NamedPullRequestQuery>) OneDev.getInstance(SettingManager.class)
-				.getPullRequestSetting().getNamedQueries();
+		return (ArrayList<NamedPullRequestQuery>) getSettingManager().getPullRequestSetting().getNamedQueries();
 	}
 
 	public List<BoardSpec> getHierarchyBoards() {
@@ -2062,7 +1549,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} while (current != null);
 		
 		if (boards == null)
-			boards = OneDev.getInstance(SettingManager.class).getIssueSetting().getBoardSpecs();
+			boards = getSettingManager().getIssueSetting().getBoardSpecs();
 		return boards;
 	}
 	
@@ -2075,6 +1562,30 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		projects.addAll(getDescendants());
 		projects.addAll(getAncestors());
 		return projects;
+	}
+	
+	public MediaType detectMediaType(BlobIdent blobIdent) {
+		Blob blob = getBlob(blobIdent, true);
+		if (blob.getLfsPointer() != null) {
+			return new LfsObject(getId(), blob.getLfsPointer().getObjectId())
+					.detectMediaType(blobIdent.getName());
+		} else {
+			return blob.getMediaType();
+		}
+	}
+	
+	@Nullable
+	public UUID getStorageServerUUID(boolean mustExist) {
+		if (storageServerUUID == null) {
+			storageServerUUID = Optional.fromNullable(
+					getProjectManager().getStorageServerUUID(getId(), false));
+		}
+		if (storageServerUUID.isPresent())
+			return storageServerUUID.get();
+		else if (mustExist) 
+			throw new ExplicitException("Storage not found for project: " + getPath());
+		else
+			return null;
 	}
 	
 }

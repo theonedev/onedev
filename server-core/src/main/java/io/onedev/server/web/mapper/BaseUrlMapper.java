@@ -76,6 +76,7 @@ import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthenticationPage;
 import io.onedev.server.web.page.project.NewProjectPage;
+import io.onedev.server.web.page.project.NoProjectStoragePage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
@@ -206,7 +207,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BaseResourceMapper("projects/${project}/raw", new RawBlobResourceReference()));
 		
 		// Change AttachmentResource.authorizeGroup accordingly if change attachment url here
-		add(new BaseResourceMapper("projects/${project}/attachment/${group}/${attachment}", 
+		add(new BaseResourceMapper("projects/${project}/attachment/${attachment-group}/${attachment}", 
 				new AttachmentResourceReference()));
 		
 		add(new BaseResourceMapper("downloads/projects/${project}/builds/${build}/artifacts", 
@@ -368,6 +369,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
 		add(new BasePageMapper("projects/${project}/settings/${" + ContributedProjectSettingPage.PARAM_SETTING + "}", 
 				ContributedProjectSettingPage.class));
+		add(new BasePageMapper("projects/${project}/no-storage", NoProjectStoragePage.class));
+		
 	}
 
 }

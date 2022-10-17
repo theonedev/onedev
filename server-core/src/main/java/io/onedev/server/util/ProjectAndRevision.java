@@ -8,12 +8,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 
 public class ProjectAndRevision implements Serializable {
@@ -53,7 +53,7 @@ public class ProjectAndRevision implements Serializable {
 	
 	@Nullable
 	public String getBranch() {
-		Ref branchRef = getProject().getBranchRef(getRevision());
+		RefFacade branchRef = getProject().getBranchRef(getRevision());
 		if (branchRef != null)
 			return GitUtils.ref2branch(branchRef.getName());
 		else
@@ -62,7 +62,7 @@ public class ProjectAndRevision implements Serializable {
 	
 	@Nullable
 	public String getTag() {
-		Ref tagRef = getProject().getTagRef(getRevision());
+		RefFacade tagRef = getProject().getTagRef(getRevision());
 		if (tagRef != null)
 			return GitUtils.ref2tag(tagRef.getName());
 		else

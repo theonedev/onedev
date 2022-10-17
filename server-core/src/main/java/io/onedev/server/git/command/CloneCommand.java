@@ -5,16 +5,17 @@ import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class CloneCommand extends GitCommand<Void> {
+public class CloneCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(CloneCommand.class);
 	
-	private String from;
+	private final File workingDir;
+	
+	private final String from;
 	
 	private boolean bare;
 	
@@ -28,15 +29,11 @@ public class CloneCommand extends GitCommand<Void> {
 	
 	private String branch;
 	
-	public CloneCommand(File gitDir) {
-		super(gitDir);
+	public CloneCommand(File workingDir, String from) {
+		this.workingDir = workingDir;
+		this.from = from;
 	}
 
-	public CloneCommand from(String from) {
-		this.from = from;
-		return this;
-	}
-	
 	public CloneCommand bare(boolean bare) {
 		this.bare = bare;
 		return this;
@@ -67,29 +64,30 @@ public class CloneCommand extends GitCommand<Void> {
 		return this;
 	}
 	
-	@Override
-	public Void call() {
-		Preconditions.checkNotNull(from, "from has to be specified.");
-		
-		Commandline cmd = cmd().addArgs("clone");
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
+	
+	public void run() {
+		Commandline git = newGit().workingDir(workingDir).addArgs("clone");
 		if (bare)
-			cmd.addArgs("--bare");
+			git.addArgs("--bare");
 		if (mirror)
-			cmd.addArgs("--mirror");
+			git.addArgs("--mirror");
 		if (shared) 
-			cmd.addArgs("--shared");
+			git.addArgs("--shared");
 		if (noCheckout) 
-			cmd.addArgs("--no-checkout");
+			git.addArgs("--no-checkout");
 		if (branch != null)
-			cmd.addArgs("-b", branch);
+			git.addArgs("-b", branch);
 		
 		if (noLfs)
-			cmd.environments().put("GIT_LFS_SKIP_SMUDGE", "1");
+			git.environments().put("GIT_LFS_SKIP_SMUDGE", "1");
 		
-		cmd.addArgs(from);
-		cmd.addArgs(".");
+		git.addArgs(from);
+		git.addArgs(".");
 		
-		cmd.execute(new LineConsumer() {
+		git.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -109,8 +107,6 @@ public class CloneCommand extends GitCommand<Void> {
 			}
 			
 		}).checkReturnCode();
-		
-		return null;
 	}
 
 }

@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
@@ -221,8 +221,7 @@ public class DefaultIssueInfoManager extends AbstractSingleEnvironmentManager
 	@Override
 	protected File getEnvDir() {
 		File infoDir = new File(storageManager.getInfoDir(), INFO_DIR);
-		if (!infoDir.exists()) 
-			FileUtils.createDir(infoDir);
+		FileUtils.createDir(infoDir);
 		return infoDir;
 	}
 

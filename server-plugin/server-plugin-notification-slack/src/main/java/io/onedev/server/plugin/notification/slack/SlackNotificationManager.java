@@ -24,8 +24,6 @@ import com.vladsch.flexmark.formatter.NodeFormattingHandler.CustomNodeFormatter;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.channelnotification.ChannelNotificationManager;
 import io.onedev.server.util.commenttext.CommentText;
@@ -38,9 +36,8 @@ public class SlackNotificationManager extends ChannelNotificationManager<SlackNo
 	private final MarkdownManager markdownManager;
 	
 	@Inject
-	public SlackNotificationManager(Dao dao, SessionManager sessionManager, ObjectMapper objectMapper, 
-			MarkdownManager markdownManager) {
-		super(dao, sessionManager, objectMapper);
+	public SlackNotificationManager(ObjectMapper objectMapper, MarkdownManager markdownManager) {
+		super(objectMapper);
 		this.markdownManager = markdownManager;
 	} 
 	

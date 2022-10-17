@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.project.blob.render.commitoption;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,22 +24,16 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -49,6 +42,8 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.PathChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -131,6 +126,10 @@ public class CommitOptionPanel extends Panel {
 			}
 		}
 			
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	private void newChangesOfOthersContainer(@Nullable AjaxRequestTarget target) {
@@ -258,101 +257,90 @@ public class CommitOptionPanel extends Panel {
 			
 			String refName = GitUtils.branch2ref(revision);
 			
-			Repository repository = context.getProject().getRepository();
 			ObjectId newCommitId = null;
-
-			Map<String, BlobContent> newBlobs = new HashMap<>();
-			if (newContentProvider != null) {
-				String newPath = context.getNewPath();
-				if (context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
-					form.error("Review required for this change. Please submit pull request instead");
-					target.add(form);
-					return false;
-				} else if (context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
-					form.error("Build required for this change. Please submit pull request instead");
-					target.add(form);
-					return false;
-				} else if (context.getProject().isCommitSignatureRequiredButNoSigningKey(user, revision)) {
-					form.error("Signature required for this change, but no signing key is specified");
-					target.add(form);
-					return false;
-				}
-				
-				newBlobs.put(context.getNewPath(), new BlobContent() {
-
-					@Override
-					public byte[] getBytes() {
-						return newContentProvider.get();
-					}
-
-					@Override
-					public FileMode getMode() {
-						if (context.getBlobIdent().isFile())
-							return FileMode.fromBits(context.getBlobIdent().mode);
-						else
-							return FileMode.REGULAR_FILE;
-					}
-
-				});
-			}
-
-			PGPSecretKeyRing signingKey = OneDev.getInstance(SettingManager.class)
-					.getGpgSetting().getSigningKey();
-			
 			while(newCommitId == null) {
 				try {
-					newCommitId = new BlobEdits(oldPaths, newBlobs).commit(repository, refName, 
-							prevCommitId, prevCommitId, user.asPerson(), commitMessage, signingKey);
-				} catch (ObjectAlreadyExistsException e) {
-					form.error("A path with same name already exists. "
-							+ "Please choose a different name and try again.");
-					target.add(form);
-					break;
-				} catch (NotTreeException e) {
-					form.error("A file exists where you’re trying to create a subdirectory. "
-							+ "Choose a new path and try again..");
-					target.add(form);
-					break;
-				} catch (ObsoleteCommitException e) {
-					try (RevWalk revWalk = new RevWalk(repository)) {
-						ObjectId lastPrevCommitId = prevCommitId;
-						send(this, Broadcast.BUBBLE, new RevisionResolved(target, e.getOldCommitId()));
-						prevCommitId = e.getOldCommitId();
-						RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
+					Map<String, BlobContent> newBlobs = new HashMap<>();
+					if (newContentProvider != null) {
+						String newPath = context.getNewPath();
+						if (context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
+							form.error("Review required for this change. Please submit pull request instead");
+							target.add(form);
+							return false;
+						} else if (context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
+							form.error("Build required for this change. Please submit pull request instead");
+							target.add(form);
+							return false;
+						} else if (context.getProject().isCommitSignatureRequiredButNoSigningKey(user, revision)) {
+							form.error("Signature required for this change, but no signing key is specified");
+							target.add(form);
+							return false;
+						}
+						
+						int mode;
+						if (context.getBlobIdent().isFile())
+							mode = context.getBlobIdent().mode;
+						else
+							mode = FileMode.REGULAR_FILE.getBits();
+						newBlobs.put(context.getNewPath(), new BlobContent(newContentProvider.get(), mode));
+					}
 
+					newCommitId = getGitService().commit(context.getProject(), 
+							new BlobEdits(oldPaths, newBlobs), refName, prevCommitId, prevCommitId, 
+							user.asPerson(), commitMessage, false);
+				} catch (Exception e) {
+					ObjectAlreadyExistsException objectAlreadyExistsException = 
+							ExceptionUtils.find(e, ObjectAlreadyExistsException.class);
+					NotTreeException notTreeException = ExceptionUtils.find(e, NotTreeException.class);
+					ObsoleteCommitException obsoleteCommitException = 
+							ExceptionUtils.find(e, ObsoleteCommitException.class);
+					
+					if (objectAlreadyExistsException != null) {
+						form.error("A path with same name already exists. "
+								+ "Please choose a different name and try again.");
+						target.add(form);
+						break;
+					} else if (notTreeException != null) {
+						form.error("A file exists where you’re trying to create a subdirectory. "
+								+ "Choose a new path and try again..");
+						target.add(form);
+						break;
+					} else if (obsoleteCommitException != null) {
+						send(this, Broadcast.BUBBLE, new RevisionResolved(target, obsoleteCommitException.getOldCommitId()));
+						ObjectId lastPrevCommitId = prevCommitId;
+						prevCommitId = obsoleteCommitException.getOldCommitId();
 						if (!oldPaths.isEmpty()) {
-							RevCommit lastPrevCommit = revWalk.parseCommit(lastPrevCommitId);
-							TreeWalk treeWalk = TreeWalk.forPath(repository, oldPaths.iterator().next(), 
-									lastPrevCommit.getTree().getId(), prevCommit.getTree().getId());
-							Preconditions.checkNotNull(treeWalk);
-							if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
-									|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
+							String path = oldPaths.iterator().next();
+							PathChange pathChange = getGitService().getPathChange(context.getProject(), 
+									lastPrevCommitId, prevCommitId, path);
+							Preconditions.checkNotNull(pathChange);
+							if (!pathChange.getOldObjectId().equals(pathChange.getNewObjectId()) 
+									|| pathChange.getOldMode() != pathChange.getNewMode()) {
 								// mark changed if original file exists and content or mode has been modified
 								// by others
-								if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
+								if (pathChange.getNewObjectId().equals(ObjectId.zeroId())) {
 									if (newContentProvider != null) {
 										oldPaths.clear();
-										changesOfOthers = getChange(treeWalk, lastPrevCommit, prevCommit);
+										changesOfOthers = getBlobChange(path, pathChange, lastPrevCommitId, prevCommitId);
 										form.warn("Someone made below change since you started editing");
 										break;
 									} else {
-										newCommitId = e.getOldCommitId();
+										newCommitId = obsoleteCommitException.getOldCommitId();
 									}
 								} else {
-									changesOfOthers = getChange(treeWalk, lastPrevCommit, prevCommit);
+									changesOfOthers = getBlobChange(path, pathChange, lastPrevCommitId, prevCommitId);
 									form.warn("Someone made below change since you started editing");
 									break;
 								}
 							} 
-						} 
-					} catch (IOException e2) {
-						throw new RuntimeException(e2);
+						}
+					} else {
+						throw ExceptionUtils.unchecked(e);
 					}
 				}
 			}
 			if (newCommitId != null) {
-				RefUpdated refUpdated = new RefUpdated(context.getProject(), refName, prevCommitId, newCommitId);
-				context.onCommitted(target, refUpdated);
+				context.onCommitted(target, newCommitId);
 				target.appendJavaScript("$(window).resize();");
 				return true;
 			} else {
@@ -362,21 +350,22 @@ public class CommitOptionPanel extends Panel {
 		}
 	}
 	
-	private BlobChange getChange(TreeWalk treeWalk, RevCommit oldCommit, RevCommit newCommit) {
+	private BlobChange getBlobChange(String path, PathChange pathChange, 
+			ObjectId oldCommitId, ObjectId newCommitId) {
 		DiffEntry.ChangeType changeType = DiffEntry.ChangeType.MODIFY;
 		BlobIdent oldBlobIdent;
-		if (!treeWalk.getObjectId(0).equals(ObjectId.zeroId())) {
-			oldBlobIdent = new BlobIdent(oldCommit.name(), treeWalk.getPathString(), treeWalk.getRawMode(0));
+		if (!pathChange.getOldObjectId().equals(ObjectId.zeroId())) {
+			oldBlobIdent = new BlobIdent(oldCommitId.name(), path, pathChange.getOldMode());
 		} else {
-			oldBlobIdent = new BlobIdent(oldCommit.name(), null, FileMode.TREE.getBits());
+			oldBlobIdent = new BlobIdent(oldCommitId.name(), null, FileMode.TREE.getBits());
 			changeType = DiffEntry.ChangeType.ADD;
 		}
 		
 		BlobIdent newBlobIdent;
-		if (!treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
-			newBlobIdent = new BlobIdent(newCommit.name(), treeWalk.getPathString(), treeWalk.getRawMode(1));
+		if (!pathChange.getNewObjectId().equals(ObjectId.zeroId())) {
+			newBlobIdent = new BlobIdent(newCommitId.name(), path, pathChange.getNewMode());
 		} else {
-			newBlobIdent = new BlobIdent(newCommit.name(), null, FileMode.TREE.getBits());
+			newBlobIdent = new BlobIdent(newCommitId.name(), null, FileMode.TREE.getBits());
 			changeType = DiffEntry.ChangeType.DELETE;
 		}
 		

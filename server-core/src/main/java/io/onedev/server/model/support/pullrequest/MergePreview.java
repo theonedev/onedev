@@ -6,11 +6,6 @@ import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.RefUpdate;
-
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 
 @SuppressWarnings("serial")
@@ -98,16 +93,4 @@ public class MergePreview implements Serializable {
 				&& getMergeStrategy() == request.getMergeStrategy();
 	}
 
-	public void syncRef(PullRequest request) {
-		Project project = request.getTargetProject();
-		ObjectId mergedId = getMergeCommitHash()!=null? ObjectId.fromString(getMergeCommitHash()): null;
-		RefUpdate refUpdate = GitUtils.getRefUpdate(project.getRepository(), request.getMergeRef());
-		if (mergedId != null && !mergedId.equals((project.getObjectId(request.getMergeRef(), false)))) {
-			refUpdate.setNewObjectId(mergedId);
-			GitUtils.updateRef(refUpdate);
-		} else if (mergeCommitHash == null && project.getObjectId(request.getMergeRef(), false) != null) {
-			GitUtils.deleteRef(refUpdate);
-		}		
-	}
-	
 }

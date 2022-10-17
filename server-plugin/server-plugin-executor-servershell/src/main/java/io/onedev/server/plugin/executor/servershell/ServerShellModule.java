@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
-import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
@@ -40,8 +39,7 @@ public class ServerShellModule extends AbstractPluginModule {
 			contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
 
 				@Override
-				public JobExecutor discover(TaskLogger jobLogger) {		
-					jobLogger.log("Fallback to shell facility");
+				public JobExecutor discover() {		
 					return new ServerShellExecutor();
 				}
 

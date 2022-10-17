@@ -2,38 +2,29 @@ package io.onedev.server.event.pullrequest;
 
 import java.util.Date;
 
-import javax.annotation.Nullable;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestAssigned extends PullRequestEvent {
 
-	private final User assignee;
+	private static final long serialVersionUID = 1L;
+	
+	private final Long assigneeId;
 	
 	public PullRequestAssigned(User user, Date date, PullRequest request, User assignee) {
 		super(user, date, request);
-		this.assignee = assignee;
+		assigneeId = assignee.getId();
 	}
 	
 	@Override
 	public String getActivity() {
-		return "assigned to \"" + assignee.getDisplayName() + "\"";
+		return "assigned to \"" + getAssignee().getDisplayName() + "\"";
 	}
 
-	@Nullable
 	public User getAssignee() {
-		return assignee;
+		return OneDev.getInstance(UserManager.class).load(assigneeId);
 	}
 
-	@Override
-	public PullRequestEvent cloneIn(Dao dao) {
-		return new PullRequestAssigned(
-				dao.load(User.class, getUser().getId()),
-				getDate(),
-				dao.load(PullRequest.class, getRequest().getId()), 
-				dao.load(User.class, assignee.getId()));
-	}
-	
 }

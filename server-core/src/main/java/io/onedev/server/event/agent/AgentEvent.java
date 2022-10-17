@@ -1,16 +1,12 @@
 package io.onedev.server.event.agent;
 
-import java.util.Date;
-
-import io.onedev.server.event.Event;
 import io.onedev.server.model.Agent;
 
-public abstract class AgentEvent extends Event {
+public abstract class AgentEvent {
 	
 	private final Agent agent;
 	
 	public AgentEvent(Agent agent) {
-		super(null, new Date());
 		this.agent = agent;
 	}
 

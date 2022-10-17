@@ -82,11 +82,11 @@ public class CoverageReportPage extends BuildReportPage {
 
 		@Override
 		protected CoverageReport load() {
-			return LockUtils.read(CoverageReport.getReportLockKey(getBuild()), new Callable<CoverageReport>() {
+			return LockUtils.read(CoverageReport.getReportLockName(getBuild()), new Callable<CoverageReport>() {
 
 				@Override
 				public CoverageReport call() throws Exception {
-					return CoverageReport.readFrom(new File(getBuild().getPublishDir(), CoverageReport.CATEGORY + "/" + getReportName()));
+					return CoverageReport.readFrom(new File(getBuild().getDir(), CoverageReport.CATEGORY + "/" + getReportName()));
 				}
 				
 			});

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.AppLoaderMocker;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.git.command.GitCommand;
 import io.onedev.server.git.config.GitConfig;
 
 public abstract class AbstractGitTest extends AppLoaderMocker {
@@ -59,7 +58,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 			
 		});
 		
-		String gitError = GitCommand.checkError("git");
+		String gitError = CommandUtils.checkError("git");
 	    Assert.assertTrue(gitError, gitError == null);
 	}
 

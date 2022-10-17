@@ -66,10 +66,10 @@ import com.sun.mail.imap.IMAPFolder;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
@@ -84,6 +84,7 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.EmailAddress;
@@ -154,6 +155,8 @@ public class DefaultMailManager implements MailManager {
 	
 	private final UrlManager urlManager;
 	
+	private final AttachmentManager attachmentManager;
+	
 	private volatile Thread thread;
 	
 	@Inject
@@ -164,7 +167,7 @@ public class DefaultMailManager implements MailManager {
 			PullRequestManager pullRequestManager, PullRequestCommentManager pullRequestCommentManager, 
 			PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
 			UrlManager urlManager, EmailAddressManager emailAddressManager, 
-			IssueAuthorizationManager issueAuthorizationManager) {
+			IssueAuthorizationManager issueAuthorizationManager, AttachmentManager attachmentManager) {
 		this.transactionManager = transactionManager;
 		this.settingManager = setingManager;
 		this.userManager = userManager;
@@ -180,6 +183,7 @@ public class DefaultMailManager implements MailManager {
 		this.urlManager = urlManager;
 		this.emailAddressManager = emailAddressManager;
 		this.issueAuthorizationManager = issueAuthorizationManager;
+		this.attachmentManager = attachmentManager;
 	}
 
 	@Sessional
@@ -1051,7 +1055,7 @@ public class DefaultMailManager implements MailManager {
 	    if (part.getDisposition() != null) {
 	    	String[] contentId = part.getHeader("Content-ID");
 	    	String fileName = MimeUtility.decodeText(part.getFileName());
-	        String attachmentName = project.saveAttachment(attachmentGroup, fileName, part.getInputStream());
+	        String attachmentName = attachmentManager.saveAttachment(project.getId(), attachmentGroup, fileName, part.getInputStream());
 			String attachmentUrl = project.getAttachmentUrlPath(attachmentGroup, attachmentName);
 			Attachment attachment;
 	        if (part.isMimeType("image/*"))

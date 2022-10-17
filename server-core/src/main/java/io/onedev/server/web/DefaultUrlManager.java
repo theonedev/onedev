@@ -42,8 +42,13 @@ public class DefaultUrlManager implements UrlManager {
 	}
 	
 	@Override
+	public String urlForProject(Long projectId) {
+		return settingManager.getSystemSetting().getServerUrl() + "/projects/" + projectId;
+	}
+	
+	@Override
 	public String urlFor(Project project) {
-		return settingManager.getSystemSetting().getServerUrl() + "/projects/" + project.getId();
+		return urlForProject(project.getId());
 	}
 
 	@Override

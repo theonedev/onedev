@@ -1,15 +1,10 @@
 package io.onedev.server.persistence.dao;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Project;
 import io.onedev.server.util.ReflectionUtils;
 
 public abstract class BaseEntityManager<T extends AbstractEntity> implements EntityManager<T> {
@@ -17,8 +12,6 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 	private final Class<T> entityClass;
 	
 	protected final Dao dao;
-	
-	private final Map<Long, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
 	public BaseEntityManager(Dao dao) {
@@ -31,46 +24,6 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 		}
 		this.dao = dao;
     }
-	
-	@Override
-	public Long getNextNumber(Project numberScope) {
-		AtomicLong nextNumber;
-		synchronized (nextNumbers) {
-			nextNumber = nextNumbers.get(numberScope.getId());
-		}
-		if (nextNumber == null) {
-			long maxNumber;
-			Query<?> query = getSession().createQuery(String.format("select max(%s) from %s where %s=:numberScope", 
-					AbstractEntity.PROP_NUMBER, entityClass.getSimpleName(), AbstractEntity.PROP_NUMBER_SCOPE));
-			query.setParameter(AbstractEntity.PROP_NUMBER_SCOPE, numberScope);
-			
-			Object result = query.uniqueResult();
-			if (result != null) 
-				maxNumber = (Long)result;
-			else 
-				maxNumber = 0;
-			
-			/*
-			 * do not put the whole method in synchronized block to avoid possible deadlocks
-			 * if there are limited connections. 
-			 */
-			synchronized (nextNumbers) {
-				nextNumber = nextNumbers.get(numberScope.getId());
-				if (nextNumber == null) {
-					nextNumber = new AtomicLong(maxNumber+1);
-					nextNumbers.put(numberScope.getId(), nextNumber);
-				}
-			}
-		} 
-		return nextNumber.getAndIncrement();
-	}
-	
-	@Override
-	public void resetNextNumber(Project numberScope) {
-		synchronized (nextNumbers) {
-			nextNumbers.remove(numberScope.getId());
-		}
-	}
 	
 	@Override
 	public T get(Long entityId) {

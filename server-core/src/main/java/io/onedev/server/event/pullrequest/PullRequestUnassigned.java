@@ -4,36 +4,30 @@ import java.util.Date;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestUnassigned extends PullRequestEvent {
 
-	private final User assignee;
+	private static final long serialVersionUID = 1L;
+	
+	private final Long assigneeId;
 	
 	public PullRequestUnassigned(User user, Date date, PullRequest request, User assignee) {
 		super(user, date, request);
-		this.assignee = assignee;
+		assigneeId = assignee.getId();
 	}
 	
 	@Override
 	public String getActivity() {
-		return "unassigned from \"" + assignee.getDisplayName() + "\"";
+		return "unassigned from \"" + getAssignee().getDisplayName() + "\"";
 	}
 	
 	@Nullable
 	public User getAssignee() {
-		return assignee;
-	}
-
-	@Override
-	public PullRequestEvent cloneIn(Dao dao) {
-		return new PullRequestUnassigned(
-				dao.load(User.class, getUser().getId()),
-				getDate(),
-				dao.load(PullRequest.class, getRequest().getId()), 
-				dao.load(User.class, assignee.getId()));
+		return OneDev.getInstance(UserManager.class).load(assigneeId);
 	}
 
 }

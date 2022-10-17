@@ -6,14 +6,12 @@ import static javax.servlet.http.HttpServletResponse.SC_CREATED;
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_IMPLEMENTED;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,7 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,25 +36,34 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.tika.mime.MimeTypes;
+import org.glassfish.jersey.client.ClientProperties;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
 
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.FileUtils;
+import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -65,6 +74,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.ProjectFacade;
 
 @Singleton
 public class GitLfsFilter implements Filter {
@@ -87,17 +97,20 @@ public class GitLfsFilter implements Filter {
 	
 	private final GitLfsLockManager lockManager;
 	
+	private final ClusterManager clusterManager;
+	
 	private final Set<CodePullAuthorizationSource> codePullAuthorizationSources;
 	
 	@Inject
 	public GitLfsFilter(ProjectManager projectManager, ObjectMapper objectMapper, SessionManager sessionManager, 
-			SettingManager settingManager, GitLfsLockManager lockManager, 
+			SettingManager settingManager, GitLfsLockManager lockManager, ClusterManager clusterManager,
 			Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
 		this.projectManager = projectManager;
 		this.objectMapper = objectMapper;
 		this.sessionManager = sessionManager;
 		this.settingManager = settingManager;
 		this.lockManager = lockManager;
+		this.clusterManager = clusterManager;
 		this.codePullAuthorizationSources = codePullAuthorizationSources;
 	}
 	
@@ -146,62 +159,144 @@ public class GitLfsFilter implements Filter {
 		String uri = httpRequest.getRequestURI();
 		String pathInfo = uri.substring(httpRequest.getContextPath().length());
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
+		boolean clusterAccess = User.SYSTEM_ID.equals(SecurityUtils.getUserId());
+		
 		if ("true".equals(httpRequest.getParameter("lfs-objects"))) {
+			String projectPath = getProjectPath(pathInfo);
+			String objectId = StringUtils.substringAfterLast(pathInfo, "/");
+			
 			if (httpRequest.getMethod().equals("GET")) {
-				LfsObjectAccess lfsObjectAccess = null;
-				sessionManager.openSession();
-				try {
-					Project project = Preconditions.checkNotNull(projectManager.findByPath(getProjectPath(pathInfo)));
-					String objectId = StringUtils.substringAfterLast(pathInfo, "/");
-					if (canReadCode(httpRequest, project))  
-						lfsObjectAccess = new LfsObjectAccess(project.getLfsObjectFile(objectId), project.getLfsObjectLock(objectId).readLock());
-					else 
-						sendAuthorizationError(httpResponse);
-				} finally {
-					sessionManager.closeSession();
+				LfsObject lfsObject = null;
+				if (clusterAccess) {
+					lfsObject = new LfsObject(projectManager.findFacadeByPath(projectPath).getId(), objectId);
+				} else {
+					sessionManager.openSession();
+					try {
+						Project project = projectManager.findByPath(projectPath);
+						if (canReadCode(httpRequest, project))  
+							lfsObject = new LfsObject(project.getId(), objectId);
+						else 
+							sendAuthorizationError(httpResponse);
+					} finally {
+						sessionManager.closeSession();
+					}
 				}
 
-				if (lfsObjectAccess != null) {
+				if (lfsObject != null) {
 					httpResponse.setContentType(MimeTypes.OCTET_STREAM);
-					lfsObjectAccess.lock.lock();
-					try (
-							InputStream is = new BufferedInputStream(new FileInputStream(lfsObjectAccess.file), Bootstrap.BUFFER_SIZE);
-							OutputStream os = new BufferedOutputStream(httpResponse.getOutputStream(), Bootstrap.BUFFER_SIZE);) {
-						IOUtils.copy(is, os);
-					} finally {
-						lfsObjectAccess.lock.unlock();
+					UUID storageServerUUID = null;
+					if (!clusterAccess) {
+						storageServerUUID = projectManager.getStorageServerUUID(lfsObject.getProjectId(), true);
+						if (storageServerUUID.equals(clusterManager.getLocalServerUUID()))
+							storageServerUUID = null;
+					}
+					if (storageServerUUID == null) {
+						try (
+								InputStream is = new BufferedInputStream(lfsObject.getInputStream(), BUFFER_SIZE);
+								OutputStream os = new BufferedOutputStream(httpResponse.getOutputStream(), BUFFER_SIZE);) {
+							IOUtils.copy(is, os);
+						}
+					} else {
+						Client client = ClientBuilder.newClient();
+						try {
+							String serverUrl = clusterManager.getServerUrl(storageServerUUID);
+							WebTarget target = client.target(serverUrl)
+									.path("api/cluster/lfs")
+									.queryParam("projectId", lfsObject.getProjectId())
+									.queryParam("objectId", lfsObject.getObjectId());
+							Invocation.Builder builder =  target.request();
+							builder.header(HttpHeaders.AUTHORIZATION, 
+									KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+							try (Response lfsResponse = builder.get()){
+								KubernetesHelper.checkStatus(lfsResponse);
+								try (
+										InputStream is = new BufferedInputStream(
+												lfsResponse.readEntity(InputStream.class), BUFFER_SIZE);
+										OutputStream os = new BufferedOutputStream(
+												httpResponse.getOutputStream(), BUFFER_SIZE);) {
+									IOUtils.copy(is, os);
+								}
+							}
+						} finally {
+							client.close();
+						}
 					}
 				}
 			} else {
-				String objectId = StringUtils.substringAfterLast(pathInfo, "/");
-				LfsObjectAccess lfsObjectAccess = null;
-				sessionManager.openSession();
-				try {
-					Project project = Preconditions.checkNotNull(projectManager.findByPath(getProjectPath(pathInfo)));
-					if (SecurityUtils.canWriteCode(project))  
-						lfsObjectAccess = new LfsObjectAccess(project.getLfsObjectFile(objectId), project.getLfsObjectLock(objectId).writeLock());
-					else 
-						sendAuthorizationError(httpResponse);
-				} finally {
-					sessionManager.closeSession();
+				LfsObject lfsObject = null;
+				if (clusterAccess) {
+					lfsObject = new LfsObject(projectManager.findFacadeByPath(projectPath).getId(), objectId);
+				} else {
+					sessionManager.openSession();
+					try {
+						Project project = projectManager.findByPath(getProjectPath(pathInfo));
+						if (SecurityUtils.canWriteCode(project))  
+							lfsObject = new LfsObject(project.getId(), objectId);
+						else 
+							sendAuthorizationError(httpResponse);
+					} finally {
+						sessionManager.closeSession();
+					}
 				}
 
-				if (lfsObjectAccess != null) {
-					lfsObjectAccess.lock.lock();
-					try {
-						String hash;
+				if (lfsObject != null) {
+					UUID storageServerUUID = null;
+					if (!clusterAccess) {
+						storageServerUUID = projectManager.getStorageServerUUID(lfsObject.getProjectId(), true);
+						if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) 
+							storageServerUUID = null;
+					}
+					
+					var hash = new AtomicReference<String>(null);
+					if (storageServerUUID == null) {
 						try (
-								HashingInputStream is = new HashingInputStream(Hashing.sha256(), new BufferedInputStream(httpRequest.getInputStream(), Bootstrap.BUFFER_SIZE));
-								OutputStream os = new BufferedOutputStream(new FileOutputStream(lfsObjectAccess.file), Bootstrap.BUFFER_SIZE);) {
+								HashingInputStream is = new HashingInputStream(
+										Hashing.sha256(), 
+										new BufferedInputStream(httpRequest.getInputStream(), BUFFER_SIZE));
+								OutputStream os = new BufferedOutputStream(
+										lfsObject.getOutputStream(), BUFFER_SIZE);) {
 							IOUtils.copy(is, os);
-							hash = Hex.encodeHexString(is.hash().asBytes());
+							hash.set(Hex.encodeHexString(is.hash().asBytes()));
 						}
-						if (!hash.equals(objectId)) {
-							FileUtils.deleteFile(lfsObjectAccess.file);
-							throw new RuntimeException("Invalid uploaded content: hash not equals to object id");
+					} else {
+						Client client = ClientBuilder.newClient();
+						client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
+						try {
+							String serverUrl = clusterManager.getServerUrl(storageServerUUID);
+							WebTarget target = client.target(serverUrl)
+									.path("api/cluster/lfs")
+									.queryParam("projectId", lfsObject.getProjectId())
+									.queryParam("objectId", lfsObject.getObjectId());
+							Invocation.Builder builder =  target.request();
+							builder.header(HttpHeaders.AUTHORIZATION, 
+									KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+							
+							StreamingOutput os = new StreamingOutput() {
+
+								@Override
+								public void write(OutputStream output) throws IOException {
+									try (
+											HashingInputStream is = new HashingInputStream(
+													Hashing.sha256(), 
+													new BufferedInputStream(httpRequest.getInputStream(), BUFFER_SIZE));
+											OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
+										IOUtils.copy(is, os);
+										hash.set(Hex.encodeHexString(is.hash().asBytes()));
+									}
+								}				   
+							   
+							};
+							
+							try (Response lfsResponse = builder.post(Entity.entity(os, MediaType.APPLICATION_OCTET_STREAM))) {
+								KubernetesHelper.checkStatus(lfsResponse);
+							}
+						} finally {
+							client.close();
 						}
-					} finally {
-						lfsObjectAccess.lock.unlock();
+					}
+					if (!objectId.equals(hash.get())) {
+						lfsObject.delete();
+						throw new RuntimeException("Invalid uploaded content: hash not equals to object id");
 					}
 				}
 			}				
@@ -209,119 +304,149 @@ public class GitLfsFilter implements Filter {
 					&& httpRequest.getContentType().startsWith(CONTENT_TYPE)
 				|| httpRequest.getHeader("Accept") != null 
 					&& httpRequest.getHeader("Accept").startsWith(CONTENT_TYPE)) {
-			sessionManager.openSession();
-			try {
-				String projectPath = getProjectPath(pathInfo);
-				Project project = projectManager.findByPath(projectPath);
+			String projectPath = getProjectPath(pathInfo);
+			
+			if (clusterAccess) {
+				ProjectFacade project = projectManager.findFacadeByPath(projectPath);
 				if (project == null) {
 					sendBatchError(httpResponse, SC_NOT_FOUND, 
 							"Project not found: " + projectPath);
 				} else {
 					httpResponse.setContentType(CONTENT_TYPE);
 					if (pathInfo.endsWith("/batch")) {
-						JsonNode batchRequestNode;
-						try (InputStream is = httpRequest.getInputStream()) {
-							batchRequestNode = objectMapper.readTree(is);
-						}
+						processBatch(httpRequest, httpResponse, project, new BooleanSupplier() {
+							
+							@Override
+							public boolean getAsBoolean() {
+								return true;
+							}
+							
+						}, new BooleanSupplier() {
+							
+							@Override
+							public boolean getAsBoolean() {
+								return true;
+							}
+							
+						});
+					} else {
+						httpResponse.setStatus(SC_NOT_IMPLEMENTED);
+					}
+				}
+			} else {
+				sessionManager.openSession();
+				try {
+					Project project = projectManager.findByPath(projectPath);
+					if (project == null) {
+						sendBatchError(httpResponse, SC_NOT_FOUND, 
+								"Project not found: " + projectPath);
+					} else {
+						httpResponse.setContentType(CONTENT_TYPE);
+						if (pathInfo.endsWith("/batch")) {
+							processBatch(httpRequest, httpResponse, project.getFacade(), new BooleanSupplier() {
 
-						boolean supportBasicTransfer;
-						JsonNode transfersNode = batchRequestNode.get("transfers");
-						if (transfersNode != null) {
-							supportBasicTransfer = false;
-							for (JsonNode transferNode: transfersNode) {
-								if (transferNode.asText().equals("basic")) {
-									supportBasicTransfer = true;
-									break;
+								@Override
+								public boolean getAsBoolean() {
+									return canReadCode(httpRequest, project);
 								}
-							}
-						} else {
-							supportBasicTransfer = true;
-						}
-						if (!supportBasicTransfer) {
-							sendBatchError(httpResponse, SC_NOT_ACCEPTABLE, 
-									"This server can only accept basic transfer");
-						} else {
-							boolean supportSha256;
-							JsonNode hashAlgoNode = batchRequestNode.get("hash_algo");
-							if (hashAlgoNode != null)
-								supportSha256 = hashAlgoNode.asText().equals("sha256");
-							else
-								supportSha256 = true;
-							if (!supportSha256) {
-								sendBatchError(httpResponse, SC_NOT_ACCEPTABLE, 
-										"This server can only accept sha256 hash algorithm");
-							} else {
-								boolean upload = batchRequestNode.get("operation").asText().equals("upload");
-								boolean authorized = false;
-								if (upload) {
-									if (!SecurityUtils.canWriteCode(project)) 
-										sendAuthorizationError(httpResponse);
-									else
-										authorized = true;
-								} else {
-									if (!canReadCode(httpRequest, project))
-										sendAuthorizationError(httpResponse);
-									else
-										authorized = true;
+								
+							}, new BooleanSupplier() {
+								
+								@Override
+								public boolean getAsBoolean() {
+									return SecurityUtils.canWriteCode(project);
 								}
-								if (authorized) {
-									List<Map<String, Object>> objectsResponse = new ArrayList<>();
-									for (JsonNode objectNode: batchRequestNode.get("objects")) {
-										String objectId = objectNode.get("oid").asText();
-										long objectSize = objectNode.get("size").asLong();
-										objectsResponse.add(getObjectResponse(
-												httpRequest, project, upload, objectId, objectSize));
+								
+							});
+						} else if (pathInfo.endsWith("/locks")) {
+							if (httpRequest.getMethod().equals("POST")) {
+								if (SecurityUtils.canWriteCode(project)) {
+									JsonNode lockRequestNode;
+									try (InputStream is = httpRequest.getInputStream()) {
+										lockRequestNode = objectMapper.readTree(is);
 									}
-									
-									Map<String, Object> batchResponse = new HashMap<>();
-									batchResponse.put("objects", objectsResponse);
-									writeTo(httpResponse, batchResponse);
-								}
-							}
-						}
-					} else if (pathInfo.endsWith("/locks")) {
-						if (httpRequest.getMethod().equals("POST")) {
-							if (SecurityUtils.canWriteCode(project)) {
-								JsonNode lockRequestNode;
-								try (InputStream is = httpRequest.getInputStream()) {
-									lockRequestNode = objectMapper.readTree(is);
-								}
-								String path = lockRequestNode.get("path").asText();
-								GitLfsLock lock = lockManager.find(path);
-								if (lock == null) {
-									lock = new GitLfsLock();
-									lock.setPath(path);
-									lock.setOwner(SecurityUtils.getUser());
-									lockManager.save(lock);
-									httpResponse.setStatus(SC_CREATED);
+									String path = lockRequestNode.get("path").asText();
+									GitLfsLock lock = lockManager.find(path);
+									if (lock == null) {
+										lock = new GitLfsLock();
+										lock.setPath(path);
+										lock.setOwner(SecurityUtils.getUser());
+										lockManager.save(lock);
+										httpResponse.setStatus(SC_CREATED);
+									} else {
+										httpResponse.setStatus(SC_CONFLICT);
+									}
+									Map<Object, Object> lockResponse = newHashMap("lock", toMap(lock));
+									if (httpResponse.getStatus() == SC_CONFLICT)
+										lockResponse.put("message", "Lock exists");
+									writeTo(httpResponse, lockResponse);
 								} else {
-									httpResponse.setStatus(SC_CONFLICT);
+									sendAuthorizationError(httpResponse);
 								}
-								Map<Object, Object> lockResponse = newHashMap("lock", toMap(lock));
-								if (httpResponse.getStatus() == SC_CONFLICT)
-									lockResponse.put("message", "Lock exists");
-								writeTo(httpResponse, lockResponse);
 							} else {
-								sendAuthorizationError(httpResponse);
+								if (canReadCode(httpRequest, project)) {
+									String path = httpRequest.getParameter("path");
+									
+									Long id = null;
+									String idString = httpRequest.getParameter("id");
+									if (idString != null)
+										id = Long.valueOf(idString);
+									
+									int cursor = 0;
+									String cursorString = httpRequest.getParameter("cursor");
+									if (cursorString != null)
+										cursor = Integer.parseInt(cursorString);
+									
+									int limit = MAX_PAGE_SIZE;
+									String limitString = httpRequest.getParameter("limit");
+									if (limitString != null)
+										limit = Integer.parseInt(limitString);
+									if (limit > MAX_PAGE_SIZE)
+										limit = MAX_PAGE_SIZE;
+									
+									EntityCriteria<GitLfsLock> criteria = EntityCriteria.of(GitLfsLock.class);
+									if (path != null)
+										criteria.add(Restrictions.eq(GitLfsLock.PROP_PATH, path));
+									if (id != null)
+										criteria.add(Restrictions.eq(GitLfsLock.PROP_ID, id));
+									
+									List<Map<Object, Object>> locks = new ArrayList<>();
+									for (GitLfsLock lock: lockManager.query(criteria, cursor, limit))
+										locks.add(toMap(lock));
+									Map<Object, Object> locksResponse = newHashMap("locks", locks);
+									if (locks.size() == limit)
+										locksResponse.put("next_cursor", String.valueOf(cursor+limit));
+									writeTo(httpResponse, locksResponse);
+								} else {
+									sendAuthorizationError(httpResponse);
+								}
 							}
-						} else {
-							if (canReadCode(httpRequest, project)) {
-								String path = httpRequest.getParameter("path");
+						} else if (pathInfo.endsWith("/locks/verify")) {
+							if (SecurityUtils.canWriteCode(project)) {
+								JsonNode lockVerifyNode;
+								try (InputStream is = httpRequest.getInputStream()) {
+									lockVerifyNode = objectMapper.readTree(is);
+								}
+		
+								String path = null;
+								JsonNode pathNode = lockVerifyNode.get("path");
+								if (pathNode != null)
+									path = pathNode.asText();
 								
 								Long id = null;
-								String idString = httpRequest.getParameter("id");
-								if (idString != null)
-									id = Long.valueOf(idString);
+								JsonNode idNode = lockVerifyNode.get("id");
+								if (idNode != null)
+									id = idNode.asLong();
 								
 								int cursor = 0;
-								String cursorString = httpRequest.getParameter("cursor");
-								if (cursorString != null)
-									cursor = Integer.parseInt(cursorString);
-								
+								JsonNode cursorNode = lockVerifyNode.get("cursor");
+								if (cursorNode != null)
+									cursor = cursorNode.intValue();
+		
 								int limit = MAX_PAGE_SIZE;
-								String limitString = httpRequest.getParameter("limit");
-								if (limitString != null)
-									limit = Integer.parseInt(limitString);
+								JsonNode limitNode = lockVerifyNode.get("limit");
+								if (limitNode != null)
+									limit = limitNode.asInt();
 								if (limit > MAX_PAGE_SIZE)
 									limit = MAX_PAGE_SIZE;
 								
@@ -331,114 +456,135 @@ public class GitLfsFilter implements Filter {
 								if (id != null)
 									criteria.add(Restrictions.eq(GitLfsLock.PROP_ID, id));
 								
-								List<Map<Object, Object>> locks = new ArrayList<>();
-								for (GitLfsLock lock: lockManager.query(criteria, cursor, limit))
-									locks.add(toMap(lock));
-								Map<Object, Object> locksResponse = newHashMap("locks", locks);
-								if (locks.size() == limit)
-									locksResponse.put("next_cursor", String.valueOf(cursor+limit));
-								writeTo(httpResponse, locksResponse);
+								List<Map<Object, Object>> ourLocks =  new ArrayList<>();
+								List<Map<Object, Object>> theirLocks = new ArrayList<>();
+								
+								for (GitLfsLock lock: lockManager.query(criteria, cursor, limit)) {
+									if (lock.getOwner().equals(SecurityUtils.getUser()))
+										ourLocks.add(toMap(lock));
+									else
+										theirLocks.add(toMap(lock));
+								}
+								Map<Object, Object> verifyResponse = newHashMap(
+										"ours", ourLocks, 
+										"theirs", theirLocks);
+								if (ourLocks.size() + theirLocks.size() == limit)
+									verifyResponse.put("next_cursor", String.valueOf(cursor+limit));
+								writeTo(httpResponse, verifyResponse);
+							} else {
+								sendAuthorizationError(httpResponse);
+							}
+						} else if (pathInfo.endsWith("/unlock")) {
+							if (SecurityUtils.canWriteCode(project)) {
+								Long id = Long.valueOf(StringUtils.substringAfterLast(
+										StringUtils.substringBeforeLast(pathInfo, "/"), "/"));
+								
+								JsonNode lockDeleteNode;
+								try (InputStream is = httpRequest.getInputStream()) {
+									lockDeleteNode = objectMapper.readTree(is);
+								}
+								
+								boolean force = false;
+								JsonNode forceNode = lockDeleteNode.get("force");
+								if (forceNode != null)
+									force = forceNode.asBoolean();
+
+								GitLfsLock lock = lockManager.load(id);
+								if (lock.getOwner().equals(SecurityUtils.getUser())) {
+									lockManager.delete(lock);
+									writeTo(httpResponse, newHashMap("lock", toMap(lock)));
+								} else if (force) {
+									if (SecurityUtils.canManage(project)) {
+										lockManager.delete(lock);
+										writeTo(httpResponse, newHashMap("lock", toMap(lock)));
+									} else {
+										sendBatchError(httpResponse, SC_FORBIDDEN, "Only project managers can unlock forcibly");
+									}
+								} else {
+									sendBatchError(httpResponse, SC_FORBIDDEN, "Lock is created by other users");
+								}
 							} else {
 								sendAuthorizationError(httpResponse);
 							}
 						}
-					} else if (pathInfo.endsWith("/locks/verify")) {
-						if (SecurityUtils.canWriteCode(project)) {
-							JsonNode lockVerifyNode;
-							try (InputStream is = httpRequest.getInputStream()) {
-								lockVerifyNode = objectMapper.readTree(is);
-							}
-	
-							String path = null;
-							JsonNode pathNode = lockVerifyNode.get("path");
-							if (pathNode != null)
-								path = pathNode.asText();
-							
-							Long id = null;
-							JsonNode idNode = lockVerifyNode.get("id");
-							if (idNode != null)
-								id = idNode.asLong();
-							
-							int cursor = 0;
-							JsonNode cursorNode = lockVerifyNode.get("cursor");
-							if (cursorNode != null)
-								cursor = cursorNode.intValue();
-	
-							int limit = MAX_PAGE_SIZE;
-							JsonNode limitNode = lockVerifyNode.get("limit");
-							if (limitNode != null)
-								limit = limitNode.asInt();
-							if (limit > MAX_PAGE_SIZE)
-								limit = MAX_PAGE_SIZE;
-							
-							EntityCriteria<GitLfsLock> criteria = EntityCriteria.of(GitLfsLock.class);
-							if (path != null)
-								criteria.add(Restrictions.eq(GitLfsLock.PROP_PATH, path));
-							if (id != null)
-								criteria.add(Restrictions.eq(GitLfsLock.PROP_ID, id));
-							
-							List<Map<Object, Object>> ourLocks =  new ArrayList<>();
-							List<Map<Object, Object>> theirLocks = new ArrayList<>();
-							
-							for (GitLfsLock lock: lockManager.query(criteria, cursor, limit)) {
-								if (lock.getOwner().equals(SecurityUtils.getUser()))
-									ourLocks.add(toMap(lock));
-								else
-									theirLocks.add(toMap(lock));
-							}
-							Map<Object, Object> verifyResponse = newHashMap(
-									"ours", ourLocks, 
-									"theirs", theirLocks);
-							if (ourLocks.size() + theirLocks.size() == limit)
-								verifyResponse.put("next_cursor", String.valueOf(cursor+limit));
-							writeTo(httpResponse, verifyResponse);
-						} else {
-							sendAuthorizationError(httpResponse);
-						}
-					} else if (pathInfo.endsWith("/unlock")) {
-						if (SecurityUtils.canWriteCode(project)) {
-							Long id = Long.valueOf(StringUtils.substringAfterLast(
-									StringUtils.substringBeforeLast(pathInfo, "/"), "/"));
-							
-							JsonNode lockDeleteNode;
-							try (InputStream is = httpRequest.getInputStream()) {
-								lockDeleteNode = objectMapper.readTree(is);
-							}
-							
-							boolean force = false;
-							JsonNode forceNode = lockDeleteNode.get("force");
-							if (forceNode != null)
-								force = forceNode.asBoolean();
-
-							GitLfsLock lock = lockManager.load(id);
-							if (lock.getOwner().equals(SecurityUtils.getUser())) {
-								lockManager.delete(lock);
-								writeTo(httpResponse, newHashMap("lock", toMap(lock)));
-							} else if (force) {
-								if (SecurityUtils.canManage(project)) {
-									lockManager.delete(lock);
-									writeTo(httpResponse, newHashMap("lock", toMap(lock)));
-								} else {
-									sendBatchError(httpResponse, SC_FORBIDDEN, "Only project managers can unlock forcibly");
-								}
-							} else {
-								sendBatchError(httpResponse, SC_FORBIDDEN, "Lock is created by other users");
-							}
-						} else {
-							sendAuthorizationError(httpResponse);
-						}
 					}
-				}
-			} catch (Exception e) {
-				logger.error("Error handling LFS request", e);
-				sendBatchError(httpResponse, SC_INTERNAL_SERVER_ERROR, 
-						"Internal server error, please check server log");
-			} finally {
-				sessionManager.closeSession();
+				} catch (Exception e) {
+					logger.error("Error handling LFS request", e);
+					sendBatchError(httpResponse, SC_INTERNAL_SERVER_ERROR, 
+							"Internal server error, please check server log");
+				} finally {
+					sessionManager.closeSession();
+				}				
 			}
 		} else {
 			chain.doFilter(request, response);
 		}
+	}
+	
+	private void processBatch(HttpServletRequest httpRequest, HttpServletResponse httpResponse, 
+			ProjectFacade project, BooleanSupplier readCheck, BooleanSupplier writeCheck) {
+		JsonNode batchRequestNode;
+		try (InputStream is = httpRequest.getInputStream()) {
+			batchRequestNode = objectMapper.readTree(is);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		boolean supportBasicTransfer;
+		JsonNode transfersNode = batchRequestNode.get("transfers");
+		if (transfersNode != null) {
+			supportBasicTransfer = false;
+			for (JsonNode transferNode: transfersNode) {
+				if (transferNode.asText().equals("basic")) {
+					supportBasicTransfer = true;
+					break;
+				}
+			}
+		} else {
+			supportBasicTransfer = true;
+		}
+		if (!supportBasicTransfer) {
+			sendBatchError(httpResponse, SC_NOT_ACCEPTABLE, 
+					"This server can only accept basic transfer");
+		} else {
+			boolean supportSha256;
+			JsonNode hashAlgoNode = batchRequestNode.get("hash_algo");
+			if (hashAlgoNode != null)
+				supportSha256 = hashAlgoNode.asText().equals("sha256");
+			else
+				supportSha256 = true;
+			if (!supportSha256) {
+				sendBatchError(httpResponse, SC_NOT_ACCEPTABLE, 
+						"This server can only accept sha256 hash algorithm");
+			} else {
+				boolean upload = batchRequestNode.get("operation").asText().equals("upload");
+				boolean authorized = false;
+				if (upload) {
+					if (!writeCheck.getAsBoolean()) 
+						sendAuthorizationError(httpResponse);
+					else
+						authorized = true;
+				} else {
+					if (!readCheck.getAsBoolean())
+						sendAuthorizationError(httpResponse);
+					else
+						authorized = true;
+				}
+				if (authorized) {
+					List<Map<String, Object>> objectsResponse = new ArrayList<>();
+					for (JsonNode objectNode: batchRequestNode.get("objects")) {
+						String objectId = objectNode.get("oid").asText();
+						long objectSize = objectNode.get("size").asLong();
+						objectsResponse.add(getObjectResponse(
+								httpRequest, project, upload, objectId, objectSize));
+					}
+					
+					Map<String, Object> batchResponse = new HashMap<>();
+					batchResponse.put("objects", objectsResponse);
+					writeTo(httpResponse, batchResponse);
+				}
+			}
+		}			
 	}
 	
 	private void sendAuthorizationError(HttpServletResponse response) {
@@ -467,7 +613,7 @@ public class GitLfsFilter implements Filter {
 						"name", lock.getOwner().getDisplayName()));
 	}
 
-	private Map<Object, Object> getActionResponse(HttpServletRequest request, Project project, String objectId) {
+	private Map<Object, Object> getActionResponse(HttpServletRequest request, ProjectFacade project, String objectId) {
 		Map<Object, Object> actionResponse = newHashMap(
 				"href", getObjectUrl(request, project.getPath(), objectId));
 		User user = SecurityUtils.getUser();
@@ -478,22 +624,23 @@ public class GitLfsFilter implements Filter {
 		return actionResponse;
 	}
 	
-	private Map<String, Object> getObjectResponse(HttpServletRequest request, Project project, boolean upload, 
+	private Map<String, Object> getObjectResponse(HttpServletRequest request, ProjectFacade project, boolean upload, 
 			String objectId, long objectSize) {
 		Map<String, Object> objectResponse = new HashMap<>();
 		objectResponse.put("oid", objectId);
 		objectResponse.put("size", objectSize);
+		LfsObject lfsObject = new LfsObject(project.getId(), objectId);
 		if (objectSize > getMaxLFSFileSize()) {
 			objectResponse.put("error", newHashMap(
 					"code", SC_NOT_ACCEPTABLE, 
 					"message", "Exceeded max acceptable LFS file size " + getMaxLFSFileSize()));
 		} else if (upload) {
-			if (!project.isLfsObjectExists(objectId)) {
+			if (!lfsObject.exists()) {
 				objectResponse.put(
 						"actions", newHashMap(
 								"upload", getActionResponse(request, project, objectId)));
 			}
-		} else if (project.isLfsObjectExists(objectId)) {
+		} else if (lfsObject.exists()) {
 			objectResponse.put(
 					"actions", newHashMap(
 							"download", getActionResponse(request, project, objectId)));
@@ -517,15 +664,4 @@ public class GitLfsFilter implements Filter {
 	public void destroy() {
 	}
 
-	private static class LfsObjectAccess {
-		
-		final File file;
-		
-		final Lock lock;
-		
-		LfsObjectAccess(File file, Lock lock) {
-			this.file = file;
-			this.lock = lock;
-		}
-	}
 }

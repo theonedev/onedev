@@ -16,6 +16,8 @@ import io.onedev.server.model.PullRequestComment;
 
 public interface UrlManager {
 	
+	String urlForProject(Long projectId);
+	
 	String urlFor(Project project);
 	
 	String urlFor(Project project, ObjectId commitId);

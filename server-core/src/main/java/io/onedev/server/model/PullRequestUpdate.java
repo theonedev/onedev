@@ -1,11 +1,8 @@
 package io.onedev.server.model;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -17,18 +14,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.RefUpdate;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.transport.RefSpec;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.git.service.GitService;
 
 @Entity
 @Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="date")})
@@ -91,30 +84,14 @@ public class PullRequestUpdate extends AbstractEntity {
 		Preconditions.checkNotNull(getId());
 		return REFS_PREFIX + getId();
 	}
-	
-	public void deleteRefs() {
-		GitUtils.deleteRef(GitUtils.getRefUpdate(getRequest().getTargetProject().getRepository(), getHeadRef()));
-	}	
-	
+		
 	public Collection<String> getChangedFiles() {
 		if (changedFiles == null) {
-			changedFiles = new HashSet<>();
-			
-			Repository repository = getRequest().getWorkProject().getRepository();
-			try (	RevWalk revWalk = new RevWalk(repository);
-					TreeWalk treeWalk = new TreeWalk(repository)) {
-				RevCommit baseCommit = revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash()));
-				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash()));
-				RevCommit comparisonBaseCommit = revWalk.parseCommit(getRequest().getComparisonBase(baseCommit, headCommit));
-				treeWalk.addTree(headCommit.getTree());
-				treeWalk.addTree(comparisonBaseCommit.getTree());
-				treeWalk.setFilter(TreeFilter.ANY_DIFF);
-				treeWalk.setRecursive(true);
-				while (treeWalk.next())
-					changedFiles.add(treeWalk.getPathString());
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			ObjectId headCommitId = ObjectId.fromString(getHeadCommitHash());
+			ObjectId comparisonBaseCommitId = getPullRequestManager().getComparisonBase(
+					getRequest(), ObjectId.fromString(getBaseCommitHash()), headCommitId);
+			changedFiles = getGitService().getChangedFiles(
+					getRequest().getWorkProject(), headCommitId, comparisonBaseCommitId, null);
 		}
 		return changedFiles;
 	}
@@ -153,51 +130,24 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	public List<RevCommit> getCommits() {
 		if (commits == null) {
-			commits = new ArrayList<>();
-			
-			try (RevWalk revWalk = new RevWalk(getRequest().getWorkProject().getRepository())) {
-				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
-				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
-				 
-				/*
-				 * Instead of excluding commits reachable from target branch, we exclude commits reachable
-				 * from the merge commit to achieve two purposes:
-				 * 1. commits merged back into target branch after this update can still be included in this
-				 * update
-				 * 2. commits of this update will remain unchanged even if tip of the target branch changes     
-				 */
-				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getTargetHeadCommitHash())));
-				
-				revWalk.forEach(c->commits.add(c));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			Collection<ObjectId> uninterestingCommitIds = Lists.newArrayList(
+					ObjectId.fromString(getBaseCommitHash()), 
+					ObjectId.fromString(getTargetHeadCommitHash()));
+			commits = getGitService().getReachableCommits(
+					getRequest().getWorkProject(), 
+					Lists.newArrayList(ObjectId.fromString(getHeadCommitHash())), 
+					uninterestingCommitIds);
 			Collections.reverse(commits);
 		}
 		return commits;
 	}
 	
-	public void writeRef() {
-		ObjectId headCommitId = ObjectId.fromString(getHeadCommitHash());
-		if (!request.getTargetProject().equals(request.getSourceProject())) {
-			try {
-				request.getTargetProject().git().fetch()
-						.setRemote(request.getSourceProject().getGitDir().getAbsolutePath())
-						.setRefSpecs(new RefSpec(GitUtils.branch2ref(request.getSourceBranch()) + ":" + getHeadRef()))
-						.call();
-				if (!request.getTargetProject().getObjectId(getHeadRef(), true).equals(headCommitId)) {
-					RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), getHeadRef());
-					refUpdate.setNewObjectId(headCommitId);
-					GitUtils.updateRef(refUpdate);
-				}
-			} catch (Exception e) {
-				throw ExceptionUtils.unchecked(e);
-			}
-		} else {
-			RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), getHeadRef());
-			refUpdate.setNewObjectId(headCommitId);
-			GitUtils.updateRef(refUpdate);
-		}
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+	
+	private PullRequestManager getPullRequestManager() {
+		return OneDev.getInstance(PullRequestManager.class);
 	}
 	
 }

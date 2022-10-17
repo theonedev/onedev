@@ -14,7 +14,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.persistence.PersistManager;
+import io.onedev.server.persistence.DataManager;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
@@ -58,8 +58,8 @@ public class DatabaseBackupPage extends AdministrationPage {
 					public void writeData(Attributes attributes) throws IOException {
 						File tempDir = FileUtils.createTempDir("backup");
 						try {
-							PersistManager persistManager = OneDev.getInstance(PersistManager.class);
-							persistManager.exportData(tempDir);
+							DataManager databaseManager = OneDev.getInstance(DataManager.class);
+							databaseManager.exportData(tempDir);
 							FileUtils.zip(tempDir, attributes.getResponse().getOutputStream());
 						} finally {
 							FileUtils.deleteDir(tempDir);

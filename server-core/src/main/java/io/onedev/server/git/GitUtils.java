@@ -16,7 +16,6 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -51,8 +50,10 @@ import org.eclipse.jgit.lib.GpgSignature;
 import org.eclipse.jgit.lib.ObjectBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
@@ -61,6 +62,7 @@ import org.eclipse.jgit.merge.ResolveMerger;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
@@ -81,10 +83,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
 import io.onedev.commons.utils.PathUtils;
-import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.git.command.IsAncestorCommand;
+import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.git.exception.RefUpdateException;
+import io.onedev.server.git.service.DiffEntryFacade;
 import io.onedev.server.git.signature.SignatureUnverified;
 import io.onedev.server.git.signature.SignatureVerification;
 import io.onedev.server.git.signature.SignatureVerificationKey;
@@ -97,8 +100,6 @@ public class GitUtils {
 	public static final int SHORT_SHA_LENGTH = 8;
 	
 	private static final Logger logger = LoggerFactory.getLogger(GitUtils.class);
-	
-	public static final String HOOK_TOKEN = RandomStringUtils.randomAlphanumeric(20); 
 	
 	public static boolean isEmptyPath(String path) {
 		return Strings.isNullOrEmpty(path) || Objects.equal(path, DiffEntry.DEV_NULL);
@@ -113,6 +114,23 @@ public class GitUtils {
 		return abbreviateSHA(sha, SHORT_SHA_LENGTH);
 	}
 
+	@Nullable
+	public static String getDefaultBranch(Repository repository) {
+		try {
+			Ref headRef = repository.findRef("HEAD");
+			if (headRef != null 
+					&& headRef.isSymbolic() 
+					&& headRef.getTarget().getName().startsWith(Constants.R_HEADS) 
+					&& headRef.getObjectId() != null) {
+				return Repository.shortenRefName(headRef.getTarget().getName());
+			} else {
+				return null;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public static List<DiffEntry> diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId) {
 		List<DiffEntry> diffs = new ArrayList<>();
 		try (DiffFormatter diffFormatter = new DiffFormatter(NullOutputStream.INSTANCE);
@@ -142,6 +160,21 @@ public class GitUtils {
 			throw new RuntimeException(e);
 		}
 		return diffs;
+	}
+	
+	public static InputStream getInputStream(Repository repository, ObjectId revId, String path) {
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			RevTree revTree = revWalk.parseCommit(revId).getTree();
+			TreeWalk treeWalk = TreeWalk.forPath(repository, path, revTree);
+			if (treeWalk != null) {
+				ObjectLoader objectLoader = treeWalk.getObjectReader().open(treeWalk.getObjectId(0));
+				return objectLoader.openStream();
+			} else {
+				throw new ObjectNotFoundException("Unable to find blob path '" + path + "' in revision '" + revId + "'");
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Nullable
@@ -297,20 +330,20 @@ public class GitUtils {
 		return Constants.R_TAGS + tag;
 	}
 
-	public static BlobIdent getOldBlobIdent(DiffEntry diffEntry, String oldRev) {
+	public static BlobIdent getOldBlobIdent(DiffEntryFacade diffEntry, String oldRev) {
 		BlobIdent blobIdent;
 		if (diffEntry.getChangeType() != ChangeType.ADD) {
-			blobIdent = new BlobIdent(oldRev, diffEntry.getOldPath(), diffEntry.getOldMode().getBits());
+			blobIdent = new BlobIdent(oldRev, diffEntry.getOldPath(), diffEntry.getOldMode());
 		} else {
 			blobIdent = new BlobIdent(oldRev, null, null);
 		}
 		return blobIdent;
 	}
 
-	public static BlobIdent getNewBlobIdent(DiffEntry diffEntry, String newRev) {
+	public static BlobIdent getNewBlobIdent(DiffEntryFacade diffEntry, String newRev) {
 		BlobIdent blobIdent;
 		if (diffEntry.getChangeType() != ChangeType.DELETE) {
-			blobIdent = new BlobIdent(newRev, diffEntry.getNewPath(), diffEntry.getNewMode().getBits());
+			blobIdent = new BlobIdent(newRev, diffEntry.getNewPath(), diffEntry.getNewMode());
 		} else {
 			blobIdent = new BlobIdent(newRev, null, null);
 		}
@@ -336,35 +369,10 @@ public class GitUtils {
 		}
 	}
 
-	/**
-	 * @return merge base of specified commits, or <tt>null</tt> if two commits do
-	 *         not have related history. In this case, these two commits can not be
-	 *         merged
-	 */
-	@Nullable
-	public static ObjectId getMergeBase(Repository repository1, ObjectId commit1, Repository repository2,
-			ObjectId commit2) {
-		if (repository1.getDirectory() == null || !repository1.getDirectory().equals(repository2.getDirectory())) {
-			fetch(repository2, commit2, repository1);
-		}
-		return GitUtils.getMergeBase(repository1, commit1, commit2);
-	}
-
-	public static void fetch(Repository fromRepository, ObjectId fromCommit, Repository toRepository) {
-		new FetchCommand(toRepository.getDirectory(), null)
-				.from(fromRepository.getDirectory().getAbsolutePath())
-				.refspec(fromCommit.name())
-				.force(true)
-				.quiet(true)
-				.call();
-	}
-
 	public static boolean isMergedInto(Repository repository, @Nullable Map<String, String> gitEnvs, ObjectId base,
 			ObjectId tip) {
 		if (gitEnvs != null && !gitEnvs.isEmpty()) {
-			IsAncestorCommand cmd = new IsAncestorCommand(repository.getDirectory(), gitEnvs);
-			cmd.ancestor(base.name()).descendant(tip.name());
-			return cmd.call();
+			return new IsAncestorCommand(repository.getDirectory(), base.name(), tip.name(), gitEnvs).run();
 		} else {
 			try (RevWalk revWalk = new RevWalk(repository)) {
 				RevCommit baseCommit;
@@ -405,11 +413,14 @@ public class GitUtils {
 	}
 
 	@Nullable
-	public static ObjectId resolve(Repository repository, String revision) {
+	public static ObjectId resolve(Repository repository, String revision, boolean errorIfInvalid) {
 		try {
 			return repository.resolve(revision);
 		} catch (RevisionSyntaxException | AmbiguousObjectException | IncorrectObjectTypeException e) {
-			return null;
+			if (errorIfInvalid)
+				throw new RuntimeException(e);
+			else
+				return null;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

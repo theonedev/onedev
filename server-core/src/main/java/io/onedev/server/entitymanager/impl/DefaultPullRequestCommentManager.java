@@ -7,8 +7,8 @@ import javax.inject.Singleton;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;

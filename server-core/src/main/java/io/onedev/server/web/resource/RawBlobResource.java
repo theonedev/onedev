@@ -9,8 +9,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -19,15 +26,20 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jetty.io.EofException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Splitter;
 
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.LfsObject;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ExceptionUtils;
@@ -148,12 +160,46 @@ public class RawBlobResource extends AbstractResource {
 			}
 
 			private InputStream getInputStream(Blob blob) {
-				if (blob.getLfsPointer() != null)
-					return project.getLfsObjectInputStream(blob.getLfsPointer().getObjectId());
-				else if (blob.isPartial())
-					return project.getInputStream(blob.getIdent());
-				else
+				if (blob.getLfsPointer() == null && !blob.isPartial()) {
 					return new ByteArrayInputStream(blob.getBytes());
+				} else {
+					UUID storageServerUUID = getProjectManager().getStorageServerUUID(project.getId(), true);
+					if (storageServerUUID.equals(getClusterManager().getLocalServerUUID())) {
+						if (blob.getLfsPointer() != null) {
+							return new LfsObject(project.getId(), blob.getLfsPointer().getObjectId()).getInputStream();
+						} else {
+							Repository repository = getProjectManager().getRepository(project.getId());
+							ObjectId commitId = project.getObjectId(blob.getIdent().revision, true);
+							return GitUtils.getInputStream(repository, commitId, blob.getIdent().path);
+						}
+					} else {
+						Client client = ClientBuilder.newClient();
+						try {
+							String serverUrl = getClusterManager().getServerUrl(storageServerUUID);
+							WebTarget target = client.target(serverUrl);
+							if (blob.getLfsPointer() != null) {
+								target = target.path("api/cluster/lfs")
+										.queryParam("projectId", project.getId())
+										.queryParam("objectId", blob.getLfsPointer().getObjectId());
+							} else {
+								ObjectId commitId = project.getObjectId(blob.getIdent().revision, true);
+								target = target.path("api/cluster/blob")
+										.queryParam("projectId", project.getId())
+										.queryParam("revId", commitId.name())
+										.queryParam("path", blob.getIdent().path);
+							}
+							Invocation.Builder builder =  target.request();
+							builder.header(HttpHeaders.AUTHORIZATION, 
+									KubernetesHelper.BEARER + " " + getClusterManager().getCredentialValue());
+							try (Response response = builder.get()){
+								KubernetesHelper.checkStatus(response);
+								return response.readEntity(InputStream.class);
+							}
+						} finally {
+							client.close();
+						}
+					}
+				}
 			}
 
 		});
@@ -161,6 +207,14 @@ public class RawBlobResource extends AbstractResource {
 		return response;
 	}
 
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
+	
+	private ClusterManager getClusterManager() {
+		return OneDev.getInstance(ClusterManager.class);
+	}
+	
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
 		PageParameters params = new PageParameters();
 		params.set(PARAM_PROJECT, project.getId());

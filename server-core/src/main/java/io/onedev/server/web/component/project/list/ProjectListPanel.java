@@ -73,7 +73,6 @@ import io.onedev.server.search.entity.project.NameCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectPullRequestStats;
@@ -1033,8 +1032,8 @@ public class ProjectListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, IModel<Project> rowModel) {
-				Fragment fragment = new Fragment(componentId, "projectFrag", ProjectListPanel.this);
 				Project project = rowModel.getObject();
+				Fragment fragment = new Fragment(componentId, "projectFrag", ProjectListPanel.this);
 				
 				Long projectId = project.getId();
 				
@@ -1059,66 +1058,73 @@ public class ProjectListPanel extends Panel {
 
 				fragment.add(new EntityLabelsPanel<ProjectLabel>("labels", rowModel));
 				
-				fragment.add(new Label("lastUpdate", "Updated " + DateUtils.formatAge(project.getUpdateDate())));
-				
-				if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) {
-					fragment.add(new CodeStatsPanel("codeStats", rowModel));
-
-					fragment.add(new PullRequestStatsPanel("pullRequestStats", rowModel, new LoadableDetachableModel<Map<PullRequest.Status, Long>>() {
-
-						@Override
-						protected Map<PullRequest.Status, Long> load() {
-							Map<PullRequest.Status, Long> statusCounts = new LinkedHashMap<>();
-							for (ProjectPullRequestStats stats: pullRequestStatsModel.getObject()) {
-								if (stats.getProjectId().equals(projectId)) 
-									statusCounts.put(stats.getPullRequestStatus(), stats.getStatusCount());
+				if (project.getStorageServerUUID(false) != null) {
+					if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) {
+						fragment.add(new CodeStatsPanel("codeStats", rowModel));
+						fragment.add(new PullRequestStatsPanel("pullRequestStats", rowModel, 
+								new LoadableDetachableModel<Map<PullRequest.Status, Long>>() {
+	
+							@Override
+							protected Map<PullRequest.Status, Long> load() {
+								Map<PullRequest.Status, Long> statusCounts = new LinkedHashMap<>();
+								for (ProjectPullRequestStats stats: pullRequestStatsModel.getObject()) {
+									if (stats.getProjectId().equals(projectId)) 
+										statusCounts.put(stats.getPullRequestStatus(), stats.getStatusCount());
+								}
+								return statusCounts;
 							}
-							return statusCounts;
-						}
-						
-					}));
+							
+						}));
+					} else {
+						fragment.add(new WebMarkupContainer("codeStats").setVisible(false));
+						fragment.add(new WebMarkupContainer("pullRequestStats").setVisible(false));
+					}
+					
+					if (project.isIssueManagement()) {
+						fragment.add(new IssueStatsPanel("issueStats", rowModel, new LoadableDetachableModel<Map<Integer, Long>>() {
+	
+							@Override
+							protected Map<Integer, Long> load() {
+								Map<Integer, Long> stateCounts = new LinkedHashMap<>();
+								GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+								for (ProjectIssueStats stats: issueStatsModel.getObject()) {
+									if (stats.getProjectId().equals(projectId) 
+											&& stats.getStateOrdinal() < issueSetting.getStateSpecs().size()) {
+										stateCounts.put(stats.getStateOrdinal(), stats.getStateCount());
+									}
+								}
+								return stateCounts;
+							}
+							
+						}));
+					} else {
+						fragment.add(new WebMarkupContainer("issueStats").setVisible(false));
+					}
+					
+					if (project.isCodeManagement()) {
+						fragment.add(new BuildStatsPanel("buildStats", rowModel, new LoadableDetachableModel<Map<Build.Status, Long>>() {
+	
+							@Override
+							protected Map<Build.Status, Long> load() {
+								Map<Build.Status, Long> statusCounts = new LinkedHashMap<>();
+								for (ProjectBuildStats stats: buildStatsModel.getObject()) {
+									if (stats.getProjectId().equals(projectId)) 
+										statusCounts.put(stats.getBuildStatus(), stats.getStatusCount());
+								}
+								return statusCounts;
+							}
+							
+						}));
+					} else {
+						fragment.add(new WebMarkupContainer("buildStats").setVisible(false));
+					}
+					fragment.add(new WebMarkupContainer("noStorage").setVisible(false));
 				} else {
 					fragment.add(new WebMarkupContainer("codeStats").setVisible(false));
 					fragment.add(new WebMarkupContainer("pullRequestStats").setVisible(false));
-				}
-				
-				if (project.isIssueManagement()) {
-					fragment.add(new IssueStatsPanel("issueStats", rowModel, new LoadableDetachableModel<Map<Integer, Long>>() {
-
-						@Override
-						protected Map<Integer, Long> load() {
-							Map<Integer, Long> stateCounts = new LinkedHashMap<>();
-							GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-							for (ProjectIssueStats stats: issueStatsModel.getObject()) {
-								if (stats.getProjectId().equals(projectId) 
-										&& stats.getStateOrdinal() < issueSetting.getStateSpecs().size()) {
-									stateCounts.put(stats.getStateOrdinal(), stats.getStateCount());
-								}
-							}
-							return stateCounts;
-						}
-						
-					}));
-				} else {
 					fragment.add(new WebMarkupContainer("issueStats").setVisible(false));
-				}
-				
-				if (project.isCodeManagement()) {
-					fragment.add(new BuildStatsPanel("buildStats", rowModel, new LoadableDetachableModel<Map<Build.Status, Long>>() {
-
-						@Override
-						protected Map<Build.Status, Long> load() {
-							Map<Build.Status, Long> statusCounts = new LinkedHashMap<>();
-							for (ProjectBuildStats stats: buildStatsModel.getObject()) {
-								if (stats.getProjectId().equals(projectId)) 
-									statusCounts.put(stats.getBuildStatus(), stats.getStatusCount());
-							}
-							return statusCounts;
-						}
-						
-					}));
-				} else {
 					fragment.add(new WebMarkupContainer("buildStats").setVisible(false));
+					fragment.add(new WebMarkupContainer("noStorage"));
 				}
 				
 				List<ProjectFacade> children = getProjectManager().getChildren(projectId);

@@ -54,12 +54,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.AbstractEntity;

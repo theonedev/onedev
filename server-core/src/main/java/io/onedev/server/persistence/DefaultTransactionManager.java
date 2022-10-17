@@ -22,9 +22,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.Lock;
 
-import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import javax.persistence.FlushModeType;
 import javax.transaction.Status;
@@ -110,24 +108,13 @@ public class DefaultTransactionManager implements TransactionManager {
 	}
 
 	@Override
-	public void runAsync(Runnable runnable, @Nullable Lock lock) {
+	public void runAsync(Runnable runnable) {
 		executorService.execute(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					if (lock != null) {
-						try {
-							lock.lockInterruptibly();
-							DefaultTransactionManager.this.run(runnable);
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						} finally {
-							lock.unlock();
-						}
-					} else {
-						DefaultTransactionManager.this.run(runnable);
-					}
+					DefaultTransactionManager.this.run(runnable);
 				} catch (Exception e) {
 					logger.error("Error executing in transaction", e);
 				}
@@ -137,12 +124,12 @@ public class DefaultTransactionManager implements TransactionManager {
 	}
 	
 	@Override
-	public void runAsyncAfterCommit(Runnable runnable, @Nullable Lock lock) {
+	public void runAsyncAfterCommit(Runnable runnable) {
 		runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				runAsync(runnable, lock);
+				runAsync(runnable);
 			}
 			
 		});
@@ -150,7 +137,7 @@ public class DefaultTransactionManager implements TransactionManager {
 	
 	@Override
 	public void runAfterCommit(Runnable runnable) {
-		if (getTransaction().isActive()) {
+		if (getTransaction() != null && getTransaction().isActive()) {
 			getTransaction().registerSynchronization(new Synchronization() {
 				
 				@Override
@@ -176,7 +163,7 @@ public class DefaultTransactionManager implements TransactionManager {
 	
 	@Override
 	public Transaction getTransaction() {
-		return getSession().getTransaction();
+		return getSession() != null? getSession().getTransaction(): null;
 	}
 
 	@Override
@@ -196,14 +183,4 @@ public class DefaultTransactionManager implements TransactionManager {
 		runnables.add(runnable);
 	}
 
-	@Override
-	public void runAsync(Runnable runnable) {
-		runAsync(runnable, null);
-	}
-
-	@Override
-	public void runAsyncAfterCommit(Runnable runnable) {
-		runAsyncAfterCommit(runnable, null);
-	}
-	
 }

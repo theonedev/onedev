@@ -32,15 +32,15 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobDependency;
-import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.build.BuildUpdated;
+import io.onedev.server.event.pubsub.ListenerRegistry;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
@@ -463,8 +463,9 @@ public abstract class BuildDetailPage extends ProjectPage
 				if (SecurityUtils.canReadCode(getProject())) 
 					tabs.add(new BuildTab("Pipeline", BuildPipelinePage.class));
 				
-				if (SecurityUtils.canManage(getBuild()) || getBuild().hasArtifacts())
+				if (SecurityUtils.canManage(getBuild()) || getBuild().getRootArtifacts().size() != 0) {
 					tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
+				}
 				
 				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class) {
 

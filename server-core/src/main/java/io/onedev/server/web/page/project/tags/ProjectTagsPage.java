@@ -36,7 +36,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -46,14 +45,16 @@ import org.eclipse.jgit.revwalk.RevTag;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -95,21 +96,21 @@ public class ProjectTagsPage extends ProjectPage {
 	
 	private TextField<String> searchField;
 	
-	private DataTable<RefInfo, Void> tagsTable;
+	private DataTable<RefFacade, Void> tagsTable;
 	
 	private String query;
 	
 	private boolean typing;
 	
-	private IModel<Map<String, RefInfo>> tagsModel = new LoadableDetachableModel<Map<String, RefInfo>>() {
+	private IModel<Map<String, RefFacade>> tagsModel = new LoadableDetachableModel<Map<String, RefFacade>>() {
 
 		@Override
-		protected Map<String, RefInfo> load() {
-			Map<String, RefInfo> refInfos = new LinkedHashMap<>();
-			for (RefInfo refInfo: getProject().getTagRefInfos()) {
-				String tag = GitUtils.ref2tag(refInfo.getRef().getName());
+		protected Map<String, RefFacade> load() {
+			Map<String, RefFacade> refInfos = new LinkedHashMap<>();
+			for (RefFacade ref: getProject().getTagRefs()) {
+				String tag = GitUtils.ref2tag(ref.getName());
 				if (query == null || tag.toLowerCase().contains(query.trim().toLowerCase()))
-					refInfos.put(tag, refInfo);
+					refInfos.put(tag, ref);
 			}
 			return refInfos;
 		}
@@ -243,19 +244,22 @@ public class ProjectTagsPage extends ProjectPage {
 							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
 							target.add(form);
 						} else {
-							PGPSecretKeyRing signingKey = OneDev.getInstance(SettingManager.class)
-									.getGpgSetting().getSigningKey();
-							if (getProject().isTagSignatureRequired(user, tagName) && signingKey == null) {
-								editor.error(new Path(new PathNode.Named("name")), "Tag signature required per "
-										+ "tag protection rule, please generate system GPG signing key first"); 
-								target.add(form);
-							} else {
-								getProject().createTag(tagName, helperBean.getRevision(), user.asPerson(), 
-										helperBean.getMessage(), signingKey);
+							try {
+								OneDev.getInstance(GitService.class).createTag(getProject(), tagName, 
+										helperBean.getRevision(), user.asPerson(), helperBean.getMessage(), 
+										getProject().isTagSignatureRequired(user, tagName));
 								modal.close();
 								target.add(tagsTable);
 								
 								getSession().success("Tag '" + tagName + "' created");
+							} catch (Exception e) {
+								ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
+								if (explicitException != null) {
+									editor.error(new Path(new PathNode.Named("name")), explicitException.getMessage());
+									target.add(form);
+								} else {
+									throw ExceptionUtils.unchecked(e);
+								}
 							}
 						}
 					}
@@ -289,9 +293,9 @@ public class ProjectTagsPage extends ProjectPage {
 			
 		});
 		
-		List<IColumn<RefInfo, Void>> columns = new ArrayList<>();
+		List<IColumn<RefFacade, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<RefFacade, Void>(Model.of("")) {
 
 			@Override
 			public String getCssClass() {
@@ -299,13 +303,13 @@ public class ProjectTagsPage extends ProjectPage {
 			}
 
 			@Override
-			public void populateItem(Item<ICellPopulator<RefInfo>> cellItem, String componentId,
-					IModel<RefInfo> rowModel) {
+			public void populateItem(Item<ICellPopulator<RefFacade>> cellItem, String componentId,
+					IModel<RefFacade> rowModel) {
 				Fragment fragment = new Fragment(componentId, "tagFrag", ProjectTagsPage.this);
 				fragment.setRenderBodyOnly(true);
 				
-				RefInfo ref = rowModel.getObject();
-				String tagName = GitUtils.ref2tag(ref.getRef().getName());
+				RefFacade ref = rowModel.getObject();
+				String tagName = GitUtils.ref2tag(ref.getName());
 				
 				BlobIdent blobIdent = new BlobIdent(tagName, null, FileMode.TREE.getBits());
 				ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
@@ -314,7 +318,7 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("name", tagName));
 				fragment.add(link);
 				
-				fragment.add(new CommitStatusLink("buildStatus", ref.getPeeledObj().copy(), ref.getRef().getName()) {
+				fragment.add(new CommitStatusLink("buildStatus", ref.getPeeledObj().copy(), ref.getName()) {
 
 					@Override
 					protected Project getProject() {
@@ -425,11 +429,11 @@ public class ProjectTagsPage extends ProjectPage {
 			
 		});
 		
-		SortableDataProvider<RefInfo, Void> dataProvider = new LoadableDetachableDataProvider<RefInfo, Void>() {
+		SortableDataProvider<RefFacade, Void> dataProvider = new LoadableDetachableDataProvider<RefFacade, Void>() {
 
 			@Override
-			public Iterator<? extends RefInfo> iterator(long first, long count) {
-				List<RefInfo> tags = new ArrayList<>(tagsModel.getObject().values());
+			public Iterator<? extends RefFacade> iterator(long first, long count) {
+				List<RefFacade> tags = new ArrayList<>(tagsModel.getObject().values());
 				if (first + count > tags.size())
 					return tags.subList((int)first, tags.size()).iterator();
 				else
@@ -442,12 +446,12 @@ public class ProjectTagsPage extends ProjectPage {
 			}
 
 			@Override
-			public IModel<RefInfo> model(RefInfo object) {
-				String tag = GitUtils.ref2tag(object.getRef().getName());
-				return new AbstractReadOnlyModel<RefInfo>() {
+			public IModel<RefFacade> model(RefFacade object) {
+				String tag = GitUtils.ref2tag(object.getName());
+				return new AbstractReadOnlyModel<RefFacade>() {
 
 					@Override
-					public RefInfo getObject() {
+					public RefFacade getObject() {
 						return tagsModel.getObject().get(tag);
 					}
 					
@@ -455,19 +459,19 @@ public class ProjectTagsPage extends ProjectPage {
 			}
 		};		
 		
-		add(tagsTable = new DefaultDataTable<RefInfo, Void>("tags", columns, dataProvider, 
+		add(tagsTable = new DefaultDataTable<RefFacade, Void>("tags", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport) {
 			
 			@Override
 			protected void onBeforeRender() {
-				List<RefInfo> tags = new ArrayList<>(tagsModel.getObject().values());
+				List<RefFacade> tags = new ArrayList<>(tagsModel.getObject().values());
 				long firstItemOffset = tagsTable.getCurrentPage() * tagsTable.getItemsPerPage();
 				List<ObjectId> commitIdsToDisplay = new ArrayList<>();
 				for (long i=firstItemOffset; i<tags.size(); i++) {
 					if (i-firstItemOffset >= tagsTable.getItemsPerPage())
 						break;
-					RefInfo ref = tags.get((int)i); 
-					commitIdsToDisplay.add(ref.getRef().getObjectId());
+					RefFacade ref = tags.get((int)i); 
+					commitIdsToDisplay.add(ref.getObjectId());
 				}
 				
 				BuildManager buildManager = OneDev.getInstance(BuildManager.class);

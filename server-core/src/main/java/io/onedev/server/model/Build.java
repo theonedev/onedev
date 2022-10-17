@@ -14,7 +14,6 @@ import static io.onedev.server.model.Build.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Build.PROP_VERSION;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -46,9 +45,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -60,6 +57,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.param.ParamCombination;
@@ -70,7 +68,8 @@ import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
@@ -79,11 +78,11 @@ import io.onedev.server.model.support.build.actionauthorization.ActionAuthorizat
 import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
 import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
 import io.onedev.server.model.support.inputspec.SecretInput;
-import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Day;
+import io.onedev.server.util.FileInfo;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
@@ -372,6 +371,8 @@ public class Build extends AbstractEntity
 	private transient Map<Integer, Collection<Long>> streamPreviousNumbersCache = new HashMap<>();
 	
 	private transient JobSecretAuthorizationContext jobSecretAuthorizationContext;
+	
+	private transient List<FileInfo> rootArtifacts;
 	
 	public Project getNumberScope() {
 		return numberScope;
@@ -710,17 +711,8 @@ public class Build extends AbstractEntity
 			fixedIssueIds = new HashSet<>();
 			Build prevBuild = getStreamPrevious(null);
 			if (prevBuild != null) {
-				Repository repository = project.getRepository();
-				try (RevWalk revWalk = new RevWalk(repository)) {
-					revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommitHash())));
-					revWalk.markUninteresting(revWalk.parseCommit(prevBuild.getCommitId()));
-
-					RevCommit commit;
-					while ((commit = revWalk.next()) != null) 
-						fixedIssueIds.addAll(getProject().parseFixedIssueIds(commit.getFullMessage()));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				for (RevCommit commit: getCommits(null)) 
+					fixedIssueIds.addAll(getProject().parseFixedIssueIds(commit.getFullMessage()));
 			} 
 		}
 		return fixedIssueIds;
@@ -730,21 +722,14 @@ public class Build extends AbstractEntity
 		if (commitsCache == null) 
 			commitsCache = new HashMap<>();
 		if (!commitsCache.containsKey(sincePrevStatus)) {
-			Collection<RevCommit> commits = new ArrayList<>();
+			Collection<RevCommit> commits;
 			Build prevBuild = getStreamPrevious(sincePrevStatus);
 			if (prevBuild != null) {
-				Repository repository = project.getRepository();
-				try (RevWalk revWalk = new RevWalk(repository)) {
-					revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommitHash())));
-					revWalk.markUninteresting(revWalk.parseCommit(prevBuild.getCommitId()));
-
-					RevCommit commit;
-					while ((commit = revWalk.next()) != null) 
-						commits.add(commit);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			} 
+				commits = getGitService().getReachableCommits(project, 
+						Lists.newArrayList(getCommitId()), Lists.newArrayList(prevBuild.getCommitId()));
+			} else {
+				commits = new ArrayList<>();
+			}
 			commitsCache.put(sincePrevStatus, commits);
 		}
 		return commitsCache.get(sincePrevStatus);
@@ -820,12 +805,20 @@ public class Build extends AbstractEntity
 		return paramBean;
 	}
 	
-	public File getPublishDir() {
-		return OneDev.getInstance(StorageManager.class).getBuildDir(getProject().getId(), getNumber());
+	public File getDir() {
+		return getDir(getProject().getId(), getNumber());
 	}
 	
 	public File getArtifactsDir() {
-		return new File(getPublishDir(), ARTIFACTS_DIR);
+		return getArtifactsDir(getProject().getId(), getNumber());
+	}
+	
+	public static File getDir(Long projectId, Long buildNumber) {
+		return OneDev.getInstance(StorageManager.class).getBuildDir(projectId, buildNumber);
+	}
+	
+	public static File getArtifactsDir(Long projectId, Long buildNumber) {
+		return new File(getDir(projectId, buildNumber), ARTIFACTS_DIR);
 	}
 	
 	@Nullable
@@ -833,23 +826,34 @@ public class Build extends AbstractEntity
 		if (streamPreviousCache == null) 
 			streamPreviousCache = new HashMap<>();
 		if (!streamPreviousCache.containsKey(status)) 
-			streamPreviousCache.put(status, OneDev.getInstance(BuildManager.class).findStreamPrevious(this, status));
+			streamPreviousCache.put(status, getBuildManager().findStreamPrevious(this, status));
 		return streamPreviousCache.get(status);
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+	
+	private BuildManager getBuildManager() {
+		return OneDev.getInstance(BuildManager.class);
 	}
 	
 	public Collection<Long> getStreamPreviousNumbers(int limit) {
 		if (streamPreviousNumbersCache == null) 
 			streamPreviousNumbersCache = new HashMap<>();
 		if (!streamPreviousNumbersCache.containsKey(limit)) {
-			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			streamPreviousNumbersCache.put(limit, buildManager.queryStreamPreviousNumbers(
+			streamPreviousNumbersCache.put(limit, getBuildManager().queryStreamPreviousNumbers(
 					this, null, Criteria.IN_CLAUSE_LIMIT));
 		}
 		return streamPreviousNumbersCache.get(limit);
 	}
 	
-	public String getArtifactsLockKey() {
-		return "build-artifacts:" + getId();
+	public String getArtifactsLockName() {
+		return getArtifactsLockName(getProject().getId(), getNumber());
+	}
+	
+	public static String getArtifactsLockName(Long projectId, Long buildNumber) {
+		return "build-artifacts:" + projectId + ":" + buildNumber;
 	}
 	
 	public ProjectScopedNumber getFQN() {
@@ -859,12 +863,12 @@ public class Build extends AbstractEntity
 	public Collection<String> getOnBranches() {
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
 		Collection<ObjectId> descendants = commitInfoManager.getDescendants(
-				getProject(), Sets.newHashSet(getCommitId()));
+				getProject().getId(), Sets.newHashSet(getCommitId()));
 		descendants.add(getCommitId());
 	
 		Collection<String> branches = new ArrayList<>();
-		for (RefInfo ref: getProject().getBranchRefInfos()) {
-			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
+		for (RefFacade ref: getProject().getBranchRefs()) {
+			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName()));
 			if (descendants.contains(ref.getPeeledObj()))
 				branches.add(branchName);
 		}
@@ -921,11 +925,7 @@ public class Build extends AbstractEntity
 	}
 	
 	public boolean isValid() {
-		try {
-			return getProject().getRepository().getObjectDatabase().has(ObjectId.fromString(getCommitHash()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return getGitService().hasObjects(getProject(), ObjectId.fromString(getCommitHash()));
 	}
 	
 	@Nullable
@@ -979,7 +979,7 @@ public class Build extends AbstractEntity
 		
 		return matches.get();
 	}
-
+	
 	@Override
 	public Project getAttachmentProject() {
 		return getProject();
@@ -990,12 +990,14 @@ public class Build extends AbstractEntity
 		return uuid;
 	}
 	
-	public boolean hasArtifacts() {
-		return getArtifactsDir().exists() && getArtifactsDir().listFiles().length != 0;
-	}
-	
 	public static String getSerialLockName(Long buildId) {
 		return "build-" + buildId + "-serial";
+	}
+	
+	public List<FileInfo> getRootArtifacts() {
+		if (rootArtifacts == null)
+			rootArtifacts = OneDev.getInstance(BuildManager.class).listArtifacts(this, null);
+		return rootArtifacts;
 	}
 	
 }

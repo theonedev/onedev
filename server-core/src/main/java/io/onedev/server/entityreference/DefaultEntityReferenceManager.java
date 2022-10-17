@@ -8,7 +8,6 @@ import javax.inject.Singleton;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -21,6 +20,7 @@ import io.onedev.server.event.codecomment.CodeCommentUpdated;
 import io.onedev.server.event.issue.IssueChanged;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueOpened;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.pullrequest.PullRequestChanged;
 import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.event.pullrequest.PullRequestOpened;

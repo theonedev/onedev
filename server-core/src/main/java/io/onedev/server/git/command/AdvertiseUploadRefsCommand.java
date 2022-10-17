@@ -6,26 +6,23 @@ import java.io.OutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class AdvertiseUploadRefsCommand extends GitCommand<Void> {
+public class AdvertiseUploadRefsCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(AdvertiseUploadRefsCommand.class);
 	
-	private OutputStream output;
+	private final File workingDir;
+	
+	private final OutputStream output;
 	
 	private String protocol;
 	
-	public AdvertiseUploadRefsCommand(File gitDir) {
-		super(gitDir);
-	}
-
-	public AdvertiseUploadRefsCommand output(OutputStream output) {
+	public AdvertiseUploadRefsCommand(File workingDir, OutputStream output) {
+		this.workingDir = workingDir;
 		this.output = output;
-		return this;
 	}
 
 	public AdvertiseUploadRefsCommand protocol(String protocol) {
@@ -33,17 +30,18 @@ public class AdvertiseUploadRefsCommand extends GitCommand<Void> {
 		return this;
 	}
 	
-	@Override
-	public Void call() {
-		Preconditions.checkNotNull(output);
-		
-		Commandline cmd = cmd();
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
+	
+	public void run() {
+		Commandline git = newGit().workingDir(workingDir);
 		
 		if (protocol != null)
-			cmd.environments().put("GIT_PROTOCOL", protocol);
+			git.environments().put("GIT_PROTOCOL", protocol);
 		
-		cmd.addArgs("upload-pack", "--stateless-rpc", "--advertise-refs", ".");
-		cmd.execute(output, new LineConsumer() {
+		git.addArgs("upload-pack", "--stateless-rpc", "--advertise-refs", ".");
+		git.execute(output, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -51,8 +49,6 @@ public class AdvertiseUploadRefsCommand extends GitCommand<Void> {
 			}
 			
 		}).checkReturnCode();
-		
-		return null;
 	}
 
 }

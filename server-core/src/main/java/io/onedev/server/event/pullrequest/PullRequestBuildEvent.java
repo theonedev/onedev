@@ -2,24 +2,28 @@ package io.onedev.server.event.pullrequest;
 
 import java.util.Date;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestBuildEvent extends PullRequestEvent {
 
-	private final Build build;
+	private static final long serialVersionUID = 1L;
+	
+	private final Long buildId;
 	
 	public PullRequestBuildEvent(Build build) {
 		super(null, new Date(), build.getRequest());
-		this.build = build;
+		buildId = build.getId();
 	}
 
 	public Build getBuild() {
-		return build;
+		return OneDev.getInstance(BuildManager.class).load(buildId);
 	}
 
 	@Override
 	public String getActivity() {
+		Build build = getBuild();
 		String activity = build.getJobName() + " ";
 		if (build.getVersion() != null)
 			activity = "build #" + build.getNumber() + " (" + build.getVersion() + ")";
@@ -27,11 +31,6 @@ public class PullRequestBuildEvent extends PullRequestEvent {
 			activity = "build #" + build.getNumber();
 		activity += " is " + build.getStatus();
 		return activity;
-	}
-
-	@Override
-	public PullRequestEvent cloneIn(Dao dao) {
-		return new PullRequestBuildEvent(dao.load(Build.class, build.getId()));
 	}
 
 }

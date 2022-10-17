@@ -5,8 +5,8 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestAssigned;
 import io.onedev.server.event.pullrequest.PullRequestUnassigned;
 import io.onedev.server.model.PullRequestAssignment;

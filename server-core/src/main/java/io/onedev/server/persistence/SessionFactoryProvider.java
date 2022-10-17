@@ -9,16 +9,16 @@ import org.hibernate.SessionFactory;
 @Singleton
 public class SessionFactoryProvider implements Provider<SessionFactory> {
 
-	private final PersistManager persistManager;
+	private final SessionFactoryManager sessionFactoryManager;
 	
 	@Inject
-	public SessionFactoryProvider(PersistManager persistManager) {
-		this.persistManager = persistManager;
+	public SessionFactoryProvider(SessionFactoryManager sessionFactoryManager) {
+		this.sessionFactoryManager = sessionFactoryManager;
 	}
 	
 	@Override
 	public SessionFactory get() {
-		return persistManager.getSessionFactory();
+		return sessionFactoryManager.getSessionFactory();
 	}
 
 }

@@ -116,9 +116,9 @@ public class SuggestionUtils {
 			@Override
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) {
-					List<String> branchNames = project.getBranchRefInfos()
+					List<String> branchNames = project.getBranchRefs()
 							.stream()
-							.map(it->GitUtils.ref2branch(it.getRef().getName()))
+							.map(it->GitUtils.ref2branch(it.getName()))
 							.sorted()
 							.collect(Collectors.toList());
 					return SuggestionUtils.suggest(branchNames, matchWith);
@@ -136,9 +136,9 @@ public class SuggestionUtils {
 			@Override
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) {
-					List<String> tagNames = project.getTagRefInfos()
+					List<String> tagNames = project.getTagRefs()
 							.stream()
-							.map(it->GitUtils.ref2tag(it.getRef().getName()))
+							.map(it->GitUtils.ref2tag(it.getName()))
 							.sorted()
 							.collect(Collectors.toList());
 					return SuggestionUtils.suggest(tagNames, matchWith);
@@ -369,7 +369,7 @@ public class SuggestionUtils {
 	
 	public static List<InputSuggestion> suggestBlobs(Project project, String matchWith) {
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-		return suggestByPattern(commitInfoManager.getFiles(project), matchWith);
+		return suggestByPattern(commitInfoManager.getFiles(project.getId()), matchWith);
 	}
 	
 	private static List<InputSuggestion> suggest(@Nullable Project project, String matchWith, 

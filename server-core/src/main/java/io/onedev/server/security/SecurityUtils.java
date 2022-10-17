@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -22,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.AppLoader;
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
@@ -351,7 +354,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
     }
     
 	public static void bindAsSystem() {
-		ThreadContext.bind(asSubject(User.ONEDEV_ID));
+		ThreadContext.bind(asSubject(User.SYSTEM_ID));
 	}
 	
 	public static Runnable inheritSubject(Runnable task) {
@@ -421,6 +424,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			});
 		}
 		return wrappedTasks;
+	}
+	
+	@Nullable
+	public static String getBearerToken(HttpServletRequest request) {
+		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if (authHeader != null && authHeader.startsWith(KubernetesHelper.BEARER + " "))
+			return authHeader.substring(KubernetesHelper.BEARER.length() + 1);
+		else
+			return null;
 	}
 	
 }

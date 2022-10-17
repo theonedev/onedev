@@ -2,36 +2,25 @@ package io.onedev.server.git;
 
 import java.io.Serializable;
 
-import org.eclipse.jgit.lib.FileMode;
+public class BlobContent implements Serializable {
 
-public interface BlobContent extends Serializable {
+	private static final long serialVersionUID = 1L;
 
-	byte[] getBytes();
+	private final byte[] bytes;
 	
-	FileMode getMode();
+	private final int mode;
 	
-	public static class Immutable implements BlobContent {
-
-		private static final long serialVersionUID = 1L;
-
-		private final byte[] bytes;
-		
-		private final FileMode mode;
-		
-		public Immutable(byte[] bytes, FileMode mode) {
-			this.bytes = bytes;
-			this.mode = mode;
-		}
-		
-		@Override
-		public byte[] getBytes() {
-			return bytes;
-		}
-
-		@Override
-		public FileMode getMode() {
-			return mode;
-		}
-		
+	public BlobContent(byte[] bytes, int mode) {
+		this.bytes = bytes;
+		this.mode = mode;
 	}
+	
+	public byte[] getBytes() {
+		return bytes;
+	}
+
+	public int getMode() {
+		return mode;
+	}
+	
 }

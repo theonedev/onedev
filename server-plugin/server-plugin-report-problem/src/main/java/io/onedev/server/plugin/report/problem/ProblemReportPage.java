@@ -86,11 +86,11 @@ public class ProblemReportPage extends BuildReportPage {
 
 		@Override
 		protected ProblemReport load() {
-			return LockUtils.read(ProblemReport.getReportLockKey(getBuild()), new Callable<ProblemReport>() {
+			return LockUtils.read(ProblemReport.getReportLockName(getBuild()), new Callable<ProblemReport>() {
 
 				@Override
 				public ProblemReport call() throws Exception {
-					File reportDir = new File(getBuild().getPublishDir(), ProblemReport.CATEGORY + "/" + getReportName());				
+					File reportDir = new File(getBuild().getDir(), ProblemReport.CATEGORY + "/" + getReportName());				
 					return ProblemReport.readFrom(reportDir);
 				}
 				

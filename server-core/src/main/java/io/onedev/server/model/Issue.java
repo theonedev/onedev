@@ -53,6 +53,7 @@ import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -68,7 +69,6 @@ import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
@@ -812,7 +812,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
 			
 			getProject().getTree().stream().filter(it->it.isCodeManagement()).forEach(it-> {
-				for (ObjectId commitId: commitInfoManager.getFixCommits(it, getId())) {
+				for (ObjectId commitId: commitInfoManager.getFixCommits(it.getId(), getId())) {
 					RevCommit commit = it.getRevCommit(commitId, false);
 					if (commit != null)
 						commits.add(new FixCommit(it, commit));

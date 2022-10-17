@@ -7,30 +7,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class LsRemoteCommand extends GitCommand<Map<String, String>> {
+public class LsRemoteCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(LsRemoteCommand.class);
 	
-	private String remote;
+	private final String remote;
 		
 	private boolean quiet;
 	
 	private String refs;
 	
-	public LsRemoteCommand() {
-		super(null);
+	public LsRemoteCommand(String remote) {
+		this.remote = remote;
 	}
 
-	public LsRemoteCommand remote(String remote) {
-		this.remote = remote;
-		return this;
-	}
-	
 	public LsRemoteCommand quiet(boolean quiet) {
 		this.quiet = quiet;
 		return this;
@@ -40,12 +34,13 @@ public class LsRemoteCommand extends GitCommand<Map<String, String>> {
 		this.refs = refs;
 		return this;
 	}
+
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
 	
-	@Override
-	public Map<String, String> call() {
-		Preconditions.checkNotNull(remote, "remote has to be specified.");
-		
-		Commandline cmd = cmd().addArgs("ls-remote");
+	public Map<String, String> run() {
+		Commandline cmd = newGit().addArgs("ls-remote");
 		if (quiet)
 			cmd.addArgs("--quiet");
 		

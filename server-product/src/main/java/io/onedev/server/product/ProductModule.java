@@ -12,10 +12,10 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.persistence.HibernateProperties;
-import io.onedev.server.util.ServerConfig;
-import io.onedev.server.util.jetty.ServerConfigurator;
-import io.onedev.server.util.jetty.ServletConfigurator;
+import io.onedev.server.ServerConfig;
+import io.onedev.server.jetty.ServerConfigurator;
+import io.onedev.server.jetty.ServletConfigurator;
+import io.onedev.server.persistence.HibernateConfig;
 
 public class ProductModule extends AbstractPluginModule {
 
@@ -31,18 +31,18 @@ public class ProductModule extends AbstractPluginModule {
 		super.configure();
 		
 		File file = new File(Bootstrap.installDir, "conf/hibernate.properties"); 
-		HibernateProperties hibernateProps = new HibernateProperties(FileUtils.loadProperties(file));
-		String url = hibernateProps.getProperty(URL);
-		hibernateProps.setProperty(URL, 
+		HibernateConfig hibernateConfig = new HibernateConfig(FileUtils.loadProperties(file));
+		String url = hibernateConfig.getProperty(URL);
+		hibernateConfig.setProperty(URL, 
 				StringUtils.replace(url, "${installDir}", Bootstrap.installDir.getAbsolutePath()));
 		
 		for (String prop: HIBERNATE_PROPS) {
 			String env = System.getenv(prop.replace('.', '_'));
 			if (env != null)
-				hibernateProps.setProperty(prop, env);
+				hibernateConfig.setProperty(prop, env);
 		}
 		
-		bind(HibernateProperties.class).toInstance(hibernateProps);
+		bind(HibernateConfig.class).toInstance(hibernateConfig);
 		
 		file = new File(Bootstrap.installDir, "conf/server.properties");
 		ServerProperties serverProps = new ServerProperties(FileUtils.loadProperties(file)); 

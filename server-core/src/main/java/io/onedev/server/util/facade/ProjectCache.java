@@ -1,5 +1,6 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,7 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -17,10 +18,15 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class ProjectCache extends HashMap<Long, ProjectFacade> {
+public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Serializable {
+
+	public ProjectCache(Map<Long, ProjectFacade> delegate) {
+		super(delegate);
+	}
 
 	private static final long serialVersionUID = 1L;
 	
@@ -56,22 +62,19 @@ public class ProjectCache extends HashMap<Long, ProjectFacade> {
 	
     @Nullable
     public Long findId(String path) {
+    	ProjectFacade project = find(path);
+    	return project != null? project.getId(): null;
+    }
+    
+    @Nullable
+    public ProjectFacade find(String path) {
     	for (ProjectFacade project: values()) {
     		if (project.getPath().equals(path))
-    			return project.getId();
+    			return project;
     	}
     	return null;
     }
     
-	@Nullable
-    public Long findId(@Nullable Long parentId, String name) {
-		for (ProjectFacade project: values()) {
-			if (project.getName().equals(name) && Objects.equals(parentId, project.getParentId())) 
-				return project.getId();
-		}
-		return null;
-    }
-	
 	public List<ProjectFacade> getChildren(Long id) {
 		List<ProjectFacade> children = new ArrayList<>();
 		for (ProjectFacade facade: values()) {
@@ -88,12 +91,10 @@ public class ProjectCache extends HashMap<Long, ProjectFacade> {
 		});
 		return children;
 	}
-	
+
 	@Override
 	public ProjectCache clone() {
-		ProjectCache clone = new ProjectCache();
-		clone.putAll(this);
-		return clone;
+		return new ProjectCache(new HashMap<>(delegate));
 	}
 
 	public double getSimilarScore(Project project, @Nullable String term) {
@@ -116,5 +117,5 @@ public class ProjectCache extends HashMap<Long, ProjectFacade> {
 			
 		};		
 	}
-	
+
 }

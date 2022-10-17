@@ -7,42 +7,35 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
+import io.onedev.server.git.CommandUtils;
 
-public class UploadPackCommand extends GitCommand<ExecutionResult> {
+public class UploadPackCommand {
 
-	private InputStream stdin;
+	private final File workingDir;
 	
-	private OutputStream stdout;
+	private final Map<String, String> envs;
 	
-	private OutputStream stderr;
+	private final InputStream stdin;
+	
+	private final OutputStream stdout;
+	
+	private final OutputStream stderr;
 	
 	private boolean statelessRpc;
 	
 	private String protocol;
 	
-	public UploadPackCommand(File gitDir, Map<String, String> environments) {
-		super(gitDir, environments);
-	}
-	
-	public UploadPackCommand stdin(InputStream stdin) {
+	public UploadPackCommand(File workingDir, InputStream stdin, OutputStream stdout, 
+			OutputStream stderr, Map<String, String> envs) {
+		this.workingDir = workingDir;
 		this.stdin = stdin;
-		return this;
-	}
-	
-	public UploadPackCommand stdout(OutputStream stdout) {
 		this.stdout = stdout;
-		return this;
+		this.stderr = stderr;
+		this.envs = envs;
 	}
 	
-	public UploadPackCommand stderr(OutputStream stderr) {
-		this.stderr = stderr;
-		return this;
-	}
-
 	public UploadPackCommand statelessRpc(boolean statelessRpc) {
 		this.statelessRpc = statelessRpc;
 		return this;
@@ -53,23 +46,23 @@ public class UploadPackCommand extends GitCommand<ExecutionResult> {
 		return this;
 	}
 	
-	@Override
-	public ExecutionResult call() {
-		Preconditions.checkNotNull(stdin);
-		Preconditions.checkNotNull(stdout);
-		Preconditions.checkNotNull(stderr);
-		
-		Commandline cmd = cmd();
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
+	
+	public ExecutionResult run() {
+		Commandline git = newGit().workingDir(workingDir);
+		git.environments().putAll(envs);
 		
 		if (protocol != null)
-			cmd.environments().put("GIT_PROTOCOL", protocol);
+			git.environments().put("GIT_PROTOCOL", protocol);
 		
-		cmd.addArgs("upload-pack");
+		git.addArgs("upload-pack");
 		if (statelessRpc)
-			cmd.addArgs("--stateless-rpc");
-		cmd.addArgs(".");
+			git.addArgs("--stateless-rpc");
+		git.addArgs(".");
 		
-		return cmd.execute(stdout, stderr, stdin);
+		return git.execute(stdout, stderr, stdin);
 	}
 
 }

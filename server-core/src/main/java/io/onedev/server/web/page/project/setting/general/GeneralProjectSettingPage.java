@@ -24,7 +24,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectLabelManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
@@ -181,10 +180,6 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		add(form);
 	}
 
-	private ProjectManager getProjectManager() {
-		return OneDev.getInstance(ProjectManager.class);
-	}
-	
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "General Setting").add(AttributeAppender.replace("class", "text-truncate"));

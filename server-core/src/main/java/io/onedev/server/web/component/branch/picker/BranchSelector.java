@@ -25,7 +25,7 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -56,8 +56,8 @@ public abstract class BranchSelector extends Panel {
 		this.projectModel = projectModel;
 		this.branch = branch;		
 		
-		for (RefInfo ref: projectModel.getObject().getBranchRefInfos())
-			branches.add(GitUtils.ref2branch(ref.getRef().getName()));
+		for (RefFacade ref: projectModel.getObject().getBranchRefs())
+			branches.add(GitUtils.ref2branch(ref.getName()));
 		
 		filteredBranches.addAll(branches);
 	}

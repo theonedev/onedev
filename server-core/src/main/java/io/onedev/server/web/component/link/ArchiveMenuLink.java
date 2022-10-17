@@ -37,7 +37,7 @@ public abstract class ArchiveMenuLink extends MenuLink {
 			@Override
 			public AbstractLink newLink(String id) {
 				return new ResourceLink<Void>(id, new ArchiveResourceReference(), 
-						ArchiveResource.paramsOf(projectModel.getObject(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
+						ArchiveResource.paramsOf(projectModel.getObject().getId(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
 
 					@Override
 					protected CharSequence getOnClickScript(CharSequence url) {
@@ -58,7 +58,7 @@ public abstract class ArchiveMenuLink extends MenuLink {
 			@Override
 			public AbstractLink newLink(String id) {
 				return new ResourceLink<Void>(id, new ArchiveResourceReference(), 
-						ArchiveResource.paramsOf(projectModel.getObject(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
+						ArchiveResource.paramsOf(projectModel.getObject().getId(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
 
 					@Override
 					protected CharSequence getOnClickScript(CharSequence url) {

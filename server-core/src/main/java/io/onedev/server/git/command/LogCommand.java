@@ -17,9 +17,10 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 
-public abstract class LogCommand extends GitCommand<Void> {
+public abstract class LogCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogCommand.class); 
 	
@@ -27,25 +28,20 @@ public abstract class LogCommand extends GitCommand<Void> {
 	
  	private static final String BODY_END = "$<#BodyEnd#>$";
 	
+ 	private final File workingDir;
+ 	
+    private final List<String> revisions;
+    
     private boolean firstParent;
     
     private EnumSet<Field> fields = EnumSet.noneOf(Field.class);
     
-    private List<String> revisions = new ArrayList<>();
-    
-    public LogCommand(File gitDir) {
-        super(gitDir);
+    public LogCommand(File workingDir, List<String> revisions) {
+    	this.workingDir = workingDir;
+    	Preconditions.checkArgument(!revisions.isEmpty());
+    	this.revisions = revisions;
     }
 
-	public List<String> revisions() {
-		return revisions;
-	}
-
-	public LogCommand revisions(List<String> revisions) {
-		this.revisions = revisions;
-		return this;
-	}
-	
 	public LogCommand fields(EnumSet<Field> fields) {
 		this.fields = fields;
 		return this;
@@ -55,12 +51,13 @@ public abstract class LogCommand extends GitCommand<Void> {
 		this.firstParent = firstParent;
 		return this;
 	}
+
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
 	
-	@Override
-    public Void call() {
-		Preconditions.checkArgument(!revisions.isEmpty(), "Log revisions have to be specified");
-		
-        Commandline cmd = cmd();
+    public void run() {
+        Commandline cmd = newGit().workingDir(workingDir);
 
         String format = "hash:%H %n";
 
@@ -160,7 +157,7 @@ public abstract class LogCommand extends GitCommand<Void> {
             	} else if (line.trim().length() != 0 && line.contains("\t")) {
             		FileChange change;
             		if (fields.contains(Field.LINE_CHANGES)) {
-            			change = parseNumStats(line);
+            			change = CommandUtils.parseNumStats(line);
             		} else {
                 		StringTokenizer tokenizer = new StringTokenizer(line, "\t");
                 		String statusCode = tokenizer.nextToken();
@@ -202,8 +199,6 @@ public abstract class LogCommand extends GitCommand<Void> {
 
         if (commitBuilderRef.get() != null)
         	consume(commitBuilderRef.get().build());
-        
-        return null;
     }
 	
 	protected abstract void consume(GitCommit commit);

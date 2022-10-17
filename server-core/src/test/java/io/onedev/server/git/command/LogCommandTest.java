@@ -72,14 +72,14 @@ public class LogCommandTest extends AbstractGitTest {
 
 		EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
 		fields.remove(LogCommand.Field.LINE_CHANGES);
-		new LogCommand(git.getRepository().getDirectory()) {
+		new LogCommand(git.getRepository().getDirectory(), Lists.newArrayList("master")) {
 
 			@Override
 			protected void consume(GitCommit commit) {
 				commits.add(commit);
 			}
 			
-		}.revisions(Lists.newArrayList("master")).fields(fields).call();
+		}.fields(fields).run();
 		
 		assertEquals(2, commits.size());
 
@@ -98,14 +98,14 @@ public class LogCommandTest extends AbstractGitTest {
 
 		commits.clear();
 		fields = EnumSet.allOf(LogCommand.Field.class);
-		new LogCommand(git.getRepository().getDirectory()) {
+		new LogCommand(git.getRepository().getDirectory(), Lists.newArrayList("master")) {
 
 			@Override
 			protected void consume(GitCommit commit) {
 				commits.add(commit);
 			}
 			
-		}.revisions(Lists.newArrayList("master")).fields(fields).call();
+		}.fields(fields).run();
 		
 		GitCommit commit = commits.get(0);
 		

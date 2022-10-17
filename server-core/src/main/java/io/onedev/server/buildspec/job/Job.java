@@ -19,21 +19,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.ws.rs.core.HttpHeaders;
+import javax.validation.constraints.NotEmpty;
 
 import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
-import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.k8shelper.CloneInfo;
-import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
@@ -488,17 +484,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 		return choices;
 	}
 
-	@Nullable
-	public static String getToken(HttpServletRequest request) {
-		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (authHeader == null)
-			authHeader = request.getHeader(CloneInfo.ONEDEV_AUTHORIZATION);
-		if (authHeader != null && authHeader.startsWith(KubernetesHelper.BEARER + " "))
-			return authHeader.substring(KubernetesHelper.BEARER.length() + 1);
-		else
-			return null;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);

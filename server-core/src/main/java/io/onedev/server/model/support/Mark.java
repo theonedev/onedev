@@ -1,6 +1,5 @@
 package io.onedev.server.model.support;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +13,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -110,32 +109,19 @@ public class Mark implements Serializable {
 	
 	@Nullable
 	public Mark mapTo(Project project, ObjectId commitId) {
+		GitService gitService = OneDev.getInstance(GitService.class);
+		
 		List<String> newLines = new ArrayList<>();
-		RevCommit commit = project.getRevCommit(commitId, true);
-		try (TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), path, commit.getTree())) {
-			if (treeWalk == null)
-				return null;
-			
-			BlobIdent newBlobIdent = new BlobIdent(commitId.name(), path, treeWalk.getFileMode(0).getBits());
-			Blob newBlob = new Blob(newBlobIdent, treeWalk.getObjectId(0), treeWalk.getObjectReader());
-			if (newBlob.getText() == null)
-				return null;
-			for (String line: newBlob.getText().getLines())
-				newLines.add(WhitespaceOption.DEFAULT.apply(line));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		Blob newBlob = gitService.getBlob(project, commitId, path);
+		if (newBlob == null || newBlob.getText() == null)
+			return null;
+		for (String line: newBlob.getText().getLines())
+			newLines.add(WhitespaceOption.DEFAULT.apply(line));
 		
 		List<String> oldLines = new ArrayList<>();
-		RevCommit markCommit = project.getRevCommit(ObjectId.fromString(commitHash), true);
-		try (TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), path, markCommit.getTree())) {
-			BlobIdent oldBlobIdent = new BlobIdent(commitHash, path, treeWalk.getFileMode(0).getBits());
-			Blob oldBlob = new Blob(oldBlobIdent, treeWalk.getObjectId(0), treeWalk.getObjectReader());
-			for (String line: oldBlob.getText().getLines())
-				oldLines.add(WhitespaceOption.DEFAULT.apply(line));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		Blob oldBlob = gitService.getBlob(project, ObjectId.fromString(commitHash), path);
+		for (String line: oldBlob.getText().getLines())
+			oldLines.add(WhitespaceOption.DEFAULT.apply(line));
 
 		Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
 		

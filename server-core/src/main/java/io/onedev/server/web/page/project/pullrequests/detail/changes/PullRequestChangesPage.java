@@ -53,6 +53,7 @@ import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
@@ -78,6 +79,7 @@ import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.RevisionDiff;
@@ -104,8 +106,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	
 	private State state = new State();
 	
-	private WebMarkupContainer head;
-	
 	private final IModel<List<RevCommit>> commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
 
 		@Override
@@ -125,7 +125,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		protected ObjectId load() {
 			ObjectId oldCommitId = ObjectId.fromString(state.oldCommitHash);
 			ObjectId newCommitId = ObjectId.fromString(state.newCommitHash);
-			return getPullRequest().getComparisonBase(oldCommitId, newCommitId);
+			return getPullRequestManager().getComparisonBase(getPullRequest(), oldCommitId, newCommitId);
 		}
 		
 	};
@@ -178,6 +178,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		
 		state.oldCommitHash = params.get(PARAM_OLD_COMMIT).toString();
 		state.newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
+		state.createdCommitHash = params.get(ProjectBlobPage.PARAM_CREATED_COMMIT).toString();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.currentFile = params.get(PARAM_CURRENT_FILE).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
@@ -186,8 +187,13 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		PullRequest request = getPullRequest();
 		if (state.oldCommitHash == null) 
 			state.oldCommitHash = request.getBaseCommitHash();
-		if (state.newCommitHash == null)
-			state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+		
+		if (state.newCommitHash == null) {
+			if (state.createdCommitHash != null)
+				state.newCommitHash = state.createdCommitHash;
+			else
+				state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+		}
 		if (state.whitespaceOption == null)
 			state.whitespaceOption = WhitespaceOption.DEFAULT;
 	}
@@ -266,11 +272,23 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		}
 	}
 	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	private boolean isOutdated() {
+		for (PullRequestUpdate update: getPullRequest().getUpdates()) {
+			if (update.getHeadCommitHash().equals(state.newCommitHash))
+				return false;
+		}
+		return true;
+	}
+
+	private PullRequestManager getPullRequestManager() {
+		return OneDev.getInstance(PullRequestManager.class);
+	}
+	
+	private Component newChangesContainer() {
+		Fragment fragment = new Fragment("content", "changesFrag", this);
 		
-		add(head = new WebMarkupContainer("changesHead"));
+		WebMarkupContainer head;
+		fragment.add(head = new WebMarkupContainer("changesHead"));
 		head.add(new WebSocketObserver() {
 
 			@Override
@@ -315,7 +333,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					} else {
 						state.oldCommitHash = commitsModel.getObject().get(index).name();
 					}
-					newRevisionDiff(target);
+					newRevisionDiff(target, fragment);
 					OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				}
 				target.add(head);
@@ -362,7 +380,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					}
 					index++;
 					state.newCommitHash = commitsModel.getObject().get(index).name();
-					newRevisionDiff(target);
+					newRevisionDiff(target, fragment);
 					OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				} 
 				target.add(head);
@@ -389,7 +407,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						state.oldCommitHash = params.getParameterValue("oldCommit").toString();
 						state.newCommitHash = params.getParameterValue("newCommit").toString();
 						target.add(head);
-						newRevisionDiff(target);
+						newRevisionDiff(target, fragment);
 						OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 						pushState(target);
 						dropdown.close();
@@ -531,7 +549,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 				state.oldCommitHash = getPullRequest().getBaseCommitHash();
 				state.newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
 				target.add(head);
-				newRevisionDiff(target);
+				newRevisionDiff(target, fragment);
 				OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				pushState(target);
 			}
@@ -545,7 +563,44 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			
 		});
 		
-		newRevisionDiff(null);
+		newRevisionDiff(null, fragment);	
+		
+		return fragment;
+	}
+	
+	private void newContent(@Nullable IPartialPageRequestHandler handler) {
+		Component content;
+		if (isOutdated()) {
+			content = new Fragment("content", "waitingFrag", this);
+			content.add(new WebSocketObserver() {
+
+				@Override
+				public Collection<String> getObservables() {
+					return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				}
+
+				@Override
+				public void onObservableChanged(IPartialPageRequestHandler handler) {
+					newContent(handler);
+				}
+				
+			});
+		} else { 
+			content = newChangesContainer();
+		}
+		content.setOutputMarkupId(true);
+		if (handler != null) {
+			replace(content);
+			handler.add(content);
+		} else {
+			add(content);
+		}
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		newContent(null);
 	}
 
 	@Override
@@ -606,7 +661,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		super.onPopState(target, data);
 
 		state = (State) data;
-		newRevisionDiff(target);
+		newContent(target);
+		
 		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 	
@@ -616,7 +672,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
 		
-	private void newRevisionDiff(@Nullable AjaxRequestTarget target) {
+	private void newRevisionDiff(@Nullable AjaxRequestTarget target, WebMarkupContainer container) {
 		IModel<String> blameModel = new IModel<String>() {
 
 			@Override
@@ -713,12 +769,14 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			}
 			
 		};
+		
 		revisionDiff.setOutputMarkupId(true);
+		
 		if (target != null) {
-			replace(revisionDiff);
+			container.replace(revisionDiff);
 			target.add(revisionDiff);
 		} else {
-			add(revisionDiff);
+			container.add(revisionDiff);
 		}
 	}
 	
@@ -864,6 +922,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		public String oldCommitHash;
 		
 		public String newCommitHash;
+		
+		public String createdCommitHash;
 		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 		

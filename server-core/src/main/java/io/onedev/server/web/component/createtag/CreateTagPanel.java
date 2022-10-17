@@ -9,13 +9,14 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -68,16 +69,18 @@ public abstract class CreateTagPanel extends Panel {
 					editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
 					target.add(form);
 				} else {
-					PGPSecretKeyRing signingKey = OneDev.getInstance(SettingManager.class)
-							.getGpgSetting().getSigningKey();
-					if (project.isTagSignatureRequired(user, tagName) && signingKey == null) {
-						editor.error(new Path(new PathNode.Named("name")), 
-								"Tag signature required per tag protection rule, please generate system GPG "
-								+ "signing key first");
-						target.add(form);
-					} else {
-						project.createTag(tagName, revision, user.asPerson(), helperBean.getMessage(), signingKey);
+					try {
+						OneDev.getInstance(GitService.class).createTag(project, tagName, revision, user.asPerson(), 
+								helperBean.getMessage(), project.isTagSignatureRequired(user, tagName));
 						onCreate(target, tagName);
+					} catch (Exception e) {
+						ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
+						if (explicitException != null) {
+							editor.error(new Path(new PathNode.Named("name")), explicitException.getMessage());
+							target.add(form);
+						} else {
+							throw ExceptionUtils.unchecked(e);
+						}
 					}
 				}
 			}

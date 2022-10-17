@@ -12,15 +12,15 @@ import org.apache.wicket.model.PropertyModel;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.comment.CommentInput;
-import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
 public abstract class CommentableOperationConfirmPanel extends OperationConfirmPanel {

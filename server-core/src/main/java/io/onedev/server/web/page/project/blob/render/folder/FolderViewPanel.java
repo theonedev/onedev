@@ -1,8 +1,5 @@
 package io.onedev.server.web.page.project.blob.render.folder;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -31,21 +28,18 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.base.Preconditions;
-
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.util.ProgrammingLanguageDetector;
+import io.onedev.server.git.BlobIdentFilter;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.FileExtension;
 import io.onedev.server.util.FilterIterator;
+import io.onedev.server.util.ProgrammingLanguageDetector;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.CtrlAwareOnClickAjaxBehavior;
@@ -69,60 +63,24 @@ public class FolderViewPanel extends Panel {
 
 		@Override
 		protected List<BlobIdent> load() {
-			Repository repository = context.getProject().getRepository();			
-			try (RevWalk revWalk = new RevWalk(repository)) {
-				RevTree revTree = revWalk.parseCommit(getCommitId()).getTree();
-				TreeWalk treeWalk;
-				if (context.getBlobIdent().path != null) {
-					treeWalk = Preconditions.checkNotNull(
-							TreeWalk.forPath(repository, context.getBlobIdent().path, revTree));
-					treeWalk.enterSubtree();
-				} else {
-					treeWalk = new TreeWalk(repository);
-					treeWalk.addTree(revTree);
-				}
-				List<BlobIdent> children = new ArrayList<>();
-				while (treeWalk.next())
-					children.add(new BlobIdent(context.getBlobIdent().revision, treeWalk.getPathString(), 
-							treeWalk.getRawMode(0)));
-				for (int i=0; i<children.size(); i++) {
-					BlobIdent child = children.get(i);
-					while (child.isTree()) {
-						treeWalk = TreeWalk.forPath(repository, child.path, revTree);
-						Preconditions.checkNotNull(treeWalk);
-						treeWalk.enterSubtree();
-						if (treeWalk.next()) {
-							BlobIdent grandChild = new BlobIdent(context.getBlobIdent().revision, 
-									treeWalk.getPathString(), treeWalk.getRawMode(0));
-							if (treeWalk.next() || !grandChild.isTree()) 
-								break;
-							else
-								child = grandChild;
-						} else {
-							break;
-						}
-					}
-					children.set(i, child);
-				}
-				
-				Collections.sort(children);
-				
-				BlobIdent oldBuildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
-						".onedev-buildspec", FileMode.REGULAR_FILE.getBits());
-				BlobIdent buildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
-						BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
-				if (children.contains(oldBuildSpecIdent)) {
-					children.remove(oldBuildSpecIdent);
-					children.add(0, oldBuildSpecIdent);
-				}
-				if (children.contains(buildSpecIdent)) {
-					children.remove(buildSpecIdent);
-					children.add(0, buildSpecIdent);
-				}
-				return children;
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			} 
+			List<BlobIdent> children = getGitService().getChildren(context.getProject(), getCommitId(), 
+					context.getBlobIdent().path, BlobIdentFilter.ALL, true);
+			for (BlobIdent child: children)
+				child.revision = context.getBlobIdent().revision;
+			
+			BlobIdent oldBuildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
+					".onedev-buildspec", FileMode.REGULAR_FILE.getBits());
+			BlobIdent buildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
+					BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
+			if (children.contains(oldBuildSpecIdent)) {
+				children.remove(oldBuildSpecIdent);
+				children.add(0, oldBuildSpecIdent);
+			}
+			if (children.contains(buildSpecIdent)) {
+				children.remove(buildSpecIdent);
+				children.add(0, buildSpecIdent);
+			}
+			return children;
 		}
 		
 	};
@@ -338,6 +296,10 @@ public class FolderViewPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	@Override

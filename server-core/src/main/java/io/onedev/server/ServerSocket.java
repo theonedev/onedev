@@ -24,12 +24,12 @@ import io.onedev.agent.WebsocketUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.buildspec.job.JobContext;
-import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.exception.SystemNotReadyException;
-import io.onedev.server.job.resource.ResourceManager;
-import io.onedev.server.tasklog.JobLogManager;
+import io.onedev.server.job.JobContext;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.job.ResourceAllocator;
+import io.onedev.server.job.log.LogManager;
 import io.onedev.server.terminal.RemoteSession;
 
 @WebSocket
@@ -98,7 +98,7 @@ public class ServerSocket {
 			switch (message.getType()) {
 	    	case AGENT_DATA:
 	    		// It is fine to deserialize from agent as they have valid agent token which can only 
-	    		// be retrieved via Administrator
+	    		// be assigned via Administrator
 	    		AgentData data = (AgentData) SerializationUtils.deserialize(message.getData());
 	    		try {
 	    			agentId = getAgentManager().agentConnected(data, session);
@@ -127,16 +127,16 @@ public class ServerSocket {
 	    		break;
 	    	case JOB_LOG:
 	    		try {
-	    		String dataString = new String(messageData, StandardCharsets.UTF_8);
-	    		String jobToken = StringUtils.substringBefore(dataString, ":");
-	    		String remaining = StringUtils.substringAfter(dataString, ":");
-	    		String sessionId = StringUtils.substringBefore(remaining, ":");
-	    		if (sessionId.length() == 0)
-	    			sessionId = null;
-	    		String logMessage = StringUtils.substringAfter(remaining, ":");
-	    		TaskLogger logger = OneDev.getInstance(JobLogManager.class).getLogger(jobToken);
-	    		if (logger != null)
-	    			logger.log(logMessage, sessionId);
+		    		String dataString = new String(messageData, StandardCharsets.UTF_8);
+		    		String jobToken = StringUtils.substringBefore(dataString, ":");
+		    		String remaining = StringUtils.substringAfter(dataString, ":");
+		    		String sessionId = StringUtils.substringBefore(remaining, ":");
+		    		if (sessionId.length() == 0)
+		    			sessionId = null;
+		    		String logMessage = StringUtils.substringAfter(remaining, ":");
+		    		TaskLogger logger = OneDev.getInstance(LogManager.class).getJobLogger(jobToken);
+		    		if (logger != null)
+		    			logger.log(logMessage, sessionId);
 	    		} catch (Exception e) {
 	    			logger.error("Error processing job log", e);
 	    		}
@@ -145,9 +145,10 @@ public class ServerSocket {
 	    		String dataString = new String(messageData, StandardCharsets.UTF_8);
 	    		String jobToken = StringUtils.substringBefore(dataString, ":");
 	    		String jobWorkspace = StringUtils.substringAfter(dataString, ":");
-	    		JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(jobToken, false);
+	    		JobManager jobManager = OneDev.getInstance(JobManager.class);
+	    		JobContext jobContext = jobManager.getJobContext(jobToken, false);
 	    		if (jobContext != null)
-	    			jobContext.reportJobWorkspace(jobWorkspace);
+	    			jobManager.reportJobWorkspace(jobContext, jobWorkspace);
 	    		break;
 	    	case SHELL_OUTPUT: 
 	    		dataString = new String(messageData, StandardCharsets.UTF_8);
@@ -178,7 +179,7 @@ public class ServerSocket {
     private Serializable service(Serializable request) {
 		try {
 			if (request instanceof WaitingForAgentResourceToBeReleased) {
-				OneDev.getInstance(ResourceManager.class).waitingForAgentResourceToBeReleased(agentId);
+				OneDev.getInstance(ResourceAllocator.class).waitingForAgentResourceToBeReleased(agentId);
 				return null;
 			} else {
 				throw new ExplicitException("Unknown request: " + request.getClass());

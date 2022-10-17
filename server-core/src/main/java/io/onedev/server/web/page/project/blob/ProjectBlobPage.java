@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.blob;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -46,13 +45,9 @@ import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandle
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,34 +56,32 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.CommitIndexed;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.LfsObject;
 import io.onedev.server.git.LfsPointer;
 import io.onedev.server.git.exception.BlobEditException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.search.code.CodeSearchManager;
-import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
@@ -156,6 +149,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	private static final String PARAM_QUERY = "query";
 	
 	public static final String PARAM_POSITION = "position";
+	
+	public static final String PARAM_CREATED_COMMIT = "created-commit";
 	
 	private static final String PARAM_COVERAGE_REPORT = "coverage-report";
 	
@@ -250,8 +245,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				if (resolvedRevision != null) {
 					RevCommit commit = getProject().getRevCommit(resolvedRevision, true);
 					CodeIndexManager indexManager = OneDev.getInstance(CodeIndexManager.class);
-					if (!indexManager.isIndexed(getProject(), commit)) {
-						OneDev.getInstance(CodeIndexManager.class).indexAsync(getProject(), commit);
+					if (!indexManager.isIndexed(getProject().getId(), commit)) {
+						OneDev.getInstance(CodeIndexManager.class).indexAsync(getProject().getId(), commit);
 						setVisible(true);
 					} else {
 						setVisible(false);
@@ -466,8 +461,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 									}
 
 									@Override
-									public void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
-										ProjectBlobPage.this.onCommitted(target, refUpdated);
+									public void onCommitted(AjaxRequestTarget target, ObjectId commitId) {
+										ProjectBlobPage.this.onCommitted(target, commitId);
 										modal.close();
 									}
 									
@@ -755,7 +750,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		} else {
 			if (getMode() == Mode.VIEW) {
 				LfsPointer lfsPointer = getProject().getBlob(getBlobIdent(), true).getLfsPointer();
-				if (lfsPointer != null && !getProject().isLfsObjectExists(lfsPointer.getObjectId())) 
+				if (lfsPointer != null && !new LfsObject(getProject().getId(), lfsPointer.getObjectId()).exists()) 
 					blobContent = new Fragment(BLOB_CONTENT_ID, "lfsObjectMissingFrag", this);
 			}
 			
@@ -979,17 +974,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				BlobIdent newBlobIdent = new BlobIdent(state.blobIdent);
 				newBlobIdent.revision = revision;
 				if (newBlobIdent.path != null) {
-					try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-						RevTree revTree = getProject().getRevCommit(revision, true).getTree();
-						TreeWalk treeWalk = TreeWalk.forPath(getProject().getRepository(), newBlobIdent.path, revTree);
-						if (treeWalk != null) {
-							newBlobIdent.mode = treeWalk.getRawMode(0);
-						} else {
-							newBlobIdent.path = null;
-							newBlobIdent.mode = FileMode.TREE.getBits();
-						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+					newBlobIdent.mode = getProject().getMode(revision, newBlobIdent.path);
+					if (newBlobIdent.mode == 0) {
+						newBlobIdent.path = null;
+						newBlobIdent.mode = FileMode.TREE.getBits();
 					}
 				}
 				
@@ -1388,64 +1376,32 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 
 	@Override
-	public void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated) {
+	public void onCommitted(@Nullable AjaxRequestTarget target, ObjectId commitId) {
 		Project project = getProject();
 		if (state.blobIdent.revision == null) {
 			state.blobIdent.revision = "master";
-			resolvedRevision = refUpdated.getNewCommitId();
+			resolvedRevision = commitId;
 			project.setDefaultBranch("master");
 		}
 		String branch = state.blobIdent.revision;
 		
-		getProject().cacheObjectId(branch, refUpdated.getNewCommitId());
-
-		Long projectId = project.getId();
-		String refName = refUpdated.getRefName();
-		ObjectId oldCommitId = refUpdated.getOldCommitId();
-		ObjectId newCommitId = refUpdated.getNewCommitId();
-		
-		/*
-		 * Update pull request as this is a direct consequence of editing source branch. Also this 
-		 * is necessary to show the latest changes of the pull request after editing 
-		 */
-		if (state.requestId != null) {
-			PullRequest request = OneDev.getInstance(PullRequestManager.class).load(state.requestId);
-			OneDev.getInstance(PullRequestUpdateManager.class).checkUpdate(request);
-		}
-		
-		OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-				project.cacheObjectId(branch, newCommitId);
-				RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
-				OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-			}
-			
-		});
+		getProject().cacheObjectId(branch, commitId);
 		
 		if (target != null) {
 			if (state.urlAfterEdit != null) {
-				throw new RedirectToUrlException(state.urlAfterEdit);
+				try {
+					URIBuilder builder = new URIBuilder(state.urlAfterEdit);
+					builder.addParameter(PARAM_CREATED_COMMIT, commitId.name());
+					throw new RedirectToUrlException(builder.build().toString());
+				} catch (URISyntaxException e) {
+					throw new RuntimeException(e);
+				}
 			} else {
 				BlobIdent newBlobIdent;
 				if (state.mode == Mode.DELETE) {
-					try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-						RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId(), true).getTree();
-						String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
-						while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
-							if (parentPath.contains("/")) {
-								parentPath = StringUtils.substringBeforeLast(parentPath, "/");
-							} else {
-								parentPath = null;
-								break;
-							}
-						}
-						newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}	
+					String parentPath = getGitService().getClosestPath(
+							getProject(), commitId, StringUtils.substringBeforeLast(state.blobIdent.path, "/"));
+					newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
 				} else if (state.mode == Mode.ADD) {
 					newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
 				} else if (state.mode == Mode.EDIT) {
@@ -1470,6 +1426,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 			}
 		}
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	@Override
@@ -1541,7 +1501,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 
 	@Override
-	public RefUpdated uploadFiles(Collection<FileUpload> uploads, String directory, String commitMessage) {
+	public ObjectId uploadFiles(Collection<FileUpload> uploads, String directory, String commitMessage) {
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
 		String parentPath = getDirectory();
@@ -1556,6 +1516,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 		BlobIdent blobIdent = getBlobIdent();
 		
+		boolean signRequired = false;
 		for (FileUpload upload: uploads) {
 			String blobPath = FilenameUtils.sanitizeFilename(upload.getFileName());
 			if (parentPath != null)
@@ -1566,9 +1527,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			else if (getProject().isBuildRequiredForModification(user, blobIdent.revision, blobPath)) 
 				throw new BlobEditException("Build required for this change. Please submit pull request instead");
 			else if (getProject().isCommitSignatureRequiredButNoSigningKey(user, blobIdent.revision)) 
-				throw new BlobEditException("Signature required for this change, please generate system GPG signing key first");
+				signRequired = true;
 			
-			BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
+			BlobContent blobContent = new BlobContent(upload.getBytes(), FileMode.REGULAR_FILE.getBits());
 			newBlobs.put(blobPath, blobContent);
 		}
 
@@ -1581,17 +1542,25 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		else
 			prevCommitId = ObjectId.zeroId();
 
-		PGPSecretKeyRing signingKey = getSettingManager().getGpgSetting().getSigningKey();
-		
 		while (true) {
 			try {
-				ObjectId newCommitId = blobEdits.commit(getProject().getRepository(), refName, prevCommitId, 
-						prevCommitId, user.asPerson(), commitMessage, signingKey);
-				return new RefUpdated(getProject(), refName, prevCommitId, newCommitId);
-			} catch (ObjectAlreadyExistsException|NotTreeException e) {
-				throw new BlobEditException(e.getMessage());
-			} catch (ObsoleteCommitException e) {
-				prevCommitId = e.getOldCommitId();
+				return getGitService().commit(getProject(), blobEdits, refName, prevCommitId, 
+						prevCommitId, user.asPerson(), commitMessage, signRequired);
+			} catch (Exception e) {
+				ObjectAlreadyExistsException objectAlreadyExistsException = 
+						ExceptionUtils.find(e, ObjectAlreadyExistsException.class);
+				NotTreeException notTreeException = ExceptionUtils.find(e, NotTreeException.class);
+				ObsoleteCommitException obsoleteCommitException = 
+						ExceptionUtils.find(e, ObsoleteCommitException.class);
+				
+				if (objectAlreadyExistsException != null)
+					throw new BlobEditException(objectAlreadyExistsException.getMessage());
+				else if (notTreeException != null)
+					throw new BlobEditException(notTreeException.getMessage());
+				else if (obsoleteCommitException != null)
+					prevCommitId = obsoleteCommitException.getOldCommitId();
+				else
+					throw ExceptionUtils.unchecked(e);
 			}
 		}
 	}
@@ -1647,6 +1616,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "Files");
+	}
+
+	@Override
+	public PullRequest getPullRequest() {
+		if (state.requestId != null)
+			return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
+		else
+			return null;
 	}
 
 	@Override

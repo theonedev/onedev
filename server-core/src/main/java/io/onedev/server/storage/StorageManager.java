@@ -4,6 +4,10 @@ import java.io.File;
 
 public interface StorageManager {
     
+	File getProjectsDir();
+	
+	File getProjectDir(Long projectId);
+	
 	/**
 	 * Get directory to store git repository of specified project
 	 * 

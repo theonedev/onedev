@@ -18,13 +18,7 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.loader.Listen;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.model.Setting;
-import io.onedev.server.model.support.administration.PerformanceSetting;
-import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.ServerConfig;
 import io.onedev.server.security.SecurityUtils;
 
 @Singleton
@@ -36,50 +30,14 @@ public class DefaultWorkExecutor implements WorkExecutor {
 	
 	private final Map<String, Collection<WorkFuture<?>>> waitings = new HashMap<>();
 
-	private final SettingManager settingManager;
-	
-	private volatile int concurrency = 1;
+	private final int concurrency;
 	
 	@Inject
-	public DefaultWorkExecutor(ExecutorService executorService, SettingManager settingManager) {
+	public DefaultWorkExecutor(ExecutorService executorService, ServerConfig serverConfig) {
 		this.executorService = executorService;
-		this.settingManager = settingManager;
+		concurrency = serverConfig.getServerCpu() / 1000;
 	}
 
-	@Transactional
-	@Listen
-	public void on(SystemStarted event) {
-		concurrency = settingManager.getPerformanceSetting().getCpuIntensiveTaskConcurrency();
-		executorService.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				check();
-			}
-			
-		});
-	}
-	
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof Setting) {
-			Setting setting = (Setting) event.getEntity();
-			if (setting.getKey() == Setting.Key.PERFORMANCE) {
-				PerformanceSetting performanceSetting = (PerformanceSetting) setting.getValue();
-				concurrency = performanceSetting.getCpuIntensiveTaskConcurrency();
-				executorService.execute(new Runnable() {
-
-					@Override
-					public void run() {
-						check();
-					}
-					
-				});
-			}
-		}
-	}
-	
 	private synchronized void check() {
 		if (concurrency > runnings.size()) {
 			Map<String, Integer> averagePriorities = new HashMap<>();

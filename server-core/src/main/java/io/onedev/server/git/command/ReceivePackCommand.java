@@ -7,42 +7,35 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
+import io.onedev.server.git.CommandUtils;
 
-public class ReceivePackCommand extends GitCommand<ExecutionResult> {
+public class ReceivePackCommand {
 
-	private InputStream stdin;
+	private final File workingDir;
 	
-	private OutputStream stdout;
+	private final Map<String, String> envs;
 	
-	private OutputStream stderr;
+	private final InputStream stdin;
+	
+	private final OutputStream stdout;
+	
+	private final OutputStream stderr;
 	
 	private boolean statelessRpc;
 	
 	private String protocol;
 	
-	public ReceivePackCommand(File gitDir, Map<String, String> environments) {
-		super(gitDir, environments);
-	}
-	
-	public ReceivePackCommand stdin(InputStream stdin) {
+	public ReceivePackCommand(File workingDir, InputStream stdin, OutputStream stdout, 
+			OutputStream stderr, Map<String, String> envs) {
+		this.workingDir = workingDir;
 		this.stdin = stdin;
-		return this;
-	}
-	
-	public ReceivePackCommand stdout(OutputStream stdout) {
 		this.stdout = stdout;
-		return this;
-	}
-	
-	public ReceivePackCommand stderr(OutputStream stderr) {
 		this.stderr = stderr;
-		return this;
+		this.envs = envs;
 	}
-	
+
 	public ReceivePackCommand statelessRpc(boolean statelessRpc) {
 		this.statelessRpc = statelessRpc;
 		return this;
@@ -52,24 +45,24 @@ public class ReceivePackCommand extends GitCommand<ExecutionResult> {
 		this.protocol = protocol;
 		return this;
 	}
+
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
 	
-	@Override
-	public ExecutionResult call() {
-		Preconditions.checkNotNull(stdin);
-		Preconditions.checkNotNull(stdout);
-		Preconditions.checkNotNull(stderr);
-		
-		Commandline cmd = cmd();
+	public ExecutionResult run() {
+		Commandline git = newGit().workingDir(workingDir);
+		git.environments().putAll(envs);
 		
 		if (protocol != null)
-			cmd.environments().put("GIT_PROTOCOL", protocol);
+			git.environments().put("GIT_PROTOCOL", protocol);
 		
-		cmd.addArgs("receive-pack");
+		git.addArgs("receive-pack");
 		if (statelessRpc)
-			cmd.addArgs("--stateless-rpc");
-		cmd.addArgs(".");
+			git.addArgs("--stateless-rpc");
+		git.addArgs(".");
 		
-    	return cmd.execute(stdout, stderr, stdin);
+    	return git.execute(stdout, stderr, stdin);
 	}
 
 }

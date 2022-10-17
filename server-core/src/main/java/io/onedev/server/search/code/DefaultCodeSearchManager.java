@@ -6,12 +6,15 @@ import static io.onedev.server.search.code.FieldConstants.BLOB_PATH;
 import static io.onedev.server.search.code.FieldConstants.BLOB_SYMBOL_LIST;
 
 import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -19,7 +22,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DirectoryReader;
@@ -34,6 +37,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -44,9 +48,14 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
-import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.event.CommitIndexed;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -57,7 +66,7 @@ import io.onedev.server.search.code.query.TooGeneralQueryException;
 import io.onedev.server.storage.StorageManager;
 
 @Singleton
-public class DefaultCodeSearchManager implements CodeSearchManager {
+public class DefaultCodeSearchManager implements CodeSearchManager, Serializable {
 
 	private static final int MAX_BLOB_PATH_QUERY_COUNT = 5;
 	
@@ -69,23 +78,34 @@ public class DefaultCodeSearchManager implements CodeSearchManager {
 	
 	private final CodeIndexManager indexManager;
 	
+	private final ProjectManager projectManager;
+	
+	private final ClusterManager clusterManager;
+	
 	@Inject
-	public DefaultCodeSearchManager(StorageManager storageManager, CodeIndexManager indexManager) {
+	public DefaultCodeSearchManager(StorageManager storageManager, CodeIndexManager indexManager, 
+			ProjectManager projectManager, ClusterManager clusterManager) {
 		this.storageManager = storageManager;
 		this.indexManager = indexManager;
+		this.projectManager = projectManager;
+		this.clusterManager = clusterManager;
+	}
+	
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(CodeSearchManager.class);
 	}
 	
 	@Nullable
-	private SearcherManager getSearcherManager(Project project) throws InterruptedException {
+	private SearcherManager getSearcherManager(Long projectId) throws InterruptedException {
 		try {
-			SearcherManager searcherManager = searcherManagers.get(project.getId());
+			SearcherManager searcherManager = searcherManagers.get(projectId);
 			if (searcherManager == null) synchronized (searcherManagers) {
-				searcherManager = searcherManagers.get(project.getId());
+				searcherManager = searcherManagers.get(projectId);
 				if (searcherManager == null) {
-					Directory directory = FSDirectory.open(storageManager.getProjectIndexDir(project.getId()).toPath());
+					Directory directory = FSDirectory.open(storageManager.getProjectIndexDir(projectId).toPath());
 					if (DirectoryReader.indexExists(directory)) {
 						searcherManager = new SearcherManager(directory, null);
-						searcherManagers.put(project.getId(), searcherManager);
+						searcherManagers.put(projectId, searcherManager);
 					}
 				}
 			}
@@ -105,14 +125,31 @@ public class DefaultCodeSearchManager implements CodeSearchManager {
 	@Override
 	public List<QueryHit> search(Project project, ObjectId commitId, final BlobQuery query) 
 			throws InterruptedException {
+		Long projectId = project.getId();
+		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<QueryHit>>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public List<QueryHit> call() throws Exception {
+				return search(projectId, commitId, query);
+			}
+			
+		});
+
+	}
+	
+	private List<QueryHit> search(Long projectId, ObjectId commitId, final BlobQuery query) 
+			throws InterruptedException {
 		List<QueryHit> hits = new ArrayList<>();
 
-		SearcherManager searcherManager = getSearcherManager(project.getForkRoot());
+		SearcherManager searcherManager = getSearcherManager(projectId);
 		if (searcherManager != null) {
 			try {
 				final IndexSearcher searcher = searcherManager.acquire();
 				try {
-					try (RevWalk revWalk = new RevWalk(project.getRepository())){
+					Repository repository = projectManager.getRepository(projectId);
+					try (RevWalk revWalk = new RevWalk(repository)){
 						final RevTree revTree = revWalk.parseCommit(commitId).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
@@ -127,7 +164,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager {
 									String blobPath = blobPathValues.binaryValue().utf8ToString();
 									
 									if (!checkedBlobPaths.contains(blobPath)) {
-										TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), blobPath, revTree);									
+										TreeWalk treeWalk = TreeWalk.forPath(repository, blobPath, revTree);									
 										if (treeWalk != null)
 											query.collect(searcher, treeWalk, hits);
 										checkedBlobPaths.add(blobPath);
@@ -159,28 +196,44 @@ public class DefaultCodeSearchManager implements CodeSearchManager {
 
 		return hits;
 	}
-
+	
 	@Override
 	public List<Symbol> getSymbols(Project project, ObjectId blobId, String blobPath) {
-		try {
-			SearcherManager searcherManager = getSearcherManager(project.getForkRoot());
-			if (searcherManager != null) {
+		Long projectId = project.getId();
+		
+		// Use Java serialization to maintain symbol parent/child relationship relying on object identity comparison 
+		byte[] bytes = projectManager.runOnProjectServer(projectId, new ClusterTask<byte[]>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public byte[] call() throws Exception {
 				try {
-					IndexSearcher searcher = searcherManager.acquire();
-					try {
-						return getSymbols(searcher, blobId, blobPath);
-					} finally {
-						searcherManager.release(searcher);
+					SearcherManager searcherManager = getSearcherManager(projectId);
+					if (searcherManager != null) {
+						try {
+							IndexSearcher searcher = searcherManager.acquire();
+							try {
+								return SerializationUtils.serialize((Serializable) getSymbols(searcher, blobId, blobPath));
+							} finally {
+								searcherManager.release(searcher);
+							}
+						} catch (IOException e) {
+							throw ExceptionUtils.unchecked(e);
+						}
+					} else {
+						return null;
 					}
-				} catch (IOException e) {
-					throw ExceptionUtils.unchecked(e);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
 				}
-			} else {
-				return null;
 			}
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+			
+		});
+		if (bytes != null)
+			return SerializationUtils.deserialize(bytes);
+		else
+			return null;
 	}
 	
 	@Override
@@ -237,7 +290,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager {
 	@Listen
 	public void on(CommitIndexed event) {
 		try {
-			SearcherManager searcherManager = getSearcherManager(event.getProject().getForkRoot()); 
+			SearcherManager searcherManager = getSearcherManager(event.getProject().getId()); 
 			if (searcherManager != null)
 				searcherManager.maybeRefresh();
 		} catch (InterruptedException | IOException e) {
@@ -249,16 +302,29 @@ public class DefaultCodeSearchManager implements CodeSearchManager {
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
-			synchronized (searcherManagers) {
-				Long projectId = event.getEntity().getId();						
-				SearcherManager searcherManager = searcherManagers.remove(projectId);
-				if (searcherManager != null) {
-					try {
-						searcherManager.close();
-					} catch (IOException e) {
-						throw ExceptionUtils.unchecked(e);
+			Long projectId = event.getEntity().getId();	
+			UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, false);
+			if (storageServerUUID != null) {
+				clusterManager.runOnServer(storageServerUUID, new ClusterTask<Void>() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Void call() throws Exception {
+						synchronized (searcherManagers) {
+							SearcherManager searcherManager = searcherManagers.remove(projectId);
+							if (searcherManager != null) {
+								try {
+									searcherManager.close();
+								} catch (IOException e) {
+									throw ExceptionUtils.unchecked(e);
+								}
+							}
+						}
+						return null;
 					}
-				}
+					
+				});
 			}
 		}
 	}
@@ -279,28 +345,38 @@ public class DefaultCodeSearchManager implements CodeSearchManager {
 
 	@Override
 	public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
-		FileQuery.Builder builder = new FileQuery.Builder();
-		builder.caseSensitive(true);
-		builder.count(MAX_BLOB_PATH_QUERY_COUNT);
-		
-		String blobPath = null;
-		FileQuery query = builder.fileNames(fileName).build();
-		try {
-			for (QueryHit hit: search(project, commit, query)) {
-				if (partialBlobPath == null || hit.getBlobPath().contains(partialBlobPath)) { 
-					if (blobPath == null) {
-						blobPath = hit.getBlobPath();
-					} else {
-						blobPath = null;
-						break;
+		Long projectId = project.getId();
+		return projectManager.runOnProjectServer(projectId, new ClusterTask<String>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public String call() throws Exception {
+				FileQuery.Builder builder = new FileQuery.Builder();
+				builder.caseSensitive(true);
+				builder.count(MAX_BLOB_PATH_QUERY_COUNT);
+				
+				String blobPath = null;
+				FileQuery query = builder.fileNames(fileName).build();
+				try {
+					for (QueryHit hit: search(projectId, commit, query)) {
+						if (partialBlobPath == null || hit.getBlobPath().contains(partialBlobPath)) { 
+							if (blobPath == null) {
+								blobPath = hit.getBlobPath();
+							} else {
+								blobPath = null;
+								break;
+							}
+						}
 					}
+				} catch (TooGeneralQueryException e) {
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
 				}
+				return blobPath;
 			}
-		} catch (TooGeneralQueryException e) {
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
-		return blobPath;
+			
+		});
 	}
 
 }

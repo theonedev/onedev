@@ -15,10 +15,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
+import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
@@ -83,15 +83,12 @@ public abstract class BlobUploadPanel extends Panel {
 				if (StringUtils.isBlank(commitMessage))
 					commitMessage = "Add files via upload";
 				
-				RefUpdated refUpdated;
 				try {
-					refUpdated = context.uploadFiles(uploads, directory, commitMessage);
+					onCommitted(target, context.uploadFiles(uploads, directory, commitMessage));
 				} finally {
 					for (FileUpload upload: uploads)
 						upload.release();
 				}
-				
-				onCommitted(target, refUpdated);
 			}
 
 			@Override
@@ -127,7 +124,7 @@ public abstract class BlobUploadPanel extends Panel {
 		});
 	}
 
-	public abstract void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated);
+	public abstract void onCommitted(AjaxRequestTarget target, ObjectId commitId);
 	
 	public abstract void onCancel(AjaxRequestTarget target);
 	

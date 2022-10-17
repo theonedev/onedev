@@ -14,7 +14,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 
-import io.onedev.commons.loader.Listen;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -63,7 +63,8 @@ public class DefaultUploadItemManager implements UploadItemManager, SchedulableT
 
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
+		if (taskId != null)
+			taskScheduler.unschedule(taskId);
 	}
 
 	@Sessional

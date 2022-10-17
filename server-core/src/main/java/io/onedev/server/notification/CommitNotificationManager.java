@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;

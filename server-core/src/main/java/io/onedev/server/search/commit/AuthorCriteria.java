@@ -10,7 +10,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -27,19 +27,19 @@ public class AuthorCriteria extends CommitCriteria {
 	}
 	
 	@Override
-	public void fill(Project project, RevListCommand command) {
+	public void fill(Project project, RevListOptions options) {
 		for (String value: values) {
 			if (value == null) { // authored by me
 				User user = SecurityUtils.getUser();
 				if (user != null) {
 					user.getEmailAddresses().stream().filter(it->it.isVerified()).forEach(it-> {
-						command.authors().add("<" + it.getValue() + ">");
+						options.authors().add("<" + it.getValue() + ">");
 					});
 				} else {
 					throw new ExplicitException("Please login to perform this query");
 				}
 			} else {
-				command.authors().add(StringUtils.replace(value, "*", ".*"));
+				options.authors().add(StringUtils.replace(value, "*", ".*"));
 			}
 		}
 	}

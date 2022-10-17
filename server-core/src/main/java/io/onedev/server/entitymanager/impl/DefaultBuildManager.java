@@ -1,6 +1,8 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,8 +14,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -30,8 +30,6 @@ import javax.persistence.criteria.Selection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
@@ -45,19 +43,26 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.cp.IAtomicLong;
 
-import io.onedev.commons.loader.Listen;
-import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.BuildDeleted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -72,6 +77,7 @@ import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.build.BuildPreservation;
+import io.onedev.server.persistence.SequenceGenerator;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -86,7 +92,7 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
-import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.FileInfo;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
@@ -96,7 +102,7 @@ import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 
 @Singleton
-public class DefaultBuildManager extends BaseEntityManager<Build> implements BuildManager, SchedulableTask {
+public class DefaultBuildManager extends BaseEntityManager<Build> implements BuildManager, SchedulableTask, Serializable {
 
 	private static final int STATUS_QUERY_BATCH = 500;
 	
@@ -108,8 +114,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final BuildDependenceManager buildDependenceManager;
 	
-	private final StorageManager storageManager;
-	
 	private final ProjectManager projectManager;
 	
 	private final TaskScheduler taskScheduler;
@@ -120,57 +124,52 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final SettingManager settingManager;
 	
-	private final ListenerRegistry listenerRegistry;
+	private final ClusterManager clusterManager;
 	
-	private final Map<Long, BuildFacade> builds = new HashMap<>();
+	private volatile Map<Long, BuildFacade> builds = new HashMap<>();
 	
-	private final ReadWriteLock buildsLock = new ReentrantReadWriteLock();
+	private volatile Map<Long, Collection<String>> jobNames = new HashMap<>();
 	
-	private final Map<Long, Collection<String>> jobNames = new HashMap<>();
-	
-	private final ReadWriteLock jobNamesLock = new ReentrantReadWriteLock();
+	private final SequenceGenerator numberGenerator;
 	
 	private String taskId;
 	
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
 			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
-			StorageManager storageManager, ProjectManager projectManager, 
-			SessionManager sessionManager, TransactionManager transactionManager, 
-			SettingManager settingManager, ListenerRegistry listenerRegistry) {
+			ProjectManager projectManager, SessionManager sessionManager, 
+			TransactionManager transactionManager, SettingManager settingManager, 
+			ClusterManager clusterManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
-		this.storageManager = storageManager;
 		this.projectManager = projectManager;
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 		this.settingManager = settingManager;
-		this.listenerRegistry = listenerRegistry;
+		this.clusterManager = clusterManager;
+		
+		numberGenerator = new SequenceGenerator(Build.class, clusterManager, dao);
 	}
 
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(BuildManager.class);
+	}
+	
 	@Transactional
 	@Override
 	public void delete(Build build) {
     	super.delete(build);
     	
-		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
-		
-		listenerRegistry.post(new BuildDeleted(build));
-		
 		Long buildId = build.getId();
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				buildsLock.writeLock().lock();
-				try {
-					builds.remove(buildId);
-				} finally {
-					buildsLock.writeLock().unlock();
-				}
+				builds.remove(buildId);
 			}
+			
 		});
 	}
 	
@@ -219,18 +218,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 			@Override
 			public void run() {
-				buildsLock.writeLock().lock();
-				try {
-					builds.put(facade.getId(), facade);
-				} finally {
-					buildsLock.writeLock().unlock();
-				}
-				jobNamesLock.writeLock().lock();
-				try {
-					populateJobNames(facade.getProjectId(), jobName);
-				} finally {
-					jobNamesLock.writeLock().unlock();
-				}
+				builds.put(facade.getId(), facade);
+				populateJobNames(facade.getProjectId(), jobName);
 			}
 			
 		});
@@ -240,30 +229,21 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Listen
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
-			Long projectId = event.getEntity().getId();
+			Project project = (Project) event.getEntity();
+	    	if (project.getForkRoot().equals(project))
+	    		numberGenerator.removeNextSequence(project);
+			
+			Long projectId = project.getId();
 			transactionManager.runAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-					buildsLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, BuildFacade>> it = builds.entrySet().iterator(); it.hasNext();) {
-							BuildFacade build = it.next().getValue();
-							if (build.getProjectId().equals(projectId))
-								it.remove();
-						}
-					} finally {
-						buildsLock.writeLock().unlock();
+					for (Iterator<Map.Entry<Long, BuildFacade>> it = builds.entrySet().iterator(); it.hasNext();) {
+						BuildFacade build = it.next().getValue();
+						if (build.getProjectId().equals(projectId))
+							it.remove();
 					}
-					jobNamesLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, Collection<String>>> it = jobNames.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getKey().equals(projectId))
-								it.remove();
-						}
-					} finally {
-						jobNamesLock.writeLock().unlock();
-					}
+					jobNames.remove(projectId);
 				}
 			});
 		}
@@ -313,50 +293,22 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return getSession().createQuery(query).list();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
-	public Collection<Build> queryUnfinished() {
-		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.or(
-				Restrictions.eq(Build.PROP_STATUS, Status.PENDING), 
-				Restrictions.eq(Build.PROP_STATUS, Status.RUNNING), 
-				Restrictions.eq(Build.PROP_STATUS, Status.WAITING)));
-		criteria.setCacheable(true);
-		return query(criteria);
+	public Map<Long, Long> queryUnfinished() {
+		Query<?> query = getSession().createQuery("select id, project.id from Build where "
+				+ "status=:waiting or status=:pending or status=:running");
+		query.setParameter("waiting", Build.Status.WAITING);
+		query.setParameter("pending", Build.Status.PENDING);
+		query.setParameter("running", Build.Status.RUNNING);
+		
+		Map<Long, Long> result = new HashMap<>();
+		for (Object[] fields: (List<Object[]>)query.list()) 
+			result.put((Long)fields[0], (Long)fields[1]);
+		return result;
 	}
 
-	@Sessional
-	@Override
-	public Collection<Build> queryUnfinished(Project project, String jobName, @Nullable String refName, 
-			@Nullable Optional<PullRequest> request, Map<String, List<String>> params) {
-		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<Build> query = builder.createQuery(Build.class);
-		Root<Build> root = query.from(Build.class);
-		
-		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.or(
-				builder.equal(root.get(Build.PROP_STATUS), Build.Status.PENDING),
-				builder.equal(root.get(Build.PROP_STATUS), Build.Status.RUNNING),
-				builder.equal(root.get(Build.PROP_STATUS), Build.Status.WAITING)));
-		predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-		predicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
-		
-		if (refName != null)
-			predicates.add(builder.equal(root.get(Build.PROP_REF_NAME), refName));
-
-		if (request != null) {
-			if (request.isPresent())
-				predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request.get()));
-			else
-				predicates.add(builder.isNull(root.get(Build.PROP_PULL_REQUEST)));
-		}
-			
-		predicates.addAll(getPredicates(root, builder, params));
-		
-		query.where(predicates.toArray(new Predicate[0]));
-		return getSession().createQuery(query).list();
-	}
-	
 	private List<Predicate> getPredicates(From<Build, Build> root, CriteriaBuilder builder, 
 			Map<String, List<String>> params) {
 		List<Predicate> predicates = new ArrayList<>();
@@ -398,28 +350,23 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		projects.addAll(project.getForkParents());
 
 		List<Criterion> projectCriterions = new ArrayList<>();
-		jobNamesLock.readLock().lock();
-		try {
-			for (Project each: projects) {
-				Collection<String> availableJobNames = jobNames.get(each.getId());
-				if (availableJobNames != null && !availableJobNames.isEmpty()) {
-					Collection<String> accessibleJobNames = getAccessibleJobNames(each);
-					if (accessibleJobNames.containsAll(availableJobNames)) {
-						projectCriterions.add(Restrictions.eq(Build.PROP_PROJECT, each));
-					} else {
-						List<Criterion> jobCriterions = new ArrayList<>();
-						for (String jobName: accessibleJobNames) 
-							jobCriterions.add(Restrictions.eq(Build.PROP_JOB, jobName));
-						if (!jobCriterions.isEmpty()) {
-							projectCriterions.add(Restrictions.and(
-									Restrictions.eq(Build.PROP_PROJECT, each), 
-									Restrictions.or(jobCriterions.toArray(new Criterion[0]))));
-						}
+		for (Project each: projects) {
+			Collection<String> availableJobNames = jobNames.get(each.getId());
+			if (availableJobNames != null && !availableJobNames.isEmpty()) {
+				Collection<String> accessibleJobNames = getAccessibleJobNames(each);
+				if (accessibleJobNames.containsAll(availableJobNames)) {
+					projectCriterions.add(Restrictions.eq(Build.PROP_PROJECT, each));
+				} else {
+					List<Criterion> jobCriterions = new ArrayList<>();
+					for (String jobName: accessibleJobNames) 
+						jobCriterions.add(Restrictions.eq(Build.PROP_JOB, jobName));
+					if (!jobCriterions.isEmpty()) {
+						projectCriterions.add(Restrictions.and(
+								Restrictions.eq(Build.PROP_PROJECT, each), 
+								Restrictions.or(jobCriterions.toArray(new Criterion[0]))));
 					}
 				}
 			}
-		} finally {
-			jobNamesLock.readLock().unlock();
 		}
 		
 		if (!projectCriterions.isEmpty()) {
@@ -473,7 +420,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public void create(Build build) {
 		Preconditions.checkArgument(build.isNew());
 		build.setNumberScope(build.getProject().getForkRoot());
-		build.setNumber(getNextNumber(build.getNumberScope()));
+		build.setNumber(numberGenerator.getNextSequence(build.getNumberScope()));
 		save(build);
 		for (BuildParam param: build.getParams())
 			buildParamManager.save(param);
@@ -484,53 +431,48 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	private Collection<Predicate> getPredicates(@Nullable Project project, From<Build, Build> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = new ArrayList<>();
 
-		jobNamesLock.readLock().lock();
-		try {
-			if (project != null) {
-				predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-				if (!SecurityUtils.canManageBuilds(project)) {
-					Collection<String> accessibleJobNames = getAccessibleJobNames(project);
-					Collection<String> availableJobNames = jobNames.get(project.getId());
-					if (availableJobNames != null && !accessibleJobNames.containsAll(availableJobNames)) {
-						List<Predicate> jobPredicates = new ArrayList<>();
-						for (String jobName: accessibleJobNames) 
-							jobPredicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
-						predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
-					}
+		if (project != null) {
+			predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
+			if (!SecurityUtils.canManageBuilds(project)) {
+				Collection<String> accessibleJobNames = getAccessibleJobNames(project);
+				Collection<String> availableJobNames = jobNames.get(project.getId());
+				if (availableJobNames != null && !accessibleJobNames.containsAll(availableJobNames)) {
+					List<Predicate> jobPredicates = new ArrayList<>();
+					for (String jobName: accessibleJobNames) 
+						jobPredicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
+					predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
 				}
-			} else if (!SecurityUtils.isAdministrator()) {
-				List<Predicate> projectPredicates = new ArrayList<>();
-				Collection<Long> projectsWithAllJobs = new HashSet<>();
-				for (Map.Entry<Project, Collection<String>> entry: getAccessibleJobNames().entrySet()) {
-					project = entry.getKey();
-					if (SecurityUtils.canManageBuilds(project)) {
-						projectPredicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-						projectsWithAllJobs.add(project.getId());
-					} else {
-						Collection<String> availableJobNamesOfProject = jobNames.get(project.getId());
-						if (availableJobNamesOfProject != null) {
-							Collection<String> accessibleJobNamesOfProject = entry.getValue();
-							if (accessibleJobNamesOfProject.containsAll(availableJobNamesOfProject)) {
-								projectsWithAllJobs.add(project.getId());
-								projectPredicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
-							} else {
-								List<Predicate> jobPredicates = new ArrayList<>();
-								for (String jobName: accessibleJobNamesOfProject) 
-									jobPredicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
-								projectPredicates.add(builder.and(
-										builder.equal(root.get(Build.PROP_PROJECT), project), 
-										builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()]))));
-							}
-						} else {
-							projectsWithAllJobs.add(project.getId());
-						}
-					}
-				}
-				if (!projectsWithAllJobs.containsAll(jobNames.keySet()))
-					predicates.add(builder.or(projectPredicates.toArray(new Predicate[projectPredicates.size()])));
 			}
-		} finally {
-			jobNamesLock.readLock().unlock();
+		} else if (!SecurityUtils.isAdministrator()) {
+			List<Predicate> projectPredicates = new ArrayList<>();
+			Collection<Long> projectsWithAllJobs = new HashSet<>();
+			for (Map.Entry<Project, Collection<String>> entry: getAccessibleJobNames().entrySet()) {
+				project = entry.getKey();
+				if (SecurityUtils.canManageBuilds(project)) {
+					projectPredicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
+					projectsWithAllJobs.add(project.getId());
+				} else {
+					Collection<String> availableJobNamesOfProject = jobNames.get(project.getId());
+					if (availableJobNamesOfProject != null) {
+						Collection<String> accessibleJobNamesOfProject = entry.getValue();
+						if (accessibleJobNamesOfProject.containsAll(availableJobNamesOfProject)) {
+							projectsWithAllJobs.add(project.getId());
+							projectPredicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
+						} else {
+							List<Predicate> jobPredicates = new ArrayList<>();
+							for (String jobName: accessibleJobNamesOfProject) 
+								jobPredicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
+							projectPredicates.add(builder.and(
+									builder.equal(root.get(Build.PROP_PROJECT), project), 
+									builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()]))));
+						}
+					} else {
+						projectsWithAllJobs.add(project.getId());
+					}
+				}
+			}
+			if (!projectsWithAllJobs.containsAll(jobNames.keySet()))
+				predicates.add(builder.or(projectPredicates.toArray(new Predicate[projectPredicates.size()])));
 		}
 		
 		return predicates;
@@ -680,64 +622,66 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Override
 	public void execute() {
-		long maxId = getMaxId();
-		Collection<Long> idsToPreserve = new HashSet<>();
-		
-		sessionManager.run(new Runnable() {
+		if (clusterManager.isLeaderServer()) {
+			long maxId = getMaxId();
+			Collection<Long> idsToPreserve = new HashSet<>();
+			
+			sessionManager.run(new Runnable() {
 
-			@Override
-			public void run() {
-				for (Project project: projectManager.query()) {
-					logger.debug("Populating preserved build ids of project '" + project.getPath() + "'...");
-					List<BuildPreservation> preservations = project.getHierarchyBuildPreservations();
-					if (preservations.isEmpty()) {
-						idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
-					} else {
-						for (BuildPreservation preservation: preservations) {
-							try {
-								BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
-								int count;
-								if (preservation.getCount() != null)
-									count = preservation.getCount();
-								else
-									count = Integer.MAX_VALUE;
-								idsToPreserve.addAll(queryIds(project, query, 0, count));
-							} catch (Exception e) {
-								String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
-										project.getPath(), preservation.getCondition());
-								logger.error(message, e);
-								idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+				@Override
+				public void run() {
+					for (Project project: projectManager.query()) {
+						logger.debug("Populating preserved build ids of project '" + project.getPath() + "'...");
+						List<BuildPreservation> preservations = project.getHierarchyBuildPreservations();
+						if (preservations.isEmpty()) {
+							idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+						} else {
+							for (BuildPreservation preservation: preservations) {
+								try {
+									BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
+									int count;
+									if (preservation.getCount() != null)
+										count = preservation.getCount();
+									else
+										count = Integer.MAX_VALUE;
+									idsToPreserve.addAll(queryIds(project, query, 0, count));
+								} catch (Exception e) {
+									String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
+											project.getPath(), preservation.getCondition());
+									logger.error(message, e);
+									idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+								}
 							}
 						}
 					}
 				}
-			}
+				
+			});
+
+			EntityCriteria<Build> criteria = newCriteria();
+			AtomicInteger firstResult = new AtomicInteger(0);
 			
-		});
+			while (transactionManager.call(new Callable<Boolean>() {
 
-		EntityCriteria<Build> criteria = newCriteria();
-		AtomicInteger firstResult = new AtomicInteger(0);
-		
-		while (transactionManager.call(new Callable<Boolean>() {
-
-			@Override
-			public Boolean call() {
-				List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
-				if (!builds.isEmpty()) {
-					logger.debug("Checking build preservation: {}->{}", 
-							firstResult.get()+1, firstResult.get()+builds.size());
-				}
-				for (Build build: builds) {
-					if (build.isFinished() && build.getId() <= maxId && !idsToPreserve.contains(build.getId())) {
-						logger.debug("Deleting build " + build.getFQN() + "...");
-						delete(build);
+				@Override
+				public Boolean call() {
+					List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
+					if (!builds.isEmpty()) {
+						logger.debug("Checking build preservation: {}->{}", 
+								firstResult.get()+1, firstResult.get()+builds.size());
 					}
+					for (Build build: builds) {
+						if (build.isFinished() && build.getId() <= maxId && !idsToPreserve.contains(build.getId())) {
+							logger.debug("Deleting build " + build.getFQN() + "...");
+							delete(build);
+						}
+					}
+					firstResult.set(firstResult.get() + CLEANUP_BATCH);
+					return builds.size() == CLEANUP_BATCH;
 				}
-				firstResult.set(firstResult.get() + CLEANUP_BATCH);
-				return builds.size() == CLEANUP_BATCH;
-			}
-			
-		})) {}
+				
+			})) {}			
+		}
 	}
 
 	@Override
@@ -750,20 +694,35 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public void on(SystemStarted event) {
 		logger.info("Caching build info...");
 		
-		Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
-		for (Object[] fields: (List<Object[]>)query.list()) {
-			Long buildId = (Long) fields[0];
-			Long projectId = (Long)fields[1];
-			Long buildNumber = (Long) fields[2];
-			builds.put(buildId, new BuildFacade(buildId, projectId, buildNumber, (String)fields[3]));
-			populateJobNames(projectId, (String)fields[4]);
-		}
+		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
+        builds = hazelcastInstance.getMap("builds");
+        jobNames = hazelcastInstance.getMap("jobNames");
+        
+        IAtomicLong buildManagerInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildManagerInited");
+        clusterManager.init(buildManagerInited, new Callable<Long>() {
+
+			@Override
+			public Long call() throws Exception {
+				Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
+				for (Object[] fields: (List<Object[]>)query.list()) {
+					Long buildId = (Long) fields[0];
+					Long projectId = (Long)fields[1];
+					Long buildNumber = (Long) fields[2];
+					builds.put(buildId, new BuildFacade(buildId, projectId, buildNumber, (String)fields[3]));
+					populateJobNames(projectId, (String)fields[4]);
+				}
+				return 1L;
+			}
+        	
+        });
+		
 		taskId = taskScheduler.schedule(this);
 	}
 
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
+		if (taskId != null)
+			taskScheduler.unschedule(taskId);
 	}
 	
 	private CriteriaQuery<Object[]> buildStreamPreviousQuery(Build build, Status status, String...fields) {
@@ -790,28 +749,21 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Override
 	public Collection<Long> queryStreamPreviousNumbers(Build build, Status status, int limit) {
 		Map<ObjectId, Long> buildNumbers = new HashMap<>();
-		for (Object[] fields: getSession().createQuery(buildStreamPreviousQuery(build, status, "commitHash", "number")).list()) {
+		CriteriaQuery<Object[]> query = buildStreamPreviousQuery(build, status, "commitHash", "number");
+		for (Object[] fields: getSession().createQuery(query).list()) {
 			buildNumbers.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
 		}
 		
-		Collection<Long> prevBuildNumbers = new HashSet<>();
 		if (!buildNumbers.isEmpty()) {
-			try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
-				revWalk.markStart(revWalk.lookupCommit(build.getCommitId()));
-				RevCommit nextCommit;
-				while ((nextCommit = revWalk.next()) != null) {
-					Long buildNumber = buildNumbers.remove(nextCommit);
-					if (buildNumber != null) {
-						prevBuildNumbers.add(buildNumber);
-						if (prevBuildNumbers.size() >= limit || buildNumbers.isEmpty())
-							break;
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			return getGitService().filterParents(build.getProject(), build.getCommitId(), 
+					buildNumbers, limit);
+		} else { 
+			return new HashSet<>();
 		}
-		return prevBuildNumbers;
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 
 	@Sessional
@@ -824,75 +776,52 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		}
 		
 		if (!buildIds.isEmpty()) {
-			try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
-				revWalk.markStart(revWalk.lookupCommit(build.getCommitId()));
-				RevCommit nextCommit;
-				while ((nextCommit = revWalk.next()) != null) {
-					Long buildId = buildIds.get(nextCommit);
-					if (buildId != null)
-						return load(buildId);
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			Collection<Long> filtered = getGitService().filterParents(
+					build.getProject(), build.getCommitId(), buildIds, 1);
+			if (!filtered.isEmpty())
+				return load(filtered.iterator().next());
 		}
 		return null;
 	}
 	
 	@Override
 	public Collection<Long> getNumbersByProject(Long projectId) {
-		buildsLock.readLock().lock();
-		try {
-			Collection<Long> buildNumbers = new HashSet<>();
-			for (BuildFacade build: builds.values()) {
-				if (build.getProjectId().equals(projectId))
-					buildNumbers.add(build.getNumber());
-			}
-			return buildNumbers;
-		} finally {
-			buildsLock.readLock().unlock();
+		Collection<Long> buildNumbers = new HashSet<>();
+		for (BuildFacade build: builds.values()) {
+			if (build.getProjectId().equals(projectId))
+				buildNumbers.add(build.getNumber());
 		}
+		return buildNumbers;
 	}
 
 	@Override
 	public Collection<Long> filterNumbers(Long projectId, Collection<String> commitHashes) {
-		buildsLock.readLock().lock();
-		try {
-			Collection<Long> buildNumbers = new HashSet<>();
-			for (BuildFacade build: builds.values()) {
-				if (build.getProjectId().equals(projectId) 
-						&& commitHashes.contains(build.getCommitHash())) {
-					buildNumbers.add(build.getNumber());
-				}
+		Collection<Long> buildNumbers = new HashSet<>();
+		for (BuildFacade build: builds.values()) {
+			if (build.getProjectId().equals(projectId) 
+					&& commitHashes.contains(build.getCommitHash())) {
+				buildNumbers.add(build.getNumber());
 			}
-			return buildNumbers;
-		} finally {
-			buildsLock.readLock().unlock();
 		}
+		return buildNumbers;
 	}
 	
 	private void populateJobNames(Long projectId, String jobName) {
 		Collection<String> jobNamesOfProject = jobNames.get(projectId);
-		if (jobNamesOfProject == null) {
+		if (jobNamesOfProject == null) 
 			jobNamesOfProject = new HashSet<>();
-			jobNames.put(projectId, jobNamesOfProject);
-		}
 		jobNamesOfProject.add(jobName);
+		jobNames.put(projectId, jobNamesOfProject);
 	}
 
 	@Override
 	public Collection<String> getJobNames(@Nullable Project project) {
-		jobNamesLock.readLock().lock();
-		try {
-			Collection<String> jobNames = new HashSet<>();
-			for (Map.Entry<Long, Collection<String>> entry: this.jobNames.entrySet()) { 
-				if (project == null || project.getId().equals(entry.getKey()))
-					jobNames.addAll(entry.getValue());
-			}
-			return jobNames;
-		} finally {
-			jobNamesLock.readLock().unlock();
+		Collection<String> jobNames = new HashSet<>();
+		for (Map.Entry<Long, Collection<String>> entry: this.jobNames.entrySet()) { 
+			if (project == null || project.getId().equals(entry.getKey()))
+				jobNames.addAll(entry.getValue());
 		}
+		return jobNames;
 	}
 	
 	private void populateAccessibleJobNames(Collection<String> accessibleJobNames, 
@@ -905,68 +834,58 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Override
 	public Map<Project, Collection<String>> getAccessibleJobNames() {
-		jobNamesLock.readLock().lock();
-		try {
-			Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();
-			for (Long projectId: jobNames.keySet()) {
-				Project project = projectManager.load(projectId);
-				Collection<String> accessibleJobNamsOfProject = getAccessibleJobNames(project);
-				if (!accessibleJobNamsOfProject.isEmpty())
-					accessibleJobNames.put(project, accessibleJobNamsOfProject); 
-			}
-			return accessibleJobNames;
-		} finally {
-			jobNamesLock.readLock().unlock();
+		Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();
+		for (Long projectId: jobNames.keySet()) {
+			Project project = projectManager.load(projectId);
+			Collection<String> accessibleJobNamsOfProject = getAccessibleJobNames(project);
+			if (!accessibleJobNamsOfProject.isEmpty())
+				accessibleJobNames.put(project, accessibleJobNamsOfProject); 
 		}
+		return accessibleJobNames;
 	}
 	
 	@Override
 	public Collection<String> getAccessibleJobNames(Project project) {
-		jobNamesLock.readLock().lock();
-		try {
-			Collection<String> accessibleJobNames = new HashSet<>();
-			Collection<String> availableJobNames = jobNames.get(project.getId());
-			if (availableJobNames != null) {
-				if (SecurityUtils.isAdministrator()) {
-					accessibleJobNames.addAll(availableJobNames);
-				} else {
-					User user = SecurityUtils.getUser();
-					if (user != null) {
-						for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+		Collection<String> accessibleJobNames = new HashSet<>();
+		Collection<String> availableJobNames = jobNames.get(project.getId());
+		if (availableJobNames != null) {
+			if (SecurityUtils.isAdministrator()) {
+				accessibleJobNames.addAll(availableJobNames);
+			} else {
+				User user = SecurityUtils.getUser();
+				if (user != null) {
+					for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+						if (authorization.getProject().isSelfOrAncestorOf(project)) {
+							populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
+									authorization.getRole());
+						}
+					}
+					
+					Set<Group> groups = new HashSet<>(user.getGroups());
+					Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+					if (defaultLoginGroup != null) 
+						groups.add(defaultLoginGroup);
+					
+					for (Group group: groups) {
+						for (GroupAuthorization authorization: group.getAuthorizations()) {
 							if (authorization.getProject().isSelfOrAncestorOf(project)) {
 								populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
 										authorization.getRole());
 							}
 						}
-						
-						Set<Group> groups = new HashSet<>(user.getGroups());
-						Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-						if (defaultLoginGroup != null) 
-							groups.add(defaultLoginGroup);
-						
-						for (Group group: groups) {
-							for (GroupAuthorization authorization: group.getAuthorizations()) {
-								if (authorization.getProject().isSelfOrAncestorOf(project)) {
-									populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
-											authorization.getRole());
-								}
-							}
-						}
 					}
-					
-					Project current = project;
-					do {
-						Role defaultRole = current.getDefaultRole();
-						if (defaultRole != null)
-							populateAccessibleJobNames(accessibleJobNames, availableJobNames, defaultRole);
-						current = current.getParent();
-					} while (current != null);
 				}
+				
+				Project current = project;
+				do {
+					Role defaultRole = current.getDefaultRole();
+					if (defaultRole != null)
+						populateAccessibleJobNames(accessibleJobNames, availableJobNames, defaultRole);
+					current = current.getParent();
+				} while (current != null);
 			}
-			return accessibleJobNames;
-		} finally {
-			jobNamesLock.readLock().unlock();
 		}
+		return accessibleJobNames;
 	}
 
 	@Override
@@ -1034,4 +953,107 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return find(criteria);
 	}
 
+	@Override
+	public long getArtifactSize(Build build, String artifactPath) {
+		Long projectId = build.getProject().getId();
+		Long buildNumber = build.getNumber();
+		return projectManager.runOnProjectServer(projectId, new ClusterTask<Long>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Long call() throws Exception {
+				File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+				File artifactFile = new File(artifactsDir, artifactPath);
+				
+				if (artifactFile.exists() && artifactFile.isFile()) {
+					return artifactFile.length();
+				} else {
+					String errorMessage = String.format(
+							"Specified artifact path does not exist or is a directory (project: %s, build number: %d, path: %s)", 
+							projectId, buildNumber, artifactPath);
+					throw new ExplicitException(errorMessage);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void deleteArtifact(Build build, String artifactPath) {
+		Long projectId = build.getProject().getId();
+		Long buildNumber = build.getNumber();
+		projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Void call() throws Exception {
+				return LockUtils.write(Build.getArtifactsLockName(projectId, buildNumber), new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+						File artifactFile = new File(artifactsDir, artifactPath);
+						FileUtils.forceDelete(artifactFile);
+						return null;
+					}
+					
+				});				
+			}
+			
+		});
+	}
+
+	@Override
+	public List<FileInfo> listArtifacts(Build build, String artifactPath) {
+		Long projectId = build.getProject().getId();
+		Long buildNumber = build.getNumber();
+		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<FileInfo>>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public List<FileInfo> call() throws Exception {
+				return LockUtils.read(Build.getArtifactsLockName(projectId, buildNumber), new Callable<List<FileInfo>>() {
+
+					@Override
+					public List<FileInfo> call() throws Exception {
+						List<FileInfo> files = new ArrayList<>();
+						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+						
+						File directory = artifactsDir;
+						if (artifactPath != null)
+							directory = new File(artifactsDir, artifactPath);
+						
+						if (directory.exists()) {
+							int baseLen = artifactsDir.getAbsolutePath().length() + 1;
+							for (File file: directory.listFiles()) {
+								files.add(new FileInfo(file.getAbsolutePath().substring(baseLen), 
+										file.isFile()? file.length(): -1, file.lastModified()));
+							}
+						}
+						return files;
+					}
+					
+				});				
+			}
+			
+		});
+	}
+
+	@Override
+	public BuildFacade findFacade(Long buildId) {
+		return builds.get(buildId);
+	}
+	
+	@Override
+	public Long findId(Long projectId, Long buildNumber) {
+		for (var entry: builds.entrySet()) {
+			BuildFacade build = entry.getValue();
+			if (build.getProjectId().equals(projectId) && build.getNumber().equals(buildNumber))
+				return entry.getKey();
+		}
+		return null;
+	}
+	
 }

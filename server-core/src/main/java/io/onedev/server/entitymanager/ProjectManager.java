@@ -1,7 +1,10 @@
 package io.onedev.server.entitymanager;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -11,6 +14,7 @@ import javax.persistence.criteria.Predicate;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.Repository;
 
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
@@ -22,6 +26,9 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	@Nullable 
 	Project findByPath(String path);
+
+	@Nullable
+	ProjectFacade findFacadeByPath(String path);
 	
 	@Nullable
 	Project findByServiceDeskName(String serviceDeskName);
@@ -45,7 +52,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	void deleteTag(Project project, String tagName);
 	
-	Repository getRepository(Project project);
+	Repository getRepository(Long projectId);
 	
 	List<Project> query(EntityQuery<Project> query, int firstResult, int maxResults);
 	
@@ -69,5 +76,14 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	@Nullable
 	String getFavoriteQuery();
+	
+	@Nullable
+	UUID getStorageServerUUID(Long projectId, boolean mustExist);
+	
+	<T> T runOnProjectServer(Long projectId, ClusterTask<T> task);
+	
+	<T> Future<T> submitToProjectServer(Long projectId, ClusterTask<T> task);
+	
+	File getLfsObjectsDir(Long projectId);
 	
 }

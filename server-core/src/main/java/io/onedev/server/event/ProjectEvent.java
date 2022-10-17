@@ -1,32 +1,50 @@
 package io.onedev.server.event;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.notification.ActivityDetail;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.commenttext.CommentText;
 
-public abstract class ProjectEvent extends Event {
+public abstract class ProjectEvent implements Serializable {
 
-	private final Project project;
+	private static final long serialVersionUID = 1L;
+
+	private final Long projectId;
+	
+	private final Long userId;
+	
+	private final Date date;
 	
 	private transient Optional<CommentText> commentText;
 	
-	public ProjectEvent(User user, Date date, Project project) {
-		super(user, date);
-		this.project = project;
+	public ProjectEvent(@Nullable User user, Date date, Project project) {
+		userId = User.idOf(user);
+		this.date = date;
+		projectId = project.getId();
 	}
 
 	public Project getProject() {
-		return project;
+		return OneDev.getInstance(ProjectManager.class).load(projectId);
+	}
+	
+	@Nullable
+	public User getUser() {
+		return userId != null? OneDev.getInstance(UserManager.class).load(userId): null;
+	}
+
+	public Date getDate() {
+		return date;
 	}
 	
 	public abstract String getActivity();
@@ -86,9 +104,13 @@ public abstract class ProjectEvent extends Event {
 			return null;
 	}
 	
-	public abstract ProjectEvent cloneIn(Dao dao);
-	
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(project);
+		return OneDev.getInstance(UrlManager.class).urlFor(getProject());
 	}
+	
+	@Nullable
+	public String getLockName() {
+		return null;
+	}
+	
 }

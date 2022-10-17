@@ -80,12 +80,12 @@ public class BuildDependence extends AbstractEntity {
 	public void setDestinationPath(String destinationPath) {
 		this.destinationPath = destinationPath;
 	}
-
+	
 	@SuppressWarnings("unused")
 	private static Build getDependentExample() {
 		Build build = new Build();
 		build.setId(2L);
 		return build;
 	}
-	
+
 }

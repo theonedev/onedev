@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidatorContext;
-
-import org.apache.commons.lang3.SystemUtils;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -17,9 +15,10 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.CommandUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -143,12 +142,8 @@ public abstract class SyncRepository extends ServerSideStep implements Validatab
 	}
 	
 	protected Commandline newGit(Project project) {
-		Commandline git = new Commandline(OneDev.getInstance(GitConfig.class).getExecutable());
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			String path = System.getenv("PATH") + ":/usr/local/bin";
-			git.environments().put("PATH", path);
-		}
-		git.workingDir(project.getGitDir());
+		Commandline git = CommandUtils.newGit();
+		git.workingDir(OneDev.getInstance(StorageManager.class).getProjectGitDir(project.getId()));
 		return git;
 	}
 	

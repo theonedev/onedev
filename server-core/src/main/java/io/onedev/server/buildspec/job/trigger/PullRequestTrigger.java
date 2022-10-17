@@ -5,8 +5,12 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.Repository;
+
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.SubmitReason;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -63,7 +67,9 @@ public abstract class PullRequestTrigger extends JobTrigger {
 
 	private boolean touchedFile(PullRequest request) {
 		if (getPaths() != null) {
-			Collection<String> changedFiles = GitUtils.getChangedFiles(request.getTargetProject().getRepository(), 
+			Repository repository = OneDev.getInstance(ProjectManager.class)
+					.getRepository(request.getTargetProject().getId());
+			Collection<String> changedFiles = GitUtils.getChangedFiles(repository, 
 					request.getBaseCommit(), request.getLatestUpdate().getHeadCommit());
 			PatternSet patternSet = PatternSet.parse(getPaths());
 			Matcher matcher = new PathMatcher();

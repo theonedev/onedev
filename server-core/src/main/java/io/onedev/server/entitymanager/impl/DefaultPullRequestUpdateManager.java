@@ -9,11 +9,11 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
@@ -27,13 +27,16 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullRequestUpdate> 
 		implements PullRequestUpdateManager {
 	
+	private final GitService gitService;
+	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
 	public DefaultPullRequestUpdateManager(Dao dao, ListenerRegistry listenerRegistry,
-			PullRequestCommentManager commentManager) {
+			PullRequestCommentManager commentManager, GitService gitService) {
 		super(dao);
 		
+		this.gitService = gitService;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -41,26 +44,33 @@ public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullReque
 	@Override
 	public void save(PullRequestUpdate update) {
 		super.save(update);
-		update.writeRef();
+		PullRequest request = update.getRequest();
+		if (!request.getTargetProject().equals(request.getSourceProject())) {
+			gitService.push(request.getSourceProject(), request.getTargetProject(),  
+					update.getHeadCommitHash() + ":" + update.getHeadRef());
+		} else {
+			ObjectId headCommitId = ObjectId.fromString(update.getHeadCommitHash());
+			gitService.updateRef(request.getTargetProject(), update.getHeadRef(), headCommitId, null);
+		}
 	}
 
 	@Transactional
 	@Override
 	public void checkUpdate(PullRequest request) {
 		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
-			ObjectId mergeBase = GitUtils.getMergeBase(
-					request.getTargetProject().getRepository(), request.getTarget().getObjectId(), 
-					request.getSourceProject().getRepository(), request.getSource().getObjectId());
+			ObjectId mergeBase = gitService.getMergeBase(
+					request.getTargetProject(), request.getTarget().getObjectId(), 
+					request.getSourceProject(), request.getSource().getObjectId());
 			if (mergeBase != null) {
 				PullRequestUpdate update = new PullRequestUpdate();
 				update.setRequest(request);
 				update.setHeadCommitHash(request.getSource().getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 				request.getUpdates().add(update);
-				request.setUpdates(request.getUpdates());
 				save(update);
 
-				request.writeHeadRef();
+				gitService.updateRef(request.getTargetProject(), request.getHeadRef(), 
+						ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()), null);
 				
 				listenerRegistry.post(new PullRequestUpdated(update));
 			}

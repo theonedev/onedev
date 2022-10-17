@@ -33,6 +33,8 @@ import io.onedev.server.util.ContentDetector;
 
 public class TextQuery extends BlobQuery {
 
+	private static final long serialVersionUID = 1L;
+
 	private static int MAX_LINE_LEN = 1024;
 
 	private final String term;

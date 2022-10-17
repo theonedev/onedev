@@ -20,7 +20,7 @@ public class OnlineCriteria extends Criteria<Agent> {
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Agent, Agent> from, CriteriaBuilder builder) {
 		Path<?> attribute = from.get(Agent.PROP_ID);
-		Collection<Long> agentIds = OneDev.getInstance(AgentManager.class).getOnlineAgentIds();
+		Collection<Long> agentIds = OneDev.getInstance(AgentManager.class).getAgentServers().keySet();
 		if (!agentIds.isEmpty())
 			return attribute.in(agentIds);
 		else

@@ -1,11 +1,13 @@
 package io.onedev.server.buildspec.job.gitcredential;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintValidatorContext;
 
+import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.config.keys.PublicKeyEntry;
 import javax.validation.constraints.NotEmpty;
 
@@ -56,8 +58,9 @@ public class SshCredential implements GitCredential, Validatable {
 		SshSetting sshSetting = settingManager.getSshSetting();
 		StringBuilder knownHosts = new StringBuilder(systemSetting.getSshServerName()).append(" ");
 		try {
-			PublicKeyEntry.appendPublicKeyEntry(knownHosts, sshSetting.getPublicKey());
-		} catch (IOException e) {
+			PublicKeyEntry.appendPublicKeyEntry(knownHosts, 
+					KeyUtils.recoverPublicKey(sshSetting.getPrivateKey()));
+		} catch (IOException|GeneralSecurityException e) {
 			throw new RuntimeException(e);
 		}
 		

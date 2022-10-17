@@ -72,13 +72,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final Long UNKNOWN_ID = -2L;
 	
-	public static final Long ONEDEV_ID = -1L;
+	public static final Long SYSTEM_ID = -1L;
 	
 	public static final Long ROOT_ID = 1L;
 	
-	public static final String ONEDEV_NAME = "OneDev";
+	public static final String SYSTEM_NAME = "OneDev";
 	
-	public static final String ONEDEV_EMAIL_ADDRESS = "noreply@onedev.io";
+	public static final String SYSTEM_EMAIL_ADDRESS = "noreply@onedev.io";
 	
 	public static final String UNKNOWN_NAME = "Unknown";
 	
@@ -519,7 +519,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public PersonIdent asPerson() {
 		if (isSystem()) {
-			return new PersonIdent(User.ONEDEV_NAME, User.ONEDEV_EMAIL_ADDRESS);
+			return new PersonIdent(User.SYSTEM_NAME, User.SYSTEM_EMAIL_ADDRESS);
 		} else {
 			EmailAddress emailAddress = getGitEmailAddress();
 			if (emailAddress != null && emailAddress.isVerified())
@@ -541,7 +541,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	}
 
 	public boolean isSystem() {
-		return ONEDEV_ID.equals(getId());
+		return SYSTEM_ID.equals(getId());
 	}
 	
 	public boolean isUnknown() {

@@ -38,7 +38,7 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Editable(order=100, description="Specify clover coverage xml report file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
+	@Editable(order=100, description="Specify clover coverage xml report file under <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/site/clover/clover.xml</tt>. "
 			+ "Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> "
 			+ "on how to generate clover xml file. Use * or ? for pattern match")

@@ -10,16 +10,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.PathMatchingFilter;
 import org.apache.shiro.web.util.WebUtils;
 
-import com.google.common.net.HttpHeaders;
-
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.k8shelper.CloneInfo;
-import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -30,9 +25,12 @@ public class BearerAuthenticationFilter extends PathMatchingFilter {
 	
 	private final UserManager userManager;
 	
+	private final ClusterManager clusterManager;
+	
 	@Inject
-	public BearerAuthenticationFilter(UserManager userManager) {
+	public BearerAuthenticationFilter(UserManager userManager, ClusterManager clusterManager) {
 		this.userManager = userManager;
+		this.clusterManager = clusterManager;
 	}
 
 	@Sessional
@@ -40,15 +38,15 @@ public class BearerAuthenticationFilter extends PathMatchingFilter {
 	protected boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception {
     	Subject subject = SecurityUtils.getSubject();
 		if (!subject.isAuthenticated()) {
-	        HttpServletRequest httpRequest = WebUtils.toHttp(request);
-	        String authzHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
-	        if (authzHeader == null)
-	        	authzHeader = httpRequest.getHeader(CloneInfo.ONEDEV_AUTHORIZATION);
-	        if (authzHeader != null && authzHeader.startsWith(KubernetesHelper.BEARER + " ")) {
-            	String tokenValue = StringUtils.substringAfter(authzHeader, " ");
-            	User user = userManager.findByAccessToken(tokenValue);
-            	if (user != null)
-            		subject.login(new BearerAuthenticationToken(user));
+			String bearerToken = SecurityUtils.getBearerToken((HttpServletRequest)request);
+			if (bearerToken != null) {
+				if (clusterManager.getCredentialValue().equals(bearerToken)) { 
+					subject.login(new BearerAuthenticationToken(userManager.getSystem()));
+				} else {
+	            	User user = userManager.findByAccessToken(bearerToken);
+	            	if (user != null)
+	            		subject.login(new BearerAuthenticationToken(user));
+				}
 	        } 
 		} 
 		

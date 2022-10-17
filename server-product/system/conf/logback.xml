@@ -48,6 +48,7 @@
 	<logger name="org.apache.wicket.request.resource.ResourceReferenceRegistry" level="ERROR"/>
 	<logger name="org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator" level="ERROR"/>
 	<logger name="org.eclipse.jgit.util.FS" level="ERROR"></logger>
+	<logger name="com.hazelcast" level="ERROR"></logger>
 	<logger name="io.onedev" level="INFO"/>	
 	
 	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />

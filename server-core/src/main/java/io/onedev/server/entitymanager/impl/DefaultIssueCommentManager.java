@@ -7,9 +7,9 @@ import javax.inject.Singleton;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.event.issue.IssueCommented;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Transactional;

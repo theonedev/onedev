@@ -15,9 +15,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.PendingSuggestionApply;
@@ -34,12 +34,12 @@ import io.onedev.server.security.SecurityUtils;
 public class DefaultPendingSuggestionApplyManager extends BaseEntityManager<PendingSuggestionApply> 
 		implements PendingSuggestionApplyManager {
 
-	private final SettingManager settingManager;
+	private final GitService gitService;
 	
 	@Inject
-	public DefaultPendingSuggestionApplyManager(Dao dao, SettingManager settingManager) {
+	public DefaultPendingSuggestionApplyManager(Dao dao, GitService gitService) {
 		super(dao);
-		this.settingManager = settingManager;
+		this.gitService = gitService;
 	}
 
 	@Transactional
@@ -69,10 +69,9 @@ public class DefaultPendingSuggestionApplyManager extends BaseEntityManager<Pend
 		
 		String refName = GitUtils.branch2ref(request.getSourceBranch());
 		
-		ObjectId newCommitId = blobEdits.commit(
-				request.getSourceProject().getRepository(), refName, 
-				headCommitId, headCommitId, user.asPerson(), commitMessage, 
-				settingManager.getGpgSetting().getSigningKey());
+		ObjectId newCommitId = gitService.commit(request.getSourceProject(), 
+				blobEdits, refName, headCommitId, headCommitId, user.asPerson(), 
+				commitMessage, false);
 
 		for (CodeComment comment: unresolvedComments) {
 			CodeCommentStatusChange change = new CodeCommentStatusChange();

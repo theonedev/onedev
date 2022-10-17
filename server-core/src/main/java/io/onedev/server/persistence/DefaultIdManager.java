@@ -1,51 +1,80 @@
 package io.onedev.server.persistence;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.EntityType;
 
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.dao.Dao;
+import com.hazelcast.cp.IAtomicLong;
+
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.model.AbstractEntity;
 
 @Singleton
 public class DefaultIdManager implements IdManager {
 
-	private final Dao dao;
+	private final DataManager dataManager;
 	
-	private final PersistManager persistManager;
+	private final ClusterManager clusterManager;
 	
-	private final Map<Class<?>, AtomicLong> nextIds = new HashMap<>();
+	private final SessionFactoryManager sessionFactoryManager;
+	
+	private final Map<Class<?>, IAtomicLong> nextIds = new HashMap<>();
 	
 	@Inject
-	public DefaultIdManager(Dao dao, PersistManager persistManager) {
-		this.dao = dao;
-		this.persistManager = persistManager;
+	public DefaultIdManager(DataManager dataManager, ClusterManager clusterManager, 
+			SessionFactoryManager sessionFactoryManager) {
+		this.dataManager = dataManager;
+		this.sessionFactoryManager = sessionFactoryManager;
+		this.clusterManager = clusterManager;
 	}
 
-	private long getMaxId(Class<?> entityClass) {
-		CriteriaBuilder builder = persistManager.getSessionFactory().getCriteriaBuilder();
-		CriteriaQuery<Number> query = builder.createQuery(Number.class);
-		Root<?> root = query.from(entityClass);
-		query.select(builder.max(root.get("id")));
-		Number result = dao.getSession().createQuery(query).getSingleResult();
-		return result!=null?result.longValue():0;
+	@SuppressWarnings("unchecked")
+	private long getMaxId(Connection conn, Class<?> entityClass) {
+		try (Statement stmt = conn.createStatement()) {
+			String query = String.format("select max(%s) from %s", 
+					dataManager.getColumnName(AbstractEntity.PROP_ID), 
+					dataManager.getTableName((Class<? extends AbstractEntity>) entityClass));
+			try (ResultSet resultset = stmt.executeQuery(query)) {
+				if (resultset.next()) 
+					return Math.max(resultset.getLong(1), 0);
+				else 
+					return 0;
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
-	@Sessional
 	@Override
 	public void init() {
-		for (EntityType<?> entityType: ((EntityManagerFactory)persistManager.getSessionFactory()).getMetamodel().getEntities()) {
-			Class<?> entityClass = entityType.getJavaType();
-			nextIds.put(entityClass, new AtomicLong(getMaxId(entityClass)+1));
-		}
+		dataManager.callWithConnection(new ConnectionCallable<Void>() {
+
+			@Override
+			public Void call(Connection conn) {
+				for (var persistenceClass: sessionFactoryManager.getMetadata().getEntityBindings()) {
+					Class<?> entityClass = persistenceClass.getMappedClass();
+					var nextId = clusterManager.getHazelcastInstance().getCPSubsystem().getAtomicLong(entityClass.getName());
+					clusterManager.init(nextId, new Callable<Long>() {
+
+						@Override
+						public Long call() throws Exception {
+							return getMaxId(conn, entityClass) + 1;
+						}
+						
+					});
+					nextIds.put(entityClass, nextId);
+				}
+				return null;
+			}
+			
+		});
 	}
 
 	@Override
@@ -55,11 +84,11 @@ public class DefaultIdManager implements IdManager {
 
 	@Override
 	public void useId(Class<?> entityClass, long id) {
-		AtomicLong nextIdAtom = nextIds.get(entityClass);
+		var nextAtomicId = nextIds.get(entityClass);
 		while (true) {
-			long nextId = nextIdAtom.get();
+			long nextId = nextAtomicId.getAndIncrement();
 			if (id+1 > nextId) {
-				if (nextIdAtom.compareAndSet(nextId, id+1))
+				if (nextAtomicId.compareAndSet(nextId, id+1))
 					break;
 			} else {
 				break;

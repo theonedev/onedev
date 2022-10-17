@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;

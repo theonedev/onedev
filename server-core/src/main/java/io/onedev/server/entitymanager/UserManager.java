@@ -11,6 +11,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.util.facade.UserFacade;
 
 public interface UserManager extends EntityManager<User> {
 	
@@ -65,6 +66,9 @@ public interface UserManager extends EntityManager<User> {
 	 */
 	@Nullable 
 	User findByName(String userName);
+	
+	@Nullable
+	UserFacade findFacadeById(Long userId);
 	
 	@Nullable
 	User findByFullName(String fullName);

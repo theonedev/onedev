@@ -22,6 +22,8 @@ import io.onedev.server.util.match.WildcardUtils;
 
 public class FileQuery extends BlobQuery {
 
+	private static final long serialVersionUID = 1L;
+
 	private final String fileNames;
 	
 	private final String excludeFileName;

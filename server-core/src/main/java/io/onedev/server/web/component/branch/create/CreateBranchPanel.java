@@ -10,7 +10,9 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -69,7 +71,7 @@ abstract class CreateBranchPanel extends Panel {
 								"Valid signature required for head commit of this branch per branch protection rule");
 						target.add(form);
 					} else {
-						project.createBranch(branchName, revision);
+						OneDev.getInstance(GitService.class).createBranch(project, branchName, revision);
 						onCreate(target, branchName);
 					}
 				}

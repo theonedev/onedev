@@ -3,6 +3,7 @@ package io.onedev.server.event.codecomment;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.CodeComment;
@@ -10,7 +11,9 @@ import io.onedev.server.model.User;
 
 public abstract class CodeCommentEvent extends ProjectEvent {
 
-	private final CodeComment comment;
+	private static final long serialVersionUID = 1L;
+	
+	private final Long commentId;
 	
 	/**
 	 * @param comment
@@ -19,16 +22,16 @@ public abstract class CodeCommentEvent extends ProjectEvent {
 	 */
 	public CodeCommentEvent(User user, Date date, CodeComment comment) {
 		super(user, date, comment.getProject());
-		this.comment = comment;
+		commentId = comment.getId();
 	}
 
 	public CodeComment getComment() {
-		return comment;
+		return OneDev.getInstance(CodeCommentManager.class).load(commentId);
 	}
 
 	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(comment);
+		return OneDev.getInstance(UrlManager.class).urlFor(getComment());
 	}
 	
 }

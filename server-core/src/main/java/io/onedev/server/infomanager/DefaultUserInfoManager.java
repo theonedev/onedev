@@ -10,10 +10,10 @@ import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueEvent;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.model.CodeComment;
@@ -58,7 +58,7 @@ public class DefaultUserInfoManager extends AbstractMultiEnvironmentManager impl
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof User)
+		if (event.getEntity() instanceof User) 
 			removeEnv(event.getEntity().getId().toString());
 	}
 

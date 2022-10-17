@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,8 +8,10 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class Pair<FirstType, SecondType> {
+public class Pair<FirstType, SecondType> implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private FirstType first;
 	
 	private SecondType second;

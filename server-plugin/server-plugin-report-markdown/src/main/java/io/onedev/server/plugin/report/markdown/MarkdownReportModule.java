@@ -3,8 +3,11 @@ package io.onedev.server.plugin.report.markdown;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.protocol.http.WebApplication;
 
@@ -13,7 +16,10 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.step.PublishReportStep;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
@@ -52,23 +58,13 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<BuildTab> getTabs(Build build) {
-				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(PublishMarkdownReportStep.getReportLockKey(build), new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						File categoryDir = new File(build.getPublishDir(), PublishMarkdownReportStep.CATEGORY);
-						if (categoryDir.exists()) {
-							for (File reportDir: categoryDir.listFiles()) {
-								if (SecurityUtils.canAccessReport(build, reportDir.getName()))
-									tabs.add(new MarkdownReportTab(reportDir.getName()));
-							}
-						}
-						return null;
-					}
-					
-				});
-				return tabs;
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+				Long projectId = build.getProject().getId();
+				Long buildNumber = build.getNumber();
+				
+				return projectManager.runOnProjectServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
+						.collect(Collectors.toList());
 			}
 			
 			@Override
@@ -89,7 +85,7 @@ public class MarkdownReportModule extends AbstractPluginModule {
 						@Override
 						public List<PullRequestSummaryPart> call() throws Exception {
 							List<PullRequestSummaryPart> parts = new ArrayList<>();
-							File categoryDir = new File(build.getPublishDir(), PublishPullRequestMarkdownReportStep.CATEGORY);
+							File categoryDir = new File(build.getDir(), PublishPullRequestMarkdownReportStep.CATEGORY);
 							if (categoryDir.exists()) {
 								for (File reportDir: categoryDir.listFiles()) {
 									if (SecurityUtils.canAccessReport(build, reportDir.getName()))
@@ -124,4 +120,45 @@ public class MarkdownReportModule extends AbstractPluginModule {
 		
 	}
 
+	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
+
+		private static final long serialVersionUID = 1L;
+		
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		public GetBuildTabs(Long projectId, Long buildNumber) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+		}
+
+		@Override
+		public List<BuildTab> call() throws Exception {
+			return LockUtils.read(PublishMarkdownReportStep.getReportLockName(projectId, buildNumber), new Callable<List<BuildTab>>() {
+
+				@Override
+				public List<BuildTab> call() throws Exception {
+					List<BuildTab> tabs = new ArrayList<>();
+					File categoryDir = new File(Build.getDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
+					if (categoryDir.exists()) {
+						for (File reportDir: categoryDir.listFiles()) 
+							tabs.add(new MarkdownReportTab(reportDir.getName()));
+					}
+					Collections.sort(tabs, new Comparator<BuildTab>() {
+
+						@Override
+						public int compare(BuildTab o1, BuildTab o2) {
+							return o1.getTitle().compareTo(o1.getTitle());
+						}
+						
+					});
+					return tabs;
+				}
+				
+			});
+		}
+		
+	}
+	
 }

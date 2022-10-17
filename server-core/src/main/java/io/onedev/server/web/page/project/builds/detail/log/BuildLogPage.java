@@ -33,7 +33,7 @@ public class BuildLogPage extends BuildDetailPage {
 	public Component renderOptions(String componentId) {
 		Fragment fragment = new Fragment(componentId, "optionsFrag", this);
 		fragment.add(new ResourceLink<Void>("download", new BuildLogResourceReference(), 
-				BuildLogResource.paramsOf(projectModel.getObject(), getBuild().getNumber())));
+				BuildLogResource.paramsOf(projectModel.getObject().getId(), getBuild().getNumber())));
 		return fragment;
 	}
 }

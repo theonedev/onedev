@@ -1,18 +1,15 @@
 package io.onedev.server.web.page.project.branches;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -51,10 +48,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.filter.RevFilter;
 
 import com.google.common.base.Preconditions;
 
@@ -64,7 +58,9 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.AheadBehind;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -112,17 +108,17 @@ public class ProjectBranchesPage extends ProjectPage {
 	
 	private String baseBranch;
 	
-	private IModel<Map<String, RefInfo>> branchesModel = new LoadableDetachableModel<Map<String, RefInfo>>() {
+	private IModel<Map<String, RefFacade>> branchesModel = new LoadableDetachableModel<Map<String, RefFacade>>() {
 
 		@Override
-		protected Map<String, RefInfo> load() {
-			Map<String, RefInfo> refInfos = new LinkedHashMap<>();
-			for (RefInfo refInfo: getProject().getBranchRefInfos()) {
-				String branch = GitUtils.ref2branch(refInfo.getRef().getName());
+		protected Map<String, RefFacade> load() {
+			Map<String, RefFacade> refs = new LinkedHashMap<>();
+			for (RefFacade ref: getProject().getBranchRefs()) {
+				String branch = GitUtils.ref2branch(ref.getName());
 				if (query == null || branch.toLowerCase().contains(query.trim().toLowerCase()))
-					refInfos.put(branch, refInfo);
+					refs.put(branch, ref);
 			}
-			return refInfos;
+			return refs;
 		}
 		
 	};
@@ -136,13 +132,13 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 			Collection<ProjectAndBranch> sources = new ArrayList<>();
 			
-			List<RefInfo> branches = new ArrayList<>(branchesModel.getObject().values());
+			List<RefFacade> branches = new ArrayList<>(branchesModel.getObject().values());
 			long firstItemOffset = branchesTable.getCurrentPage() * branchesTable.getItemsPerPage();
 			for (long i=firstItemOffset; i<branches.size(); i++) {
 				if (i-firstItemOffset >= branchesTable.getItemsPerPage())
 					break;
-				RefInfo refInfo = branches.get((int)i);
-				String branchName = GitUtils.ref2branch(refInfo.getRef().getName());
+				RefFacade ref = branches.get((int)i);
+				String branchName = GitUtils.ref2branch(ref.getName());
 				sources.add(new ProjectAndBranch(getProject(), branchName)); 
 			}
 			
@@ -155,7 +151,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 	private TextField<String> searchField;
 	
-	private DataTable<RefInfo, Void> branchesTable;
+	private DataTable<RefFacade, Void> branchesTable;
 	
 	private String query;
 	
@@ -164,83 +160,14 @@ public class ProjectBranchesPage extends ProjectPage {
 	private final IModel<Map<ObjectId, AheadBehind>> aheadBehindsModel = 
 			new LoadableDetachableModel<Map<ObjectId, AheadBehind>>() {
 
-		@SuppressWarnings("unused")
 		@Override
 		protected Map<ObjectId, AheadBehind> load() {
 			List<ObjectId> compareIds = getCommitIdsToDisplay();
 
-			Ref baseRef = Preconditions.checkNotNull(getProject().getBranchRef(baseBranch));
-			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
+			GitService gitService = OneDev.getInstance(GitService.class);
 			
-			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-				RevCommit baseCommit = revWalk.lookupCommit(baseRef.getObjectId());
-				revWalk.markStart(baseCommit);
-				Map<ObjectId, RevCommit> compareCommits = new HashMap<>();
-				for (ObjectId compareId: compareIds) {
-					RevCommit compareCommit = revWalk.lookupCommit(compareId);
-					compareCommits.put(compareId, compareCommit);
-					revWalk.markStart(compareCommit);
-				}
-				revWalk.setRevFilter(RevFilter.MERGE_BASE);
-				RevCommit mergeBase = revWalk.next();
-				
-				revWalk.reset();
-				revWalk.setRevFilter(RevFilter.ALL);
-
-				if (mergeBase != null) {
-					revWalk.markStart(baseCommit);
-					revWalk.markUninteresting(mergeBase);
-					Set<ObjectId> baseSet = new HashSet<>();
-					for (RevCommit commit: revWalk) 
-						baseSet.add(commit.copy());
-					revWalk.reset();
-					
-					for (ObjectId compareId: compareIds) {
-						RevCommit compareCommit = Preconditions.checkNotNull(compareCommits.get(compareId));
-						revWalk.markStart(compareCommit);
-						revWalk.markUninteresting(mergeBase);
-						Set<ObjectId> compareSet = new HashSet<>();
-						for (RevCommit commit: revWalk) 
-							compareSet.add(commit.copy());
-						revWalk.reset();
-						
-						int ahead = 0;
-						for (ObjectId each: compareSet) {
-							if (!baseSet.contains(each))
-								ahead++;
-						}
-						int behind = 0;
-						for (ObjectId each: baseSet) {
-							if (!compareSet.contains(each))
-								behind++;
-						}
-						aheadBehinds.put(compareId, new AheadBehind(ahead, behind));
-					}					
-				} else {
-					for (ObjectId compareId: compareIds) {
-						RevCommit compareCommit = Preconditions.checkNotNull(compareCommits.get(compareId));
-						revWalk.markUninteresting(baseCommit);
-						revWalk.markStart(compareCommit);
-						int ahead = 0;
-						for (RevCommit commit: revWalk)
-							ahead++;
-						revWalk.reset();
-						
-						revWalk.markUninteresting(compareCommit);
-						revWalk.markStart(baseCommit);
-						int behind = 0;
-						for (RevCommit commit: revWalk)
-							behind++;
-						revWalk.reset();
-						
-						aheadBehinds.put(compareId, new AheadBehind(ahead, behind));
-					}					
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			
-			return aheadBehinds;
+			RefFacade baseRef = Preconditions.checkNotNull(getProject().getBranchRef(baseBranch));
+			return gitService.getAheadBehinds(getProject(), baseRef.getObjectId(), compareIds);
 		}
 	};
 	
@@ -354,8 +281,8 @@ public class ProjectBranchesPage extends ProjectPage {
 			@Override
 			protected Map<String, String> load() {
 				Map<String, String> branches = new LinkedHashMap<>();
-				for (RefInfo ref: getProject().getBranchRefInfos()) {
-					String branch = GitUtils.ref2branch(ref.getRef().getName());
+				for (RefFacade ref: getProject().getBranchRefs()) {
+					String branch = GitUtils.ref2branch(ref.getName());
 					branches.put(branch, branch);
 				}
 				return branches;
@@ -461,7 +388,7 @@ public class ProjectBranchesPage extends ProjectPage {
 										"Valid signature required for head commit of this branch per branch protection rule");
 								target.add(form);
 							} else {
-								getProject().createBranch(branchName, helperBean.getRevision());
+								OneDev.getInstance(GitService.class).createBranch(getProject(), branchName, helperBean.getRevision());
 								modal.close();
 								target.add(branchesTable);
 								
@@ -499,17 +426,17 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 		});		
 
-		List<IColumn<RefInfo, Void>> columns = new ArrayList<>();
+		List<IColumn<RefFacade, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<RefFacade, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<RefInfo>> cellItem, String componentId,
-					IModel<RefInfo> rowModel) {
+			public void populateItem(Item<ICellPopulator<RefFacade>> cellItem, String componentId,
+					IModel<RefFacade> rowModel) {
 				Fragment fragment = new Fragment(componentId, "branchFrag", ProjectBranchesPage.this);
 				fragment.setRenderBodyOnly(true);
-				RefInfo ref = rowModel.getObject();
-				String branch = GitUtils.ref2branch(ref.getRef().getName());
+				RefFacade ref = rowModel.getObject();
+				String branch = GitUtils.ref2branch(ref.getName());
 				
 				BlobIdent blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
 				ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
@@ -518,7 +445,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				link.add(new Label("name", branch));
 				fragment.add(link);
 				
-				fragment.add(new CommitStatusLink("buildStatus", ref.getRef().getObjectId(), ref.getRef().getName()) {
+				fragment.add(new CommitStatusLink("buildStatus", ref.getObjectId(), ref.getName()) {
 
 					@Override
 					protected Project getProject() {
@@ -542,14 +469,14 @@ public class ProjectBranchesPage extends ProjectPage {
 					
 				});
 				
-				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
+				RevCommit lastCommit = getProject().getRevCommit(ref.getObjectId(), true);
 				fragment.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent()));
 				
 				fragment.add(new Label("message", new LoadableDetachableModel<String>() {
 
 					@Override
 					protected String load() {
-						RevCommit lastCommit = getProject().getRevCommit(rowModel.getObject().getRef().getObjectId(), true);
+						RevCommit lastCommit = getProject().getRevCommit(rowModel.getObject().getObjectId(), true);
 						PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name()); 
 						String commitUrl = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 						ReferenceTransformer transformer = new ReferenceTransformer(getProject(), commitUrl);
@@ -703,13 +630,13 @@ public class ProjectBranchesPage extends ProjectPage {
 			}
 			
 		});
-		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<RefFacade, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<RefInfo>> cellItem, String componentId,
-					IModel<RefInfo> rowModel) {
-				RefInfo ref = rowModel.getObject();
-				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
+			public void populateItem(Item<ICellPopulator<RefFacade>> cellItem, String componentId,
+					IModel<RefFacade> rowModel) {
+				RefFacade ref = rowModel.getObject();
+				RevCommit lastCommit = getProject().getRevCommit(ref.getObjectId(), true);
 				AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
 				cellItem.add(newAheadBehindFrag(componentId, ref, ab.getBehind(), false));
 			}
@@ -720,13 +647,13 @@ public class ProjectBranchesPage extends ProjectPage {
 			}
 			
 		});
-		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<RefFacade, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<RefInfo>> cellItem, String componentId,
-					IModel<RefInfo> rowModel) {
-				RefInfo ref = rowModel.getObject();
-				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
+			public void populateItem(Item<ICellPopulator<RefFacade>> cellItem, String componentId,
+					IModel<RefFacade> rowModel) {
+				RefFacade ref = rowModel.getObject();
+				RevCommit lastCommit = getProject().getRevCommit(ref.getObjectId(), true);
 				AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
 				cellItem.add(newAheadBehindFrag(componentId, ref, ab.getAhead(), true));
 			}
@@ -738,11 +665,11 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 		});
 		
-		SortableDataProvider<RefInfo, Void> dataProvider = new LoadableDetachableDataProvider<RefInfo, Void>() {
+		SortableDataProvider<RefFacade, Void> dataProvider = new LoadableDetachableDataProvider<RefFacade, Void>() {
 
 			@Override
-			public Iterator<? extends RefInfo> iterator(long first, long count) {
-				List<RefInfo> branches = new ArrayList<>(branchesModel.getObject().values());
+			public Iterator<? extends RefFacade> iterator(long first, long count) {
+				List<RefFacade> branches = new ArrayList<>(branchesModel.getObject().values());
 				if (first + count > branches.size())
 					return branches.subList((int)first, branches.size()).iterator();
 				else
@@ -755,12 +682,12 @@ public class ProjectBranchesPage extends ProjectPage {
 			}
 
 			@Override
-			public IModel<RefInfo> model(RefInfo object) {
-				String branch = GitUtils.ref2branch(object.getRef().getName());
-				return new AbstractReadOnlyModel<RefInfo>() {
+			public IModel<RefFacade> model(RefFacade object) {
+				String branch = GitUtils.ref2branch(object.getName());
+				return new AbstractReadOnlyModel<RefFacade>() {
 
 					@Override
-					public RefInfo getObject() {
+					public RefFacade getObject() {
 						return branchesModel.getObject().get(branch);
 					}
 					
@@ -768,7 +695,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			}
 		};		
 		
-		add(branchesTable = new DefaultDataTable<RefInfo, Void>("branches", columns, dataProvider, 
+		add(branchesTable = new DefaultDataTable<RefFacade, Void>("branches", columns, dataProvider, 
 				PAGE_SIZE, pagingHistorySupport) {
 			
 			@Override
@@ -782,9 +709,9 @@ public class ProjectBranchesPage extends ProjectPage {
 		
 	}
 	
-	private Fragment newAheadBehindFrag(String componentId, RefInfo ref, int count, boolean ahead) {
+	private Fragment newAheadBehindFrag(String componentId, RefFacade ref, int count, boolean ahead) {
 		Fragment fragment = new Fragment(componentId, "aheadBehindFrag", ProjectBranchesPage.this);
-		String branch = GitUtils.ref2branch(ref.getRef().getName());
+		String branch = GitUtils.ref2branch(ref.getName());
 		fragment.add(new Link<Void>("link") {
 
 			@Override
@@ -842,14 +769,14 @@ public class ProjectBranchesPage extends ProjectPage {
 	}
 	
 	private List<ObjectId> getCommitIdsToDisplay() {
-		List<RefInfo> branches = new ArrayList<>(branchesModel.getObject().values());
+		List<RefFacade> branches = new ArrayList<>(branchesModel.getObject().values());
 		long firstItemOffset = branchesTable.getCurrentPage() * branchesTable.getItemsPerPage();
 		List<ObjectId> commitIdsToDisplay = new ArrayList<>();
 		for (long i=firstItemOffset; i<branches.size(); i++) {
 			if (i-firstItemOffset >= branchesTable.getItemsPerPage())
 				break;
-			RefInfo ref = branches.get((int)i); 
-			commitIdsToDisplay.add(ref.getRef().getObjectId());
+			RefFacade ref = branches.get((int)i); 
+			commitIdsToDisplay.add(ref.getObjectId());
 		}
 		return commitIdsToDisplay;
 	}

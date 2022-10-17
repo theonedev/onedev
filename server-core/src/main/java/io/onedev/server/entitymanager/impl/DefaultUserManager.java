@@ -23,7 +23,6 @@ import org.hibernate.query.Query;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -32,6 +31,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
@@ -135,7 +135,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Sessional
     @Override
     public User getSystem() {
-    	return load(User.ONEDEV_ID);
+    	return load(User.SYSTEM_ID);
     }
     
     @Sessional
@@ -251,6 +251,16 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		}
     }
 
+    @Override
+    public UserFacade findFacadeById(Long userId) {
+		cacheLock.readLock().lock();
+		try {
+			return cache.get(userId);
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+    }
+	
 	@Sessional
     @Override
     public User findByFullName(String fullName) {

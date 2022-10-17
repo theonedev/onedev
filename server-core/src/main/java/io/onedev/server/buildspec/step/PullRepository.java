@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import javax.validation.constraints.NotEmpty;
@@ -21,7 +22,6 @@ import com.google.common.collect.Maps;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
@@ -30,7 +30,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.event.pubsub.ListenerRegistry;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.EditContext;
@@ -162,7 +163,9 @@ public class PullRepository extends SyncRepository {
 					List<ObjectId> lfsFetchCommitIds = new ArrayList<>();
 					
 					if (baseCommitId != null) {
-						try (RevWalk revWalk = new RevWalk(targetProject.getRepository())) {
+						Repository repository = OneDev.getInstance(ProjectManager.class)
+								.getRepository(targetProject.getId());
+						try (RevWalk revWalk = new RevWalk(repository)) {
 							if (!difference.entriesOnlyOnRight().isEmpty()) {
 								for (Map.Entry<String, ObjectId> entry: difference.entriesOnlyOnRight().entrySet()) {
 									revWalk.markStart(revWalk.lookupCommit(entry.getValue()));
@@ -228,16 +231,16 @@ public class PullRepository extends SyncRepository {
 	
 	private Map<String, ObjectId> getCommitIds(Project project) {
 		Map<String, ObjectId> commitIds = new HashMap<>();
-		for (RefInfo refInfo: project.getBranchRefInfos()) {
+		for (RefFacade ref: project.getBranchRefs()) {
 			boolean matches = false;
 			for (String pattern: Splitter.on(" ").omitEmptyStrings().trimResults().split(getRefs())) {
-				if (WildcardUtils.matchString(pattern, refInfo.getRef().getName())) {
+				if (WildcardUtils.matchString(pattern, ref.getName())) {
 					matches = true;
 					break;
 				}
 			}
 			if (matches) 
-				commitIds.put(refInfo.getRef().getName(), refInfo.getPeeledObj().copy());
+				commitIds.put(ref.getName(), ref.getPeeledObj().copy());
 		}
 		return commitIds;
 	}

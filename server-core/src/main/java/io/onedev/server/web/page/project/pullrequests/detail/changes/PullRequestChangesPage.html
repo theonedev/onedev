@@ -1,5 +1,6 @@
 <wicket:extend>
-	<div class="changes">
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="changesFrag">
 		<div wicket:id="changesHead" class="head">
 			<div class="btn-group btn-block mb-4">
 				<button wicket:id="prevCommitLink" class="btn btn-light btn-hover-primary btn-icon flex-grow-0 flex-shrink-0" title="Previous commit"><wicket:svg href="arrow" class="icon rotate-180"></wicket:svg></button>
@@ -13,7 +14,7 @@
 			</wicket:enclosure>
 		</div>
 		<div wicket:id="revisionDiff" class="body"></div>		
-	</div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="commitsFrag">
 		<div class="commits-selector noselect p-4">
 			<div class="links mb-3">
@@ -33,5 +34,8 @@
 				<wicket:svg href="bulb" class="icon mr-2"/> Click to select a commit, or shift-click to select multiple commit
 			</div>
 		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="waitingFrag">
+		<div class="alert alert-notice alert-light-warning">Please waiting...</div>
 	</wicket:fragment>
 </wicket:extend>

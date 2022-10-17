@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -34,8 +36,6 @@ import javax.ws.rs.core.Response;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +50,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -789,7 +790,9 @@ public class ImportServer implements Serializable, Validatable {
 														endpoint, errorMessage));
 											}
 											try (InputStream is = response.readEntity(InputStream.class)) {
-												String oneDevAttachmentName = oneDevProject.saveAttachment(issue.getUUID(), attachmentName, is);
+												AttachmentManager attachmentManager = OneDev.getInstance(AttachmentManager.class);
+												String oneDevAttachmentName = attachmentManager.saveAttachment(
+														oneDevProject.getId(), issue.getUUID(), attachmentName, is);
 												String oneDevAttachmentUrl = oneDevProject.getAttachmentUrlPath(issue.getUUID(), oneDevAttachmentName);
 												attachments.add("[" + oneDevAttachmentName + "](" + oneDevAttachmentUrl + ")");
 											} catch (IOException e) {

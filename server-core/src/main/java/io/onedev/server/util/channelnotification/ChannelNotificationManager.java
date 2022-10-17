@@ -24,8 +24,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.util.IOUtils;
 
-import io.onedev.commons.loader.Listen;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
@@ -34,6 +32,7 @@ import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentUpdated;
 import io.onedev.server.event.issue.IssueChanged;
 import io.onedev.server.event.issue.IssueEvent;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.pullrequest.PullRequestAssigned;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChanged;
@@ -55,19 +54,12 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardD
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.ReflectionUtils;
 
 public abstract class ChannelNotificationManager<T extends ChannelNotificationSetting> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChannelNotificationManager.class);
-	
-	private final Dao dao;
-	
-	private final SessionManager sessionManager;
 	
 	private final ObjectMapper objectMapper;
 	
@@ -75,9 +67,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	
 	@SuppressWarnings("unchecked")
 	@Inject
-	public ChannelNotificationManager(Dao dao, SessionManager sessionManager, ObjectMapper objectMapper) {
-		this.dao = dao;
-		this.sessionManager = sessionManager;
+	public ChannelNotificationManager(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 		
 		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ChannelNotificationManager.class, getClass());
@@ -89,37 +79,28 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 		}
 	} 
 	
-	@Transactional
+	@Sessional
 	@Listen
 	public void on(IssueEvent event) {
 		if (!(event instanceof IssueChanged) 
 				|| !(((IssueChanged) event).getChange().getData() instanceof ReferencedFromAware)) {
-			sessionManager.runAsyncAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					IssueEvent clone = (IssueEvent) event.cloneIn(dao);
-					
-					Issue issue = clone.getIssue();
-					User user = clone.getUser();
-					
-					String issueInfo = String.format("[Issue] (%s - %s)", issue.getFQN(), issue.getTitle()); 
-					
-					String eventDescription; 
-					if (user != null)
-						eventDescription = user.getDisplayName() + " " + clone.getActivity();
-					else
-						eventDescription = StringUtils.capitalize(clone.getActivity());
-					
-					postIfApplicable(issueInfo + " " + eventDescription, clone);
-				}
-				
-			}, LockUtils.getLock(Issue.getSerialLockName(event.getIssue().getId()), true));
+			Issue issue = event.getIssue();
+			User user = event.getUser();
+			
+			String issueInfo = String.format("[Issue] (%s - %s)", issue.getFQN(), issue.getTitle()); 
+			
+			String eventDescription; 
+			if (user != null)
+				eventDescription = user.getDisplayName() + " " + event.getActivity();
+			else
+				eventDescription = StringUtils.capitalize(event.getActivity());
+			
+			postIfApplicable(issueInfo + " " + eventDescription, event);
 		}
 		
 	}
 	
-	@Transactional
+	@Sessional
 	@Listen
 	public void on(PullRequestEvent event) {
 		boolean significantChange = false;
@@ -142,51 +123,33 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 		}
 		
 		if (significantChange) {
-			sessionManager.runAsyncAfterCommit(new Runnable() {
+			PullRequest request = event.getRequest();
+			User user = event.getUser();
+			
+			String pullRequestInfo = String.format("[Pull Request] (%s - %s)", request.getFQN(), request.getTitle()); 
+			
+			String eventDescription; 
+			if (user != null)
+				eventDescription = user.getDisplayName() + " " + event.getActivity();
+			else
+				eventDescription = StringUtils.capitalize(event.getActivity());
 
-				@Override
-				public void run() {
-					PullRequestEvent clone = (PullRequestEvent) event.cloneIn(dao);
-					
-					PullRequest request = clone.getRequest();
-					User user = clone.getUser();
-					
-					String pullRequestInfo = String.format("[Pull Request] (%s - %s)", request.getFQN(), request.getTitle()); 
-					
-					String eventDescription; 
-					if (user != null)
-						eventDescription = user.getDisplayName() + " " + clone.getActivity();
-					else
-						eventDescription = StringUtils.capitalize(clone.getActivity());
-
-					postIfApplicable(pullRequestInfo + " " + eventDescription, clone);
-				}
-				
-			}, LockUtils.getLock(PullRequest.getSerialLockName(event.getRequest().getId()), true));
+			postIfApplicable(pullRequestInfo + " " + eventDescription, event);
 		}
 		
 	}
 	
-	@Transactional
+	@Sessional
 	@Listen
 	public void on(BuildEvent event) {
-		sessionManager.runAsyncAfterCommit(new Runnable() {
+		Build build = event.getBuild();
 
-			@Override
-			public void run() {
-				BuildEvent clone = (BuildEvent) event.cloneIn(dao);
-				
-				Build build = clone.getBuild();
-
-				String eventDescription = build.getStatus().toString();
-				if (build.getVersion() != null)
-					eventDescription = build.getVersion() + " " + eventDescription;
-					
-				String buildInfo = String.format("[Build] (%s - %s)", build.getFQN(), build.getJobName());
-				postIfApplicable(buildInfo + " " + eventDescription, clone);
-			}
+		String eventDescription = build.getStatus().toString();
+		if (build.getVersion() != null)
+			eventDescription = build.getVersion() + " " + eventDescription;
 			
-		}, LockUtils.getLock(Build.getSerialLockName(event.getBuild().getId()), true));
+		String buildInfo = String.format("[Build] (%s - %s)", build.getFQN(), build.getJobName());
+		postIfApplicable(buildInfo + " " + eventDescription, event);
 	}
 	
 	@Sessional
@@ -210,28 +173,19 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 		}
 	}
 	
-	@Transactional
+	@Sessional
 	@Listen
 	public void on(CodeCommentEvent event) {
 		if (!(event instanceof CodeCommentUpdated)) {
-			sessionManager.runAsyncAfterCommit(new Runnable() {
+			CodeComment comment = event.getComment();
 
-				@Override
-				public void run() {
-					CodeCommentEvent clone = (CodeCommentEvent) event.cloneIn(dao);
-					
-					CodeComment comment = clone.getComment();
-
-					String commentInfo = String.format("[Code Comment] (%s:%s)", 
-							clone.getProject().getPath(), comment.getMark().getPath());
-					
-					String eventDescription = String.format("%s %s", 
-							clone.getUser().getDisplayName(), clone.getActivity());
-					
-					postIfApplicable(commentInfo + " " + eventDescription, clone);
-				}
-				
-			});			
+			String commentInfo = String.format("[Code Comment] (%s:%s)", 
+					event.getProject().getPath(), comment.getMark().getPath());
+			
+			String eventDescription = String.format("%s %s", 
+					event.getUser().getDisplayName(), event.getActivity());
+			
+			postIfApplicable(commentInfo + " " + eventDescription, event);
 		}
 	}	
 	

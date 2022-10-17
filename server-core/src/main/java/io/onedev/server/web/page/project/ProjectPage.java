@@ -81,6 +81,7 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
+import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
@@ -150,6 +151,14 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 		};
 		projectModel.setObject(project);
+		
+		if (!(this instanceof ProjectSettingPage) 
+				&& !(this instanceof ProjectChildrenPage)
+				&& !(this instanceof NoProjectStoragePage) 
+				&& getProject().getStorageServerUUID(false) == null) {
+			throw new RestartResponseException(NoProjectStoragePage.class, 
+					NoProjectStoragePage.paramsOf(getProject()));
+		}
 	}
 	
 	protected Map<String, ObjectId> getObjectIdCache() {
@@ -487,7 +496,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	protected abstract void navToProject(Project project);
 	
-	private ProjectManager getProjectManager() {
+	protected ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}
 	

@@ -6,13 +6,12 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractor;
-import io.onedev.server.model.Project;
 
 public interface CodeIndexManager {
 	
-	void indexAsync(Project project, ObjectId commitId);
+	void indexAsync(Long projectId, ObjectId commitId);
 	
-	boolean isIndexed(Project project, ObjectId commitId);
+	boolean isIndexed(Long projectId, ObjectId commitId);
 	
 	String getIndexVersion();
 	

@@ -7,36 +7,38 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class GetRawCommitCommand extends GitCommand<byte[]> {
+public class GetRawCommitCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(GetRawCommitCommand.class);
 	
-	private String revision;
+	private final File workingDir;
 	
-	public GetRawCommitCommand(File gitDir, Map<String, String> gitEnvs) {
-		super(gitDir, gitEnvs);
-	}
+	private final String revision;
 	
-	public GetRawCommitCommand revision(String revision) {
+	private final Map<String, String> envs;
+	
+	public GetRawCommitCommand(File workingDir, String revision, Map<String, String> envs) {
+		this.workingDir = workingDir;
 		this.revision = revision;
-		return this;
+		this.envs = envs;
+	}
+
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
 	}
 	
-	@Override
-	public byte[] call() {
-		Preconditions.checkNotNull(revision, "revision has to be specified.");
+	public byte[] run() {
+		Commandline git = newGit().workingDir(workingDir);
+		git.environments().putAll(envs);
 		
-		Commandline cmd = cmd();
-		
-		cmd.addArgs("cat-file", "commit", revision);
+		git.addArgs("cat-file", "commit", revision);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		cmd.execute(baos, new LineConsumer() {
+		git.execute(baos, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {

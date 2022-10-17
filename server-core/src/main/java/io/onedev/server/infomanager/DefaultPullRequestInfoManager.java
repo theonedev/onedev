@@ -1,9 +1,12 @@
 package io.onedev.server.infomanager;
 
 import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
@@ -13,12 +16,16 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -41,7 +48,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
 public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManager 
-		implements PullRequestInfoManager {
+		implements PullRequestInfoManager, Serializable {
 
 	private static final int INFO_VERSION = 7;
 	
@@ -65,6 +72,8 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	
 	private final BatchWorkManager batchWorkManager;
 	
+	private final ClusterManager clusterManager;
+	
 	private final ProjectManager projectManager;
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
@@ -76,13 +85,18 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	@Inject
 	public DefaultPullRequestInfoManager(TransactionManager transactionManager, ProjectManager projectManager, 
 			StorageManager storageManager, PullRequestUpdateManager pullRequestUpdateManager, 
-			BatchWorkManager batchWorkManager, SessionManager sessionManager) {
+			BatchWorkManager batchWorkManager, SessionManager sessionManager, ClusterManager clusterManager) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
+		this.clusterManager = clusterManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
+	}
+	
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(PullRequestInfoManager.class);
 	}
 	
 	private BatchWorker getBatchWorker(Long projectId) {
@@ -112,7 +126,20 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
 			Long projectId = event.getEntity().getId();
-			removeEnv(projectId.toString());
+			UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, false);
+			if (storageServerUUID != null) {
+				clusterManager.runOnServer(storageServerUUID, new ClusterTask<Void>() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Void call() throws Exception {
+						removeEnv(projectId.toString());
+						return null;
+					}
+					
+				});
+			}
 		}
 	}
 	
@@ -163,14 +190,25 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	
 	@Override
 	public Collection<Long> getPullRequestIds(Project project, ObjectId commitId) {
-		Environment env = getEnv(project.getId().toString());
-		Store store = getStore(env, COMMIT_TO_IDS_STORE);
+		Long projectId = project.getId();
 		
-		return env.computeInTransaction(new TransactionalComputable<Collection<Long>>() {
-			
+		return projectManager.runOnProjectServer(projectId, new ClusterTask<Collection<Long>>() {
+
+			private static final long serialVersionUID = 1L;
+
 			@Override
-			public Collection<Long> compute(Transaction txn) {
-				return readLongs(store, txn, new CommitByteIterable(commitId));
+			public Collection<Long> call() throws Exception {
+				Environment env = getEnv(projectId.toString());
+				Store store = getStore(env, COMMIT_TO_IDS_STORE);
+				
+				return env.computeInTransaction(new TransactionalComputable<Collection<Long>>() {
+					
+					@Override
+					public Collection<Long> compute(Transaction txn) {
+						return readLongs(store, txn, new CommitByteIterable(commitId));
+					}
+					
+				});
 			}
 			
 		});
@@ -182,11 +220,23 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		if (event.isNew()) {
 			if (event.getEntity() instanceof PullRequestUpdate) {
 				Long projectId = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject().getId();
-				transactionManager.runAfterCommit(new Runnable() {
+				transactionManager.runAfterCommit(new ClusterRunnable() {
+
+					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void run() {
-						batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+						projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
+
+							private static final long serialVersionUID = 1L;
+
+							@Override
+							public Void call() throws Exception {
+								batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+								return null;
+							}
+							
+						});
 					}
 					
 				});
@@ -197,17 +247,20 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (Project project: projectManager.query()) {
-			checkVersion(getEnvDir(project.getId().toString()));
-			batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
+		Collection<Long> projectIds = projectManager.getIds();
+		for (File file: storageManager.getProjectsDir().listFiles()) {
+			Long projectId = Long.valueOf(file.getName());
+			if (projectIds.contains(projectId)) {
+				checkVersion(getEnvDir(projectId.toString()));
+				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+			}
 		}
 	}
 	
 	@Override
 	protected File getEnvDir(String envKey) {
 		File infoDir = new File(storageManager.getProjectInfoDir(Long.valueOf(envKey)), INFO_DIR);
-		if (!infoDir.exists()) 
-			FileUtils.createDir(infoDir);
+		FileUtils.createDir(infoDir);
 		return infoDir;
 	}
 
@@ -216,43 +269,71 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		return INFO_VERSION;
 	}
 
+	@Sessional
 	@Override
 	public ObjectId getComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2) {
-		Environment env = getEnv(request.getTargetProject().getId().toString());
-		Store store = getStore(env, COMPARISON_BASES_STORE);
+		Long targetProjectId = request.getTargetProject().getId();
+		Long requestId = request.getId();
 		
-		return env.computeInTransaction(new TransactionalComputable<ObjectId>() {
-			
+		return projectManager.runOnProjectServer(targetProjectId, new ClusterTask<ObjectId>() {
+
+			private static final long serialVersionUID = 1L;
+
 			@Override
-			public ObjectId compute(Transaction txn) {
-				byte[] valueBytes = readBytes(store, txn, getComparisonBaseKey(request, commitId1, commitId2));
-				if (valueBytes != null)
-					return ObjectId.fromRaw(valueBytes);
-				else
-					return null;
+			public ObjectId call() throws Exception {
+				Environment env = getEnv(targetProjectId.toString());
+				Store store = getStore(env, COMPARISON_BASES_STORE);
+				
+				return env.computeInTransaction(new TransactionalComputable<ObjectId>() {
+					
+					@Override
+					public ObjectId compute(Transaction txn) {
+						byte[] valueBytes = readBytes(store, txn, getComparisonBaseKey(requestId, commitId1, commitId2));
+						if (valueBytes != null)
+							return ObjectId.fromRaw(valueBytes);
+						else
+							return null;
+					}
+					
+				});
 			}
 			
 		});
+
 	}
 	
-	private ByteIterable getComparisonBaseKey(PullRequest request, ObjectId commitId1, ObjectId commitId2) {
+	private ByteIterable getComparisonBaseKey(Long requestId, ObjectId commitId1, ObjectId commitId2) {
 		byte[] keyBytes = new byte[40 + Long.BYTES];
-		ByteBuffer.wrap(keyBytes, 0, Long.BYTES).putLong(request.getId());
+		ByteBuffer.wrap(keyBytes, 0, Long.BYTES).putLong(requestId);
 		commitId1.copyRawTo(keyBytes, Long.BYTES);
 		commitId2.copyRawTo(keyBytes, Long.BYTES + 20);
 		return new ArrayByteIterable(keyBytes);
 	}
 
+	@Sessional
 	@Override
 	public void cacheComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2, ObjectId comparisonBase) {
-		Environment env = getEnv(request.getTargetProject().getId().toString());
-		Store store = getStore(env, COMPARISON_BASES_STORE);
+		Long targetProjectId = request.getTargetProject().getId();
+		Long requestId = request.getId();
 		
-		env.executeInTransaction(new TransactionalExecutable() {
-			
+		projectManager.runOnProjectServer(targetProjectId, new ClusterTask<Void>() {
+
+			private static final long serialVersionUID = 1L;
+
 			@Override
-			public void execute(Transaction txn) {
-				store.put(txn, getComparisonBaseKey(request, commitId1, commitId2), new CommitByteIterable(comparisonBase));
+			public Void call() throws Exception {
+				Environment env = getEnv(targetProjectId.toString());
+				Store store = getStore(env, COMPARISON_BASES_STORE);
+				
+				env.executeInTransaction(new TransactionalExecutable() {
+					
+					@Override
+					public void execute(Transaction txn) {
+						store.put(txn, getComparisonBaseKey(requestId, commitId1, commitId2), new CommitByteIterable(comparisonBase));
+					}
+					
+				});
+				return null;
 			}
 			
 		});

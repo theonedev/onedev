@@ -6,16 +6,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
 /**
  * This entity stores object in serialized form, with one entity 
  * representing one object. 
  *
  */
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Setting extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

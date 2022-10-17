@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.MoreObjects;
 
+import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.RevisionAndPath;
 
@@ -53,10 +54,15 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		RevisionAndPath revisionAndPath = RevisionAndPath.parse(project, segments); 
 		revision = revisionAndPath.getRevision();
 		path = revisionAndPath.getPath();
-		if (path != null)
+		if (path != null) {
 			mode = project.getMode(revision, path);
-		else
+			if (mode == 0) {
+				throw new ObjectNotFoundException("Unable to find blob path '" + path
+						+ "' in revision '" + revision + "'");
+			}
+		} else {
 			mode = FileMode.TREE.getBits();
+		}
 	}
 	
 	public boolean isTree() {

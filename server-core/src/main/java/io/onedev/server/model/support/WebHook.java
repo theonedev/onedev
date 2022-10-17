@@ -4,12 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.event.Event;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
@@ -26,7 +25,7 @@ public class WebHook implements Serializable {
 		CODE_PUSH {
 
 			@Override
-			public boolean includes(Event event) {
+			public boolean includes(Object event) {
 				return event instanceof RefUpdated;
 			}
 			
@@ -34,7 +33,7 @@ public class WebHook implements Serializable {
 		PULL_REQUEST {
 
 			@Override
-			public boolean includes(Event event) {
+			public boolean includes(Object event) {
 				return event instanceof PullRequestEvent;
 			}
 			
@@ -42,7 +41,7 @@ public class WebHook implements Serializable {
 		ISSUE {
 
 			@Override
-			public boolean includes(Event event) {
+			public boolean includes(Object event) {
 				return event instanceof IssueEvent;
 			}
 			
@@ -50,7 +49,7 @@ public class WebHook implements Serializable {
 		CODE_COMMENT {
 
 			@Override
-			public boolean includes(Event event) {
+			public boolean includes(Object event) {
 				return event instanceof CodeCommentEvent;
 			}
 			
@@ -58,13 +57,13 @@ public class WebHook implements Serializable {
 		BUILD {
 
 			@Override
-			public boolean includes(Event event) {
+			public boolean includes(Object event) {
 				return event instanceof BuildEvent;
 			}
 			
 		};
 
-		public abstract boolean includes(Event event);
+		public abstract boolean includes(Object event);
 	}
 	
 	private String postUrl;

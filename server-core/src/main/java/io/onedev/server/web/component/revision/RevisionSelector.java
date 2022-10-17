@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.revision;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +29,6 @@ import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.unbescape.html.HtmlEscape;
 
@@ -38,8 +36,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -86,11 +86,11 @@ public abstract class RevisionSelector extends Panel {
 		List<String> names = new ArrayList<>();
 		
 		if (branchesActive) {
-			for (RefInfo ref: projectModel.getObject().getBranchRefInfos())
-				names.add(GitUtils.ref2branch(ref.getRef().getName()));
+			for (RefFacade ref: projectModel.getObject().getBranchRefs())
+				names.add(GitUtils.ref2branch(ref.getName()));
 		} else {
-			for (RefInfo ref: projectModel.getObject().getTagRefInfos())
-				names.add(GitUtils.ref2tag(ref.getRef().getName()));
+			for (RefFacade ref: projectModel.getObject().getTagRefs())
+				names.add(GitUtils.ref2tag(ref.getName()));
 		}
 		return names;
 	}
@@ -123,7 +123,7 @@ public abstract class RevisionSelector extends Panel {
 			canCreateTag = false;
 		}
 		if (revision != null) {
-			Ref ref = projectModel.getObject().getRef(revision);
+			RefFacade ref = projectModel.getObject().getRef(revision);
 			branchesActive = ref == null || GitUtils.ref2tag(ref.getName()) == null;
 		} else {
 			branchesActive = true;
@@ -243,7 +243,7 @@ public abstract class RevisionSelector extends Panel {
 				Project project = projectModel.getObject();
 				try {
 					User user = SecurityUtils.getUser();
-					if (project.getRepository().resolve(revInput) != null) {
+					if (getGitService().resolve(project, revInput, true) != null) {
 						itemValues.add(COMMIT_FLAG + revInput);
 					} else if (branchesActive) {
 						if (canCreateBranch) {
@@ -258,9 +258,12 @@ public abstract class RevisionSelector extends Panel {
 							&& !project.isTagSignatureRequiredButNoSigningKey(user, revInput)) { 
 						itemValues.add(ADD_FLAG + revInput);
 					}
-				} catch (RevisionSyntaxException | AmbiguousObjectException | IncorrectObjectTypeException e) {
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				} catch (Exception e) {
+					if (ExceptionUtils.find(e, RevisionSyntaxException.class) == null 
+							&& ExceptionUtils.find(e, AmbiguousObjectException.class) == null 
+							&& ExceptionUtils.find(e, IncorrectObjectTypeException.class) == null) {
+						throw ExceptionUtils.unchecked(e);
+					}
 				}
 			}
 		} else {
@@ -272,9 +275,13 @@ public abstract class RevisionSelector extends Panel {
 		return itemValues;
 	}
 	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+	
 	private void onCreateRef(AjaxRequestTarget target, final String refName) {
 		if (branchesActive) {
-			projectModel.getObject().createBranch(refName, revision);
+			getGitService().createBranch(projectModel.getObject(), refName, revision);
 			selectRevision(target, refName);
 		} else {
 			ModalPanel modal = new ModalPanel(target) {

@@ -5,23 +5,25 @@ import java.util.stream.Collectors;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
 
 public class PullRequestUpdated extends PullRequestEvent {
 
-	private final PullRequestUpdate update;
+	private static final long serialVersionUID = 1L;
+
+	private final Long updateId;
 	
 	private transient Collection<User> committers;
 	
 	public PullRequestUpdated(PullRequestUpdate update) {
 		super(null, update.getDate(), update.getRequest());
-		this.update = update;
+		updateId = update.getId();
 	}
 
 	public PullRequestUpdate getUpdate() {
-		return update;
+		return OneDev.getInstance(PullRequestUpdateManager.class).load(updateId);
 	}
 
 	@Override
@@ -41,9 +43,4 @@ public class PullRequestUpdated extends PullRequestEvent {
 		return committers;
 	}
 
-	@Override
-	public PullRequestEvent cloneIn(Dao dao) {
-		return new PullRequestUpdated(dao.load(PullRequestUpdate.class, update.getId()));
-	}
-	
 }

@@ -1,16 +1,12 @@
 package io.onedev.server.markdown;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -20,9 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PathUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
@@ -43,16 +42,14 @@ public class UrlProcessor implements MarkdownProcessor {
 			@Nullable SuggestionSupport suggestionSupport, 
 			boolean forExternal) {
 		if (RequestCycle.get() != null && blobRenderContext != null && project != null) {
-			Repository repository = project.getRepository();
-			RevCommit commit;
+			GitService gitService = OneDev.getInstance(GitService.class);
+			ObjectId revId;
 			if (blobRenderContext.getBlobIdent().revision != null) {
-				try (RevWalk revWalk = new RevWalk(repository)) {
-					commit = revWalk.parseCommit(repository.resolve(blobRenderContext.getBlobIdent().revision));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				revId = gitService.resolve(project, blobRenderContext.getBlobIdent().revision, true);
+				if (revId == null)
+					throw new ExplicitException("Revision not found: " + blobRenderContext.getBlobIdent().revision);
 			} else {
-				commit = null;
+				revId = null;
 			}
 			
 			NodeTraversor.traverse(new NodeVisitor() {
@@ -75,7 +72,7 @@ public class UrlProcessor implements MarkdownProcessor {
 									String directory = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(directory, path);
 									referencedPath = GitUtils.normalizePath(referencedPath);
-									if (referencedPath != null && (commit == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null)) {
+									if (referencedPath != null && (revId == null || gitService.getMode(project, revId, referencedPath) == 0)) {
 										element.after("<span class='missing'>!!missing!!</span>");
 										Element missingElement = element.nextElementSibling();
 										BlobIdent blobIdent = blobRenderContext.getBlobIdent();
@@ -106,7 +103,7 @@ public class UrlProcessor implements MarkdownProcessor {
 									String basePath = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(basePath, UrlUtils.decodePath(UrlUtils.trimHashAndQuery(url)));
 									referencedPath = GitUtils.normalizePath(referencedPath);
-									if (referencedPath != null && (commit == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null)) {
+									if (referencedPath != null && (revId == null || gitService.getMode(project, revId, referencedPath) == 0)) {
 										element.after("<span class='missing'>!!missing!!</span>");
 									}
 								}

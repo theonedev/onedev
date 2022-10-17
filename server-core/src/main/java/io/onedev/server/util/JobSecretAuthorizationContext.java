@@ -121,8 +121,8 @@ public class JobSecretAuthorizationContext {
 	
 	};
 	
-	public static void push(JobSecretAuthorizationContext commitId) {
-		stack.get().push(commitId);
+	public static void push(JobSecretAuthorizationContext authorizationContext) {
+		stack.get().push(authorizationContext);
 	}
 
 	public static void pop() {

@@ -8,11 +8,18 @@ import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.util.facade.EmailAddressCache;
+import io.onedev.server.util.facade.EmailAddressFacade;
 
 public interface EmailAddressManager extends EntityManager<EmailAddress> {
 
 	@Nullable
 	EmailAddress findByValue(String value);
+	
+	@Nullable
+	EmailAddressFacade findFacadeByValue(String value);
+	
+	@Nullable 
+	EmailAddressFacade findPrimaryFacade(Long userId);
 	
 	@Nullable
 	EmailAddress findPrimary(User user);

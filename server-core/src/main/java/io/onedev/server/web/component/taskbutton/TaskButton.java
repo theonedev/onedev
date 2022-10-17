@@ -30,7 +30,6 @@ import org.quartz.SimpleScheduleBuilder;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.agent.job.FailedException;
-import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
@@ -38,9 +37,10 @@ import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.JobLogEntry;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.tasklog.StyleBuilder;
+import io.onedev.server.job.log.StyleBuilder;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -288,7 +288,8 @@ public abstract class TaskButton extends AjaxButton {
 		
 		@Listen
 		public void on(SystemStopping event) {
-			taskScheduler.unschedule(taskId);
+			if (taskId != null)
+				taskScheduler.unschedule(taskId);
 		}
 
 		@Override

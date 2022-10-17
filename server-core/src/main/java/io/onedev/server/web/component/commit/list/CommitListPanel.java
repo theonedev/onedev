@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.commit.list;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,7 +43,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,8 +57,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.commit.CommitCriteria;
@@ -149,20 +148,20 @@ public abstract class CommitListPanel extends Panel {
 			List<String> commitHashes;
 			if (query != null) {
 				try {
-					RevListCommand command = new RevListCommand(getProject().getGitDir());
-					command.ignoreCase(true);
+					RevListOptions options = new RevListOptions();
+					options.ignoreCase(true);
 					
 					if (page > MAX_PAGES)
 						throw new ExplicitException("Page should be no more than " + MAX_PAGES);
 					
-					command.count(page * COMMITS_PER_PAGE);
+					options.count(page * COMMITS_PER_PAGE);
 					
-					query.fill(getProject(), command);
+					query.fill(getProject(), options);
 					
-					if (command.revisions().isEmpty() && getCompareWith() != null)
-						command.revisions(Lists.newArrayList(getCompareWith()));
+					if (options.revisions().isEmpty() && getCompareWith() != null)
+						options.revisions(Lists.newArrayList(getCompareWith()));
 					
-					commitHashes = command.call();
+					commitHashes = getGitService().revList(getProject(), options);
 				} catch (Exception e) {
 					if (e.getMessage() != null)
 						error(e.getMessage());
@@ -177,50 +176,52 @@ public abstract class CommitListPanel extends Panel {
 			
 			commits.hasMore = (commitHashes.size() == page * COMMITS_PER_PAGE);
 			
-			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-				int lastMaxCount = Math.min((page - 1) * COMMITS_PER_PAGE, commitHashes.size());
-				
-				commits.last = new ArrayList<>();
-				
-				for (int i=0; i<lastMaxCount; i++) { 
-					commits.last.add(revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i))));
-				}
-				
-				sort(commits.last, 0);
-				
-				commits.current = new ArrayList<>(commits.last);
-				for (int i=lastMaxCount; i<commitHashes.size(); i++)
-					commits.current.add(revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i))));
-				
-				sort(commits.current, lastMaxCount);
-
-				commits.last = separateByDate(commits.last);
-				commits.current = separateByDate(commits.current);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			int lastMaxCount = Math.min((page - 1) * COMMITS_PER_PAGE, commitHashes.size());
+			
+			List<ObjectId> commitIds = new ArrayList<>();
+			for (int i=0; i<lastMaxCount; i++) 
+				commitIds.add(ObjectId.fromString(commitHashes.get(i)));
+			
+			commits.last = getGitService().getCommits(getProject(), commitIds);
+			sort(commits.last, 0);
+			commits.current = new ArrayList<>(commits.last);
+			
+			commitIds.clear();
+			for (int i=lastMaxCount; i<commitHashes.size(); i++)
+				commitIds.add(ObjectId.fromString(commitHashes.get(i)));
+			
+			for (RevCommit commit: getGitService().getCommits(getProject(), commitIds))
+				commits.current.add(commit);
+			
+			sort(commits.current, lastMaxCount);
+			commits.last = separateByDate(commits.last);
+			commits.current = separateByDate(commits.current);
 			
 			return commits;
 		}
 		
 	};
 	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+	
 	private final IModel<Map<String, List<String>>> labelsModel = new LoadableDetachableModel<Map<String, List<String>>>() {
 		
 		@Override
 		protected Map<String, List<String>> load() {
 			Map<String, List<String>> labels = new HashMap<>();
-			List<RefInfo> refInfos = getProject().getBranchRefInfos();
-			refInfos.addAll(getProject().getTagRefInfos());
-			for (RefInfo refInfo: refInfos) {
-				if (refInfo.getPeeledObj() instanceof RevCommit) {
-					RevCommit commit = (RevCommit) refInfo.getPeeledObj();
+			List<RefFacade> refInfos = getProject().getBranchRefs();
+			refInfos.addAll(getProject().getTagRefs());
+			for (RefFacade ref: refInfos) {
+				if (ref.getPeeledObj() instanceof RevCommit) {
+					RevCommit commit = (RevCommit) ref.getPeeledObj();
 					List<String> commitLabels = labels.get(commit.name());
 					if (commitLabels == null) {
 						commitLabels = new ArrayList<>();
 						labels.put(commit.name(), commitLabels);
 					}
-					commitLabels.add(Repository.shortenRefName(refInfo.getRef().getName()));
+					commitLabels.add(Repository.shortenRefName(ref.getName()));
 				}
 			}
 			return labels;
@@ -789,6 +790,6 @@ public abstract class CommitListPanel extends Panel {
 		List<RevCommit> current;
 		
 		boolean hasMore;
-	}
-	
+		
+	}	
 }

@@ -5,8 +5,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -15,9 +22,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
 import io.onedev.server.entitymanager.BuildMetricManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.ProblemMetric;
 import io.onedev.server.model.Project;
@@ -64,31 +73,19 @@ public class ProblemReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<CodeProblem> getCodeProblems(Build build, String blobPath, String reportName) {
-				return LockUtils.read(ProblemReport.getReportLockKey(build), new Callable<List<CodeProblem>>() {
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public List<CodeProblem> call() throws Exception {
-						List<CodeProblem> problems = new ArrayList<>();
-						File categoryDir = new File(build.getPublishDir(), ProblemReport.CATEGORY);
-						if (categoryDir.exists()) {
-							for (File reportDir: categoryDir.listFiles()) {
-								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
-										&& (reportName == null || reportName.equals(reportDir.getName()))) { 
-									File file = new File(reportDir, ProblemReport.FILES_DIR + "/" + blobPath);
-									if (file.exists()) {
-										try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
-											problems.addAll((List<CodeProblem>) SerializationUtils.deserialize(is));
-										}
-									}
-								}
-							}
-						}
-						return problems;
-					}
-					
-				});
+				Long projectId = build.getProject().getId();
+				Long buildNumber = build.getNumber();
 				
+				Map<String, List<CodeProblem>> problemsMap = getProjectManager().runOnProjectServer(
+						projectId, new GetCodeProblems(projectId, buildNumber, blobPath, reportName));
+				
+				List<CodeProblem> problems = new ArrayList<>();
+				for (var entry: problemsMap.entrySet()) {
+					if (SecurityUtils.canAccessReport(build, entry.getKey()))
+						problems.addAll(entry.getValue());
+				}
+				
+				return problems;
 			}
 			
 		});
@@ -97,25 +94,12 @@ public class ProblemReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<BuildTab> getTabs(Build build) {
-				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(ProblemReport.getReportLockKey(build), new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						File categoryDir = new File(build.getPublishDir(), ProblemReport.CATEGORY);
-						if (categoryDir.exists()) {
-							for (File reportDir: categoryDir.listFiles()) {
-								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
-									tabs.add(new BuildReportTab(reportDir.getName(), ProblemReportPage.class, 
-											ProblemStatsPage.class));
-								}
-							}
-						}
-						return null;
-					}
-					
-				});
-				return tabs;
+				Long projectId = build.getProject().getId();
+				Long buildNumber = build.getNumber();
+				
+				return getProjectManager().runOnProjectServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
+						.collect(Collectors.toList());
 			}
 			
 			@Override
@@ -137,4 +121,101 @@ public class ProblemReportModule extends AbstractPluginModule {
 		});			
 	}
 
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
+	
+	private static class GetCodeProblems implements ClusterTask<Map<String, List<CodeProblem>>> {
+
+		private static final long serialVersionUID = 1L;
+
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		private final String blobPath;
+		
+		private final String reportName;
+		
+		public GetCodeProblems(Long projectId, Long buildNumber, String blobPath, @Nullable String reportName) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+			this.blobPath = blobPath;
+			this.reportName = reportName;
+		}
+
+		@Override
+		public Map<String, List<CodeProblem>> call() throws Exception {
+			return LockUtils.read(ProblemReport.getReportLockName(projectId, buildNumber), new Callable<Map<String, List<CodeProblem>>>() {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public Map<String, List<CodeProblem>> call() throws Exception {
+					Map<String, List<CodeProblem>> problems = new HashMap<>();
+					File categoryDir = new File(Build.getDir(projectId, buildNumber), ProblemReport.CATEGORY);
+					if (categoryDir.exists()) {
+						for (File reportDir: categoryDir.listFiles()) {
+							if (reportName == null || reportName.equals(reportDir.getName())) { 
+								File file = new File(reportDir, ProblemReport.FILES_DIR + "/" + blobPath);
+								if (file.exists()) {
+									try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
+										problems.put(reportDir.getName(), (List<CodeProblem>) SerializationUtils.deserialize(is));
+									}
+								}
+							}
+						}
+					}
+					return problems;
+				}
+				
+			});
+		}
+		
+	}
+	
+	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
+
+		private static final long serialVersionUID = 1L;
+		
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		public GetBuildTabs(Long projectId, Long buildNumber) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+		}
+
+		@Override
+		public List<BuildTab> call() throws Exception {
+			return LockUtils.read(ProblemReport.getReportLockName(projectId, buildNumber), new Callable<List<BuildTab>>() {
+
+				@Override
+				public List<BuildTab> call() throws Exception {
+					List<BuildTab> tabs = new ArrayList<>();
+					File categoryDir = new File(Build.getDir(projectId, buildNumber), ProblemReport.CATEGORY);
+					if (categoryDir.exists()) {
+						for (File reportDir: categoryDir.listFiles()) {
+							if (!reportDir.isHidden()) {
+								tabs.add(new BuildReportTab(reportDir.getName(), ProblemReportPage.class, 
+										ProblemStatsPage.class));
+							}
+						}
+					}
+					Collections.sort(tabs, new Comparator<BuildTab>() {
+
+						@Override
+						public int compare(BuildTab o1, BuildTab o2) {
+							return o1.getTitle().compareTo(o1.getTitle());
+						}
+						
+					});
+					return tabs;
+				}
+				
+			});
+		}
+		
+	}	
+	
 }

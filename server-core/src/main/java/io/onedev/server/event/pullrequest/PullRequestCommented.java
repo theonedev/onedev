@@ -3,26 +3,28 @@ package io.onedev.server.event.pullrequest;
 import java.util.Collection;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
 public class PullRequestCommented extends PullRequestEvent {
 
-	private final PullRequestComment comment;
+	private static final long serialVersionUID = 1L;
+
+	private final Long commentId;
 	
 	private final Collection<String> notifiedEmailAddresses;
 	
 	public PullRequestCommented(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
 		super(comment.getUser(), comment.getDate(), comment.getRequest());
-		this.comment = comment;
+		commentId = comment.getId();
 		this.notifiedEmailAddresses = notifiedEmailAddresses;
 	}
 
 	public PullRequestComment getComment() {
-		return comment;
+		return OneDev.getInstance(PullRequestCommentManager.class).load(commentId);
 	}
 
 	public Collection<String> getNotifiedEmailAddresses() {
@@ -31,7 +33,7 @@ public class PullRequestCommented extends PullRequestEvent {
 
 	@Override
 	protected CommentText newCommentText() {
-		return new MarkdownText(getProject(), comment.getContent());
+		return new MarkdownText(getProject(), getComment().getContent());
 	}
 
 	@Override
@@ -40,15 +42,8 @@ public class PullRequestCommented extends PullRequestEvent {
 	}
 
 	@Override
-	public PullRequestEvent cloneIn(Dao dao) {
-		return new PullRequestCommented(
-				dao.load(PullRequestComment.class, comment.getId()), 
-				notifiedEmailAddresses);
-	}
-
-	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(comment);
+		return OneDev.getInstance(UrlManager.class).urlFor(getComment());
 	}
 
 }

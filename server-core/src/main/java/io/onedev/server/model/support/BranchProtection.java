@@ -18,6 +18,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
@@ -295,7 +296,7 @@ public class BranchProtection implements Serializable {
 		if (!requirement.getUsers().isEmpty() || !requirement.getGroups().isEmpty()) 
 			return true;
 		
-		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) {
+		for (String changedFile: getGitService().getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) {
 			requirement = getFileProtection(changedFile).getParsedReviewRequirement();
 			if (!requirement.getUsers().isEmpty() || !requirement.getGroups().isEmpty())
 				return true;
@@ -307,9 +308,13 @@ public class BranchProtection implements Serializable {
 	public Collection<String> getRequiredJobs(Project project, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
 		Collection<String> requiredJobs = new HashSet<>(getJobNames());
-		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) 
+		for (String changedFile: getGitService().getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) 
 			requiredJobs.addAll(getFileProtection(changedFile).getJobNames());
 		return requiredJobs;
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	public boolean isBuildRequiredForPush(Project project, ObjectId oldObjectId, ObjectId newObjectId, 

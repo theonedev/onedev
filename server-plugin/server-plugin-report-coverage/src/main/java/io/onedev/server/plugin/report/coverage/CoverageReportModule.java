@@ -5,10 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -17,9 +20,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildMetricManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CoverageMetric;
 import io.onedev.server.model.Project;
@@ -65,12 +70,12 @@ public class CoverageReportModule extends AbstractPluginModule {
 			
 			@Override
 			public Map<Integer, CoverageStatus> getLineCoverages(Build build, String blobPath, String reportName) {
-				return LockUtils.read(CoverageReport.getReportLockKey(build), new Callable<Map<Integer, CoverageStatus>>() {
+				return LockUtils.read(CoverageReport.getReportLockName(build), new Callable<Map<Integer, CoverageStatus>>() {
 
 					@Override
 					public Map<Integer, CoverageStatus> call() throws Exception {
 						Map<Integer, CoverageStatus> coverages = new HashMap<>();
-						File categoryDir = new File(build.getPublishDir(), CoverageReport.CATEGORY);
+						File categoryDir = new File(build.getDir(), CoverageReport.CATEGORY);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
@@ -101,25 +106,13 @@ public class CoverageReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<BuildTab> getTabs(Build build) {
-				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(CoverageReport.getReportLockKey(build), new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						File categoryDir = new File(build.getPublishDir(), CoverageReport.CATEGORY);
-						if (categoryDir.exists()) {
-							for (File reportDir: categoryDir.listFiles()) {
-								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) { 
-									tabs.add(new BuildReportTab(reportDir.getName(), CoverageReportPage.class, 
-											CoverageStatsPage.class));
-								}
-							}
-						}
-						return null;
-					}
-					
-				});
-				return tabs;
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+				Long projectId = build.getProject().getId();
+				Long buildNumber = build.getNumber();
+				
+				return projectManager.runOnProjectServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
+						.collect(Collectors.toList());
 			}
 			
 			@Override
@@ -141,4 +134,48 @@ public class CoverageReportModule extends AbstractPluginModule {
 		
 	}
 
+	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
+
+		private static final long serialVersionUID = 1L;
+		
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		public GetBuildTabs(Long projectId, Long buildNumber) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+		}
+
+		@Override
+		public List<BuildTab> call() throws Exception {
+			return LockUtils.read(CoverageReport.getReportLockName(projectId, buildNumber), new Callable<List<BuildTab>>() {
+
+				@Override
+				public List<BuildTab> call() throws Exception {
+					List<BuildTab> tabs = new ArrayList<>();
+					File categoryDir = new File(Build.getDir(projectId, buildNumber), CoverageReport.CATEGORY);
+					if (categoryDir.exists()) {
+						for (File reportDir: categoryDir.listFiles()) {
+							if (!reportDir.isHidden()) {
+								tabs.add(new BuildReportTab(reportDir.getName(), CoverageReportPage.class, 
+										CoverageStatsPage.class));
+							}
+						}
+					}
+					Collections.sort(tabs, new Comparator<BuildTab>() {
+
+						@Override
+						public int compare(BuildTab o1, BuildTab o2) {
+							return o1.getTitle().compareTo(o1.getTitle());
+						}
+						
+					});
+					return tabs;
+				}
+				
+			});
+		}
+		
+	}	
 }

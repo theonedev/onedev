@@ -57,14 +57,6 @@ public class SshSetting implements Serializable, Validatable {
 		}
     }
     
-    public PublicKey getPublicKey() {
-		try {
-			return KeyUtils.recoverPublicKey(getPrivateKey());
-		} catch (GeneralSecurityException e) {
-			throw new RuntimeException(e);
-		}
-    }
-    
     @Override
     public boolean isValid(ConstraintValidatorContext context) {
         boolean hasErrors = false;

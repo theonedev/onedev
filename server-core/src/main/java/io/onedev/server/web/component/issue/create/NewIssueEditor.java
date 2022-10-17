@@ -39,6 +39,8 @@ import org.unbescape.javascript.JavaScriptEscape;
 import com.google.common.base.Objects;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
@@ -61,7 +63,6 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.link.IssueLinkPanel;
-import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.milestone.choice.MilestoneMultiChoice;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -69,7 +70,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
 public abstract class NewIssueEditor extends FormComponentPanel<Issue> implements InputContext {

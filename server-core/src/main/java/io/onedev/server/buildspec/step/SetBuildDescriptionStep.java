@@ -8,11 +8,11 @@ import java.util.concurrent.Callable;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.event.build.BuildUpdated;
+import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.web.editable.annotation.Editable;

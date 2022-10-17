@@ -6,44 +6,42 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class IsAncestorCommand extends GitCommand<Boolean> {
+public class IsAncestorCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(IsAncestorCommand.class);
 	
-	private String ancestor;
+	private final File workingDir;
 	
-	private String descendant;
+	private final String ancestor;
 	
-	public IsAncestorCommand(File gitDir, Map<String, String> gitEnvs) {
-		super(gitDir, gitEnvs);
-	}
+	private final String descendant;
 	
-	public IsAncestorCommand ancestor(String ancestor) {
+	private final Map<String, String> envs;
+	
+	public IsAncestorCommand(File workingDir, String ancestor, String descendant, 
+			Map<String, String> envs) {
+		this.workingDir = workingDir;
 		this.ancestor = ancestor;
-		return this;
-	}
-	
-	public IsAncestorCommand descendant(String descendant) {
 		this.descendant = descendant;
-		return this;
+		this.envs = envs;
 	}
 	
-	@Override
-	public Boolean call() {
-		Preconditions.checkNotNull(ancestor, "ancestor has to be specified.");
-		Preconditions.checkNotNull(descendant, "descendant has to be specified.");
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
+	}
+	
+	public boolean run() {
+		Commandline git = newGit().workingDir(workingDir);
+		git.environments().putAll(envs);
 		
-		Commandline cmd = cmd();
+		git.addArgs("merge-base", "--is-ancestor", ancestor, descendant);
 		
-		cmd.addArgs("merge-base", "--is-ancestor", ancestor, descendant);
-		
-		ExecutionResult result = cmd.execute(new LineConsumer() {
+		ExecutionResult result = git.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {

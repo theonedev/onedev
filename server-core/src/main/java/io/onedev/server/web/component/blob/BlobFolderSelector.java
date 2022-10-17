@@ -65,7 +65,7 @@ public abstract class BlobFolderSelector extends Panel {
 
 			@Override
 			public Iterator<? extends BlobIdent> getChildren(BlobIdent node) {
-				return getProject().getChildren(node, BlobIdentFilter.TREE, commitId).iterator();
+				return getProject().getBlobChildren(node, BlobIdentFilter.TREE, commitId).iterator();
 			}
 
 			@Override
@@ -98,7 +98,7 @@ public abstract class BlobFolderSelector extends Panel {
 			public void expand(BlobIdent blobIdent) {
 				super.expand(blobIdent);
 				
-				List<BlobIdent> children = getProject().getChildren(blobIdent, BlobIdentFilter.TREE, commitId);
+				List<BlobIdent> children = getProject().getBlobChildren(blobIdent, BlobIdentFilter.TREE, commitId);
 				if (children.size() == 1 && children.get(0).isTree()) 
 					expand(children.get(0));
 				

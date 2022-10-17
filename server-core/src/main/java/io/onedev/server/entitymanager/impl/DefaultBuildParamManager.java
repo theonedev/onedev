@@ -17,9 +17,9 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;

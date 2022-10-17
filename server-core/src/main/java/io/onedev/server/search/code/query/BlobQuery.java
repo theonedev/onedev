@@ -2,6 +2,7 @@ package io.onedev.server.search.code.query;
 
 import static io.onedev.server.search.code.FieldConstants.BLOB_PATH;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -15,7 +16,9 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import io.onedev.server.search.code.hit.QueryHit;
 
-public abstract class BlobQuery {
+public abstract class BlobQuery implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private final String directory;
 	

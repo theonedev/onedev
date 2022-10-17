@@ -8,7 +8,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
-import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -38,12 +37,11 @@ public class KubernetesModule extends AbstractPluginModule {
 			}
 			
 		});
+		
 		contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
 			
 			@Override
-			public JobExecutor discover(TaskLogger jobLogger) {
-				jobLogger.log("Checking if inside Kubernetes cluster...");
-
+			public JobExecutor discover() {
 				if (OneDev.getK8sService() != null)
 					return new KubernetesExecutor();
 				else

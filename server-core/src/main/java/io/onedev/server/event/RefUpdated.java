@@ -9,7 +9,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.commenttext.CommentText;
@@ -17,6 +16,8 @@ import io.onedev.server.util.commenttext.PlainText;
 
 public class RefUpdated extends ProjectEvent implements CommitAware {
 	
+	private static final long serialVersionUID = 1L;
+
 	private final String refName;
 	
 	private final ObjectId oldCommitId;
@@ -45,6 +46,16 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 	}
 
 	@Override
+	public Project getProject() {
+		Project project = super.getProject();
+		if (!newCommitId.equals(ObjectId.zeroId())) 
+			project.cacheObjectId(refName, newCommitId);
+		else
+			project.cacheObjectId(refName, null);
+		return project;
+	}
+
+	@Override
 	public ProjectScopedCommit getCommit() {
 		if (commit == null)
 			commit = new ProjectScopedCommit(getProject(), newCommitId);
@@ -69,11 +80,6 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 		return null;
 	}
 
-	@Override
-	public ProjectEvent cloneIn(Dao dao) {
-		return new RefUpdated(dao.load(Project.class, getProject().getId()), refName, oldCommitId, newCommitId);
-	}
-	
 	@Override
 	public String getUrl() {
 		if (newCommitId != null)

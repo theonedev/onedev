@@ -24,11 +24,11 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 
-import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
@@ -82,6 +82,7 @@ public class DefaultIssueTextManager extends EntityTextManager<Issue> implements
 		super.on(event);
 		if (event.getEntity() instanceof Project) {
 			Long projectId = event.getEntity().getId();
+			
 			transactionManager.runAfterCommit(new Runnable() {
 
 				@Override

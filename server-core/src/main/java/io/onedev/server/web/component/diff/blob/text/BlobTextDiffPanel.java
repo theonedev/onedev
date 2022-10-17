@@ -49,7 +49,7 @@ import io.onedev.server.git.BlameCommit;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.BlameCommand;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -163,13 +163,15 @@ public class BlobTextDiffPanel extends Panel {
 		return null;
 	}
 	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
+	}
+	
 	private BlameInfo getBlameInfo() {
 		blameInfo = new BlameInfo();
-		BlameCommand cmd = new BlameCommand(getProject().getGitDir());
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
-			cmd.commitHash(change.getOldCommitId().name()).file(oldPath);
-			for (BlameBlock blame: cmd.call()) {
+			for (BlameBlock blame: getGitService().blame(getProject(), change.getOldCommitId(), oldPath, null)) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.oldBlame.put(i, blame.getCommit());
@@ -178,8 +180,7 @@ public class BlobTextDiffPanel extends Panel {
 		}
 		String newPath = change.getNewBlobIdent().path;
 		if (newPath != null) {
-			cmd.commitHash(change.getNewCommitId().name()).file(newPath);
-			for (BlameBlock blame: cmd.call()) {
+			for (BlameBlock blame: getGitService().blame(getProject(), change.getNewCommitId(), newPath, null)) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.newBlame.put(i, blame.getCommit());

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Group;
@@ -14,15 +15,17 @@ import io.onedev.server.model.User;
 
 public abstract class IssueEvent extends ProjectEvent {
 
-	private final Issue issue;
+	private static final long serialVersionUID = 1L;
+	
+	private final Long issueId;
 	
 	public IssueEvent(User user, Date date, Issue issue) {
 		super(user, date, issue.getProject());
-		this.issue = issue;
+		issueId = issue.getId();
 	}
 
 	public Issue getIssue() {
-		return issue;
+		return OneDev.getInstance(IssueManager.class).load(issueId);
 	}
 	
 	public abstract boolean affectsListing();
@@ -36,8 +39,13 @@ public abstract class IssueEvent extends ProjectEvent {
 	}
 	
 	@Override
+	public String getLockName() {
+		return Issue.getSerialLockName(issueId);
+	}
+	
+	@Override
 	public String getUrl() {
-		return OneDev.getInstance(UrlManager.class).urlFor(issue);
+		return OneDev.getInstance(UrlManager.class).urlFor(getIssue());
 	}
 	
 }

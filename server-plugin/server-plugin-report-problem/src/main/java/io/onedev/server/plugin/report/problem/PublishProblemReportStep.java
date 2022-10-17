@@ -31,9 +31,9 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		File reportDir = new File(build.getPublishDir(), ProblemReport.CATEGORY + "/" + getReportName());
+		File reportDir = new File(build.getDir(), ProblemReport.CATEGORY + "/" + getReportName());
 		
-		ProblemReport report = LockUtils.write(ProblemReport.getReportLockKey(build), new Callable<ProblemReport>() {
+		ProblemReport report = LockUtils.write(ProblemReport.getReportLockName(build), new Callable<ProblemReport>() {
 
 			@Override
 			public ProblemReport call() throws Exception {
@@ -79,7 +79,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	}
 	
 	protected void writeFileProblems(Build build, String blobPath, List<CodeProblem> problemsOfFile) {
-		File reportDir = new File(build.getPublishDir(), ProblemReport.CATEGORY + "/" + getReportName());
+		File reportDir = new File(build.getDir(), ProblemReport.CATEGORY + "/" + getReportName());
 		File violationsFile = new File(reportDir, ProblemReport.FILES_DIR + "/" + blobPath);
 		FileUtils.createDir(violationsFile.getParentFile());
 		try (OutputStream os = new FileOutputStream(violationsFile)) {

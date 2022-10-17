@@ -4,10 +4,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.SubmitReason;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
@@ -74,7 +77,10 @@ public class BranchUpdateTrigger extends JobTrigger {
 			} else if (refUpdated.getNewCommitId().equals(ObjectId.zeroId())) {
 				return false;
 			} else {
-				Collection<String> changedFiles = GitUtils.getChangedFiles(refUpdated.getProject().getRepository(), 
+				Repository repository = OneDev.getInstance(ProjectManager.class)
+						.getRepository(refUpdated.getProject().getId());
+				Collection<String> changedFiles = GitUtils.getChangedFiles(
+						repository, 
 						refUpdated.getOldCommitId(), refUpdated.getNewCommitId());
 				PatternSet patternSet = PatternSet.parse(getPaths());
 				Matcher matcher = new PathMatcher();

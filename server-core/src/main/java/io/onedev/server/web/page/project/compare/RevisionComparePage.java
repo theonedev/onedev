@@ -41,7 +41,7 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -255,10 +255,14 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		};
 
 		if (leftCommitId != null && rightCommitId != null) {
-			mergeBase = GitUtils.getMergeBase(
-					state.leftSide.getProject().getRepository(), leftCommitId, 
-					state.rightSide.getProject().getRepository(), rightCommitId);
+			mergeBase = getGitService().getMergeBase(
+					state.leftSide.getProject(), leftCommitId, 
+					state.rightSide.getProject(), rightCommitId);
 		}
+	}
+	
+	private GitService getGitService() {
+		return OneDev.getInstance(GitService.class);
 	}
 	
 	@Override

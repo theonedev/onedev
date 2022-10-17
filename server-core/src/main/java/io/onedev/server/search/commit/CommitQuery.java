@@ -23,7 +23,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
@@ -153,8 +153,8 @@ public class CommitQuery implements Serializable {
 			return false;
 	}
 	
-	public void fill(Project project, RevListCommand command) {
-		criterias.stream().forEach(it->it.fill(project, command));
+	public void fill(Project project, RevListOptions options) {
+		criterias.stream().forEach(it->it.fill(project, options));
 	}
 	
 	public List<CommitCriteria> getCriterias() {

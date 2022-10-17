@@ -9,24 +9,19 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestUpdateManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentStatusChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
-import io.onedev.server.model.support.administration.GpgSetting;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -60,12 +55,11 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 			try {
 				blobEdits.applySuggestion(project, mark, getSuggestion(), commitId);
 				String commitMessage = bean.getCommitMessage();
-				GpgSetting gpgSetting = OneDev.getInstance(SettingManager.class).getGpgSetting();
 				
-				ObjectId newCommitId = blobEdits.commit(
-						project.getRepository(), GitUtils.branch2ref(branch), 
-						commitId, commitId, SecurityUtils.getUser().asPerson(), commitMessage, 
-						gpgSetting.getSigningKey());
+				ObjectId newCommitId = OneDev.getInstance(GitService.class).commit(
+						project, blobEdits, GitUtils.branch2ref(branch), 
+						commitId, commitId, SecurityUtils.getUser().asPerson(), 
+						commitMessage, false);
 				project.cacheObjectId(branch, newCommitId);
 				
 				if (!comment.isResolved()) {
@@ -81,24 +75,6 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 					OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, "Suggestion applied");
 				}
 
-				if (request != null)
-					OneDev.getInstance(PullRequestUpdateManager.class).checkUpdate(request);
-				
-				Long projectId = project.getId();
-				String refName = GitUtils.branch2ref(branch);
-				OneDev.getInstance(SessionManager.class).runAsyncAfterCommit(new Runnable() {
-
-					@Override
-					public void run() {
-						Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-						project.cacheObjectId(branch, newCommitId);
-						RefUpdated refUpdated = new RefUpdated(project, refName, commitId, newCommitId);
-						OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-					}
-					
-				});
-				
-				
 				if (request != null) {
 					PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 					state.oldCommitHash = mark.getCommitHash();
@@ -117,11 +93,19 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 							RevisionComparePage.class, 
 							RevisionComparePage.paramsOf(project, state));
 				}
-			} catch (ObsoleteCommitException e) {
-				Session.get().error("Branch was updated by some others just now, please try again");
-			} catch (OutdatedSuggestionException e) {
-				Session.get().error(e.getMessage());
-				close();
+			} catch (Exception e) {
+				ObsoleteCommitException obsoleteCommitException = 
+						ExceptionUtils.find(e, ObsoleteCommitException.class);
+				OutdatedSuggestionException outdatedSuggestionException = 
+						ExceptionUtils.find(e, OutdatedSuggestionException.class);
+				if (obsoleteCommitException != null) {
+					Session.get().error("Branch was updated by some others just now, please try again");
+				} else if (outdatedSuggestionException  != null) {
+					Session.get().error(outdatedSuggestionException.getMessage());
+					close();
+				} else {
+					throw ExceptionUtils.unchecked(e);
+				}
 			}
 		} else {
 			Session.get().error("Suggestion apply disallowed by branch protection rule");

@@ -11,16 +11,11 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
-import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
@@ -69,10 +64,7 @@ public class ProjectImportPage extends LayoutPage {
 						super.onCompleted(target, successful);
 
 						if (successful) {
-							EntitySort sort = new EntitySort();
-							sort.setField(Project.NAME_UPDATE_DATE);
-							sort.setDirection(Direction.DESCENDING);
-							ProjectQuery query = new ProjectQuery(null, Lists.newArrayList(sort));
+							ProjectQuery query = new ProjectQuery();
 							PageParameters params = ProjectListPage.paramsOf(query.toString(), 0, 0);
 							throw new RestartResponseException(ProjectListPage.class, params); 
 						}

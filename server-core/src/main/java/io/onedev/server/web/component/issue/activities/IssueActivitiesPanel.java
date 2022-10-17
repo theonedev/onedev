@@ -34,6 +34,8 @@ import org.apache.wicket.request.http.WebResponse;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
@@ -50,13 +52,11 @@ import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueCommentedActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueOpenedActivity;
-import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
-import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
 public abstract class IssueActivitiesPanel extends Panel {

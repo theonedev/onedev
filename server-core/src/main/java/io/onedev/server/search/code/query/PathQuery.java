@@ -20,6 +20,8 @@ import io.onedev.server.search.code.hit.QueryHit;
 
 public class PathQuery extends BlobQuery {
 
+	private static final long serialVersionUID = 1L;
+	
 	private final String match;
 	
 	public PathQuery(@Nullable String directory, String match, int count) {

@@ -117,7 +117,7 @@ public class ImportServer implements Serializable, Validatable {
 			});
 			try {
 				if (dryRun) {
-					new LsRemoteCommand().remote(builder.build().toString()).refs("HEAD").quiet(true).call();
+					new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 				} else {
 					getProjectManager().clone(project, builder.build().toString());
 					projectId = project.getId();

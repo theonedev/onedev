@@ -15,7 +15,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.maintenance.Upgrade;
+import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.page.layout.LayoutPage;
 

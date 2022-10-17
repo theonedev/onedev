@@ -17,7 +17,6 @@
 package io.onedev.server.persistence;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.locks.Lock;
 
 import javax.annotation.Nullable;
 
@@ -26,17 +25,15 @@ import org.hibernate.Transaction;
 
 public interface TransactionManager {
 
+	@Nullable
 	Transaction getTransaction();
 	
+	@Nullable
 	Session getSession();
 	
 	<T> T call(Callable<T> callable);
 	
 	void run(Runnable runnable);
-	
-	void runAsync(Runnable runnable, @Nullable Lock lock);
-	
-	void runAsyncAfterCommit(Runnable runnable, @Nullable Lock lock);
 	
 	void runAsync(Runnable runnable);
 	

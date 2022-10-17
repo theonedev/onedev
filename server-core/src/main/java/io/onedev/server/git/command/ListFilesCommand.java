@@ -9,37 +9,35 @@ import org.eclipse.jgit.util.QuotedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.git.CommandUtils;
 
-public class ListFilesCommand extends GitCommand<Collection<String>> {
+public class ListFilesCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(ListFilesCommand.class);
 	
-	private String revision;
+	private final File workingDir;
 	
-	public ListFilesCommand(File gitDir) {
-		super(gitDir);
-	}
+	private final String revision;
 	
-	public ListFilesCommand revision(String revision) {
+	public ListFilesCommand(File workingDir, String revision) {
+		this.workingDir = workingDir;
 		this.revision = revision;
-		return this;
+	}
+
+	protected Commandline newGit() {
+		return CommandUtils.newGit();
 	}
 	
-	@Override
-	public Collection<String> call() {
-		Preconditions.checkNotNull(revision, "revision has to be specified.");
-		
+	public Collection<String> run() {
 		Set<String> files = new HashSet<String>();
 		
-		Commandline cmd = cmd();
+		Commandline git = newGit().workingDir(workingDir);
 		
-		cmd.addArgs("ls-tree", "--name-only", "-r", revision);
+		git.addArgs("ls-tree", "--name-only", "-r", revision);
 		
-		cmd.execute(new LineConsumer() {
+		git.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {

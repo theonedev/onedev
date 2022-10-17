@@ -61,7 +61,8 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
     }
 
 	private AuthorizationInfo newAuthorizationInfo(Long userId) {
-		Collection<Permission> permissions = sessionManager.call(new Callable<Collection<Permission>>() {
+		Collection<Permission> permissions = 
+				sessionManager.call(new Callable<Collection<Permission>>() {
 
 			@Override
 			public Collection<Permission> call() throws Exception {
@@ -138,6 +139,7 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 			public Collection<Permission> getObjectPermissions() {
 				return permissions;
 			}
+			
 		};		
 	}
 	
