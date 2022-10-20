@@ -99,10 +99,11 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
 		        sessionManager.openSession(); 
 		        try {
 		        	String accessToken = OneDev.getInstance(UserManager.class).load(userId).getAccessToken();
-		        	String projectName = StringUtils.substringBefore(command.substring(COMMAND_PREFIX.length()+1), " ");
-		        	Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectName);
+		        	String projectPath = StringUtils.strip(StringUtils.substringBefore(
+		        			command.substring(COMMAND_PREFIX.length()+1), " "), "/\\");
+		        	Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 		        	if (project == null)
-		        		throw new ExplicitException("Project not found: " + projectName);
+		        		throw new ExplicitException("Project not found: " + projectPath);
 		        	String url = OneDev.getInstance(UrlManager.class).cloneUrlFor(project, false);
 		        	Map<Object, Object> response = CollectionUtils.newHashMap(
 		        			"href", url + ".git/info/lfs", 

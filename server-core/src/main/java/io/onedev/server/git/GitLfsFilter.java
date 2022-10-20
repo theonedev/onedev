@@ -17,7 +17,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +39,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.tika.mime.MimeTypes;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -122,16 +120,9 @@ public class GitLfsFilter implements Filter {
 	}
 
 	private String getObjectUrl(HttpServletRequest request, String projectPath, String objectId) {
-		try {
-			String path = projectPath + ".git/lfs/objects/" + objectId;
-			return new URIBuilder(request.getRequestURL().toString())
-					.setPath(path)
-					.addParameter("lfs-objects", "true")
-					.build()
-					.toString();
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+		return String.format("%s/%s.git/lfs/objects/%s?lfs-objects=true", 
+				StringUtils.stripEnd(settingManager.getSystemSetting().getServerUrl(), "/\\"), 
+				projectPath, objectId);
 	}
 
 	private String getProjectPath(String pathInfo) {
