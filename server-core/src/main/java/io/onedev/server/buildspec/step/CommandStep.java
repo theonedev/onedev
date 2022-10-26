@@ -2,9 +2,13 @@ package io.onedev.server.buildspec.step;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.List;
+
 import javax.validation.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
@@ -58,6 +62,10 @@ public class CommandStep extends Step {
 		this.image = image;
 	}
 
+	static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, false, false, false);
+	}
+	
 	@Editable(order=110)
 	@NotNull
 	public Interpreter getInterpreter() {
