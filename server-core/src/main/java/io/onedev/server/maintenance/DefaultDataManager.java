@@ -28,6 +28,7 @@ import io.onedev.commons.loader.Listen;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
@@ -70,6 +71,16 @@ import io.onedev.server.web.util.editablebean.NewUserBean;
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
 
+	private static final String ENV_INITIAL_USER = "initial_user";
+	
+	private static final String ENV_INITIAL_PASSWORD = "initial_password";
+	
+	private static final String ENV_INITIAL_EMAIL = "initial_email";
+	
+	private static final String ENV_INITIAL_SERVER_URL = "initial_server_url";
+	
+	private static final String ENV_INITIAL_SSH_ROOT_URL = "initial_ssh_root_url";
+	
 	private final UserManager userManager;
 	
 	private final SettingManager settingManager;
@@ -109,6 +120,33 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.linkSpecManager = linkSpecManager;
 		this.emailAddressManager = emailAddressManager;
 	}
+	
+	private void createRoot(NewUserBean bean) {
+		User user = new User();
+		user.setId(User.ROOT_ID);
+		user.setName(bean.getName());
+		user.setFullName(bean.getFullName());
+		user.setPassword(passwordService.encryptPassword(bean.getPassword()));
+		userManager.replicate(user);
+
+		EmailAddress primaryEmailAddress = null;
+		for (EmailAddress emailAddress: emailAddressManager.query()) { 
+			if (emailAddress.getOwner().equals(user) && emailAddress.isPrimary()) {
+				primaryEmailAddress = emailAddress;
+				break;
+			}
+		}
+		
+		if (primaryEmailAddress == null) {
+    		primaryEmailAddress = new EmailAddress();
+    		primaryEmailAddress.setPrimary(true);
+    		primaryEmailAddress.setGit(true);
+    		primaryEmailAddress.setVerificationCode(null);
+    		primaryEmailAddress.setOwner(user);
+		}
+		primaryEmailAddress.setValue(bean.getEmailAddress());
+		emailAddressManager.save(primaryEmailAddress);
+	}
 
 	@SuppressWarnings({"serial"})
 	@Transactional
@@ -134,38 +172,23 @@ public class DefaultDataManager implements DataManager, Serializable {
     		userManager.replicate(unknown);
 		}
 		if (userManager.get(User.ROOT_ID) == null) {
-			manualConfigs.add(new ManualConfig("Create Administrator Account", null, new NewUserBean()) {
-
-				@Override
-				public void complete() {
-					NewUserBean newUserBean = (NewUserBean) getSetting();
-					User user = new User();
-					user.setId(User.ROOT_ID);
-					user.setName(newUserBean.getName());
-					user.setFullName(newUserBean.getFullName());
-					user.setPassword(passwordService.encryptPassword(newUserBean.getPassword()));
-		    		userManager.replicate(user);
-
-		    		EmailAddress primaryEmailAddress = null;
-		    		for (EmailAddress emailAddress: emailAddressManager.query()) { 
-		    			if (emailAddress.getOwner().equals(user) && emailAddress.isPrimary()) {
-		    				primaryEmailAddress = emailAddress;
-		    				break;
-		    			}
-		    		}
-		    		
-		    		if (primaryEmailAddress == null) {
-			    		primaryEmailAddress = new EmailAddress();
-			    		primaryEmailAddress.setPrimary(true);
-			    		primaryEmailAddress.setGit(true);
-			    		primaryEmailAddress.setVerificationCode(null);
-			    		primaryEmailAddress.setOwner(user);
-		    		}
-		    		primaryEmailAddress.setValue(newUserBean.getEmailAddress());
-		    		emailAddressManager.save(primaryEmailAddress);
-				}
-				
-			});
+			NewUserBean bean = new NewUserBean();
+			bean.setName(System.getenv(ENV_INITIAL_USER));
+			bean.setPassword(System.getenv(ENV_INITIAL_PASSWORD));
+			bean.setEmailAddress(System.getenv(ENV_INITIAL_EMAIL));
+			
+			if (validator.validate(bean).isEmpty()) {
+				createRoot(bean);
+			} else {
+				manualConfigs.add(new ManualConfig("Create Administrator Account", null, bean) {
+	
+					@Override
+					public void complete() {
+						createRoot((NewUserBean) getSetting());
+					}
+					
+				});
+			}
 		}
 
 		Setting setting = settingManager.getSetting(Key.SYSTEM);
@@ -175,10 +198,16 @@ public class DefaultDataManager implements DataManager, Serializable {
 		
 		if (setting == null || setting.getValue() == null) {
 		    systemSetting = new SystemSetting();
-			if (ingressUrl != null) {
+	    	systemSetting.setSshRootUrl(System.getenv(ENV_INITIAL_SSH_ROOT_URL));
+		    String serverUrl = System.getenv(ENV_INITIAL_SERVER_URL);
+		    if (ingressUrl != null) {
 				systemSetting.setServerUrl(ingressUrl);
 				settingManager.saveSystemSetting(systemSetting);
 				systemSetting = null;
+		    } else if (serverUrl != null) {
+		    	systemSetting.setServerUrl(StringUtils.stripEnd(serverUrl, "/\\"));
+		    	settingManager.saveSystemSetting(systemSetting);
+		    	systemSetting = null;
 			} else {
 				systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl());
 			}

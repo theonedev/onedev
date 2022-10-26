@@ -46,6 +46,26 @@ spec:
           - name: ingress_host
             value: {{ .Values.ingress.host }}
           {{- end }}
+          {{- if .Values.initial.user }}
+          - name: initial_user
+            value: {{ .Values.initial.user }}
+          {{- end }}
+          {{- if .Values.initial.password }}
+          - name: initial_password
+            value: {{ .Values.initial.password }}
+          {{- end }}
+          {{- if .Values.initial.email }}
+          - name: initial_email
+            value: {{ .Values.initial.email }}
+          {{- end }}
+          {{- if .Values.initial.serverUrl }}
+          - name: initial_server_url
+            value: {{ .Values.initial.serverUrl }}
+          {{- end }}
+          {{- if .Values.initial.sshRootUrl }}
+          - name: initial_ssh_root_url
+            value: {{ .Values.initial.sshRootUrl }}
+          {{- end }}
           - name: ingress_tls
             value: "{{ .Values.ingress.tls }}"
           - name: hibernate_dialect
