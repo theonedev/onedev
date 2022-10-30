@@ -204,6 +204,18 @@ public class OpenIdConnector extends SsoConnector {
 		}
 	}
 	
+	private String getStringValue(Object jsonValue) {
+		if (jsonValue instanceof String) {
+			return (String) jsonValue;
+		} else {
+			JSONArray emailArray = (JSONArray) jsonValue;
+			if (!emailArray.isEmpty())
+				return (String) emailArray.iterator().next();
+			else
+				return null;
+		}
+	}
+	
 	protected SsoAuthenticated processTokenResponse(OIDCTokenResponse tokenResponse) {
 		try {
 			JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
@@ -232,15 +244,17 @@ public class OpenIdConnector extends SsoConnector {
 				JSONObject json = httpResponse.getContentAsJSONObject();
 				if (!subject.equals(json.get("sub")))
 					throw new AuthenticationException("OIDC error: Inconsistent sub in ID token and userinfo");
-				String email = (String) json.get("email");
+				
+				String email = getStringValue(json.get("email"));
 				if (StringUtils.isBlank(email))
 					throw new AuthenticationException("OIDC error: No email claim returned");
-				String userName = (String) json.get("preferred_username");
+				
+				String userName = getStringValue(json.get("preferred_username"));
 				if (StringUtils.isBlank(userName))
 					userName = email;
 				userName = StringUtils.substringBefore(userName, "@");
 				
-				String fullName = (String) json.get("name");
+				String fullName = getStringValue(json.get("name"));
 
 				List<String> groupNames;
 				if (getGroupsClaim() != null) {
