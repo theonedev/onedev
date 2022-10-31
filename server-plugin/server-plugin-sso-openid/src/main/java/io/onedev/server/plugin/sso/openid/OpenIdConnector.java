@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.authc.AuthenticationException;
@@ -204,15 +205,18 @@ public class OpenIdConnector extends SsoConnector {
 		}
 	}
 	
+	@Nullable
 	private String getStringValue(Object jsonValue) {
 		if (jsonValue instanceof String) {
 			return (String) jsonValue;
-		} else {
-			JSONArray emailArray = (JSONArray) jsonValue;
-			if (!emailArray.isEmpty())
-				return (String) emailArray.iterator().next();
+		} else if (jsonValue instanceof JSONArray) {
+			JSONArray jsonArray = (JSONArray) jsonValue;
+			if (!jsonArray.isEmpty())
+				return (String) jsonArray.iterator().next();
 			else
 				return null;
+		} else {
+			return null;
 		}
 	}
 	
