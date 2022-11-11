@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-	: operator=(Roots|ForkRoots|OwnedByMe|OwnedByNone) #OperatorCriteria
+	: operator=(Roots|Leafs|ForkRoots|OwnedByMe|OwnedByNone) #OperatorCriteria
 	| operator=(OwnedBy|ForksOf|ChildrenOf) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
@@ -50,6 +50,10 @@ ForksOf
 	
 Roots
 	: 'roots'
+	;
+	
+Leafs
+	: 'leafs'
 	;
 	
 ForkRoots

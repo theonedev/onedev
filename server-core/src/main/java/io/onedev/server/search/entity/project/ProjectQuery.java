@@ -92,6 +92,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 					public Criteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						if (ctx.operator.getType() == ProjectQueryLexer.Roots)
 							return new RootsCriteria();
+						else if (ctx.operator.getType() == ProjectQueryLexer.Leafs)
+							return new LeafsCriteria();
 						else if (ctx.operator.getType() == ProjectQueryLexer.ForkRoots)
 							return new ForkRootsCriteria();
 						else if (ctx.operator.getType() == ProjectQueryLexer.OwnedByMe)

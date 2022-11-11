@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.authc.AuthenticationException;
@@ -204,6 +205,21 @@ public class OpenIdConnector extends SsoConnector {
 		}
 	}
 	
+	@Nullable
+	private String getStringValue(Object jsonValue) {
+		if (jsonValue instanceof String) {
+			return (String) jsonValue;
+		} else if (jsonValue instanceof JSONArray) {
+			JSONArray jsonArray = (JSONArray) jsonValue;
+			if (!jsonArray.isEmpty())
+				return (String) jsonArray.iterator().next();
+			else
+				return null;
+		} else {
+			return null;
+		}
+	}
+	
 	protected SsoAuthenticated processTokenResponse(OIDCTokenResponse tokenResponse) {
 		try {
 			JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
@@ -232,15 +248,17 @@ public class OpenIdConnector extends SsoConnector {
 				JSONObject json = httpResponse.getContentAsJSONObject();
 				if (!subject.equals(json.get("sub")))
 					throw new AuthenticationException("OIDC error: Inconsistent sub in ID token and userinfo");
-				String email = (String) json.get("email");
+				
+				String email = getStringValue(json.get("email"));
 				if (StringUtils.isBlank(email))
 					throw new AuthenticationException("OIDC error: No email claim returned");
-				String userName = (String) json.get("preferred_username");
+				
+				String userName = getStringValue(json.get("preferred_username"));
 				if (StringUtils.isBlank(userName))
 					userName = email;
 				userName = StringUtils.substringBefore(userName, "@");
 				
-				String fullName = (String) json.get("name");
+				String fullName = getStringValue(json.get("name"));
 
 				List<String> groupNames;
 				if (getGroupsClaim() != null) {

@@ -166,7 +166,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 		
 		user.getEmailAddresses().add(emailAddress);
 		
-		if (isNew && settingManager.getMailSetting() != null && !emailAddress.isVerified()) {
+		if (isNew && !emailAddress.isVerified() && settingManager.getMailSetting() != null) {
 			Long addressId = emailAddress.getId();
 			sessionManager.runAsyncAfterCommit(new Runnable() {
 

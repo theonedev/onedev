@@ -79,3 +79,15 @@ secrets:
   mysql:
     ## change mysql root password if desired
     password: changeit
+
+## Specify OneDev initial settings to avoid manual setup
+initial:
+  ## Login name of administrator
+  user: "" 
+  ## Password of administrator
+  password: "" 
+  ## Email address of adminsitrator
+  email: ""
+  ## Server url will be ignored if ingress.host is specified above
+  serverUrl: ""  
+  sshRootUrl: ""
