@@ -45,6 +45,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronScheduleBuilder;
@@ -142,6 +143,9 @@ import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
+import io.onedev.server.terminal.WebShell;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
@@ -169,7 +173,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final Map<String, List<Action>> jobActions = new ConcurrentHashMap<>();
 	
+	private final Map<String, JobExecutor> jobExecutors = new ConcurrentHashMap<>();
+	
 	private final Map<Long, Collection<String>> scheduledTasks = new ConcurrentHashMap<>();
+	
+	private final Map<String, Shell> jobShells = new ConcurrentHashMap<>();
 	
 	private final ProjectManager projectManager;
 	
@@ -208,6 +216,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private volatile Thread thread;
 	
 	private volatile Map<String, JobContext> jobContexts;
+	
+	private volatile Map<String, UUID> jobServers;
 	
 	private volatile Map<String, Collection<String>> allocatedCaches;
 	
@@ -838,19 +848,140 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Transactional
-	public void resume(Build build) {
-		JobContext jobContext = getJobContext(build);
-		if (jobContext != null)
-			jobContext.getJobExecutor().resume(jobContext);
-		build.setPaused(false);
-		listenerRegistry.post(new BuildUpdated(build));
-	}
-
 	@Override
-	public JobContext getJobContext(Build build) {
+	public void resume(Build build) {
+		Long buildId = build.getId();
+		JobContext jobContext = getJobContext(buildId);
+		if (jobContext != null) {
+			UUID jobServerUUID = jobServers.get(jobContext.getJobToken());
+			if (jobServerUUID != null) {
+				clusterManager.runOnServer(jobServerUUID, new ClusterTask<Void>() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Void call() throws Exception {
+						JobContext jobContext = getJobContext(buildId);
+						if (jobContext != null) {
+							JobExecutor jobExecutor = jobExecutors.get(jobContext.getJobToken());
+							if (jobExecutor != null)
+								jobExecutor.resume(jobContext);
+						}
+						return null;
+					}
+					
+				});
+				build.setPaused(false);
+				listenerRegistry.post(new BuildUpdated(build));
+			}
+		}
+	}
+	
+	@Override
+	public WebShell openShell(Long buildId, Terminal terminal) {
+		JobContext jobContext = getJobContext(buildId);
+		if (jobContext!= null) {
+			String jobToken = jobContext.getJobToken();
+			UUID shellServerUUID = jobServers.get(jobToken);
+			if (shellServerUUID != null) {
+				if (SecurityUtils.isAdministrator() || jobContext.getJobExecutor().isShellAccessEnabled()) {  
+					clusterManager.runOnServer(shellServerUUID, new ClusterTask<Void>() {
+
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						public Void call() throws Exception {
+							JobContext jobContext = getJobContext(jobToken, true);
+							JobExecutor jobExecutor = jobExecutors.get(jobContext.getJobToken());
+							if (jobExecutor != null) {
+								Shell shell = jobExecutor.openShell(jobContext, terminal);
+								jobShells.put(terminal.getSessionId(), shell);
+							} else {
+								throw new ExplicitException("Job shell not ready");
+							}
+							return null;
+						}
+						
+					});
+					
+					return new WebShell(buildId, terminal.getSessionId()) {
+						
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						public void sendInput(String input) {
+							clusterManager.submitToServer(shellServerUUID, new ClusterTask<Void>() {
+
+								private static final long serialVersionUID = 1L;
+
+								@Override
+								public Void call() throws Exception {
+									Shell shell = jobShells.get(terminal.getSessionId());
+									if (shell != null)
+										shell.sendInput(input);
+									return null;
+								}
+								
+							});
+						}
+
+						@Override
+						public void resize(int rows, int cols) {
+							clusterManager.submitToServer(shellServerUUID, new ClusterTask<Void>() {
+
+								private static final long serialVersionUID = 1L;
+
+								@Override
+								public Void call() throws Exception {
+									Shell shell = jobShells.get(terminal.getSessionId());
+									if (shell != null)
+										shell.resize(rows, cols);
+									return null;
+								}
+								
+							});
+						}
+
+						@Override
+						public void exit() {
+							clusterManager.submitToServer(shellServerUUID, new ClusterTask<Void>() {
+
+								private static final long serialVersionUID = 1L;
+
+								@Override
+								public Void call() throws Exception {
+									Shell shell = jobShells.remove(terminal.getSessionId());
+									if (shell != null)
+										shell.exit();
+									return null;
+								}
+								
+							});
+						}
+						
+					};
+				} else { 
+					throw new UnauthorizedException();
+				}
+			} else {
+				throw new ExplicitException("Job shell not ready");
+			}
+		} else {
+			throw new ExplicitException("Job shell not ready");
+		}
+		
+	}
+	
+	@Override
+	public Shell getShellLocal(String sessionId) {
+		return jobShells.get(sessionId);
+	}
+	
+	@Override
+	public JobContext getJobContext(Long buildId) {
 		for (Map.Entry<String, JobContext> entry: jobContexts.entrySet()) {
 			JobContext jobContext = entry.getValue();
-			if (jobContext.getBuildId().equals(build.getId())) 
+			if (jobContext.getBuildId().equals(buildId)) 
 				return jobContext;
 		}
 		return null;
@@ -899,6 +1030,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public void on(SystemStarted event) {
 		jobContexts = clusterManager.getHazelcastInstance().getMap("jobContexts");
 		allocatedCaches = clusterManager.getHazelcastInstance().getMap("allocatedCaches");
+		jobServers = clusterManager.getHazelcastInstance().getMap("jobRunServers");
 		
 		thread = new Thread(this);
 		thread.start();	
@@ -1302,24 +1434,32 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			
 		});
 
-		TaskLogger jobLogger = logManager.getJobLogger(jobToken);
-		if (jobLogger == null) {
-			jobLogger = new TaskLogger() {
+		jobServers.put(jobToken, clusterManager.getLocalServerUUID());
+		JobExecutor jobExecutor = jobContext.getJobExecutor();
+		jobExecutors.put(jobToken, jobExecutor);
+		try {
+			TaskLogger jobLogger = logManager.getJobLogger(jobToken);
+			if (jobLogger == null) {
+				jobLogger = new TaskLogger() {
 
-				@Override
-				public void log(String message, String sessionId) {
-					projectManager.runOnProjectServer(jobContext.getProjectId(), new LogTask(jobToken, message, sessionId)); 
+					@Override
+					public void log(String message, String sessionId) {
+						projectManager.runOnProjectServer(jobContext.getProjectId(), new LogTask(jobToken, message, sessionId)); 
+					}
+					
+				};
+				logManager.addJobLogger(jobToken, jobLogger);
+				try {
+					jobExecutor.execute(jobContext, jobLogger, agentInfo);
+				} finally {
+					logManager.removeJobLogger(jobToken);
 				}
-				
-			};
-			logManager.addJobLogger(jobToken, jobLogger);
-			try {
-				jobContext.getJobExecutor().execute(jobContext, jobLogger, agentInfo);
-			} finally {
-				logManager.removeJobLogger(jobToken);
+			} else {
+				jobExecutor.execute(jobContext, jobLogger, agentInfo);
 			}
-		} else {
-			jobContext.getJobExecutor().execute(jobContext, jobLogger, agentInfo);
+		} finally {
+			jobExecutors.remove(jobToken);
+			jobServers.remove(jobToken);
 		}
 	}
 	

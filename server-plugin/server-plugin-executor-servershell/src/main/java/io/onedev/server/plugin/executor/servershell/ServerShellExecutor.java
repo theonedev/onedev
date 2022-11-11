@@ -16,7 +16,6 @@ import java.util.Map;
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang.SystemUtils;
-import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 
 import com.hazelcast.cluster.Member;
 
@@ -52,8 +51,9 @@ import io.onedev.server.job.JobManager;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.servershell.ServerShellExecutor.TestData;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.terminal.CommandlineSession;
-import io.onedev.server.terminal.ShellSession;
+import io.onedev.server.terminal.CommandlineShell;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
@@ -310,7 +310,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	}
 
 	@Override
-	public ShellSession openShell(IWebSocketConnection connection, JobContext jobContext) {
+	public Shell openShell(JobContext jobContext, Terminal terminal) {
 		if (buildDir != null) {
 			Commandline shell;
 			if (runningStep instanceof CommandFacade) {
@@ -322,7 +322,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 				shell = new Commandline("sh");
 			}
 			shell.workingDir(new File(buildDir, "workspace"));
-			return new CommandlineSession(connection, shell);
+			return new CommandlineShell(terminal, shell);
 		} else {
 			throw new ExplicitException("Shell not ready");
 		}

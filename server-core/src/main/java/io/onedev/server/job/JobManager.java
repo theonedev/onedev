@@ -14,6 +14,9 @@ import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
+import io.onedev.server.terminal.WebShell;
 
 public interface JobManager {
 	
@@ -30,12 +33,17 @@ public interface JobManager {
 	
 	void resume(Build build);
 	
+	WebShell openShell(Long buildId, Terminal terminal);
+	
 	JobContext getJobContext(String jobToken, boolean mustExist);
+	
+	@Nullable
+	Shell getShellLocal(String sessionId);
 	
 	void reportJobWorkspace(JobContext jobContext, String jobWorkspace);
 	
 	@Nullable
-	JobContext getJobContext(Build build);
+	JobContext getJobContext(Long buildId);
 	
 	Map<CacheInstance, String> allocateCaches(JobContext jobContext, CacheAllocationRequest request);
 

@@ -30,7 +30,7 @@ import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.job.ResourceAllocator;
 import io.onedev.server.job.log.LogManager;
-import io.onedev.server.terminal.RemoteSession;
+import io.onedev.server.terminal.AgentShell;
 
 @WebSocket
 public class ServerSocket {
@@ -145,25 +145,31 @@ public class ServerSocket {
 	    		String dataString = new String(messageData, StandardCharsets.UTF_8);
 	    		String jobToken = StringUtils.substringBefore(dataString, ":");
 	    		String jobWorkspace = StringUtils.substringAfter(dataString, ":");
-	    		JobManager jobManager = OneDev.getInstance(JobManager.class);
-	    		JobContext jobContext = jobManager.getJobContext(jobToken, false);
+	    		JobContext jobContext = getJobManager().getJobContext(jobToken, false);
 	    		if (jobContext != null)
-	    			jobManager.reportJobWorkspace(jobContext, jobWorkspace);
+	    			getJobManager().reportJobWorkspace(jobContext, jobWorkspace);
 	    		break;
 	    	case SHELL_OUTPUT: 
 	    		dataString = new String(messageData, StandardCharsets.UTF_8);
 	    		String sessionId = StringUtils.substringBefore(dataString, ":");
 	    		String output = StringUtils.substringAfter(dataString, ":");
-	    		RemoteSession.sendOutput(sessionId, output);
+	    		AgentShell shell = (AgentShell) getJobManager().getShellLocal(sessionId);
+	    		if (shell != null)
+	    			shell.getTerminal().sendOutput(output);
 	    		break;
 	    	case SHELL_ERROR: 
 	    		dataString = new String(messageData, StandardCharsets.UTF_8);
 	    		sessionId = StringUtils.substringBefore(dataString, ":");
 	    		String error = StringUtils.substringAfter(dataString, ":");
-	    		RemoteSession.sendError(sessionId, error);
+	    		shell = (AgentShell) getJobManager().getShellLocal(sessionId);
+	    		if (shell != null)
+	    			shell.getTerminal().sendError(error);
 	    		break;
 	    	case SHELL_CLOSED:
-	    		RemoteSession.onRemoteClosed(new String(messageData, StandardCharsets.UTF_8));
+	    		sessionId = new String(messageData, StandardCharsets.UTF_8);
+	    		shell = (AgentShell) getJobManager().getShellLocal(sessionId);
+	    		if (shell != null)
+	    			shell.getTerminal().close();
 	    		break;
 	    	default: 
 			}
@@ -174,6 +180,10 @@ public class ServerSocket {
 			} catch (IOException e2) {
 			}
     	}
+    }
+    
+    private JobManager getJobManager() {
+    	return OneDev.getInstance(JobManager.class);
     }
     
     private Serializable service(Serializable request) {

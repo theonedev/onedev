@@ -40,11 +40,11 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 	
 	private static final String DELETE_MARK = "to-be-deleted-when-onedev-is-restarted";
 
-	private final ProjectManager projectManager;
+	protected final ProjectManager projectManager;
 	
-	private final TransactionManager transactionManager;
+	protected final TransactionManager transactionManager;
 	
-	private final ClusterManager clusterManager;
+	protected final ClusterManager clusterManager;
 	
     @Inject
     public DefaultStorageManager(ProjectManager projectManager, TransactionManager transactionManager, 
@@ -178,7 +178,7 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 
 					@Override
 					public void run() {
-						clusterManager.runOnServer(storageServerUUID, new ClusterTask<Void>() {
+						clusterManager.submitToServer(storageServerUUID, new ClusterTask<Void>() {
 
 							private static final long serialVersionUID = 1L;
 
@@ -216,7 +216,7 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 				@Override
 				public void run() {
 					if (storageServerUUID != null) {
-				    	clusterManager.runOnServer(storageServerUUID, new ClusterTask<Void>() {
+				    	clusterManager.submitToServer(storageServerUUID, new ClusterTask<Void>() {
 
 							private static final long serialVersionUID = 1L;
 

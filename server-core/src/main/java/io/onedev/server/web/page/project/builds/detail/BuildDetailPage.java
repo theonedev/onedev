@@ -327,7 +327,8 @@ public abstract class BuildDetailPage extends ProjectPage
 				super.onConfigure();
 
 				if (getTerminalManager().isTerminalSupported()) {
-					JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(getBuild());
+					JobManager jobManager = OneDev.getInstance(JobManager.class);
+					JobContext jobContext = jobManager.getJobContext(getBuild().getId());
 					if (jobContext!= null) {
 						setVisible(SecurityUtils.isAdministrator() 
 								|| SecurityUtils.canManage(getProject()) && jobContext.getJobExecutor().isShellAccessEnabled());

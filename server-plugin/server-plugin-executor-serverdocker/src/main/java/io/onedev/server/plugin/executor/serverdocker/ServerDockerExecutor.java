@@ -27,7 +27,6 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -73,8 +72,9 @@ import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.terminal.CommandlineSession;
-import io.onedev.server.terminal.ShellSession;
+import io.onedev.server.terminal.CommandlineShell;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -647,7 +647,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public ShellSession openShell(IWebSocketConnection connection, JobContext jobContext) {
+	public Shell openShell(JobContext jobContext, Terminal terminal) {
 		String containerNameCopy = containerName;
 		if (containerNameCopy != null) {
 			Commandline docker = newDocker();
@@ -660,7 +660,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			} else {
 				docker.addArgs("sh");
 			}
-			return new CommandlineSession(connection, docker);
+			return new CommandlineShell(terminal, docker);
 		} else if (hostBuildHome != null) {
 			Commandline shell;
 			if (SystemUtils.IS_OS_WINDOWS)
@@ -668,7 +668,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			else
 				shell = new Commandline("sh");
 			shell.workingDir(new File(hostBuildHome, "workspace"));
-			return new CommandlineSession(connection, shell);
+			return new CommandlineShell(terminal, shell);
 		} else {
 			throw new ExplicitException("Shell not ready");
 		}

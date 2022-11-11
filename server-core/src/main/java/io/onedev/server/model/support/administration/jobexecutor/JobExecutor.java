@@ -13,8 +13,6 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.core.Response;
 
-import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
-
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 
@@ -26,7 +24,8 @@ import io.onedev.server.ServerConfig;
 import io.onedev.server.job.AgentInfo;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.terminal.ShellSession;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
@@ -120,7 +119,7 @@ public abstract class JobExecutor implements Serializable {
 	
 	public abstract void resume(JobContext jobContext);
 	
-	public abstract ShellSession openShell(IWebSocketConnection connection, JobContext jobContext);
+	public abstract Shell openShell(JobContext jobContext, Terminal terminal);
 	
 	public boolean isPlaceholderAllowed() {
 		return true;

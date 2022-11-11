@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +21,9 @@ import io.onedev.commons.utils.command.PtyMode.ResizeSupport;
 import io.onedev.commons.utils.command.PumpInputToOutput;
 import io.onedev.server.OneDev;
 
-public class CommandlineSession implements ShellSession {
+public class CommandlineShell implements Shell {
 
-	private static final Logger logger = LoggerFactory.getLogger(CommandlineSession.class);
+	private static final Logger logger = LoggerFactory.getLogger(CommandlineShell.class);
 	
 	private final PtyMode ptyMode;
 	
@@ -32,7 +31,7 @@ public class CommandlineSession implements ShellSession {
 	
 	private final Future<?> execution;
 	
-	public CommandlineSession(IWebSocketConnection connection, Commandline cmdline) {
+	public CommandlineShell(Terminal terminal, Commandline cmdline) {
         ptyMode = new PtyMode();
         cmdline.ptyMode(ptyMode);
 
@@ -46,7 +45,7 @@ public class CommandlineSession implements ShellSession {
 
             	        @Override
             	        public void write(byte[] b, int off, int len) throws IOException {
-                            TerminalUtils.sendOutput(connection, new String(b, off, len, StandardCharsets.UTF_8));
+                            terminal.sendOutput(new String(b, off, len, StandardCharsets.UTF_8));
             	        }
             	
             	        @Override
@@ -59,7 +58,7 @@ public class CommandlineSession implements ShellSession {
 
                         @Override
                         public void write(byte[] b, int off, int len) throws IOException {
-                        	TerminalUtils.sendError(connection, new String(b, off, len, StandardCharsets.UTF_8));
+                        	terminal.sendError(new String(b, off, len, StandardCharsets.UTF_8));
                         }
 
                         @Override
@@ -80,20 +79,20 @@ public class CommandlineSession implements ShellSession {
                     };
                     ExecutionResult result = cmdline.execute(outputHandler, errorHandler, shellInput, processKiller);
                     if (result.getReturnCode() != 0)
-                    	TerminalUtils.sendError(connection, "Shell exited");
+                    	terminal.sendError("Shell exited");
                     else
-                    	TerminalUtils.close(connection);
+                    	terminal.close();
 	            } catch (ExplicitException e) {
-	            	TerminalUtils.sendError(connection, e.getMessage());
+	            	terminal.sendError(e.getMessage());
 	            } catch (Throwable e) {
 	            	ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
 	            	if (explicitException != null) {
-		            	TerminalUtils.sendError(connection, explicitException.getMessage());
+		            	terminal.sendError(explicitException.getMessage());
 	            	} else if (ExceptionUtils.find(e, InterruptedException.class) != null) {
-	                    TerminalUtils.sendError(connection, "Shell exited");
+	                    terminal.sendError("Shell exited");
 	                } else {
 	                	logger.error("Error running shell", e);
-	                    TerminalUtils.sendError(connection, "Error running shell, check server log for details");
+	                    terminal.sendError("Error running shell, check server log for details");
 	                }
 	            }
 			}

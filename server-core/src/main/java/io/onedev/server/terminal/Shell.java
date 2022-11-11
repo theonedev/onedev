@@ -1,6 +1,6 @@
 package io.onedev.server.terminal;
 
-public interface ShellSession {
+public interface Shell {
 
 	void sendInput(String input);
 	

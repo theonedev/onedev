@@ -36,7 +36,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.text.WordUtils;
-import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -86,8 +85,9 @@ import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.terminal.CommandlineSession;
-import io.onedev.server.terminal.ShellSession;
+import io.onedev.server.terminal.CommandlineShell;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -258,7 +258,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	@Override
-	public ShellSession openShell(IWebSocketConnection connection, JobContext jobContext) {
+	public Shell openShell(JobContext jobContext, Terminal terminal) {
 		String containerNameCopy = containerName;
 		if (osInfo != null && containerNameCopy != null) {
 			Commandline kubectl = newKubeCtl();
@@ -301,7 +301,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				}
 			}
 			kubectl.addArgs(shell);
-			return new CommandlineSession(connection, kubectl);
+			return new CommandlineShell(terminal, kubectl);
 		} else {
 			throw new ExplicitException("Shell not ready");
 		}

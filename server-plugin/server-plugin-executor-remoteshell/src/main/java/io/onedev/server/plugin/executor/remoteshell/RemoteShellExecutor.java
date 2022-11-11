@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
 import org.eclipse.jetty.websocket.api.Session;
 
 import io.onedev.agent.AgentData;
@@ -28,8 +27,9 @@ import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.LogTask;
 import io.onedev.server.plugin.executor.servershell.ServerShellExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
-import io.onedev.server.terminal.RemoteSession;
-import io.onedev.server.terminal.ShellSession;
+import io.onedev.server.terminal.AgentShell;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 
@@ -141,9 +141,9 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	}
 
 	@Override
-	public ShellSession openShell(IWebSocketConnection connection, JobContext jobContext) {
+	public Shell openShell(JobContext jobContext, Terminal terminal) {
 		if (agentSession != null) 
-			return new RemoteSession(connection, agentSession, jobContext.getJobToken());
+			return new AgentShell(terminal, agentSession, jobContext.getJobToken());
 		else
 			throw new ExplicitException("Shell not ready");
 	}
