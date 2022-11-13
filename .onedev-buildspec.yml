@@ -107,9 +107,6 @@ jobs:
       - ./build.sh
       - ''
       - cd $projectDir/server-product/target/helm-chart
-      - echo "Please do it"
-      - sleep 3600
-      - ''
       - cloudsmith push helm onedev/onedev onedev-${buildVersion}.tgz -k @secret:cloudsmith-token@
       - ''
       - cd $projectDir
