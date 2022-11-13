@@ -437,7 +437,7 @@ public class DefaultMailManager implements MailManager {
 								throw new ExplicitException(errorMessage);
 							}
 							checkPermission(from, project, new AccessProject(), user, authorization);
-							issues.add(openIssue(message, project, from, user, authorization));
+							issues.add(openIssue(message, project, from, user, authorization, parsedSystemAddress));
 						} else {
 							throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 						}
@@ -522,7 +522,7 @@ public class DefaultMailManager implements MailManager {
 							if (serviceDeskSetting != null) {
 								checkPermission(from, project, new AccessProject(), user, authorization);
 								logger.debug("Creating issue via email (project: {})...", project.getPath());
-								issues.add(openIssue(message, project, from, user, authorization));
+								issues.add(openIssue(message, project, from, user, authorization, parsedSystemAddress));
 							} else {
 								throw new ExplicitException("Unable to create issue from email as service desk is not enabled");
 							}
@@ -695,7 +695,8 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	private Issue openIssue(Message message, Project project, InternetAddress submitter, 
-			@Nullable User user, @Nullable SenderAuthorization authorization) throws MessagingException, IOException {
+			@Nullable User user, @Nullable SenderAuthorization authorization, 
+			ParsedEmailAddress parsedSystemAddress) throws MessagingException, IOException {
 		Issue issue = new Issue();
 		issue.setProject(project);
 		if (StringUtils.isNotBlank(message.getSubject()))
@@ -729,14 +730,19 @@ public class DefaultMailManager implements MailManager {
 		
 		issueManager.open(issue);
 		
-		String htmlBody = String.format("Issue <a href='%s'>%s</a> is created. You may reply this email to add more comments", 
-				urlManager.urlFor(issue), issue.getFQN());
-		String textBody = String.format("Issue %s is created. You may reply this email to add more comments", 
-				issue.getFQN());
-		
-		sendMailAsync(Lists.newArrayList(submitter.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
-				"Re: " + issue.getTitle(), htmlBody, textBody, getReplyAddress(issue), 
-				issue.getEffectiveThreadingReference()); 
+		ParsedEmailAddress parsedSubmitterAddress = ParsedEmailAddress.parse(submitter.getAddress());
+		if (!parsedSubmitterAddress.getDomain().equalsIgnoreCase(parsedSystemAddress.getDomain()) 
+				|| !parsedSubmitterAddress.getName().toLowerCase().startsWith(parsedSystemAddress.getName().toLowerCase() + "+") 
+						&& !parsedSubmitterAddress.getName().equalsIgnoreCase(parsedSystemAddress.getName())) {
+			String htmlBody = String.format("Issue <a href='%s'>%s</a> is created. You may reply this email to add more comments", 
+					urlManager.urlFor(issue), issue.getFQN());
+			String textBody = String.format("Issue %s is created. You may reply this email to add more comments", 
+					issue.getFQN());
+			
+			sendMailAsync(Lists.newArrayList(submitter.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
+					"Re: " + issue.getTitle(), htmlBody, textBody, getReplyAddress(issue), 
+					issue.getEffectiveThreadingReference()); 
+		}
 		return issue;
 	}
 

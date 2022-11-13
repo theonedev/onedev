@@ -22,7 +22,9 @@ public class LastFinishedBuild implements BuildProvider {
 	
 	private String jobName;
 	
-	@Editable
+	private String refName;
+	
+	@Editable(order=100)
 	@OmitName
 	@ChoiceProvider("getJobChoices")
 	@NotEmpty
@@ -32,6 +34,16 @@ public class LastFinishedBuild implements BuildProvider {
 
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
+	}
+
+	@Editable(name="Ref Name", order=200, placeholder="Any ref", description="Optionally specify ref of above job, "
+			+ "for instance <i>refs/heads/main</i>. Use * for wildcard match")
+	public String getRefName() {
+		return refName;
+	}
+
+	public void setRefName(String refName) {
+		this.refName = refName;
 	}
 
 	@SuppressWarnings("unused")
@@ -47,12 +59,15 @@ public class LastFinishedBuild implements BuildProvider {
 	
 	@Override
 	public Build getBuild(Project project) {
-		return OneDev.getInstance(BuildManager.class).findLastFinished(project, jobName);
+		return OneDev.getInstance(BuildManager.class).findLastFinished(project, jobName, refName);
 	}
 
 	@Override
 	public String getDescription() {
-		return "Last finished of job '" + jobName + "'";
+		if (refName != null)
+			return "Last finished of job '" + jobName + "' on ref '" + refName + "'";
+		else
+			return "Last finished of job '" + jobName + "'";
 	}
 
 }

@@ -37,7 +37,7 @@ public interface BuildManager extends EntityManager<Build> {
 	Build find(ProjectScopedNumber buildFQN);
 	
 	@Nullable
-	Build findLastFinished(Project project, String jobName);
+	Build findLastFinished(Project project, String jobName, @Nullable String refName);
 
 	@Nullable
 	Build findStreamPrevious(Build build, @Nullable Build.Status status);
