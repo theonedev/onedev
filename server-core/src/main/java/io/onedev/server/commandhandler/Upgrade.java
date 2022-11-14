@@ -423,6 +423,8 @@ public class Upgrade extends AbstractPlugin {
 				try {
 					String serverScript = null;
 					if (file.getName().equals("server.sh")) {
+						serverScript = FileUtils.readFileToString(file, Charset.defaultCharset());
+						
 						String siteRunAsUserLine = null;
 						for (String line: (List<String>)FileUtils.readLines(siteServerScriptFile, Charset.defaultCharset())) {
 							if (line.contains("RUN_AS_USER")) {
@@ -431,17 +433,34 @@ public class Upgrade extends AbstractPlugin {
 							}
 						}
 						if (siteRunAsUserLine != null) {
-							String newRunAsUserLine = null;
+							String runAsUserLine = null;
 							for (String line: (List<String>)FileUtils.readLines(file, Charset.defaultCharset())) {
 								if (line.contains("RUN_AS_USER")) {
-									newRunAsUserLine = line;
+									runAsUserLine = line;
 									break;
 								}
 							}
-							if (newRunAsUserLine != null) {
-								serverScript = FileUtils.readFileToString(file, Charset.defaultCharset());
-								serverScript = StringUtils.replace(serverScript, newRunAsUserLine, siteRunAsUserLine);
+							if (runAsUserLine != null) 
+								serverScript = StringUtils.replace(serverScript, runAsUserLine, siteRunAsUserLine);
+						}
+						
+						String siteFilesToSourceLine = null;
+						for (String line: (List<String>)FileUtils.readLines(siteServerScriptFile, Charset.defaultCharset())) {
+							if (line.contains("FILES_TO_SOURCE") && !line.startsWith("#")) {
+								siteFilesToSourceLine = line;
+								break;
 							}
+						}
+						if (siteFilesToSourceLine != null) {
+							String filesToSourceLine = null;
+							for (String line: (List<String>)FileUtils.readLines(file, Charset.defaultCharset())) {
+								if (line.contains("FILES_TO_SOURCE") && !line.startsWith("#")) {
+									filesToSourceLine = line;
+									break;
+								}
+							}
+							if (filesToSourceLine != null) 
+								serverScript = StringUtils.replace(serverScript, filesToSourceLine, siteFilesToSourceLine);
 						}
 					}
 					if (serverScript != null)

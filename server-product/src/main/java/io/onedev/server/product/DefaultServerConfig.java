@@ -126,7 +126,10 @@ public class DefaultServerConfig implements ServerConfig {
 		String clusterPortStr = System.getenv(PROP_CLUSTER_PORT);
 		if (StringUtils.isBlank(clusterPortStr))
 			clusterPortStr = props.getProperty(PROP_CLUSTER_PORT);
-		clusterPort = Integer.parseInt(clusterPortStr.trim());
+		if (StringUtils.isBlank(clusterPortStr))
+			clusterPort = 5701;
+		else
+			clusterPort = Integer.parseInt(clusterPortStr.trim());
 		
 		HardwareAbstractionLayer hardware = null;
 		try {
