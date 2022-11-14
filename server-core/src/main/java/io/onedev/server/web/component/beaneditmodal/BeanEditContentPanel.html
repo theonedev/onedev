@@ -1,5 +1,5 @@
 <wicket:panel>
-	<form wicket:id="form" class="bean-edit">
+	<form wicket:id="form" class="bean-edit leave-confirm">
 		<div class="modal-header">
 			<h5 wicket:id="title" class="modal-title"></h5>
 			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
@@ -10,7 +10,7 @@
             <div wicket:id="editor"></div>
 		</div>
 		<div class="modal-footer">
-			<button wicket:id="ok" class="btn btn-primary">Ok</button>
+			<button wicket:id="ok" class="dirty-aware btn btn-primary">Ok</button>
 			<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
 		</div>
 	</form>

@@ -94,8 +94,7 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 	protected void markFormDirty(AjaxRequestTarget target) {
 		String script = String.format(""
 				+ "var $form = $('#%s').closest('form');"
-				+ "if ($form.closest('.blob-edit').length == 0)"
-				+ "  onedev.server.form.markDirty($form);", 
+				+ "onedev.server.form.markDirty($form);", 
 				getMarkupId());
 		target.prependJavaScript(script);
 	}
