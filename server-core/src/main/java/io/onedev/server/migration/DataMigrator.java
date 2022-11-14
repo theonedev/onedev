@@ -4414,6 +4414,28 @@ public class DataMigrator {
 				for (Element element: dom.getRootElement().elements())  
 					element.element("updateDate").detach();
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("PERFORMANCE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.element("serverJobExecutorCpuQuota").detach();
+							valueElement.element("serverJobExecutorMemoryQuota").detach();
+							valueElement.element("cpuIntensiveTaskConcurrency").detach();
+						}
+					} else if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement: valueElement.elements()) {
+								Element mountDockerSockElement = executorElement.element("mountDockerSock");
+								if (mountDockerSockElement != null && mountDockerSockElement.attribute("defined-in") != null)
+									mountDockerSockElement.detach();
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

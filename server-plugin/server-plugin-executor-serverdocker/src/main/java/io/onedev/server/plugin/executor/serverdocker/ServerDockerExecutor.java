@@ -75,11 +75,13 @@ import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
@@ -102,6 +104,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private boolean mountDockerSock;
 	
+	private String dockerSockPath;
+	
 	private transient volatile File hostBuildHome;
 	
 	private transient volatile LeafFacade runningStep;
@@ -119,10 +123,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.registryLogins = registryLogins;
 	}
 
-	@Editable(order=500, description="Whether or not to mount docker sock into job container to "
+	@Editable(order=500, group="More Settings", description="Whether or not to mount docker sock into job container to "
 			+ "support docker operations in job commands, for instance to build docker image.<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
-			+ "by operating the mounted docker sock. You should configure job authorization below "
+			+ "by operating the mounted docker sock. You should configure job authorization "
 			+ "to make sure the executor can only be used by trusted jobs if this option is enabled")
 	public boolean isMountDockerSock() {
 		return mountDockerSock;
@@ -130,6 +134,22 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	public void setMountDockerSock(boolean mountDockerSock) {
 		this.mountDockerSock = mountDockerSock;
+	}
+	
+	@SuppressWarnings("unused")
+	private static boolean isMountDockerSockEnabled() {
+		return (Boolean)EditContext.get().getInputValue("mountDockerSock");
+	}
+
+	@Editable(order=510, group="More Settings", placeholder="Default", description="Optionally specify docker sock path to mount from. "
+			+ "Defaults to <i>/var/run/docker.sock</i> on Linux, and <i>//./pipe/docker_engine</i> on Windows")
+	@ShowCondition("isMountDockerSockEnabled")
+	public String getDockerSockPath() {
+		return dockerSockPath;
+	}
+
+	public void setDockerSockPath(String dockerSockPath) {
+		this.dockerSockPath = dockerSockPath;
 	}
 
 	@Editable(order=50050, group="More Settings", description="Optionally specify options to run container. For instance, you may use <tt>-m 2g</tt> "
@@ -290,10 +310,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								}
 								
 								if (isMountDockerSock()) {
-									if (SystemUtils.IS_OS_WINDOWS) 
-										docker.addArgs("-v", "//./pipe/docker_engine://./pipe/docker_engine");
-									else
-										docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+									if (getDockerSockPath() != null) {
+										if (SystemUtils.IS_OS_WINDOWS) 
+											docker.addArgs("-v", getDockerSockPath() + "://./pipe/docker_engine");
+										else
+											docker.addArgs("-v",getDockerSockPath() + ":/var/run/docker.sock");
+									} else {
+										if (SystemUtils.IS_OS_WINDOWS) 
+											docker.addArgs("-v", "//./pipe/docker_engine://./pipe/docker_engine");
+										else
+											docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+									}
 								}
 								
 								if (hostAuthInfoHome.get() != null) {
