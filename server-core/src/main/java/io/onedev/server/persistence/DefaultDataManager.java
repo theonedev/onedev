@@ -743,41 +743,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 			}
 		}
 		
-		if (userManager.get(User.ROOT_ID) == null) {
-			manualConfigs.add(new ManualConfig("Create Administrator Account", null, new NewUserBean()) {
-
-				@Override
-				public void complete() {
-					NewUserBean newUserBean = (NewUserBean) getSetting();
-					User user = new User();
-					user.setId(User.ROOT_ID);
-					user.setName(newUserBean.getName());
-					user.setFullName(newUserBean.getFullName());
-					user.setPassword(passwordService.encryptPassword(newUserBean.getPassword()));
-		    		userManager.replicate(user);
-
-		    		EmailAddress primaryEmailAddress = null;
-		    		for (EmailAddress emailAddress: emailAddressManager.query()) { 
-		    			if (emailAddress.getOwner().equals(user) && emailAddress.isPrimary()) {
-		    				primaryEmailAddress = emailAddress;
-		    				break;
-		    			}
-		    		}
-		    		
-		    		if (primaryEmailAddress == null) {
-			    		primaryEmailAddress = new EmailAddress();
-			    		primaryEmailAddress.setPrimary(true);
-			    		primaryEmailAddress.setGit(true);
-			    		primaryEmailAddress.setVerificationCode(null);
-			    		primaryEmailAddress.setOwner(user);
-		    		}
-		    		primaryEmailAddress.setValue(newUserBean.getEmailAddress());
-		    		emailAddressManager.save(primaryEmailAddress);
-				}
-				
-			});
-		}
-
 		Setting setting = settingManager.findSetting(Key.SYSTEM);
 		SystemSetting systemSetting = null;
 

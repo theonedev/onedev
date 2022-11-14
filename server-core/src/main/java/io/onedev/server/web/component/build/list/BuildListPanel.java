@@ -153,9 +153,11 @@ public abstract class BuildListPanel extends Panel {
 		try {
 			return BuildQuery.merge(baseQuery, BuildQuery.parse(getProject(), queryString, true, true));
 		} catch (ExplicitException e) {
+			getFeedbackMessages().clear();
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
+			getFeedbackMessages().clear();
 			info("Performing fuzzy query");
 			try {
 				EntityQuery.getProjectScopedNumber(getProject(), queryString);

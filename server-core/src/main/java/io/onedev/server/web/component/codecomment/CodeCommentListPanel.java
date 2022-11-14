@@ -100,13 +100,16 @@ public abstract class CodeCommentListPanel extends Panel {
 			try {
 				return CodeCommentQuery.parse(getProject(), queryString, true);
 			} catch (ExplicitException e) {
+				getFeedbackMessages().clear();
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
 				if (getPullRequest() != null) {
+					getFeedbackMessages().clear();
 					error("Malformed code comment query");
 					return null;
 				} else {
+					getFeedbackMessages().clear();
 					info("Performing fuzzy query");
 					return queryString;
 				}

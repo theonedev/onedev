@@ -1198,9 +1198,11 @@ public class ProjectListPanel extends Panel {
 		try {
 			return ProjectQuery.merge(baseQuery, ProjectQuery.parse(queryString));
 		} catch (ExplicitException e) {
+			getFeedbackMessages().clear();
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
+			getFeedbackMessages().clear();
 			info("Performing fuzzy query");
 			if (getParentProject() != null) {
 				queryString = "*" + queryString.replace(" ", "*") + "*";

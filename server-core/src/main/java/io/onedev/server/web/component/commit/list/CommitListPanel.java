@@ -108,9 +108,11 @@ public abstract class CommitListPanel extends Panel {
 			try {
 				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), queryString, true));
 			} catch (ExplicitException e) {
+				getFeedbackMessages().clear();
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
+				getFeedbackMessages().clear();
 				info("Performing fuzzy query");
 				List<CommitCriteria> criterias = new ArrayList<>();
 				ObjectId commitId = getProject().getObjectId(queryString, false);

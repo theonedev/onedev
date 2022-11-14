@@ -181,12 +181,15 @@ public abstract class IssueListPanel extends Panel {
 			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, option, true));
 		} catch (Exception e) {
 			if (e instanceof ExplicitException) {
+				getFeedbackMessages().clear();
 				error(e.getMessage());
 				return null;
 			} else if (getBaseQuery().toString() != null) {
+				getFeedbackMessages().clear();
 				error("Malformed issue query");
 				return null;
 			} else {
+				getFeedbackMessages().clear();
 				info("Performing fuzzy query");
 				return queryString;
 			}
