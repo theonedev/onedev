@@ -663,7 +663,7 @@ table.norecords tfoot td, div.norecords, td.norecords {
 	border-top: none;
 	height: 240px;
 }
-.dark-mode table.norecords tfoot td, div.norecords, td.norecords {
+.dark-mode table.norecords tfoot td, .dark-mode div.norecords, .dark-mode td.norecords {
 	filter: invert(80%);
 }
 
