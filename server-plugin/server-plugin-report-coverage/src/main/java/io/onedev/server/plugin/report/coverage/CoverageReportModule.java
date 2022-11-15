@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -70,34 +72,19 @@ public class CoverageReportModule extends AbstractPluginModule {
 			
 			@Override
 			public Map<Integer, CoverageStatus> getLineCoverages(Build build, String blobPath, String reportName) {
-				return LockUtils.read(CoverageReport.getReportLockName(build), new Callable<Map<Integer, CoverageStatus>>() {
-
-					@Override
-					public Map<Integer, CoverageStatus> call() throws Exception {
-						Map<Integer, CoverageStatus> coverages = new HashMap<>();
-						File categoryDir = new File(build.getDir(), CoverageReport.CATEGORY);
-						if (categoryDir.exists()) {
-							for (File reportDir: categoryDir.listFiles()) {
-								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
-										&& (reportName == null || reportName.equals(reportDir.getName()))) { 
-									File lineCoveragesFile = new File(reportDir, CoverageReport.FILES_DIR + "/" + blobPath);
-									if (lineCoveragesFile.exists()) {
-										try (InputStream is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
-											@SuppressWarnings("unchecked")
-											Map<Integer, CoverageStatus> deserialized = (Map<Integer, CoverageStatus>) SerializationUtils.deserialize(is);
-											deserialized.forEach((key, value) -> {
-												coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
-											});
-										}
-									}
-								}
-							}
-						}
-						return coverages;
-					}
-					
-				});
+				Long projectId = build.getProject().getId();
+				Long buildNumber = build.getNumber();
 				
+				Map<Integer, CoverageStatus> coverages = new HashMap<>();
+				for (var entry: getProjectManager().runOnProjectServer(projectId, new GetLineCoverages(projectId, buildNumber, blobPath, reportName)).entrySet()) {
+					if (SecurityUtils.canAccessReport(build, entry.getKey())) {
+						entry.getValue().forEach((key, value) -> {
+							coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
+						});
+					}
+				}
+				
+				return coverages;
 			}
 			
 		});
@@ -106,11 +93,10 @@ public class CoverageReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<BuildTab> getTabs(Build build) {
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 				Long projectId = build.getProject().getId();
 				Long buildNumber = build.getNumber();
 				
-				return projectManager.runOnProjectServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+				return getProjectManager().runOnProjectServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
 						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
 						.collect(Collectors.toList());
 			}
@@ -133,7 +119,11 @@ public class CoverageReportModule extends AbstractPluginModule {
 		});		
 		
 	}
-
+	
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
+	
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
 
 		private static final long serialVersionUID = 1L;
@@ -178,4 +168,53 @@ public class CoverageReportModule extends AbstractPluginModule {
 		}
 		
 	}	
+	
+	private static class GetLineCoverages implements ClusterTask<Map<String, Map<Integer, CoverageStatus>>> {
+
+		private static final long serialVersionUID = 1L;
+
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		private final String blobPath;
+		
+		private final String reportName;
+		
+		public GetLineCoverages(Long projectId, Long buildNumber, String blobPath, @Nullable String reportName) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+			this.blobPath = blobPath;
+			this.reportName = reportName;
+		}
+		
+		@Override
+		public Map<String, Map<Integer, CoverageStatus>> call() throws Exception {
+			return LockUtils.read(CoverageReport.getReportLockName(projectId, buildNumber), new Callable<Map<String, Map<Integer, CoverageStatus>>>() {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public Map<String, Map<Integer, CoverageStatus>> call() throws Exception {
+					Map<String, Map<Integer, CoverageStatus>> coverages = new HashMap<>();
+					File categoryDir = new File(Build.getDir(projectId, buildNumber), CoverageReport.CATEGORY);
+					if (categoryDir.exists()) {
+						for (File reportDir: categoryDir.listFiles()) {
+							if (reportName == null || reportName.equals(reportDir.getName())) { 
+								File lineCoveragesFile = new File(reportDir, CoverageReport.FILES_DIR + "/" + blobPath);
+								if (lineCoveragesFile.exists()) {
+									try (InputStream is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
+										coverages.put(reportDir.getName(), (Map<Integer, CoverageStatus>) SerializationUtils.deserialize(is));
+									}
+								}
+							}
+						}
+					}
+					return coverages;
+				}
+				
+			});
+			
+		}
+		
+	}
 }

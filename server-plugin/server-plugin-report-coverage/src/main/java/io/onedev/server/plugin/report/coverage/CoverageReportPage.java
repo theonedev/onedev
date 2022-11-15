@@ -40,6 +40,9 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.match.Matcher;
@@ -82,15 +85,8 @@ public class CoverageReportPage extends BuildReportPage {
 
 		@Override
 		protected CoverageReport load() {
-			return LockUtils.read(CoverageReport.getReportLockName(getBuild()), new Callable<CoverageReport>() {
-
-				@Override
-				public CoverageReport call() throws Exception {
-					return CoverageReport.readFrom(new File(getBuild().getDir(), CoverageReport.CATEGORY + "/" + getReportName()));
-				}
-				
-			});
-			
+			Long projectId = getProject().getId();
+			return OneDev.getInstance(ProjectManager.class).runOnProjectServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
 		}
 		
 	};
@@ -415,4 +411,31 @@ public class CoverageReportPage extends BuildReportPage {
 		
 	}
 	
+	private static class GetCoverageReport implements ClusterTask<CoverageReport> {
+
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		private final String reportName;
+		
+		private GetCoverageReport(Long projectId, Long buildNumber, String reportName) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+			this.reportName = reportName;
+		}
+		
+		@Override
+		public CoverageReport call() throws Exception {
+			return LockUtils.read(CoverageReport.getReportLockName(projectId, buildNumber), new Callable<CoverageReport>() {
+
+				@Override
+				public CoverageReport call() throws Exception {
+					return CoverageReport.readFrom(new File(Build.getDir(projectId, buildNumber), CoverageReport.CATEGORY + "/" + reportName));
+				}
+				
+			});
+		}
+		
+	}
 }

@@ -173,10 +173,10 @@ public class BlameCommand {
 		}
 		
 		if (System.currentTimeMillis()-time > CACHE_THRESHOLD) synchronized (cache) {
-			cache.put(cacheKey, blocks.values());
+			cache.put(cacheKey, new ArrayList<>(blocks.values()));
 		}
 		
-		return blocks.values();
+		return new ArrayList<>(blocks.values());
 	}
 
     private static class CommitBuilder {

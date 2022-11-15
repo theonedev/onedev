@@ -1,13 +1,16 @@
 package io.onedev.server.git;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 import io.onedev.commons.utils.LinearRange;
 
-public class BlameBlock {
+public class BlameBlock implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private final BlameCommit commit;
 
 	private final List<LinearRange> ranges;

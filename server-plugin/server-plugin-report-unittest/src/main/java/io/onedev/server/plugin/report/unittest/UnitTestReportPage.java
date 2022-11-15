@@ -17,6 +17,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -28,19 +32,13 @@ import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 @SuppressWarnings("serial")
 public abstract class UnitTestReportPage extends BuildReportPage {
 
-	private final IModel<UnitTestReport> reportModel = new LoadableDetachableModel<UnitTestReport>() {
+	private final IModel<UnitTestReport> reportModel = new LoadableDetachableModel<>() {
 
 		@Override
 		protected UnitTestReport load() {
-			return LockUtils.read(UnitTestReport.getReportLockName(getBuild()), new Callable<UnitTestReport>() {
-
-				@Override
-				public UnitTestReport call() throws Exception {
-					File reportDir = new File(getBuild().getDir(), UnitTestReport.CATEGORY + "/" + getReportName());				
-					return UnitTestReport.readFrom(reportDir);
-				}
-				
-			});
+			Long projectId = getProject().getId();
+			Long buildNumber = getBuild().getNumber();
+			return OneDev.getInstance(ProjectManager.class).runOnProjectServer(projectId, new GetUnitTestReport(projectId, buildNumber, getReportName()));
 		}
 		
 	};
@@ -110,4 +108,32 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 		
 	}
 	
+	private static class GetUnitTestReport implements ClusterTask<UnitTestReport> {
+
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		private final String reportName;
+		
+		private GetUnitTestReport(Long projectId, Long buildNumber, String reportName) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+			this.reportName = reportName;
+		}		
+		
+		@Override
+		public UnitTestReport call() throws Exception {
+			return LockUtils.read(UnitTestReport.getReportLockName(projectId, buildNumber), new Callable<UnitTestReport>() {
+
+				@Override
+				public UnitTestReport call() throws Exception {
+					File reportDir = new File(Build.getDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);				
+					return UnitTestReport.readFrom(reportDir);
+				}
+				
+			});
+		}
+		
+	}
 }

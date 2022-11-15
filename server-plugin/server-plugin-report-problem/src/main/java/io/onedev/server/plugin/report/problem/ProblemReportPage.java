@@ -43,8 +43,11 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.match.Matcher;
@@ -86,15 +89,10 @@ public class ProblemReportPage extends BuildReportPage {
 
 		@Override
 		protected ProblemReport load() {
-			return LockUtils.read(ProblemReport.getReportLockName(getBuild()), new Callable<ProblemReport>() {
-
-				@Override
-				public ProblemReport call() throws Exception {
-					File reportDir = new File(getBuild().getDir(), ProblemReport.CATEGORY + "/" + getReportName());				
-					return ProblemReport.readFrom(reportDir);
-				}
-				
-			});
+			Long projectId = getProject().getId();
+			Long buildNumber = getBuild().getNumber();
+			
+			return OneDev.getInstance(ProjectManager.class).runOnProjectServer(projectId, new GetProblemReport(projectId, buildNumber, getReportName()));
 		}
 		
 	};
@@ -375,4 +373,34 @@ public class ProblemReportPage extends BuildReportPage {
 			params.add(PARAM_FILE, file);
 		return params;
 	}
+	
+	private static class GetProblemReport implements ClusterTask<ProblemReport> {
+
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		private final String reportName;
+		
+		private GetProblemReport(Long projectId, Long buildNumber, String reportName) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+			this.reportName = reportName;
+		}
+		
+		@Override
+		public ProblemReport call() throws Exception {
+			return LockUtils.read(ProblemReport.getReportLockName(projectId, buildNumber), new Callable<ProblemReport>() {
+
+				@Override
+				public ProblemReport call() throws Exception {
+					File reportDir = new File(Build.getDir(projectId, buildNumber), ProblemReport.CATEGORY + "/" + reportName);				
+					return ProblemReport.readFrom(reportDir);
+				}
+				
+			});
+		}
+		
+	}
+	
 }
