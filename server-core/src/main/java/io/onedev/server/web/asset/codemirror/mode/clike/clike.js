@@ -311,6 +311,22 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     return cTypes(identifier) || contains(basicObjCTypes, identifier);
   }
 
+  var eCKeywords = "class private public property import delete new new0 renew renew0" +
+      "define get set remote dllexport dllimport stdcall subclass __on_register_module" +
+      "namespace using typed_object any_object incref register watch stopwatching" +
+      "firewatchers watchable class_designer class_fixed class_no_expansion isset" +
+      "class_default_property property_category class_data class_property virtual thisclass" +
+      "dbtable dbindex database_open dbfield";
+
+  // Do not use this. Use the eCTypes function below. This is global just to avoid
+  // excessive calls when eCTypes is being called multiple times during a parse.
+  var basiceCTypes = words("uint uint32 uint16 uint64 bool byte int64 uintptr intptr intsize uintsize unichar");
+
+  // Returns true if identifier is an "eC" type.
+  function eCTypes(identifier) {
+    return cTypes(identifier) || contains(basiceCTypes, identifier);
+  }
+
   var cBlockKeywords = "case do else for if switch while struct enum union";
   var cDefKeywords = "struct enum union";
 
@@ -843,6 +859,24 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     modeProps: {fold: ["brace", "include"]}
   });
 
+
+  def(["text/x-ecsrc", "text/x-echdr"], {
+    name: "clike",
+    keywords: words(cKeywords + " " + eCKeywords),
+    types: eCTypes,
+    blockKeywords: words(cBlockKeywords + " class dbtable"),
+    defKeywords: words(cDefKeywords + " class"),
+    typeFirstDefinitions: true,
+    atoms: words("true false null value this"),
+    isIdentifierChar: /[\w\$_~\xa1-\uffff]/,
+    isReservedIdentifier: cIsReservedIdentifier,
+    hooks: {
+      "#": cppHook,
+      "*": pointerHook
+    },
+    namespaceSeparator: "::",
+    modeProps: {fold: ["brace", "include"]}
+  });
   def("text/x-squirrel", {
     name: "clike",
     keywords: words("base break clone continue const default delete enum extends function in class" +
