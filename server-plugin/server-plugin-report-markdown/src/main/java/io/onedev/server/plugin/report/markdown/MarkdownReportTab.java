@@ -11,6 +11,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
@@ -30,16 +34,11 @@ public class MarkdownReportTab extends BuildTab {
 			@Override
 			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 				BuildDetailPage page = (BuildDetailPage) getPage();
-				String startPage = LockUtils.read(PublishMarkdownReportStep.getReportLockName(page.getBuild()), new Callable<String>() {
-
-					@Override
-					public String call() throws Exception {
-						File startPageFile = new File(page.getBuild().getDir(), 
-								PublishMarkdownReportStep.CATEGORY + "/" + getTitle() + "/" + PublishMarkdownReportStep.START_PAGE);
-						return FileUtils.readFileToString(startPageFile, StandardCharsets.UTF_8);
-					}
-					
-				});
+				Build build = page.getBuild();
+				Long projectId = build.getProject().getId();
+				Long buildNumber = build.getNumber();
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+				String startPage = projectManager.runOnProjectServer(projectId, new GetStartPage(projectId, buildNumber, getTitle()));
 				
 				PageParameters params = MarkdownReportPage.paramsOf(page.getBuild(), getTitle(), startPage);
 				return new ViewStateAwarePageLink<Void>(linkId, pageClass, params);
@@ -58,4 +57,33 @@ public class MarkdownReportTab extends BuildTab {
 		}
 	}
 
+	private static class GetStartPage implements ClusterTask<String> {
+
+		private Long projectId;
+		
+		private Long buildNumber;
+		
+		private String reportName;
+		
+		private GetStartPage(Long projectId, Long buildNumber, String reportName) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+			this.reportName = reportName;
+		}
+		
+		@Override
+		public String call() throws Exception {
+			return LockUtils.read(PublishMarkdownReportStep.getReportLockName(projectId, buildNumber), new Callable<String>() {
+
+				@Override
+				public String call() throws Exception {
+					File startPageFile = new File(Build.getDir(projectId, buildNumber), 
+							PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + PublishMarkdownReportStep.START_PAGE);
+					return FileUtils.readFileToString(startPageFile, StandardCharsets.UTF_8);
+				}
+				
+			});
+		}
+		
+	}
 }

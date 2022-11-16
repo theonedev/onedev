@@ -55,7 +55,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 	@Override
 	public Map<String, byte[]> run(Build build, File workspace, TaskLogger logger) {
 		if (build.getRequest() != null) {
-			LockUtils.write(getReportLockKey(build), new Callable<Void>() {
+			LockUtils.write(getReportLockName(build.getProject().getId(), build.getNumber()), new Callable<Void>() {
 
 				@Override
 				public Void call() throws Exception {
@@ -76,8 +76,8 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 		return null;
 	}
 
-	public static String getReportLockKey(Build build) {
-		return PublishPullRequestMarkdownReportStep.class.getName() + ":" + build.getId();
+	public static String getReportLockName(Long projectId, Long buildNumber) {
+		return PublishPullRequestMarkdownReportStep.class.getName() + ":" + projectId + ":" + buildNumber;
 	}
 
 }

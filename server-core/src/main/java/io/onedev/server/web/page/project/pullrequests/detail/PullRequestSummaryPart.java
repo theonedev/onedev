@@ -1,17 +1,21 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
+import java.io.Serializable;
+
 import org.apache.wicket.Component;
 
-public abstract class PullRequestSummaryPart {
+public abstract class PullRequestSummaryPart implements Serializable {
 
-	private final String title;
+	private static final long serialVersionUID = 1L;
 	
-	public PullRequestSummaryPart(String title) {
-		this.title = title;
+	private final String reportName;
+	
+	public PullRequestSummaryPart(String reportName) {
+		this.reportName = reportName;
 	}
 	
-	public String getTitle() {
-		return title;
+	public String getReportName() {
+		return reportName;
 	}
 	
 	public abstract Component render(String componentId);

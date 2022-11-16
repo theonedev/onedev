@@ -58,11 +58,10 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<BuildTab> getTabs(Build build) {
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 				Long projectId = build.getProject().getId();
 				Long buildNumber = build.getNumber();
 				
-				return projectManager.runOnProjectServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+				return getProjectManager().runOnProjectServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
 						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
 						.collect(Collectors.toList());
 			}
@@ -79,23 +78,13 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			@Override
 			public List<PullRequestSummaryPart> getParts(PullRequest request) {
 				List<PullRequestSummaryPart> parts = new ArrayList<>();
+				Long projectId = request.getProject().getId();
 				for (Build build: request.getCurrentBuilds()) {
-					parts.addAll(LockUtils.read(PublishPullRequestMarkdownReportStep.getReportLockKey(build), new Callable<List<PullRequestSummaryPart>>() {
-
-						@Override
-						public List<PullRequestSummaryPart> call() throws Exception {
-							List<PullRequestSummaryPart> parts = new ArrayList<>();
-							File categoryDir = new File(build.getDir(), PublishPullRequestMarkdownReportStep.CATEGORY);
-							if (categoryDir.exists()) {
-								for (File reportDir: categoryDir.listFiles()) {
-									if (SecurityUtils.canAccessReport(build, reportDir.getName()))
-										parts.add(new PullRequestSummaryMarkdownPart(reportDir));
-								}
-							}
-							return parts;
-						}
-						
-					}));
+					Long buildNumber = build.getNumber();
+					for (PullRequestSummaryPart part: getProjectManager().runOnProjectServer(projectId, new GetPullRequestSummaryParts(projectId, buildNumber))) {
+						if (SecurityUtils.canAccessReport(build, part.getReportName()))
+							parts.add(part);
+					}
 				}
 				return parts;
 			}
@@ -119,6 +108,10 @@ public class MarkdownReportModule extends AbstractPluginModule {
 		});	
 		
 	}
+	
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
 
 	private static class GetBuildTabs implements ClusterTask<List<BuildTab>> {
 
@@ -140,7 +133,7 @@ public class MarkdownReportModule extends AbstractPluginModule {
 				@Override
 				public List<BuildTab> call() throws Exception {
 					List<BuildTab> tabs = new ArrayList<>();
-					File categoryDir = new File(Build.getDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
+					File categoryDir = new File(Build.getDir(projectId, buildNumber), PublishMarkdownReportStep.CATEGORY);
 					if (categoryDir.exists()) {
 						for (File reportDir: categoryDir.listFiles()) 
 							tabs.add(new MarkdownReportTab(reportDir.getName()));
@@ -161,4 +154,36 @@ public class MarkdownReportModule extends AbstractPluginModule {
 		
 	}
 	
+	private static class GetPullRequestSummaryParts implements ClusterTask<List<PullRequestSummaryPart>> {
+
+		private static final long serialVersionUID = 1L;
+
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		private GetPullRequestSummaryParts(Long projectId, Long buildNumber) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+		}
+		
+		@Override
+		public List<PullRequestSummaryPart> call() throws Exception {
+			return LockUtils.read(PublishPullRequestMarkdownReportStep.getReportLockName(projectId, buildNumber), new Callable<List<PullRequestSummaryPart>>() {
+
+				@Override
+				public List<PullRequestSummaryPart> call() throws Exception {
+					List<PullRequestSummaryPart> parts = new ArrayList<>();
+					File categoryDir = new File(Build.getDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
+					if (categoryDir.exists()) {
+						for (File reportDir: categoryDir.listFiles()) 
+							parts.add(new PullRequestSummaryMarkdownPart(projectId, buildNumber, reportDir.getName()));
+					}
+					return parts;
+				}
+				
+			});
+		}
+		
+	}
 }

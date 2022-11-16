@@ -1,7 +1,6 @@
 package io.onedev.server.plugin.report.markdown;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,9 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -57,14 +59,10 @@ public class MarkdownReportPage extends BuildDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		File file = new File(getBuild().getDir(), 
-				PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + filePath);
-		try {
-			String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-			add(new MarkdownViewer("markdownReport", Model.of(markdown), null));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		Long projectId = getBuild().getProject().getId();
+		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+		String markdown = projectManager.runOnProjectServer(projectId, new GetMarkdownContent(projectId, getBuild().getNumber(), reportName, filePath));
+		add(new MarkdownViewer("markdownReport", Model.of(markdown), null));
 	}
 
 	@Override
@@ -93,5 +91,31 @@ public class MarkdownReportPage extends BuildDetailPage {
 			}
 		}
 		return params;
+	}
+	
+	private static class GetMarkdownContent implements ClusterTask<String> {
+
+		private final Long projectId;
+		
+		private final Long buildNumber;
+		
+		private final String reportName;
+		
+		private final String filePath;
+		
+		private GetMarkdownContent(Long projectId, Long buildNumber, String reportName, String filePath) {
+			this.projectId = projectId;
+			this.buildNumber = buildNumber;
+			this.reportName = reportName;
+			this.filePath = filePath;
+		}
+		
+		@Override
+		public String call() throws Exception {
+			File file = new File(Build.getDir(projectId, buildNumber), 
+					PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + filePath);
+			return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+		}
+		
 	}
 }

@@ -1500,11 +1500,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 						@Override
 						public Void call() throws Exception {
-							if (dependency.getArtifactsDir().exists()) {
+							File artifactsDir = dependency.getArtifactsDir();
+							if (artifactsDir.exists()) {
 								PatternSet patternSet = PatternSet.parse(dependence.getArtifacts());
-								int baseLen = dependency.getArtifactsDir().getAbsolutePath().length()+1;
-								for (File file: FileUtils.listFiles(dependency.getArtifactsDir(), 
-										patternSet.getIncludes(), patternSet.getExcludes())) {
+								int baseLen = artifactsDir.getAbsolutePath().length()+1;
+								for (File file: FileUtils.listFiles(artifactsDir, patternSet.getIncludes(), patternSet.getExcludes())) {
 									FileUtils.copyFile(file, 
 											new File(targetDir, file.getAbsolutePath().substring(baseLen)));
 								}

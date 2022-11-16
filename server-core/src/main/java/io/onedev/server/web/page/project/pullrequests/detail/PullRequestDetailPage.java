@@ -1230,7 +1230,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void populateItem(ListItem<PullRequestSummaryPart> item) {
 				PullRequestSummaryPart part = item.getModelObject();
-				item.add(new Label("head", part.getTitle()));
+				item.add(new Label("head", part.getReportName()));
 				item.add(part.render("body"));
 			}
 			

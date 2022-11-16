@@ -811,7 +811,7 @@ public class PullRequest extends AbstractEntity
 			Project project = getTargetProject();
 			ObjectId headCommitId = ObjectId.fromString(getLatestUpdate().getHeadCommitHash());
 			ObjectId targetHeadCommitId = ObjectId.fromString(getLatestUpdate().getTargetHeadCommitHash());
-			return getGitService().getReachableCommits(project, Lists.newArrayList(headCommitId), 
+			pendingCommits = getGitService().getReachableCommits(project, Lists.newArrayList(headCommitId), 
 					Lists.newArrayList(targetHeadCommitId)); 
 		}
 		return pendingCommits;
