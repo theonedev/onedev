@@ -1,6 +1,8 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -8,16 +10,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.model.User;
+import io.onedev.server.util.MapProxy;
 
-public class EmailAddressCache extends HashMap<Long, EmailAddressFacade> {
+public class EmailAddressCache extends MapProxy<Long, EmailAddressFacade> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	public EmailAddressCache(Map<Long, EmailAddressFacade> delegate) {
+		super(delegate);
+	}
+	
 	@Override
 	public EmailAddressCache clone() {
-		EmailAddressCache clone = new EmailAddressCache();
-		clone.putAll(this);
-		return clone;
+		return new EmailAddressCache(new HashMap<>(delegate));
 	}
 	
 	@Nullable

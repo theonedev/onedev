@@ -1,8 +1,10 @@
 package io.onedev.server.util.facade;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -10,11 +12,16 @@ import javax.annotation.Nullable;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
+import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
 
-public class UserCache extends HashMap<Long, UserFacade> {
+public class UserCache extends MapProxy<Long, UserFacade> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public UserCache(Map<Long, UserFacade> delegate) {
+		super(delegate);
+	}
 	
 	@Nullable
 	public UserFacade findByName(String name) {
@@ -53,9 +60,7 @@ public class UserCache extends HashMap<Long, UserFacade> {
 	
 	@Override
 	public UserCache clone() {
-		UserCache clone = new UserCache();
-		clone.putAll(this);
-		return clone;
+		return new UserCache(new HashMap<>(delegate));
 	}
 	
 	public Collection<User> getUsers() {

@@ -5,8 +5,7 @@ import static io.onedev.server.model.User.PROP_SSO_CONNECTOR;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,7 +21,10 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import com.google.common.collect.Sets;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.cp.IAtomicLong;
 
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -72,14 +74,15 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     
     private final TransactionManager transactionManager;
     
-	private final UserCache cache = new UserCache();
-	
-	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
+    private final ClusterManager clusterManager;
+    
+	private volatile UserCache cache;
 	
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
     		IssueFieldManager issueFieldManager, IdManager idManager, GroupManager groupManager,
-    		EmailAddressManager emailAddressManager, TransactionManager transactionManager) {
+    		EmailAddressManager emailAddressManager, TransactionManager transactionManager,
+    		ClusterManager clusterManager) {
         super(dao);
         
         this.projectManager = projectManager;
@@ -89,6 +92,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
         this.emailAddressManager = emailAddressManager;
         this.transactionManager = transactionManager;
         this.groupManager = groupManager;
+        this.clusterManager = clusterManager;
     }
 
 	@Transactional
@@ -239,56 +243,36 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Sessional
     @Override
     public User findByName(String userName) {
-		cacheLock.readLock().lock();
-		try {
-			UserFacade facade = cache.findByName(userName);
-			if (facade != null)
-				return load(facade.getId());
-			else
-				return null;
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		UserFacade facade = cache.findByName(userName);
+		if (facade != null)
+			return load(facade.getId());
+		else
+			return null;
     }
 
     @Override
     public UserFacade findFacadeById(Long userId) {
-		cacheLock.readLock().lock();
-		try {
-			return cache.get(userId);
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		return cache.get(userId);
     }
 	
 	@Sessional
     @Override
     public User findByFullName(String fullName) {
-		cacheLock.readLock().lock();
-		try {
-			UserFacade facade = cache.findByFullName(fullName);
-			if (facade != null)
-				return load(facade.getId());
-			else
-				return null;
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		UserFacade facade = cache.findByFullName(fullName);
+		if (facade != null)
+			return load(facade.getId());
+		else
+			return null;
     }
 	
 	@Sessional
     @Override
     public User findByAccessToken(String accessToken) {
-		cacheLock.readLock().lock();
-		try {
-			UserFacade facade = cache.findByAccessToken(accessToken);
-			if (facade != null)
-				return load(facade.getId());
-			else
-				return null;
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		UserFacade facade = cache.findByAccessToken(accessToken);
+		if (facade != null)
+			return load(facade.getId());
+		else
+			return null;
     }
 	
 	@Override
@@ -307,13 +291,20 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Sessional
     @Listen
     public void on(SystemStarted event) {
-    	cacheLock.writeLock().lock();
-    	try {
-        	for (User user: query()) 
-        		cache.put(user.getId(), user.getFacade());
-    	} finally {
-    		cacheLock.writeLock().unlock();
-    	}
+		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
+        cache = new UserCache(hazelcastInstance.getMap("userCache"));
+        
+        IAtomicLong userCacheLoaded = hazelcastInstance.getCPSubsystem().getAtomicLong("userCacheLoaded");
+        clusterManager.init(userCacheLoaded, new Callable<Long>() {
+
+			@Override
+			public Long call() throws Exception {
+		    	for (User user: query()) 
+		    		cache.put(user.getId(), user.getFacade());
+				return 1L;
+			}
+        	
+        });
     }
 	
     @Transactional
@@ -325,12 +316,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 				@Override
 				public void run() {
-			    	cacheLock.writeLock().lock();
-			    	try {
-			    		cache.remove(id);
-			    	} finally {
-			    		cacheLock.writeLock().unlock();
-			    	}
+			    	cache.remove(id);
 				}
 				
     		});
@@ -350,12 +336,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 			@Override
 			public void run() {
-		    	cacheLock.writeLock().lock();
-		    	try {
-		    		cache.put(facade.getId(), facade);
-		    	} finally {
-		    		cacheLock.writeLock().unlock();
-		    	}
+		    	cache.put(facade.getId(), facade);
 			}
 			
 		});
@@ -443,23 +424,12 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 	@Override
 	public UserCache cloneCache() {
-		cacheLock.readLock().lock();
-		try {
-			return cache.clone();
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		return cache.clone();
 	}
 
 	@Override
 	public Collection<User> getAuthorizedUsers(Project project, Permission permission) {
-		UserCache cacheClone;
-		cacheLock.readLock().lock();
-		try {
-			cacheClone = cache.clone();
-		} finally {
-			cacheLock.readLock().unlock();
-		}
+		UserCache cacheClone = cache.clone();
 
 		Collection<User> authorizedUsers = Sets.newHashSet(getRoot());
 
