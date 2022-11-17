@@ -34,6 +34,7 @@ import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.Mark;
+import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 
@@ -43,7 +44,7 @@ import io.onedev.server.util.CollectionUtils;
 		@Index(columnList="o_pullRequest_id"),
 		@Index(columnList=Mark.PROP_COMMIT_HASH), @Index(columnList=Mark.PROP_PATH), 
 		@Index(columnList=PROP_CREATE_DATE), @Index(columnList=LastUpdate.COLUMN_DATE)})
-public class CodeComment extends AbstractEntity implements AttachmentStorageSupport {
+public class CodeComment extends ProjectBelonging implements AttachmentStorageSupport {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -137,6 +138,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	private transient Collection<User> participants;
 	
+	@Override
 	public Project getProject() {
 		return project;
 	}

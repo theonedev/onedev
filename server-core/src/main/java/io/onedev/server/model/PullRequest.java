@@ -58,6 +58,7 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
@@ -81,7 +82,7 @@ import io.onedev.server.web.util.WicketUtils;
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
-public class PullRequest extends AbstractEntity 
+public class PullRequest extends ProjectBelonging 
 		implements Referenceable, AttachmentStorageSupport, LabelSupport<PullRequestLabel> {
 
 	private static final long serialVersionUID = 1L;

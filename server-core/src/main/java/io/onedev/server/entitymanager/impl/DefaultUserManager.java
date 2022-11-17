@@ -336,7 +336,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 			@Override
 			public void run() {
-		    	cache.put(facade.getId(), facade);
+				if (cache != null)
+					cache.put(facade.getId(), facade);
 			}
 			
 		});

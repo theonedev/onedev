@@ -64,6 +64,7 @@ import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -92,7 +93,7 @@ import io.onedev.server.web.util.WicketUtils;
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 @Editable
-public class Issue extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
+public class Issue extends ProjectBelonging implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
 	

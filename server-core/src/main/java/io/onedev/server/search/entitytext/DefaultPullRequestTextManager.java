@@ -1,6 +1,6 @@
 package io.onedev.server.search.entitytext;
 
-import java.io.IOException;
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,42 +17,38 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.lucene.BooleanQueryBuilder;
+import io.onedev.server.util.lucene.LuceneUtils;
 
 @Singleton
-public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest> 
+public class DefaultPullRequestTextManager extends ProjectTextManager<PullRequest> 
 		implements PullRequestTextManager {
 
-	private static final String FIELD_PROJECT_ID = "projectId";
-	
 	private static final String FIELD_NUMBER = "number";
 	
 	private static final String FIELD_TITLE = "title";
 	
 	private static final String FIELD_DESCRIPTION = "description";
-	
-	private final ProjectManager projectManager;
 	
 	private final PullRequestReviewManager reviewManager;
 	
@@ -62,45 +58,24 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 	public DefaultPullRequestTextManager(Dao dao, StorageManager storageManager, 
 			BatchWorkManager batchWorkManager, TransactionManager transactionManager, 
 			ProjectManager projectManager, PullRequestReviewManager reviewManager, 
-			BuildManager buildManager) {
-		super(dao, storageManager, batchWorkManager, transactionManager);
-		this.projectManager = projectManager;
+			BuildManager buildManager, ClusterManager clusterManager) {
+		super(dao, storageManager, batchWorkManager, transactionManager, projectManager, 
+				clusterManager);
 		this.reviewManager = reviewManager;
 		this.buildManager = buildManager;
 	}
 
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(PullRequestTextManager.class);
+	}
+	
 	@Override
 	protected int getIndexVersion() {
 		return 1;
 	}
 
-	@Transactional
-	@Listen
-	public void on(EntityRemoved event) {
-		super.on(event);
-		if (event.getEntity() instanceof Project) {
-			Long projectId = event.getEntity().getId();
-			transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					doWithWriter(new WriterRunnable() {
-
-						@Override
-						public void run(IndexWriter writer) throws IOException {
-							writer.deleteDocuments(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectId));
-						}
-						
-					});
-				}
-				
-			});
-		}
-	}
-	
 	@Override
 	protected void addFields(Document document, PullRequest entity) {
-		document.add(new LongPoint(FIELD_PROJECT_ID, entity.getProject().getId()));
 		document.add(new LongPoint(FIELD_NUMBER, entity.getNumber()));
 		document.add(new TextField(FIELD_TITLE, entity.getTitle(), Store.NO));
 		if (entity.getDescription() != null)
@@ -109,7 +84,7 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 
 	@Nullable
 	private Query buildQuery(@Nullable Project project, String queryString) {
-		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+		BooleanQueryBuilder queryBuilder = new BooleanQueryBuilder();
 		if (project != null) {
 			queryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
 		} else if (!SecurityUtils.isAdministrator()) {
@@ -124,7 +99,7 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 				return null;
 			}
 		}
-		BooleanQuery.Builder contentQueryBuilder = new BooleanQuery.Builder();
+		BooleanQueryBuilder contentQueryBuilder = new BooleanQueryBuilder();
 		
 		String numberString = queryString;
 		if (numberString.startsWith("#")) 
@@ -141,12 +116,10 @@ public class DefaultPullRequestTextManager extends EntityTextManager<PullRequest
 			boosts.put(FIELD_DESCRIPTION, 0.5f);
 			MultiFieldQueryParser parser = new MultiFieldQueryParser(
 					new String[] {FIELD_TITLE, FIELD_DESCRIPTION}, analyzer, boosts);
-			contentQueryBuilder.add(parser.parse(queryString), Occur.SHOULD);
-		} catch (Exception e) {
-			contentQueryBuilder.add(getTermQuery(FIELD_TITLE, queryString), Occur.SHOULD);
-			contentQueryBuilder.add(getTermQuery(FIELD_DESCRIPTION, queryString), Occur.SHOULD);
+			contentQueryBuilder.add(parser.parse(LuceneUtils.escape(queryString)), Occur.SHOULD);
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
 		}
-		contentQueryBuilder.setMinimumNumberShouldMatch(1);
 		queryBuilder.add(contentQueryBuilder.build(), Occur.MUST);
 		
 		return queryBuilder.build();		

@@ -214,7 +214,8 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 
 				@Override
 				public void run() {
-			    	cache.put(facade.getId(), facade);
+					if (cache != null)
+						cache.put(facade.getId(), facade);
 				}
     			
     		});

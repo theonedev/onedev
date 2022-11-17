@@ -73,6 +73,7 @@ import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
+import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
 import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
@@ -112,7 +113,7 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
-public class Build extends AbstractEntity 
+public class Build extends ProjectBelonging 
 		implements Referenceable, AttachmentStorageSupport, LabelSupport<BuildLabel> {
 
 	private static final long serialVersionUID = 1L;

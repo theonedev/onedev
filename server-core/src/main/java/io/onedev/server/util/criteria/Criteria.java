@@ -76,7 +76,6 @@ public abstract class Criteria<T> implements Serializable {
 			
 		});
 		
-		queryBuilder.setMinimumNumberShouldMatch(1);
 		return queryBuilder.build();
 	}
 	
