@@ -41,6 +41,6 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, @Nullable Boolean confidential,
 			@Nullable Collection<Milestone> milestone, Map<String, Object> fieldValues, @Nullable String comment);
 	
-	List<IssueChange> queryAfter(Long afterChangeId, int count);
+	List<IssueChange> queryAfter(Long projectId, Long afterChangeId, int count);
 	
 }

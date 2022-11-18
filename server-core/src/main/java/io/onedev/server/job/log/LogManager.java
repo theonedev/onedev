@@ -48,7 +48,7 @@ public interface LogManager {
 	 */
 	LogSnippet readLogSnippetReversely(Build build, int count);
 	
-	InputStream openLogStream(Long buildId);
+	InputStream openLogStream(Long projectId, Long buildNumber);
 	
 	@Nullable
 	TaskLogger getJobLogger(String jobToken);

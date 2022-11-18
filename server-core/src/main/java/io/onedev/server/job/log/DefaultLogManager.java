@@ -55,7 +55,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
@@ -81,7 +80,7 @@ public class DefaultLogManager implements LogManager, Serializable {
 	
 	private final BuildManager buildManager;
 	
-	private final Map<Long, LogSnippet> recentSnippets = new ConcurrentHashMap<>();
+	private final Map<String, LogSnippet> recentSnippets = new ConcurrentHashMap<>();
 	
 	private final Map<String, TaskLogger> jobLoggers = new ConcurrentHashMap<>();
 	
@@ -124,16 +123,17 @@ public class DefaultLogManager implements LogManager, Serializable {
 					message = StringUtils.replace(message, maskSecret, SecretInput.MASK);
 				
 				String maskedMessage = message;
-				LockUtils.write(getLockName(buildId), new Callable<Void>() {
+				LockUtils.write(getLockName(projectId, buildNumber), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						LogSnippet snippet = recentSnippets.get(buildId);
+						String logKey = getLogKey(projectId, buildNumber);
+						LogSnippet snippet = recentSnippets.get(logKey);
 						if (snippet == null) {
 							File logFile = getLogFile(projectId, buildNumber);
 							if (!logFile.exists())	{
 								snippet = new LogSnippet();
-								recentSnippets.put(buildId, snippet);
+								recentSnippets.put(logKey, snippet);
 							}
 						}
 						if (snippet != null) {
@@ -224,17 +224,18 @@ public class DefaultLogManager implements LogManager, Serializable {
 		instruction.execute(buildManager.load(buildId), params, logger);
 	}
 
-	private String getLockName(Long buildId) {
-		return "build-log: " + buildId;
+	private String getLockName(Long projectId, Long buildNumber) {
+		return "build-log: " + projectId + ":" + buildNumber;
 	}
 
 	@Override
 	public boolean matches(Build build, Pattern pattern) {
-		return LockUtils.read(getLockName(build.getId()), new Callable<Boolean>() {
+		String key = getLogKey(build.getProject().getId(), build.getNumber());
+		return LockUtils.read(getLockName(build.getProject().getId(), build.getNumber()), new Callable<Boolean>() {
 
 			@Override
 			public Boolean call() throws Exception {
-				LogSnippet snippet = recentSnippets.get(build.getId());
+				LogSnippet snippet = recentSnippets.get(key);
 				if (snippet != null) {
 					for (JobLogEntryEx entry: snippet.entries) {
 						if ((build.getRetryDate() == null || !entry.getDate().before(build.getRetryDate())) 
@@ -337,7 +338,6 @@ public class DefaultLogManager implements LogManager, Serializable {
 	@Override
 	public List<JobLogEntryEx> readLogEntries(Build build, int from, int count) {
 		Long projectId = build.getProject().getId();
-		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
 		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<JobLogEntryEx>>() {
 
@@ -345,12 +345,12 @@ public class DefaultLogManager implements LogManager, Serializable {
 
 			@Override
 			public List<JobLogEntryEx> call() throws Exception {
-				return LockUtils.read(getLockName(buildId), new Callable<List<JobLogEntryEx>>() {
+				return LockUtils.read(getLockName(projectId, buildNumber), new Callable<List<JobLogEntryEx>>() {
 
 					@Override
 					public List<JobLogEntryEx> call() throws Exception {
 						File logFile = getLogFile(projectId, buildNumber);
-						LogSnippet snippet = recentSnippets.get(buildId);
+						LogSnippet snippet = recentSnippets.get(getLogKey(projectId, buildNumber));
 						if (snippet != null) {
 							if (from >= snippet.offset) {
 								return readLogEntries(snippet.entries, from - snippet.offset, count);
@@ -378,7 +378,6 @@ public class DefaultLogManager implements LogManager, Serializable {
 	@Override
 	public LogSnippet readLogSnippetReversely(Build build, int count) {
 		Long projectId = build.getProject().getId();
-		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
 		return projectManager.runOnProjectServer(projectId, new ClusterTask<LogSnippet>() {
 
@@ -386,12 +385,12 @@ public class DefaultLogManager implements LogManager, Serializable {
 
 			@Override
 			public LogSnippet call() throws Exception {
-				return LockUtils.read(getLockName(buildId), new Callable<LogSnippet>() {
+				return LockUtils.read(getLockName(projectId, buildNumber), new Callable<LogSnippet>() {
 
 					@Override
 					public LogSnippet call() throws Exception {
 						File logFile = getLogFile(projectId, buildNumber);
-						LogSnippet recentSnippet = recentSnippets.get(buildId);
+						LogSnippet recentSnippet = recentSnippets.get(getLogKey(projectId, buildNumber));
 						if (recentSnippet != null) {
 							LogSnippet snippet = new LogSnippet();
 							if (count <= recentSnippet.entries.size()) {
@@ -437,11 +436,11 @@ public class DefaultLogManager implements LogManager, Serializable {
 	@Listen
 	public void on(BuildFinished event) {
 		Build build = event.getBuild();
-		LockUtils.write(getLockName(build.getId()), new Callable<Void>() {
+		LockUtils.write(getLockName(build.getProject().getId(), build.getNumber()), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
-				LogSnippet snippet = recentSnippets.remove(build.getId());
+				LogSnippet snippet = recentSnippets.remove(getLogKey(build.getProject().getId(), build.getNumber()));
 				if (snippet != null) {
 					File logFile = getLogFile(build.getProject().getId(), build.getNumber());
 					try (ObjectOutputStream oos = newOutputStream(logFile)) {
@@ -456,10 +455,14 @@ public class DefaultLogManager implements LogManager, Serializable {
 			
 		});
 	}
+	
+	private String getLogKey(Long projectId, Long buildNumber) {
+		return projectId + ":" + buildNumber;
+	}
 
 	@Override
-	public InputStream openLogStream(Long buildId) {
-		return new LogStream(buildId);
+	public InputStream openLogStream(Long projectId, Long buildNumber) {
+		return new LogStream(projectId, buildNumber);
 	}
 
 	class LogStream extends InputStream {
@@ -474,17 +477,16 @@ public class DefaultLogManager implements LogManager, Serializable {
 		
 		private int pos = 0;
 		
-		public LogStream(Long buildId) {
-			lock = LockUtils.getReadWriteLock(getLockName(buildId)).readLock();
+		public LogStream(Long projectId, Long buildNumber) {
+			lock = LockUtils.getReadWriteLock(getLockName(projectId, buildNumber)).readLock();
 			lock.lock();
 			try {
-				BuildFacade build = OneDev.getInstance(BuildManager.class).findFacade(buildId);
-				File logFile = getLogFile(build.getProjectId(), build.getNumber());
+				File logFile = getLogFile(projectId, buildNumber);
 				
 				if (logFile.exists())
 					ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)));
 				
-				LogSnippet snippet = recentSnippets.get(buildId);
+				LogSnippet snippet = recentSnippets.get(getLogKey(projectId, buildNumber));
 				if (snippet != null) {
 					StringBuilder builder = new StringBuilder();
 					for (JobLogEntryEx entry: snippet.entries)

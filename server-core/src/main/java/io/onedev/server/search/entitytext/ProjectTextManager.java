@@ -32,7 +32,6 @@ import org.apache.lucene.analysis.no.NorwegianAnalyzer;
 import org.apache.lucene.analysis.pt.PortugueseAnalyzer;
 import org.apache.lucene.analysis.ru.RussianAnalyzer;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.sv.SwedishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -332,30 +331,33 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			});
 		} else if (event.getEntity() instanceof Project) {
 			Long projectId = event.getEntity().getId();
+			UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, false);
 			transactionManager.runAfterCommit(new ClusterRunnable() {
 
 				private static final long serialVersionUID = 1L;
 
 				@Override
 				public void run() {
-					projectManager.submitToProjectServer(projectId, new ClusterTask<Void>() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public Void call() throws Exception {
-							doWithWriter(new WriterRunnable() {
-
-								@Override
-								public void run(IndexWriter writer) throws IOException {
-									writer.deleteDocuments(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectId));
-								}
-								
-							});
-							return null;
-						}
-						
-					});
+					if (storageServerUUID != null) {
+						clusterManager.submitToServer(storageServerUUID, new ClusterTask<Void>() {
+	
+							private static final long serialVersionUID = 1L;
+	
+							@Override
+							public Void call() throws Exception {
+								doWithWriter(new WriterRunnable() {
+	
+									@Override
+									public void run(IndexWriter writer) throws IOException {
+										writer.deleteDocuments(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectId));
+									}
+									
+								});
+								return null;
+							}
+							
+						});
+					}
 				}
 				
 			});
@@ -460,7 +462,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	protected boolean index() {
 		File indexDir = getIndexDir();
 		try (Directory directory = FSDirectory.open(indexDir.toPath())) {
-			Long lastEntityId = null;
+			Long lastEntityId = 0L;
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					lastEntityId = getLastEntityId(new IndexSearcher(reader));
@@ -497,7 +499,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	private Query parse(String queryString) {
 		try {
-			QueryParser parser = new QueryParser("", new StandardAnalyzer()) {
+			QueryParser parser = new QueryParser("", newAnalyzer()) {
 
 				@Override
 				protected Query getRangeQuery(String field, String part1, String part2, boolean startInclusive,

@@ -67,9 +67,6 @@ public interface IssueManager extends EntityManager<Issue> {
 	@Override
 	void delete(Issue issue);
 	
-	@Nullable
-	Long getIssueId(Long projectId, Long issueNumber);
-	
 	void move(Project targetProject, Collection<Issue> issues);
 	
 	void delete(Collection<Issue> issues);
@@ -82,7 +79,7 @@ public interface IssueManager extends EntityManager<Issue> {
 
 	void clearSchedules(Project project, Collection<Milestone> milestones);
 	
-	List<Issue> queryAfter(@Nullable Long afterIssueId, int count);
+	List<Issue> queryAfter(Long projectId, Long afterIssueId, int count);
 
 	Collection<Long> parseFixedIssueIds(Project project, String commitMessage);
 	

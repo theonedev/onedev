@@ -8,10 +8,14 @@ import org.apache.lucene.search.Query;
 
 public class BooleanQueryBuilder extends BooleanQuery.Builder {
 
+	private boolean matchNone;
+	
 	@Override
 	public Builder add(Query query, Occur occur) {
-		if (query != null && !LuceneUtils.isEmpty(query)) 
+		if (query != null && !LuceneUtils.isEmpty(query))  
 			super.add(query, occur);
+		else
+			matchNone = occur == Occur.MUST;
 		return this;
 	}
 
@@ -19,16 +23,22 @@ public class BooleanQueryBuilder extends BooleanQuery.Builder {
 	public Builder add(BooleanClause clause) {
 		if (clause.getQuery() != null && !LuceneUtils.isEmpty(clause.getQuery()))
 			super.add(clause);
+		else
+			matchNone = clause.getOccur() == Occur.MUST;
 		return this;
 	}
 
 	@Override
 	public BooleanQuery build() {
-		BooleanQuery query = super.build();
-		if (!LuceneUtils.isEmpty(query))
-			return query;
-		else
+		if (matchNone) {
 			return null;
+		} else {
+			BooleanQuery query = super.build();
+			if (!LuceneUtils.isEmpty(query))
+				return query;
+			else
+				return null;
+		}
 	}
 
 	@Override

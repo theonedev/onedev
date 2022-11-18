@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -51,7 +50,6 @@ import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
 import com.hazelcast.map.IMap;
 import com.hazelcast.map.listener.EntryAddedListener;
 import com.hazelcast.map.listener.EntryRemovedListener;
@@ -686,22 +684,13 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Listen(1)
 	public void on(SystemStarted event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = new ProjectCache(hazelcastInstance.getMap("projectCache"));
-        IAtomicLong projectCacheLoaded = hazelcastInstance.getCPSubsystem().getAtomicLong("projectCacheLoaded");
-        clusterManager.init(projectCacheLoaded, new Callable<Long>() {
-
-			@Override
-			public Long call() throws Exception {
-				for (Project project: query()) {
-					String path = project.getPath();
-					if (!path.equals(project.calcPath()))
-						project.setPath(path);
-					cache.put(project.getId(), project.getFacade());
-				}
-				return 1L;
-			}
-        	
-        });
+        cache = new ProjectCache(hazelcastInstance.getReplicatedMap("projectCache"));
+		for (Project project: query()) {
+			String path = project.getPath();
+			if (!path.equals(project.calcPath()))
+				project.setPath(path);
+			cache.put(project.getId(), project.getFacade());
+		}
 
 		logger.info("Checking projects...");
 		

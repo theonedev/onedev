@@ -247,11 +247,7 @@ public class DefaultClusterManager implements ClusterManager {
 					throw ExceptionUtils.unchecked(e);
 				}
 			} else {
-				logger.info("Waiting for cluster leader...");
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-				}
+//				logger.info("Waiting for cluster leader...");
 			}
 		}
 	}

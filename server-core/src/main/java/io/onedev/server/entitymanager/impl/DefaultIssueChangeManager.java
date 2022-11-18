@@ -19,6 +19,8 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -79,6 +81,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -171,7 +174,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			dao.persist(issue);
 		}
 	}
-
+	
 	@Transactional
 	@Override
 	public void changeConfidential(Issue issue, boolean confidential) {
@@ -573,8 +576,12 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	@Sessional
 	@Override
-	public List<IssueChange> queryAfter(Long afterChangeId, int count) {
-		return dao.queryAfter(IssueChange.class, afterChangeId, count);
+	public List<IssueChange> queryAfter(Long projectId, Long afterChangeId, int count) {
+		EntityCriteria<IssueChange> criteria = newCriteria();
+		criteria.createCriteria("issue").add(Restrictions.eq("project.id", projectId));
+		criteria.add(Restrictions.gt("id", afterChangeId));
+		criteria.addOrder(Order.asc("id"));
+		return query(criteria, 0, count);
 	}
 
 	@Override

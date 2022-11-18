@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,7 +29,6 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -78,20 +76,18 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final SessionManager sessionManager;
-	
 	private final TransactionManager transactionManager;
 	
 	@Inject
-	public DefaultPullRequestInfoManager(TransactionManager transactionManager, ProjectManager projectManager, 
-			StorageManager storageManager, PullRequestUpdateManager pullRequestUpdateManager, 
-			BatchWorkManager batchWorkManager, SessionManager sessionManager, ClusterManager clusterManager) {
+	public DefaultPullRequestInfoManager(TransactionManager transactionManager, 
+			ProjectManager projectManager, StorageManager storageManager, 
+			PullRequestUpdateManager pullRequestUpdateManager, 
+			BatchWorkManager batchWorkManager, ClusterManager clusterManager) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.clusterManager = clusterManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.batchWorkManager = batchWorkManager;
-		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 	}
 	
@@ -104,18 +100,8 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 
 			@Override
 			public void doWorks(Collection<Prioritized> works) {
-				boolean hasMore;
-				do {
-					// do the work batch by batch to avoid consuming too much memory
-					hasMore = sessionManager.call(new Callable<Boolean>() {
-
-						@Override
-						public Boolean call() throws Exception {
-							return collect(projectManager.load(projectId));
-						}
-						
-					});
-				} while (hasMore);
+				// do the work batch by batch to avoid consuming too much memory
+				while (collect(projectId));
 			}
 			
 		};
@@ -143,10 +129,11 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		}
 	}
 	
-	private boolean collect(Project project) {
-		logger.debug("Collecting pull request info (project: {})...", project);
+	@Sessional
+	protected boolean collect(Long projectId) {
+		logger.debug("Collecting pull request info (project id: {})...", projectId);
 		
-		Environment env = getEnv(project.getId().toString());
+		Environment env = getEnv(projectId.toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store commitToIdsStore = getStore(env, COMMIT_TO_IDS_STORE);
 
@@ -160,7 +147,7 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		});
 		
 		List<PullRequestUpdate> unprocessedPullRequestUpdates = pullRequestUpdateManager.queryAfter(
-				project, lastPullRequestUpdateId, BATCH_SIZE); 
+				projectId, lastPullRequestUpdateId, BATCH_SIZE); 
 		env.executeInTransaction(new TransactionalExecutable() {
 
 			@Override
@@ -183,7 +170,7 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 			}
 			
 		});
-		logger.debug("Collected pull request info (project: {})", project);
+		logger.debug("Collected pull request info (project id: {})", projectId);
 		
 		return unprocessedPullRequestUpdates.size() == BATCH_SIZE;
 	}
@@ -217,31 +204,29 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {
-		if (event.isNew()) {
-			if (event.getEntity() instanceof PullRequestUpdate) {
-				Long projectId = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject().getId();
-				transactionManager.runAfterCommit(new ClusterRunnable() {
+		if (event.isNew() && event.getEntity() instanceof PullRequestUpdate) {
+			Long projectId = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject().getId();
+			transactionManager.runAfterCommit(new ClusterRunnable() {
 
-					private static final long serialVersionUID = 1L;
+				private static final long serialVersionUID = 1L;
 
-					@Override
-					public void run() {
-						projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
+				@Override
+				public void run() {
+					projectManager.submitToProjectServer(projectId, new ClusterTask<Void>() {
 
-							private static final long serialVersionUID = 1L;
+						private static final long serialVersionUID = 1L;
 
-							@Override
-							public Void call() throws Exception {
-								batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
-								return null;
-							}
-							
-						});
-					}
-					
-				});
-			} 
-		}
+						@Override
+						public Void call() throws Exception {
+							batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+							return null;
+						}
+						
+					});
+				}
+				
+			});
+		} 
 	}
 
 	@Sessional

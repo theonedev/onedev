@@ -70,8 +70,6 @@ public class BuildLogResource extends AbstractResource {
 				throw new UnauthorizedException();
 		}
 		
-		Long buildId = OneDev.getInstance(BuildManager.class).findId(projectId, buildNumber);
-	
 		ResourceResponse response = new ResourceResponse();
 		response.setContentType(MimeTypes.OCTET_STREAM);
 		
@@ -92,7 +90,7 @@ public class BuildLogResource extends AbstractResource {
 				LogManager logManager = OneDev.getInstance(LogManager.class);
 				if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
 					try (
-							InputStream is = new BufferedInputStream(logManager.openLogStream(buildId), BUFFER_SIZE);
+							InputStream is = new BufferedInputStream(logManager.openLogStream(projectId, buildNumber), BUFFER_SIZE);
 							OutputStream os = new BufferedOutputStream(attributes.getResponse().getOutputStream(), BUFFER_SIZE)) {
 						IOUtils.copy(is, os);
 					}

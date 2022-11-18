@@ -1,7 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
 import java.util.Arrays;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -12,7 +11,6 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
 
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
@@ -64,19 +62,10 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
     @Sessional
     public void on(SystemStarted event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = new EmailAddressCache(hazelcastInstance.getMap("emailAddressCache"));
+        cache = new EmailAddressCache(hazelcastInstance.getReplicatedMap("emailAddressCache"));
         
-        IAtomicLong emailAddressCacheLoaded = hazelcastInstance.getCPSubsystem().getAtomicLong("emailAddressCacheLoaded");
-        clusterManager.init(emailAddressCacheLoaded, new Callable<Long>() {
-
-			@Override
-			public Long call() throws Exception {
-		    	for (EmailAddress address: query())
-		    		cache.put(address.getId(), address.getFacade());
-				return 1L;
-			}
-        	
-        });
+    	for (EmailAddress address: query())
+    		cache.put(address.getId(), address.getFacade());
     }
     
     @Sessional
@@ -194,7 +183,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 				@Override
 				public void run() {
 					for (var id: cache.entrySet().stream()
-							.filter(it->!it.getValue().getOwnerId().equals(ownerId))
+							.filter(it->it.getValue().getOwnerId().equals(ownerId))
 							.map(it->it.getKey())
 							.collect(Collectors.toSet())) {
 						cache.remove(id);

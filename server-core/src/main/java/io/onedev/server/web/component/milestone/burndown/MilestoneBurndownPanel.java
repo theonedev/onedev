@@ -161,7 +161,7 @@ public class MilestoneBurndownPanel extends GenericPanel<Milestone> {
 						int issueWeight = getFieldValue(issue);
 						int scheduleDayValue = new Day(schedule.getDate()).getValue();
 						Map<Integer, String> dailyStates = OneDev.getInstance(IssueInfoManager.class)
-								.getDailyStates(issue.getId(), Math.max(startDayValue, scheduleDayValue), dueDayValue);
+								.getDailyStates(issue, Math.max(startDayValue, scheduleDayValue), dueDayValue);
 						for (Map.Entry<Integer, String> entry: dailyStates.entrySet()) {
 							Map<String, Integer> stateWeights = dailyStateWeights.get(entry.getKey());
 							if (stateWeights == null) {

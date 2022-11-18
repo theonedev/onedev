@@ -9,6 +9,8 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -25,27 +27,36 @@ public class ProjectScopedCommit implements Serializable {
 	
 	};
 
-	private final Project project;
+	private final Long projectId;
 	
 	private final ObjectId commitId;
 	
 	private transient Collection<Long> fixedIssueIds;
 	
 	public ProjectScopedCommit(Project project, ObjectId commitId) {
-		this.project = project;
+		this(project.getId(), commitId);
+	}
+
+	public ProjectScopedCommit(Long projectId, ObjectId commitId) {
+		this.projectId = projectId;
 		this.commitId = commitId;
 	}
 
 	public Project getProject() {
-		return project;
+		return OneDev.getInstance(ProjectManager.class).load(projectId);
 	}
 
+	public Long getProjectId() {
+		return projectId;
+	}
+	
 	public ObjectId getCommitId() {
 		return commitId;
 	}
 
 	public Collection<Long> getFixedIssueIds() {
 		if (fixedIssueIds == null) {
+			Project project = getProject();
 			RevCommit revCommit = project.getRevCommit(commitId, true);
 			fixedIssueIds = project.parseFixedIssueIds(revCommit.getFullMessage());
 		}

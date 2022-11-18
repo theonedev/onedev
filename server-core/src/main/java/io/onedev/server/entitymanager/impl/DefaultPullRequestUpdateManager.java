@@ -14,7 +14,6 @@ import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.pubsub.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -79,12 +78,11 @@ public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullReque
 	
 	@Sessional
 	@Override
-	public List<PullRequestUpdate> queryAfter(Project project, Long afterUpdateId, int count) {
+	public List<PullRequestUpdate> queryAfter(Long projectId, Long afterUpdateId, int count) {
 		EntityCriteria<PullRequestUpdate> criteria = newCriteria();
-		criteria.createCriteria("request").add(Restrictions.eq("targetProject", project));
+		criteria.createCriteria("request").add(Restrictions.eq("targetProject.id", projectId));
+		criteria.add(Restrictions.gt("id", afterUpdateId));
 		criteria.addOrder(Order.asc("id"));
-		if (afterUpdateId != null) 
-			criteria.add(Restrictions.gt("id", afterUpdateId));
 		return query(criteria, 0, count);
 	}
 

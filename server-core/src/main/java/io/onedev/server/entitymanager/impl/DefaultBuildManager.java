@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
@@ -126,13 +124,13 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final ClusterManager clusterManager;
 	
-	private volatile Map<Long, BuildFacade> builds = new HashMap<>();
-	
-	private volatile Map<Long, Collection<String>> jobNames = new HashMap<>();
-	
 	private final SequenceGenerator numberGenerator;
 	
-	private String taskId;
+	private volatile Map<Long, BuildFacade> cache;
+	
+	private volatile Map<Long, Collection<String>> jobNames;
+	
+	private volatile String taskId;
 	
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
@@ -167,7 +165,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 			@Override
 			public void run() {
-				builds.remove(buildId);
+				cache.remove(buildId);
 			}
 			
 		});
@@ -222,7 +220,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 			@Override
 			public void run() {
-				builds.put(facade.getId(), facade);
+				cache.put(facade.getId(), facade);
 				populateJobNames(facade.getProjectId(), jobName);
 			}
 			
@@ -242,10 +240,11 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 				@Override
 				public void run() {
-					for (Iterator<Map.Entry<Long, BuildFacade>> it = builds.entrySet().iterator(); it.hasNext();) {
-						BuildFacade build = it.next().getValue();
-						if (build.getProjectId().equals(projectId))
-							it.remove();
+					for (var id: cache.entrySet().stream()
+							.filter(it->it.getValue().getProjectId().equals(projectId))
+							.map(it->it.getKey())
+							.collect(Collectors.toSet())) {
+						cache.remove(id);
 					}
 					jobNames.remove(projectId);
 				}
@@ -699,26 +698,17 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		logger.info("Caching build info...");
 		
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        builds = hazelcastInstance.getMap("builds");
-        jobNames = hazelcastInstance.getMap("jobNames");
+        cache = hazelcastInstance.getMap("builds");
+        jobNames = hazelcastInstance.getReplicatedMap("jobNames");
         
-        IAtomicLong buildManagerInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildManagerInited");
-        clusterManager.init(buildManagerInited, new Callable<Long>() {
-
-			@Override
-			public Long call() throws Exception {
-				Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
-				for (Object[] fields: (List<Object[]>)query.list()) {
-					Long buildId = (Long) fields[0];
-					Long projectId = (Long)fields[1];
-					Long buildNumber = (Long) fields[2];
-					builds.put(buildId, new BuildFacade(buildId, projectId, buildNumber, (String)fields[3]));
-					populateJobNames(projectId, (String)fields[4]);
-				}
-				return 1L;
-			}
-        	
-        });
+		Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
+		for (Object[] fields: (List<Object[]>)query.list()) {
+			Long buildId = (Long) fields[0];
+			Long projectId = (Long)fields[1];
+			Long buildNumber = (Long) fields[2];
+			cache.put(buildId, new BuildFacade(buildId, projectId, buildNumber, (String)fields[3]));
+			populateJobNames(projectId, (String)fields[4]);
+		}
 		
 		taskId = taskScheduler.schedule(this);
 	}
@@ -791,7 +781,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Override
 	public Collection<Long> getNumbersByProject(Long projectId) {
 		Collection<Long> buildNumbers = new HashSet<>();
-		for (BuildFacade build: builds.values()) {
+		for (BuildFacade build: cache.values()) {
 			if (build.getProjectId().equals(projectId))
 				buildNumbers.add(build.getNumber());
 		}
@@ -801,7 +791,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Override
 	public Collection<Long> filterNumbers(Long projectId, Collection<String> commitHashes) {
 		Collection<Long> buildNumbers = new HashSet<>();
-		for (BuildFacade build: builds.values()) {
+		for (BuildFacade build: cache.values()) {
 			if (build.getProjectId().equals(projectId) 
 					&& commitHashes.contains(build.getCommitHash())) {
 				buildNumbers.add(build.getNumber());
@@ -1045,19 +1035,4 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		});
 	}
 
-	@Override
-	public BuildFacade findFacade(Long buildId) {
-		return builds.get(buildId);
-	}
-	
-	@Override
-	public Long findId(Long projectId, Long buildNumber) {
-		for (var entry: builds.entrySet()) {
-			BuildFacade build = entry.getValue();
-			if (build.getProjectId().equals(projectId) && build.getNumber().equals(buildNumber))
-				return entry.getKey();
-		}
-		return null;
-	}
-	
 }

@@ -5,7 +5,6 @@ import static io.onedev.server.model.User.PROP_SSO_CONNECTOR;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,7 +21,6 @@ import org.hibernate.query.Query;
 
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
 
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
@@ -292,19 +290,10 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Listen
     public void on(SystemStarted event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = new UserCache(hazelcastInstance.getMap("userCache"));
+        cache = new UserCache(hazelcastInstance.getReplicatedMap("userCache"));
         
-        IAtomicLong userCacheLoaded = hazelcastInstance.getCPSubsystem().getAtomicLong("userCacheLoaded");
-        clusterManager.init(userCacheLoaded, new Callable<Long>() {
-
-			@Override
-			public Long call() throws Exception {
-		    	for (User user: query()) 
-		    		cache.put(user.getId(), user.getFacade());
-				return 1L;
-			}
-        	
-        });
+    	for (User user: query()) 
+    		cache.put(user.getId(), user.getFacade());
     }
 	
     @Transactional

@@ -20,7 +20,6 @@ import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.facade.BuildFacade;
 
 public interface BuildManager extends EntityManager<Build> {
 
@@ -42,12 +41,6 @@ public interface BuildManager extends EntityManager<Build> {
 	@Nullable
 	Build findStreamPrevious(Build build, @Nullable Build.Status status);
 	
-	@Nullable
-	BuildFacade findFacade(Long buildId);
-	
-	@Nullable
-	Long findId(Long projectId, Long buildNumber);
-
 	Collection<Long> queryStreamPreviousNumbers(Build build, @Nullable Build.Status status, int limit);
 
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, 

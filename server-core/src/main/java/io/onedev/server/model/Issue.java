@@ -73,6 +73,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -632,6 +633,11 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	public static String getListWebSocketObservable(Long projectId) {
 		return Issue.class.getName() + ":list:" + projectId;
+	}
+
+	@Override
+	public IssueFacade getFacade() {
+		return new IssueFacade(getId(), getProject().getId(), getNumber());
 	}
 
 	@Nullable

@@ -1,5 +1,7 @@
 package io.onedev.server.util;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -9,22 +11,32 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 
-public class ProjectScopedNumber {
+public class ProjectScopedNumber implements Serializable {
 
-	private final Project project; 
+	private static final long serialVersionUID = 1L;
+
+	private final Long projectId; 
 	
 	private final Long number;
 
 	public ProjectScopedNumber(Project project, Long number) {
-		this.project = project;
+		this(project.getId(), number);
+	}
+	
+	public ProjectScopedNumber(Long projectId, Long number) {
+		this.projectId = projectId;
 		this.number = number;
+	}
+	
+	private static ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
 	}
 	
 	public static ProjectScopedNumber from(String fqn) {
 		if (fqn.contains("#")) {
 			String projectName = StringUtils.substringBefore(fqn, "#");
 			if (projectName.length() != 0) {
-				Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectName);
+				Project project = getProjectManager().findByPath(projectName);
 				if (project != null) {
 					String numberStr = StringUtils.substringAfter(fqn, "#");
 					try {
@@ -41,7 +53,11 @@ public class ProjectScopedNumber {
 	}
 
 	public Project getProject() {
-		return project;
+		return getProjectManager().load(projectId);
+	}
+	
+	public Long getProjectId() {
+		return projectId;
 	}
 
 	public Long getNumber() {
@@ -56,14 +72,14 @@ public class ProjectScopedNumber {
 			return true;
 		ProjectScopedNumber otherProjectScopedNumber = (ProjectScopedNumber) other;
 		return new EqualsBuilder()
-				.append(project, otherProjectScopedNumber.project)
+				.append(projectId, otherProjectScopedNumber.projectId)
 				.append(number, otherProjectScopedNumber.number)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(project).append(number).toHashCode();
+		return new HashCodeBuilder(17, 37).append(projectId).append(number).toHashCode();
 	}
 	
 	@Override

@@ -990,7 +990,7 @@ public class Build extends ProjectBelonging
 	public String getAttachmentGroup() {
 		return uuid;
 	}
-	
+
 	public static String getSerialLockName(Long buildId) {
 		return "build-" + buildId + "-serial";
 	}

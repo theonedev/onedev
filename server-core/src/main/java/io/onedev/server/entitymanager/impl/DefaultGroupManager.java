@@ -42,7 +42,7 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 		this.settingManager = settingManager;
 		this.issueFieldManager = issueFieldManager;
 	}
-
+	
 	@Transactional
 	@Override
 	public void save(Group group, String oldName) {
