@@ -9,7 +9,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 
-public interface UserInfoManager {
+public interface VisitInfoManager {
 	
 	void visitPullRequest(User user, PullRequest request);
 	

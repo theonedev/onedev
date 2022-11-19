@@ -67,7 +67,7 @@ import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -680,7 +680,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getUser() != null) 
-					OneDev.getInstance(UserInfoManager.class).visitPullRequest(SecurityUtils.getUser(), getPullRequest());
+					OneDev.getInstance(VisitInfoManager.class).visitPullRequest(SecurityUtils.getUser(), getPullRequest());
 			}
 			
 			@Override

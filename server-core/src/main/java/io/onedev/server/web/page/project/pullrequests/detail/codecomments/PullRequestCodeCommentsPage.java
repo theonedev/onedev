@@ -17,7 +17,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
@@ -151,7 +151,7 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getUser() != null) 
-					OneDev.getInstance(UserInfoManager.class).visitPullRequestCodeComments(SecurityUtils.getUser(), getPullRequest());
+					OneDev.getInstance(VisitInfoManager.class).visitPullRequestCodeComments(SecurityUtils.getUser(), getPullRequest());
 			}
 			
 			@Override

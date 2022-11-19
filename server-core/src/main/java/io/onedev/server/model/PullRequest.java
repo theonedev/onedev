@@ -53,7 +53,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LabelSupport;
@@ -743,7 +743,7 @@ public class PullRequest extends ProjectBelonging
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(UserInfoManager.class).getPullRequestVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getPullRequestVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
@@ -753,7 +753,7 @@ public class PullRequest extends ProjectBelonging
 	public boolean isCodeCommentsVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(UserInfoManager.class).getPullRequestCodeCommentsVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getPullRequestCodeCommentsVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;

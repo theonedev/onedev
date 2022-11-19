@@ -36,8 +36,6 @@ public interface StorageManager {
     
     void initArtifactsDir(Long projectId, Long buildNumber);
     
-    File getInfoDir();
-    
     File getIndexDir();
     
     /**
@@ -47,8 +45,6 @@ public interface StorageManager {
      * 			directory store attachments. The directory will be exist after calling this method
      */
     File getProjectAttachmentDir(Long projectId);
-    
-    File getUserInfoDir(Long userId);
     
     /**
      * Get directory to store build related files such as logs, artifacts and reports

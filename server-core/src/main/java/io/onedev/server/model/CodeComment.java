@@ -30,7 +30,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.Mark;
@@ -246,7 +246,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(UserInfoManager.class).getCodeCommentVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getCodeCommentVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;

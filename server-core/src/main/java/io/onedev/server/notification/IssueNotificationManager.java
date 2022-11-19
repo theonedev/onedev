@@ -25,7 +25,7 @@ import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.event.pubsub.Listen;
-import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
@@ -55,11 +55,11 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	
 	private final UserManager userManager;
 	
-	private final UserInfoManager userInfoManager;
+	private final VisitInfoManager userInfoManager;
 	
 	@Inject
 	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager,
-			IssueWatchManager watchManager, UserInfoManager userInfoManager, UserManager userManager, 
+			IssueWatchManager watchManager, VisitInfoManager userInfoManager, UserManager userManager, 
 			SettingManager settingManager, IssueAuthorizationManager authorizationManager) {
 		super(markdownManager, settingManager);
 		this.mailManager = mailManager;

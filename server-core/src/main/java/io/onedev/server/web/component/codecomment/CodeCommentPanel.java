@@ -43,7 +43,7 @@ import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.CodeCommentStatusChange;
@@ -431,7 +431,7 @@ public abstract class CodeCommentPanel extends Panel {
 					prevActivityContainer = newActivityContainer;
 				}
 				
-				OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
+				OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
 			}
 			
 			@Override
@@ -447,7 +447,7 @@ public abstract class CodeCommentPanel extends Panel {
 	@Override
 	protected void onBeforeRender() {
 		if (SecurityUtils.getUser() != null) 
-			OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
+			OneDev.getInstance(VisitInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
 		super.onBeforeRender();
 	}
 

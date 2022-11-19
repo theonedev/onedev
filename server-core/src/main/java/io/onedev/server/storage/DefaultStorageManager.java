@@ -25,7 +25,6 @@ import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 
@@ -70,12 +69,6 @@ public class DefaultStorageManager implements StorageManager, Serializable {
         return new File(getProjectsDir(), String.valueOf(projectId));
     }
     
-    private File getUserDir(Long userId) {
-        File userDir = new File(getUsersDir(), String.valueOf(userId));
-        FileUtils.createDir(userDir);
-        return userDir;
-    }
-    
     private File getProjectSubdir(Long projectId, String subdirName) {
     	File projectDir = getProjectDir(projectId);
     	if (projectDir.exists()) {
@@ -106,7 +99,7 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 	public File getProjectAttachmentDir(Long projectId) {
         return getProjectSubdir(projectId, "attachment");
 	}
-
+	
 	private File getBuildsDir(Long projectId) {
         return getProjectSubdir(projectId, "builds");
 	}
@@ -132,13 +125,6 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 	}
 
 	@Override
-	public File getInfoDir() {
-    	File infoDir = new File(Bootstrap.getSiteDir(), "info");
-    	FileUtils.createDir(infoDir);
-    	return infoDir;
-	}
-	
-	@Override
 	public File getIndexDir() {
     	File indexDir = new File(Bootstrap.getSiteDir(), "index");
     	FileUtils.createDir(indexDir);
@@ -153,14 +139,6 @@ public class DefaultStorageManager implements StorageManager, Serializable {
         			|| new File(projectDir, DELETE_MARK).exists()) { 
         		logger.info("Deleting directory marked for deletion: " + projectDir);
         		FileUtils.deleteDir(projectDir);
-        	}
-        }
-        for (File userDir: getUsersDir().listFiles()) {
-        	if (new File(userDir, OLD_DELETE_MARK1).exists()
-        			|| new File(userDir, OLD_DELETE_MARK2).exists()
-        			|| new File(userDir, DELETE_MARK).exists()) { 
-        		logger.info("Deleting directory marked for deletion: " + userDir);
-        		FileUtils.deleteDir(userDir);
         	}
         }
 	}
@@ -235,22 +213,6 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 			
 		}
 		
-		if (event.getEntity() instanceof User) {
-			transactionManager.runAfterCommit(new ClusterRunnable() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void run() {
-					try {
-						new File(getUserDir(id), DELETE_MARK).createNewFile();
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-				
-			});
-		}
 	}
 	
 	@Override
@@ -261,18 +223,5 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 			throw new RuntimeException(e);
 		}
 	}
-
-    private File getUsersDir() {
-    	File usersDir = new File(Bootstrap.getSiteDir(), "users");
-    	FileUtils.createDir(usersDir);
-    	return usersDir;
-    }
     
-	@Override
-    public File getUserInfoDir(Long userId) {
-        File infoDir = new File(getUserDir(userId), "info");
-        FileUtils.createDir(infoDir);
-        return infoDir;
-    }
-
 }

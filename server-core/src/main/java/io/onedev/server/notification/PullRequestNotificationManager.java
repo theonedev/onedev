@@ -34,7 +34,7 @@ import io.onedev.server.event.pullrequest.PullRequestReviewRequested;
 import io.onedev.server.event.pullrequest.PullRequestReviewerRemoved;
 import io.onedev.server.event.pullrequest.PullRequestUnassigned;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
-import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
@@ -68,13 +68,13 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 	
 	private final PullRequestWatchManager pullRequestWatchManager;
 	
-	private final UserInfoManager userInfoManager;
+	private final VisitInfoManager userInfoManager;
 	
 	private final UserManager userManager;
 	
 	@Inject
 	public PullRequestNotificationManager(MailManager mailManager, MarkdownManager markdownManager, 
-			PullRequestWatchManager pullRequestWatchManager, UserInfoManager userInfoManager, 
+			PullRequestWatchManager pullRequestWatchManager, VisitInfoManager userInfoManager, 
 			UserManager userManager, SettingManager settingManager) {
 		super(markdownManager, settingManager);
 		this.mailManager = mailManager;

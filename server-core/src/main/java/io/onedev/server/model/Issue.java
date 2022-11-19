@@ -61,7 +61,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.PullRequestInfoManager;
-import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.ProjectBelonging;
@@ -570,7 +570,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(UserInfoManager.class).getIssueVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(VisitInfoManager.class).getIssueVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
