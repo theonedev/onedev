@@ -17,10 +17,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.ServerSocketServlet;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitLfsFilter;
@@ -122,14 +119,11 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		 * to hold site specific web assets.   
 		 */
 		File assetsDir = new File(Bootstrap.getSiteDir(), "assets");
-		ServletHolder assetsServletHolder = new ServletHolder(new FileAssetServlet(assetsDir));
-		context.addServlet(assetsServletHolder, "/site/*");
-		
-		File rootAssetsDir = new File(Bootstrap.getSiteDir(), "assets/root");
-		ServletHolder rootAssetsServletHolder = new ServletHolder(new FileAssetServlet(rootAssetsDir));
-		for (File file: FileUtils.listFiles(rootAssetsDir, Lists.newArrayList("**"), Lists.newArrayList())) {
-			String path = file.getAbsolutePath().substring(rootAssetsDir.getAbsolutePath().length());
-			context.addServlet(rootAssetsServletHolder, path.replace('\\', '/'));
+		for (File file: assetsDir.listFiles()) {
+			if (file.isFile())
+				context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/" + file.getName());
+			else
+				context.addServlet(new ServletHolder(new FileAssetServlet(file)), "/" + file.getName() + "/*");
 		}
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/api/*");	

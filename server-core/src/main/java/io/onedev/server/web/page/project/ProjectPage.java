@@ -298,7 +298,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			menuItems.add(new SidebarMenuItem.SubMenu("sliders", "Settings", settingMenuItems));
 		}
 		
-		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(getProject().getId());
+		String avatarUrl = OneDev.getInstance(AvatarManager.class).getProjectAvatarUrl(getProject().getId());
 		SidebarMenu.Header menuHeader = new SidebarMenu.Header(avatarUrl, getProject().getName()) {
 			
 			@Override
@@ -477,7 +477,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		}
 		
 		String urlOfProjectImage = getSettingManager().getSystemSetting().getServerUrl() +
-				OneDev.getInstance(AvatarManager.class).getAvatarUrl(getProject().getId());
+				OneDev.getInstance(AvatarManager.class).getProjectAvatarUrl(getProject().getId());
 		
 		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Title, getProject().getPath()).render(response);
 		new OpenGraphHeaderMeta(OpenGraphHeaderMetaType.Description, description).render(response);

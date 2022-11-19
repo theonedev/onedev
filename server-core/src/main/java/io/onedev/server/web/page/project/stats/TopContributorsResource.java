@@ -65,7 +65,7 @@ class TopContributorsResource extends AbstractResource {
 					Map<String, Object> contributorData = new HashMap<>();
 					contributorData.put("authorName", contributor.getAuthor().getName());
 					contributorData.put("authorEmailAddress", contributor.getAuthor().getEmailAddress());
-					contributorData.put("authorAvatarUrl", avatarManager.getAvatarUrl(contributor.getAuthor()));
+					contributorData.put("authorAvatarUrl", avatarManager.getPersonAvatarUrl(contributor.getAuthor()));
 					contributorData.put("totalCommits", contributor.getTotalContribution().getCommits());
 					contributorData.put("totalAdditions", contributor.getTotalContribution().getAdditions());
 					contributorData.put("totalDeletions", contributor.getTotalContribution().getDeletions());

@@ -2,7 +2,6 @@ package io.onedev.server.web.component.avatarupload;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -84,21 +83,6 @@ public class AvatarUploadField extends FormComponentPanel<String> {
 			}
 		} else if (file.exists()) {
 			FileUtils.deleteFile(file);
-		}
-	}
-	
-	@Nullable
-	public static String readFromFile(File file) {
-		if (file.exists()) {
-	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        try {
-	        	ImageIO.write(ImageIO.read(file), "jpeg", baos);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-	        return "data:image/jpeg;base64," + DatatypeConverter.printBase64Binary(baos.toByteArray());
-		} else {
-			return null;
 		}
 	}
 	

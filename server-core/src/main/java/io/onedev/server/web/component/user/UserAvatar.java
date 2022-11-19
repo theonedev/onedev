@@ -18,13 +18,13 @@ public class UserAvatar extends WebComponent {
 	
 	public UserAvatar(String id, User user) {
 		super(id);
-		url = getAvatarManager().getAvatarUrl(user);
+		url = getAvatarManager().getUserAvatarUrl(user.getId());
 		system = user.isSystem();
 	}
 	
 	public UserAvatar(String id, PersonIdent personIdent) {
 		super(id);
-		url = getAvatarManager().getAvatarUrl(personIdent);
+		url = getAvatarManager().getPersonAvatarUrl(personIdent);
 	}
 	
 	private AvatarManager getAvatarManager() {

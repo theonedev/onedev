@@ -6,26 +6,23 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-
 public interface AvatarManager {
 	
-	String getAvatarUrl(User user);
+	String getUserAvatarUrl(Long userId);
 	
-	String getAvatarUrl(PersonIdent personIdent);
+	String getPersonAvatarUrl(PersonIdent personIdent);
 	
-	String getAvatarUrl(Long projectId);
+	String getProjectAvatarUrl(Long projectId);
 	
-	void useAvatar(User user, @Nullable String avatarData);
+	void useUserAvatar(Long userId, @Nullable String avatarData);
 	
-	void useAvatar(Project project, @Nullable String avatarData);
+	void useProjectAvatar(Long projectId, @Nullable String avatarData);
 	
-	File getUploaded(User user);
+	File getUserUploaded(Long userId);
 	
-	File getUploaded(Long projectId);
+	File getProjectUploaded(Long projectId);
 	
-	void copyAvatar(Project from, Project to);
+	void copyProjectAvatar(Long fromProjectId, Long toProjectId);
 	
 }
 

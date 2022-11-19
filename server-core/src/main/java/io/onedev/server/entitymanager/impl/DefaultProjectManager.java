@@ -541,7 +541,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         
         checkGitHooksAndConfig(to.getId());
         commitInfoManager.cloneInfo(from.getId(), to.getId());
-        avatarManager.copyAvatar(from, to);
+        avatarManager.copyProjectAvatar(from.getId(), to.getId());
             
        	updateStorageServer(to);
         

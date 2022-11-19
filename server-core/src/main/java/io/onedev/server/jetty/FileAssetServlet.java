@@ -7,6 +7,8 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * This servlet serves static web assets from file system.
  * 
@@ -37,6 +39,8 @@ public class FileAssetServlet extends AssetServlet {
 			logger.trace("Loading file resource '{}' from directory '{}'...", 
 					relativePath, assetDir.getAbsolutePath());
 		}
+		
+		Preconditions.checkArgument(!relativePath.contains(".."));
 		
 		File assetFile = new File(assetDir, relativePath);
 		if (assetFile.exists()) {

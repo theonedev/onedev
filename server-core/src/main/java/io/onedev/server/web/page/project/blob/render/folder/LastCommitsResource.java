@@ -95,7 +95,7 @@ class LastCommitsResource extends AbstractResource {
 						info.authorName = author.getName();
 						info.authorEmailAddress = author.getEmailAddress();
 					}
-					info.authorAvatarUrl = avatarManager.getAvatarUrl(author);
+					info.authorAvatarUrl = avatarManager.getPersonAvatarUrl(author);
 					map.put(entry.getKey(), info);
 				}
 				String json;

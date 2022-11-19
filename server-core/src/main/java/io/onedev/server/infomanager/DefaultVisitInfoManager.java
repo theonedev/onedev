@@ -52,13 +52,13 @@ public class DefaultVisitInfoManager extends AbstractMultiEnvironmentManager
 	
 	private static final String INFO_DIR = "visit";
 	
-	private static final String PULL_REQUEST_STORE = "pullRequest";
+	private static final String PULL_REQUEST_STORE = "pullRequestVisit";
 	
-	private static final String PULL_REQUEST_CODE_COMMENT_STORE = "pullRequestCodeComment";
+	private static final String PULL_REQUEST_CODE_COMMENT_STORE = "pullRequestCodeCommentsVisit";
 	
-	private static final String CODE_COMMENT_STORE = "codeComment";
+	private static final String CODE_COMMENT_STORE = "codeCommentVisit";
 
-	private static final String ISSUE_STORE = "issue";
+	private static final String ISSUE_STORE = "issueVisit";
 	
 	private final StorageManager storageManager;
 	

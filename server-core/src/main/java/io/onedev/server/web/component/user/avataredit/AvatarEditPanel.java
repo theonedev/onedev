@@ -45,12 +45,12 @@ public class AvatarEditPanel extends GenericPanel<User> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAvatarManager().getUploaded(getUser()).exists());
+				setVisible(getAvatarManager().getUserUploaded(getUser().getId()).exists());
 			}
 
 			@Override
 			public void onClick() {
-				getAvatarManager().useAvatar(getUser(), null);
+				getAvatarManager().useUserAvatar(getUser().getId(), null);
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 			
@@ -65,7 +65,7 @@ public class AvatarEditPanel extends GenericPanel<User> {
 			protected void onSubmit() {
 				super.onSubmit();
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-            	avatarManager.useAvatar(getUser(), uploadedAvatarData);
+            	avatarManager.useUserAvatar(getUser().getId(), uploadedAvatarData);
 				setResponsePage(getPage().getClass(), getPage().getPageParameters());
 			}
 

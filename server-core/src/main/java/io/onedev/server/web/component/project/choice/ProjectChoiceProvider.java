@@ -36,7 +36,7 @@ public class ProjectChoiceProvider extends ChoiceProvider<Project> {
 		writer.key("id").value(choice.getId());
 		writer.key("path");
 		writer.value(HtmlEscape.escapeHtml5(choice.getPath()));
-		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(choice.getId());
+		String avatarUrl = OneDev.getInstance(AvatarManager.class).getProjectAvatarUrl(choice.getId());
 		writer.key("avatar").value(avatarUrl);
 	}
 	

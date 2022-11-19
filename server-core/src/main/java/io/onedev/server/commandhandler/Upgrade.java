@@ -306,7 +306,7 @@ public class Upgrade extends AbstractPlugin {
 						
 						if (ret == 0) {
 							logger.info("Updating program files...");
-							updateProgramFiles(upgradeDir);
+							updateProgramFiles(upgradeDir, oldDataVersion.get());
 
 							logger.info("Restoring database with new program...");
 							ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
@@ -333,7 +333,7 @@ public class Upgrade extends AbstractPlugin {
 						
 					} else {
 						logger.info("Copying new program files into {}...", upgradeDir.getAbsolutePath());
-						updateProgramFiles(upgradeDir);
+						updateProgramFiles(upgradeDir, oldDataVersion.get());
 					}
 				} catch (Exception e) {
 					logger.error("Error upgrading " + upgradeDir.getAbsolutePath(), e);
@@ -414,7 +414,7 @@ public class Upgrade extends AbstractPlugin {
 		}
 	}
 	
-	protected void updateProgramFiles(File upgradeDir) {
+	protected void updateProgramFiles(File upgradeDir, int oldDataVersion) {
 		cleanAndCopy(new File(Bootstrap.installDir, "3rdparty-licenses"), new File(upgradeDir, "3rdparty-licenses"));
 
 		File siteServerScriptFile = new File(upgradeDir, "bin/server.sh");
@@ -554,16 +554,49 @@ public class Upgrade extends AbstractPlugin {
 			}
 		}
 		
-		FileUtils.createDir(new File(upgradeDir, "site/assets/root"));
-		if (new File(upgradeDir, "site/assets/robots.txt").exists()) {
-			try {
-				FileUtils.copyFile(
-						new File(upgradeDir, "site/assets/robots.txt"), 
-						new File(upgradeDir, "site/assets/root/robots.txt"));
-				FileUtils.deleteFile(new File(upgradeDir, "site/assets/robots.txt"));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+		if (oldDataVersion <= 102) {
+			File assetsRootDir = new File(upgradeDir, "site/assets/root");
+			FileUtils.createDir(assetsRootDir);
+			if (new File(upgradeDir, "site/assets/robots.txt").exists()) {
+				try {
+					FileUtils.copyFile(
+							new File(upgradeDir, "site/assets/robots.txt"), 
+							new File(assetsRootDir, "robots.txt"));
+					FileUtils.deleteFile(new File(upgradeDir, "site/assets/robots.txt"));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
+	
+			for (File file: assetsRootDir.listFiles()) {
+				try {
+					FileUtils.moveToDirectory(file, new File(upgradeDir, "site/assets"), true);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+			FileUtils.deleteDir(assetsRootDir);
+			
+			File usersDir = new File(upgradeDir, "site/users");
+			if (usersDir.exists()) {
+				for (File file: usersDir.listFiles()) {
+					File oldVisitInfoDir = new File(file, "info");
+					File projectDir = new File(upgradeDir, "site/projects/" + file.getName());
+					if (oldVisitInfoDir.exists() && projectDir.exists()) {
+						File newVisitInfoDir = new File(projectDir, "info/visit");
+						FileUtils.createDir(newVisitInfoDir.getParentFile());
+						FileUtils.deleteDir(newVisitInfoDir);
+						try {
+							FileUtils.moveDirectory(oldVisitInfoDir, newVisitInfoDir);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				}
+				FileUtils.deleteDir(usersDir);
+			}
+			FileUtils.deleteDir(new File(upgradeDir, "site/info"));
 		}
 
 		try {

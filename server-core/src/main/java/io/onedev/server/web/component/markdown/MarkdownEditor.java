@@ -401,7 +401,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						} else {
 							userMap.put("searchKey", noSpaceName);
 						}
-						String avatarUrl = avatarManager.getAvatarUrl(user);
+						String avatarUrl = avatarManager.getUserAvatarUrl(user.getId());
 						userMap.put("avatarUrl", avatarUrl);
 						userList.add(userMap);
 					}

@@ -178,9 +178,7 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 					
 				});
 			}
-		}
-		
-		if (event.getEntity() instanceof Build) {
+		} else if (event.getEntity() instanceof Build) {
 			Build build = (Build) event.getEntity();
 	    	Long projectId = build.getProject().getId();
 	    	Long buildNumber = build.getNumber();
@@ -210,9 +208,7 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 				}
 				
 			});
-			
 		}
-		
 	}
 	
 	@Override
@@ -223,5 +219,5 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 			throw new RuntimeException(e);
 		}
 	}
-    
+
 }
