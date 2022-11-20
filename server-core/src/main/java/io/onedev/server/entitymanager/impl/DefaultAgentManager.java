@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,10 +11,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,10 +39,12 @@ import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.agent.job.LogRequest;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AgentTokenManager;
@@ -67,7 +70,7 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.AttributeNameValidator;
 
 @Singleton
-public class DefaultAgentManager extends BaseEntityManager<Agent> implements AgentManager {
+public class DefaultAgentManager extends BaseEntityManager<Agent> implements AgentManager, Serializable {
 
 	private final AgentAttributeManager attributeManager;
 	
@@ -117,6 +120,10 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		}
 	}
 
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(AgentManager.class);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Sessional
 	@Listen
@@ -136,25 +143,22 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 			@Override
 			public void memberRemoved(MembershipEvent membershipEvent) {
 				if (clusterManager.isLeaderServer()) {
-					Set<Long> agentsToRemove = new HashSet<>();
-					for (var entry: agentServers.entrySet()) {
-						if (entry.getValue().equals(membershipEvent.getMember().getUuid()))
-							agentsToRemove.add(entry.getKey());
+					for (var id: agentServers.entrySet().stream()
+							.filter(it->it.getValue().equals(membershipEvent.getMember().getUuid()))
+							.map(it->it.getKey())
+							.collect(Collectors.toSet())) {
+						agentServers.remove(id);
 					}
-					for (Long agentId: agentsToRemove)
-						agentServers.remove(agentId);
 				}
 			}
 			
 		});
 		
-		if (clusterManager.isLeaderServer()) {
-			Query<Object[]> query = dao.getSession().createQuery(String.format("select %s, %s from Agent", 
-					Agent.PROP_OS_NAME, Agent.PROP_OS_ARCH));
-			for (Object[] row: query.list()) { 
-				osNames.put((String) row[0], (String) row[0]);
-				osArchs.put((String) row[1], (String) row[1]);
-			}
+		Query<Object[]> query = dao.getSession().createQuery(String.format("select %s, %s from Agent", 
+				Agent.PROP_OS_NAME, Agent.PROP_OS_ARCH));
+		for (Object[] row: query.list()) { 
+			osNames.put((String) row[0], (String) row[0]);
+			osArchs.put((String) row[1], (String) row[1]);
 		}
 	}
 	
@@ -244,12 +248,14 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	public void agentDisconnected(Long agentId) {
 		agentServers.remove(agentId);
 		agentSessions.remove(agentId);
-		Agent agent = load(agentId);
-		if (agent.isTemporal()) {
-			removeReferences(agent);
-			dao.remove(agent);
+		Agent agent = get(agentId);
+		if (agent != null) {
+			if (agent.isTemporal()) {
+				removeReferences(agent);
+				dao.remove(agent);
+			}
+			listenerRegistry.post(new AgentDisconnected(agent));
 		}
-		listenerRegistry.post(new AgentDisconnected(agent));
 	}
 
 	@Override
@@ -273,22 +279,6 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
     	query.executeUpdate();
 	}
 	
-	@Transactional
-	@Override
-	public void delete(Agent agent) {
-		removeReferences(agent);
-		dao.remove(agent);
-
-		agentServers.remove(agent.getId());
-		Session prevSession = agentSessions.remove(agent.getId());
-		if (prevSession != null) {
-			try {
-				prevSession.disconnect();
-			} catch (IOException e) {
-			}
-		}
-	}
-
 	@Sessional
 	@Override
 	public Agent findByName(String name) {
@@ -367,89 +357,129 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
-	@Override
-	public void restartLocal(Long agentId) {
-		Session session = agentSessions.get(agentId);
-		if (session != null)
-			new Message(MessageTypes.RESTART, new byte[0]).sendBy(session);
-	}
-	
 	@Sessional
 	@Override
 	public void restart(Agent agent) {
-		UUID serverUUID = agentServers.get(agent.getId());
-		if (serverUUID != null) 
-			clusterManager.submitToServer(serverUUID, new RestartTask(agent.getId()));
-	}
+		Long agentId = agent.getId();
+		UUID serverUUID = agentServers.get(agentId);
+		if (serverUUID != null) {
+			clusterManager.submitToServer(serverUUID, new ClusterTask<Void>() {
 
-	@Transactional
-	@Override
-	public void delete(Collection<Agent> agents) {
-		for (Agent agent: agents) {
-			removeReferences(agent);
-			dao.remove(agent);
-			
-			agentServers.remove(agent.getId());
-			Session prevSession = agentSessions.remove(agent.getId());
-			if (prevSession != null) {
-				try {
-					prevSession.disconnect();
-				} catch (IOException e) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Void call() throws Exception {
+					Session session = agentSessions.get(agentId);
+					if (session != null)
+						new Message(MessageTypes.RESTART, new byte[0]).sendBy(session);
+					return null;
 				}
-			}
+				
+			});
 		}
 	}
 
 	@Transactional
 	@Override
-	public void unauthorize(Collection<Agent> agents) {
-		Collection<AgentToken> tokens = new HashSet<>();
-		for (Agent agent: agents) 
-			tokens.add(agent.getToken());
-		
-		for (AgentToken token: tokens) {
-			for (Agent agent: token.getAgents())
-				delete(agent);
-			dao.remove(token);
+	public void delete(Agent agent) {
+		for (Agent eachAgent: agent.getToken().getAgents()) {
+			removeReferences(eachAgent);
+			dao.remove(eachAgent);
+			Long eachAgentId = eachAgent.getId();
+			
+			transactionManager.runAfterCommit(new ClusterRunnable() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public void run() {
+					UUID serverUUID = agentServers.remove(eachAgentId);
+					if (serverUUID != null) {
+						clusterManager.submitToServer(serverUUID, new ClusterTask<Void>() {
+
+							private static final long serialVersionUID = 1L;
+
+							@Override
+							public Void call() throws Exception {
+								Session prevSession = agentSessions.remove(eachAgentId);
+								if (prevSession != null) {
+									new Message(MessageTypes.STOP, new byte[0]).sendBy(prevSession);
+									prevSession.disconnect();
+								}
+								return null;
+							}
+							
+						});
+					}
+				}
+				
+			});
 		}
-	}
-	
-	@Transactional
-	@Override
-	public void pause(Collection<Agent> agents) {
-		for (Agent agent: agents) { 
-			agent.setPaused(true);
-			save(agent);
-		}
+		dao.remove(agent.getToken());
 	}
 
 	@Transactional
 	@Override
-	public void resume(Collection<Agent> agents) {
-		for (Agent agent: agents) { 
-			agent.setPaused(false);
-			save(agent);
-		}
+	public void pause(Agent agent) {
+		agent.setPaused(true);
+		save(agent);
+	}
+
+	@Transactional
+	@Override
+	public void resume(Agent agent) {
+		agent.setPaused(false);
+		save(agent);
 	}
 
 	@Override
 	public void attributesUpdated(Agent agent) {
-		Session session = agentSessions.get(agent.getId());
-		if (session != null) {
-			byte[] attributeBytes = SerializationUtils.serialize((Serializable) agent.getAttributeMap());
-			new Message(MessageTypes.UPDATE_ATTRIBUTES, attributeBytes).sendBy(session);
+		Long agentId = agent.getId();
+		var attributes = agent.getAttributeMap();
+		UUID serverUUID = agentServers.get(agentId);
+		if (serverUUID != null) {
+			clusterManager.submitToServer(serverUUID, new ClusterTask<Void>() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Void call() throws Exception {
+					Session session = agentSessions.get(agent.getId());
+					if (session != null) {
+						byte[] attributeBytes = SerializationUtils.serialize((Serializable) attributes);
+						new Message(MessageTypes.UPDATE_ATTRIBUTES, attributeBytes).sendBy(session);
+					}
+					return null;
+				}
+				
+			});
 		}
 	}
 
 	@Override
 	public List<String> getAgentLog(Agent agent) {
-		Session session = agentSessions.get(agent.getId());
-		if (session != null) {
-			try {
-				return WebsocketUtils.call(session, new LogRequest(), 60000);
-			} catch (InterruptedException | TimeoutException e) {
-				throw new RuntimeException(e);
-			}
+		Long agentId = agent.getId();
+		UUID serverUUID = agentServers.get(agentId);
+		if (serverUUID != null) {
+			return clusterManager.runOnServer(serverUUID, new ClusterTask<List<String>>() {
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public List<String> call() throws Exception {
+					Session session = agentSessions.get(agentId);
+					if (session != null) {
+						try {
+							return WebsocketUtils.call(session, new LogRequest(), 60000);
+						} catch (InterruptedException | TimeoutException e) {
+							throw new RuntimeException(e);
+						}
+					} else { 
+						return new ArrayList<>();
+					}
+				}
+				
+			});
 		} else { 
 			return new ArrayList<>();
 		}
@@ -460,21 +490,4 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		return agentSessions.get(agentId);
 	}
 
-	private static class RestartTask implements ClusterTask<Void> {
-
-		private static final long serialVersionUID = 1L;
-		
-		private final Long agentId;
-		
-		public RestartTask(Long agentId) {
-			this.agentId = agentId;
-		}
-		
-		@Override
-		public Void call() throws Exception {
-			OneDev.getInstance(AgentManager.class).restartLocal(agentId);
-			return null;
-		}
-		
-	}
 }

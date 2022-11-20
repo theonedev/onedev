@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.admin.buildsetting.agent;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -270,10 +269,8 @@ class AgentListPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<Agent> agents = new ArrayList<>();
-								for (IModel<Agent> each: selectionColumn.getSelections())
-									agents.add(each.getObject());
-								OneDev.getInstance(AgentManager.class).pause(agents);
+								for (var model: selectionColumn.getSelections())
+									getAgentManager().pause(model.getObject());
 								target.add(body);
 								selectionColumn.getSelections().clear();
 								Session.get().success("Paused selected agents");
@@ -314,10 +311,8 @@ class AgentListPanel extends Panel {
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<Agent> agents = new ArrayList<>();
-								for (IModel<Agent> each: selectionColumn.getSelections())
-									agents.add(each.getObject());
-								OneDev.getInstance(AgentManager.class).resume(agents);
+								for (var model: selectionColumn.getSelections())
+									getAgentManager().resume(model.getObject());
 								target.add(body);
 								selectionColumn.getSelections().clear();
 								Session.get().success("Resumed selected agents");
@@ -364,7 +359,7 @@ class AgentListPanel extends Panel {
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
 										for (IModel<Agent> each: selectionColumn.getSelections()) 
-											OneDev.getInstance(AgentManager.class).restart(each.getObject());
+											getAgentManager().restart(each.getObject());
 										target.add(body);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Restart command issued to selected agents");
@@ -408,7 +403,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Remove Selected Offline Agents";
+						return "Remove Selected Agents";
 					}
 					
 					@Override
@@ -423,22 +418,16 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Agent> agents = new ArrayList<>();
-										for (IModel<Agent> each: selectionColumn.getSelections()) {
-											Agent agent = each.getObject();
-											if (!agent.isOnline())
-												agents.add(agent);
-										}
-										OneDev.getInstance(AgentManager.class).delete(agents);
+										for (var model: selectionColumn.getSelections()) 
+											getAgentManager().delete(model.getObject());
 										selectionColumn.getSelections().clear();
 										target.add(body);
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Removed selected offline agents. Please note that tokens used by these agents will "
-												+ "NOT be removed, and they will reappear here if go online. "
-												+ "Type <code>yes</code> below to confirm";
+										return "Removed selected agents. Please note that other agents sharing tokens with these "
+												+ "agents will also be removed. Type <code>yes</code> below to confirm";
 									}
 									
 									@Override
@@ -462,73 +451,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "Please select offline agents to remove");
-								}
-							}
-							
-						};
-					}
-					
-				});
-				
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Unauthorize Selected Agents";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								
-								new ConfirmModalPanel(target) {
-									
-									@Override
-									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Agent> agents = new ArrayList<>();
-										for (IModel<Agent> each: selectionColumn.getSelections()) {
-											Agent agent = each.getObject();
-											if (!agent.isOnline())
-												agents.add(agent);
-										}
-										OneDev.getInstance(AgentManager.class).unauthorize(agents);
-										selectionColumn.getSelections().clear();
-										target.add(body);
-									}
-									
-									@Override
-									protected String getConfirmMessage() {
-										return "Removing selected agents as well as tokens used by them. Please note that other agents sharing "
-												+ "tokens with these agents will also be removed. Type <code>yes</code> below to confirm";
-									}
-									
-									@Override
-									protected String getConfirmInput() {
-										return "yes";
-									}
-									
-								};
-								
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(!selectionColumn.getSelections().isEmpty());
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select offline agents to remove");
+									tag.put("title", "Please select agents to remove");
 								}
 							}
 							
@@ -557,11 +480,8 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Agent> agents = new ArrayList<>();
-										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
-											agents.add(it.next());
-										}
-										OneDev.getInstance(AgentManager.class).pause(agents);
+										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
+											getAgentManager().pause(it.next());
 										selectionColumn.getSelections().clear();
 										target.add(body);
 										Session.get().success("Paused all queried agents");
@@ -622,11 +542,8 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Agent> agents = new ArrayList<>();
-										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
-											agents.add(it.next());
-										}
-										OneDev.getInstance(AgentManager.class).resume(agents);
+										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
+											getAgentManager().resume(it.next());
 										target.add(body);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Resumed all queried agents");
@@ -687,8 +604,8 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
-											OneDev.getInstance(AgentManager.class).restart(it.next());
+										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
+											getAgentManager().restart(it.next());
 										target.add(body);
 										selectionColumn.getSelections().clear();
 										Session.get().success("Restart command issued to all queried agents");
@@ -733,7 +650,7 @@ class AgentListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Remove All Queried Offline Agents";
+						return "Remove All Queried Agents";
 					}
 					
 					@Override
@@ -749,22 +666,16 @@ class AgentListPanel extends Panel {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Agent> agents = new ArrayList<>();
-										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
-											Agent agent = it.next();
-											if (!agent.isOnline())
-												agents.add(agent);
-										}
-										OneDev.getInstance(AgentManager.class).delete(agents);
+										for (var it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) 
+											getAgentManager().delete(it.next());
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Remove all queried offline agents. Please note that this will NOT remove "
-												+ "tokens used by these agents, and they will reappear here if go online. "
-												+ "Type <code>yes</code> below to confirm";
+										return "Removed all queried agents. Please note that other agents sharing tokens with "
+												+ "these agents will also be removed. Type <code>yes</code> below to confirm";
 									}
 									
 									@Override
@@ -788,72 +699,7 @@ class AgentListPanel extends Panel {
 								configure();
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
-									tag.put("title", "No offline agents to remove");
-								}
-							}
-							
-						};
-					}
-					
-				});
-				
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Unauthorize All Queried Agents";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@SuppressWarnings("unchecked")
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								
-								new ConfirmModalPanel(target) {
-									
-									@Override
-									protected void onConfirm(AjaxRequestTarget target) {
-										Collection<Agent> agents = new ArrayList<>();
-										for (Iterator<Agent> it = (Iterator<Agent>) dataProvider.iterator(0, agentsTable.getItemCount()); it.hasNext();) {
-											agents.add(it.next());
-										}
-										OneDev.getInstance(AgentManager.class).unauthorize(agents);
-										target.add(body);
-										selectionColumn.getSelections().clear();
-									}
-									
-									@Override
-									protected String getConfirmMessage() {
-										return "Removing all queried agents as well as tokens used by them. Please note that other agents sharing "
-												+ "tokens with these agents will also be removed. Type <code>yes</code> below to confirm";
-									}
-									
-									@Override
-									protected String getConfirmInput() {
-										return "yes";
-									}
-									
-								};
-								
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(agentsTable.getItemCount() != 0);
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "No agents to unauthorize");
+									tag.put("title", "No agents to remove");
 								}
 							}
 							

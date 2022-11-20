@@ -33,6 +33,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.exception.SystemNotReadyException;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.Group;
@@ -266,11 +267,15 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Sessional
     @Override
     public User findByAccessToken(String accessToken) {
-		UserFacade facade = cache.findByAccessToken(accessToken);
-		if (facade != null)
-			return load(facade.getId());
-		else
-			return null;
+		if (cache != null) {
+			UserFacade facade = cache.findByAccessToken(accessToken);
+			if (facade != null)
+				return load(facade.getId());
+			else
+				return null;
+		} else {
+			throw new SystemNotReadyException();
+		}
     }
 	
 	@Override

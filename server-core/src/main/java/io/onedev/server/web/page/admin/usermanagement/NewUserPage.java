@@ -23,7 +23,7 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.usermanagement.membership.UserMembershipsPage;
+import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.util.editablebean.NewUserBean;
 
 @SuppressWarnings("serial")
@@ -85,7 +85,7 @@ public class NewUserPage extends AdministrationPage {
 						newUserBean = new NewUserBean();
 						replace(BeanContext.edit("editor", newUserBean));
 					} else {
-						setResponsePage(UserMembershipsPage.class, UserMembershipsPage.paramsOf(user));
+						setResponsePage(UserProfilePage.class, UserProfilePage.paramsOf(user));
 					}
 				}
 			}

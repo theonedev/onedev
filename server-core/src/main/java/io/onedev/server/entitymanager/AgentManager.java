@@ -39,15 +39,9 @@ public interface AgentManager extends EntityManager<Agent> {
 	
 	void restart(Agent agent);
 	
-	void restartLocal(Long agentId);
+	void pause(Agent agent);
 	
-	void delete(Collection<Agent> agents);
-	
-	void unauthorize(Collection<Agent> agents);
-	
-	void pause(Collection<Agent> agents);
-	
-	void resume(Collection<Agent> agents);
+	void resume(Agent agent);
 	
 	void attributesUpdated(Agent agent);
 	

@@ -32,6 +32,10 @@ public class AgentOverviewPage extends AgentDetailPage {
 		super(params);
 	}
 
+	private AgentManager getAgentManager() {
+		return OneDev.getInstance(AgentManager.class);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -40,7 +44,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(AgentManager.class).restart(getAgent());
+				getAgentManager().restart(getAgent());
 				setResponsePage(AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent()));
 				Session.get().success("Restart command issued");
 			}
@@ -51,11 +55,11 @@ public class AgentOverviewPage extends AgentDetailPage {
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(AgentManager.class).delete(getAgent());
+				getAgentManager().delete(getAgent());
 				setResponsePage(AgentListPage.class);
 				Session.get().success("Agent removed");
 			}
-			
+
 		}.add(new ConfirmClickModifier("Do you really want to remove this agent?")));
 		
 		add(new Link<Void>("pauseOrResume") {
@@ -75,8 +79,10 @@ public class AgentOverviewPage extends AgentDetailPage {
 
 			@Override
 			public void onClick() {
-				getAgent().setPaused(!getAgent().isPaused());
-				OneDev.getInstance(AgentManager.class).save(getAgent());
+				if (getAgent().isPaused())
+					getAgentManager().resume(getAgent());
+				else
+					getAgentManager().pause(getAgent());
 				setResponsePage(AgentOverviewPage.class, AgentOverviewPage.paramsOf(getAgent()));
 			}
 			
@@ -108,7 +114,7 @@ public class AgentOverviewPage extends AgentDetailPage {
 					for (AgentAttribute attribute: bean.getAttributes())
 						attributeMap.put(attribute.getName(), attribute.getValue());
 					OneDev.getInstance(AgentAttributeManager.class).syncAttributes(getAgent(), attributeMap);
-					OneDev.getInstance(AgentManager.class).attributesUpdated(getAgent());
+					getAgentManager().attributesUpdated(getAgent());
 					Session.get().success("Attributes saved");
 				}
 				
