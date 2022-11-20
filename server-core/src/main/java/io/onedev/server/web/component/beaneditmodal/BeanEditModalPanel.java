@@ -41,6 +41,11 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 		return new BeanEditContentPanel(id) {
 			
 			@Override
+			protected boolean isDirtyAware() {
+				return BeanEditModalPanel.this.isDirtyAware();
+			}
+
+			@Override
 			protected void onSave(AjaxRequestTarget target) {
 				BeanEditModalPanel.this.onSave(target, bean);
 			}
@@ -72,6 +77,10 @@ public abstract class BeanEditModalPanel<T extends Serializable> extends ModalPa
 			}
 			
 		};
+	}
+	
+	protected boolean isDirtyAware() {
+		return true;
 	}
 
 	protected abstract void onSave(AjaxRequestTarget target, T bean);

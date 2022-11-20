@@ -176,6 +176,11 @@ abstract class JobExecutorEditPanel extends Panel {
 						new BeanEditModalPanel<Serializable>(target, testData, Sets.newHashSet(), true, title) {
 
 							@Override
+							protected boolean isDirtyAware() {
+								return false;
+							}
+
+							@Override
 							protected void onSave(AjaxRequestTarget target, Serializable bean) {
 								close();
 								target.add(editor);

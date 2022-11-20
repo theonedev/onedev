@@ -9,6 +9,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -64,6 +65,13 @@ abstract class BeanEditContentPanel extends Panel {
 		form.add(new AjaxButton("ok") {
 
 			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (isDirtyAware())
+					add(AttributeAppender.append("class", "dirty-aware"));
+			}
+
+			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				onSave(target);
@@ -113,4 +121,9 @@ abstract class BeanEditContentPanel extends Panel {
 	protected abstract void onSave(AjaxRequestTarget target);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
+	
+	protected boolean isDirtyAware() {
+		return true;
+	}
+	
 }

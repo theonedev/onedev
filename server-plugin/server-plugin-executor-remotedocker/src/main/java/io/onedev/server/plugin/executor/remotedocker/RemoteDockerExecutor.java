@@ -93,29 +93,42 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		}
 	}
 	
+	private LogManager getLogManager() {
+		return OneDev.getInstance(LogManager.class);
+	}
+	
+	private ClusterManager getClusterManager() {
+		return OneDev.getInstance(ClusterManager.class);
+	}
+	
+	private ResourceAllocator getResourceAllocator() {
+		return OneDev.getInstance(ResourceAllocator.class);
+	}
+	
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		String jobToken = UUID.randomUUID().toString();
-		UUID localServerUUID = OneDev.getInstance(ClusterManager.class).getLocalServerUUID();
-		LogManager logManager = OneDev.getInstance(LogManager.class);
-		logManager.addJobLogger(jobToken, jobLogger);
+		getLogManager().addJobLogger(jobToken, jobLogger);
 		try {
-			OneDev.getInstance(ResourceAllocator.class).run(
+			UUID localServerUUID = getClusterManager().getLocalServerUUID();
+			jobLogger.log("Waiting for resources...");
+			getResourceAllocator().run(
 					new TestRunnable(jobToken, this, testData, localServerUUID), 
 					getAgentRequirement(), new HashMap<>());
 		} finally {
-			logManager.removeJobLogger(jobToken);
+			getLogManager().removeJobLogger(jobToken);
 		}
 	}
 
 	private void testLocal(String jobToken, AgentInfo agentInfo, 
-			TestData testData, UUID dispatcherMemberUUID) {
+			TestData testData, UUID dispatcherServerUUID) {
 		TaskLogger jobLogger = new TaskLogger() {
 
 			@Override
 			public void log(String message, String sessionId) {
-				OneDev.getInstance(ClusterManager.class).runOnServer(
-						dispatcherMemberUUID, new LogTask(jobToken, message, sessionId));
+				getClusterManager().runOnServer(
+						dispatcherServerUUID, 
+						new LogTask(jobToken, message, sessionId));
 			}
 			
 		};
@@ -135,12 +148,23 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		
 		TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken, 
 				testData.getDockerImage(), registryLogins, getRunOptions());
-		
-		try {
-			WebsocketUtils.call(agentSession, jobData, 0);
-		} catch (InterruptedException | TimeoutException e) {
-			new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
-		} 
+
+		if (getLogManager().getJobLogger(jobToken) == null) {
+			getLogManager().addJobLogger(jobToken, jobLogger);
+			try {
+				WebsocketUtils.call(agentSession, jobData, 0);
+			} catch (InterruptedException | TimeoutException e) {
+				new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+			} finally {
+				getLogManager().removeJobLogger(jobToken);
+			}
+		} else {
+			try {
+				WebsocketUtils.call(agentSession, jobData, 0);
+			} catch (InterruptedException | TimeoutException e) {
+				new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
+			}
+		}
 	}
 	
 	@Override
