@@ -3,14 +3,14 @@ package io.onedev.server.entitymanager.impl;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.persistence.TransactionManager;
@@ -29,20 +29,27 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 	
 	private final TransactionManager transactionManager;
 	
-	private final Map<String, Long> ids = new ConcurrentHashMap<>();
+	private final ClusterManager clusterManager;
 	
-	private final Map<Long, LinkSpecFacade> cache = new ConcurrentHashMap<>();
+	private volatile Map<String, Long> ids;
+	
+	private volatile Map<Long, LinkSpecFacade> cache;
 	
 	@Inject
-	public DefaultLinkSpecManager(Dao dao, SettingManager settingManager, TransactionManager transactionManager) {
+	public DefaultLinkSpecManager(Dao dao, SettingManager settingManager, TransactionManager transactionManager, 
+			ClusterManager clusterManager) {
 		super(dao);
 		this.settingManager = settingManager;
 		this.transactionManager = transactionManager;
+		this.clusterManager = clusterManager;
 	}
 
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
+		ids = clusterManager.getHazelcastInstance().getReplicatedMap("linkSpecIds");
+		cache = clusterManager.getHazelcastInstance().getReplicatedMap("linkSpecCache");
+		
 		for (LinkSpec link: query(true)) {
 			ids.put(link.getName(), link.getId());
 			

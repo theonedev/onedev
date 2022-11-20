@@ -6,9 +6,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
-import io.onedev.server.event.pubsub.ListenerRegistry;
-import io.onedev.server.event.pullrequest.PullRequestAssigned;
-import io.onedev.server.event.pullrequest.PullRequestUnassigned;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
+import io.onedev.server.event.project.pullrequest.PullRequestUnassigned;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;

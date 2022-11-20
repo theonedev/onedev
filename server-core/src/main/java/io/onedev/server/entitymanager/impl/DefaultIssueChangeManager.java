@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
@@ -35,13 +36,13 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.build.BuildFinished;
-import io.onedev.server.event.issue.IssueChanged;
-import io.onedev.server.event.pubsub.Listen;
-import io.onedev.server.event.pubsub.ListenerRegistry;
-import io.onedev.server.event.pullrequest.PullRequestChanged;
-import io.onedev.server.event.pullrequest.PullRequestOpened;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.build.BuildFinished;
+import io.onedev.server.event.project.issue.IssueChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
@@ -121,12 +122,15 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	private final TaskScheduler taskScheduler;
 	
+	private final ClusterManager clusterManager;
+	
 	private String taskId;
 	
 	@Inject
 	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager, IssueFieldManager issueFieldManager,
 			ProjectManager projectManager,  ListenerRegistry listenerRegistry, TaskScheduler taskScheduler, 
-			IssueScheduleManager issueScheduleManager, IssueLinkManager issueLinkManager) {
+			IssueScheduleManager issueScheduleManager, IssueLinkManager issueLinkManager, 
+			ClusterManager clusterManager) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
@@ -135,6 +139,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		this.taskScheduler = taskScheduler;
 		this.issueScheduleManager = issueScheduleManager;
 		this.issueLinkManager = issueLinkManager;
+		this.clusterManager = clusterManager;
 	}
 
 	@Transactional
@@ -545,30 +550,32 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void execute() {
-		IssueQueryParseOption option = new IssueQueryParseOption();
-		for (TransitionSpec transition: getTransitionSpecs()) {
-			if (transition.getTrigger() instanceof NoActivityTrigger) {
-				NoActivityTrigger trigger = (NoActivityTrigger) transition.getTrigger();
-				IssueQuery query = IssueQuery.parse(null, trigger.getIssueQuery(), option, false);
-				List<Criteria<Issue>> criterias = new ArrayList<>();
-				
-				List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
-				for (String fromState: transition.getFromStates()) 
-					fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
-				
-				criterias.add(Criteria.orCriterias(fromStateCriterias));
-				if (query.getCriteria() != null)
-					criterias.add(query.getCriteria());
-				
-				criterias.add(new UpdateDateCriteria(
-						new DateTime().minusDays(trigger.getDays()).toDate(), 
-						IssueQueryLexer.IsUntil));
-				
-				query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
-				
-				for (Issue issue: issueManager.query(null, query, true, 0, Integer.MAX_VALUE)) {
-					changeState(issue, transition.getToState(), new HashMap<>(), 
-							transition.getRemoveFields(), null);
+		if (clusterManager.isLeaderServer()) {
+			IssueQueryParseOption option = new IssueQueryParseOption();
+			for (TransitionSpec transition: getTransitionSpecs()) {
+				if (transition.getTrigger() instanceof NoActivityTrigger) {
+					NoActivityTrigger trigger = (NoActivityTrigger) transition.getTrigger();
+					IssueQuery query = IssueQuery.parse(null, trigger.getIssueQuery(), option, false);
+					List<Criteria<Issue>> criterias = new ArrayList<>();
+					
+					List<Criteria<Issue>> fromStateCriterias = new ArrayList<>();
+					for (String fromState: transition.getFromStates()) 
+						fromStateCriterias.add(new StateCriteria(fromState, IssueQueryLexer.Is));
+					
+					criterias.add(Criteria.orCriterias(fromStateCriterias));
+					if (query.getCriteria() != null)
+						criterias.add(query.getCriteria());
+					
+					criterias.add(new UpdateDateCriteria(
+							new DateTime().minusDays(trigger.getDays()).toDate(), 
+							IssueQueryLexer.IsUntil));
+					
+					query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
+					
+					for (Issue issue: issueManager.query(null, query, true, 0, Integer.MAX_VALUE)) {
+						changeState(issue, transition.getToState(), new HashMap<>(), 
+								transition.getRemoveFields(), null);
+					}
 				}
 			}
 		}

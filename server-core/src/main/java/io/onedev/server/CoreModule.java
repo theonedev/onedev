@@ -9,17 +9,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
@@ -166,7 +160,7 @@ import io.onedev.server.entitymanager.impl.DefaultBuildMetricManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildParamManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultClusterCredentialManager;
-import io.onedev.server.entitymanager.impl.DefaultClusterMemberManager;
+import io.onedev.server.entitymanager.impl.DefaultClusterServerManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentReplyManager;
@@ -216,8 +210,8 @@ import io.onedev.server.entitymanager.impl.DefaultUserInvitationManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.entityreference.DefaultEntityReferenceManager;
 import io.onedev.server.entityreference.EntityReferenceManager;
-import io.onedev.server.event.pubsub.DefaultListenerRegistry;
-import io.onedev.server.event.pubsub.ListenerRegistry;
+import io.onedev.server.event.DefaultListenerRegistry;
+import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.exception.ExceptionHandler;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitLfsFilter;
@@ -534,53 +528,6 @@ public class CoreModule extends AbstractPluginModule {
 	    	
 	    }).in(Singleton.class);
 	    
-	    bind(ForkJoinPool.class).toInstance(new ForkJoinPool() {
-
-			@Override
-			public ForkJoinTask<?> submit(Runnable task) {
-				return super.submit(SecurityUtils.inheritSubject(task));
-			}
-
-			@Override
-			public void execute(Runnable task) {
-				super.execute(SecurityUtils.inheritSubject(task));
-			}
-
-			@Override
-			public <T> ForkJoinTask<T> submit(Callable<T> task) {
-				return super.submit(SecurityUtils.inheritSubject(task));
-			}
-
-			@Override
-			public <T> ForkJoinTask<T> submit(Runnable task, T result) {
-				return super.submit(SecurityUtils.inheritSubject(task), result);
-			}
-
-			@Override
-			public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
-					throws InterruptedException, ExecutionException {
-				return super.invokeAny(SecurityUtils.inheritSubject(tasks));
-			}
-
-			@Override
-			public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
-					throws InterruptedException, ExecutionException, TimeoutException {
-				return super.invokeAny(SecurityUtils.inheritSubject(tasks), timeout, unit);
-			}
-
-			@Override
-			public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, 
-					long timeout, TimeUnit unit) throws InterruptedException {
-				return super.invokeAll(SecurityUtils.inheritSubject(tasks), timeout, unit);
-			}
-
-			@Override
-			public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
-				return super.invokeAll(SecurityUtils.inheritSubject(tasks));
-			}
-
-	    });
-	    
 	    contributeFromPackage(LogInstruction.class, LogInstruction.class);
 	    
 	    
@@ -622,7 +569,7 @@ public class CoreModule extends AbstractPluginModule {
 	
 	private void configureCluster() {
 		bind(ClusterCredentialManager.class).to(DefaultClusterCredentialManager.class);
-		bind(ClusterServerManager.class).to(DefaultClusterMemberManager.class);
+		bind(ClusterServerManager.class).to(DefaultClusterServerManager.class);
 		bind(ClusterManager.class).to(DefaultClusterManager.class);
 	}
 	

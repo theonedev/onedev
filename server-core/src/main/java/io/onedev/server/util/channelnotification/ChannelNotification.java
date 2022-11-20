@@ -4,12 +4,12 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.build.BuildEvent;
-import io.onedev.server.event.codecomment.CodeCommentEvent;
-import io.onedev.server.event.issue.IssueEvent;
-import io.onedev.server.event.pullrequest.PullRequestEvent;
+import io.onedev.server.event.project.ProjectEvent;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.build.BuildEvent;
+import io.onedev.server.event.project.codecomment.CodeCommentEvent;
+import io.onedev.server.event.project.issue.IssueEvent;
+import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.BuildQuery;

@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.bouncycastle.openpgp.PGPPublicKey;
 
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.signature.SignatureVerificationKey;
 import io.onedev.server.model.EmailAddress;
@@ -35,21 +35,27 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 	
 	private final EmailAddressManager emailAddressManager;
 	
-	private final Map<Long, Long> entityIdCache = new ConcurrentHashMap<>();
+	private final ClusterManager clusterManager;
+	
+	private volatile Map<Long, Long> entityIds;
 	
     @Inject
-    public DefaultGpgKeyManager(Dao dao, TransactionManager transactionManager, EmailAddressManager emailAddressManager) {
+    public DefaultGpgKeyManager(Dao dao, TransactionManager transactionManager, EmailAddressManager emailAddressManager, 
+    		ClusterManager clusterManager) {
         super(dao);
         this.transactionManager = transactionManager;
         this.emailAddressManager = emailAddressManager;
+        this.clusterManager = clusterManager;
     }
     
     @Listen
     @Sessional
     public void on(SystemStarted event) {
+    	entityIds = clusterManager.getHazelcastInstance().getReplicatedMap("gpgKeyEntityIds");
+    	
     	for (GpgKey key: query()) {
     		for (Long keyId: key.getKeyIds())
-    			entityIdCache.put(keyId, key.getId());
+    			entityIds.put(keyId, key.getId());
     	}
     }
     
@@ -62,7 +68,8 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 
 				@Override
 				public void run() {
-					entityIdCache.keySet().removeAll(keyIds);
+					for (var id: keyIds)
+						entityIds.remove(id);
 				}
     			
     		});
@@ -75,7 +82,8 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 
 				@Override
 				public void run() {
-					entityIdCache.keySet().removeAll(keyIds);
+					for (var id: keyIds)
+						entityIds.remove(id);
 				}
     			
     		});
@@ -94,7 +102,7 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 				@Override
 				public void run() {
 					for (Long keyId: keyIds)
-						entityIdCache.put(keyId, entityId);
+						entityIds.put(keyId, entityId);
 				}
     			
     		});
@@ -104,7 +112,7 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
     @Sessional
 	@Override
 	public SignatureVerificationKey findSignatureVerificationKey(long keyId) {
-    	Long entityId = entityIdCache.get(keyId);
+    	Long entityId = entityIds.get(keyId);
     	if (entityId != null) {
     		return new SignatureVerificationKey() {
 				

@@ -84,8 +84,8 @@ public class Office365Setting extends MailSetting {
 
 	@Editable(order=400, description="Long-live refresh token of above account which will be used to generate access token "
 			+ "to access office 365 mail server. <b class='text-info'>TIPS: </b> you may use the button at right "
-			+ "side of this field to generate refresh token. Note that whenever tenant id, client id, client secret, or "
-			+ "user principal name is changed, refresh token should be re-generated")
+			+ "side of this field to login to your office 365 account and generate refresh token. Note that whenever "
+			+ "tenant id, client id, client secret, or user principal name is changed, refresh token should be re-generated")
 	@RefreshToken("getRefreshTokenCallback")
 	@NotEmpty
 	public String getRefreshToken() {

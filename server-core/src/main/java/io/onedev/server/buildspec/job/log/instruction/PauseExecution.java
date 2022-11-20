@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.event.build.BuildUpdated;
-import io.onedev.server.event.pubsub.ListenerRegistry;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Transactional;
 

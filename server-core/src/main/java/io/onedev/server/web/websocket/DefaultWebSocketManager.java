@@ -33,7 +33,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.TransactionManager;

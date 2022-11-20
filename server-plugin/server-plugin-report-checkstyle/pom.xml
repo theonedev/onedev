@@ -15,6 +15,6 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.report.checkstyle.CheckstylePluginModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.report.checkstyle.CheckstyleModule</moduleClass>
 	</properties>
 </project>

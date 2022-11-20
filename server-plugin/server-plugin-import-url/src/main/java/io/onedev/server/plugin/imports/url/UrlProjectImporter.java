@@ -31,7 +31,7 @@ public class UrlProjectImporter implements ProjectImporter {
 	
 	@Override
 	public String getName() {
-		return UrlPluginModule.NAME;
+		return UrlModule.NAME;
 	}
 	
 	@Override

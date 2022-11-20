@@ -15,6 +15,6 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.report.cpd.CPDReportModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.report.cpd.CPDModule</moduleClass>
 	</properties>
 </project>

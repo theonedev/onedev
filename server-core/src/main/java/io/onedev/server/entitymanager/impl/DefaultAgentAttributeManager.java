@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentAttributeManager;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;

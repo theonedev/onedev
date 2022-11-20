@@ -14,7 +14,7 @@ import com.vladsch.flexmark.ast.Image;
 import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 
-import io.onedev.server.event.ProjectEvent;
+import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.markdown.ExternalLinkFormatter;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.notification.ActivityDetail;

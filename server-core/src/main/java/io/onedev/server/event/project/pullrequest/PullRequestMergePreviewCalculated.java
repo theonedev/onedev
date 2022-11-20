@@ -1,0 +1,34 @@
+package io.onedev.server.event.project.pullrequest;
+
+import java.util.Date;
+
+import org.eclipse.jgit.lib.ObjectId;
+
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectScopedCommit;
+
+public class PullRequestMergePreviewCalculated extends PullRequestEvent implements CommitAware {
+	
+	private static final long serialVersionUID = 1L;
+
+	public PullRequestMergePreviewCalculated(PullRequest request) {
+		super(null, new Date(), request);
+	}
+
+	@Override
+	public String getActivity() {
+		return "Merge preview calculated";
+	}
+
+	@Override
+	public ProjectScopedCommit getCommit() {
+		MergePreview mergePreview = getRequest().getMergePreview();
+		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
+			return new ProjectScopedCommit(getProject(), ObjectId.fromString(mergePreview.getMergeCommitHash()));
+		else
+			return new ProjectScopedCommit(getProject(), ObjectId.zeroId());
+	}
+
+}

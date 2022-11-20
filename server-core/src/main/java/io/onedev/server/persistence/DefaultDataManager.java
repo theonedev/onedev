@@ -63,14 +63,18 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.commandhandler.Upgrade;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.pubsub.Listen;
-import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.migration.DataMigrator;
 import io.onedev.server.migration.MigrationHelper;
@@ -152,6 +156,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final EmailAddressManager emailAddressManager;
 	
+	private final ClusterManager clusterManager;
+	
+	private final TransactionManager transactionManager;
+	
 	private String backupTaskId;
 
 	@Inject
@@ -159,7 +167,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 			Validator validator, SessionManager sessionManager, Dao dao, SessionFactoryManager sessionFactoryManager,
 			SettingManager settingManager, MailManager mailManager, TaskScheduler taskScheduler, 
 			PasswordService passwordService, RoleManager roleManager, LinkSpecManager linkSpecManager, 
-			EmailAddressManager emailAddressManager, UserManager userManager) {
+			EmailAddressManager emailAddressManager, UserManager userManager, ClusterManager clusterManager, 
+			TransactionManager transactionManager) {
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.hibernateConfig = hibernateConfig;
 		this.validator = validator;
@@ -174,6 +183,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.roleManager = roleManager;
 		this.linkSpecManager = linkSpecManager;
 		this.emailAddressManager = emailAddressManager;
+		this.clusterManager = clusterManager;
+		this.transactionManager = transactionManager;
 	}
 	
 	@Override
@@ -942,19 +953,21 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void execute() {
-					File tempDir = FileUtils.createTempDir("backup");
-					try {
-						File backupDir = new File(Bootstrap.getSiteDir(), Upgrade.DB_BACKUP_DIR);
-						FileUtils.createDir(backupDir);
-						exportData(tempDir);
-						File backupFile = new File(backupDir, 
-								DateTimeFormat.forPattern(Upgrade.BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
-						FileUtils.zip(tempDir, backupFile, null);
-					} catch (Exception e) {
-						notifyBackupError(e);
-						throw ExceptionUtils.unchecked(e);
-					} finally {
-						FileUtils.deleteDir(tempDir);
+					if (clusterManager.isLeaderServer()) {
+						File tempDir = FileUtils.createTempDir("backup");
+						try {
+							File backupDir = new File(Bootstrap.getSiteDir(), Upgrade.DB_BACKUP_DIR);
+							FileUtils.createDir(backupDir);
+							exportData(tempDir);
+							File backupFile = new File(backupDir, 
+									DateTimeFormat.forPattern(Upgrade.BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
+							FileUtils.zip(tempDir, backupFile, null);
+						} catch (Exception e) {
+							notifyBackupError(e);
+							throw ExceptionUtils.unchecked(e);
+						} finally {
+							FileUtils.deleteDir(tempDir);
+						}
 					}
 				}
 
@@ -968,8 +981,39 @@ public class DefaultDataManager implements DataManager, Serializable {
 	}
 	
 	@Listen
-	public void on(SystemStarting event) {
+	public void on(SystemStarted event) {
 		scheduleBackup(settingManager.getBackupSetting());
+	}
+
+	@Transactional
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof Setting) {
+			Setting setting = (Setting) event.getEntity();
+			if (setting.getKey() == Setting.Key.BACKUP) {
+				BackupSetting backupSetting = (BackupSetting) setting.getValue();
+				transactionManager.runAfterCommit(new ClusterRunnable() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public void run() {
+						clusterManager.submitToAllServers(new ClusterTask<Void>() {
+
+							private static final long serialVersionUID = 1L;
+
+							@Override
+							public Void call() throws Exception {
+								scheduleBackup(backupSetting);
+								return null;
+							}
+							
+						});
+					}
+					
+				});
+			}
+		}
 	}
 	
 	@Sessional

@@ -21,7 +21,7 @@ import com.vladsch.flexmark.formatter.NodeFormatterContext;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler.CustomNodeFormatter;
 
-import io.onedev.server.event.ProjectEvent;
+import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CollectionUtils;

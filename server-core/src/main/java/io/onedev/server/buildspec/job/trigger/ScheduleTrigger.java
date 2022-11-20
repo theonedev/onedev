@@ -4,8 +4,8 @@ import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.SubmitReason;
-import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.event.ScheduledTimeReaches;
+import io.onedev.server.event.project.ProjectEvent;
+import io.onedev.server.event.project.ScheduledTimeReaches;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.validation.annotation.CronExpression;

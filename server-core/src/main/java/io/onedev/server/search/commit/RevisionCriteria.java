@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.model.Project;

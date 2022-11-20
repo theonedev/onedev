@@ -8,6 +8,6 @@
 		<version>7.7.11</version>
 	</parent>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.imports.gitea.GiteaPluginModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.imports.gitea.GiteaModule</moduleClass>
 	</properties>
 </project>

@@ -1,6 +1,8 @@
 package io.onedev.server.mail;
 
 import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -61,15 +63,21 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.hazelcast.cluster.MembershipEvent;
+import com.hazelcast.cluster.MembershipListener;
 import com.ibm.icu.impl.locale.XCldrStub.Splitter;
 import com.sun.mail.imap.IMAPFolder;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.IssueAuthorizationManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
@@ -83,8 +91,8 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.EmailAddress;
@@ -117,7 +125,7 @@ import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.util.validation.UserNameValidator;
 
 @Singleton
-public class DefaultMailManager implements MailManager {
+public class DefaultMailManager implements MailManager, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultMailManager.class);
 	
@@ -157,6 +165,8 @@ public class DefaultMailManager implements MailManager {
 	
 	private final AttachmentManager attachmentManager;
 	
+	private final ClusterManager clusterManager;
+	
 	private volatile Thread thread;
 	
 	@Inject
@@ -167,7 +177,8 @@ public class DefaultMailManager implements MailManager {
 			PullRequestManager pullRequestManager, PullRequestCommentManager pullRequestCommentManager, 
 			PullRequestWatchManager pullRequestWatchManager, ExecutorService executorService, 
 			UrlManager urlManager, EmailAddressManager emailAddressManager, 
-			IssueAuthorizationManager issueAuthorizationManager, AttachmentManager attachmentManager) {
+			IssueAuthorizationManager issueAuthorizationManager, AttachmentManager attachmentManager, 
+			ClusterManager clusterManager) {
 		this.transactionManager = transactionManager;
 		this.settingManager = setingManager;
 		this.userManager = userManager;
@@ -184,8 +195,13 @@ public class DefaultMailManager implements MailManager {
 		this.emailAddressManager = emailAddressManager;
 		this.issueAuthorizationManager = issueAuthorizationManager;
 		this.attachmentManager = attachmentManager;
+		this.clusterManager = clusterManager;
 	}
 
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(MailManager.class);
+	}
+	
 	@Sessional
 	@Override
 	public void sendMailAsync(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
@@ -353,13 +369,25 @@ public class DefaultMailManager implements MailManager {
 		if (event.getEntity() instanceof Setting) {
 			Setting setting = (Setting) event.getEntity();
 			if (setting.getKey() == Setting.Key.MAIL) {
-				transactionManager.runAfterCommit(new Runnable() {
+				transactionManager.runAfterCommit(new ClusterRunnable() {
+
+					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void run() {
-						Thread copy = thread;
-						if (copy != null)
-							copy.interrupt();
+						clusterManager.submitToServer(clusterManager.getLeaderServerUUID(), new ClusterTask<Void>() {
+
+							private static final long serialVersionUID = 1L;
+
+							@Override
+							public Void call() throws Exception {
+								Thread copy = thread;
+								if (copy != null)
+									copy.interrupt();
+								return null;
+							}
+							
+						});
 					}
 					
 				});
@@ -781,6 +809,22 @@ public class DefaultMailManager implements MailManager {
 	
 	@Listen
 	public void on(SystemStarted event) {
+		clusterManager.getHazelcastInstance().getCluster().addMembershipListener(new MembershipListener() {
+
+			@Override
+			public void memberAdded(MembershipEvent membershipEvent) {
+			}
+
+			@Override
+			public void memberRemoved(MembershipEvent membershipEvent) {
+				if (clusterManager.isLeaderServer()) {
+					Thread copy = thread;
+					if (copy != null)
+						copy.interrupt();
+				}
+			}
+			
+		});
 		thread = new Thread(new Runnable() {
 
 			@Override
@@ -789,7 +833,7 @@ public class DefaultMailManager implements MailManager {
 					try {
 						MailSetting mailSetting = settingManager.getMailSetting();
 						MailCheckSetting checkSetting = mailSetting!=null?mailSetting.getCheckSetting():null;
-						if (checkSetting != null) {
+						if (checkSetting != null && clusterManager.isLeaderServer()) {
 							MailSendSetting sendSetting = mailSetting.getSendSetting();
 							MailPosition mailPosition = new MailPosition();
 							while (thread != null) {

@@ -3,11 +3,8 @@ package io.onedev.server.entitymanager.impl;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -17,9 +14,10 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
@@ -37,14 +35,15 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 	
 	private final TransactionManager transactionManager;
 	
-	private final Map<Long, Collection<String>> paramNames = new HashMap<>();
+	private final ClusterManager clusterManager;
 	
-	private final ReadWriteLock paramNamesLock = new ReentrantReadWriteLock();
+	private volatile Map<Long, Collection<String>> paramNames;
 	
 	@Inject
-	public DefaultBuildParamManager(Dao dao, TransactionManager transactionManager) {
+	public DefaultBuildParamManager(Dao dao, TransactionManager transactionManager, ClusterManager clusterManager) {
 		super(dao);
 		this.transactionManager = transactionManager;
+		this.clusterManager = clusterManager;
 	}
 
 	@Transactional
@@ -67,6 +66,8 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 		for (Object[] fields: (List<Object[]>)query.list()) 
 			projectIds.put((Long)fields[0], (Long)fields[1]);
 		
+		paramNames = clusterManager.getHazelcastInstance().getReplicatedMap("buildParamNames");
+		
 		query = dao.getSession().createQuery("select build.id, name from BuildParam");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long projectId = projectIds.get(fields[0]);
@@ -87,12 +88,7 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 
 			@Override
 			public void run() {
-				paramNamesLock.writeLock().lock();
-				try {
-					addParam(projectId, paramName);
-				} finally {
-					paramNamesLock.writeLock().unlock();
-				}
+				addParam(projectId, paramName);
 			}
 			
 		});
@@ -100,26 +96,20 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 
 	private void addParam(Long projectId, String paramName) {
 		Collection<String> paramsOfProject = paramNames.get(projectId);
-		if (paramsOfProject == null) {
+		if (paramsOfProject == null) 
 			paramsOfProject = new HashSet<>();
-			paramNames.put(projectId, paramsOfProject);
-		}
 		paramsOfProject.add(paramName);
+		paramNames.put(projectId, paramsOfProject);
 	}
 	
 	@Override
 	public Collection<String> getParamNames(@Nullable Project project) {
-		paramNamesLock.readLock().lock();
-		try {
-			Collection<String> paramNames = new HashSet<>();
-			for (Map.Entry<Long, Collection<String>> entry: this.paramNames.entrySet()) {
-				if (project == null || project.getId().equals(entry.getKey()))
-					paramNames.addAll(entry.getValue());
-			}
-			return paramNames;
-		} finally {
-			paramNamesLock.readLock().unlock();
+		Collection<String> paramNames = new HashSet<>();
+		for (Map.Entry<Long, Collection<String>> entry: this.paramNames.entrySet()) {
+			if (project == null || project.getId().equals(entry.getKey()))
+				paramNames.addAll(entry.getValue());
 		}
+		return paramNames;
 	}
 	
 	@Transactional
@@ -131,16 +121,9 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 
 				@Override
 				public void run() {
-					paramNamesLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, Collection<String>>> it = paramNames.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getKey().equals(projectId))
-								it.remove();
-						}
-					} finally {
-						paramNamesLock.writeLock().unlock();
-					}
+					paramNames.remove(projectId);
 				}
+				
 			});
 		}
 	}

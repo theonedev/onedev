@@ -94,7 +94,7 @@ public class GitHubProjectImporter implements ProjectImporter {
 	
 	@Override
 	public String getName() {
-		return GitHubPluginModule.NAME;
+		return GitHubModule.NAME;
 	}
 	
 	@Override

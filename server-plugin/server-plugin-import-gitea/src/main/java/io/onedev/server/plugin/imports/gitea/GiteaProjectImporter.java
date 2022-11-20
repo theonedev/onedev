@@ -94,7 +94,7 @@ public class GiteaProjectImporter implements ProjectImporter {
 	
 	@Override
 	public String getName() {
-		return GiteaPluginModule.NAME;
+		return GiteaModule.NAME;
 	}
 
 	@Override

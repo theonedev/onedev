@@ -90,7 +90,7 @@ public class BitbucketProjectImporter implements ProjectImporter {
 	
 	@Override
 	public String getName() {
-		return BitbucketPluginModule.NAME;
+		return BitbucketModule.NAME;
 	}
 	
 	@Override

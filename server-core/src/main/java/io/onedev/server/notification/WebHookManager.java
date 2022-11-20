@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.persistence.annotation.Sessional;
 

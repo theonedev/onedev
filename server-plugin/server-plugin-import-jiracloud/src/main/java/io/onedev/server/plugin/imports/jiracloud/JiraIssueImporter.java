@@ -67,7 +67,7 @@ public class JiraIssueImporter implements IssueImporter {
 	
 	@Override
 	public String getName() {
-		return JiraPluginModule.NAME;
+		return JiraModule.NAME;
 	}
 
 	@Override

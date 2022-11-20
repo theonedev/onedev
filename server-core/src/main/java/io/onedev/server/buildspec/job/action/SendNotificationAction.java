@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.job.action;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.event.build.BuildFinished;
+import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.notification.BuildNotificationManager;
 import io.onedev.server.web.editable.annotation.Editable;

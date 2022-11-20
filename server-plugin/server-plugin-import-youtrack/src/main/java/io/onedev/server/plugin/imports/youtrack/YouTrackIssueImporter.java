@@ -68,7 +68,7 @@ public class YouTrackIssueImporter implements IssueImporter {
 	
 	@Override
 	public String getName() {
-		return YouTrackPluginModule.NAME;
+		return YouTrackModule.NAME;
 	}
 
 	@Override

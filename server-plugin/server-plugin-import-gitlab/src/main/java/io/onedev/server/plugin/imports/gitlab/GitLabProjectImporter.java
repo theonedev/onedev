@@ -94,7 +94,7 @@ public class GitLabProjectImporter implements ProjectImporter {
 	
 	@Override
 	public String getName() {
-		return GitLabPluginModule.NAME;
+		return GitLabModule.NAME;
 	}
 	
 	@Override

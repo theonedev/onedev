@@ -2,16 +2,15 @@ package io.onedev.server.entitymanager.impl;
 
 import static io.onedev.commons.utils.ExceptionUtils.unchecked;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,10 +32,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
@@ -67,14 +67,15 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 	
 	private final TransactionManager transactionManager;
 	
-	private final Map<Key, Map<String, Collection<String>>> reportNames = new HashMap<>();
+	private final ClusterManager clusterManager;
 	
-	private final ReadWriteLock reportNamesLock = new ReentrantReadWriteLock();
+	private volatile Map<Key, Map<String, Collection<String>>> reportNames;
 	
 	@Inject
-	public DefaultBuildMetricManager(Dao dao, TransactionManager transactionManager) {
+	public DefaultBuildMetricManager(Dao dao, TransactionManager transactionManager, ClusterManager clusterManager) {
 		this.dao = dao;
 		this.transactionManager = transactionManager;
+		this.clusterManager = clusterManager;
 	}
 	
 	@SuppressWarnings("resource")
@@ -91,36 +92,31 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 		predicates.add(builder.equal(buildJoin.get(Build.PROP_PROJECT), project));
 		
 		if (!SecurityUtils.canManageBuilds(project)) {
-			reportNamesLock.readLock().lock();
-			try {
-				Key key = new Key(project.getId(), metricClass);
-				Map<String, Collection<String>> availableReportNames = reportNames.get(key);
-				if (availableReportNames != null) {
-					List<Predicate> jobPredicates = new ArrayList<>();
-					Collection<String> jobsWithAllReports = new HashSet<>();
-					for (Map.Entry<String, Collection<String>> entry: getAccessibleReportNames(project, metricClass).entrySet()) {
-						Collection<String> availableReportNamesOfJob = availableReportNames.get(entry.getKey());
-						if (availableReportNamesOfJob != null) {
-							if (entry.getValue().containsAll(availableReportNamesOfJob)) {
-								jobsWithAllReports.add(entry.getKey());
-								jobPredicates.add(builder.equal(buildJoin.get(Build.PROP_JOB), entry.getKey()));
-							} else {
-								List<Predicate> reportPredicates = new ArrayList<>();
-								for (String reportName: entry.getValue()) 
-									reportPredicates.add(builder.equal(metricRoot.get(BuildMetric.PROP_REPORT), reportName));
-								jobPredicates.add(builder.and(
-										builder.equal(buildJoin.get(Build.PROP_JOB), entry.getKey()), 
-										builder.or(reportPredicates.toArray(new Predicate[reportPredicates.size()]))));
-							}
-						} else {
+			Key key = new Key(project.getId(), metricClass);
+			Map<String, Collection<String>> availableReportNames = reportNames.get(key);
+			if (availableReportNames != null) {
+				List<Predicate> jobPredicates = new ArrayList<>();
+				Collection<String> jobsWithAllReports = new HashSet<>();
+				for (Map.Entry<String, Collection<String>> entry: getAccessibleReportNames(project, metricClass).entrySet()) {
+					Collection<String> availableReportNamesOfJob = availableReportNames.get(entry.getKey());
+					if (availableReportNamesOfJob != null) {
+						if (entry.getValue().containsAll(availableReportNamesOfJob)) {
 							jobsWithAllReports.add(entry.getKey());
+							jobPredicates.add(builder.equal(buildJoin.get(Build.PROP_JOB), entry.getKey()));
+						} else {
+							List<Predicate> reportPredicates = new ArrayList<>();
+							for (String reportName: entry.getValue()) 
+								reportPredicates.add(builder.equal(metricRoot.get(BuildMetric.PROP_REPORT), reportName));
+							jobPredicates.add(builder.and(
+									builder.equal(buildJoin.get(Build.PROP_JOB), entry.getKey()), 
+									builder.or(reportPredicates.toArray(new Predicate[reportPredicates.size()]))));
 						}
+					} else {
+						jobsWithAllReports.add(entry.getKey());
 					}
-					if (!jobsWithAllReports.containsAll(availableReportNames.keySet()))
-						predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
 				}
-			} finally {
-				reportNamesLock.readLock().unlock();
+				if (!jobsWithAllReports.containsAll(availableReportNames.keySet()))
+					predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
 			}
 		}
 		
@@ -166,6 +162,8 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 	public void on(SystemStarted event) {
 		logger.info("Caching build metric info...");
 		
+		reportNames = clusterManager.getHazelcastInstance().getReplicatedMap("buildReportNames");
+		
 		EntityManagerFactory emf = (EntityManagerFactory)dao.getSession().getEntityManagerFactory();
 		for (EntityType<?> entityType: emf.getMetamodel().getEntities()) {
 			Class<?> entityClass = entityType.getJavaType();
@@ -188,16 +186,14 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 
 				@Override
 				public void run() {
-					reportNamesLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Key, Map<String, Collection<String>>>> it = reportNames.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getKey().projectId.equals(projectId))
-								it.remove();
-						}
-					} finally {
-						reportNamesLock.writeLock().unlock();
+					for (var key: reportNames.entrySet().stream()
+							.map(it->it.getKey())
+							.filter(it->it.projectId.equals(projectId))
+							.collect(Collectors.toSet())) {
+						reportNames.remove(key);
 					}
 				}
+				
 			});
 		}
 	}
@@ -214,12 +210,7 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 
 				@Override
 				public void run() {
-					reportNamesLock.writeLock().lock();
-					try {
-						populateReportNames(key, jobName, reportName);
-					} finally {
-						reportNamesLock.writeLock().unlock();
-					}
+					populateReportNames(key, jobName, reportName);
 				}
 				
 			});
@@ -228,16 +219,15 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 	
 	private void populateReportNames(Key key, String jobName, String reportName) {
 		Map<String, Collection<String>> reportNamesOfKey = reportNames.get(key);
-		if (reportNamesOfKey == null) {
+		if (reportNamesOfKey == null) 
 			reportNamesOfKey = new HashMap<>();
-			reportNames.put(key, reportNamesOfKey);
-		}
 		Collection<String> reportNamesOfJob = reportNamesOfKey.get(jobName);
 		if (reportNamesOfJob == null) {
 			reportNamesOfJob = new HashSet<>();
 			reportNamesOfKey.put(jobName, reportNamesOfJob);
 		}
 		reportNamesOfJob.add(reportName);
+		reportNames.put(key, reportNamesOfKey);
 	}
 	
 	private void populateAccessibleReportNames(Map<String, Collection<String>> accessibleReportNames, 
@@ -259,47 +249,44 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 	
 	@Override
 	public Map<String, Collection<String>> getAccessibleReportNames(Project project, Class<?> metricClass) {
-		reportNamesLock.readLock().lock();
-		try {
-			Map<String, Collection<String>> accessibleReportNames = new HashMap<>();
-			Key key = new Key(project.getId(), metricClass);
-			Map<String, Collection<String>> availableReportNames = reportNames.get(key);
-			if (availableReportNames != null) {
-				if (SecurityUtils.isAdministrator()) {
-					for (Map.Entry<String, Collection<String>> entry: availableReportNames.entrySet())
-						accessibleReportNames.put(entry.getKey(), new HashSet<>(entry.getValue()));
-				} else {
-					User user = SecurityUtils.getUser();
-					if (user != null) {
-						for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+		Map<String, Collection<String>> accessibleReportNames = new HashMap<>();
+		Key key = new Key(project.getId(), metricClass);
+		Map<String, Collection<String>> availableReportNames = reportNames.get(key);
+		if (availableReportNames != null) {
+			if (SecurityUtils.isAdministrator()) {
+				for (Map.Entry<String, Collection<String>> entry: availableReportNames.entrySet())
+					accessibleReportNames.put(entry.getKey(), new HashSet<>(entry.getValue()));
+			} else {
+				User user = SecurityUtils.getUser();
+				if (user != null) {
+					for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+						if (project.equals(authorization.getProject())) {
+							populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
+									project, authorization.getRole());
+						}
+					}
+					for (Group group: user.getGroups()) {
+						for (GroupAuthorization authorization: group.getAuthorizations()) {
 							if (project.equals(authorization.getProject())) {
 								populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
 										project, authorization.getRole());
 							}
 						}
-						for (Group group: user.getGroups()) {
-							for (GroupAuthorization authorization: group.getAuthorizations()) {
-								if (project.equals(authorization.getProject())) {
-									populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
-											project, authorization.getRole());
-								}
-							}
-						}
 					}
-					if (project.getDefaultRole() != null) {
-						populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
-								project, project.getDefaultRole());
-					}
-				}				
-			}
-			return accessibleReportNames;
-		} finally {
-			reportNamesLock.readLock().unlock();
+				}
+				if (project.getDefaultRole() != null) {
+					populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
+							project, project.getDefaultRole());
+				}
+			}				
 		}
+		return accessibleReportNames;
 	}
 	
-	private static class Key {
+	private static class Key implements Serializable {
 		
+		private static final long serialVersionUID = 1L;
+
 		private final Long projectId;
 		
 		private final Class<?> metricClass;

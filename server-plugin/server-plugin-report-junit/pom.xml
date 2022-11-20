@@ -21,6 +21,6 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.report.junit.JUnitReportModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.report.junit.JUnitModule</moduleClass>
 	</properties>
 </project>

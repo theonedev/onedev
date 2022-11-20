@@ -71,7 +71,7 @@ public class GitHubIssueImporter implements IssueImporter {
 	
 	@Override
 	public String getName() {
-		return GitHubPluginModule.NAME;
+		return GitHubModule.NAME;
 	}
 	
 	@Override

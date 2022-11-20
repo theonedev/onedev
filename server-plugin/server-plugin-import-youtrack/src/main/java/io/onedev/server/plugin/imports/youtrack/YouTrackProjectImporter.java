@@ -67,7 +67,7 @@ public class YouTrackProjectImporter implements ProjectImporter {
 	
 	@Override
 	public String getName() {
-		return YouTrackPluginModule.NAME;
+		return YouTrackModule.NAME;
 	}
 
 	@Override

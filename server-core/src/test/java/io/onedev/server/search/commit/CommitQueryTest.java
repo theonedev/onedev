@@ -18,7 +18,7 @@ import org.mockito.stubbing.Answer;
 import static org.mockito.Mockito.*;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.AbstractGitTest;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;

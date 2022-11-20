@@ -8,6 +8,6 @@
 		<version>7.7.11</version>
 	</parent>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.report.unittest.UnitTestReportModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.report.unittest.UnitTestModule</moduleClass>
 	</properties>
 </project>

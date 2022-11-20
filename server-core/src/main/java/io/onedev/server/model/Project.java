@@ -642,10 +642,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	 * Read blob content and cache result in repository in case the same blob 
 	 * content is requested again. 
 	 * 
-	 * We made this method thread-safe as we are using ForkJoinPool to calculate 
-	 * diffs of multiple blob changes concurrently, and this method will be 
-	 * accessed concurrently in that special case.
-	 * 
 	 * @param blobIdent
 	 * 			ident of the blob
 	 * @return

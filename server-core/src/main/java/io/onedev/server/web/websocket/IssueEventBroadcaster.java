@@ -3,9 +3,9 @@ package io.onedev.server.web.websocket;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.issue.IssueEvent;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 

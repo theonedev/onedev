@@ -56,8 +56,8 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.pubsub.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.service.GitService;
@@ -698,7 +698,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		logger.info("Caching build info...");
 		
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = hazelcastInstance.getMap("builds");
+        cache = hazelcastInstance.getReplicatedMap("buildCache");
         jobNames = hazelcastInstance.getReplicatedMap("jobNames");
         
 		Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");

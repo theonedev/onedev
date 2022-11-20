@@ -33,7 +33,7 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.pubsub.ListenerRegistry;
+import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.git.AbstractGitTest;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;

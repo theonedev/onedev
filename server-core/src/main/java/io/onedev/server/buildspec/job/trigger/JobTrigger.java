@@ -17,7 +17,7 @@ import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.supply.ParamSupply;
-import io.onedev.server.event.ProjectEvent;
+import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;

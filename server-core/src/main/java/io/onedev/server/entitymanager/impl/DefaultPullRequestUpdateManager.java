@@ -11,8 +11,8 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
-import io.onedev.server.event.pubsub.ListenerRegistry;
-import io.onedev.server.event.pullrequest.PullRequestUpdated;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;

@@ -9,11 +9,11 @@ import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.build.BuildEvent;
-import io.onedev.server.event.codecomment.CodeCommentEvent;
-import io.onedev.server.event.issue.IssueEvent;
-import io.onedev.server.event.pullrequest.PullRequestEvent;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.build.BuildEvent;
+import io.onedev.server.event.project.codecomment.CodeCommentEvent;
+import io.onedev.server.event.project.issue.IssueEvent;
+import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable

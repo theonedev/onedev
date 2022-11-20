@@ -64,7 +64,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.CommitIndexed;
+import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;

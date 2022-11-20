@@ -49,8 +49,8 @@ import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser.Param
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.event.build.BuildFinished;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.persistence.annotation.Sessional;

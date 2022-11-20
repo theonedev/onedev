@@ -15,6 +15,6 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.report.jacoco.JacocoReportModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.report.jacoco.JacocoModule</moduleClass>
 	</properties>
 </project>

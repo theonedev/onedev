@@ -32,7 +32,7 @@ import com.hazelcast.core.HazelcastInstance;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.User;

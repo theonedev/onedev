@@ -6,7 +6,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.WildcardUtils;

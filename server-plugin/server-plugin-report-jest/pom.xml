@@ -15,6 +15,6 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.report.jest.JestReportModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.report.jest.JestModule</moduleClass>
 	</properties>
 </project>

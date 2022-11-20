@@ -71,7 +71,7 @@ public class GitLabIssueImporter implements IssueImporter {
 	
 	@Override
 	public String getName() {
-		return GitLabPluginModule.NAME;
+		return GitLabModule.NAME;
 	}
 	
 	@Override

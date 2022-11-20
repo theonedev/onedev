@@ -37,7 +37,7 @@ import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.JobLogEntry;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.job.log.StyleBuilder;

@@ -2,7 +2,7 @@ package io.onedev.server.infomanager;
 
 import java.io.File;
 
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStopping;
 import jetbrains.exodus.env.Environment;
 

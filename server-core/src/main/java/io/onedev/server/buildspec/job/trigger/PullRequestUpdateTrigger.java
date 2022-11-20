@@ -2,8 +2,8 @@ package io.onedev.server.buildspec.job.trigger;
 
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.SubmitReason;
-import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
+import io.onedev.server.event.project.ProjectEvent;
+import io.onedev.server.event.project.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.editable.annotation.Editable;
 

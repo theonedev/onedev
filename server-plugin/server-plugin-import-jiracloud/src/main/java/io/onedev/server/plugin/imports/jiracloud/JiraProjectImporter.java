@@ -73,7 +73,7 @@ public class JiraProjectImporter implements ProjectImporter {
 	
 	@Override
 	public String getName() {
-		return JiraPluginModule.NAME;
+		return JiraModule.NAME;
 	}
 
 	@Override

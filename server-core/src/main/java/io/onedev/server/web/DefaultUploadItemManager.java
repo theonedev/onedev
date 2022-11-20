@@ -14,7 +14,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.annotation.Sessional;

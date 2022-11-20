@@ -12,9 +12,9 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.codecomment.CodeCommentEvent;
-import io.onedev.server.event.codecomment.CodeCommentUpdated;
-import io.onedev.server.event.pubsub.Listen;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.codecomment.CodeCommentEvent;
+import io.onedev.server.event.project.codecomment.CodeCommentUpdated;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;

@@ -53,8 +53,6 @@ import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 @Singleton
 public class DefaultSettingManager extends BaseEntityManager<Setting> implements SettingManager {
 	
-	private final DataManager dataManager;
-	
 	private final ClusterManager clusterManager;
 	
 	private volatile Map<Key, Serializable> settingValues;
@@ -62,7 +60,6 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager, ClusterManager clusterManager) {
 		super(dao);
-		this.dataManager = dataManager;
 		this.clusterManager = clusterManager;
 	}
 	
@@ -211,7 +208,6 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	@Override
 	public void saveBackupSetting(BackupSetting backupSetting) {
 		saveSetting(Key.BACKUP, backupSetting);
-		dataManager.scheduleBackup(backupSetting);
 	}
 
 	@Transactional

@@ -15,6 +15,6 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.report.spotbugs.SpotBugsReportModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.report.spotbugs.SpotBugsModule</moduleClass>
 	</properties>
 </project>

@@ -71,7 +71,7 @@ public class GiteaIssueImporter implements IssueImporter {
 	
 	@Override
 	public String getName() {
-		return GiteaPluginModule.NAME;
+		return GiteaModule.NAME;
 	}
 
 	@Override
