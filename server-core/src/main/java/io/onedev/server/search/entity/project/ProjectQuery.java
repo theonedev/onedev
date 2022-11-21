@@ -136,6 +136,9 @@ public class ProjectQuery extends EntityQuery<Project> {
 								return new LabelCriteria(getLabelSpec(value));
 						case ProjectQueryLexer.Contains:
 							return new DescriptionCriteria(value);
+						case ProjectQueryLexer.IsUntil:
+						case ProjectQueryLexer.IsSince:
+							return new UpdateDateCriteria(value, operator);
 						default:
 							throw new ExplicitException("Unexpected operator " + getRuleName(operator));
 						}
@@ -207,6 +210,11 @@ public class ProjectQuery extends EntityQuery<Project> {
 					&& !fieldName.equals(Project.NAME_PATH)) { 
 				throw newOperatorException(fieldName, operator);
 			}
+			break;
+		case ProjectQueryLexer.IsUntil:
+		case ProjectQueryLexer.IsSince:
+			if (!fieldName.equals(Project.NAME_UPDATE_DATE)) 
+				throw newOperatorException(fieldName, operator);
 			break;
 		}
 	}

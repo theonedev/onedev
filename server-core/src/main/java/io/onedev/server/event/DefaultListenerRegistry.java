@@ -23,9 +23,12 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.event.project.ProjectCreated;
 import io.onedev.server.event.project.ProjectEvent;
+import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Transactional;
 
 @Singleton
 public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
@@ -104,11 +107,16 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 			listener.notify(event);
 	}
 
+	@Transactional
 	@Override
 	public void post(Object event) {
 		if (event instanceof ProjectEvent) {
 			ProjectEvent projectEvent = (ProjectEvent) event;
-			Long projectId = projectEvent.getProject().getId();
+			Project project = projectEvent.getProject();
+			if (!(event instanceof ProjectCreated)) 
+				project.getUpdate().setDate(projectEvent.getDate());
+			
+			Long projectId = project.getId();
 			
 			transactionManager.runAfterCommit(new ClusterRunnable() {
 

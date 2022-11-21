@@ -4408,11 +4408,25 @@ public class DataMigrator {
 	}
 	
 	private void migrate103(File dataDir, Stack<Integer> versions) {
+		VersionedXmlDoc projectUpdatesDom;
+		File projectUpdatesFile = new File(dataDir, "ProjectUpdates.xml");
+		projectUpdatesDom = new VersionedXmlDoc();
+		Element listElement = projectUpdatesDom.addElement("list");
+		
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())  
-					element.element("updateDate").detach();
+				for (Element element: dom.getRootElement().elements()) {
+					String projectId = element.elementTextTrim("id");
+					Element updateDateElement = element.element("updateDate");
+					element.addElement("update").setText(projectId);
+					
+					Element updateElement = listElement.addElement("io.onedev.server.model.ProjectUpdate");
+					updateElement.addAttribute("revision", "0.0");
+					updateElement.addElement("id").setText(projectId);
+					updateElement.addElement("date").setText(updateDateElement.getText().trim());
+					updateDateElement.detach();
+				}				
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
@@ -4438,6 +4452,8 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
+				
+		projectUpdatesDom.writeToFile(projectUpdatesFile, true);
 	}
 	
 }

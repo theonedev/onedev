@@ -31,6 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.Validator;
@@ -127,8 +128,8 @@ import io.onedev.server.web.util.WicketUtils;
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"), 
-				@Index(columnList=PROP_NAME)
+				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"),
+				@Index(columnList="o_update_id"), @Index(columnList=PROP_NAME)
 		}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
 )
@@ -156,6 +157,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public static final String PROP_FORKED_FROM = "forkedFrom";
 	
+	public static final String NAME_UPDATE_DATE = "Update Date";
+	
+	public static final String PROP_UPDATE = "update";
+	
 	public static final String NAME_LABEL = "Label";
 	
 	public static final String PROP_PARENT = "parent";
@@ -175,12 +180,13 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NAME, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION);
+			NAME_NAME, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_PATH, PROP_PATH,
 			NAME_NAME, PROP_NAME, 
-			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME);
+			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,
+			NAME_UPDATE_DATE, PROP_UPDATE + "." + ProjectUpdate.PROP_DATE);
 	
 	static ThreadLocal<Stack<Project>> stack =  new ThreadLocal<Stack<Project>>() {
 
@@ -213,6 +219,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Api(description="Represents the parent project. Remove this property if the project does not have a parent project")
 	private Project parent;
 	
+	@OneToOne(fetch=FetchType.LAZY)
+	@JoinColumn(unique=true, nullable=false)
+	private ProjectUpdate update;
+
 	@Column(nullable=false)
 	private String name;
 	
@@ -433,6 +443,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
+	}
+
+	public ProjectUpdate getUpdate() {
+		return update;
+	}
+
+	public void setUpdate(ProjectUpdate update) {
+		this.update = update;
 	}
 
 	public Collection<PullRequest> getIncomingRequests() {

@@ -67,6 +67,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectUpdateManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
@@ -95,6 +96,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectUpdate;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
@@ -148,6 +150,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final JobManager jobManager;
     
+    private final ProjectUpdateManager updateManager;
+    
     private final ListenerRegistry listenerRegistry;
     
     private final RoleManager roleManager;
@@ -173,7 +177,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
     		UserAuthorizationManager userAuthorizationManager, RoleManager roleManager, 
     		JobManager jobManager, IssueManager issueManager, LinkSpecManager linkSpecManager, 
-    		StorageManager storageManager, ClusterManager clusterManager, GitService gitService) {
+    		StorageManager storageManager, ClusterManager clusterManager, GitService gitService, 
+    		ProjectUpdateManager updateManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -191,6 +196,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         this.storageManager = storageManager;
         this.clusterManager = clusterManager;
         this.gitService = gitService;
+        this.updateManager = updateManager;
     }
     
 	public Object writeReplace() throws ObjectStreamException {
@@ -287,6 +293,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	if (parent != null && parent.isNew())
     		create(parent);
     	project.setPath(project.calcPath());
+    	ProjectUpdate update = new ProjectUpdate();
+    	update.setProject(project);
+    	updateManager.save(update);
+    	project.setUpdate(update);
     	dao.persist(project);
     	FileUtils.createDir(storageManager.getProjectDir(project.getId()));
        	checkGitDir(project.getId());
@@ -491,6 +501,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	if (parent != null && parent.isNew())
     		create(parent);
     	
+    	ProjectUpdate update = new ProjectUpdate();
+    	update.setProject(to);
+    	updateManager.save(update);
+    	to.setUpdate(update);
+    	
     	dao.persist(to);
     	FileUtils.createDir(storageManager.getProjectDir(to.getId()));
     	
@@ -560,6 +575,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	Project parent = project.getParent();
     	if (parent != null && parent.isNew())
     		create(parent);
+    	
+    	ProjectUpdate update = new ProjectUpdate();
+    	update.setProject(project);
+    	updateManager.save(update);
+    	project.setUpdate(update);
     	
     	dao.persist(project);
     	FileUtils.createDir(storageManager.getProjectDir(project.getId()));
