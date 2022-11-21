@@ -36,18 +36,13 @@ onedev.server.inputassist = {
 		$input.data("update", function($item) {
 			var value = $item.data("content");
 			var caret = $item.data("caret");
-			if (value != $input.val() || caret != $input.caret()) {
-				$input.val(value);
-				if (caret != undefined)
-					$input.caret(caret);
-				$input.blur();
-				$input.focus();
-				$input.trigger("input");
-				$input.trigger("assist");
-				return true;
-			} else {
-				return false;
-			}
+			$input.val(value);
+			if (caret != undefined)
+				$input.caret(caret);
+			$input.blur();
+			$input.focus();
+			$input.trigger("input");
+			$input.trigger("assist");
 		});
 		
 		$input.bind("keydown", "up", function() {
@@ -113,14 +108,10 @@ onedev.server.inputassist = {
 				} else {
 					tabbing = false;
 					var $active = $dropdown.find("li.active");
-					if ($active.length != 0) { 
+					if ($active.length != 0)  
 						$input.data("update")($active);
-					} else if ($dropdown.find("li").length != 0) {
-						$dropdown.find("li").each(function() {
-							if ($input.data("update")($(this)))
-								return false;
-						});
-					}
+					else if ($dropdown.find("li").length != 0) 
+						$input.data("update")($dropdown.find("li").first());
 				}
 				return false;
 			} else {
