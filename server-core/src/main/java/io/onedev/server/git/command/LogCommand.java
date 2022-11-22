@@ -34,6 +34,8 @@ public abstract class LogCommand {
     
     private boolean firstParent;
     
+    private boolean noRenames;
+    
     private EnumSet<Field> fields = EnumSet.noneOf(Field.class);
     
     public LogCommand(File workingDir, List<String> revisions) {
@@ -49,6 +51,11 @@ public abstract class LogCommand {
 	
 	public LogCommand firstParent(boolean firstParent) {
 		this.firstParent = firstParent;
+		return this;
+	}
+	
+	public LogCommand noRenames(boolean noRenames) {
+		this.noRenames = noRenames;
 		return this;
 	}
 
@@ -83,12 +90,21 @@ public abstract class LogCommand {
         if (fields.contains(Field.BODY))
         	format += "body:%b" + BODY_END + "%n";
 
-        if (fields.contains(Field.LINE_CHANGES)) 
-	        cmd.addArgs("-c", "diff.renameLimit=1000", "log", "--numstat", "--find-renames");
-        else if (fields.contains(Field.FILE_CHANGES))
-            cmd.addArgs("-c", "diff.renameLimit=1000", "log", "--name-status", "--find-renames");
-        else 
-	        cmd.addArgs("log");
+        if (noRenames) {
+            if (fields.contains(Field.LINE_CHANGES)) 
+    	        cmd.addArgs("log", "--numstat", "--no-renames");
+            else if (fields.contains(Field.FILE_CHANGES))
+                cmd.addArgs("log", "--name-status", "--no-renames");
+            else 
+    	        cmd.addArgs("log");
+        } else {
+            if (fields.contains(Field.LINE_CHANGES)) 
+    	        cmd.addArgs("-c", "diff.renameLimit=1000", "log", "--numstat", "--find-renames");
+            else if (fields.contains(Field.FILE_CHANGES))
+                cmd.addArgs("-c", "diff.renameLimit=1000", "log", "--name-status", "--find-renames");
+            else 
+    	        cmd.addArgs("log");
+        }
         
         cmd.addArgs("--format=" + format, "--date=raw");
         if (firstParent) {

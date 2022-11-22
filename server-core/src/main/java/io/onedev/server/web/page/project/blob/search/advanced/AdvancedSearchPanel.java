@@ -587,7 +587,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 		public List<QueryHit> query(AdvancedSearchPanel context) throws InterruptedException {
 			CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
 			BlobQuery query = new FileQuery.Builder()
-					.fileNames(term)
+					.fileNames(term.toLowerCase())
 					.caseSensitive(caseSensitive) 
 					.directory(context.getDirectory(insideCurrentDir))
 					.count(getMaxQueryEntries())

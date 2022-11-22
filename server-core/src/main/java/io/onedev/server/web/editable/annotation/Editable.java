@@ -19,6 +19,10 @@ public @interface Editable {
 	
 	String placeholderProvider() default "";
 	
+	String rootProjectPlaceholder() default "";
+	
+	String rootProjectPlaceholderProvider() default "";
+	
 	int order() default 0;
 	
 	String description() default "";

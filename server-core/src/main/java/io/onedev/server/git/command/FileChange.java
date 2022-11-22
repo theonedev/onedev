@@ -8,6 +8,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import io.onedev.server.util.FileExtension;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 
 @SuppressWarnings("serial")
 public class FileChange implements Serializable {
@@ -62,6 +65,12 @@ public class FileChange implements Serializable {
 		if (getNewPath() != null)
 			paths.add(getNewPath());
 		return paths;
+	}
+	
+	public boolean matches(PatternSet patterns) {
+		Matcher matcher = new PathMatcher();
+		return oldPath != null && patterns.matches(matcher, oldPath)
+				|| newPath != null && patterns.matches(matcher, newPath);
 	}
 	
 }

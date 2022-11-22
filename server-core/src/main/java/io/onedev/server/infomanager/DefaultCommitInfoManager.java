@@ -89,6 +89,7 @@ import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.patternset.PatternSet;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.backup.BackupStrategy;
@@ -480,6 +481,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);	
 		
 		Repository repository = projectManager.getRepository(project.getId());
+		PatternSet filePatterns = project.findCodeAnalysisPatterns();
 		
 		ObjectId lastCommitId = env.computeInTransaction(new TransactionalComputable<ObjectId>() {
 			
@@ -545,7 +547,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 							public void process(GitCommit currentCommit) {
 								if (currentCommit.getCommitDate() != null && currentCommit.getParentHashes().size() <= 1) {
 									int dayValue = new Day(currentCommit.getCommitDate()).getValue();
-									updateContribution(overallContributions, dayValue, currentCommit);
+									updateContribution(overallContributions, dayValue, currentCommit, filePatterns);
 
 									if (currentCommit.getAuthor() != null) {
 										NameAndEmail author = new NameAndEmail(currentCommit.getAuthor());
@@ -559,7 +561,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 													dailyContributionsStore, txn, new IntByteIterable(dayValue)));
 											dailyContributionsCache.put(dayValue, contributionsOnDay);
 										}
-										updateContribution(contributionsOnDay, userIndex, currentCommit);
+										updateContribution(contributionsOnDay, userIndex, currentCommit, filePatterns);
 									}
 								}
 							}
@@ -695,6 +697,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			
 		});
 
+		PatternSet filePatterns = project.findCodeAnalysisPatterns();
 		if (lastCommitId == null) {
 			env.executeInTransaction(new TransactionalExecutable() {
 				
@@ -720,12 +723,12 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 									consumer.accept(commit);
 								}
 								
-							}.firstParent(true).fields(fields).run();
+							}.firstParent(true).noRenames(true).fields(fields).run();
 						}
 
 						@Override
 						public void process(GitCommit currentCommit) {
-							updateLineStats(txn, currentCommit, lineStats);
+							updateLineStats(txn, currentCommit, lineStats, filePatterns);
 						}
 						
 					}.pump();
@@ -754,13 +757,13 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 					
 					ListNumStatsCommand command = new ListNumStatsCommand(
 							storageManager.getProjectGitDir(project.getId()), 
-							lastCommitId.name(), commitId.name());
+							lastCommitId.name(), commitId.name(), true);
 					List<FileChange> fileChanges = command.run();
 					RevCommit revCommit = project.getRevCommit(commitId, true);
 					GitCommit gitCommit = new GitCommit(revCommit.name(), null, null, revCommit.getAuthorIdent(), 
 							revCommit.getCommitterIdent().getWhen(), null, null, fileChanges);
 					
-					updateLineStats(txn, gitCommit, lineStats);
+					updateLineStats(txn, gitCommit, lineStats, filePatterns);
 
 					bytesOfLineStats = SerializationUtils.serialize((Serializable) lineStats);
 					defaultStore.put(txn, LINE_STATS_KEY, new ArrayByteIterable(bytesOfLineStats));
@@ -825,7 +828,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		}		
 	}
 		
-	private void updateLineStats(Transaction txn, GitCommit currentCommit, Map<Integer, Map<String, Integer>> lineStats) {		
+	private void updateLineStats(Transaction txn, GitCommit currentCommit, Map<Integer, Map<String, Integer>> lineStats, 
+			PatternSet filePatterns) {		
 		int dayValue = new Day(currentCommit.getCommitDate()).getValue();
 		
 		Map<String, Integer> lineStatsOnDay = lineStats.get(dayValue);
@@ -836,14 +840,16 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		
 		Map<String, Integer> languageLines = new HashMap<>();
 		for (FileChange change: currentCommit.getFileChanges()) {
-			int lines = change.getAdditions() - change.getDeletions();
-			if (lines != 0 && !change.getNewExtension().equals("")) {
-				String language = ProgrammingLanguageDetector.getLanguageForExtension(change.getNewExtension());
-				if (language != null) {
-					Integer accumulatedLines = languageLines.get(language);
-					if (accumulatedLines != null) 
-						lines += accumulatedLines;
-					languageLines.put(language, lines);
+			if (change.matches(filePatterns)) {
+				int lines = change.getAdditions() - change.getDeletions();
+				if (lines != 0 && StringUtils.isNotBlank(change.getNewExtension())) {
+					String language = ProgrammingLanguageDetector.getLanguageForExtension(change.getNewExtension());
+					if (language != null) {
+						Integer accumulatedLines = languageLines.get(language);
+						if (accumulatedLines != null) 
+							lines += accumulatedLines;
+						languageLines.put(language, lines);
+					}
 				}
 			}
 		}
@@ -987,9 +993,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 						byte[] bytes = readBytes(store, txn, LINE_STATS_KEY);
 						if (bytes != null) {
 							@SuppressWarnings("unchecked")
-							Map<Integer, Map<String, Integer>> storedMap = 
-									(Map<Integer, Map<String, Integer>>) SerializationUtils.deserialize(bytes);
-							for (Map.Entry<Integer, Map<String, Integer>> entry: storedMap.entrySet())
+							var storedMap = (Map<Integer, Map<String, Integer>>) SerializationUtils.deserialize(bytes);
+							for (var entry: storedMap.entrySet())
 								lineIncrements.put(new Day(entry.getKey()), entry.getValue());
 						} 
 						return lineIncrements;
@@ -1002,15 +1007,17 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		
 	}
 	
-	private void updateContribution(Map<Integer, GitContribution> contributions, int key, GitCommit commit) {
+	private void updateContribution(Map<Integer, GitContribution> contributions, int key, GitCommit commit, 
+			PatternSet filePatterns) {
 		GitContribution contribution = contributions.get(key);
 		if (contribution != null) {
 			contribution = new GitContribution(
 					contribution.getCommits()+1, 
-					contribution.getAdditions()+commit.getAdditions(), 
-					contribution.getDeletions()+commit.getDeletions());
+					contribution.getAdditions()+commit.getAdditions(filePatterns), 
+					contribution.getDeletions()+commit.getDeletions(filePatterns));
 		} else {
-			contribution = new GitContribution(1, commit.getAdditions(), commit.getDeletions());
+			contribution = new GitContribution(
+					1, commit.getAdditions(filePatterns), commit.getDeletions(filePatterns));
 		}
 		contributions.put(key, contribution);
 	}

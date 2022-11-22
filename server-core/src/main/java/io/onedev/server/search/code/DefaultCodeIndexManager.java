@@ -91,6 +91,9 @@ import io.onedev.server.util.IndexResult;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
 public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
@@ -153,8 +156,8 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 		return indexVersion.get();
 	}
 	
-	private IndexResult index(Repository repository, AnyObjectId commitId, 
-			IndexWriter writer, final IndexSearcher searcher) throws Exception {
+	private IndexResult index(Repository repository, AnyObjectId commitId, IndexWriter writer, 
+			IndexSearcher searcher, PatternSet filePatterns) throws Exception {
 		try (	RevWalk revWalk = new RevWalk(repository); 
 				TreeWalk treeWalk = new TreeWalk(repository)) {
 			treeWalk.addTree(revWalk.parseCommit(commitId).getTree());
@@ -176,58 +179,63 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 				}
 			}
 	
+			Matcher matcher = new PathMatcher();
 			int indexed = 0;
 			int checked = 0;
 			while (treeWalk.next()) {
 				if ((treeWalk.getRawMode(0) & FileMode.TYPE_MASK) == FileMode.TYPE_FILE 
 						&& (treeWalk.getTreeCount() == 1 || !treeWalk.idEqual(0, 1))) {
-					ObjectId blobId = treeWalk.getObjectId(0);
 					String blobPath = treeWalk.getPathString();
-					String blobName = treeWalk.getNameString();
 					
-					BooleanQuery.Builder builder = new BooleanQuery.Builder();
-					builder.add(BLOB_HASH.getTermQuery(blobId.name()), Occur.MUST);
-					builder.add(BLOB_PATH.getTermQuery(blobPath), Occur.MUST);
-					BooleanQuery query = builder.build();
-					
-					final AtomicReference<String> blobIndexVersionRef = new AtomicReference<>(null);
-					if (searcher != null) {
-						searcher.search(query, new SimpleCollector() {
-	
-							private LeafReaderContext context;
-	
-							@Override
-							public void collect(int doc) throws IOException {
-								blobIndexVersionRef.set(searcher.doc(context.docBase+doc).get(BLOB_INDEX_VERSION.name()));
+					if (filePatterns.matches(matcher, blobPath)) {
+						ObjectId blobId = treeWalk.getObjectId(0);
+						String blobName = treeWalk.getNameString();
+						
+						BooleanQuery.Builder builder = new BooleanQuery.Builder();
+						builder.add(BLOB_HASH.getTermQuery(blobId.name()), Occur.MUST);
+						builder.add(BLOB_PATH.getTermQuery(blobPath), Occur.MUST);
+						BooleanQuery query = builder.build();
+						
+						final AtomicReference<String> blobIndexVersionRef = new AtomicReference<>(null);
+						if (searcher != null) {
+							searcher.search(query, new SimpleCollector() {
+		
+								private LeafReaderContext context;
+		
+								@Override
+								public void collect(int doc) throws IOException {
+									blobIndexVersionRef.set(searcher.doc(context.docBase+doc).get(BLOB_INDEX_VERSION.name()));
+								}
+		
+								@Override
+								protected void doSetNextReader(LeafReaderContext context) throws IOException {
+									this.context = context;
+								}
+		
+								@Override
+								public ScoreMode scoreMode() {
+									return ScoreMode.COMPLETE_NO_SCORES;
+								}
+								
+							});
+							checked++;
+						}
+		
+						SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
+						String currentBlobIndexVersion = getIndexVersion(extractor);
+						String blobIndexVersion = blobIndexVersionRef.get();
+						if (blobIndexVersion != null) {
+							if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
+								writer.deleteDocuments(query);
+								indexBlob(writer, repository, extractor, blobId, blobPath);
+								indexed++;
 							}
-	
-							@Override
-							protected void doSetNextReader(LeafReaderContext context) throws IOException {
-								this.context = context;
-							}
-	
-							@Override
-							public ScoreMode scoreMode() {
-								return ScoreMode.COMPLETE_NO_SCORES;
-							}
-							
-						});
-						checked++;
-					}
-	
-					SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
-					String currentBlobIndexVersion = getIndexVersion(extractor);
-					String blobIndexVersion = blobIndexVersionRef.get();
-					if (blobIndexVersion != null) {
-						if (!blobIndexVersion.equals(currentBlobIndexVersion)) {
-							writer.deleteDocuments(query);
+						} else {
 							indexBlob(writer, repository, extractor, blobId, blobPath);
 							indexed++;
 						}
-					} else {
-						indexBlob(writer, repository, extractor, blobId, blobPath);
-						indexed++;
 					}
+					
 				}
 			}
 	
@@ -336,7 +344,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 			try {
 				logger.debug("Indexing commit (project: {}, commit: {})", project.getPath(), commit.getName());
 				IndexResult indexResult = index(projectManager.getRepository(project.getId()), 
-						commit, writer, searcher);
+						commit, writer, searcher, project.findCodeAnalysisPatterns());
 				writer.commit();
 				return indexResult;
 			} catch (Exception e) {

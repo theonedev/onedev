@@ -4426,6 +4426,8 @@ public class DataMigrator {
 					updateElement.addElement("id").setText(projectId);
 					updateElement.addElement("date").setText(updateDateElement.getText().trim());
 					updateDateElement.detach();
+					
+					element.addElement("codeAnalysisSetting");
 				}				
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {

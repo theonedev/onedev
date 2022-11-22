@@ -89,6 +89,7 @@ import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
+import io.onedev.server.web.page.project.setting.codeanalysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
@@ -263,6 +264,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					BranchProtectionsPage.class, BranchProtectionsPage.paramsOf(getProject())));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Tag Protection", 
 					TagProtectionsPage.class, TagProtectionsPage.paramsOf(getProject())));
+			
+			settingMenuItems.add(new SidebarMenuItem.Page(null, "Code Analysis", 
+					CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject())));
 			
 			List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
 			

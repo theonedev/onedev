@@ -123,6 +123,7 @@ import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
+import io.onedev.server.web.page.project.setting.codeanalysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
@@ -365,6 +366,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("projects/${project}/settings/build/action-authorizations", ActionAuthorizationsPage.class));
 		add(new BasePageMapper("projects/${project}/settings/build/build-preserve-rules", BuildPreservationsPage.class));
 		add(new BasePageMapper("projects/${project}/settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));
+		add(new BasePageMapper("projects/${project}/settings/code-analysis", CodeAnalysisSettingPage.class));
 		add(new BasePageMapper("projects/${project}/settings/service-desk", ProjectServiceDeskSettingPage.class));
 		add(new BasePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
 		add(new BasePageMapper("projects/${project}/settings/${" + ContributedProjectSettingPage.PARAM_SETTING + "}", 

@@ -21,10 +21,13 @@ public class ListNumStatsCommand {
 	
 	private final String toRev;
 	
-	public ListNumStatsCommand(File workingDir, String fromRev, String toRev) {
+	private final boolean noRenames;
+	
+	public ListNumStatsCommand(File workingDir, String fromRev, String toRev, boolean noRenames) {
 		this.workingDir = workingDir;
 		this.fromRev = fromRev;
 		this.toRev = toRev;
+		this.noRenames = noRenames;
 	}
 	
 	protected Commandline newGit() {
@@ -35,9 +38,13 @@ public class ListNumStatsCommand {
 		List<FileChange> fileChanges = new ArrayList<>();
 		
 		Commandline git = newGit().workingDir(workingDir);
-		
-		git.addArgs("-c", "diff.renameLimit=1000", "diff", "--numstat", 
-				"--find-renames", fromRev + ".." + toRev);
+
+		if (noRenames) {
+			git.addArgs("diff", "--numstat", "--no-renames", fromRev + ".." + toRev);
+		} else {
+			git.addArgs("-c", "diff.renameLimit=1000", "diff", "--numstat", 
+					"--find-renames", fromRev + ".." + toRev);
+		}
 		
 		git.execute(new LineConsumer() {
 

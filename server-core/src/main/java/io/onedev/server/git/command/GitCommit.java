@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.util.patternset.PatternSet;
 
 public class GitCommit implements Serializable {
 
@@ -95,20 +96,20 @@ public class GitCommit implements Serializable {
 	public Date getCommitDate() {
 		return commitDate;
 	}
-
-	public int getAdditions() {
+	
+	public int getAdditions(@Nullable PatternSet patterns) {
 		int additions = 0;
 		for (FileChange change: fileChanges) {
-			if (change.getAdditions() > 0)
+			if (change.getAdditions() > 0 && change.matches(patterns))
 				additions += change.getAdditions();
 		}
 		return additions;
 	}
 	
-	public int getDeletions() {
+	public int getDeletions(@Nullable PatternSet patterns) {
 		int deletions = 0;
 		for (FileChange change: fileChanges) {
-			if (change.getDeletions() > 0)
+			if (change.getDeletions() > 0 && change.matches(patterns))
 			deletions += change.getDeletions();
 		}
 		return deletions;

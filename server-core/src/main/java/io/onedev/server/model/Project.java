@@ -88,6 +88,7 @@ import io.onedev.server.git.signature.SignatureVerified;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
+import io.onedev.server.model.support.CodeAnalysisSetting;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
@@ -315,6 +316,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private boolean codeManagement = true;
 	
 	private boolean issueManagement = true;
+	
+	private CodeAnalysisSetting codeAnalysisSetting = new CodeAnalysisSetting();
 	
 	// SQL Server does not allow duplicate null values for unique column. So we use 
 	// special prefix to indicate null
@@ -884,7 +887,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public void setCodeManagement(boolean codeManagement) {
 		this.codeManagement = codeManagement;
 	}
-
+	
 	@Editable(order=300, description="Whether or not to enable issue management for the project")
 	public boolean isIssueManagement() {
 		return issueManagement;
@@ -907,6 +910,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			this.serviceDeskName = serviceDeskName;
 		else if (!this.serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
 			this.serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString();
+	}
+
+	public CodeAnalysisSetting getCodeAnalysisSetting() {
+		return codeAnalysisSetting;
+	}
+
+	public void setCodeAnalysisSetting(CodeAnalysisSetting codeAnalysisSetting) {
+		this.codeAnalysisSetting = codeAnalysisSetting;
 	}
 
 	public ProjectIssueSetting getIssueSetting() {
@@ -1600,6 +1611,17 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			throw new ExplicitException("Storage not found for project: " + getPath());
 		else
 			return null;
+	}
+	
+	public PatternSet findCodeAnalysisPatterns() {
+		Project current = this;
+		do {
+			if (current.getCodeAnalysisSetting().getAnalyzeFiles() != null)
+				return PatternSet.parse(current.getCodeAnalysisSetting().getAnalyzeFiles());
+			current = current.getParent();
+		} while (current != null);
+
+		return PatternSet.parse("**");
 	}
 	
 }
