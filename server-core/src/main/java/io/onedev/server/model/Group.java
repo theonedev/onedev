@@ -8,15 +8,16 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotEmpty;
 
 import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
@@ -142,6 +143,11 @@ public class Group extends AbstractEntity implements Permission {
 		return members;
 	}
 
+	@Override
+	public GroupFacade getFacade() {
+		return new GroupFacade(getId(), getName());
+	}
+	
 	@Override
 	public int compareTo(AbstractEntity entity) {
 		Group group = (Group) entity;

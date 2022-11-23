@@ -1,7 +1,6 @@
 package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -29,8 +28,6 @@ public class SecuritySetting implements Serializable {
 	private String defaultLoginGroupName;
 	
 	private boolean enforce2FA;
-	
-	private transient Optional<Group> defaultLoginGroup;
 	
 	@Editable(order=100, description="Whether or not to allow anonymous users to access this server")
 	public boolean isEnableAnonymousAccess() {
@@ -74,17 +71,12 @@ public class SecuritySetting implements Serializable {
 
 	@Nullable
 	public Group getDefaultLoginGroup() {
-		if (defaultLoginGroup == null) {
-			if (defaultLoginGroupName != null) {
-	       		Group group = OneDev.getInstance(GroupManager.class).find(defaultLoginGroupName);
-	       		if (group == null) 
-	       			logger.error("Unable to find default login group: " + defaultLoginGroupName);
-	       		defaultLoginGroup = Optional.ofNullable(group);
-			} else {
-				defaultLoginGroup = Optional.empty();
-			}
+		if (defaultLoginGroupName != null) {
+       		Group group = OneDev.getInstance(GroupManager.class).find(defaultLoginGroupName);
+       		if (group == null) 
+       			logger.error("Unable to find default login group: " + defaultLoginGroupName);
 		}
-		return defaultLoginGroup.orElse(null);
+		return null;
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
