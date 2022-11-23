@@ -27,7 +27,7 @@
 				</div>
 				<div wicket:id="requestSummary" class="summary mb-4 font-size-h6">
 					<wicket:enclosure>
-	                <div class="text-danger">
+	                <div class="text-warning">
 	                	<wicket:svg href="exclamation-circle" class="icon"></wicket:svg>  <span wicket:id="checkError"></span>
 	                </div>
 					</wicket:enclosure>
@@ -55,13 +55,13 @@
 					<div wicket:id="calculatedMergePreview" class="calculated-merge-preview text-success">
 						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Able to merge without conflicts
 					</div>
-					<div wicket:id="hasMergeConflict" class="has-merge-conflict text-danger">
+					<div wicket:id="hasMergeConflict" class="has-merge-conflict text-warning">
 						<wicket:svg href="exclamation-circle" class="icon"></wicket:svg> There are merge conflicts. 
 						<wicket:enclosure child="resolveInstructions">
 							Please follow <a wicket:id="resolveInstructions" class="link-primary" href="javascript:void(0);">this instruction</a> to resolve the conflicts
 						</wicket:enclosure>
 					</div>
-					<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-danger">
+					<div wicket:id="noValidCommitSignature" class="no-valid-commit-signature text-warning">
 						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as valid signature is required for head commit   
 					</div>
 					<div wicket:id="requestedForChanges" class="requested-for-changes text-warning">
@@ -70,7 +70,7 @@
 					<div wicket:id="waitingForReviews" class="waiting-for-reviews text-warning">
 						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as it is <a class="more-info d-inline link-primary">pending review</a>
 					</div>
-					<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds text-danger">
+					<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds text-warning">
 						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">required builds</a> are not successful
 					</div>
 					<div wicket:id="unfinishedBuilds" class="unfinished-builds text-warning">

@@ -91,11 +91,14 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	@Override
 	public void save(CodeComment comment) {
 		if (comment.isNew()) {
-			CodeCommentCreated event = new CodeCommentCreated(comment);
-			comment.setLastUpdate(event.getLastUpdate());
+			LastUpdate lastUpdate = new LastUpdate();
+			lastUpdate.setUser(comment.getUser());
+			lastUpdate.setActivity("added");
+			lastUpdate.setDate(comment.getCreateDate());
+			comment.setLastUpdate(lastUpdate);
 			dao.persist(comment);
-
-			listenerRegistry.post(event);
+			
+			listenerRegistry.post(new CodeCommentCreated(comment));
 			
 			PullRequest request = comment.getCompareContext().getPullRequest();
 			if (request != null && comment.getCreateDate().after(request.getLastUpdate().getDate())) 

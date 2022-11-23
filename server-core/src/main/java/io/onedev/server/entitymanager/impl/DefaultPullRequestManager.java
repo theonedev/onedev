@@ -359,8 +359,11 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		request.setNumberScope(request.getTargetProject().getForkRoot());
 		request.setNumber(numberGenerator.getNextSequence(request.getNumberScope()));
 		
-		PullRequestOpened event = new PullRequestOpened(request);
-		request.setLastUpdate(event.getLastUpdate());
+		LastUpdate lastUpdate = new LastUpdate();
+		lastUpdate.setUser(request.getSubmitter());
+		lastUpdate.setActivity("opened");
+		lastUpdate.setDate(request.getSubmitDate());
+		request.setLastUpdate(lastUpdate);
 		
 		dao.persist(request);
 
@@ -384,7 +387,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		
 		checkAsync(request, false);
 		
-		listenerRegistry.post(event);
+		listenerRegistry.post(new PullRequestOpened(request));
 	}
 	
 	private void closeAsMerged(PullRequest request, boolean dueToMerged) {

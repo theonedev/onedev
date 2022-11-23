@@ -88,7 +88,6 @@ import io.onedev.server.model.support.issue.changedata.IssueChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueProjectChangeData;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.SequenceGenerator;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -164,8 +163,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final IssueLinkManager linkManager;
 	
-	private final SessionManager sessionManager;
-	
 	private final ClusterManager clusterManager;
 	
 	private final IssueChangeManager changeManager;
@@ -182,8 +179,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			RoleManager roleManager, AttachmentManager attachmentStorageManager, 
 			IssueCommentManager commentManager, EntityReferenceManager entityReferenceManager, 
 			LinkSpecManager linkSpecManager, IssueLinkManager linkManager, 
-			IssueAuthorizationManager authorizationManager, SessionManager sessionManager, 
-			IssueChangeManager changeManager) {
+			IssueAuthorizationManager authorizationManager, IssueChangeManager changeManager) {
 		super(dao);
 		this.fieldManager = fieldManager;
 		this.queryPersonalizationManager = queryPersonalizationManager;
@@ -199,7 +195,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.commentManager = commentManager;
 		this.entityReferenceManager = entityReferenceManager;
 		this.authorizationManager = authorizationManager;
-		this.sessionManager = sessionManager;
 		this.clusterManager = clusterManager;
 		this.changeManager = changeManager;
 		
@@ -265,7 +260,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issue.setNumberScope(issue.getProject().getForkRoot());
 		issue.setNumber(getNextNumber(issue.getNumberScope()));
 		
-		issue.setLastUpdate(new IssueOpened(issue).getLastUpdate());
+		LastUpdate lastUpdate = new LastUpdate();
+		lastUpdate.setUser(issue.getSubmitter());
+		lastUpdate.setActivity("opened");
+		lastUpdate.setDate(issue.getSubmitDate());
+		issue.setLastUpdate(lastUpdate);
 		
 		save(issue);
 
@@ -279,16 +278,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issue.getAuthorizations().add(authorization);
 		authorizationManager.save(authorization);
 		
-		Long issueId = issue.getId();
-		sessionManager.runAsyncAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				listenerRegistry.post(new IssueOpened(load(issueId)));
-			}
-			
-		});
-		
+		listenerRegistry.post(new IssueOpened(issue));
 	}
 
 	@Transactional

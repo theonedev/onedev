@@ -16,3 +16,7 @@
 .issue-detail .transition-option .modal-footer>* {
 	margin-left: 0;
 }
+
+.issue-detail .issue-pull-requests .operations {
+	margin-bottom: 0.5rem !important;
+}
