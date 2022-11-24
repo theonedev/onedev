@@ -189,7 +189,8 @@ public class ServerSocket {
     private Serializable service(Serializable request) {
 		try {
 			if (request instanceof WaitingForAgentResourceToBeReleased) {
-				OneDev.getInstance(ResourceAllocator.class).waitingForAgentResourceToBeReleased(agentId);
+				if (agentId != null)
+					OneDev.getInstance(ResourceAllocator.class).waitingForAgentResourceToBeReleased(agentId);
 				return null;
 			} else {
 				throw new ExplicitException("Unknown request: " + request.getClass());
