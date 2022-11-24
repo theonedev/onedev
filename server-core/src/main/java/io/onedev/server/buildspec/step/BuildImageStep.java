@@ -42,7 +42,7 @@ public class BuildImageStep extends Step {
 	}
 
 	@Editable(order=200, description="Optionally specify Dockerfile relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. "
-			+ "Leave empty to use file <tt>Dockerfile</tt> under job workspace")
+			+ "Leave empty to use file <tt>Dockerfile</tt> under build path specified above")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SafePath
 	public String getDockerfile() {
