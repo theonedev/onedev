@@ -1,5 +1,5 @@
 ## Set this as true to stop OneDev server to perform various maintenance tasks such as backup, restore.
-## Check https://code.onedev.io/projects/162/blob/main/pages/backup-restore.md for details
+## Check https://code.onedev.io/onedev/manual/~files/main/pages/backup-restore.md for details
 maintenance: false
 
 nodeSelector:
@@ -35,7 +35,7 @@ service:
     annotations:
 
 ## Ingress support, check below for more info.
-## Check https://code.onedev.io/projects/162/blob/main/pages/deploy-into-k8s-with-helm.md#ingress-setup for details
+## Check https://code.onedev.io/onedev/manual/~files/main/pages/deploy-into-k8s-with-helm.md#ingress-setup for details
 ingress:
   ## Optionally specify dns name to access OneDev via ingress controller
   host: ""
@@ -54,7 +54,7 @@ ingress:
 
 letsencrypt:
   ## Specify an email here to enable LetsEncrypt.
-  ## Check https://code.onedev.io/projects/162/blob/main/pages/deploy-into-k8s-with-helm.md#letsencrypt-setup for details
+  ## Check https://code.onedev.io/onedev./server/~files/main/pages/deploy-into-k8s-with-helm.md#letsencrypt-setup for details
   email: ""
 
 resources:

@@ -475,7 +475,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						throw new FailedException();
 				} finally {
 					cache.uninstallSymbolinks(hostWorkspace);
-					// Fix https://code.onedev.io/projects/160/issues/597
+					// Fix https://code.onedev.io/onedev/server/~issues/597
 					if (SystemUtils.IS_OS_WINDOWS)
 						FileUtils.deleteDir(hostWorkspace);
 					if (hostAuthInfoHome.get() != null)

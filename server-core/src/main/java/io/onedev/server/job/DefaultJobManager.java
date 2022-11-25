@@ -1517,7 +1517,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					String serverUrl = clusterManager.getServerUrl(dependencyStorageServerUUID);
 					Client client = ClientBuilder.newClient();
 					try {
-						WebTarget target = client.target(serverUrl).path("api/cluster/artifacts")
+						WebTarget target = client.target(serverUrl).path("~api/cluster/artifacts")
 								.queryParam("projectId", dependency.getProject().getId())
 								.queryParam("buildNumber", dependency.getNumber())
 								.queryParam("artifacts", dependence.getArtifacts());

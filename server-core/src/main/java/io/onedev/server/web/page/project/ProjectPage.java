@@ -7,9 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ValidationException;
+import javax.persistence.EntityNotFoundException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -52,6 +51,7 @@ import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.info.ProjectInfoPanel;
 import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.opengraph.OpenGraphHeaderMeta;
 import io.onedev.server.web.opengraph.OpenGraphHeaderMetaType;
 import io.onedev.server.web.page.layout.LayoutPage;
@@ -103,37 +103,37 @@ import io.onedev.server.web.util.ProjectAware;
 @SuppressWarnings("serial")
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
-	public static final String PARAM_PROJECT = "project";
-	
 	protected final IModel<Project> projectModel;
 	
 	private transient Map<ObjectId, Collection<Build>> buildsCache;
 	
 	public static PageParameters paramsOf(Long projectId) {
+		ProjectFacade project = OneDev.getInstance(ProjectManager.class).findFacadeById(projectId);
+		return paramsOf(project.getPath());
+	}
+	
+	public static PageParameters paramsOf(String projectPath) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_PROJECT, projectId);
+		params.add(ProjectMapperUtils.PARAM_PROJECT, projectPath);
 		return params;
 	}
 	
 	public static PageParameters paramsOf(Project project) {
-		return paramsOf(project.getId());
+		return paramsOf(project.getPath());
 	}
 	
 	public ProjectPage(PageParameters params) {
 		super(params);
 
-		String projectIdString = params.get(PARAM_PROJECT).toOptionalString();
-		if (StringUtils.isBlank(projectIdString))
+		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toOptionalString();
+		if (projectPath == null)
 			throw new RestartResponseException(ProjectListPage.class);
-
-		Long projectId;
-		try {
-			projectId = Long.valueOf(projectIdString);
-		} catch (NumberFormatException e) {
-			throw new ValidationException("Invalid project id: " + projectIdString);
-		}
 		
-		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+		if (project == null)
+			throw new EntityNotFoundException();
+
+		Long projectId = project.getId();
 		projectModel = new LoadableDetachableModel<Project>() {
 
 			@Override

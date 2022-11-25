@@ -26,7 +26,7 @@ import io.onedev.server.web.page.simple.security.LoginPage;
 @SuppressWarnings("serial")
 public class SsoProcessPage extends BasePage {
 
-	public static final String MOUNT_PATH = "sso";
+	public static final String MOUNT_PATH = "~sso";
 	
 	public static final String COOKIE_CONNECTOR = "ssoConnector";
 	

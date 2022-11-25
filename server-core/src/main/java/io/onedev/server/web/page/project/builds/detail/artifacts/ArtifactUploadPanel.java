@@ -147,7 +147,7 @@ public abstract class ArtifactUploadPanel extends Panel {
 							for (FileUpload upload: uploads) {
 								String filePath = getArtifactPath(upload);
 								WebTarget jerseyTarget = client.target(serverUrl)
-										.path("api/cluster/artifact")
+										.path("~api/cluster/artifact")
 										.queryParam("projectId", projectId)
 										.queryParam("buildNumber", getBuild().getNumber())
 										.queryParam("artifactPath", filePath);

@@ -12,6 +12,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Splitter;
 
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Build;
@@ -34,16 +35,24 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 @Singleton
 public class DefaultUrlManager implements UrlManager {
 
+	private final ProjectManager projectManager;
+	
 	private final SettingManager settingManager;
 	
 	@Inject
-	public DefaultUrlManager(SettingManager settingManager) {
+	public DefaultUrlManager(ProjectManager projectManager, SettingManager settingManager) {
+		this.projectManager = projectManager;
 		this.settingManager = settingManager;
 	}
 	
 	@Override
 	public String urlForProject(Long projectId) {
-		return settingManager.getSystemSetting().getServerUrl() + "/projects/" + projectId;
+		return urlForProject(projectManager.findFacadeById(projectId).getPath());
+	}
+	
+	@Override
+	public String urlForProject(String projectPath) {
+		return settingManager.getSystemSetting().getServerUrl() + "/" + projectPath;
 	}
 	
 	@Override
@@ -101,12 +110,12 @@ public class DefaultUrlManager implements UrlManager {
 					params.set(0, newCommit.name());
 					
 					CommitDetailPage.fillParams(params, state);
-					return url + "/commits/" + paramsEncoder.encodePageParameters(params);
+					return url + "/~commits/" + paramsEncoder.encodePageParameters(params);
 				} else {				
 					String url = urlFor(comment.getProject());
 					PageParameters params = new PageParameters();
 					RevisionComparePage.fillParams(params, RevisionComparePage.getState(comment, compareContext));
-					return url + "/compare" + paramsEncoder.encodePageParameters(params);
+					return url + "/~compare" + paramsEncoder.encodePageParameters(params);
 				}
 			}
 		} else {
@@ -126,7 +135,7 @@ public class DefaultUrlManager implements UrlManager {
 			
 			ProjectBlobPage.fillParams(params, state);
 			
-			return url + "/files/" + paramsEncoder.encodePageParameters(params);
+			return url + "/~files/" + paramsEncoder.encodePageParameters(params);
 		}		
 	}
 	
@@ -140,7 +149,7 @@ public class DefaultUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlFor(request.getTarget().getProject()) + "/pulls/" + request.getNumber();
+		return urlFor(request.getTarget().getProject()) + "/~pulls/" + request.getNumber();
 	}
 
 	@Override
@@ -155,12 +164,12 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String urlFor(Issue issue) {
-		return urlFor(issue.getProject()) + "/issues/" + issue.getNumber();
+		return urlFor(issue.getProject()) + "/~issues/" + issue.getNumber();
 	}
 
 	@Override
 	public String urlFor(Build build) {
-		return urlFor(build.getProject()) + "/builds/" + build.getNumber();
+		return urlFor(build.getProject()) + "/~builds/" + build.getNumber();
 	}
 	
 	@Override
@@ -175,7 +184,7 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String urlFor(Project project, ObjectId commitId) {
-		return urlFor(project) + "/commits/" + commitId.name();
+		return urlFor(project) + "/~commits/" + commitId.name();
 	}
 
 }

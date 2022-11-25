@@ -192,7 +192,7 @@ public class GitLfsFilter implements Filter {
 						try {
 							String serverUrl = clusterManager.getServerUrl(storageServerUUID);
 							WebTarget target = client.target(serverUrl)
-									.path("api/cluster/lfs")
+									.path("~api/cluster/lfs")
 									.queryParam("projectId", lfsObject.getProjectId())
 									.queryParam("objectId", lfsObject.getObjectId());
 							Invocation.Builder builder =  target.request();
@@ -255,7 +255,7 @@ public class GitLfsFilter implements Filter {
 						try {
 							String serverUrl = clusterManager.getServerUrl(storageServerUUID);
 							WebTarget target = client.target(serverUrl)
-									.path("api/cluster/lfs")
+									.path("~api/cluster/lfs")
 									.queryParam("projectId", lfsObject.getProjectId())
 									.queryParam("objectId", lfsObject.getObjectId());
 							Invocation.Builder builder =  target.request();

@@ -126,8 +126,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 				context.addServlet(new ServletHolder(new FileAssetServlet(file)), "/" + file.getName() + "/*");
 		}
 		
-		context.addServlet(new ServletHolder(jerseyServlet), "/api/*");	
-		context.addServlet(new ServletHolder(serverServlet), "/server");
+		context.addServlet(new ServletHolder(jerseyServlet), "/~api/*");	
+		context.addServlet(new ServletHolder(serverServlet), "/~server");
 	}
 	
 }

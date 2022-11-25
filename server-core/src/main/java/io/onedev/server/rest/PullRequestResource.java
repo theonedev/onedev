@@ -51,7 +51,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
 
 @Api(order=3000, description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
-		+ "To get pull request id of a particular pull request number, use the <a href='/help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
+		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
 		+ "instance <code>&quot;Number&quot; is &quot;projectName#100&quot;</code>")
 @Path("/pull-requests")
 @Consumes(MediaType.APPLICATION_JSON)

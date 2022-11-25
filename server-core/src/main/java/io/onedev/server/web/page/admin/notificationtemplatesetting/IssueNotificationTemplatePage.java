@@ -41,7 +41,7 @@ public class IssueNotificationTemplatePage extends AdministrationPage {
 		NotificationTemplateSetting setting = getSettingManager().getNotificationTemplateSetting();
 		
 		Map<String, String> variableHelp = new LinkedHashMap<>();
-		variableHelp.put("issue", " represents the <a href='https://code.onedev.io/projects/160/blob/main/server-core/src/main/java/io/onedev/server/model/Issue.java' target='_blank'>issue</a> object to be notified");
+		variableHelp.put("issue", " represents the <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/model/Issue.java' target='_blank'>issue</a> object to be notified");
 		add(new Label("notificationTemplateHelp", NotificationTemplateSetting.getTemplateHelp(variableHelp))
 				.setEscapeModelStrings(false));
 		

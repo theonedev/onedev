@@ -184,8 +184,8 @@ public class AttachmentResource extends AbstractResource {
 	public static String authorizeGroup(String attachmentUrl) {
 		try {
 			URIBuilder builder = new URIBuilder(attachmentUrl);
-			if (builder.getPathSegments().size() >= 4) {
-				String group = builder.getPathSegments().get(3);
+			if (builder.getPathSegments().size() >= 5) {
+				String group = builder.getPathSegments().get(4);
 				byte[] encrypted = CryptoUtils.encrypt(group.getBytes(StandardCharsets.UTF_8));
 				String base64 = Base64.encodeBase64URLSafeString(encrypted);
 				builder.addParameter(PARAM_AUTHORIZATION, base64);

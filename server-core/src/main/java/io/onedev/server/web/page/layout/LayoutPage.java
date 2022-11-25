@@ -159,7 +159,7 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Security Setting", 
 							SecuritySettingPage.class, new PageParameters()));
 					List<SidebarMenuItem> userManagementMenuItems = new ArrayList<>();
-					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Accounts", UserListPage.class, 
+					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Users", UserListPage.class, 
 							new PageParameters(), Lists.newArrayList(NewUserPage.class, UserPage.class)));
 					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Invitations", InvitationListPage.class, 
 							new PageParameters(), Lists.newArrayList(NewInvitationPage.class)));
@@ -351,7 +351,7 @@ public abstract class LayoutPage extends BasePage {
 		});
 		
 		Plugin product = AppLoader.getProduct();
-		sidebar.add(new ExternalLink("productVersion", "https://code.onedev.io/projects/160")
+		sidebar.add(new ExternalLink("productVersion", "https://code.onedev.io/onedev/server")
 				.setBody(Model.of("OneDev " + product.getVersion())));
 		sidebar.add(new ExternalLink("docLink", OneDev.getInstance().getDocRoot() + "/"));
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));

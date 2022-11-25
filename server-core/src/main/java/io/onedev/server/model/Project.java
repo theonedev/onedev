@@ -1395,7 +1395,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public String getAttachmentUrlPath(String attachmentGroup, String attachmentName) {
-		return String.format("/projects/%d/attachment/%s/%s", getId(), attachmentGroup, 
+		return String.format("/~downloads/projects/%s/attachments/%s/%s", getId(), attachmentGroup, 
 				UrlEncoder.PATH_INSTANCE.encode(attachmentName, StandardCharsets.UTF_8));
 	}
 	

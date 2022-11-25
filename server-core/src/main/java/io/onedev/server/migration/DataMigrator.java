@@ -4457,5 +4457,67 @@ public class DataMigrator {
 				
 		projectUpdatesDom.writeToFile(projectUpdatesFile, true);
 	}
+
+	private static final Pattern migrate104_pattern = Pattern.compile("\\(/projects/(\\d+)/attachment/(.*?)\\)");
 	
+	private String migrate104_markdown(String content) {
+		StringBuffer buffer = new StringBuffer();
+		Matcher matcher = migrate104_pattern.matcher(content);
+		while (matcher.find()) {
+	    	matcher.appendReplacement(buffer, 
+	    			Matcher.quoteReplacement("(/~downloads/projects/" + matcher.group(1) + "/attachments/" + matcher.group(2) + ")"));  
+		}
+		matcher.appendTail(buffer);
+		return buffer.toString();
+	}
+	
+	private void migrate104(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element descriptionElement = element.element("description");
+					if (descriptionElement != null)
+						descriptionElement.setText(migrate104_markdown(descriptionElement.getText()));
+				}				
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element contentElement = element.element("content");
+					contentElement.setText(migrate104_markdown(contentElement.getText()));
+				}				
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element descriptionElement = element.element("description");
+					if (descriptionElement != null)
+						descriptionElement.setText(migrate104_markdown(descriptionElement.getText()));
+				}				
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element contentElement = element.element("content");
+					contentElement.setText(migrate104_markdown(contentElement.getText()));
+				}				
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element contentElement = element.element("content");
+					contentElement.setText(migrate104_markdown(contentElement.getText()));
+				}				
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element contentElement = element.element("content");
+					contentElement.setText(migrate104_markdown(contentElement.getText()));
+				}				
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }

@@ -8,14 +8,14 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.PathCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
-import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.mapper.ProjectMapperUtils;
 
 public class ProjectParam extends ParamSegment {
 
 	private static final long serialVersionUID = 1L;
 	
 	public ProjectParam(boolean optional) {
-		super(ProjectPage.PARAM_PROJECT, optional);
+		super(ProjectMapperUtils.PARAM_PROJECT, optional);
 	}
 	
 	@Override
@@ -29,7 +29,7 @@ public class ProjectParam extends ParamSegment {
 			query = new ProjectQuery(new PathCriteria("**/*" + matchWith + "*/**"));
 		Map<String, String> suggestions = new LinkedHashMap<>();
 		for (Project project: projectManager.query(query, 0, count))
-			suggestions.put(project.getPath(), String.valueOf(project.getId()));
+			suggestions.put(project.getPath(), String.valueOf(project.getPath()));
 		return suggestions;
 	}
 
@@ -37,8 +37,7 @@ public class ProjectParam extends ParamSegment {
 	public boolean isExactMatch(String matchWith, Map<String, String> paramValues) {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 		try {
-			Long projectId = Long.valueOf(matchWith);
-			if (projectManager.get(projectId) != null) 
+			if (projectManager.findFacadeByPath(matchWith) != null)
 				return true;
 		} catch (NumberFormatException e) {
 		}

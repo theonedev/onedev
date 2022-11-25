@@ -1306,7 +1306,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			try {
 				String serverUrl = clusterManager.getServerUrl(sourceStorageServerUUID);
 				WebTarget target = client.target(serverUrl)
-						.path("api/cluster/commit-info")
+						.path("~api/cluster/commit-info")
 						.queryParam("projectId", sourceProjectId);
 				Invocation.Builder builder =  target.request();
 				builder.header(HttpHeaders.AUTHORIZATION, 

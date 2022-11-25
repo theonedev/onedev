@@ -172,9 +172,9 @@ public class MethodDetailPage extends ApiHelpPage {
 		
 		String endPoint;
 		if (methodPath != null)
-			endPoint = "/api" + resourcePathValue + methodPath.value();
+			endPoint = "/~api" + resourcePathValue + methodPath.value();
 		else
-			endPoint = "/api" + resourcePathValue;
+			endPoint = "/~api" + resourcePathValue;
 		
 		add(new Label("path", endPoint));
 		

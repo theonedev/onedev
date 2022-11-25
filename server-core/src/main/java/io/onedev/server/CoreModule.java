@@ -627,7 +627,7 @@ public class CoreModule extends AbstractPluginModule {
 
 			@Override
 			public void configure(FilterChainManager filterChainManager) {
-				filterChainManager.createChain("/api/**", "noSessionCreation, authcBasic, authcBearer");
+				filterChainManager.createChain("/~api/**", "noSessionCreation, authcBasic, authcBearer");
 			}
 			
 		});
@@ -670,7 +670,7 @@ public class CoreModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(org.apache.wicket.protocol.http.WebApplication application) {
-				application.mount(new BasePageMapper("/test", TestPage.class));
+				application.mount(new BasePageMapper("/~test", TestPage.class));
 			}
 			
 		});

@@ -26,6 +26,9 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	@Nullable 
 	Project findByPath(String path);
+	
+	@Nullable 
+	ProjectFacade findFacadeById(Long id);
 
 	@Nullable
 	ProjectFacade findFacadeByPath(String path);
@@ -85,5 +88,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	<T> Future<T> submitToProjectServer(Long projectId, ClusterTask<T> task);
 	
 	File getLfsObjectsDir(Long projectId);
+	
+	Collection<String> getReservedNames();
 	
 }

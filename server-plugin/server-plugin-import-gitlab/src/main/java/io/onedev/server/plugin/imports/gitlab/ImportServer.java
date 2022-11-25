@@ -440,6 +440,7 @@ public class ImportServer implements Serializable, Validatable {
 						issue.setProject(oneDevProject);
 						issue.setTitle(issueNode.get("title").asText());
 						issue.setDescription(issueNode.get("description").asText(null));
+						issue.setConfidential(issueNode.get("confidential").asBoolean());
 						
 						issue.setNumberScope(oneDevProject.getForkRoot());
 

@@ -73,8 +73,8 @@ import io.onedev.server.web.resource.SpriteResourceReference;
 import io.onedev.server.web.resource.SpriteResourceStream;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
-import io.onedev.server.web.websocket.WebSocketMessages;
 import io.onedev.server.web.websocket.WebSocketManager;
+import io.onedev.server.web.websocket.WebSocketMessages;
 
 @Singleton
 public class WebApplication extends org.apache.wicket.protocol.http.WebApplication {

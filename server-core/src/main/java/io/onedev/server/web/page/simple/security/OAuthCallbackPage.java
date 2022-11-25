@@ -12,7 +12,7 @@ import io.onedev.server.web.page.simple.SimplePage;
 @SuppressWarnings("serial")
 public class OAuthCallbackPage extends SimplePage {
 
-	public static final String MOUNT_PATH = "oauth/callback";
+	public static final String MOUNT_PATH = "~oauth/callback";
 	
 	private static final String PARAM_CODE = "code";
 	

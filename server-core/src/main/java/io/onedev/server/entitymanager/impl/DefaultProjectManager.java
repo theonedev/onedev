@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
 import com.hazelcast.cluster.Member;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
@@ -119,6 +120,7 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.ProjectNameReservation;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -164,6 +166,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final GitService gitService;
     
+    private final Collection<String> reservedNames = Sets.newHashSet("robots.txt", "sitemap.xml",
+			"favicon.ico", "favicon.png", "wicket");
+    
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
 
 	private volatile IMap<Long, ProjectServer> storageServers;
@@ -178,7 +183,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		UserAuthorizationManager userAuthorizationManager, RoleManager roleManager, 
     		JobManager jobManager, IssueManager issueManager, LinkSpecManager linkSpecManager, 
     		StorageManager storageManager, ClusterManager clusterManager, GitService gitService, 
-    		ProjectUpdateManager updateManager) {
+    		ProjectUpdateManager updateManager, Set<ProjectNameReservation> nameReservations) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -197,6 +202,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         this.clusterManager = clusterManager;
         this.gitService = gitService;
         this.updateManager = updateManager;
+        
+        for (ProjectNameReservation reservation: nameReservations)
+        	reservedNames.addAll(reservation.getReserved());
     }
     
 	public Object writeReplace() throws ObjectStreamException {
@@ -1030,6 +1038,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
+	public ProjectFacade findFacadeById(Long id) {
+		return cache.get(id);
+	}
+	
+	@Override
 	public File getLfsObjectsDir(Long projectId) {
 		return new File(storageManager.getProjectGitDir(projectId), "lfs/objects");
 	}
@@ -1135,4 +1148,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 		
 	}
+	
+	@Override
+	public Collection<String> getReservedNames() {
+		return reservedNames;
+	}
+	
 }

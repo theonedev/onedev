@@ -30,12 +30,12 @@ public class NotificationTemplateSetting implements Serializable {
 			+ "<a href='https://docs.groovy-lang.org/latest/html/api/groovy/text/SimpleTemplateEngine.html' target='_blank'>Groovy simple template</a>. "
 			+ "When evaluating this template, below variables will be available:"
 			+ "<ul class='mb-0'>"
-			+ "<li><code>event:</code> <a href='https://code.onedev.io/projects/160/blob/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification"
+			+ "<li><code>event:</code> <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification"
 			+ "<li><code>eventSummary:</code> a string representing summary of the event"
 			+ "<li><code>eventBody:</code> a string representing body of the event. May be <code>null</code>"
 			+ "<li><code>eventUrl:</code> a string representing event detail url"
 			+ "<li><code>replyable:</code> a boolean indiciating whether or not topic comment can be created directly by replying the email"
-			+ "<li><code>unsubscribable:</code> an <a href='https://code.onedev.io/projects/160/blob/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information. "
+			+ "<li><code>unsubscribable:</code> an <a href='https://code.onedev.io/onedev/server/~files/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information. "
 			+ "		A <code>null</code> value means that the notification can not be unsubscribed";
 	
 	static {

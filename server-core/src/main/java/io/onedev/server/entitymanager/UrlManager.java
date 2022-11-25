@@ -18,6 +18,8 @@ public interface UrlManager {
 	
 	String urlForProject(Long projectId);
 	
+	String urlForProject(String projectPath);
+	
 	String urlFor(Project project);
 	
 	String urlFor(Project project, ObjectId commitId);

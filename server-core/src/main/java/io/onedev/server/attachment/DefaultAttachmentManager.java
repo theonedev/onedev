@@ -132,7 +132,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			Client client = ClientBuilder.newClient();
 			try {
 				String fromServerUrl = clusterManager.getServerUrl(sourceStorageServerUUID);
-				WebTarget target = client.target(fromServerUrl).path("/api/cluster/attachments")
+				WebTarget target = client.target(fromServerUrl).path("/~api/cluster/attachments")
 						.queryParam("projectId", sourceProjectId)
 						.queryParam("attachmentGroup", attachmentGroup);
 				Invocation.Builder builder = target.request();
@@ -305,7 +305,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			try {
 				String serverUrl = clusterManager.getServerUrl(storageServerUUID);
 				WebTarget target = client.target(serverUrl)
-						.path("api/cluster/attachment")
+						.path("~api/cluster/attachment")
 						.queryParam("projectId", projectId)
 						.queryParam("attachmentGroup", attachmentGroup)
 						.queryParam("suggestedAttachmentName", suggestedAttachmentName);

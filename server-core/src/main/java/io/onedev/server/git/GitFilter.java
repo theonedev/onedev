@@ -200,7 +200,7 @@ public class GitFilter implements Filter {
 				try {
 					String serverUrl = clusterManager.getServerUrl(storageServerUUID);
 					WebTarget target = client.target(serverUrl)
-							.path("api/cluster/git-pack")
+							.path("~api/cluster/git-pack")
 							.queryParam("projectId", projectId)
 							.queryParam("userId", userId)
 							.queryParam("protocol", protocol)
@@ -337,7 +337,7 @@ public class GitFilter implements Filter {
 			try {
 				String serverUrl = clusterManager.getServerUrl(storageServerUUID);
 				WebTarget target = client.target(serverUrl)
-						.path("api/cluster/git-advertise-refs")
+						.path("~api/cluster/git-advertise-refs")
 						.queryParam("projectId", projectId)
 						.queryParam("protocol", protocol)
 						.queryParam("upload", upload);

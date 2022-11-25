@@ -53,7 +53,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.security.SecurityUtils;
 
 @Api(order=2000, description="In most cases, issue resource is operated with issue id, which is different from issue number. "
-		+ "To get issue id of a particular issue number, use the <a href='/help/api/io.onedev.server.rest.IssueResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
+		+ "To get issue id of a particular issue number, use the <a href='/~help/api/io.onedev.server.rest.IssueResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
 		+ "instance <code>&quot;Number&quot; is &quot;projectName#100&quot;</code>")
 @Path("/issues")
 @Consumes(MediaType.APPLICATION_JSON)

@@ -265,7 +265,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 			if (!successful)
 				throw new FailedException();
 		} finally {
-			// Fix https://code.onedev.io/projects/160/issues/597
+			// Fix https://code.onedev.io/onedev/server/~issues/597
 			if (SystemUtils.IS_OS_WINDOWS && workspaceDir.exists())
 				FileUtils.deleteDir(workspaceDir);
 			synchronized (buildDir) {

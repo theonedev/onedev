@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -43,6 +44,7 @@ import io.onedev.server.git.LfsObject;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.web.mapper.ProjectMapperUtils;
 
 public class RawBlobResource extends AbstractResource {
 
@@ -50,17 +52,17 @@ public class RawBlobResource extends AbstractResource {
 	
 	private static final Logger logger = LoggerFactory.getLogger(RawBlobResource.class);
 
-	private static final String PARAM_PROJECT = "project";
-
 	private static final int BUFFER_SIZE = 8*1024;
 
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		Long projectId = params.get(PARAM_PROJECT).toLong();
-		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-
+		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toString();
+		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+		if (project == null)
+			throw new EntityNotFoundException();
+		
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String segment = params.get(i).toString();
@@ -178,12 +180,12 @@ public class RawBlobResource extends AbstractResource {
 							String serverUrl = getClusterManager().getServerUrl(storageServerUUID);
 							WebTarget target = client.target(serverUrl);
 							if (blob.getLfsPointer() != null) {
-								target = target.path("api/cluster/lfs")
+								target = target.path("~api/cluster/lfs")
 										.queryParam("projectId", project.getId())
 										.queryParam("objectId", blob.getLfsPointer().getObjectId());
 							} else {
 								ObjectId commitId = project.getObjectId(blob.getIdent().revision, true);
-								target = target.path("api/cluster/blob")
+								target = target.path("~api/cluster/blob")
 										.queryParam("projectId", project.getId())
 										.queryParam("revId", commitId.name())
 										.queryParam("path", blob.getIdent().path);
@@ -217,7 +219,7 @@ public class RawBlobResource extends AbstractResource {
 	
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_PROJECT, project.getId());
+		params.set(ProjectMapperUtils.PARAM_PROJECT, project.getPath());
 		
 		int index = 0;
 		for (String segment: Splitter.on("/").split(blobIdent.revision)) {

@@ -401,14 +401,13 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		}
 	}
 
-	@Nullable
 	private Long getLastEntityId(IndexSearcher searcher) throws IOException {
 		TopDocs topDocs = searcher.search(getTermQuery(FIELD_TYPE, FIELD_LAST_ENTITY_ID), 1);
 		if (topDocs.scoreDocs.length != 0) {
 			Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
 			return Long.valueOf(doc.get(FIELD_LAST_ENTITY_ID));
 		} else {
-			return null;
+			return 0L;
 		}
 	}
 	
@@ -504,10 +503,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 				@Override
 				protected Query getRangeQuery(String field, String part1, String part2, boolean startInclusive,
 						boolean endInclusive) throws ParseException {
-					if (field.equals(FIELD_PROJECT_ID))
-						return LongPoint.newRangeQuery(field, Long.parseLong(part1), Long.parseLong(part2));
-					else
-						return super.getRangeQuery(field, part1, part2, startInclusive, endInclusive);
+					return LongPoint.newRangeQuery(field, Long.parseLong(part1), Long.parseLong(part2));
 				}
 				
 			};

@@ -24,7 +24,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.BasePageMapper;
+import io.onedev.server.web.mapper.ProjectPageMapper;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestSummaryContribution;
@@ -100,8 +100,8 @@ public class MarkdownModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new BasePageMapper(
-						"projects/${project}/builds/${build}/markdown/${report}", 
+				application.mount(new ProjectPageMapper(
+						"${project}/~builds/${build}/markdown/${report}", 
 						MarkdownReportPage.class));
 			}
 			

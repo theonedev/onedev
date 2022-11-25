@@ -22,11 +22,11 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
 import io.onedev.server.web.page.admin.groupmanagement.GroupPage;
 import io.onedev.server.web.page.admin.rolemanagement.RoleDetailPage;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
-import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
@@ -53,7 +53,7 @@ public abstract class ParsedUrl implements Serializable {
 				boolean optional = segment.contains("#");
 				String paramName = StringUtils.strip(segment, "$#{}");
 				switch (paramName) {
-				case ProjectPage.PARAM_PROJECT:
+				case ProjectMapperUtils.PARAM_PROJECT:
 					parsedSegments.add(new ProjectParam(optional));
 					break;
 				case IssueDetailPage.PARAM_ISSUE:
@@ -107,7 +107,7 @@ public abstract class ParsedUrl implements Serializable {
 		String segment1 = segments.get(0);
 		String segment2 = segments.size()>1? segments.get(1): "";
 		switch (segment1) {
-		case "settings":
+		case "~settings":
 			if (SecurityUtils.canManage(project)) {
 				if (segment2.equals("service-desk")) {
 					return OneDev.getInstance(SettingManager.class).getServiceDeskSetting() != null 
@@ -118,15 +118,15 @@ public abstract class ParsedUrl implements Serializable {
 			} else {
 				return false;
 			}
-		case "files":
-		case "commits":
-		case "pulls":
-		case "compare":
-		case "branches":
-		case "tags":
-		case "code-comments":
+		case "~files":
+		case "~commits":
+		case "~pulls":
+		case "~compare":
+		case "~branches":
+		case "~tags":
+		case "~code-comments":
 			return project.isCodeManagement() && SecurityUtils.canReadCode(project);
-		case "stats":
+		case "~stats":
 			switch (segment2) {
 			case "contribs":
 			case "lines":
@@ -134,10 +134,10 @@ public abstract class ParsedUrl implements Serializable {
 			default:
 				return true;
 			}
-		case "boards":
-		case "issues":
+		case "~boards":
+		case "~issues":
 			return project.isIssueManagement();
-		case "milestones":
+		case "~milestones":
 			if (project.isIssueManagement()) {
 				if (segment2.equals("new"))
 					return SecurityUtils.canManageIssues(project);
@@ -146,7 +146,7 @@ public abstract class ParsedUrl implements Serializable {
 			} else {
 				return false;
 			}
-		case "builds":
+		case "~builds":
 			return project.isCodeManagement();
 		default:
 			return true;
@@ -157,7 +157,7 @@ public abstract class ParsedUrl implements Serializable {
 		Map<String, SuggestionContent> suggestions = new LinkedHashMap<>();
 		Map<String, String> paramValues = new HashMap<>();
 		if (getProject() != null) {
-			paramValues.put(ProjectPage.PARAM_PROJECT, String.valueOf(getProject().getId()));
+			paramValues.put(ProjectMapperUtils.PARAM_PROJECT, getProject().getPath());
 			if (matchWith.startsWith("/"))
 				return suggestions;
 		} else {
@@ -182,10 +182,9 @@ public abstract class ParsedUrl implements Serializable {
 				FixedSegment fixedSegment = (FixedSegment) segment;
 				String path = fixedSegment.getPath();
 
-				if ((index == 0 && getProject() != null 
-						|| index != 0 && parsedSegments.get(index-1) instanceof ProjectParam)
-					&& !isApplicable(getProject(paramValues), path)) { 
-						break;
+				if ((index == 0 && getProject() != null || index != 0 && parsedSegments.get(index-1) instanceof ProjectParam) 
+						&& !isApplicable(getProject(paramValues), path)) {  
+					break;
 				}
 				
 				if (matchWith.startsWith(path)) { 
@@ -210,11 +209,29 @@ public abstract class ParsedUrl implements Serializable {
 				}
 			} else {
 				ParamSegment paramSegment = (ParamSegment) segment;
-				String paramValue = StringUtils.substringBefore(matchWith, "/");
-				if (paramSegment.isExactMatch(paramValue, paramValues)) {
+				String paramValue;
+				if (paramSegment.getName().equals(ProjectMapperUtils.PARAM_PROJECT)) {
+					if (matchWith.contains("/~")) 
+						paramValue = StringUtils.substringBefore(matchWith, "/~");
+					else  
+						paramValue = null;
+				} else {
+					paramValue = StringUtils.substringBefore(matchWith, "/");
+				}
+				
+				if (paramValue != null && paramSegment.isExactMatch(paramValue, paramValues)) {
 					paramValues.put(paramSegment.getName(), paramValue);
 					segments.add(paramValue);
-					if (matchWith.contains("/")) {
+					if (paramSegment.getName().equals(ProjectMapperUtils.PARAM_PROJECT)) {
+						if (matchWith.contains("/~")) { 
+							matchWith = StringUtils.substringAfter(matchWith, "/~");
+						} else if (matchWith.endsWith("/")) {
+							matchWith = StringUtils.substringAfterLast(matchWith, "/");
+						} else {
+							addSuggestion(suggestions, segments, hasMoreSegments, hasMoreRequiredSegments);
+							break;
+						}
+					} else if (matchWith.contains("/")) {
 						matchWith = StringUtils.substringAfter(matchWith, "/");
 					} else {
 						addSuggestion(suggestions, segments, hasMoreSegments, hasMoreRequiredSegments);
@@ -223,15 +240,23 @@ public abstract class ParsedUrl implements Serializable {
 				} else {
 					Map<String, String> paramSuggestions = paramSegment.suggest(matchWith, paramValues, count);
 					for (Map.Entry<String, String> entry: paramSuggestions.entrySet()) {
+						String label = entry.getKey();
+						if (paramSegment.getName().equals(ProjectMapperUtils.PARAM_PROJECT))
+							label = makeAbsoluteIfNecessary(label);
 						if (entry.getValue() != null) {
 							List<String> segmentsCopy = new ArrayList<>(segments);
 							segmentsCopy.add(entry.getValue());
 							String joined = StringUtils.join(segmentsCopy, "/");
 							String url = !hasMoreRequiredSegments? makeAbsoluteIfNecessary(joined): null;
-							String searchBase = hasMoreSegments? makeAbsoluteIfNecessary(joined + "/"): null;
-							suggestions.put(entry.getKey(), new SuggestionContent(url, searchBase));
+							String searchBase = null;
+							if (hasMoreSegments) {
+								searchBase = makeAbsoluteIfNecessary(joined + "/");
+								if (paramSegment.getName().equals(ProjectMapperUtils.PARAM_PROJECT))
+									searchBase += "~";
+							}
+							suggestions.put(label, new SuggestionContent(url, searchBase));
 						} else {
-							suggestions.put(entry.getKey(), null);
+							suggestions.put(label, null);
 						}
 					}
 					break;
@@ -272,8 +297,8 @@ public abstract class ParsedUrl implements Serializable {
 	}
 	
 	static Project getProject(Map<String, String> paramValues) {
-		Long projectId = Long.valueOf(paramValues.get(ProjectPage.PARAM_PROJECT));
-		return OneDev.getInstance(ProjectManager.class).load(projectId);
+		String projectPath = paramValues.get(ProjectMapperUtils.PARAM_PROJECT);
+		return OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 	}
 	
 	static Build getBuild(Map<String, String> paramValues) {

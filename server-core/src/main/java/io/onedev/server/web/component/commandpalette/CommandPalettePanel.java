@@ -60,9 +60,9 @@ public abstract class CommandPalettePanel extends Panel {
 	private static final List<String[]> availableUrls = new ArrayList<>();
 
 	private static final PatternSet excludedUrlPatterns = PatternSet.parse(""
-			+ "test/** errors/** sso/** oauth/** verify-email-address/** create-user-from-invitation/** "
-			+ "reset-password/** signup/** logout/** login/** loading/** init/** help/** builds/** issues/** "
-			+ "pull-requests/** **/invalid **/blob **/${issue}/** -**/${issue} **/${request}/** -**/${request} "
+			+ "~test/** ~errors/** ~sso/** ~oauth/** ~verify-email-address/** ~create-user-from-invitation/** "
+			+ "~reset-password/** ~signup/** ~logout/** ~login/** ~loading/** ~init/** ~help/** ~builds/** issues/** "
+			+ "~pull-requests/** **/invalid **/${issue}/** -**/${issue} **/${request}/** -**/${request} "
 			+ "**/${build}/** -**/${build} **/${milestone}/** -**/${milestone} **/${agent}/** -**/${agent} "
 			+ "**/${group}/** -**/${group}");
 	
@@ -92,8 +92,8 @@ public abstract class CommandPalettePanel extends Panel {
 				List<String[]> mountedPaths = new ArrayList<>();
 				if (mountSegments != null && mountSegments.length != 0) {
 					int index = -1;
-					if (Arrays.equals(mountSegments, new String[] {"projects", "${project}", "files"})) {
-						mountedPaths.add(new String[] {"projects", "${project}", "files", "#{revision-and-path}"});
+					if (Arrays.equals(mountSegments, new String[] {"${project}", "~files"})) {
+						mountedPaths.add(new String[] {"${project}", "~files", "#{revision-and-path}"});
 					} else if ((index = Arrays.asList(mountSegments).indexOf("${" + ContributedAdministrationSettingPage.PARAM_SETTING + "}")) != -1) {
 						for (AdministrationSettingContribution contribution: OneDev.getExtensions(AdministrationSettingContribution.class)) {
 							for (Class<? extends ContributedAdministrationSetting> settingClass: contribution.getSettingClasses()) {
@@ -205,9 +205,9 @@ public abstract class CommandPalettePanel extends Panel {
 		if (getPage() instanceof ProjectPage) {
 			for (String[] url: availableUrls) {
 				try {
-					if (url.length > 2 && url[0].equals("projects") && url[1].equals("${project}")) {
-						String[] relativeUrl = new String[url.length-2];
-						System.arraycopy(url, 2, relativeUrl, 0, relativeUrl.length);
+					if (url.length > 1 && url[0].equals("${project}")) {
+						String[] relativeUrl = new String[url.length-1];
+						System.arraycopy(url, 1, relativeUrl, 0, relativeUrl.length);
 						parsedUrls.add(newProjectAwareParsedUrl(relativeUrl));
 					}
 				} catch (IgnoredUrlParam e) {
@@ -219,9 +219,9 @@ public abstract class CommandPalettePanel extends Panel {
 			if (SecurityUtils.isAdministrator()) {
 				applicable = true;
 			} else if (SecurityUtils.getUser() != null) {
-				if (!url[0].equals("administration"))
+				if (!url[0].equals("~administration"))
 					applicable = true;
-			} else if (!url[0].equals("administration") && !url[0].equals("my")) {
+			} else if (!url[0].equals("~administration") && !url[0].equals("~my")) {
 				applicable = true;
 			}
 			if (applicable) {
@@ -312,8 +312,8 @@ public abstract class CommandPalettePanel extends Panel {
 							if (url.startsWith("/")) {
 								tag.put("onclick", String.format("javascript:window.location='%s';", url));
 							} else {
-								Long projectId = ((ProjectPage)getPage()).getProject().getId();
-								tag.put("onclick", String.format("javascript:window.location='/projects/%d/%s';", projectId, url));
+								String projectPath = ((ProjectPage)getPage()).getProject().getPath();
+								tag.put("onclick", String.format("javascript:window.location='/%s/%s';", projectPath, url));
 							}
 						}
 						else

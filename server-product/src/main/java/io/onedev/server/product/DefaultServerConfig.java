@@ -65,18 +65,22 @@ public class DefaultServerConfig implements ServerConfig {
 		String httpPortStr = System.getenv(PROP_HTTP_PORT);
 		if (StringUtils.isBlank(httpPortStr))
 			httpPortStr = props.getProperty(PROP_HTTP_PORT);
-		if (StringUtils.isNotBlank(httpPortStr)) 
+		if (StringUtils.isNotBlank(httpPortStr)) { 
 			httpPort = Integer.parseInt(httpPortStr.trim());
-		else
-        	throw new ExplicitException(PROP_HTTP_PORT + " should be specified");
+		} else {
+        	logger.warn(PROP_HTTP_PORT + " not specified, default to 6610");
+        	httpPort = 6610;
+		}
 
 		String sshPortStr = System.getenv(PROP_SSH_PORT);
         if (StringUtils.isBlank(sshPortStr))
             sshPortStr = props.getProperty(PROP_SSH_PORT);
-        if (StringUtils.isNotBlank(sshPortStr))
+        if (StringUtils.isNotBlank(sshPortStr)) {
             sshPort = Integer.parseInt(sshPortStr.trim());
-        else
-        	throw new ExplicitException(PROP_SSH_PORT + " should be specified");
+        } else {
+        	logger.warn(PROP_SSH_PORT + " not specified, default to 6611");
+        	sshPort = 6611;
+        }
 		
 		String trustCerts = System.getenv(PROP_TRUST_CERTS);
 		if (StringUtils.isBlank(trustCerts))
