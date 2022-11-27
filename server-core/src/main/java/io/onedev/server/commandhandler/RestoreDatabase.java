@@ -110,9 +110,18 @@ public class RestoreDatabase extends AbstractPlugin {
 				logger.info("Creating tables...");
 				dataManager.createTables(conn);
 				
-				logger.info("Importing data into database...");
-				dataManager.importData(dataDir);
+				return null;
+			}
+			
+		});
 				
+		logger.info("Importing data into database...");
+		dataManager.importData(dataDir);
+				
+		dataManager.callWithConnection(new ConnectionCallable<Void>() {
+
+			@Override
+			public Void call(Connection conn) {
 				logger.info("Applying foreign key constraints...");
 				try {
 					dataManager.applyConstraints(conn);		
