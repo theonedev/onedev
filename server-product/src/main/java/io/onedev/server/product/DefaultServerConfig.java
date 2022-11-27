@@ -103,7 +103,11 @@ public class DefaultServerConfig implements ServerConfig {
 				if (dbUrl.startsWith("oracle")) {
 					List<String> fields = Splitter.on(":").splitToList(dbUrl);
 					dbHost = StringUtils.stripStart(fields.get(2), "@");
-					dbPort = Integer.parseInt(fields.get(3));
+					String dbPortString = fields.get(3);
+					if (dbPortString.contains("/"))
+						dbPort = Integer.parseInt(StringUtils.substringBefore(dbPortString, "/"));
+					else
+						dbPort = Integer.parseInt(dbPortString);
 				} else {
 					String tempStr = StringUtils.substringAfter(dbUrl, "//");
 					dbHost = StringUtils.substringBefore(tempStr, ":");
