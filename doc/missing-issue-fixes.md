@@ -22,3 +22,5 @@ issue #489
 issue #626
 issue #753 
 issue #953 
+issue #997 
+issue #1001 
