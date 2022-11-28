@@ -90,7 +90,7 @@ class AddAgentPanel extends Panel {
 	
 	private Component newBareMetalInstructions() {
 		Fragment fragment = new Fragment("instructions", "bareMetalInstructionsFrag", this);
-		fragment.add(new ExternalLink("agent", "/downloads/agent.zip"));
+		fragment.add(new ExternalLink("agent", "/~downloads/agent.zip"));
 		fragment.add(new ExternalLink("help", OneDev.getInstance().getDocRoot() + "/pages/agent-management.md"));
 		fragment.setOutputMarkupId(true);
 		return fragment;

@@ -55,7 +55,7 @@ public class DefaultCodeCommentTextManager extends ProjectTextManager<CodeCommen
 	
 	@Override
 	protected int getIndexVersion() {
-		return 1;
+		return 2;
 	}
 
 	@Override

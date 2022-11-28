@@ -74,7 +74,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	
 	@Override
 	protected int getIndexVersion() {
-		return 2;
+		return 3;
 	}
 
 	@Override

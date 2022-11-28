@@ -71,7 +71,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	
 	@Override
 	protected int getIndexVersion() {
-		return 1;
+		return 2;
 	}
 
 	@Override
