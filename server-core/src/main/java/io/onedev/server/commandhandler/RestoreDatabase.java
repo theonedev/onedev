@@ -59,6 +59,10 @@ public class RestoreDatabase extends AbstractPlugin {
 			System.exit(1);
 		}
 		
+		boolean validateData = true;
+		if (Bootstrap.command.getArgs().length >= 2)
+			validateData = Boolean.parseBoolean(Bootstrap.command.getArgs()[1]);
+		
 		logger.info("Restoring database from {}...", backupFile.getAbsolutePath());
 		
 		if (OneDev.isServerRunning(Bootstrap.installDir)) {
@@ -72,12 +76,12 @@ public class RestoreDatabase extends AbstractPlugin {
 			File dataDir = FileUtils.createTempDir("restore");
 			try {
 				FileUtils.unzip(backupFile, dataDir);
-				doRestore(dataDir);
+				doRestore(dataDir, validateData);
 			} finally {
 				FileUtils.deleteDir(dataDir);
 			}
 		} else {
-			doRestore(backupFile);
+			doRestore(backupFile, validateData);
 		}
 
 		if (hibernateConfig.isHSQLDialect()) {
@@ -92,9 +96,11 @@ public class RestoreDatabase extends AbstractPlugin {
 		System.exit(0);
 	}
 
-	private void doRestore(File dataDir) {
+	private void doRestore(File dataDir, boolean validateData) {
 		dataManager.migrateData(dataDir);
-		dataManager.validateData(dataDir);
+		
+		if (validateData)
+			dataManager.validateData(dataDir);
 
 		dataManager.callWithConnection(new ConnectionCallable<Void>() {
 
@@ -117,7 +123,7 @@ public class RestoreDatabase extends AbstractPlugin {
 				
 		logger.info("Importing data into database...");
 		dataManager.importData(dataDir);
-				
+
 		dataManager.callWithConnection(new ConnectionCallable<Void>() {
 
 			@Override

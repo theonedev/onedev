@@ -188,21 +188,31 @@ public class DefaultDataManager implements DataManager, Serializable {
 	}
 	
 	@Override
-	public <T> T callWithConnection(ConnectionCallable<T> callable) {
+	public <T> T callWithConnection(ConnectionCallable<T> callable, boolean autoCommit) {
 		try (Connection conn = openConnection()) {
-			conn.setAutoCommit(false);
-			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-			try {
-				T result = callable.call(conn);
-				conn.commit();
-				return result;
-			} catch (Exception e) {
-				conn.rollback();
-				throw ExceptionUtils.unchecked(e);
+			if (autoCommit) {
+				conn.setAutoCommit(true);
+				return callable.call(conn);
+			} else {
+				conn.setAutoCommit(false);
+				conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+				try {
+					T result = callable.call(conn);
+					conn.commit();
+					return result;
+				} catch (Exception e) {
+					conn.rollback();
+					throw ExceptionUtils.unchecked(e);
+				}
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	@Override
+	public <T> T callWithConnection(ConnectionCallable<T> callable) {
+		return callWithConnection(callable, false);
 	}
 	
 	private Metadata getMetadata() {
@@ -215,7 +225,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 				try {
 					stmt.execute(sql);
 				} catch (Exception e) {
-					logger.error("Error executing sql: " + sql, e);
+					if (sql.contains(" drop ") && e.getMessage() != null)
+						logger.warn(e.getMessage());
+					else
+						logger.error("Error executing sql: " + sql, e);
 					if (failOnError) 
 						throw e;
 				}

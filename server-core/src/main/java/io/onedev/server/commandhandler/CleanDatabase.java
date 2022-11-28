@@ -49,6 +49,10 @@ public class CleanDatabase extends AbstractPlugin {
 
 		sessionFactoryManager.start();
 		
+		// Run this in autocommit mode as some sqls in the clean script may fail
+		// when drop non-existent constraints, and we want to ignore them and 
+		// continue to execute other sql statements without rolling back whole 
+		// transaction
 		dataManager.callWithConnection(new ConnectionCallable<Void>() {
 
 			@Override
@@ -58,7 +62,7 @@ public class CleanDatabase extends AbstractPlugin {
 				return null;
 			}
 			
-		});
+		}, true);
 
 		if (hibernateConfig.isHSQLDialect()) {
 			try {

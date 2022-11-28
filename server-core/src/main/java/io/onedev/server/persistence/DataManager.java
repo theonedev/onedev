@@ -42,6 +42,8 @@ public interface DataManager {
 	
 	String getColumnName(String fieldName);
 	
+	<T> T callWithConnection(ConnectionCallable<T> callable, boolean autoCommit);
+	
 	<T> T callWithConnection(ConnectionCallable<T> callable);
 	
 }
