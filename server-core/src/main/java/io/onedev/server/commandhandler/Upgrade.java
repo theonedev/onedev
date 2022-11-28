@@ -355,6 +355,9 @@ public class Upgrade extends AbstractPlugin {
 							}
 						}
 						
+						if (oldDataVersion.get() <= 102) 
+							FileUtils.createDir(new File(upgradeDir, "site/assets/root"));
+						
 						restoreExecutables(upgradeDir);
 						logger.info("Old program files restored");
 						FileUtils.deleteDir(programBackup);

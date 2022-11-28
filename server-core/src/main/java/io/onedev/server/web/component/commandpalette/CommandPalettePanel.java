@@ -62,7 +62,7 @@ public abstract class CommandPalettePanel extends Panel {
 	private static final PatternSet excludedUrlPatterns = PatternSet.parse(""
 			+ "~test/** ~errors/** ~sso/** ~oauth/** ~verify-email-address/** ~create-user-from-invitation/** "
 			+ "~reset-password/** ~signup/** ~logout/** ~login/** ~loading/** ~init/** ~help/** ~builds/** issues/** "
-			+ "~pull-requests/** **/invalid **/${issue}/** -**/${issue} **/${request}/** -**/${request} "
+			+ "~pulls/** **/invalid **/${issue}/** -**/${issue} **/${request}/** -**/${request} "
 			+ "**/${build}/** -**/${build} **/${milestone}/** -**/${milestone} **/${agent}/** -**/${agent} "
 			+ "**/${group}/** -**/${group}");
 	

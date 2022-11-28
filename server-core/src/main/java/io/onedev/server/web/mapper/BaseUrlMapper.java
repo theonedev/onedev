@@ -168,7 +168,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~loading", BrowserInfoPage.class));
 		addProjectPages();
 		add(new BasePageMapper("~issues", IssueListPage.class));
-		add(new BasePageMapper("~pull-requests", PullRequestListPage.class));
+		add(new BasePageMapper("~pulls", PullRequestListPage.class));
 		add(new BasePageMapper("~builds", BuildListPage.class));
 		addAdministrationPages();
 		addMyPages();
@@ -334,7 +334,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~issues", ProjectIssueListPage.class));
 		add(new ProjectPageMapper("${project}/~issues/${issue}", IssueActivitiesPage.class));
 		add(new ProjectPageMapper("${project}/~issues/${issue}/commits", IssueCommitsPage.class));
-		add(new ProjectPageMapper("${project}/~issues/${issue}/pull-requests", IssuePullRequestsPage.class));
+		add(new ProjectPageMapper("${project}/~issues/${issue}/pulls", IssuePullRequestsPage.class));
 		add(new ProjectPageMapper("${project}/~issues/${issue}/builds", IssueBuildsPage.class));
 		add(new ProjectPageMapper("${project}/~issues/${issue}/authorizations", IssueAuthorizationsPage.class));
 		add(new ProjectPageMapper("${project}/~issues/new", NewIssuePage.class));

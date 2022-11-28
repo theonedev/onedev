@@ -153,7 +153,7 @@ public class IssueResource {
     }
 	
 	@Api(order=700)
-	@Path("/{issueId}/pull-requests")
+	@Path("/{issueId}/pulls")
     @GET
     public Collection<PullRequest> getPullRequests(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);

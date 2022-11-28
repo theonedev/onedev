@@ -53,7 +53,7 @@ import io.onedev.server.util.ProjectAndBranch;
 @Api(order=3000, description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
 		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
 		+ "instance <code>&quot;Number&quot; is &quot;projectName#100&quot;</code>")
-@Path("/pull-requests")
+@Path("/pulls")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Singleton
@@ -182,7 +182,7 @@ public class PullRequestResource {
 	@Api(order=1100)
 	@GET
     public List<PullRequest> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/pull-requests'>pull requests page</a>", example="\"Number\" is \"projectName#100\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/pulls'>pull requests page</a>", example="\"Number\" is \"projectName#100\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		
