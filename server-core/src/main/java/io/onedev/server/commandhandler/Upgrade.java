@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,6 +18,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
@@ -791,18 +794,31 @@ public class Upgrade extends AbstractPlugin {
 				FileUtils.deleteFile(new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
 			if (new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists())
 				FileUtils.deleteFile(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
-			String incompatibilities = FileUtils.readFileToString(
+			List<String> incompatibilities = FileUtils.readLines(
 					new File(Bootstrap.installDir, INCOMPATIBILITIES), StandardCharsets.UTF_8);
 			if (new File(upgradeDir, INCOMPATIBILITIES).exists()) {
-				String incompatibilitiesOfUpgradedVersion = FileUtils.readFileToString(
-						new File(upgradeDir, INCOMPATIBILITIES), StandardCharsets.UTF_8);
-				if (incompatibilities.endsWith(incompatibilitiesOfUpgradedVersion)) {
-					String incompatibilitiesSinceUpgradedVersion = 
-							incompatibilities.substring(0, incompatibilities.length()-incompatibilitiesOfUpgradedVersion.length());
-					if (StringUtils.isNotBlank(incompatibilitiesSinceUpgradedVersion)) {
+				String lastIncompatibilityVersion = null;
+				for (var line: FileUtils.readLines(new File(upgradeDir, INCOMPATIBILITIES), StandardCharsets.UTF_8)) {
+					if (line.trim().startsWith("# ")) {
+						lastIncompatibilityVersion = line.trim().substring(1).trim();
+						break;
+					}
+				}
+				
+				if (lastIncompatibilityVersion != null) {
+					var incompatibilitiesSinceUpgradedVersion = new ArrayList<>();
+					for (var line: incompatibilities) {
+						if (line.trim().startsWith("# ") 
+								&& line.trim().substring(1).trim().equals(lastIncompatibilityVersion)) {
+							break;
+						} else {
+							incompatibilitiesSinceUpgradedVersion.add(line);
+						}
+					}
+					if (!incompatibilitiesSinceUpgradedVersion.isEmpty()) {
 						FileUtils.writeFile(
 								new File(upgradeDir, INCOMPATIBILITIES_SINCE_UPGRADED_VERSION), 
-								incompatibilitiesSinceUpgradedVersion);
+								Joiner.on("\n").join(incompatibilitiesSinceUpgradedVersion));
 					}
 				}
 			}
