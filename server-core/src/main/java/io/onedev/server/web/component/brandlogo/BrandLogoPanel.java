@@ -25,7 +25,7 @@ public class BrandLogoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ExternalImage("custom", "/site/logo.png?v=" + getCustomLogoFile().lastModified()) {
+		add(new ExternalImage("custom", "/logo.png?v=" + getCustomLogoFile().lastModified()) {
 			
 			@Override
 			protected void onConfigure() {

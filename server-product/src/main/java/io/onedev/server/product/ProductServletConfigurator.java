@@ -119,12 +119,19 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		 * to hold site specific web assets.   
 		 */
 		File assetsDir = new File(Bootstrap.getSiteDir(), "assets");
+		
+		boolean hasCustomLogo = false;
 		for (File file: assetsDir.listFiles()) {
-			if (file.isFile())
+			if (file.isFile()) {
 				context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/" + file.getName());
-			else
+				if (file.getName().equals("logo.png"))
+					hasCustomLogo = true;
+			} else {
 				context.addServlet(new ServletHolder(new FileAssetServlet(file)), "/" + file.getName() + "/*");
+			}
 		}
+		if (!hasCustomLogo)
+			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/logo.png");
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/~api/*");	
 		context.addServlet(new ServletHolder(serverServlet), "/~server");
