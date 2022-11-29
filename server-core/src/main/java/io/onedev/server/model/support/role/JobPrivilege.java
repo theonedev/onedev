@@ -100,8 +100,8 @@ public class JobPrivilege implements Serializable {
 		return !(boolean) EditContext.get().getInputValue("accessLog");
 	}
 	
-	@Editable(order=400, name="Access Build Reports", description="Optionally specify space-separated reports. "
-			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all")
+	@Editable(order=400, name="Access Build Reports", placeholder="No accessible reports", description="Optionally specify space-separated reports. "
+			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude")
 	@ShowCondition("isAccessLogDisabled")
 	@Patterns
 	@Nullable
