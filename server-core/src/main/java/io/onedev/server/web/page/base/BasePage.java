@@ -120,6 +120,17 @@ public abstract class BasePage extends WebPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		if (getLoginUser() == null) {
+			Cookie cookie = SsoProcessPage.getConnectorCookie();
+			if (cookie != null) {
+				SsoProcessPage.clearConnectorCookie();
+				new RestartResponseAtInterceptPageException(getPage().getClass());
+				String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+				String redirectUrl = serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + cookie.getValue();
+				throw new RedirectToUrlException(redirectUrl);
+			}
+		}
+		
 		if (!isPermitted())
 			unauthorized();
 		
@@ -340,24 +351,10 @@ public abstract class BasePage extends WebPage {
 	}
 	
 	public void unauthorized() {
-		if (getLoginUser() != null) {
+		if (getLoginUser() != null) 
 			throw new UnauthorizedException("You are not allowed to perform this operation");
-		} else { 
-			Cookie cookie = SsoProcessPage.getConnectorCookie();
-			
-			// Instantiate here to record current page url even if we are redirecting to 
-			// sso initiating url
-			RestartResponseAtInterceptPageException redirectToLoginException = 
-					new RestartResponseAtInterceptPageException(LoginPage.class);
-			if (cookie != null) {
-				String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-				
-				String redirectUrl = serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + cookie.getValue();
-				throw new RedirectToUrlException(redirectUrl);
-			} else {
-				throw redirectToLoginException;
-			}
-		}
+		else 
+			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 	}
 	
 	protected String getPageTitle() {

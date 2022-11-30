@@ -23,7 +23,7 @@
 .CodeMirror-simplescroll-horizontal {
   bottom: 0; 
   left: 0;
-  height: 6px;
+  height: 10px;
 }
 .CodeMirror-simplescroll-horizontal div {
   bottom: 0;
@@ -33,7 +33,7 @@
 .CodeMirror-simplescroll-vertical {
   right: 0; 
   top: 0;
-  width: 6px;
+  width: 10px;
 }
 .CodeMirror-simplescroll-vertical div {
   right: 0;

@@ -1,11 +1,12 @@
 # 7.8.0
 
-To be more user friendly, OneDev now uses project path instead of project id to access project via web UI, for instance `https://code.onedev.io/projects/160` has been changed to `https://code.onedev.io/onedev/server`. To avoid conflicting with this url scheme, 
-other service urls have been re-organized and this causes two incompatibitlities:
+To use consistent project url for web and git access, OneDev now uses project path instead of project id to access projects via web UI, for instance `https://code.onedev.io/projects/160` has been changed to `https://code.onedev.io/onedev/server`. To avoid conflicting with this url scheme, 
+some service urls have been changed and this causes some incompatibitlities:
 
-1. The RESTful api url now starts with `~api` instead of `api`, for instance url to access project information is now 
-`/~api/projects/{projectId}` instead of `/api/projects/{projectId}`
-2. Agents can not upgrade itself for this version, as url connecting to server has been changed. You will need to re-download 
+1. The RESTful api url now starts with `~api` instead of `api`, for instance url to access project information is now `/~api/projects/{projectId}` 
+2. SSO callback url now takes the form `https://<onedev root url>/~sso/callback/<Provider Name>` (use `~sso` instead of `sso`)
+3. If you are using OAuth based Office365 or Gmail mail service, make sure to change redirect url as `https://<onedev root url>/~oauth/callback` (use `~oauth` instead of `oauth`)
+4. Agents can not upgrade itself for this version, as url connecting to server has been changed. You will need to re-download 
 agent package from server if running in bare-metal mode, or re-pull the agent image if running in docker mode
 
 # 7.7.0
