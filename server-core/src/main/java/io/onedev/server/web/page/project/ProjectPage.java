@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -128,6 +129,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toOptionalString();
 		if (projectPath == null)
 			throw new RestartResponseException(ProjectListPage.class);
+		
+		projectPath = StringUtils.strip(projectPath, "/");
 		
 		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 		if (project == null)
