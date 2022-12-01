@@ -54,12 +54,12 @@ onedev.server.infiniteScroll = {
 						$container.data("callback")($items.length, pageSize);
 						$container.data("appending", true);
 						if ($lastItem.is("li")) {
-							$lastItem.after("<li class='loading-indicator' style='text-align:center;'><img src='/img/" + ajaxIndicator + "'></img></li>");
+							$lastItem.after("<li class='loading-indicator' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></li>");
 						} else if ($lastItem.is("tr")) {
 							var colspan = $lastItem.children().length;
-							$lastItem.after("<tr class='loading-indicator'><td colspan='" + colspan + "' style='text-align:center;'><img src='/img/" + ajaxIndicator + "'></img></td></tr>");
+							$lastItem.after("<tr class='loading-indicator'><td colspan='" + colspan + "' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></td></tr>");
 						} else {
-							$lastItem.after("<div class='loading-indicator' style='text-align:center;'><img src='/img/" + ajaxIndicator + "'></img></div>");
+							$lastItem.after("<div class='loading-indicator' style='text-align:center;'><img src='/~img/" + ajaxIndicator + "'></img></div>");
 						}		
 					} else if (scrollTop) {
 						if (scrollTop > $container.scrollTop()) 

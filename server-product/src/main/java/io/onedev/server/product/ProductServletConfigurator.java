@@ -98,8 +98,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		 */
 		context.addServlet(new ServletHolder(wicketServlet), "/");
 		
-		context.addServlet(new ServletHolder(new ClasspathAssetServlet(ImageScope.class)), "/img/*");
-		context.addServlet(new ServletHolder(new ClasspathAssetServlet(IconScope.class)), "/icon/*");
+		context.addServlet(new ServletHolder(new ClasspathAssetServlet(ImageScope.class)), "/~img/*");
+		context.addServlet(new ServletHolder(new ClasspathAssetServlet(IconScope.class)), "/~icon/*");
 		
 		context.getSessionHandler().addEventListener(new HttpSessionListener() {
 

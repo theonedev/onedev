@@ -66,7 +66,7 @@
 }
 
 #searching-branches {
-	background: url(/img/ajax-indicator-big.png) no-repeat scroll center center;
+	background: url(/~img/ajax-indicator-big.png) no-repeat scroll center center;
 	background-size: 64px 64px;
 	width: 64px;
 	height: 64px;
@@ -77,5 +77,5 @@
 	display: none;
 }
 .dark-mode #searching-branches {
-	background: url(/img/dark-ajax-indicator-big.png) no-repeat scroll center center;
+	background: url(/~img/dark-ajax-indicator-big.png) no-repeat scroll center center;
 }

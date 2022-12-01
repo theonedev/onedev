@@ -45,7 +45,7 @@
 	border-top-color: var(--dark-mode-lighter-dark);
 }
 .project-blob>.search-result>.ui-resizable-handle {
-	background: var(--light) url(/icon/grip2.svg) no-repeat scroll center center;
+	background: var(--light) url(/~icon/grip2.svg) no-repeat scroll center center;
 	background-size: 20px 20px;
     cursor: n-resize;
     height: 4px;
@@ -53,7 +53,7 @@
     position: relative;
 }
 .dark-mode .project-blob>.search-result>.ui-resizable-handle {
-	background: var(--dark-mode-light-dark) url(/icon/dark-grip2.svg) no-repeat scroll center center;
+	background: var(--dark-mode-light-dark) url(/~icon/dark-grip2.svg) no-repeat scroll center center;
 	background-size: 20px 20px;
 }
 

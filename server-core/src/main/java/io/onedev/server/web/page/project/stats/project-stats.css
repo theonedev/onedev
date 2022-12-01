@@ -12,12 +12,12 @@
 }
 
 .project-contribs .top-contributors .loading {
-	background: url(/img/ajax-indicator-big.png) no-repeat scroll center center;
+	background: url(/~img/ajax-indicator-big.png) no-repeat scroll center center;
 	background-size: 64px 64px;
 	height: 64px;
 }
 .dark-mode .project-contribs .top-contributors .loading {
-	background: url(/img/dark-ajax-indicator-big.png) no-repeat scroll center center;
+	background: url(/~img/dark-ajax-indicator-big.png) no-repeat scroll center center;
 }
 
 .project-contribs .top-contributors .head .total-contribution span.additions {

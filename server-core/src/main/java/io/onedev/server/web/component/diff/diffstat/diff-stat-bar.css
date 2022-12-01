@@ -1,6 +1,9 @@
 .diff-stat-bar {
 	color: var(--secondary); 
 }
+.dark-mode .diff-stat-bar {
+	color: var(--gray-dark); 
+}
 .diff-stat-bar>i {
 	font-size: 16px;
 	font-style: normal; 

@@ -82,7 +82,7 @@
 }
 
 .markdown-editor .ui-resizable-handle {
-	background: var(--light-gray) url(/icon/grip2.svg) no-repeat scroll center center;
+	background: var(--light-gray) url(/~icon/grip2.svg) no-repeat scroll center center;
 	background-size: 20px 20px;
     cursor: s-resize;
     height: 4px;
@@ -90,7 +90,7 @@
 	border-radius: 0 0 0.42rem 0.42rem;
 }
 .dark-mode .markdown-editor .ui-resizable-handle {
-	background: var(--dark-mode-light-dark) url(/icon/dark-grip2.svg) no-repeat scroll center center;
+	background: var(--dark-mode-light-dark) url(/~icon/dark-grip2.svg) no-repeat scroll center center;
 	background-size: 20px 20px;
 }
 
@@ -451,10 +451,10 @@
 	position: absolute;
 	left: 0;
 	top: 0;
-	background: url("/img/ajax-indicator-big.png") center no-repeat;
+	background: url("/~img/ajax-indicator-big.png") center no-repeat;
 }
 .dark-mode .markdown-image-loading {
-	background: url("/img/dark-ajax-indicator-big.png") center no-repeat;
+	background: url("/~img/dark-ajax-indicator-big.png") center no-repeat;
 }
 
 .reference.mention {

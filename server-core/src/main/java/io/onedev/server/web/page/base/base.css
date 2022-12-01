@@ -658,7 +658,7 @@ table.norecords thead {
 	display: none;
 }
 table.norecords tfoot td, div.norecords, td.norecords {
-	background: url(/icon/empty.svg) no-repeat scroll center center;
+	background: url(/~icon/empty.svg) no-repeat scroll center center;
 	background-size: 240px 240px;
 	border-top: none;
 	height: 240px;

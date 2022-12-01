@@ -27,7 +27,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
@@ -156,9 +155,16 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 		};
 		
 		DataTable<AgentToken, Void> table;
-		add(table = new DataTable<AgentToken, Void>("tokens", columns, dataProvider, Integer.MAX_VALUE));
+		add(table = new DataTable<AgentToken, Void>("tokens", columns, dataProvider, Integer.MAX_VALUE) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getUnusedTokens().isEmpty());
+			}
+			
+		});
 		table.addBottomToolbar(new NoRecordsToolbar(table));
-		table.add(new NoRecordsBehavior());
 	}
 
 	private List<AgentToken> getUnusedTokens() {
