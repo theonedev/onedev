@@ -45,12 +45,12 @@ public abstract class ProjectInfoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BookmarkablePageLink<Void>("path", ProjectDashboardPage.class, 
+		add(new BookmarkablePageLink<Void>("pathAndId", ProjectDashboardPage.class, 
 				ProjectDashboardPage.paramsOf(getProject())) {
 
 			@Override
 			public IModel<?> getBody() {
-				return Model.of(getProject().getPath());
+				return Model.of(getProject().getPath() + " (id: " + getProject().getId() + ")");
 			}
 			
 		});

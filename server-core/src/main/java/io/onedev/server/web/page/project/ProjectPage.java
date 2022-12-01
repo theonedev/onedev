@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -26,6 +27,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -108,31 +112,32 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	private transient Map<ObjectId, Collection<Build>> buildsCache;
 	
-	public static PageParameters paramsOf(Long projectId) {
-		ProjectFacade project = OneDev.getInstance(ProjectManager.class).findFacadeById(projectId);
-		return paramsOf(project.getPath());
-	}
-	
-	public static PageParameters paramsOf(String projectPath) {
-		PageParameters params = new PageParameters();
-		params.add(ProjectMapperUtils.PARAM_PROJECT, projectPath);
-		return params;
-	}
-	
-	public static PageParameters paramsOf(Project project) {
-		return paramsOf(project.getPath());
-	}
-	
 	public ProjectPage(PageParameters params) {
 		super(params);
 
+		Request request = RequestCycle.get().getRequest();
+		String requestUrl = request.getUrl().toString();
+		requestUrl = StringUtils.stripStart(requestUrl, "/");
+		if (requestUrl.startsWith("projects/")) {
+			requestUrl = StringUtils.stripStart(requestUrl.substring("projects/".length()), "/");
+			Long projectId = Long.valueOf(StringUtils.substringBefore(requestUrl, "/"));
+			Project project = getProjectManager().load(projectId);
+			String suffix = StringUtils.substringAfter(requestUrl, "/");
+			
+			String redirectUrl = "/" + project.getPath();
+			if (StringUtils.isNotBlank(suffix)) 
+				redirectUrl += "/~" + suffix;
+			
+			throw new RedirectToUrlException(redirectUrl, HttpServletResponse.SC_MOVED_PERMANENTLY);
+		}
+	
 		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toOptionalString();
 		if (projectPath == null)
 			throw new RestartResponseException(ProjectListPage.class);
 		
 		projectPath = StringUtils.strip(projectPath, "/");
 		
-		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+		Project project = getProjectManager().findByPath(projectPath);
 		if (project == null)
 			throw new EntityNotFoundException();
 
@@ -503,7 +508,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	protected abstract void navToProject(Project project);
 	
-	protected ProjectManager getProjectManager() {
+	protected static ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}
 	
@@ -520,5 +525,20 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		}
 		return builds;
 	}
-
+	
+	public static PageParameters paramsOf(Long projectId) {
+		ProjectFacade project = getProjectManager().findFacadeById(projectId);
+		return paramsOf(project.getPath());
+	}
+	
+	public static PageParameters paramsOf(String projectPath) {
+		PageParameters params = new PageParameters();
+		params.add(ProjectMapperUtils.PARAM_PROJECT, projectPath);
+		return params;
+	}
+	
+	public static PageParameters paramsOf(Project project) {
+		return paramsOf(project.getPath());
+	}
+	
 }
