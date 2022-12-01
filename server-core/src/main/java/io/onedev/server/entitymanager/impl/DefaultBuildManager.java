@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -91,6 +92,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.util.FileInfo;
+import io.onedev.server.util.MimeFileInfo;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
@@ -948,20 +950,21 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	}
 
 	@Override
-	public long getArtifactSize(Build build, String artifactPath) {
+	public MimeFileInfo getArtifactInfo(Build build, String artifactPath) {
 		Long projectId = build.getProject().getId();
 		Long buildNumber = build.getNumber();
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Long>() {
+		return projectManager.runOnProjectServer(projectId, new ClusterTask<MimeFileInfo>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Long call() throws Exception {
+			public MimeFileInfo call() throws Exception {
 				File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
 				File artifactFile = new File(artifactsDir, artifactPath);
 				
 				if (artifactFile.exists() && artifactFile.isFile()) {
-					return artifactFile.length();
+					return new MimeFileInfo(artifactPath, artifactFile.lastModified(), 
+							artifactFile.length(), Files.probeContentType(artifactFile.toPath()));
 				} else {
 					String errorMessage = String.format(
 							"Specified artifact path does not exist or is a directory (project: %s, build number: %d, path: %s)", 

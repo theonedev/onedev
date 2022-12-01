@@ -11,7 +11,7 @@ public class MimeFileInfo extends FileInfo {
 		this.type = type;
 	}
 
-	public String getType() {
+	public String getMediaType() {
 		return type;
 	}
 	

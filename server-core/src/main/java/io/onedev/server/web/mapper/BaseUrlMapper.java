@@ -311,7 +311,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~projects/import/${importer}", ProjectImportPage.class));
 
 		// For backward compatibility
-		add(new BasePageMapper("projects", ProjectDashboardPage.class));
+		add(new BasePageMapper("projects/${project}", ProjectDashboardPage.class));
 		
 		add(new ProjectPageMapper("${project}", ProjectDashboardPage.class));
 

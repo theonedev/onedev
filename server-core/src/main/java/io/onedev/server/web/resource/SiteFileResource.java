@@ -83,7 +83,7 @@ public class SiteFileResource extends AbstractResource {
 		response.setAcceptRange(ContentRangeType.BYTES);
 		
 		MimeFileInfo mimeFileInfo = getProjectManager().getSiteFileInfo(projectId, filePath);
-		response.setContentType(mimeFileInfo.getType());
+		response.setContentType(mimeFileInfo.getMediaType());
 		
 		response.setContentLength(mimeFileInfo.getLength());
 		

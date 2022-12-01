@@ -16,6 +16,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.FileInfo;
+import io.onedev.server.util.MimeFileInfo;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
@@ -86,7 +87,7 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	List<ProjectBuildStats> queryStats(Collection<Project> projects);
 	
-	long getArtifactSize(Build build, String artifactPath);
+	MimeFileInfo getArtifactInfo(Build build, String artifactPath);
 	
 	void deleteArtifact(Build build, String artifactPath);
 	

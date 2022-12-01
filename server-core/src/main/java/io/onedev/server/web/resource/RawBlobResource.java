@@ -16,7 +16,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +44,7 @@ import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
+import io.onedev.server.web.util.MimeUtils;
 import io.onedev.server.web.util.WicketUtils;
 
 public class RawBlobResource extends AbstractResource {
@@ -83,16 +83,14 @@ public class RawBlobResource extends AbstractResource {
 
 		ResourceResponse response = new ResourceResponse();
 		response.setAcceptRange(ContentRangeType.BYTES);
-		response.setContentType(project.detectMediaType(blob.getIdent()).toString());
+		response.getHeaders().addHeader("X-Content-Type-Options", "nosniff");
+		response.setContentType(MimeUtils.sanitize(project.detectMediaType(blob.getIdent()).toString()));
 		
 		if (blob.getLfsPointer() != null) 
 			response.setContentLength(blob.getLfsPointer().getObjectSize());
 		else 
 			response.setContentLength(blob.getSize());
 		
-		if (response.getContentType().equals(MediaType.TEXT_HTML)) 
-			response.setContentType(MediaType.TEXT_PLAIN);
-
 		if (!ObjectId.isId(revision))
 			response.disableCaching();
 

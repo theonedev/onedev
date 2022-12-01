@@ -47,6 +47,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.MimeFileInfo;
+import io.onedev.server.web.util.MimeUtils;
 
 public class ArtifactResource extends AbstractResource {
 
@@ -79,7 +81,7 @@ public class ArtifactResource extends AbstractResource {
 		
 		String artifactPath = Joiner.on("/").join(pathSegments);
 		
-		long artifactSize = -1;
+		MimeFileInfo fileInfo = null;
 		if (!SecurityUtils.getUserId().equals(User.SYSTEM_ID)) {
 			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 			
@@ -94,12 +96,11 @@ public class ArtifactResource extends AbstractResource {
 			if (!SecurityUtils.canAccess(build))
 				throw new UnauthorizedException();
 			
-			artifactSize = getBuildManager().getArtifactSize(build, artifactPath);
+			fileInfo = getBuildManager().getArtifactInfo(build, artifactPath);
 		}
 		
 		ResourceResponse response = new ResourceResponse();
 		response.getHeaders().addHeader("X-Content-Type-Options", "nosniff");
-		response.setContentType(MimeTypes.OCTET_STREAM);
 		response.disableCaching();
 
 		String fileName = artifactPath;
@@ -111,8 +112,12 @@ public class ArtifactResource extends AbstractResource {
 			throw new RuntimeException(e);
 		}
 		
-		if (artifactSize != -1)
-			response.setContentLength(artifactSize);
+		if (fileInfo != null) {
+			response.setContentLength(fileInfo.getLength());
+			response.setContentType(MimeUtils.sanitize(fileInfo.getMediaType()));
+		} else {
+			response.setContentType(MimeTypes.OCTET_STREAM);
+		}
 		
 		response.setWriteCallback(new WriteCallback() {
 
