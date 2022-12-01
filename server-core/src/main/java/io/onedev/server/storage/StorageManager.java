@@ -25,6 +25,14 @@ public interface StorageManager {
     File getProjectIndexDir(Long projectId);
 
     /**
+     * Get directory to store static content of specified project
+     * 
+     * @return
+     * 			directory to store static content. The directory will be exist after calling this method
+     */
+    File getProjectSiteDir(Long projectId);
+    
+    /**
      * Get directory to store additional info of specified project
      * 
      * @return

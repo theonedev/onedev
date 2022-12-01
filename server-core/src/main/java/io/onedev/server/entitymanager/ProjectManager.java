@@ -18,6 +18,7 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.MimeFileInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -90,5 +91,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	File getLfsObjectsDir(Long projectId);
 	
 	Collection<String> getReservedNames();
+	
+	MimeFileInfo getSiteFileInfo(Long projectId, String siteFilePath);
 	
 }

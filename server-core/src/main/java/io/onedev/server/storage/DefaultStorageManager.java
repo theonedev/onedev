@@ -96,6 +96,11 @@ public class DefaultStorageManager implements StorageManager, Serializable {
 	}
 
 	@Override
+	public File getProjectSiteDir(Long projectId) {
+        return getProjectSubdir(projectId, "site");
+	}
+	
+	@Override
 	public File getProjectAttachmentDir(Long projectId) {
         return getProjectSubdir(projectId, "attachment");
 	}

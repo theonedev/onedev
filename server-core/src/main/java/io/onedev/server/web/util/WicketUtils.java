@@ -16,7 +16,9 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.IRequestHandlerDelegate;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.resource.AbstractResource;
 
+import io.onedev.server.util.LongRange;
 import io.onedev.server.web.websocket.PageKey;
 
 public class WicketUtils {
@@ -112,6 +114,18 @@ public class WicketUtils {
 		return -1;
 	}
 	
+	public static LongRange getRequestContentRange(long contentLength) {
+		Long start = RequestCycle.get().getMetaData(AbstractResource.CONTENT_RANGE_STARTBYTE);
+		Long end = RequestCycle.get().getMetaData(AbstractResource.CONTENT_RANGE_ENDBYTE);
+
+		if (start == null)
+			start = 0L;
+		if (end == null || end == -1) 
+			end = contentLength;
+		
+		return new LongRange(start, end);
+	}
+	
 	public static class LastVisibleAppender extends AttributeAppender {
 
 		private static final long serialVersionUID = 1L;
@@ -121,4 +135,5 @@ public class WicketUtils {
 		}
 		
 	}
+	
 }

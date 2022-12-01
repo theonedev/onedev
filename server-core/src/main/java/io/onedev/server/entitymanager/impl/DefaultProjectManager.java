@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -60,6 +62,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
@@ -120,6 +123,7 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.MimeFileInfo;
 import io.onedev.server.util.ProjectNameReservation;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
@@ -1152,6 +1156,29 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public Collection<String> getReservedNames() {
 		return reservedNames;
+	}
+
+	@Override
+	public MimeFileInfo getSiteFileInfo(Long projectId, String filePath) {
+		return runOnProjectServer(projectId, new ClusterTask<MimeFileInfo>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public MimeFileInfo call() throws Exception {
+				return LockUtils.read(Project.getSiteLockName(projectId), new Callable<MimeFileInfo>() {
+
+					@Override
+					public MimeFileInfo call() throws Exception {
+						File siteFile = new File(storageManager.getProjectSiteDir(projectId), filePath);
+						String mimeType = Files.probeContentType(siteFile.toPath());
+						return new MimeFileInfo(filePath, siteFile.length(), siteFile.lastModified(), mimeType);
+					}
+
+				});
+			}
+			
+		});
 	}
 	
 }

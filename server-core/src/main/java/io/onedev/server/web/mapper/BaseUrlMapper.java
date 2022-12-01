@@ -153,6 +153,7 @@ import io.onedev.server.web.resource.BuildLogResourceReference;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.resource.ServerLogResourceReference;
 import io.onedev.server.web.resource.SpriteResourceReference;
+import io.onedev.server.web.resource.SiteFileResourceReference;
 
 public class BaseUrlMapper extends CompoundRequestMapper {
 
@@ -206,6 +207,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BaseResourceMapper("~downloads/projects/${project}/archives", new ArchiveResourceReference()));
 		
 		add(new ProjectResourceMapper("${project}/~raw", new RawBlobResourceReference()));
+		add(new ProjectResourceMapper("${project}/~site", new SiteFileResourceReference()));
 		
 		// Change AttachmentResource.authorizeGroup accordingly if change attachment url here
 		add(new BaseResourceMapper("~downloads/projects/${project}/attachments/${attachment-group}/${attachment}", 

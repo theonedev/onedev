@@ -5,6 +5,7 @@ import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +46,7 @@ import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
@@ -129,6 +131,37 @@ public class ClusterResource {
 						OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE)) {
 					IOUtils.copy(is, os);
 				}
+		   }				   
+		   
+		};
+		return Response.ok(os).build();
+	}
+	
+	@Path("/site")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadSiteFile(@QueryParam("projectId") Long projectId, @QueryParam("filePath") String filePath) {
+		if (!SecurityUtils.getUser().isSystem()) 
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+		
+		StreamingOutput os = new StreamingOutput() {
+
+			@Override
+		   public void write(OutputStream output) throws IOException {
+				LockUtils.read(Project.getSiteLockName(projectId), new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						File file = new File(storageManager.getProjectSiteDir(projectId), filePath);
+						try (
+								InputStream is = new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE);
+								OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE)) {
+							IOUtils.copy(is, os);
+						}
+						return null;
+					}
+
+				});
 		   }				   
 		   
 		};

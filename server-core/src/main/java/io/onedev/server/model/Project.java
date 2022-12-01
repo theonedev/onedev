@@ -1624,4 +1624,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return PatternSet.parse("**");
 	}
 	
+	public String getSiteLockName() {
+		return getSiteLockName(getId());
+	}
+	
+	public static String getSiteLockName(Long projectId) {
+		return "project-site:" + projectId;
+	}
+	
 }

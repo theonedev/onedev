@@ -3,7 +3,6 @@ package io.onedev.server.web.resource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +21,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jetty.io.EofException;
@@ -44,7 +42,10 @@ import io.onedev.server.git.LfsObject;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ExceptionUtils;
+import io.onedev.server.util.IOUtils;
+import io.onedev.server.util.LongRange;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
+import io.onedev.server.web.util.WicketUtils;
 
 public class RawBlobResource extends AbstractResource {
 
@@ -52,14 +53,12 @@ public class RawBlobResource extends AbstractResource {
 	
 	private static final Logger logger = LoggerFactory.getLogger(RawBlobResource.class);
 
-	private static final int BUFFER_SIZE = 8*1024;
-
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
 		String projectPath = params.get(ProjectMapperUtils.PARAM_PROJECT).toString();
-		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+		Project project = getProjectManager().findByPath(projectPath);
 		if (project == null)
 			throw new EntityNotFoundException();
 		
@@ -105,52 +104,18 @@ public class RawBlobResource extends AbstractResource {
 
 		response.setWriteCallback(new WriteCallback() {
 
-			private void copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
-				int totalSkipped = 0;
-				while (totalSkipped < start)	 {
-					long skipped = in.skip(start-totalSkipped);
-					if (skipped == 0)
-						break;
-					totalSkipped += skipped;
-				}
-				
-				if (totalSkipped < start) 
-					throw new IOException("Skipped only " + totalSkipped + " bytes out of " + start + " required.");
-
-				long bytesToCopy = end - start + 1;
-
-				byte buffer[] = new byte[BUFFER_SIZE];
-				while (bytesToCopy > 0) {
-					int bytesRead = in.read(buffer);
-					if (bytesRead <= bytesToCopy) {
-						out.write(buffer, 0, bytesRead);
-						bytesToCopy -= bytesRead;
-					} else {
-						out.write(buffer, 0, (int) bytesToCopy);
-						bytesToCopy = 0;
-					}
-					if (bytesRead < buffer.length) {
-						break;
-					}
-				}
-			}
-
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				try (InputStream is = getInputStream(blob)) {
-					Long startByte = RequestCycle.get().getMetaData(CONTENT_RANGE_STARTBYTE);
-					Long endByte = RequestCycle.get().getMetaData(CONTENT_RANGE_ENDBYTE);
-
-					if (startByte == null)
-						startByte = 0L;
-					if (endByte == null || endByte == -1) {
-						if (blob.getLfsPointer() != null)
-							endByte = blob.getLfsPointer().getObjectSize() - 1;
-						else
-							endByte = blob.getSize() - 1;
-					}
+					long contentLength;
+					if (blob.getLfsPointer() != null)
+						contentLength = blob.getLfsPointer().getObjectSize() - 1;
+					else
+						contentLength = blob.getSize() - 1;
+					
+					LongRange range = WicketUtils.getRequestContentRange(contentLength);
 					try {
-						copyRange(is, attributes.getResponse().getOutputStream(), startByte, endByte);
+						IOUtils.copyRange(is, attributes.getResponse().getOutputStream(), range);
 					} catch (Exception e) {
 						EofException eofException = ExceptionUtils.find(e, EofException.class);
 						if (eofException != null) 

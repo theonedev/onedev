@@ -49,6 +49,8 @@ public abstract class JobExecutor implements Serializable {
 	
 	private boolean shellAccessEnabled;
 	
+	private boolean sitePublishEnabled;
+	
 	private int cacheTTL = 7;
 	
 	public boolean isEnabled() {
@@ -82,7 +84,17 @@ public abstract class JobExecutor implements Serializable {
 	public void setShellAccessEnabled(boolean shellAccessEnabled) {
 		this.shellAccessEnabled = shellAccessEnabled;
 	}
-	
+
+	@Editable(order=30, description="Enable this to allow to run site publish step. OneDev will serve project "
+			+ "site files as is. To avoid XSS attack, make sure this executor can only be used by trusted jobs")
+	public boolean isSitePublishEnabled() {
+		return sitePublishEnabled;
+	}
+
+	public void setSitePublishEnabled(boolean sitePublishEnabled) {
+		this.sitePublishEnabled = sitePublishEnabled;
+	}
+
 	@SuppressWarnings("unused")
 	private static boolean isTerminalSupported() {
 		return OneDev.getInstance(TerminalManager.class).isTerminalSupported();
