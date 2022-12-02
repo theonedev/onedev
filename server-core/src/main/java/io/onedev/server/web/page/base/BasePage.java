@@ -207,6 +207,19 @@ public abstract class BasePage extends WebPage {
 			}
 			
 		});
+		
+		add(new WebMarkupContainer("icon") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				File logoFile = new File(Bootstrap.getSiteDir(), "assets/logo.png");
+				if (logoFile.exists())
+					tag.put("href", "/logo.png?v=" + logoFile.lastModified());
+			}
+			
+		});
 
 		add(new Label("script", new LoadableDetachableModel<String>() {
 

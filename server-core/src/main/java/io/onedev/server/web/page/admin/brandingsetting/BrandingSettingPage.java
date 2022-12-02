@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -22,6 +23,7 @@ import io.onedev.server.web.component.fileupload.FileUploadField;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class BrandingSettingPage extends AdministrationPage {
@@ -101,6 +103,22 @@ public class BrandingSettingPage extends AdministrationPage {
 		});
 		
 		form.add(saveButton);
+		
+		form.add(new Link<Void>("useDefaultLogo") {
+
+			@Override
+			public void onClick() {
+				getLogoFile().delete();
+				getSession().success("Using default logo now");
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getLogoFile().exists());
+			}
+			
+		}.add(new ConfirmClickModifier("Do you really want to use the default logo?")));
 		
 		add(form);
 	}
