@@ -75,6 +75,8 @@ public class PublishArtifactStep extends ServerSideStep {
 			public Void call() throws Exception {
 				OneDev.getInstance(StorageManager.class).initArtifactsDir(build.getProject().getId(), build.getNumber());
 				FileUtils.copyDirectory(inputDir, build.getArtifactsDir());
+				if (jobLogger != null)
+					throw new RuntimeException("OOPS");
 				return null;
 			}
 			

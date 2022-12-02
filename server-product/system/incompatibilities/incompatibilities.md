@@ -8,6 +8,7 @@ some service urls have been changed and this causes some incompatibitlities:
 3. If you are using OAuth based Office365 or Gmail mail service, make sure to change redirect url as `https://<onedev root url>/~oauth/callback` (use `~oauth` instead of `oauth`)
 4. Agents can not upgrade itself for this version, as url connecting to server has been changed. You will need to re-download 
 agent package from server if running in bare-metal mode, or re-pull the agent image if running in docker mode
+5. If you are setting up reverse proxy using Apache or Nginx, make sure to change proxied path `/server` to `/~server`. Check [the manual](https://code.onedev.io/onedev/manual/~files/main/pages/reverse-proxy-setup.md) for details
 
 # 7.7.0
 
