@@ -1571,24 +1571,6 @@ public abstract class RevisionDiffPanel extends Panel {
 			commentContainer.setVisible(false);
 		}
 		
-		commentContainer.add(new WebSocketObserver() {
-			
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				if (component.isVisible())
-					handler.add(component);
-			}
-			
-			@Override
-			public Collection<String> getObservables() {
-				Set<String> observables = new HashSet<>();
-				if (getPullRequest() != null)
-					observables.add(PullRequest.getClosedWebSocketObservable(getPullRequest().getId()));
-				return observables;
-			}
-			
-		});
-		
 		return commentContainer;
 	}
 	
