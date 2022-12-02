@@ -208,7 +208,7 @@ public abstract class BasePage extends WebPage {
 			
 		});
 		
-		add(new WebMarkupContainer("icon") {
+		add(new WebMarkupContainer("siteIcon") {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
