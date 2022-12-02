@@ -28,6 +28,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.shiro.authz.Permission;
@@ -1172,6 +1173,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					public MimeFileInfo call() throws Exception {
 						File siteFile = new File(storageManager.getProjectSiteDir(projectId), filePath);
 						String mimeType = Files.probeContentType(siteFile.toPath());
+						if (mimeType == null)
+							mimeType = MediaType.APPLICATION_OCTET_STREAM;
 						return new MimeFileInfo(filePath, siteFile.length(), siteFile.lastModified(), mimeType);
 					}
 

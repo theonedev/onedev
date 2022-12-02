@@ -4,15 +4,15 @@ public class MimeFileInfo extends FileInfo {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String type;
+	private final String mediaType;
 	
-	public MimeFileInfo(String path, long length, long lastModified, String type) {
+	public MimeFileInfo(String path, long length, long lastModified, String mediaType) {
 		super(path, length, lastModified);
-		this.type = type;
+		this.mediaType = mediaType;
 	}
 
 	public String getMediaType() {
-		return type;
+		return mediaType;
 	}
 	
 }

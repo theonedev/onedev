@@ -27,6 +27,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
@@ -963,8 +964,11 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				File artifactFile = new File(artifactsDir, artifactPath);
 				
 				if (artifactFile.exists() && artifactFile.isFile()) {
-					return new MimeFileInfo(artifactPath, artifactFile.lastModified(), 
-							artifactFile.length(), Files.probeContentType(artifactFile.toPath()));
+					String mimeType = Files.probeContentType(artifactFile.toPath());
+					if (mimeType == null)
+						mimeType = MediaType.APPLICATION_OCTET_STREAM;
+					return new MimeFileInfo(artifactPath, artifactFile.length(), 
+							artifactFile.lastModified(), mimeType);
 				} else {
 					String errorMessage = String.format(
 							"Specified artifact path does not exist or is a directory (project: %s, build number: %d, path: %s)", 
