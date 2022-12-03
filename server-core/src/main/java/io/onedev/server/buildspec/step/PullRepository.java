@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -23,6 +24,7 @@ import com.google.common.collect.Maps;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
@@ -154,6 +156,38 @@ public class PullRepository extends SyncRepository {
 				}
 				
 			}).checkReturnCode();
+			
+			if (defaultBranch == null) {
+				if (targetProject.getObjectId("refs/heads/master", false) != null) {
+					targetProject.setDefaultBranch("master");
+				} else if (targetProject.getObjectId("refs/heads/main", false) != null) {
+					targetProject.setDefaultBranch("main");
+				} else {
+					git.clearArgs();
+					git.addArgs("branch");
+					
+					AtomicReference<String> firstBranch = new AtomicReference<>(null);
+					git.execute(new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							if (firstBranch.get() == null)
+								firstBranch.set(StringUtils.stripStart(line.trim(), "*"));
+						}
+						
+					}, new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							logger.warning(line);
+						}
+						
+					}).checkReturnCode();
+					
+					if (firstBranch.get() != null)
+						targetProject.setDefaultBranch(firstBranch.get());
+				}
+			}
 		} finally {
 			Map<String, ObjectId> newCommitIds = getCommitIds(targetProject);
 			MapDifference<String, ObjectId> difference = Maps.difference(oldCommitIds, newCommitIds);
