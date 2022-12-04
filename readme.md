@@ -4,10 +4,10 @@
 <h1>Self-hosted Git Server with Kanban and CI/CD</h1>
 
 <div style="font-size: 18px;">
-| <a href="https://code.onedev.io/onedev/manual/files/main/pages/quickstart.md">5-minute Quickstart</a> 
-| <a href="https://code.onedev.io/onedev/manual/files/main/pages/installation-guide.md">Installation Guide</a> 
-| <a href="https://code.onedev.io/onedev/manual/files/main/pages/tutorials.md">Tutorials</a>
-| <a href="https://code.onedev.io/onedev/manual/files">All Documentations</a> |
+| <a href="https://code.onedev.io/onedev/manual/~files/main/pages/quickstart.md">5-minute Quickstart</a> 
+| <a href="https://code.onedev.io/onedev/manual/~files/main/pages/installation-guide.md">Installation Guide</a> 
+| <a href="https://code.onedev.io/onedev/manual/~files/main/pages/tutorials.md">Tutorials</a>
+| <a href="https://code.onedev.io/onedev/manual/~files">All Documentations</a> |
 </div>
 
 <p style="margin-bottom: 20px;">
