@@ -139,7 +139,7 @@ public class ImportServer implements Serializable, Validatable {
 		return organizations;
 	}
 	
-	List<String> listRepositories(@Nullable String organization) {
+	List<String> listRepositories(@Nullable String organization, boolean includeForks) {
 		Client client = newClient();
 		try {
 			String apiEndpoint;
@@ -158,7 +158,8 @@ public class ImportServer implements Serializable, Validatable {
 			})) {
 				String repoName = repoNode.get("name").asText();
 				String ownerName = repoNode.get("owner").get("login").asText();
-				repositories.add(ownerName + "/" + repoName);
+				if (includeForks || !repoNode.get("fork").asBoolean())
+					repositories.add(ownerName + "/" + repoName);
 			}					
 			Collections.sort(repositories);
 			return repositories;

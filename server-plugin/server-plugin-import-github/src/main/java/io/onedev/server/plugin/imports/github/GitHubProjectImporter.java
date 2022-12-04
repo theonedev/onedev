@@ -61,7 +61,8 @@ public class GitHubProjectImporter implements ProjectImporter {
 		protected ImportRepositories newSetting() {
 			ImportRepositories repositories = new ImportRepositories();
 			String organization = organizationStep.getSetting().getOrganization();
-			for (String repository: serverStep.getSetting().listRepositories(organization)) {
+			for (String repository: serverStep.getSetting().listRepositories(
+					organization, organizationStep.getSetting().isIncludeForks())) {
 				ProjectMapping projectMapping = new ProjectMapping();
 				projectMapping.setGitHubRepo(repository);
 				projectMapping.setOneDevProject(repository);
