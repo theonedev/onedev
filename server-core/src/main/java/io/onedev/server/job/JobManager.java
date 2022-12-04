@@ -24,8 +24,10 @@ public interface JobManager {
 	
 	void unschedule(Project project);
 	
+	@Nullable
 	Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, String pipeline, SubmitReason reason);
+			Map<String, List<String>> paramMap, String pipeline, 
+			SubmitReason reason);
 	
 	void resubmit(Build build, String reason);
 	

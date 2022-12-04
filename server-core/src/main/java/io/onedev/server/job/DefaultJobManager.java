@@ -100,6 +100,7 @@ import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
@@ -119,6 +120,7 @@ import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.job.authorization.JobAuthorization;
@@ -183,6 +185,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final BuildManager buildManager;
 	
+	private final PullRequestManager pullRequestManager;
+	
 	private final ListenerRegistry listenerRegistry;
 	
 	private final TransactionManager transactionManager;
@@ -213,6 +217,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final ResourceAllocator resourceAllocator;
 	
+	private final GitService gitService;
+	
 	private volatile Thread thread;
 	
 	private volatile Map<String, JobContext> jobContexts;
@@ -227,7 +233,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
 			ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler, AgentManager agentManager, 
 			ClusterManager clusterManager, CodeIndexManager codeIndexManager, StorageManager storageManager,
-			ResourceAllocator resourceAllocator) {
+			ResourceAllocator resourceAllocator, PullRequestManager pullRequestManager, GitService gitService) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -245,6 +251,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.clusterManager = clusterManager;
 		this.resourceAllocator = resourceAllocator;
 		this.storageManager = storageManager;
+		this.pullRequestManager = pullRequestManager;
+		this.gitService = gitService;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -420,6 +428,31 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 				buildManager.create(build);
 				buildSubmitted(build);
+
+				Long buildId = build.getId();
+				Long projectId = project.getId();
+				Long pullRequestId = PullRequest.idOf(reason.getPullRequest());
+				sessionManager.runAsyncAfterCommit(new Runnable() {
+
+					@Override
+					public void run() {
+						SecurityUtils.bindAsSystem();
+						Project project = projectManager.load(projectId);
+						PullRequest pullRequest;
+						if (pullRequestId != null)
+							pullRequest = pullRequestManager.load(pullRequestId);
+						else
+							pullRequest = null;
+						for (Build unfinished: buildManager.queryUnfinished(project, jobName, reason.getRefName(), 
+								Optional.ofNullable(pullRequest), paramMapToQuery)) {
+							if (unfinished.getId() < buildId 
+									&& gitService.isMergedInto(project, null, unfinished.getCommitId(), commitId)) { 
+								cancel(unfinished);
+							}
+						}
+					}
+					
+				});
 				
 				return build;
 			} else {
