@@ -9,11 +9,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.NotEmpty;
+
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import javax.validation.constraints.NotEmpty;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -158,21 +160,48 @@ public class PullRepository extends SyncRepository {
 			}).checkReturnCode();
 			
 			if (defaultBranch == null) {
-				if (targetProject.getObjectId("refs/heads/master", false) != null) {
-					targetProject.setDefaultBranch("master");
-				} else if (targetProject.getObjectId("refs/heads/main", false) != null) {
-					targetProject.setDefaultBranch("main");
+				logger.log("Determining remote head branch...");
+				
+				git.clearArgs();
+				git.addArgs("remote", "show", remoteUrl);
+				
+				AtomicReference<String> headBranch = new AtomicReference<>(null);
+				git.execute(new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.log(line);
+						if (line.trim().startsWith("HEAD branch:"))
+							headBranch.set(line.trim().substring("HEAD branch:".length()).trim());
+					}
+					
+				}, new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.warning(line);
+					}
+					
+				}).checkReturnCode();
+
+				if (headBranch.get() != null) {
+					if (targetProject.getObjectId(Constants.R_HEADS + headBranch.get(), false) == null) {
+						logger.log("Remote head branch not synced, using first branch as default");
+						headBranch.set(null);
+					}
 				} else {
+					logger.log("Remote head branch not found, using first branch as default");
+				}
+				if (headBranch.get() == null) {
 					git.clearArgs();
 					git.addArgs("branch");
 					
-					AtomicReference<String> firstBranch = new AtomicReference<>(null);
 					git.execute(new LineConsumer() {
 
 						@Override
 						public void consume(String line) {
-							if (firstBranch.get() == null)
-								firstBranch.set(StringUtils.stripStart(line.trim(), "*"));
+							if (headBranch.get() == null)
+								headBranch.set(StringUtils.stripStart(line.trim(), "*").trim());
 						}
 						
 					}, new LineConsumer() {
@@ -183,10 +212,9 @@ public class PullRepository extends SyncRepository {
 						}
 						
 					}).checkReturnCode();
-					
-					if (firstBranch.get() != null)
-						targetProject.setDefaultBranch(firstBranch.get());
 				}
+				if (headBranch.get() != null)
+					targetProject.setDefaultBranch(headBranch.get());
 			}
 		} finally {
 			Map<String, ObjectId> newCommitIds = getCommitIds(targetProject);
