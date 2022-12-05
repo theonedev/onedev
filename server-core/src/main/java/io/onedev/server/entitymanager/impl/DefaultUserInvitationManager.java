@@ -57,7 +57,7 @@ public class DefaultUserInvitationManager extends BaseEntityManager<UserInvitati
 		
 		String serverUrl = settingManager.getSystemSetting().getServerUrl();
 		
-		String setupAccountUrl = String.format("%s/create-user-from-invitation/%d/%s", 
+		String setupAccountUrl = String.format("%s/~create-user-from-invitation/%d/%s", 
 				serverUrl, invitation.getId(), invitation.getInvitationCode());
 		String htmlBody = String.format("Hello,"
 			+ "<p style='margin: 16px 0;'>"

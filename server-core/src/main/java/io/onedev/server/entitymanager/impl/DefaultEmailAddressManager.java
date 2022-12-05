@@ -220,7 +220,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 		
 		String serverUrl = settingManager.getSystemSetting().getServerUrl();
 		
-		String verificationUrl = String.format("%s/verify-email-address/%d/%s", 
+		String verificationUrl = String.format("%s/~verify-email-address/%d/%s", 
 				serverUrl, emailAddress.getId(), emailAddress.getVerificationCode());
 		String htmlBody = String.format("Hello,"
 			+ "<p style='margin: 16px 0;'>"
