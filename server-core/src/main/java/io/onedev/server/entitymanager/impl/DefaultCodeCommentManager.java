@@ -222,7 +222,11 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 								new BlobIdent(historyCommit.name(), pathEntry.getKey(), FileMode.REGULAR_FILE.getBits()), 
 								WhitespaceOption.DEFAULT, false);
 						if (oldLines != null) {
-							Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
+							Map<Integer, Integer> lineMapping;
+							if (oldLines.size() + newLines.size() <= DiffUtils.MAX_DIFF_SIZE)
+								lineMapping = DiffUtils.mapLines(oldLines, newLines);
+							else
+								lineMapping = new HashMap<>();
 							for (CodeComment comment: pathEntry.getValue()) {
 								PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
 								if (newRange != null) 

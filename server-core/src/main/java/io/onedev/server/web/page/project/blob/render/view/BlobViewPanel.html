@@ -5,6 +5,8 @@
 				<wicket:enclosure child="lines">
 				<span wicket:id="lines"></span>
 				<span class="text-muted">|</span>
+				</wicket:enclosure>
+				<wicket:enclosure child="charset">
 				<span wicket:id="charset"></span>
 				<span class="text-muted">|</span>
 				</wicket:enclosure>
@@ -36,6 +38,7 @@
 				<div wicket:id="formats" class="formats d-none d-sm-block"></div>
 			</div>
 		</div>
+		<div wicket:id="fileTooLarge" class="alert alert-light-warning flex-shrink-0 mb-0 px-3 py-2"></div>
 		<div class="body autofit flex-grow-1 d-flex flex-column">
 			<wicket:child></wicket:child>
 		</div>

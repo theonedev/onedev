@@ -765,14 +765,20 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			if (blobContent == null) {
 				if (getMode() == Mode.ADD 
 						|| getMode() == Mode.EDIT 
-								&& getProject().getBlob(getBlobIdent(), true).getText() != null) {
+								&& getProject().getBlob(getBlobIdent(), true).getText() != null
+								&& !getProject().getBlob(getBlobIdent(), true).isPartial()) {
 					blobContent = new SourceEditPanel(BLOB_CONTENT_ID, this);
 				} else if ((getMode() == Mode.VIEW || getMode() == Mode.BLAME) 
 						&& getBlobIdent().isFile() 
 						&& getProject().getBlob(getBlobIdent(), true).getText() != null) {
 					blobContent = new SourceViewPanel(BLOB_CONTENT_ID, this, false);
 				} else {
-					Fragment fragment = new Fragment(BLOB_CONTENT_ID, "binaryFileFrag", this);
+					Fragment fragment = new Fragment(BLOB_CONTENT_ID, "binaryOrLargeFileFrag", this);
+					
+					if (getProject().getBlob(getBlobIdent(), true).getText() == null)
+						fragment.add(new Label("message", "Binary file"));
+					else
+						fragment.add(new Label("message", "File is too large"));
 					
 					long size = getProject().getBlob(getBlobIdent(), true).getSize();
 					fragment.add(new Label("size", FileUtils.byteCountToDisplaySize(size)));

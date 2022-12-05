@@ -27,7 +27,7 @@
 			<div wicket:id="content" class="flex-grow-1 d-flex flex-column overflow-hidden"></div>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="binaryFileFrag">
+	<wicket:fragment wicket:id="binaryOrLargeFileFrag">
 		<div class="border-bottom d-flex align-items-center px-3 py-2 justify-content-between">
 			<span wicket:id="size"></span>
 			<span>
@@ -37,9 +37,7 @@
 				</span>
 			</span>
 		</div>	
-		<div class="alert alert-notice alert-light-warning m-4">
-			Binary file
-		</div>
+		<div wicket:id="message" class="alert alert-notice alert-light-warning m-4"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="lfsObjectMissingFrag">
 	<div class="alert alert-notice alert-light-warning m-4">

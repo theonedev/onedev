@@ -34,3 +34,8 @@
 .blob-view>.head>.tools>.options>:last-child {
 	margin-right: 0;
 }
+
+.blob-view>.alert {
+	border: none !important;
+	border-radius: 0 !important;
+}

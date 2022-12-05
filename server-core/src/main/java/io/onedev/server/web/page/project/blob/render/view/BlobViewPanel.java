@@ -74,6 +74,7 @@ public abstract class BlobViewPanel extends Panel {
 			String path = context.getBlobIdent().path;
 			boolean reviewRequired = project.isReviewRequiredForModification(user, revision, path);
 			boolean buildRequired = project.isBuildRequiredForModification(user, revision, path);
+			boolean fileTooLarge = context.getProject().getBlob(context.getBlobIdent(), true).isPartial();
 			boolean signatureRequiredButNoSigningKey = project.isCommitSignatureRequiredButNoSigningKey(user, revision);
 
 			WebMarkupContainer edit = new WebMarkupContainer("edit");
@@ -86,7 +87,9 @@ public abstract class BlobViewPanel extends Panel {
 					title = "Build required for this change. Submit pull request instead";
 				else if (signatureRequiredButNoSigningKey)
 					title = "Signature required for this change, please generate system GPG signing key first";
-				else 
+				else if (fileTooLarge)
+					title = "File is too large to edit here";
+				else
 					title = "Edit on branch " + context.getBlobIdent().revision;
 				
 				edit.add(AttributeAppender.append("title", title));
@@ -105,7 +108,7 @@ public abstract class BlobViewPanel extends Panel {
 					}
 					
 				};
-				if (reviewRequired || buildRequired) {
+				if (reviewRequired || buildRequired || fileTooLarge) {
 					link.add(AttributeAppender.append("class", "disabled"));
 					link.setEnabled(false);
 				}
@@ -190,7 +193,7 @@ public abstract class BlobViewPanel extends Panel {
 				super.onConfigure();
 				
 				Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
-				setVisible(blob.getLfsPointer() == null && blob.getText() != null);
+				setVisible(!blob.isPartial() && blob.getLfsPointer() == null && blob.getText() != null);
 			}
 			
 		});
@@ -283,6 +286,24 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(newExtraOptions("extraOptions"));
 		newChangeActions(null);
+		
+		add(new Label("fileTooLarge", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return "Displaying first " + context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines().size() 
+						+ " lines as file is too large";
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(context.getProject().getBlob(context.getBlobIdent(), true).isPartial());
+			}
+			
+		});
 		
 		setOutputMarkupId(true);
 	}

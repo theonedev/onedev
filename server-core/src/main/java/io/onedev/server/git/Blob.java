@@ -121,15 +121,11 @@ public class Blob implements Serializable {
  			if (ident.isGitLink() || ident.isSymbolLink() || ident.isTree()) {
  				Charset charset = StandardCharsets.UTF_8;
  				text = Optional.of(new Text(charset, new String(bytes, charset)));
- 			} else if (!isPartial()) {
-				if (!ContentDetector.isBinary(bytes, ident.path)) {
-					Charset charset = ContentDetector.detectCharset(bytes);
-					if (charset == null)
-						charset = Charset.defaultCharset();
-					text = Optional.of(new Text(charset, new String(bytes, charset)));
-				} else {
-					text = Optional.absent();
-				}
+ 			} else if (!ContentDetector.isBinary(bytes, ident.path)) {
+				Charset charset = ContentDetector.detectCharset(bytes);
+				if (charset == null)
+					charset = Charset.defaultCharset();
+				text = Optional.of(new Text(charset, new String(bytes, charset)));
 			} else {
 				text = Optional.absent();
 			}
