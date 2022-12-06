@@ -64,7 +64,7 @@ public abstract class CommandPalettePanel extends Panel {
 			+ "~reset-password/** ~signup/** ~logout/** ~login/** ~loading/** ~init/** ~help/** ~builds/** issues/** "
 			+ "~pulls/** **/invalid **/${issue}/** -**/${issue} **/${request}/** -**/${request} "
 			+ "**/${build}/** -**/${build} **/${milestone}/** -**/${milestone} **/${agent}/** -**/${agent} "
-			+ "**/${group}/** -**/${group}");
+			+ "**/${group}/** -**/${group} projects/**");
 	
 	static {
 		for (IRequestMapper mapper: OneDev.getInstance(WebApplication.class).getRequestMappers())
