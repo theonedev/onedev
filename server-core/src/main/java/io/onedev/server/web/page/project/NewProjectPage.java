@@ -77,7 +77,7 @@ public class NewProjectPage extends LayoutPage {
 					String projectPath = editProject.getName();
 					if (parentBean.getParentPath() != null)
 						projectPath = parentBean.getParentPath() + "/" + projectPath;
-					Project newProject = getProjectManager().initialize(projectPath);
+					Project newProject = getProjectManager().prepareToCreate(projectPath);
 					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named("name")),
 								"This name has already been used by another project");

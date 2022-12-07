@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.sshd.common.channel.ChannelOutputStream;
 import org.apache.sshd.server.Environment;
@@ -23,6 +24,8 @@ import org.apache.sshd.server.session.ServerSessionAware;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.ExecutionResult;
@@ -82,6 +85,8 @@ class SshCommand implements Command, ServerSessionAware {
 		SshAuthenticator authenticator = OneDev.getInstance(SshAuthenticator.class);
 		ThreadContext.bind(SecurityUtils.asSubject(authenticator.getPublicKeyOwnerId(session)));
 		
+		boolean clusterAccess = SecurityUtils.getUserId().equals(User.SYSTEM_ID);		
+		
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 
 		String tempStr = StringUtils.substringAfter(commandString, "'/");   
@@ -92,19 +97,33 @@ class SshCommand implements Command, ServerSessionAware {
 			projectFacade = projectManager.findFacadeByPath(projectPath);
 		}
         if (projectFacade == null) {
-            onExit(-1, "Unable to find project '" + projectPath + "'");
-            return;
+        	if (clusterAccess || upload) {
+	            onExit(-1, "Unable to find project '" + projectPath + "'");
+	            return;
+        	} else {
+        		try {
+					Project project = projectManager.prepareToCreate(projectPath);
+					Preconditions.checkState(project.isNew());
+					projectManager.create(project);
+					projectFacade = project.getFacade();
+        		} catch (UnauthorizedException e) {
+        			if (e.getMessage() != null)
+        				onExit(-1, e.getMessage());
+        			else
+        				onExit(-1, "Permission denied");
+    	            return;
+        		}
+        	}
         } 
 		
 		ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
 		
 		UUID storageServerUUID = projectManager.getStorageServerUUID(projectFacade.getId(), true);
-		if (SecurityUtils.getUserId().equals(User.SYSTEM_ID) 
-				|| storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+		if (clusterAccess || storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
 	        File gitDir = OneDev.getInstance(StorageManager.class).getProjectGitDir(projectFacade.getId());
 	        Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectFacade.getId(), SecurityUtils.getUserId());
 
-	        if (!SecurityUtils.getUserId().equals(User.SYSTEM_ID)) {
+	        if (!clusterAccess) {
 		        SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
 		        sessionManager.openSession(); 
 		        try {

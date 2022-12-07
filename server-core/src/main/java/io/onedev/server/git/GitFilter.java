@@ -40,6 +40,8 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
@@ -103,17 +105,26 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Long getProjectId(String projectInfo) throws IOException {
+	private Long getProjectId(String projectInfo, boolean clusterAccess, boolean upload) throws IOException {
 		String projectPath = StringUtils.strip(projectInfo, "/");
 
-		ProjectFacade project = projectManager.findFacadeByPath(projectPath);
-		if (project == null && projectPath.startsWith("projects/")) {
+		ProjectFacade facade = projectManager.findFacadeByPath(projectPath);
+		if (facade == null && projectPath.startsWith("projects/")) {
 			projectPath = projectPath.substring("projects/".length());
-			project = projectManager.findFacadeByPath(projectPath);
+			facade = projectManager.findFacadeByPath(projectPath);
 		}
-		if (project == null) 
-			throw new GitException(String.format("Unable to find project '%s'", projectPath));
-		return project.getId();
+		
+		if (facade == null) {
+			if (clusterAccess || upload) { 
+				throw new GitException(String.format("Unable to find project '%s'", projectPath));
+			} else {
+				Project project = projectManager.prepareToCreate(projectPath);
+				Preconditions.checkState(project.isNew());
+				projectManager.create(project);
+				facade = project.getFacade();
+			}
+		}
+		return facade.getId();
 	}
 	
 	private void doNotCache(HttpServletResponse response) {
@@ -125,13 +136,16 @@ public class GitFilter implements Filter {
 	protected void processPack(final HttpServletRequest request, final HttpServletResponse response) 
 			throws ServletException, IOException, InterruptedException, ExecutionException {
 		Long userId = SecurityUtils.getUserId();
+		boolean clusterAccess = userId.equals(User.SYSTEM_ID);
+		
+		boolean upload = GitSmartHttpTools.isUploadPack(request);
 		
 		String pathInfo = getPathInfo(request);
 		
 		String service = StringUtils.substringAfterLast(pathInfo, "/");
 
 		String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Long projectId = getProjectId(projectInfo);
+		Long projectId = getProjectId(projectInfo, clusterAccess, upload);
 		
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
@@ -155,18 +169,15 @@ public class GitFilter implements Filter {
 		
 		String protocol = request.getHeader("Git-Protocol");		
 		
-		if (!userId.equals(User.SYSTEM_ID)) {
-			boolean upload;
+		if (!clusterAccess) {
 			sessionManager.openSession();
 			try {
 				Project project = projectManager.load(projectId);
-				if (GitSmartHttpTools.isUploadPack(request)) {
+				if (upload) {
 					checkPullPermission(request, project);
-					upload = true;
 				} else {
 					if (!SecurityUtils.canWriteCode(project))
 						throw new UnauthorizedException("You do not have permission to push to this project.");
-					upload = false;
 				}			
 			} finally {
 				sessionManager.closeSession();
@@ -246,7 +257,7 @@ public class GitFilter implements Filter {
 			}
 		} else {
 			File gitDir = storageManager.getProjectGitDir(projectId);
-			if (GitSmartHttpTools.isUploadPack(request)) { 
+			if (upload) { 
 				// Run immediately if accessed with cluster credential to avoid 
 				// possible deadlock as caller itself might also hold some 
 				// resources (db connections, work executors etc) 
@@ -284,35 +295,34 @@ public class GitFilter implements Filter {
 	
 	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Long userId = SecurityUtils.getUserId();
+		boolean clusterAccess = userId.equals(User.SYSTEM_ID);
+		
+		String service = request.getParameter("service");
+		boolean upload = service.contains("upload");
 		
 		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
 		String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Long projectId = getProjectId(projectInfo);
-		String service = request.getParameter("service");
+		Long projectId = getProjectId(projectInfo, clusterAccess, upload);
 		
-		boolean upload;
-		if (!userId.equals(User.SYSTEM_ID)) {
+		if (!clusterAccess) {
 			sessionManager.openSession();
 			try {
 				Project project = projectManager.load(projectId);
-				if (service.contains("upload")) {
+				if (upload) {
 					checkPullPermission(request, project);
 					writeInitial(response, service);
-					upload = true;
 				} else {
 					if (!SecurityUtils.canWriteCode(project))
 						throw new UnauthorizedException("You do not have permission to push to this project.");
 					writeInitial(response, service);
-					upload = false;
 				}
 			} finally {
 				sessionManager.closeSession();
 			}
 		} else { // cluster access, avoid accessing database
 			writeInitial(response, service);
-			upload = service.contains("upload");
 		}
 		
 		OutputStream output = new OutputStreamWrapper(response.getOutputStream()) {
