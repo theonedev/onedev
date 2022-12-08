@@ -97,7 +97,7 @@ public class ImportServer implements Serializable, Validatable {
 			if (projectPath == null)
 				throw new ExplicitException("Invalid url: " + getUrl());
 			
-			Project project = getProjectManager().prepareToCreate(projectPath);
+			Project project = getProjectManager().setup(projectPath);
 			Preconditions.checkState(project.isNew());				
 			
 			URIBuilder builder = new URIBuilder(getUrl());
@@ -153,7 +153,7 @@ public class ImportServer implements Serializable, Validatable {
 		if (getProject() != null) {
 			String errorMessage = null;
 			try {
-				Project project = getProjectManager().prepareToCreate(getProject());
+				Project project = getProjectManager().setup(getProject());
 				if (!project.isNew()) 
 					errorMessage = "Project already exists";
 			} catch (UnauthorizedException e) {

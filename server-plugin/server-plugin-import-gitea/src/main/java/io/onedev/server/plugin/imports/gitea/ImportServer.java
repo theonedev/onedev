@@ -496,7 +496,7 @@ public class ImportServer implements Serializable, Validatable {
 				String apiEndpoint = getApiEndpoint("/repos/" + projectMapping.getGiteaRepo());
 				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.prepareToCreate(projectMapping.getOneDevProject());
+				Project project = projectManager.setup(projectMapping.getOneDevProject());
 				Preconditions.checkState(project.isNew());
 				project.setDescription(repoNode.get("description").asText(null));
 				project.setIssueManagement(repoNode.get("has_issues").asBoolean());

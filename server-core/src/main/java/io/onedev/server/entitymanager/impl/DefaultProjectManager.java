@@ -448,7 +448,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     @Sessional
     @Override
-    public Project prepareToCreate(String path) {
+    public Project setup(String path) {
     	List<String> names = Splitter.on("/").omitEmptyStrings().trimResults().splitToList(path);
     	Project project = null;
     	for (String name: names) { 

@@ -95,7 +95,7 @@ public abstract class ForkOptionPanel extends Panel {
 					String projectPath = editProject.getName();
 					if (parentBean.getParentPath() != null)
 						projectPath = parentBean.getParentPath() + "/" + projectPath;
-					Project newProject = getProjectManager().prepareToCreate(projectPath);
+					Project newProject = getProjectManager().setup(projectPath);
 					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named("name")),
 								"This name has already been used by another project");

@@ -102,7 +102,7 @@ class SshCommand implements Command, ServerSessionAware {
 	            return;
         	} else {
         		try {
-					Project project = projectManager.prepareToCreate(projectPath);
+					Project project = projectManager.setup(projectPath);
 					Preconditions.checkState(project.isNew());
 					projectManager.create(project);
 					projectFacade = project.getFacade();

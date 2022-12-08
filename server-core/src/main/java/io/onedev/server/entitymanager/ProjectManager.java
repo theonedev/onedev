@@ -37,7 +37,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	@Nullable
 	Project findByServiceDeskName(String serviceDeskName);
 	
-	Project prepareToCreate(String path);
+	Project setup(String path);
 	
 	@Nullable
 	Project find(@Nullable Project parent, String name);

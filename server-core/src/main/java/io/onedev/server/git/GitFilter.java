@@ -118,7 +118,7 @@ public class GitFilter implements Filter {
 			if (clusterAccess || upload) { 
 				throw new GitException(String.format("Unable to find project '%s'", projectPath));
 			} else {
-				Project project = projectManager.prepareToCreate(projectPath);
+				Project project = projectManager.setup(projectPath);
 				Preconditions.checkState(project.isNew());
 				projectManager.create(project);
 				facade = project.getFacade();

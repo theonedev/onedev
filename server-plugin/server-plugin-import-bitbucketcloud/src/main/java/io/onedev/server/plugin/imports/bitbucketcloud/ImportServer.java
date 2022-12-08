@@ -186,7 +186,7 @@ public class ImportServer implements Serializable, Validatable {
 				String apiEndpoint = getApiEndpoint("/repositories/" + projectMapping.getBitbucketRepo());
 				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);                               
-				Project project = projectManager.prepareToCreate(projectMapping.getOneDevProject());
+				Project project = projectManager.setup(projectMapping.getOneDevProject());
 				Preconditions.checkState(project.isNew());				
 				
 				project.setDescription(repoNode.get("description").asText(null));

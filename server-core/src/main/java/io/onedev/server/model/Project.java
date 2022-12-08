@@ -1308,6 +1308,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return null;
 	}
 	
+	@Nullable
+	public Milestone getMilestone(String milestoneName) {
+		for (Milestone milestone: getMilestones()) {
+			if (milestone.getName().equals(milestoneName))
+				return milestone;
+		}
+		return null;
+	}
+	
 	public boolean isCommitOnBranches(@Nullable ObjectId commitId, String branches) {
 		Matcher matcher = new PathMatcher();
 		if (commitId != null) {

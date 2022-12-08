@@ -45,7 +45,7 @@ public class ImportProjects implements Serializable, Validatable {
 		for (int i=0; i<projectMappings.size(); i++) {
 			String errorMessage = null;
 			try {
-				Project project = projectManager.prepareToCreate(projectMappings.get(i).getOneDevProject());
+				Project project = projectManager.setup(projectMappings.get(i).getOneDevProject());
 				if (!project.isNew()) 
 					errorMessage = "Project already exists";
 			} catch (UnauthorizedException e) {

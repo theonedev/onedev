@@ -277,7 +277,7 @@ public class ImportServer implements Serializable, Validatable {
 				String apiEndpoint = getApiEndpoint("/projects/" + projectMapping.getGitLabProject().replace("/", "%2F"));
 				JsonNode projectNode = JerseyUtils.get(client, apiEndpoint, logger);
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.prepareToCreate(projectMapping.getOneDevProject());
+				Project project = projectManager.setup(projectMapping.getOneDevProject());
 				Preconditions.checkState(project.isNew());
 				project.setDescription(projectNode.get("description").asText(null));
 				project.setIssueManagement(projectNode.get("issues_enabled").asBoolean());

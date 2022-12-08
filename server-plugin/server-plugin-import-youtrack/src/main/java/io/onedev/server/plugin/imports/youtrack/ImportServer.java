@@ -1095,7 +1095,7 @@ public class ImportServer implements Serializable, Validatable {
 					throw new ExplicitException("Unable to find YouTrack project: " + projectMapping.getYouTrackProject());
 				
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.prepareToCreate(projectMapping.getOneDevProject());
+				Project project = projectManager.setup(projectMapping.getOneDevProject());
 				Preconditions.checkState(project.isNew());
 				project.setDescription(youTrackProjectDescriptions.get(projectMapping.getYouTrackProject()));
 				project.setIssueManagement(true);

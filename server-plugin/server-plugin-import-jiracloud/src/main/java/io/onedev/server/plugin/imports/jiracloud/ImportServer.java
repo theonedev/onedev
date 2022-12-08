@@ -354,7 +354,7 @@ public class ImportServer implements Serializable, Validatable {
 				projectNode = JerseyUtils.get(client, apiEndpoint, logger);
 				
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.prepareToCreate(projectMapping.getOneDevProject());
+				Project project = projectManager.setup(projectMapping.getOneDevProject());
 				Preconditions.checkState(project.isNew());
 				
 				project.setDescription(projectNode.get("description").asText(null));

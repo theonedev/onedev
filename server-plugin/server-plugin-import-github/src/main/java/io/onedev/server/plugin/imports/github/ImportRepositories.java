@@ -12,6 +12,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -43,9 +44,9 @@ public class ImportRepositories implements Serializable, Validatable {
 		for (int i=0; i<projectMappings.size(); i++) {
 			String errorMessage = null;
 			try {
-				Project project = projectManager.prepareToCreate(projectMappings.get(i).getOneDevProject());
-				if (!project.isNew()) 
-					errorMessage = "Project already exists";
+				Project project = projectManager.setup(projectMappings.get(i).getOneDevProject());
+				if (!project.isNew() && !SecurityUtils.canManage(project))
+					throw new UnauthorizedException("Project management permission is required");
 			} catch (UnauthorizedException e) {
 				errorMessage = e.getMessage();
 			}

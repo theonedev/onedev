@@ -31,8 +31,7 @@ public class ProjectMapping implements Serializable {
 		this.gitHubRepo = gitHubRepo;
 	}
 
-	@Editable(order=200, name="OneDev Project", description="Specify OneDev project to be created as "
-			+ "result of importing")
+	@Editable(order=200, name="OneDev Project", description="Specify OneDev project to import into")
 	@ProjectPath
 	@NotEmpty
 	public String getOneDevProject() {

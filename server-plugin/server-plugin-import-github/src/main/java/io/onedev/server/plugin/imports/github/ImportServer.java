@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -26,14 +27,12 @@ import javax.ws.rs.core.Response;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import javax.validation.constraints.NotEmpty;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Preconditions;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.bootstrap.SensitiveMasker;
@@ -540,40 +539,45 @@ public class ImportServer implements Serializable, Validatable {
 			Map<String, Optional<User>> users = new HashMap<>();
 			ImportResult result = new ImportResult();
 			for (ProjectMapping projectMapping: repositories.getProjectMappings()) {
-				logger.log("Cloning code from repository " + projectMapping.getGitHubRepo() + "...");
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
+				Project project = projectManager.setup(projectMapping.getOneDevProject());
 				
 				String apiEndpoint = getApiEndpoint("/repos/" + projectMapping.getGitHubRepo());
 				JsonNode repoNode = get(client, apiEndpoint, logger);
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.prepareToCreate(projectMapping.getOneDevProject());
-				Preconditions.checkState(project.isNew());
-				project.setDescription(repoNode.get("description").asText(null));
-				project.setIssueManagement(repoNode.get("has_issues").asBoolean());
 				
-				boolean isPrivate = repoNode.get("private").asBoolean();
-				if (!isPrivate && option.getPublicRole() != null)
-					project.setDefaultRole(option.getPublicRole());
-				
-				URIBuilder builder = new URIBuilder(repoNode.get("clone_url").asText());
-				builder.setUserInfo("git", getAccessToken());
-				
-				SensitiveMasker.push(new SensitiveMasker() {
+				if (project.isNew()) {
+					project.setDescription(repoNode.get("description").asText(null));
+					project.setIssueManagement(repoNode.get("has_issues").asBoolean());
+					boolean isPrivate = repoNode.get("private").asBoolean();
+					if (!isPrivate && option.getPublicRole() != null)
+						project.setDefaultRole(option.getPublicRole());
+				}
 
-					@Override
-					public String mask(String text) {
-						return StringUtils.replace(text, getAccessToken(), "******");
-					}
+				if (project.isNew() || project.getDefaultBranch() == null) {
+					logger.log("Cloning code from repository " + projectMapping.getGitHubRepo() + "...");
+					URIBuilder builder = new URIBuilder(repoNode.get("clone_url").asText());
+					builder.setUserInfo("git", getAccessToken());
 					
-				});
-				try {
-					if (dryRun) { 
-						new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
-					} else {
-						projectManager.clone(project, builder.build().toString());
-						projectIds.add(project.getId());
+					SensitiveMasker.push(new SensitiveMasker() {
+
+						@Override
+						public String mask(String text) {
+							return StringUtils.replace(text, getAccessToken(), "******");
+						}
+						
+					});
+					try {
+						if (dryRun) { 
+							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
+						} else {
+							projectManager.clone(project, builder.build().toString());
+							projectIds.add(project.getId());
+						}
+					} finally {
+						SensitiveMasker.pop();
 					}
-				} finally {
-					SensitiveMasker.pop();
+				} else {
+					logger.warning("Skipping code clone as the project already has code");
 				}
 
 				if (option.getIssueImportOption() != null) {
@@ -581,21 +585,25 @@ public class ImportServer implements Serializable, Validatable {
 					logger.log("Importing milestones from repository " + projectMapping.getGitHubRepo() + "...");
 					apiEndpoint = getApiEndpoint("/repos/" + projectMapping.getGitHubRepo() + "/milestones?state=all");
 					for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) {
-						Milestone milestone = new Milestone();
-						milestone.setName(milestoneNode.get("title").asText());
-						milestone.setDescription(milestoneNode.get("description").asText(null));
-						milestone.setProject(project);
-						String dueDateString = milestoneNode.get("due_on").asText(null);
-						if (dueDateString != null) 
-							milestone.setDueDate(ISODateTimeFormat.dateTimeNoMillis().parseDateTime(dueDateString).toDate());
-						if (milestoneNode.get("state").asText().equals("closed"))
-							milestone.setClosed(true);
-						
-						milestones.add(milestone);
-						project.getMilestones().add(milestone);
-						
-						if (!dryRun)
-							OneDev.getInstance(MilestoneManager.class).save(milestone);
+						String milestoneName = milestoneNode.get("title").asText();
+						Milestone milestone = project.getMilestone(milestoneName);
+						if (milestone == null) {
+							milestone = new Milestone();
+							milestone.setName(milestoneName);
+							milestone.setDescription(milestoneNode.get("description").asText(null));
+							milestone.setProject(project);
+							String dueDateString = milestoneNode.get("due_on").asText(null);
+							if (dueDateString != null) 
+								milestone.setDueDate(ISODateTimeFormat.dateTimeNoMillis().parseDateTime(dueDateString).toDate());
+							if (milestoneNode.get("state").asText().equals("closed"))
+								milestone.setClosed(true);
+							
+							milestones.add(milestone);
+							project.getMilestones().add(milestone);
+							
+							if (!dryRun)
+								OneDev.getInstance(MilestoneManager.class).save(milestone);
+						}
 					}
 					
 					logger.log("Importing issues from repository " + projectMapping.getGitHubRepo() + "...");
