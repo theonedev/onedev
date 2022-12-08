@@ -16,7 +16,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
@@ -89,7 +88,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 
 							@Override
 							public String call() throws Exception {
-								return doImport(false, logger);
+								return importer.doImport(getProject(), true, false, logger);
 							}
 							
 						});
@@ -116,7 +115,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 
 							@Override
 							public String call() throws Exception {
-								return doImport(true, logger);
+								return importer.doImport(getProject(), true, true, logger);
 							}
 							
 						});
@@ -142,19 +141,6 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 		
 	}
 	
-	private String doImport(boolean dryRun, TaskLogger logger) {
-		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-		Project numberScope = getProject().getForkRoot();
-		try {
-			issueManager.resetNextNumber(numberScope);
-			Long nextNumber = issueManager.getNextNumber(numberScope);
-			issueManager.resetNextNumber(numberScope);
-			return importer.doImport(getProject(), nextNumber==1L, dryRun, logger);
-		} finally {
-			issueManager.resetNextNumber(numberScope);
-		}
-	}
-
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.getUser() != null;

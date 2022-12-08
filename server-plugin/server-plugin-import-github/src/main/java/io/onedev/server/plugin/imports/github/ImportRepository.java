@@ -28,6 +28,11 @@ public class ImportRepository extends ImportOrganization {
 		this.repository = repository;
 	}
 	
+	@Override
+	public boolean isIncludeForks() {
+		return super.isIncludeForks();
+	}
+
 	@SuppressWarnings("unused")
 	private static List<String> getRepositoryChoices() {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);

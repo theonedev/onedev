@@ -110,6 +110,7 @@ public abstract class ForkOptionPanel extends Panel {
 
 							@Override
 							public void run() {
+								getProjectManager().create(newProject);
 								getProjectManager().fork(getProject(), newProject);
 								OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
 							}

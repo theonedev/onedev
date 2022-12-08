@@ -509,71 +509,73 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     @Transactional
 	@Override
-	public void fork(Project from, Project to) {
-    	Project parent = to.getParent();
-    	if (parent != null && parent.isNew())
-    		create(parent);
+	public void fork(Project from, Project to) {    	
+    	Long fromId = from.getId();
+    	String fromPath = from.getPath();
+    	Long toId = to.getId();
     	
-    	ProjectUpdate update = new ProjectUpdate();
-    	update.setProject(to);
-    	updateManager.save(update);
-    	to.setUpdate(update);
-    	
-    	dao.persist(to);
-    	FileUtils.createDir(storageManager.getProjectDir(to.getId()));
-    	
-       	UserAuthorization authorization = new UserAuthorization();
-       	authorization.setProject(to);
-       	authorization.setUser(SecurityUtils.getUser());
-       	authorization.setRole(roleManager.getOwner());
-       	userAuthorizationManager.save(authorization);
-    	
-       	File toGitDir = storageManager.getProjectGitDir(to.getId());       	
-        FileUtils.cleanDir(toGitDir);
+    	runOnProjectServer(toId, new ClusterTask<Void>() {
 
-        UUID fromStorageServerUUID = getStorageServerUUID(from.getId(), true);
-        if (fromStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
-        	File fromGitDir = storageManager.getProjectGitDir(from.getId());
-	        new CloneCommand(toGitDir, fromGitDir.getAbsolutePath()).noLfs(true).mirror(true).run();
-	        storageManager.initLfsDir(to.getId());
-	        new LfsFetchAllCommand(toGitDir).run();
-        } else {
-        	CommandUtils.callWithClusterCredential(new GitTask<Void>() {
+			private static final long serialVersionUID = 1L;
 
-				@Override
-				public Void call(Commandline git) {
-					String remoteUrl = clusterManager.getServerUrl(fromStorageServerUUID) + "/" + from.getPath();
-			        new CloneCommand(toGitDir, remoteUrl) {
+			@Override
+			public Void call() throws Exception {
+		       	File toGitDir = storageManager.getProjectGitDir(toId);       	
+		        FileUtils.cleanDir(toGitDir);
+
+		        UUID fromStorageServerUUID = getStorageServerUUID(fromId, true);
+		        if (fromStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+		        	File fromGitDir = storageManager.getProjectGitDir(fromId);
+			        new CloneCommand(toGitDir, fromGitDir.getAbsolutePath()).noLfs(true).mirror(true).run();
+			        storageManager.initLfsDir(toId);
+			        new LfsFetchAllCommand(toGitDir).run();
+		        } else {
+		        	CommandUtils.callWithClusterCredential(new GitTask<Void>() {
 
 						@Override
-						protected Commandline newGit() {
-							return git;
+						public Void call(Commandline git) {
+							String remoteUrl = clusterManager.getServerUrl(fromStorageServerUUID) + "/" + fromPath;
+					        new CloneCommand(toGitDir, remoteUrl) {
+
+								@Override
+								protected Commandline newGit() {
+									return git;
+								}
+					        	
+					        }.noLfs(true).mirror(true).run();
+							return null;
 						}
-			        	
-			        }.noLfs(true).mirror(true).run();
+		        		
+		        	});
+		        	
+			        storageManager.initLfsDir(toId);
 			        
-			        storageManager.initLfsDir(to.getId());
-			        new LfsFetchAllCommand(toGitDir) {
-			        	
+		        	CommandUtils.callWithClusterCredential(new GitTask<Void>() {
+
 						@Override
-						protected Commandline newGit() {
-							return git;
+						public Void call(Commandline git) {
+					        new LfsFetchAllCommand(toGitDir) {
+					        	
+								@Override
+								protected Commandline newGit() {
+									return git;
+								}
+								
+					        }.run();
+							return null;
 						}
-						
-			        }.run();
-					return null;
-				}
-        		
-        	});
-        }
-        
-        checkGitHooksAndConfig(to.getId());
-        commitInfoManager.cloneInfo(from.getId(), to.getId());
-        avatarManager.copyProjectAvatar(from.getId(), to.getId());
-            
-       	updateStorageServer(to);
-        
-        listenerRegistry.post(new ProjectCreated(to));
+		        		
+		        	});
+		        	
+		        }
+		        
+		        checkGitHooksAndConfig(toId);
+		        commitInfoManager.cloneInfo(fromId, toId);
+		        avatarManager.copyProjectAvatar(fromId, toId);
+				return null;
+			}
+    		
+    	});
 	}
     
     private void updateStorageServer(Project project) {
@@ -585,40 +587,23 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Transactional
     @Override
     public void clone(Project project, String repositoryUrl) {
-    	Project parent = project.getParent();
-    	if (parent != null && parent.isNew())
-    		create(parent);
-    	
-    	ProjectUpdate update = new ProjectUpdate();
-    	update.setProject(project);
-    	updateManager.save(update);
-    	project.setUpdate(update);
-    	
-    	dao.persist(project);
-    	FileUtils.createDir(storageManager.getProjectDir(project.getId()));
-    	
-    	User user = SecurityUtils.getUser();
-       	UserAuthorization authorization = new UserAuthorization();
-       	authorization.setProject(project);
-       	authorization.setUser(user);
-       	authorization.setRole(roleManager.getOwner());
-       	project.getUserAuthorizations().add(authorization);
-       	user.getProjectAuthorizations().add(authorization);
-       	userAuthorizationManager.save(authorization);
-    	
-       	File gitDir = storageManager.getProjectGitDir(project.getId());
-        FileUtils.cleanDir(gitDir);
-        
-        new CloneCommand(gitDir, repositoryUrl).mirror(true).noLfs(true).run();
-        storageManager.initLfsDir(project.getId());
-        new LfsFetchAllCommand(gitDir).run();
+    	Long projectId = project.getId();
+    	runOnProjectServer(projectId, new ClusterTask<Void>() {
 
-        checkGitHooksAndConfig(project.getId());
-        
-       	updateStorageServer(project);
-        
-        listenerRegistry.post(new ProjectCreated(project));
-        
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Void call() throws Exception {
+	           	File gitDir = storageManager.getProjectGitDir(projectId);
+	            FileUtils.cleanDir(gitDir);
+	            new CloneCommand(gitDir, repositoryUrl).mirror(true).noLfs(true).run();
+	            storageManager.initLfsDir(projectId);
+	            new LfsFetchAllCommand(gitDir).run();
+				return null;
+			}
+    		
+    	});
+    	
         List<ImmutableTriple<String, ObjectId, ObjectId>> refUpdatedEventData = new ArrayList<>();
         
         for (RefFacade ref: project.getBranchRefs()) {
@@ -629,8 +614,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         	refUpdatedEventData.add(new ImmutableTriple<>(ref.getName(), 
         			ObjectId.zeroId(), ref.getPeeledObj().getId().copy()));
         }
-        
-        Long projectId = project.getId();
         
         sessionManager.runAsyncAfterCommit(new Runnable() {
 

@@ -80,7 +80,7 @@ public class GitHubIssueImporter implements IssueImporter {
 		Map<String, Optional<User>> users = new HashMap<>();
 		
 		ImportResult result = serverStep.getSetting().importIssues(repositoryStep.getSetting().getRepository(), 
-				project, retainIssueNumbers, optionStep.getSetting(), users, dryRun, logger);
+				project, optionStep.getSetting(), users, dryRun, logger);
 		return result.toHtml("Issues imported successfully");
 	}
 
