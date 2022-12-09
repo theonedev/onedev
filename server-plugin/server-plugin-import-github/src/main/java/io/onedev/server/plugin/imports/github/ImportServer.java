@@ -59,7 +59,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
@@ -280,10 +279,11 @@ public class ImportServer implements Serializable, Validatable {
 
 						Long newNumber;
 						Long oldNumber = issueNode.get("number").asLong();
-						if (dryRun || issueManager.find(oneDevProject, oldNumber) == null) 
+						if (dryRun || (issueManager.find(oneDevProject, oldNumber) == null && !issueNumberMappings.containsValue(oldNumber))) 
 							newNumber = oldNumber;
 						else
 							newNumber = issueManager.getNextNumber(oneDevProject);
+						
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
 						
@@ -536,7 +536,6 @@ public class ImportServer implements Serializable, Validatable {
 	}
 
 	String importProjects(ImportRepositories repositories, ProjectImportOption option, boolean dryRun, TaskLogger logger) {
-		Collection<Long> projectIdsToDelete = new ArrayList<>();
 		Client client = newClient();
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
@@ -570,11 +569,9 @@ public class ImportServer implements Serializable, Validatable {
 					try {
 						if (dryRun) { 
 							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
-						} else if (project.isNew()) {
-							projectManager.create(project);
-							projectManager.clone(project, builder.build().toString());
-							projectIdsToDelete.add(project.getId());
 						} else {
+							if (project.isNew()) 
+								projectManager.create(project);
 							projectManager.clone(project, builder.build().toString());
 						}
 					} finally {
@@ -585,7 +582,6 @@ public class ImportServer implements Serializable, Validatable {
 				}
 
 				if (option.getIssueImportOption() != null) {
-					List<Milestone> milestones = new ArrayList<>();
 					logger.log("Importing milestones from repository " + projectMapping.getGitHubRepo() + "...");
 					apiEndpoint = getApiEndpoint("/repos/" + projectMapping.getGitHubRepo() + "/milestones?state=all");
 					for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) {
@@ -602,7 +598,6 @@ public class ImportServer implements Serializable, Validatable {
 							if (milestoneNode.get("state").asText().equals("closed"))
 								milestone.setClosed(true);
 							
-							milestones.add(milestone);
 							project.getMilestones().add(milestone);
 							
 							if (!dryRun)
@@ -622,9 +617,7 @@ public class ImportServer implements Serializable, Validatable {
 			}
 			
 			return result.toHtml("Repositories imported successfully");
-		} catch (Exception e) {
-			for (Long projectId: projectIdsToDelete)
-				OneDev.getInstance(StorageManager.class).deleteProjectDir(projectId);
+		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		} finally {
 			client.close();

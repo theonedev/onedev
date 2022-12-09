@@ -62,6 +62,5 @@ public interface StorageManager {
      * 			will be exist after calling this method
      */
     File getBuildDir(Long projectId, Long buildNumber);
-    
-    void deleteProjectDir(Long projectId);
+
 }

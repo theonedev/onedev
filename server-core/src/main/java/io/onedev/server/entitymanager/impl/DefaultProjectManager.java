@@ -311,7 +311,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	updateManager.save(update);
     	project.setUpdate(update);
     	dao.persist(project);
-    	FileUtils.createDir(storageManager.getProjectDir(project.getId()));
+    	FileUtils.cleanDir(storageManager.getProjectDir(project.getId()));
        	checkGitDir(project.getId());
        	checkGitHooksAndConfig(project.getId());
        	UserAuthorization authorization = new UserAuthorization();

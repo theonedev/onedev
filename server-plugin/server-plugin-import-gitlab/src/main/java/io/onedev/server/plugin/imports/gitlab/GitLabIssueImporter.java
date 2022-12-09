@@ -75,13 +75,13 @@ public class GitLabIssueImporter implements IssueImporter {
 	}
 	
 	@Override
-	public String doImport(Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+	public String doImport(Project project, boolean dryRun, TaskLogger logger) {
 		ImportServer server = serverStep.getSetting();
 		String gitLabProject = projectStep.getSetting().getProject();
 		IssueImportOption option = optionStep.getSetting();
 		logger.log("Importing issues from project " + gitLabProject + "...");
 		Map<String, Optional<User>> users = new HashMap<>();
-		return server.importIssues(gitLabProject, project, retainIssueNumbers, option, users, dryRun, logger)
+		return server.importIssues(gitLabProject, project, option, users, dryRun, logger)
 				.toHtml("Issues imported successfully");
 	}
 

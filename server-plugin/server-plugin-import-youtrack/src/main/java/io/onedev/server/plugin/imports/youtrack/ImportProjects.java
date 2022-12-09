@@ -12,6 +12,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -43,21 +44,10 @@ public class ImportProjects implements Serializable, Validatable {
 		boolean isValid = true;
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 		for (int i=0; i<projectMappings.size(); i++) {
-			String errorMessage = null;
 			try {
 				Project project = projectManager.setup(projectMappings.get(i).getOneDevProject());
-				if (!project.isNew()) 
-					errorMessage = "Project already exists";
-			} catch (UnauthorizedException e) {
-				errorMessage = e.getMessage();
-			}
-			if (errorMessage != null) {
-				context.buildConstraintViolationWithTemplate(errorMessage)
-						.addPropertyNode("projectMappings")
-						.addPropertyNode(ProjectMapping.PROP_ONEDEV_PROJECT)
-						.inIterable().atIndex(i).addConstraintViolation();
-				isValid = false;
-			} else {
+				if (!project.isNew() && !SecurityUtils.canManage(project))
+					throw new UnauthorizedException("Project management permission is required");
 				for (int j=0; j<projectMappings.size(); j++) {
 					if (j != i && projectMappings.get(j).getOneDevProject().equals(projectMappings.get(i).getOneDevProject())) {
 						context.buildConstraintViolationWithTemplate("Duplicate project")
@@ -68,6 +58,12 @@ public class ImportProjects implements Serializable, Validatable {
 						break;
 					}
 				}
+			} catch (UnauthorizedException e) {
+				context.buildConstraintViolationWithTemplate(e.getMessage())
+						.addPropertyNode("projectMappings")
+						.addPropertyNode(ProjectMapping.PROP_ONEDEV_PROJECT)
+						.inIterable().atIndex(i).addConstraintViolation();
+				isValid = false;
 			}
 		}
 		

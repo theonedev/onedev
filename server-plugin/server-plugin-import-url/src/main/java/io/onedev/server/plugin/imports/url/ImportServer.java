@@ -1,15 +1,14 @@
 package io.onedev.server.plugin.imports.url;
 
 import java.io.Serializable;
+import java.net.URISyntaxException;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.authz.UnauthorizedException;
-import javax.validation.constraints.NotEmpty;
-
-import com.google.common.base.Preconditions;
 
 import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.ExplicitException;
@@ -19,7 +18,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.storage.StorageManager;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -86,11 +85,7 @@ public class ImportServer implements Serializable, Validatable {
 	}
 	
 	String importProject(boolean dryRun, TaskLogger logger) {
-		Long projectId = null;
-		
 		try {
-			logger.log("Cloning code from " + getUrl() + "...");
-
 			String projectPath = getProject();
 			if (projectPath == null)
 				projectPath = deriveProjectPath(getUrl());
@@ -98,38 +93,41 @@ public class ImportServer implements Serializable, Validatable {
 				throw new ExplicitException("Invalid url: " + getUrl());
 			
 			Project project = getProjectManager().setup(projectPath);
-			Preconditions.checkState(project.isNew());				
-			
-			URIBuilder builder = new URIBuilder(getUrl());
-			if (authentication != null)
-				builder.setUserInfo(authentication.getUserName(), authentication.getPassword());
-			
-			SensitiveMasker.push(new SensitiveMasker() {
 
-				@Override
-				public String mask(String text) {
-					if (authentication != null)
-						return StringUtils.replace(text, authentication.getPassword(), "******");
-					else
-						return text;
-				}
+			if (project.isNew() || project.getDefaultBranch() == null) {
+				logger.log("Cloning code from " + getUrl() + "...");
 				
-			});
-			try {
-				if (dryRun) {
-					new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
-				} else {
-					getProjectManager().clone(project, builder.build().toString());
-					projectId = project.getId();
+				URIBuilder builder = new URIBuilder(getUrl());
+				if (authentication != null)
+					builder.setUserInfo(authentication.getUserName(), authentication.getPassword());
+				
+				SensitiveMasker.push(new SensitiveMasker() {
+
+					@Override
+					public String mask(String text) {
+						if (authentication != null)
+							return StringUtils.replace(text, authentication.getPassword(), "******");
+						else
+							return text;
+					}
+					
+				});
+				try {
+					if (dryRun) {
+						new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
+					} else {
+						if (project.isNew())
+							getProjectManager().create(project);
+						getProjectManager().clone(project, builder.build().toString());
+					}
+				} finally {
+					SensitiveMasker.pop();
 				}
-			} finally {
-				SensitiveMasker.pop();
+				return "project imported successfully";
+			} else {
+				throw new ExplicitException("Project already has code");
 			}
-			
-			return "project imported successfully";
-		} catch (Exception e) {
-			if (projectId != null)
-				OneDev.getInstance(StorageManager.class).deleteProjectDir(projectId);
+		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		} 	
 	}	
@@ -151,16 +149,12 @@ public class ImportServer implements Serializable, Validatable {
 		}
 		
 		if (getProject() != null) {
-			String errorMessage = null;
 			try {
 				Project project = getProjectManager().setup(getProject());
-				if (!project.isNew()) 
-					errorMessage = "Project already exists";
+				if (!project.isNew() && !SecurityUtils.canManage(project))
+					throw new UnauthorizedException("Project management permission is required");
 			} catch (UnauthorizedException e) {
-				errorMessage = e.getMessage();
-			}
-			if (errorMessage != null) {
-				context.buildConstraintViolationWithTemplate(errorMessage)
+				context.buildConstraintViolationWithTemplate(e.getMessage())
 						.addPropertyNode("project").addConstraintViolation();
 				isValid = false;
 			}

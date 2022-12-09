@@ -72,12 +72,12 @@ public class YouTrackIssueImporter implements IssueImporter {
 	}
 
 	@Override
-	public String doImport(Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+	public String doImport(Project project, boolean dryRun, TaskLogger logger) {
 		ImportServer server = serverStep.getSetting();
 		String youTrackProject = projectStep.getSetting().getProject();
 		ImportOption option = optionStep.getSetting();
 		
-		return server.importIssues(project, youTrackProject, option, retainIssueNumbers, dryRun, logger);
+		return server.importIssues(project, youTrackProject, option, dryRun, logger);
 	}
 
 	@Override

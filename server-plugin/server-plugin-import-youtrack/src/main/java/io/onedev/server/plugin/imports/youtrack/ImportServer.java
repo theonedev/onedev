@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -30,16 +31,13 @@ import javax.ws.rs.core.Response;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.MetaDataKey;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import javax.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -75,11 +73,10 @@ import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
 import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
-import io.onedev.server.util.Pair;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
+import io.onedev.server.util.Pair;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -296,8 +293,9 @@ public class ImportServer implements Serializable, Validatable {
 		return option;
 	}
 	
-	private ImportResult importIssues(String youTrackProjectId, Project oneDevProject, boolean retainIssueNumbers, 
+	private ImportResult importIssues(String youTrackProjectId, Project oneDevProject,  
 			ImportOption option, boolean dryRun, TaskLogger logger) {
+		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 		Client client = newClient();
 		try {
 			String apiEndpoint = getApiEndpoint("/admin/projects/" + youTrackProjectId + "?fields=shortName");
@@ -458,12 +456,14 @@ public class ImportServer implements Serializable, Validatable {
 						
 						Issue issue = new Issue();
 						String readableId = issueNode.get("idReadable").asText();
-						Long oldNumber = issueNode.get("numberInProject").asLong();
+						
 						Long newNumber;
-						if (dryRun || retainIssueNumbers)
+						Long oldNumber = issueNode.get("numberInProject").asLong();
+						if (dryRun || (issueManager.find(oneDevProject, oldNumber) == null && !issueNumberMappings.containsValue(oldNumber))) 
 							newNumber = oldNumber;
 						else
-							newNumber = getIssueManager().getNextNumber(oneDevProject);
+							newNumber = issueManager.getNextNumber(oneDevProject);
+						
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
 						issueMappings.put(oldNumber, issue);
@@ -1007,7 +1007,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), youTrackProjectShortName + "-"));
 					
-					getIssueManager().save(issue);
+					issueManager.save(issue);
 					for (IssueSchedule schedule: issue.getSchedules())
 						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
@@ -1046,12 +1046,10 @@ public class ImportServer implements Serializable, Validatable {
 			
 			return result;
 		} finally {
+			if (!dryRun)
+				issueManager.resetNextNumber(oneDevProject);
 			client.close();
 		}
-	}
-	
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
 	}
 	
 	private GlobalIssueSetting getIssueSetting() {
@@ -1074,8 +1072,6 @@ public class ImportServer implements Serializable, Validatable {
 	String importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Map<String, String> youTrackProjectIds = new HashMap<>();
 		Map<String, String> youTrackProjectDescriptions = new HashMap<>();
-		Collection<Long> projectIds = new ArrayList<>();
-		
 		Client client = newClient();
 		try {
 			String apiEndpoint = getApiEndpoint("/admin/projects?fields=id,name,description");
@@ -1096,17 +1092,14 @@ public class ImportServer implements Serializable, Validatable {
 				
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
 				Project project = projectManager.setup(projectMapping.getOneDevProject());
-				Preconditions.checkState(project.isNew());
 				project.setDescription(youTrackProjectDescriptions.get(projectMapping.getYouTrackProject()));
 				project.setIssueManagement(true);
 				
-		       	if (!dryRun) {
+		       	if (!dryRun && project.isNew()) 
 					projectManager.create(project);
-					projectIds.add(project.getId());
-		       	}
 
 		       	ImportResult currentResult = importIssues(youTrackProjectId, project, 
-		       			true, option, dryRun, logger);
+		       			option, dryRun, logger);
 		       	result.mismatchedIssueFields.putAll(currentResult.mismatchedIssueFields);
 		       	result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 		       	result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
@@ -1117,10 +1110,6 @@ public class ImportServer implements Serializable, Validatable {
 			}		       	
 
 			return result.toHtml("Projects imported successfully");
-		} catch (Exception e) {
-			for (Long projectId: projectIds)
-				OneDev.getInstance(StorageManager.class).deleteProjectDir(projectId);
-			throw ExceptionUtils.unchecked(e);
 		} finally {
 			client.close();
 		}			
@@ -1154,7 +1143,7 @@ public class ImportServer implements Serializable, Validatable {
 	}	
 	
 	String importIssues(Project project, String youTrackProject, ImportOption option, 
-			boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+			boolean dryRun, TaskLogger logger) {
 		logger.log("Importing issues from '" + youTrackProject + "'...");
 		Client client = newClient();
 		try {
@@ -1162,7 +1151,7 @@ public class ImportServer implements Serializable, Validatable {
 			for (JsonNode projectNode: list(client, apiEndpoint, logger)) {
 				if (youTrackProject.equals(projectNode.get("name").asText())) { 
 					ImportResult result = importIssues(projectNode.get("id").asText(), 
-							project, retainIssueNumbers, option, dryRun, logger);
+							project, option, dryRun, logger);
 					return result.toHtml("Issues imported successfully");
 				}
 			}

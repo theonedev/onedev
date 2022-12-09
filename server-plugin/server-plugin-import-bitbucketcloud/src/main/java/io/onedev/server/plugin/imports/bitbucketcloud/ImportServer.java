@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -19,12 +19,10 @@ import javax.ws.rs.core.Response;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import javax.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Preconditions;
 
 import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.ExplicitException;
@@ -34,7 +32,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
@@ -110,7 +107,7 @@ public class ImportServer implements Serializable, Validatable {
 		return workspaces;
 	}
 	
-	List<String> listRepositories(String workspaceId) {
+	List<String> listRepositories(String workspaceId, boolean includeForks) {
 		Client client = newClient();
 		try {
 			List<String> repositories = new ArrayList<>();
@@ -124,7 +121,8 @@ public class ImportServer implements Serializable, Validatable {
 				}
 				
 			})) {
-				repositories.add(repoNode.get("full_name").asText());
+				if (includeForks || repoNode.get("parent") == null)
+					repositories.add(repoNode.get("full_name").asText());
 			}					
 			
 			return repositories;
@@ -176,18 +174,13 @@ public class ImportServer implements Serializable, Validatable {
 	}
 	
 	String importProjects(ImportRepositories repositories, ImportOption option, boolean dryRun, TaskLogger logger) {
-		Collection<Long> projectIds = new ArrayList<>();
-		
 		Client client = newClient();
 		try {
 			for (ProjectMapping projectMapping: repositories.getProjectMappings()) {
-				logger.log("Cloning code from repository " + projectMapping.getBitbucketRepo() + "...");
-				
 				String apiEndpoint = getApiEndpoint("/repositories/" + projectMapping.getBitbucketRepo());
 				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);                               
 				Project project = projectManager.setup(projectMapping.getOneDevProject());
-				Preconditions.checkState(project.isNew());				
 				
 				project.setDescription(repoNode.get("description").asText(null));
 				
@@ -195,43 +188,48 @@ public class ImportServer implements Serializable, Validatable {
 				if (!isPrivate && option.getPublicRole() != null)
 					project.setDefaultRole(option.getPublicRole());
 
-				String cloneUrl = null;
-				for (JsonNode cloneNode: repoNode.get("links").get("clone")) {
-					if (cloneNode.get("name").asText().equals("https")) {
-						cloneUrl = cloneNode.get("href").asText();
-						break;
-					}
-				}
-				if (cloneUrl == null)
-					throw new ExplicitException("Https clone url not found");
-				
-				URIBuilder builder = new URIBuilder(cloneUrl);
-				builder.setUserInfo(getUserName(), getAppPassword());
-				
-				SensitiveMasker.push(new SensitiveMasker() {
-
-					@Override
-					public String mask(String text) {
-						return StringUtils.replace(text, getAppPassword(), "******");
-					}
+				if (project.isNew() || project.getDefaultBranch() == null) {
+					logger.log("Cloning code from repository " + projectMapping.getBitbucketRepo() + "...");
 					
-				});
-				try {
-					if (dryRun) {
-						new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
-					} else {
-						projectManager.clone(project, builder.build().toString());
-						projectIds.add(project.getId());
+					String cloneUrl = null;
+					for (JsonNode cloneNode: repoNode.get("links").get("clone")) {
+						if (cloneNode.get("name").asText().equals("https")) {
+							cloneUrl = cloneNode.get("href").asText();
+							break;
+						}
 					}
-				} finally {
-					SensitiveMasker.pop();
+					if (cloneUrl == null)
+						throw new ExplicitException("Https clone url not found");
+					
+					URIBuilder builder = new URIBuilder(cloneUrl);
+					builder.setUserInfo(getUserName(), getAppPassword());
+					
+					SensitiveMasker.push(new SensitiveMasker() {
+
+						@Override
+						public String mask(String text) {
+							return StringUtils.replace(text, getAppPassword(), "******");
+						}
+						
+					});
+					try {
+						if (dryRun) {
+							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
+						} else {
+							if (project.isNew())
+								projectManager.create(project);
+							projectManager.clone(project, builder.build().toString());
+						}
+					} finally {
+						SensitiveMasker.pop();
+					}
+				} else {
+					logger.warning("Skipping code clone as the project already has code");
 				}
 			}
 			
 			return "Repositories imported successfully";
-		} catch (Exception e) {
-			for (Long projectId: projectIds)
-				OneDev.getInstance(StorageManager.class).deleteProjectDir(projectId);
+		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		} finally {
 			client.close();

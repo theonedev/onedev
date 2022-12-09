@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -30,14 +31,12 @@ import javax.ws.rs.core.Response;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
-import javax.validation.constraints.NotEmpty;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Preconditions;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.bootstrap.SensitiveMasker;
@@ -65,7 +64,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.DateUtils;
@@ -144,7 +142,7 @@ public class ImportServer implements Serializable, Validatable {
 		return CollectionUtils.sortByValue(groups);
 	}
 	
-	List<String> listProjects(@Nullable String groupId) {
+	List<String> listProjects(@Nullable String groupId, boolean includeForks) {
 		List<String> projects = new ArrayList<>();
 		Client client = newClient();
 		try {
@@ -162,8 +160,10 @@ public class ImportServer implements Serializable, Validatable {
 				
 			});
 			for (JsonNode projectNode: projectNodes) {
-				if (groupId != null || projectNode.get("namespace").get("kind").asText().equals("user"))
+				if ((groupId != null || projectNode.get("namespace").get("kind").asText().equals("user")) 
+						&& (includeForks || projectNode.get("forked_from_project") == null)) {
 					projects.add(projectNode.get("path_with_namespace").asText());
+				}
 			}
 		} finally {
 			client.close();
@@ -266,19 +266,15 @@ public class ImportServer implements Serializable, Validatable {
 	}
 	
 	String importProjects(ImportProjects projects, ProjectImportOption option, boolean dryRun, TaskLogger logger) {
-		Collection<Long> projectIds = new ArrayList<>();
 		Client client = newClient();
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
 			ImportResult result = new ImportResult();
 			for (ProjectMapping projectMapping: projects.getProjectMappings()) {
-				logger.log("Cloning code from project " + projectMapping.getGitLabProject() + "...");
-				
 				String apiEndpoint = getApiEndpoint("/projects/" + projectMapping.getGitLabProject().replace("/", "%2F"));
 				JsonNode projectNode = JerseyUtils.get(client, apiEndpoint, logger);
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
 				Project project = projectManager.setup(projectMapping.getOneDevProject());
-				Preconditions.checkState(project.isNew());
 				project.setDescription(projectNode.get("description").asText(null));
 				project.setIssueManagement(projectNode.get("issues_enabled").asBoolean());
 				
@@ -286,26 +282,32 @@ public class ImportServer implements Serializable, Validatable {
 				if (!visibility.equals("private") && option.getPublicRole() != null)
 					project.setDefaultRole(option.getPublicRole());
 				
-				URIBuilder builder = new URIBuilder(projectNode.get("http_url_to_repo").asText());
-				builder.setUserInfo("git", getAccessToken());
-				
-				SensitiveMasker.push(new SensitiveMasker() {
-
-					@Override
-					public String mask(String text) {
-						return StringUtils.replace(text, getAccessToken(), "******");
-					}
+				if (project.isNew() || project.getDefaultBranch() == null) {
+					logger.log("Cloning code from project " + projectMapping.getGitLabProject() + "...");
+					URIBuilder builder = new URIBuilder(projectNode.get("http_url_to_repo").asText());
+					builder.setUserInfo("git", getAccessToken());
 					
-				});
-				try {
-					if (dryRun) { 
-						new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
-					} else {
-						projectManager.clone(project, builder.build().toString());
-						projectIds.add(project.getId());
+					SensitiveMasker.push(new SensitiveMasker() {
+
+						@Override
+						public String mask(String text) {
+							return StringUtils.replace(text, getAccessToken(), "******");
+						}
+						
+					});
+					try {
+						if (dryRun) { 
+							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
+						} else {
+							if (project.isNew()) 
+								projectManager.create(project);
+							projectManager.clone(project, builder.build().toString());
+						}
+					} finally {
+						SensitiveMasker.pop();
 					}
-				} finally {
-					SensitiveMasker.pop();
+				} else {
+					logger.warning("Skipping code clone as the project already has code");
 				}
 
 				if (option.getIssueImportOption() != null) {
@@ -322,15 +324,17 @@ public class ImportServer implements Serializable, Validatable {
 					}
 
 					for (Milestone milestone: milestones) {
-						milestone.setProject(project);
-						project.getMilestones().add(milestone);
-						if (!dryRun)
-							OneDev.getInstance(MilestoneManager.class).save(milestone);
+						if (project.getMilestone(milestone.getName()) == null) {
+							milestone.setProject(project);
+							project.getMilestones().add(milestone);
+							if (!dryRun)
+								OneDev.getInstance(MilestoneManager.class).save(milestone);
+						}
 					}
 					
 					logger.log("Importing issues from project " + projectMapping.getGitLabProject() + "...");
 					ImportResult currentResult = importIssues(projectMapping.getGitLabProject(), 
-							project, true, option.getIssueImportOption(), users, dryRun, logger);
+							project, option.getIssueImportOption(), users, dryRun, logger);
 					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 					result.nonExistentMilestones.addAll(currentResult.nonExistentMilestones);
 					result.unmappedIssueLabels.addAll(currentResult.unmappedIssueLabels);
@@ -340,18 +344,16 @@ public class ImportServer implements Serializable, Validatable {
 			}
 			
 			return result.toHtml("Projects imported successfully");
-		} catch (Exception e) {
-			for (Long projectId: projectIds)
-				OneDev.getInstance(StorageManager.class).deleteProjectDir(projectId);
+		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		} finally {
 			client.close();
 		}
 	}
 	
-	ImportResult importIssues(String gitLabProject, Project oneDevProject,
-			boolean useExistingIssueNumbers, IssueImportOption option, 
+	ImportResult importIssues(String gitLabProject, Project oneDevProject, IssueImportOption option, 
 			Map<String, Optional<User>> users, boolean dryRun, TaskLogger logger) {
+		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 		Client client = newClient();
 		try {
 			Set<String> nonExistentMilestones = new HashSet<>();
@@ -444,12 +446,13 @@ public class ImportServer implements Serializable, Validatable {
 						
 						issue.setNumberScope(oneDevProject.getForkRoot());
 
-						Long oldNumber = issueNode.get("iid").asLong();
 						Long newNumber;
-						if (dryRun || useExistingIssueNumbers)
+						Long oldNumber = issueNode.get("iid").asLong();
+						if (dryRun || (issueManager.find(oneDevProject, oldNumber) == null && !issueNumberMappings.containsValue(oldNumber))) 
 							newNumber = oldNumber;
 						else
-							newNumber = OneDev.getInstance(IssueManager.class).getNextNumber(oneDevProject);
+							newNumber = issueManager.getNextNumber(oneDevProject);
+						
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
 						
@@ -674,7 +677,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), "#"));
 					
-					OneDev.getInstance(IssueManager.class).save(issue);
+					issueManager.save(issue);
 					for (IssueSchedule schedule: issue.getSchedules())
 						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
@@ -695,6 +698,8 @@ public class ImportServer implements Serializable, Validatable {
 			
 			return result;
 		} finally {
+			if (!dryRun)
+				issueManager.resetNextNumber(oneDevProject);
 			client.close();
 		}
 	}

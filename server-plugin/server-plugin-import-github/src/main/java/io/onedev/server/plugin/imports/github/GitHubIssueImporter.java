@@ -75,7 +75,7 @@ public class GitHubIssueImporter implements IssueImporter {
 	}
 	
 	@Override
-	public String doImport(Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+	public String doImport(Project project, boolean dryRun, TaskLogger logger) {
 		logger.log("Importing issues from repository " + repositoryStep.getSetting().getRepository() + "...");
 		Map<String, Optional<User>> users = new HashMap<>();
 		

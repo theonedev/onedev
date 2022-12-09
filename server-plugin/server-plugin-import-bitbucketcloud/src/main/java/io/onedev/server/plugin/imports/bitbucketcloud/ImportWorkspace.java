@@ -18,6 +18,8 @@ public class ImportWorkspace implements Serializable {
 	ImportServer server;
 	
 	private String workspace;
+	
+	private boolean includeForks;
 
 	@Editable(order=100, name="Bitbucket Workspace", description="Select workspace to import from")
 	@ChoiceProvider("getWorkspaceChoices")
@@ -35,6 +37,15 @@ public class ImportWorkspace implements Serializable {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportWorkspace setting = (ImportWorkspace) editor.getModelObject();
 		return setting.server.listWorkspaces();
+	}
+	
+	@Editable(order=200, description="Whether or not to include forked repositories")
+	public boolean isIncludeForks() {
+		return includeForks;
+	}
+
+	public void setIncludeForks(boolean includeForks) {
+		this.includeForks = includeForks;
 	}
 	
 }

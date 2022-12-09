@@ -71,11 +71,11 @@ public class JiraIssueImporter implements IssueImporter {
 	}
 
 	@Override
-	public String doImport(Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+	public String doImport(Project project, boolean dryRun, TaskLogger logger) {
 		ImportServer server = serverStep.getSetting();
 		String jiraProject = projectStep.getSetting().getProject();
 		ImportOption option = optionStep.getSetting();
-		return server.importIssues(project, jiraProject, option, retainIssueNumbers, dryRun, logger);
+		return server.importIssues(project, jiraProject, option, dryRun, logger);
 	}
 
 	@Override

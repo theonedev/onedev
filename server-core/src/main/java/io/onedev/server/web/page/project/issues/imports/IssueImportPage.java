@@ -88,7 +88,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 
 							@Override
 							public String call() throws Exception {
-								return importer.doImport(getProject(), true, false, logger);
+								return importer.doImport(getProject(), false, logger);
 							}
 							
 						});
@@ -115,7 +115,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 
 							@Override
 							public String call() throws Exception {
-								return importer.doImport(getProject(), true, true, logger);
+								return importer.doImport(getProject(), true, logger);
 							}
 							
 						});

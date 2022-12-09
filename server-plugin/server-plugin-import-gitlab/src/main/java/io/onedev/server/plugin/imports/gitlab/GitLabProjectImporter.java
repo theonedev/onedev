@@ -61,7 +61,8 @@ public class GitLabProjectImporter implements ProjectImporter {
 		protected ImportProjects newSetting() {
 			ImportProjects projects = new ImportProjects();
 			String groupId = groupStep.getSetting().getGroupId();
-			for (String project: serverStep.getSetting().listProjects(groupId)) {
+			for (String project: serverStep.getSetting().listProjects(
+					groupId, groupStep.getSetting().isIncludeForks())) {
 				ProjectMapping projectMapping = new ProjectMapping();
 				projectMapping.setGitLabProject(project);
 				projectMapping.setOneDevProject(project);

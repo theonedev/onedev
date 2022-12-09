@@ -17,6 +17,8 @@ public class ImportGroup implements Serializable {
 	
 	private String groupId;
 	
+	private boolean includeForks;
+	
 	@Editable(order=100, name="GitLab Group", description="Specify group to import from. "
 			+ "Leave empty to import from projects under current account")
 	@ChoiceProvider("getGroupChoices")
@@ -33,6 +35,15 @@ public class ImportGroup implements Serializable {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportGroup setting = (ImportGroup) editor.getModelObject();
 		return setting.server.listGroups();
+	}
+	
+	@Editable(order=200, description="Whether or not to include forked repositories")
+	public boolean isIncludeForks() {
+		return includeForks;
+	}
+
+	public void setIncludeForks(boolean includeForks) {
+		this.includeForks = includeForks;
 	}
 	
 }

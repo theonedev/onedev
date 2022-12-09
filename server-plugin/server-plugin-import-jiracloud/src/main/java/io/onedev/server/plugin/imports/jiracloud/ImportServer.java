@@ -43,7 +43,6 @@ import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -67,7 +66,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
@@ -333,8 +331,6 @@ public class ImportServer implements Serializable, Validatable {
 	}
 	
 	String importProjects(ImportProjects projects, ImportOption option, boolean dryRun, TaskLogger logger) {
-		Collection<Long> projectIds = new ArrayList<>();
-		
 		Map<String, JsonNode> projectNodes = getProjectNodes(logger);
 		
 		Client client = newClient();
@@ -355,17 +351,14 @@ public class ImportServer implements Serializable, Validatable {
 				
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
 				Project project = projectManager.setup(projectMapping.getOneDevProject());
-				Preconditions.checkState(project.isNew());
 				
 				project.setDescription(projectNode.get("description").asText(null));
 				
-				if (!dryRun) {
-					OneDev.getInstance(ProjectManager.class).create(project);
-					projectIds.add(project.getId());
-				}
+				if (!dryRun && project.isNew()) 
+					projectManager.create(project);
 				
 				logger.log("Importing issues from project " + jiraProject + "...");
-				ImportResult currentResult = importIssues(projectNode, project, true, option, users, dryRun, logger);
+				ImportResult currentResult = importIssues(projectNode, project, option, users, dryRun, logger);
 				result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 				result.errorAttachments.addAll(currentResult.errorAttachments);
 				result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
@@ -375,17 +368,12 @@ public class ImportServer implements Serializable, Validatable {
 			}
 			
 			return result.toHtml("Projects imported successfully");
-		} catch (Exception e) {
-			for (Long projectId: projectIds)
-				OneDev.getInstance(StorageManager.class).deleteProjectDir(projectId);
-			throw new RuntimeException(e);
 		} finally {
 			client.close();
 		}	
 	}
 	
-	String importIssues(Project project, String jiraProject, ImportOption option, 
-			boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+	String importIssues(Project project, String jiraProject, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Map<String, JsonNode> projectNodes = getProjectNodes(logger);
 		
 		Client client = newClient();
@@ -394,17 +382,16 @@ public class ImportServer implements Serializable, Validatable {
 			JsonNode projectNode = projectNodes.get(jiraProject);
 			if (projectNode == null)
 				throw new ExplicitException("Unable to find project: " + jiraProject);
-			ImportResult result = importIssues(projectNode, project, retainIssueNumbers, 
-					option, users, dryRun, logger);
+			ImportResult result = importIssues(projectNode, project, option, users, dryRun, logger);
 			return result.toHtml("Issues imported successfully");
 		} finally {
 			client.close();
 		}
 	}
 	
-	private ImportResult importIssues(JsonNode jiraProject, Project oneDevProject, 
-			boolean retainIssueNumbers, ImportOption option, 
+	private ImportResult importIssues(JsonNode jiraProject, Project oneDevProject, ImportOption option, 
 			Map<String, Optional<User>> users, boolean dryRun, TaskLogger logger) {
+		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 		Client client = newClient();
 		try {
 			Set<String> unmappedIssueStatuses = new HashSet<>();
@@ -485,12 +472,13 @@ public class ImportServer implements Serializable, Validatable {
 						
 						issue.setNumberScope(oneDevProject.getForkRoot());
 
-						Long oldNumber = Long.valueOf(StringUtils.substringAfterLast(issueNode.get("key").asText(), "-"));
 						Long newNumber;
-						if (dryRun || retainIssueNumbers)
+						Long oldNumber = Long.valueOf(StringUtils.substringAfterLast(issueNode.get("key").asText(), "-"));
+						if (dryRun || (issueManager.find(oneDevProject, oldNumber) == null && !issueNumberMappings.containsValue(oldNumber))) 
 							newNumber = oldNumber;
 						else
-							newNumber = OneDev.getInstance(IssueManager.class).getNextNumber(oneDevProject);
+							newNumber = issueManager.getNextNumber(oneDevProject);
+						
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
 						
@@ -833,7 +821,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), jiraProjectKey + "-"));
 					
-					OneDev.getInstance(IssueManager.class).save(issue);
+					issueManager.save(issue);
 					for (IssueSchedule schedule: issue.getSchedules())
 						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
@@ -857,6 +845,8 @@ public class ImportServer implements Serializable, Validatable {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		} finally {
+			if (!dryRun)
+				issueManager.resetNextNumber(oneDevProject);
 			client.close();
 		}
 	}

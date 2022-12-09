@@ -33,7 +33,12 @@ public class ImportRepository extends ImportOrganization {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportRepository setting = (ImportRepository) editor.getModelObject();
 		String organization = (String) EditContext.get().getInputValue("organization");
-		return setting.server.listRepositories(organization);
+		return setting.server.listRepositories(organization, true);
+	}
+
+	@Override
+	public boolean isIncludeForks() {
+		return super.isIncludeForks();
 	}
 	
 }

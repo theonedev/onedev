@@ -75,7 +75,7 @@ public class GiteaIssueImporter implements IssueImporter {
 	}
 
 	@Override
-	public String doImport(Project project, boolean retainIssueNumbers, boolean dryRun, TaskLogger logger) {
+	public String doImport(Project project, boolean dryRun, TaskLogger logger) {
 		ImportServer server = serverStep.getSetting();
 		String giteaRepo = repositoryStep.getSetting().getRepository();
 		IssueImportOption option = optionStep.getSetting();
@@ -83,7 +83,7 @@ public class GiteaIssueImporter implements IssueImporter {
 		logger.log("Importing issues from repository " + giteaRepo + "...");
 		Map<String, Optional<User>> users = new HashMap<>();
 		
-		return server.importIssues(giteaRepo, project, retainIssueNumbers, option, users, dryRun, logger)
+		return server.importIssues(giteaRepo, project, option, users, dryRun, logger)
 				.toHtml("Issues imported successfully");
 	}
 

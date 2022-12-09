@@ -16,6 +16,8 @@ public class ImportOrganization implements Serializable {
 	ImportServer server;
 	
 	private String organization;
+	
+	private boolean includeForks;
 
 	@Editable(order=100, name="Gitea Organization", description="Select organization to import from. "
 			+ "Leave empty to import from repositories under current account")
@@ -33,6 +35,15 @@ public class ImportOrganization implements Serializable {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportOrganization setting = (ImportOrganization) editor.getModelObject();
 		return setting.server.listOrganizations();
+	}
+	
+	@Editable(order=200, description="Whether or not to include forked repositories")
+	public boolean isIncludeForks() {
+		return includeForks;
+	}
+
+	public void setIncludeForks(boolean includeForks) {
+		this.includeForks = includeForks;
 	}
 	
 }

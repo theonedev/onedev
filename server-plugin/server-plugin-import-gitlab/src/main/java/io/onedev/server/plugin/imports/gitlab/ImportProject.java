@@ -28,12 +28,17 @@ public class ImportProject extends ImportGroup {
 		this.project = project;
 	}
 	
+	@Override
+	public boolean isIncludeForks() {
+		return super.isIncludeForks();
+	}
+	
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportProject project = (ImportProject) editor.getModelObject();
 		String groupId = (String) EditContext.get().getInputValue("groupId");
-		return project.server.listProjects(groupId);
+		return project.server.listProjects(groupId, true);
 	}
 	
 }
