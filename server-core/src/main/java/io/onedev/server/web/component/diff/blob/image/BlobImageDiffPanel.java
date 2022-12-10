@@ -9,6 +9,7 @@ import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.Provider;
 import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 
@@ -55,7 +56,9 @@ public class BlobImageDiffPanel extends Panel {
 			add(image = new Image(id, new RawBlobResourceReference(), 
 					RawBlobResource.paramsOf(change.getProject(), blobIdent)));
 		} else {
-			add(image = new Image(id, new PackageResourceReference(BlobImageDiffPanel.class, "blank.png")));
+			BasePage page = (BasePage) getPage();
+			String blank = page.isDarkMode()?"blank-dark.png":"blank.png";
+			add(image = new Image(id, new PackageResourceReference(BlobImageDiffPanel.class, blank)));
 		}
 		return image;
 	}
