@@ -124,6 +124,7 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.job.authorization.JobAuthorization;
+import io.onedev.server.job.authorization.JobAuthorization.Context;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.LogTask;
 import io.onedev.server.model.Build;
@@ -151,7 +152,6 @@ import io.onedev.server.terminal.WebShell;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
-import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
@@ -489,16 +489,16 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		
 			for (RefFacade ref: build.getProject().getBranchRefs()) {
 				if (descendants.contains(ref.getPeeledObj())) {
-					String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName()));
-					if (authorization.matches(new ProjectAndBranch(build.getProject(), branchName))) 
+					String branch = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName()));
+					if (authorization.matches(new Context(build.getProject(), branch, build.getJobName()))) 
 						return true;
 				}
 			}
 			PullRequest request = build.getRequest();
 			return request != null 
 					&& request.getSource() != null 
-					&& authorization.matches(request.getTarget()) 
-					&& authorization.matches(request.getSource());
+					&& authorization.matches(new Context(request.getTargetProject(), request.getTargetBranch(), build.getJobName())) 
+					&& authorization.matches(new Context(request.getSourceProject(), request.getSourceBranch(), build.getJobName()));
 		} else {
 			return true;
 		}

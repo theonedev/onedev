@@ -44,11 +44,12 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.authorization.JobAuthorization;
+import io.onedev.server.job.authorization.JobAuthorization.Context;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -155,14 +156,17 @@ public class Job implements NamedElement, Serializable, Validatable {
 	private static List<InputSuggestion> suggestJobExecutors(String matchWith) {
 		List<String> applicableJobExecutors = new ArrayList<>();
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
-		ProjectAndBranch projectAndBranch = new ProjectAndBranch(page.getProject(), page.getBlobIdent().revision);
-		for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
-			if (executor.isEnabled()) {
-				if (executor.getJobAuthorization() == null) {
-					applicableJobExecutors.add(executor.getName());
-				} else {
-					if (JobAuthorization.parse(executor.getJobAuthorization()).matches(projectAndBranch))
+		String jobName = (String) EditContext.get().getInputValue(PROP_NAME);
+		if (jobName != null) {
+			Context context = new Context(page.getProject(), page.getBlobIdent().revision, jobName);
+			for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
+				if (executor.isEnabled()) {
+					if (executor.getJobAuthorization() == null) {
 						applicableJobExecutors.add(executor.getName());
+					} else {
+						if (JobAuthorization.parse(executor.getJobAuthorization()).matches(context))
+							applicableJobExecutors.add(executor.getName());
+					}
 				}
 			}
 		}

@@ -20,6 +20,7 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.job.authorization.JobAuthorization.Context;
 import io.onedev.server.job.authorization.JobAuthorizationParser.AndCriteriaContext;
 import io.onedev.server.job.authorization.JobAuthorizationParser.CriteriaContext;
 import io.onedev.server.job.authorization.JobAuthorizationParser.FieldOperatorValueCriteriaContext;
@@ -29,19 +30,19 @@ import io.onedev.server.job.authorization.JobAuthorizationParser.OperatorValueCr
 import io.onedev.server.job.authorization.JobAuthorizationParser.OrCriteriaContext;
 import io.onedev.server.job.authorization.JobAuthorizationParser.ParensCriteriaContext;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
 
-public class JobAuthorization extends Criteria<ProjectAndBranch> {
+public class JobAuthorization extends Criteria<Context> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final Criteria<ProjectAndBranch> criteria;
+	private final Criteria<Context> criteria;
 	
-	public JobAuthorization(Criteria<ProjectAndBranch> criteria) {
+	public JobAuthorization(Criteria<Context> criteria) {
 		this.criteria = criteria;
 	}
 
@@ -68,15 +69,15 @@ public class JobAuthorization extends Criteria<ProjectAndBranch> {
 		parser.setErrorHandler(new BailErrorStrategy());
 		JobAuthorizationContext jobAuthorizationContext = parser.jobAuthorization();
 
-		Criteria<ProjectAndBranch> criteria = new JobAuthorizationBaseVisitor<Criteria<ProjectAndBranch>>() {
+		Criteria<Context> criteria = new JobAuthorizationBaseVisitor<Criteria<Context>>() {
 
 			@Override
-			public Criteria<ProjectAndBranch> visitParensCriteria(ParensCriteriaContext ctx) {
+			public Criteria<Context> visitParensCriteria(ParensCriteriaContext ctx) {
 				return visit(ctx.criteria()).withParens(true);
 			}
 
 			@Override
-			public Criteria<ProjectAndBranch> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
+			public Criteria<Context> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 				String fieldName = getValue(ctx.Quoted(0).getText());
 				String fieldValue = getValue(ctx.Quoted(1).getText());
 				int operator = ctx.operator.getType();
@@ -85,36 +86,38 @@ public class JobAuthorization extends Criteria<ProjectAndBranch> {
 				switch (fieldName) {
 				case Build.NAME_PROJECT:
 					return new ProjectCriteria(fieldValue);
+				case Build.NAME_JOB:
+					return new JobCriteria(fieldValue);
 				default:
 					throw new RuntimeException("Unknown job authorization field: " + fieldName);
 				}
 			}
 			
 			@Override
-			public Criteria<ProjectAndBranch> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
+			public Criteria<Context> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 				String fieldValue = getValue(ctx.Quoted().getText());
 				return new BranchCriteria(fieldValue);
 			}
 			
 			@Override
-			public Criteria<ProjectAndBranch> visitOrCriteria(OrCriteriaContext ctx) {
-				List<Criteria<ProjectAndBranch>> childCriterias = new ArrayList<>();
+			public Criteria<Context> visitOrCriteria(OrCriteriaContext ctx) {
+				List<Criteria<Context>> childCriterias = new ArrayList<>();
 				for (CriteriaContext childCtx: ctx.criteria())
 					childCriterias.add(visit(childCtx));
-				return new OrCriteria<ProjectAndBranch>(childCriterias);
+				return new OrCriteria<Context>(childCriterias);
 			}
 
 			@Override
-			public Criteria<ProjectAndBranch> visitAndCriteria(AndCriteriaContext ctx) {
-				List<Criteria<ProjectAndBranch>> childCriterias = new ArrayList<>();
+			public Criteria<Context> visitAndCriteria(AndCriteriaContext ctx) {
+				List<Criteria<Context>> childCriterias = new ArrayList<>();
 				for (CriteriaContext childCtx: ctx.criteria())
 					childCriterias.add(visit(childCtx));
-				return new AndCriteria<ProjectAndBranch>(childCriterias);
+				return new AndCriteria<Context>(childCriterias);
 			}
 
 			@Override
-			public Criteria<ProjectAndBranch> visitNotCriteria(NotCriteriaContext ctx) {
-				return new NotCriteria<ProjectAndBranch>(visit(ctx.criteria()));
+			public Criteria<Context> visitNotCriteria(NotCriteriaContext ctx) {
+				return new NotCriteria<Context>(visit(ctx.criteria()));
 			}
 
 		}.visit(jobAuthorizationContext.criteria());
@@ -137,12 +140,12 @@ public class JobAuthorization extends Criteria<ProjectAndBranch> {
 	}
 
 	@Override
-	public boolean matches(ProjectAndBranch projectAndBranch) {
-		return criteria.matches(projectAndBranch);
+	public boolean matches(Context context) {
+		return criteria.matches(context);
 	}
 
 	@Override
-	public Predicate getPredicate(CriteriaQuery<?> query, From<ProjectAndBranch, ProjectAndBranch> from,
+	public Predicate getPredicate(CriteriaQuery<?> query, From<Context, Context> from,
 			CriteriaBuilder builder) {
 		throw new UnsupportedOperationException();
 	}
@@ -176,4 +179,31 @@ public class JobAuthorization extends Criteria<ProjectAndBranch> {
 		return criteria.toString();
 	}
 
+	public static class Context {
+		
+		private final Project project;
+		
+		private final String branch;
+		
+		private final String jobName;
+		
+		public Context(Project project, String branch, String jobName) {
+			this.project = project;
+			this.branch = branch;
+			this.jobName = jobName;
+		}
+
+		public Project getProject() {
+			return project;
+		}
+
+		public String getBranch() {
+			return branch;
+		}
+
+		public String getJobName() {
+			return jobName;
+		}
+
+	}
 }

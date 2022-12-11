@@ -2,46 +2,30 @@ package io.onedev.server.job.authorization;
 
 import static io.onedev.server.job.authorization.JobAuthorization.getRuleName;
 import static io.onedev.server.job.authorization.JobAuthorizationLexer.Is;
-import static io.onedev.server.model.Build.NAME_PROJECT;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
-import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.job.authorization.JobAuthorization.Context;
+import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 
-public class ProjectCriteria extends Criteria<Context> {
+public class JobCriteria extends Criteria<Context> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private String projectPath;
+	private String jobName;
 	
-	public ProjectCriteria(String projectPath) {
-		this.projectPath = projectPath;
+	public JobCriteria(String jobName) {
+		this.jobName = jobName;
 	}
 
 	@Override
 	public boolean matches(Context context) {
-		return WildcardUtils.matchPath(projectPath, context.getProject().getPath());
-	}
-
-	@Override
-	public void onMoveProject(String oldPath, String newPath) {
-		projectPath = PathUtils.substituteSelfOrAncestor(projectPath, oldPath, newPath);
-	}
-
-	@Override
-	public boolean isUsingProject(String projectPath) {
-		return PathUtils.isSelfOrAncestor(projectPath, this.projectPath);
-	}
-
-	@Override
-	public String toStringWithoutParens() {
-		return quote(NAME_PROJECT) + " " + getRuleName(Is) + " " + quote(projectPath);
+		return WildcardUtils.matchString(jobName, context.getJobName());
 	}
 
 	@Override
@@ -50,4 +34,9 @@ public class ProjectCriteria extends Criteria<Context> {
 		throw new UnsupportedOperationException();
 	}
 	
+	@Override
+	public String toStringWithoutParens() {
+		return quote(Build.NAME_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
+	}
+
 }
