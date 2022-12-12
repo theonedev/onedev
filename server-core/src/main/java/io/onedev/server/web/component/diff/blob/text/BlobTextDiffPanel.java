@@ -504,7 +504,7 @@ public class BlobTextDiffPanel extends Panel {
 				callback, blameMessageBehavior.getCallback(),
 				convertToJson(markRange), convertToJson(openCommentInfo), 
 				convertToJson(annotationInfoModel.getObject()), 
-				commentContainerId, OneDev.getInstance().getDocRoot());
+				commentContainerId);
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 

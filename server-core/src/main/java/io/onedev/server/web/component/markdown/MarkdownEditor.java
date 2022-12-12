@@ -309,8 +309,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			container.add(new LazyResourceLoader("lazyResourceLoader", Model.of((String)null)));
 		}
 		
-		container.add(new WebMarkupContainer("syntaxHelp")
-				.add(AttributeAppender.append("href", OneDev.getInstance().getDocRoot() + "/pages/markdown-syntax.md")));
 		container.add(new WebMarkupContainer("canAttachFile").setVisible(getAttachmentSupport()!=null));
 		
 		container.add(actionBehavior = new AbstractPostAjaxBehavior() {

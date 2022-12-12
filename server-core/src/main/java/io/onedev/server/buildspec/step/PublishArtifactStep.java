@@ -31,7 +31,7 @@ public class PublishArtifactStep extends ServerSideStep {
 	private String artifacts;
 	
 	@Editable(order=50, name="From Directory", placeholder="Job workspace", description="Optionally specify path "
-			+ "relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a> to publish "
+			+ "relative to <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to publish "
 			+ "artifacts from. Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SafePath

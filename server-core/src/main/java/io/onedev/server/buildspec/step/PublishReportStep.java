@@ -44,7 +44,7 @@ public abstract class PublishReportStep extends ServerSideStep {
 		return PatternSet.parse(getFilePatterns());
 	}
 	
-	@Editable(order=100, description="Specify files under <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a> to be published. "
+	@Editable(order=100, description="Specify files under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a> to be published. "
 			+ "Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

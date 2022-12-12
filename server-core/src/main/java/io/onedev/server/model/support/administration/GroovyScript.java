@@ -77,7 +77,7 @@ public class GroovyScript implements Serializable {
 	}
 
 	@Editable(order=400, placeholder="All", description="Optionally specify space-separated projects allowed to "
-			+ "execute this script. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. "
+			+ "execute this script. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. "
 			+ "Leave empty to allow all")
 	@Patterns(suggester="suggestProjects", path=true)
 	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
@@ -90,7 +90,7 @@ public class GroovyScript implements Serializable {
 	}
 	
 	@Editable(order=500, placeholder="All", description="Optionally specify space-separated branches allowed to "
-		+ "execute this script. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+		+ "execute this script. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 		+ "Prefix with '-' to exclude. Leave empty to allow all")
 	@Patterns(path=true)
 	@ShowCondition("isCanBeUsedByBuildJobsEnabled")

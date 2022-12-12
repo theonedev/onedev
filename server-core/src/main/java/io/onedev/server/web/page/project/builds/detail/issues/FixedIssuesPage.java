@@ -6,14 +6,11 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.FixedInBuildCriteria;
@@ -95,16 +92,6 @@ public class FixedIssuesPage extends BuildDetailPage {
 				@Override
 				protected Project getProject() {
 					return FixedIssuesPage.this.getProject();
-				}
-				
-			});
-			
-			fragment.add(new WebMarkupContainer("buildStreamHelpUrl") {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.put("href", OneDev.getInstance().getDocRoot() + "/pages/concepts.md#build-stream");
 				}
 				
 			});

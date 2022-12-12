@@ -50,7 +50,7 @@ public class JobSecret implements Serializable {
 	@Editable(order=300, placeholder="All", description=""
 			+ "Optionally specify space-separated branches to authorize.\n"
 			+ "Only builds from authorized branches can access this secret.\n"
-			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to authorize all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
 	public String getAuthorizedBranches() {

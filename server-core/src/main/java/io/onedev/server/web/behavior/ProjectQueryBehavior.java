@@ -170,14 +170,14 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					} else if (fieldName.equals(Project.NAME_PATH)) {
-						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 					}
 				} else {
 					Element operatorElement = terminalExpect.getState()
 							.findMatchedElementsByLabel("operator", true).iterator().next();
 					int type = operatorElement.getMatchedTokens().iterator().next().getType();
 					if (type == ProjectQueryLexer.ForksOf || type == ProjectQueryLexer.ChildrenOf) 
-						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 					else
 						hints.add("Use '\\' to escape quotes");
 				}

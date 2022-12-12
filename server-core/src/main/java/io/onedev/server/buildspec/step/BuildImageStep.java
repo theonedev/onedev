@@ -29,7 +29,7 @@ public class BuildImageStep extends Step {
 	
 	private boolean publish;
 	
-	@Editable(order=100, description="Optionally specify build path relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. "
+	@Editable(order=100, description="Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use job workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SafePath
@@ -41,7 +41,7 @@ public class BuildImageStep extends Step {
 		this.buildPath = buildPath;
 	}
 
-	@Editable(order=200, description="Optionally specify Dockerfile relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. "
+	@Editable(order=200, description="Optionally specify Dockerfile relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use file <tt>Dockerfile</tt> under build path specified above")
 	@Interpolative(variableSuggester="suggestVariables")
 	@SafePath

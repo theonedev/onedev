@@ -517,7 +517,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				if (!jobExecutor.isEnabled())
 					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is disabled");
 				else if (!isAuthorized(jobExecutor, build))
-					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not applicable for current job");
+					throw new ExplicitException("Specified job executor '" + jobExecutorName + "' is not authorized for current job");
 				else
 					return jobExecutor;
 			} else {
@@ -529,7 +529,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					if (executor.isEnabled() && isAuthorized(executor, build))
 						return executor;
 				}
-				throw new ExplicitException("No applicable job executor");
+				throw new ExplicitException("No authorized job executor");
 			} else {
 				jobLogger.log("No job executor defined, auto-discovering...");
 				List<JobExecutorDiscoverer> discoverers = new ArrayList<>(OneDev.getExtensions(JobExecutorDiscoverer.class));
@@ -1231,8 +1231,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 													try {
 														jobExecutions.put(build.getId(), execute(build));
 													} catch (Throwable t) {
-														if (t instanceof ExplicitException)
-															markBuildError(build, t.getMessage());
+														ExplicitException explicitException = ExceptionUtils.find(t, ExplicitException.class);
+														if (explicitException != null)
+															markBuildError(build, explicitException.getMessage());
 														else
 															markBuildError(build, Throwables.getStackTraceAsString(t));
 													}

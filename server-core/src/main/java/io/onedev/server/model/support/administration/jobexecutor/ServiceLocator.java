@@ -39,7 +39,7 @@ public class ServiceLocator implements Serializable {
 	
 	@Editable(order=200, name="Applicable Images", placeholder="All", description=""
 			+ "Optionally specify space-separated service images applicable for this locator. "
-			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(path=true)
 	public String getServiceImages() {

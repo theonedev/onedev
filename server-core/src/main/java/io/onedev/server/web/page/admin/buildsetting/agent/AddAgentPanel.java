@@ -77,7 +77,6 @@ class AddAgentPanel extends Panel {
 				Fragment commandFragment = new Fragment("command", "dockerCommandFrag", AddAgentPanel.this);
 				commandFragment.add(new Label("command", builder.toString()));
 				commandFragment.add(new CopyToClipboardLink("copy", Model.of(builder.toString())));
-				commandFragment.add(new ExternalLink("help", OneDev.getInstance().getDocRoot() + "/pages/agent-management.md"));
 				fragment.replace(commandFragment);
 				target.add(fragment);
 			}
@@ -91,7 +90,6 @@ class AddAgentPanel extends Panel {
 	private Component newBareMetalInstructions() {
 		Fragment fragment = new Fragment("instructions", "bareMetalInstructionsFrag", this);
 		fragment.add(new ExternalLink("agent", "/~downloads/agent.zip"));
-		fragment.add(new ExternalLink("help", OneDev.getInstance().getDocRoot() + "/pages/agent-management.md"));
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}

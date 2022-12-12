@@ -15,7 +15,7 @@ public class DefaultInterpreter extends Interpreter {
 	private static final long serialVersionUID = 1L;
 
 	@Editable(order=110, description="Specify shell commands (on Linux/Unix) or batch commands (on Windows) to execute "
-			+ "under the <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
+			+ "under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@Size(min=1, message="may not be empty")

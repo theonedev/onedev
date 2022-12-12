@@ -30,7 +30,7 @@ public class ShellInterpreter extends Interpreter {
 	}
 
 	@Editable(order=110, description="Specify shell commands to execute "
-			+ "under the <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
+			+ "under the <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>")
 	@Interpolative
 	@Code(language=Code.SHELL, variableProvider="suggestVariables")
 	@Size(min=1, message="may not be empty")

@@ -283,7 +283,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Issue.NAME_PROJECT)) {
-						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 					} else if (fieldName.equals(Issue.NAME_TITLE) 
 							|| fieldName.equals(Issue.NAME_DESCRIPTION)
 							|| fieldName.equals(Issue.NAME_COMMENT)

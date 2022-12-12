@@ -26,8 +26,6 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ImplementationRegistry;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -196,11 +194,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);				
 				if (beanEditor instanceof BeanEditor) {
 					Class<?> beanClass = ((BeanEditor) beanEditor).getDescriptor().getBeanClass(); 
-					String description = EditableUtils.getDescription(beanClass);
-					if (description != null)
-						return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
-					else
-						return null;
+					return EditableUtils.getDescription(beanClass);
 				} else {
 					return null;
 				}

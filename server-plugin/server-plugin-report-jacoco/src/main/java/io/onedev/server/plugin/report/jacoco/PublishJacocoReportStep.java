@@ -40,7 +40,7 @@ public class PublishJacocoReportStep extends PublishCoverageReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Editable(order=100, description="Specify JaCoCo coverage xml report file under <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
+	@Editable(order=100, description="Specify JaCoCo coverage xml report file under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/site/jacoco/jacoco.xml</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

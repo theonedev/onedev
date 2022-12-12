@@ -30,7 +30,7 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	
 	private String startPage;
 	
-	@Editable(order=1100, description="Specify start page of the report under <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>")
+	@Editable(order=1100, description="Specify start page of the report under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getStartPage() {

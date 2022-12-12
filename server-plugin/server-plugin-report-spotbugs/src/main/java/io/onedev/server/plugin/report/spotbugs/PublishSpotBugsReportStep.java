@@ -41,7 +41,7 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Editable(order=100, description="Specify SpotBugs result xml file under <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
+	@Editable(order=100, description="Specify SpotBugs result xml file under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/spotbugsXml.xml</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)

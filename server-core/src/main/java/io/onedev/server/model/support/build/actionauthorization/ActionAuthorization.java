@@ -19,7 +19,7 @@ public abstract class ActionAuthorization implements Serializable {
 
 	@Editable(order=1000, placeholder="All", description="Action is allowed only if build runs on "
 			+ "specified branches. Multiple branches should be separated with space. "
-			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestBranches", path=true)
 	public String getAuthorizedBranches() {

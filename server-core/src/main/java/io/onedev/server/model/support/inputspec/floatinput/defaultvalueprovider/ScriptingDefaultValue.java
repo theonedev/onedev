@@ -15,7 +15,7 @@ public class ScriptingDefaultValue implements DefaultValueProvider {
 	private String scriptName;
 
 	@Editable(description="Groovy script to be evaluated. It should return a <i>Float</i> value. "
-			+ "Check <a href='$docRoot/pages/scripting.md' target='_blank'>scripting help</a> for details")
+			+ "Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details")
 	@ScriptChoice
 	@OmitName
 	@NotEmpty

@@ -30,7 +30,7 @@ import io.onedev.server.web.editable.EditableStringTransformer;
 
 public class VariableInterpolator {
 
-	public static final String HELP = "<b>Tips: </b> Type <tt>@</tt> to <a href='$docRoot/pages/job-variables.md' target='_blank' tabindex='-1'>insert variable</a>. "
+	public static final String HELP = "<b>Tips: </b> Type <tt>@</tt> to <a href='https://docs.onedev.io/appendix/job-variables' target='_blank' tabindex='-1'>insert variable</a>. "
 			+ "Use <tt>@@</tt> for literal <tt>@</tt>";
 	
 	public static final String PREFIX_PARAM = "param:"; 

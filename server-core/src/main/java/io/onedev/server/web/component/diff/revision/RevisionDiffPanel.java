@@ -622,7 +622,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			protected List<String> getHints(TerminalExpect terminalExpect) {
 				return Lists.newArrayList(
 						"Path containing spaces or starting with dash needs to be quoted",
-						"Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+						"Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
 						);
 			}
 			

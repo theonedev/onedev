@@ -26,7 +26,7 @@ public class ScriptingChoices extends ChoiceProvider {
 	@Editable(description="Groovy script to be evaluated. The return value should be a value to color map, "
 			+ "for instance:<br>"
 			+ "<code>return [\"Successful\":\"#00ff00\", \"Failed\":\"#ff0000\"]</code>, "
-			+ "Use <tt>null</tt> if the value does not have a color. Check <a href='$docRoot/pages/scripting.md' target='_blank'>scripting help</a> for details")
+			+ "Use <tt>null</tt> if the value does not have a color. Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details")
 	@ScriptChoice
 	@OmitName
 	@NotEmpty

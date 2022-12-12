@@ -142,7 +142,7 @@ public abstract class FieldSpec extends InputSpec {
 
 	@Editable(order=10100, placeholder="All projects", description="Specify applicable projects for above option. "
 			+ "Multiple projects should be separated by space. Use '**', '*' or '?' for "
-			+ "<a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty for all projects")
 	@io.onedev.server.web.editable.annotation.ShowCondition("isPromptUponIssueOpenEnabled")
 	@Patterns(suggester="suggestProjects", path=true)

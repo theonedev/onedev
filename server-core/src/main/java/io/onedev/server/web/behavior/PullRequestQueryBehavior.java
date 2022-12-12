@@ -1,6 +1,18 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.model.PullRequest.NAME_NUMBER;
+import static io.onedev.server.model.AbstractEntity.NAME_NUMBER;
+import static io.onedev.server.search.entity.EntityQuery.getValue;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.checkField;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getOperator;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getRuleName;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ApprovedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.AssignedToMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesCommit;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesIssue;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.OrderBy;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.RequestedForChangesByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.SubmittedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +31,10 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.project.ProjectQuery;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.*;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.*;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
@@ -187,7 +196,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
 							|| fieldName.equals(PullRequest.NAME_TARGET_BRANCH)) {
-						hints.add("Use '**', '*', or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+						hints.add("Use '**', '*', or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 					} else if (fieldName.equals(PullRequest.NAME_TITLE) 
 							|| fieldName.equals(PullRequest.NAME_DESCRIPTION)
 							|| fieldName.equals(PullRequest.NAME_COMMENT)

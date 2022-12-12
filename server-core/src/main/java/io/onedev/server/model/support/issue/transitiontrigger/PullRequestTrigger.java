@@ -26,7 +26,7 @@ public abstract class PullRequestTrigger extends TransitionTrigger {
 	
 	@Editable(name="Target Branches", order=100, placeholder="Any branch", description="Optionally specify "
 			+ "space-separated target branches of the pull requests to check. Use '**', '*' or '?' for "
-			+ "<a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
 	public String getBranches() {

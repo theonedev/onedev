@@ -58,7 +58,6 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
-import io.onedev.server.util.Version;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.schedule.TaskScheduler;
@@ -353,11 +352,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(OneDev.class);
 	}	
-	
-	public String getDocRoot() {
-		Version version = new Version(AppLoader.getProduct().getVersion());
-		return "https://code.onedev.io/onedev/manual/~files/" + version.getMajor() + "." + version.getMinor();
-	}
 	
 	public static boolean isServerRunning(File installDir) {
 		Properties props = FileUtils.loadProperties(new File(installDir, "conf/server.properties"));

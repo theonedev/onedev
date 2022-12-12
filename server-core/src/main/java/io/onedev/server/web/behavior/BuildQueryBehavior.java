@@ -216,7 +216,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(Build.NAME_PROJECT)) {
-						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+						hints.add("Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>");
 					} else if (fieldName.equals(Build.NAME_VERSION) || fieldName.equals(Build.NAME_JOB)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");

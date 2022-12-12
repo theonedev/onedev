@@ -37,7 +37,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	private String paths;
 	
 	@Editable(name="Branches", order=100, placeholder="Any branch", description="Optionally specify space-separated branches "
-			+ "to check. Use '**' or '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "to check. Use '**' or '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
 	public String getBranches() {
@@ -54,7 +54,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 	
 	@Editable(name="Touched Files", order=200, placeholder="Any file", 
-			description="Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			description="Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 					+ "Prefix with '-' to exclude. Leave empty to match all files")
 	@Patterns(suggester = "getPathSuggestions", path=true)
 	public String getPaths() {

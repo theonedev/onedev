@@ -52,7 +52,7 @@ public class PatternsEditSupport implements EditSupport {
 							protected List<String> getHints(TerminalExpect terminalExpect) {
 								return Lists.newArrayList(
 										"Pattern containing spaces or starting with dash needs to be quoted",
-										patterns.path()? "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude": "Use '*' or '?' for wildcard match. Prefix with '-' to exclude"
+										patterns.path()? "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude": "Use '*' or '?' for wildcard match. Prefix with '-' to exclude"
 										);
 							}
 							

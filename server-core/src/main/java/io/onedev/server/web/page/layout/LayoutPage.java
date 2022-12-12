@@ -353,7 +353,6 @@ public abstract class LayoutPage extends BasePage {
 		Plugin product = AppLoader.getProduct();
 		sidebar.add(new ExternalLink("productVersion", "https://code.onedev.io/onedev/server")
 				.setBody(Model.of("OneDev " + product.getVersion())));
-		sidebar.add(new ExternalLink("docLink", OneDev.getInstance().getDocRoot() + "/"));
 		sidebar.add(new BookmarkablePageLink<Void>("incompatibilities", IncompatibilitiesPage.class));
 		
 		WebMarkupContainer topbar = new WebMarkupContainer("topbar");

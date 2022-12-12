@@ -17,7 +17,7 @@ public class CreateTagAuthorization extends ActionAuthorization {
 	private String tagNames;
 
 	@Editable(order=100, placeholder="All", description="Specify space-separated tag names. "
-			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestTags", path=true)
 	public String getTagNames() {

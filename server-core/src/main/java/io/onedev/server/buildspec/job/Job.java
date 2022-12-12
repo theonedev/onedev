@@ -141,8 +141,8 @@ public class Job implements NamedElement, Serializable, Validatable {
 		return new ArrayList<>();
 	}
 
-	@Editable(order=200, placeholder="Use Any Applicable Executor", description="Optionally specify executor "
-			+ "to execute this job. Leave empty to use any executor as long as its job requirement is satisfied")
+	@Editable(order=200, placeholder="Use Any Applicable Executor", description="Optionally specify authorized executor "
+			+ "for this job. Leave empty to use first authorized executor")
 	@Interpolative(literalSuggester="suggestJobExecutors", variableSuggester="suggestVariables")
 	public String getJobExecutor() {
 		return jobExecutor;
@@ -174,7 +174,7 @@ public class Job implements NamedElement, Serializable, Validatable {
 		return SuggestionUtils.suggest(applicableJobExecutors, matchWith);
 	}
 	
-	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>")
+	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>")
 	public List<Step> getSteps() {
 		return steps;
 	}

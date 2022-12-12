@@ -70,7 +70,7 @@ public class AgentResource extends AbstractResource {
 					
 					try (OutputStream os = new FileOutputStream(new File(agentDir, "agent/conf/agent.properties"))) {
 						String comment = "For a list of supported agent properties, please visit:\n" 
-								+ OneDev.getInstance().getDocRoot() + "/pages/agent-management.md#agent-propertiesenvironments";
+								+ "https://docs.onedev.io/administration-guide/agent-management#agent-propertiesenvironments";
 						props.store(os, comment);
 					}
 					

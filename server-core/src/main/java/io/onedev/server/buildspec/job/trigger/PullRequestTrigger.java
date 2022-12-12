@@ -31,7 +31,7 @@ public abstract class PullRequestTrigger extends JobTrigger {
 	
 	@Editable(name="Target Branches", placeholder="Any branch", order=100, description=""
 			+ "Optionally specify space-separated target branches of the pull requests to check. "
-			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
 	public String getBranches() {
@@ -49,7 +49,7 @@ public abstract class PullRequestTrigger extends JobTrigger {
 	
 	@Editable(name="Touched Files", order=200, placeholder="Any file", description=""
 			+ "Optionally specify space-separated files to check. "
-			+ "Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all files")
 	@Patterns(suggester = "getPathSuggestions", path=true)
 	public String getPaths() {

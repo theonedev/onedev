@@ -1,7 +1,7 @@
 onedev.server.blobTextDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, callback, blameMessageCallback,
-			markRange, openComment, annotationInfo, commentContainerId, doclink) {
+			markRange, openComment, annotationInfo, commentContainerId) {
 		var $container = $("#" + containerId);
 		$container.data("commentContainerId", commentContainerId);
 		$container.data("callback", callback);
@@ -325,7 +325,7 @@ onedev.server.blobTextDiff = {
 			function showInvalidSelection() {
 				var $content = $("<div></div>");
 				$content.append(`<a class='invalid'><svg class='icon'><use xlink:href='${onedev.server.icons}#warning'/></svg> Invalid selection, click for details</a>`);
-				$content.children("a").attr("href", doclink + "/pages/diff-selection.md").attr("target", "_blank");
+				$content.children("a").attr("href", "https://docs.onedev.io/appendix/diff-selection").attr("target", "_blank");
 				return {
 					position: position, 
 					content: $content

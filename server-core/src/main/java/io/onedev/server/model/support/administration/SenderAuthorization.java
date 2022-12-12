@@ -45,7 +45,7 @@ public class SenderAuthorization implements Serializable {
 
 	@Editable(order=150, placeholder="Any project", description="Specify space-separated projects "
 			+ "authorized to senders above. Use '**' or '*' or '?' for "
-			+ "<a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to authorize all projects")
 	@Patterns(suggester="suggestProjects", path=true)
 	public String getAuthorizedProjects() {
