@@ -6,7 +6,7 @@
 <div style="font-size: 18px;">
 | <a href="https://docs.onedev.io/">Quickstart</a> 
 | <a href="https://docs.onedev.io/category/installation-guide">Installation Guide</a> 
-| <a href="https://docs.onedev.io/">All Documentations</a> |
+| <a href="https://docs.onedev.io/concepts/">All Documentation</a> |
 </div>
 
 <p style="margin-bottom: 20px;">
