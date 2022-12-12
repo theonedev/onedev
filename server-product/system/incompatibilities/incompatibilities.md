@@ -8,7 +8,7 @@ some service urls have been changed and this causes some incompatibitlities:
 3. If you are using OAuth based Office365 or Gmail mail service, make sure to change redirect url as `https://<onedev root url>/~oauth/callback` (use `~oauth` instead of `oauth`)
 4. Agents can not upgrade itself for this version, as url connecting to server has been changed. You will need to re-download 
 agent package from server if running in bare-metal mode, or re-pull the agent image if running in docker mode
-5. If you are setting up reverse proxy using Apache or Nginx, make sure to change proxied path `/server` to `/~server`. Check [the manual](https://code.onedev.io/onedev/manual/~files/main/pages/reverse-proxy-setup.md) for details
+5. If you are setting up reverse proxy using Apache or Nginx, make sure to change proxied path `/server` to `/~server`. Check [the docs](https://docs.onedev.io/administration-guide/reverse-proxy-setup) for details
 
 # 7.7.0
 
@@ -97,7 +97,7 @@ consideration. As a result of this, password authentication specified previously
 
 1. Submodule authentication
   
-  You will need to use custom http/ssh clone credential with permission to access submodule projects to retrieve source. Refer to [usage scenario](https://code.onedev.io/onedev/manual/files/main/pages/clone-submodules-via-ssh.md) for an example.
+  You will need to use custom http/ssh clone credential with permission to access submodule projects to retrieve source. Refer to [tutorial](https://docs.onedev.io/tutorials/cicd/clone-submodules-ssh/) for an example.
   
 2. Project dependency authentication
 
