@@ -122,24 +122,13 @@ jobs:
       - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev
         v$buildVersion:v$buildVersion
       - ''
-      - echo "Creating release branch in onedev/manual..."
-      - ''
-      - cd /onedev-build
-      - branch=${buildVersion%.*}
-      - git clone https://robin:@secrets:onedev-token@@@code.onedev.io/onedev/manual
-        onedev-manual
-      - cd onedev-manual
-      - if [ "$(git branch -a|grep -c /$branch$)" -eq 0 ]; then
-      - '  git push origin main:$branch'
-      - fi
-      - ''
       - echo "Creating release in GitHub..."
       - ''
       - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
         | jq '.id')
       - ''
       - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
-        Installation Guide\n\nhttps://code.onedev.io/onedev/manual/~files/main/pages/installation-guide.md\n\n##
+        Installation Guide\n\nhttps://docs.onedev.io/category/installation-guide\n\n##
         Change Log\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
         Incompatibilities\n\nhttps://code.onedev.io/onedev/server/~builds/@build_number@/markdown/Incompatibilities/server-product/system/incompatibilities/incompatibilities.md\"}"
       - ''
