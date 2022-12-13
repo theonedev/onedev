@@ -1,4 +1,6 @@
 User-agent: *
 
 Allow: /wicket/resource/*
+Allow: /sitemap.xml
+Allow: /sitemap.txt
 Disallow: /
