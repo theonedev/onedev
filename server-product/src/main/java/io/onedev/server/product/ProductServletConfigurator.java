@@ -121,17 +121,27 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		File assetsDir = new File(Bootstrap.getSiteDir(), "assets");
 		
 		boolean hasCustomLogo = false;
+		boolean hasSiteMapTxt = false;
+		boolean hasSiteMapXml = false;
 		for (File file: assetsDir.listFiles()) {
 			if (file.isFile()) {
 				context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/" + file.getName());
 				if (file.getName().equals("logo.png"))
 					hasCustomLogo = true;
+				else if (file.getName().equals("sitemap.xml"))
+					hasSiteMapXml = true;
+				else if (file.getName().equals("sitemap.txt"))
+					hasSiteMapTxt = true;
 			} else {
 				context.addServlet(new ServletHolder(new FileAssetServlet(file)), "/" + file.getName() + "/*");
 			}
 		}
 		if (!hasCustomLogo)
 			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/logo.png");
+		if (!hasSiteMapTxt)
+			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/sitemap.txt");
+		if (!hasSiteMapXml)
+			context.addServlet(new ServletHolder(new FileAssetServlet(assetsDir)), "/sitemap.xml");
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/~api/*");	
 		context.addServlet(new ServletHolder(serverServlet), "/~server");

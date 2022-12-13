@@ -171,7 +171,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final GitService gitService;
     
-    private final Collection<String> reservedNames = Sets.newHashSet("robots.txt", "sitemap.xml",
+    private final Collection<String> reservedNames = Sets.newHashSet("robots.txt", "sitemap.xml", "sitemap.txt",
 			"favicon.ico", "favicon.png", "logo.png", "wicket", "projects");
     
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
