@@ -3,7 +3,7 @@
 <div align="center">
 <h1>Self-hosted Git Server with Kanban and CI/CD</h1>
 
-<div style="font-size: 18px;">
+<div style="font-size: 24px;">
 | <a href="https://docs.onedev.io/">Quickstart</a> 
 | <a href="https://docs.onedev.io/category/installation-guide">Installation Guide</a> 
 | <a href="https://docs.onedev.io/concepts/">All Documentation</a> |
