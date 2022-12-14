@@ -498,8 +498,7 @@ public class BlobTextDiffPanel extends Panel {
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
 		
-		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s,"
-				+ "%s, %s, %s, '%s');", getMarkupId(), symbolTooltip.getMarkupId(), 
+		String script = String.format("onedev.server.blobTextDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s, %s, %s, %s);", getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
 				callback, blameMessageBehavior.getCallback(),
 				convertToJson(markRange), convertToJson(openCommentInfo), 
