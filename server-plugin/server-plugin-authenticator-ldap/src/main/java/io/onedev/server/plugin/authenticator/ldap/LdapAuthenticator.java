@@ -21,29 +21,35 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.apache.shiro.authc.AccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import javax.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
+import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Editable(name="Generic LDAP", order=200)
 public class LdapAuthenticator extends Authenticator {
 
 	private static final long serialVersionUID = 1L;
 	
+	private static final String PROP_AUTHENTICATION_REQUIRED = "authenticationRequired";
+	
 	private static final Logger logger  = LoggerFactory.getLogger(LdapAuthenticator.class);
 
 	private String ldapUrl;
+	
+	private boolean authenticationRequired;
 	
     private String managerDN;
     
@@ -72,10 +78,24 @@ public class LdapAuthenticator extends Authenticator {
 		this.ldapUrl = ldapUrl;
 	}
 
-	@Editable(order=300, description=""
-			+ "To authenticate user against LDAP and retrieve associated attributes and groups, OneDev would have to "
-			+ "first authenticate itself against the LDAP server and OneDev does that by sending 'manager' DN and "
-			+ "password")
+	@Editable(order=200, description="OneDev needs to search and determine user DN, as well as searching user group "
+			+ "information if group retrieval is enabled. Tick this option and specify 'manager' DN and password if "
+			+ "these operations needs to be authenticated")
+	public boolean isAuthenticationRequired() {
+		return authenticationRequired;
+	}
+
+	public void setAuthenticationRequired(boolean authenticationRequired) {
+		this.authenticationRequired = authenticationRequired;
+	}
+
+	@SuppressWarnings("unused")
+	private static boolean isAuthenticationRequiredEnabled() {
+		return (boolean) EditContext.get().getInputValue(PROP_AUTHENTICATION_REQUIRED);
+	}
+	
+	@Editable(order=300, description="Specify manager DN to authenticate OneDev itself to LDAP server")
+	@ShowCondition("isAuthenticationRequiredEnabled")
 	@NotEmpty
 	public String getManagerDN() {
 		return managerDN;
@@ -86,8 +106,9 @@ public class LdapAuthenticator extends Authenticator {
 	}
 
 	@Editable(order=400, description="Specifies password of above manager DN")
-	@NotEmpty
 	@Password
+	@ShowCondition("isAuthenticationRequiredEnabled")
+	@NotEmpty
 	public String getManagerPassword() {
 		return managerPassword;
 	}
@@ -213,8 +234,10 @@ public class LdapAuthenticator extends Authenticator {
         ldapEnv.put("com.sun.jndi.ldap.read.timeout", String.valueOf(getTimeout()*1000L));
         ldapEnv.put(Context.REFERRAL, "follow");
         
-        ldapEnv.put(Context.SECURITY_PRINCIPAL, getManagerDN());
-        ldapEnv.put(Context.SECURITY_CREDENTIALS, getManagerPassword());
+        if (isAuthenticationRequired()) {
+	        ldapEnv.put(Context.SECURITY_PRINCIPAL, getManagerDN());
+	        ldapEnv.put(Context.SECURITY_CREDENTIALS, getManagerPassword());
+        }
 
         DirContext ctx = null;
         DirContext referralCtx = null;
@@ -263,9 +286,9 @@ public class LdapAuthenticator extends Authenticator {
                     }
                 }
             }
-
-            Attributes searchResultAttributes = searchResult.getAttributes();
             
+            DirContext effectiveCtxt = referralCtx != null? referralCtx: ctx;
+            Attributes searchResultAttributes = searchResult.getAttributes();
             if (searchResultAttributes != null) {
                 if (getUserFullNameAttribute() != null) {
                     Attribute attribute = searchResultAttributes.get(getUserFullNameAttribute());
@@ -278,14 +301,14 @@ public class LdapAuthenticator extends Authenticator {
                     email = (String) attribute.get();
                 
                 if (getGroupRetrieval() instanceof GetGroupsUsingAttribute) 
-                	groupNames = retrieveGroupsByAttribute(ctx, referralCtx, searchResultAttributes);
+                	groupNames = retrieveGroupsByAttribute(effectiveCtxt, searchResultAttributes);
                 
                 if (getUserSshKeyAttribute() != null) 
                 	sshKeys = retrieveSshKeys(searchResultAttributes);
             }
             
             if (getGroupRetrieval() instanceof SearchGroupsUsingFilter) 
-            	groupNames = retrieveGroupsByFilter(ctx, referralCtx, userDN);
+            	groupNames = retrieveGroupsByFilter(effectiveCtxt, userDN);
             
             if (StringUtils.isBlank(email))
             	throw new AccountException("Email is required but not available in ldap directory");
@@ -309,8 +332,7 @@ public class LdapAuthenticator extends Authenticator {
         }
 	}
 	
-	private Collection<String> retrieveGroupsByAttribute(DirContext ctx, DirContext referralCtx, 
-			Attributes searchResultAttributes) {
+	private Collection<String> retrieveGroupsByAttribute(DirContext ctx, Attributes searchResultAttributes) {
 		Collection<String> groupNames = new HashSet<>();
 		try {
         	GetGroupsUsingAttribute groupRetrieval = (GetGroupsUsingAttribute) getGroupRetrieval();
@@ -325,10 +347,7 @@ public class LdapAuthenticator extends Authenticator {
                     
                     DirContext groupCtx = null;
                     try {
-                        if (referralCtx != null)
-                            groupCtx = (DirContext) referralCtx.lookup(groupDN);
-                        else
-                            groupCtx = (DirContext) ctx.lookup(groupDN);
+                        groupCtx = (DirContext) ctx.lookup(groupDN);
 
                         if (groupCtx == null) {
                             throw new RuntimeException("Can not find group entry " +
@@ -363,7 +382,7 @@ public class LdapAuthenticator extends Authenticator {
 		return groupNames;
 	}
 	
-	private Collection<String> retrieveGroupsByFilter(DirContext ctx, DirContext referralCtx, String userDN) {
+	private Collection<String> retrieveGroupsByFilter(DirContext ctx, String userDN) {
 		Collection<String> groupNames = new HashSet<>();
 		try {
 	    	SearchGroupsUsingFilter groupRetrieval = (SearchGroupsUsingFilter) getGroupRetrieval();
@@ -378,11 +397,7 @@ public class LdapAuthenticator extends Authenticator {
 	        searchControls.setReturningAttributes(new String[]{groupNameAttribute});
 	        searchControls.setReturningObjFlag(true);
 	
-	    	NamingEnumeration<SearchResult> results;
-	        if (referralCtx != null)
-	            results = referralCtx.search(groupSearchBase, groupSearchFilter, searchControls);
-	        else
-	            results = ctx.search(groupSearchBase, groupSearchFilter, searchControls);
+	    	NamingEnumeration<SearchResult> results = ctx.search(groupSearchBase, groupSearchFilter, searchControls);
 	        if (results != null) {
 	            while (results.hasMore()) {
 	            	SearchResult searchResult = (SearchResult) results.next();
