@@ -402,7 +402,12 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 	public static VersionedXmlDoc fromXML(String xml) {
 		try {
 			// May contain some invalid characters, parse with 1.1
-			xml = StringUtils.replace(xml, "<?xml version=\"1.0\"", "<?xml version=\"1.1\"");
+			
+			// This is added originally due to issue #177, but writing XML with 1.0 and 
+			// reading with 1.1 resulting the issue #1038. Now input "&#27;" in an issue comment
+			// and it seems that the sequence is escaped as "&amp;#27;" in the backup, and 
+			// restore can run successfully without any issues. So just revert back
+			// xml = StringUtils.replace(xml, "<?xml version=\"1.0\"", "<?xml version=\"1.1\"");
 			return new VersionedXmlDoc(new SAXReader().read(new StringReader(xml)));
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
