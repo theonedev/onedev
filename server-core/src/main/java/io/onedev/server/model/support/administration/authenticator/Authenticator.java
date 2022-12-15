@@ -5,11 +5,15 @@ import java.io.Serializable;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.GroupChoice;
 
 @Editable
+@JsonTypeInfo(use=Id.CLASS)
 public abstract class Authenticator implements Serializable {
 
 	private static final long serialVersionUID = 1L;
