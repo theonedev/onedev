@@ -15,6 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -57,11 +59,13 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final Pattern SPECIAL_CHARACTERS = Pattern.compile("&#\\d+;");
+	
 	private transient String xml;
 	
 	private transient Document wrapped;
-
-	public VersionedXmlDoc() {
+	
+	public VersionedXmlDoc() {  
 		wrapped = DocumentHelper.createDocument();
 	}
 	
@@ -401,14 +405,14 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 	
 	public static VersionedXmlDoc fromXML(String xml) {
 		try {
-			// May contain some invalid characters, parse with 1.1
+			// remove special characters
+		     Matcher matcher = SPECIAL_CHARACTERS.matcher(xml);
+		     StringBuffer buffer = new StringBuffer();
+		     while (matcher.find()) 
+		    	 matcher.appendReplacement(buffer, "");
+		     matcher.appendTail(buffer);
 			
-			// This is added originally due to issue #177, but writing XML with 1.0 and 
-			// reading with 1.1 resulting the issue #1038. Now input "&#27;" in an issue comment
-			// and it seems that the sequence is escaped as "&amp;#27;" in the backup, and 
-			// restore can run successfully without any issues. So just revert back
-			// xml = StringUtils.replace(xml, "<?xml version=\"1.0\"", "<?xml version=\"1.1\"");
-			return new VersionedXmlDoc(new SAXReader().read(new StringReader(xml)));
+			return new VersionedXmlDoc(new SAXReader().read(new StringReader(buffer.toString())));
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}
