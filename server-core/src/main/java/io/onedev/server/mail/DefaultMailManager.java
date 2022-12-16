@@ -692,7 +692,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		comment.setUser(user);
 		String content = stripQuotation(sendSetting, readText(issue.getProject(), issue.getUUID(), message));
 		if (content != null) {
-			comment.setContent(String.format("<div class='%s'>" + content + "</div>", COMMENT_MARKER));
+			comment.setContent(String.format("<div class='%s'>", COMMENT_MARKER) + content + "</div>");
 			issueCommentManager.save(comment, receiverEmailAddresses);
 		}
 	}
