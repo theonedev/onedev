@@ -9,6 +9,7 @@ import javax.servlet.http.Cookie;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -487,7 +488,7 @@ public abstract class LayoutPage extends BasePage {
 				public void onClick() {
 					SecurityUtils.getSubject().releaseRunAs();
 					Session.get().warn("Exited impersonation");
-					setResponsePage(HomePage.class);
+					throw new RestartResponseException(HomePage.class);
 				}
 				
 			}; 
