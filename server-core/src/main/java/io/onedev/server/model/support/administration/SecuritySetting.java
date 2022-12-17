@@ -75,6 +75,8 @@ public class SecuritySetting implements Serializable {
        		Group group = OneDev.getInstance(GroupManager.class).find(defaultLoginGroupName);
        		if (group == null) 
        			logger.error("Unable to find default login group: " + defaultLoginGroupName);
+       		else
+       			return group;
 		}
 		return null;
 	}
