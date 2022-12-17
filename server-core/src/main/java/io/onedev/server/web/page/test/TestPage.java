@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.test;
 
+import io.onedev.commons.utils.FileUtils;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;

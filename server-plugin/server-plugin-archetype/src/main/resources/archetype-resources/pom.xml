@@ -38,7 +38,7 @@
 					<execution>
 						<?m2e execute onConfiguration,onIncremental?>
 						<id>populate-resources</id>
-						<phase>process-resources</phase>
+						<phase>generate-sources</phase>
 						<goals>
 							<goal>populate-resources</goal>
 						</goals>
