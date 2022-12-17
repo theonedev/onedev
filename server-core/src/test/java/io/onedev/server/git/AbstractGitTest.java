@@ -126,6 +126,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 	protected String commit(String comment) {
 		CommitCommand ci = git.commit();
 		ci.setMessage(comment);
+		ci.setSign(false);
 		ci.setAuthor(user);
 		ci.setCommitter(user);
 		try {
