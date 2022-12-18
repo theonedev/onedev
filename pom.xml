@@ -38,14 +38,14 @@
 			<plugin>
 				<groupId>io.onedev</groupId>
 				<artifactId>plugin-maven</artifactId>
-				<version>2.4.0</version>
+				<version>2.4.1</version>
 				<executions>
 					<execution>
 						<?m2e execute onConfiguration,onIncremental?>
-						<id>populate-resources</id>
-						<phase>generate-sources</phase>
+						<id>generate-resources</id>
+						<phase>generate-resources</phase>
 						<goals>
-							<goal>populate-resources</goal>
+							<goal>generate-resources</goal>
 						</goals>
 					</execution>
 					<execution>
@@ -76,7 +76,6 @@
 				<directory>src/main/java</directory>
 				<excludes>
 					<exclude>**/*.java</exclude>
-					<exclude>**/*.scss</exclude>
 				</excludes>
 			</resource>
 			<resource>
@@ -617,8 +616,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.6.3</commons.version>
-		<agent.version>1.7.7</agent.version>
+		<commons.version>2.6.4</commons.version>
+		<agent.version>1.7.8</agent.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<logback.version>1.2.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>

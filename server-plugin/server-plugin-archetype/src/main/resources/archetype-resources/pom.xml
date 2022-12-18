@@ -33,14 +33,14 @@
 			<plugin>
 				<groupId>io.onedev</groupId>
 				<artifactId>plugin-maven</artifactId>
-				<version>2.4.0</version>
+				<version>2.4.1</version>
 				<executions>
 					<execution>
 						<?m2e execute onConfiguration,onIncremental?>
-						<id>populate-resources</id>
-						<phase>generate-sources</phase>
+						<id>generate-resources</id>
+						<phase>generate-resources</phase>
 						<goals>
-							<goal>populate-resources</goal>
+							<goal>generate-resources</goal>
 						</goals>
 					</execution>
 					<execution>
@@ -58,7 +58,7 @@
 				<executions>
 					<execution>
 						<id>default-jar</id>
-						<phase>never</phase>
+						<phase>none</phase>
 						<configuration>
 							<finalName>unwanted</finalName>
 							<classifier>unwanted</classifier>
