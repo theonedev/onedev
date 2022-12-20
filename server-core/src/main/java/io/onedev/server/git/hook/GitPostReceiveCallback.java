@@ -163,7 +163,7 @@ public class GitPostReceiveCallback extends HttpServlet {
     	output.writeLine();
     	output.writeLine("Create a pull request for '"+ branch +"' by visiting:");
 		output.writeLine("    " + urlManager.urlForProject(projectId) 
-				+"/pulls/new?target=" 
+				+"/~pulls/new?target=" 
 				+ projectId 
 				+ ":" 
 				+ defaultBranch 

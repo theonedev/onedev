@@ -48,6 +48,6 @@
 		<module>server-plugin-report-cpd</module>
 		<module>server-plugin-sso-discord</module>
 		<module>server-plugin-notification-slack</module>
-    <module>server-plugin-notification-discord</module>
-  </modules>
+    	<module>server-plugin-notification-discord</module>
+    </modules>
 </project>

@@ -175,7 +175,7 @@ public class Upgrade extends AbstractPlugin {
 			}
 		}
 		if (!isEmpty) {
-			if (!new File(upgradeDir, "boot/bootstrap.keys").exists()) {
+			if (!new File(upgradeDir, "boot").exists()) {
 				logger.error("Invalid OneDev installation directory: {}, make sure you are specifying the top level "
 						+ "installation directory (it contains sub directories such as \"bin\", \"boot\", \"conf\", etc)", 
 						upgradeDir.getAbsolutePath());
@@ -566,8 +566,6 @@ public class Upgrade extends AbstractPlugin {
 		
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(new File(Bootstrap.installDir, "agent"), new File(upgradeDir, "agent"));
-		if (new File(upgradeDir, "boot/system.classpath").exists())
-			FileUtils.deleteFile(new File(upgradeDir, "boot/system.classpath"));
 		
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
 
