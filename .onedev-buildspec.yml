@@ -93,7 +93,7 @@ jobs:
       - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@
         deploy
       - ''
-      - curl -u onedev:@secrets:maven-deploy-password@ -f -d @@/root/.m2/archetype-catalog.xml
+      - curl -u onedev:@secrets:maven-deploy-password@ -f -d @@/root/.m2/repository/archetype-catalog.xml
         -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"
       - ''
       - cd $projectDir/server-product/docker
