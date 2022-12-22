@@ -93,9 +93,6 @@ jobs:
       - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@
         deploy
       - ''
-      - curl -u onedev:@secrets:maven-deploy-password@ -f -d @@/root/.m2/repository/archetype-catalog.xml
-        -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"
-      - ''
       - cd $projectDir/server-product/docker
       - ./build.sh
       - docker push 1dev/server:${buildVersion}
@@ -111,6 +108,11 @@ jobs:
       - ''
       - cd $projectDir
       - cp server-product/target/onedev-${buildVersion}.zip .
+      - ''
+      - mkdir server-plugin-archetype-${buildVersion}
+      - cp server-plugin/server-plugin-archetype/pom.xml server-plugin-archetype-${buildVersion}
+      - cp -r server-plugin/server-plugin-archetype/src server-plugin-archetype-${buildVersion}
+      - zip -r server-plugin-archetype-${buildVersion}.zip server-plugin-archetype-${buildVersion}
       - ''
       - echo "Creating release tag..."
       - git config --global user.name "Robin Shen"
