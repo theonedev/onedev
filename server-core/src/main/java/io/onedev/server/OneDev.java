@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import io.onedev.server.exception.SystemNotReadyException;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -118,7 +119,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	@Override
 	public void start() {
 		SecurityUtils.bindAsSystem();
-
+		
 		System.setProperty("hsqldb.reconfig_logging", "false");
 		System.setProperty("hsqldb.method_class_names", "java.lang.Math");
 		
@@ -321,32 +322,44 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		return bootDate;
 	}
 
-	@Sessional
 	@Override
 	public void preStop() {
 		SecurityUtils.bindAsSystem();
-		listenerRegistry.post(new SystemStopping());
+		
+		try {
+			sessionManager.run(new Runnable() {
+				@Override
+				public void run() {
+					listenerRegistry.post(new SystemStopping());
+				}
+
+			});
+		} catch (SystemNotReadyException ignore) {
+		}
 	}
 
 	@Override
 	public void stop() {
 		SecurityUtils.bindAsSystem();
 
-		sessionManager.run(new Runnable() {
+		try {
+			sessionManager.run(new Runnable() {
 
-			@Override
-			public void run() {
-				listenerRegistry.post(new SystemStopped());
-			}
-			
-		});
-		
-		// stop cluster manager first as it depends on metadata of session factory
-		clusterManager.stop();
-		sessionFactoryManager.stop();
-		taskScheduler.stop();
-		executorService.shutdown();
-		jettyLauncherProvider.get().stop();
+				@Override
+				public void run() {
+					listenerRegistry.post(new SystemStopped());
+				}
+
+			});
+
+			// stop cluster manager first as it depends on metadata of session factory
+			clusterManager.stop();
+			sessionFactoryManager.stop();
+			taskScheduler.stop();
+			executorService.shutdown();
+			jettyLauncherProvider.get().stop();
+		} catch (SystemNotReadyException ignore) {
+		}
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
