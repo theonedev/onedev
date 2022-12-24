@@ -110,7 +110,11 @@ jobs:
       - cp server-product/target/onedev-${buildVersion}.zip .
       - ''
       - mkdir server-plugin-archetype-${buildVersion}
-      - cp server-plugin/server-plugin-archetype/pom.xml server-plugin-archetype-${buildVersion}
+      - cd server-plugin/server-plugin-archetype
+      - mvn help:effective-pom -Doutput=$projectDir/server-plugin-archetype-${buildVersion}/pom.xml
+      - cd $projectDir
+      - sed -i 's/\/onedev-build\/workspace\/server-plugin\/server-plugin-archetype\///'
+        server-plugin-archetype-${buildVersion}/pom.xml
       - cp -r server-plugin/server-plugin-archetype/src server-plugin-archetype-${buildVersion}
       - zip -r server-plugin-archetype-${buildVersion}.zip server-plugin-archetype-${buildVersion}
       - ''
