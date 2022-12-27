@@ -1,85 +1,18 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.Project.PROP_NAME;
-
-import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.Stack;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.Validator;
-import javax.validation.constraints.NotEmpty;
-
-import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
-import org.apache.commons.collections4.map.ReferenceMap;
-import org.apache.shiro.authz.Permission;
-import org.apache.tika.mime.MediaType;
-import org.apache.wicket.util.encoding.UrlEncoder;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicUpdate;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
-import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
-import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UrlManager;
-import io.onedev.server.git.BlameBlock;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.BlobIdentFilter;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.LfsObject;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.git.*;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
@@ -87,20 +20,13 @@ import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
 import io.onedev.server.git.signature.SignatureVerified;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.CodeAnalysisSetting;
-import io.onedev.server.model.support.FileProtection;
-import io.onedev.server.model.support.LabelSupport;
-import io.onedev.server.model.support.NamedCodeCommentQuery;
-import io.onedev.server.model.support.NamedCommitQuery;
-import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.WebHook;
-import io.onedev.server.model.support.build.BuildPreservation;
-import io.onedev.server.model.support.build.DefaultFixedIssueFilter;
-import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.model.support.build.NamedBuildQuery;
-import io.onedev.server.model.support.build.ProjectBuildSetting;
+import io.onedev.server.model.support.*;
+import io.onedev.server.model.support.build.*;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
+import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.model.support.code.FileProtection;
+import io.onedev.server.model.support.code.GitPackConfig;
+import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
@@ -125,6 +51,31 @@ import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
+import org.apache.commons.collections4.map.ReferenceMap;
+import org.apache.shiro.authz.Permission;
+import org.apache.tika.mime.MediaType;
+import org.apache.wicket.util.encoding.UrlEncoder;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import javax.validation.Validator;
+import javax.validation.constraints.NotEmpty;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import static io.onedev.server.model.Project.PROP_NAME;
 
 @Entity
 @Table(
@@ -316,7 +267,13 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private boolean codeManagement = true;
 	
 	private boolean issueManagement = true;
+
+	@Lob
+	@Column(length=65535)
+	private GitPackConfig gitPackConfig = new GitPackConfig();
 	
+	@Lob
+	@Column(length=65535)
 	private CodeAnalysisSetting codeAnalysisSetting = new CodeAnalysisSetting();
 	
 	// SQL Server does not allow duplicate null values for unique column. So we use 
@@ -910,6 +867,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			this.serviceDeskName = serviceDeskName;
 		else if (!this.serviceDeskName.startsWith(NULL_SERVICE_DESK_PREFIX))
 			this.serviceDeskName = NULL_SERVICE_DESK_PREFIX + UUID.randomUUID().toString();
+	}
+
+	public GitPackConfig getGitPackConfig() {
+		return gitPackConfig;
+	}
+
+	public void setGitPackConfig(GitPackConfig gitPackConfig) {
+		this.gitPackConfig = gitPackConfig;
 	}
 
 	public CodeAnalysisSetting getCodeAnalysisSetting() {

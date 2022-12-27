@@ -4556,5 +4556,50 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate107(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SYSTEM")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var gitConfigElement = valueElement.element("gitConfig");
+							gitConfigElement.setName("gitLocation");
+							var clazz = gitConfigElement.attributeValue("class").replace(
+									"io.onedev.server.git.config.", 
+									"io.onedev.server.git.location.");
+							gitConfigElement.addAttribute("class", clazz);
+
+							var curlConfigElement = valueElement.element("curlConfig");
+							curlConfigElement.setName("curlLocation");
+							clazz = curlConfigElement.attributeValue("class").replace(
+									"io.onedev.server.git.config.",
+									"io.onedev.server.git.location.");
+							curlConfigElement.addAttribute("class", clazz);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.addElement("gitPackConfig");
+					
+					for (var branchProtectionElement: element.element("branchProtections").elements()) {
+						branchProtectionElement.setName("io.onedev.server.model.support.code.BranchProtection");
+						for (var fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) 
+							fileProtectionElement.setName("io.onedev.server.model.support.code.FileProtection");
+					}
+					for (var tagProtectionElement: element.element("tagProtections").elements()) {
+						tagProtectionElement.setName("io.onedev.server.model.support.code.TagProtection");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

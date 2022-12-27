@@ -219,7 +219,7 @@ import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitLfsFilter;
 import io.onedev.server.git.GoGetFilter;
 import io.onedev.server.git.SshCommandCreator;
-import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.git.exception.GitException;
 import io.onedev.server.git.hook.GitPostReceiveCallback;
 import io.onedev.server.git.hook.GitPreReceiveCallback;
@@ -609,7 +609,7 @@ public class CoreModule extends AbstractPluginModule {
 	private void configureGit() {
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 		bind(GitService.class).to(DefaultGitService.class);
-		bind(GitConfig.class).toProvider(GitConfigProvider.class);
+		bind(GitLocation.class).toProvider(GitLocationProvider.class);
 		bind(GitFilter.class);
 		bind(GoGetFilter.class);
 		bind(GitLfsFilter.class);

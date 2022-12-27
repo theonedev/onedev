@@ -37,7 +37,7 @@ public class HookUtils {
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class);
 		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 		String hookUrl = "http://localhost:" + serverConfig.getHttpPort();
-		String curl = settingManager.getSystemSetting().getCurlConfig().getExecutable();
+		String curl = settingManager.getSystemSetting().getCurlLocation().getExecutable();
 		
 		Map<String, String> envs = new HashMap<>();
 		

@@ -29,7 +29,7 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.ReceivePackCommand;
 import io.onedev.server.git.command.UploadPackCommand;
-import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.location.GitLocation;
 
 public class CommandUtils {
 
@@ -38,7 +38,7 @@ public class CommandUtils {
 	private static final String MIN_VERSION = "2.11.1";
 	
 	public static Commandline newGit() {
-		Commandline cmdline = new Commandline(OneDev.getInstance(GitConfig.class).getExecutable());
+		Commandline cmdline = new Commandline(OneDev.getInstance(GitLocation.class).getExecutable());
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			String path = System.getenv("PATH") + ":/usr/local/bin";
 			cmdline.environments().put("PATH", path);

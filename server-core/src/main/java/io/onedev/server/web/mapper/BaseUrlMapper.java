@@ -1,5 +1,6 @@
 package io.onedev.server.web.mapper;
 
+import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.markup.html.pages.BrowserInfoPage;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -118,16 +119,16 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
-import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
+import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
-import io.onedev.server.web.page.project.setting.codeanalysis.CodeAnalysisSettingPage;
+import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
-import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
+import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
@@ -366,11 +367,12 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/avatar-edit", AvatarEditPage.class));
 		add(new ProjectPageMapper("${project}/~settings/branch-protection", BranchProtectionsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/tag-protection", TagProtectionsPage.class));
+		add(new ProjectPageMapper("${project}/~settings/code-analysis", CodeAnalysisSettingPage.class));
+		add(new ProjectPageMapper("${project}/~settings/git-pack-config", GitPackConfigPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/job-secrets", JobSecretsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/action-authorizations", ActionAuthorizationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/build-preserve-rules", BuildPreservationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));
-		add(new ProjectPageMapper("${project}/~settings/code-analysis", CodeAnalysisSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/service-desk", ProjectServiceDeskSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/web-hooks", WebHooksPage.class));
 		add(new ProjectPageMapper("${project}/~settings/${" + ContributedProjectSettingPage.PARAM_SETTING + "}", 

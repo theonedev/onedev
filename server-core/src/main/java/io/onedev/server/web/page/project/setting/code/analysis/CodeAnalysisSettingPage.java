@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.setting.codeanalysis;
+package io.onedev.server.web.page.project.setting.code.analysis;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;

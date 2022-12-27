@@ -1,4 +1,4 @@
-package io.onedev.server.git.config;
+package io.onedev.server.git.location;
 
 import java.io.Serializable;
 
@@ -17,7 +17,7 @@ import io.onedev.server.web.editable.annotation.Editable;
  */
 @Editable
 @ClassValidating
-public abstract class GitConfig implements Serializable, Validatable {
+public abstract class GitLocation implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	

@@ -105,6 +105,8 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setDescription(editProject.getDescription());
 						newProject.setIssueManagement(editProject.isIssueManagement());
 						newProject.setDefaultRole(defaultRoleBean.getRole());
+						newProject.setCodeAnalysisSetting(getProject().getCodeAnalysisSetting());
+						newProject.setGitPackConfig(getProject().getGitPackConfig());
 						
 						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
 

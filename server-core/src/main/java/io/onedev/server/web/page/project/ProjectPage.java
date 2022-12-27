@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 
+import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -89,16 +90,16 @@ import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
-import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
+import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
-import io.onedev.server.web.page.project.setting.codeanalysis.CodeAnalysisSettingPage;
+import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
-import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
+import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
@@ -267,14 +268,18 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					AvatarEditPage.class, AvatarEditPage.paramsOf(getProject())));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Authorizations", 
 					ProjectAuthorizationsPage.class, ProjectAuthorizationsPage.paramsOf(getProject())));
-			
-			settingMenuItems.add(new SidebarMenuItem.Page(null, "Branch Protection", 
+
+			List<SidebarMenuItem> codeSettingMenuItems = new ArrayList<>();
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Branch Protection", 
 					BranchProtectionsPage.class, BranchProtectionsPage.paramsOf(getProject())));
-			settingMenuItems.add(new SidebarMenuItem.Page(null, "Tag Protection", 
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Tag Protection", 
 					TagProtectionsPage.class, TagProtectionsPage.paramsOf(getProject())));
-			
-			settingMenuItems.add(new SidebarMenuItem.Page(null, "Code Analysis", 
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Code Analysis", 
 					CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject())));
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Git Pack Config",
+					GitPackConfigPage.class, GitPackConfigPage.paramsOf(getProject())));
+
+			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Code", codeSettingMenuItems));
 			
 			List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
 			

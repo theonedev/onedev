@@ -5,21 +5,21 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.location.GitLocation;
 
 @Singleton
-public class GitConfigProvider implements Provider<GitConfig> {
+public class GitLocationProvider implements Provider<GitLocation> {
 
 	private final SettingManager settingManager;
 	
 	@Inject
-	public GitConfigProvider(SettingManager settingManager) {
+	public GitLocationProvider(SettingManager settingManager) {
 		this.settingManager = settingManager;
 	}
 	
 	@Override
-	public GitConfig get() {
-		return settingManager.getSystemSetting().getGitConfig();
+	public GitLocation get() {
+		return settingManager.getSystemSetting().getGitLocation();
 	}
 
 }

@@ -11,6 +11,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.model.support.code.GitPackConfig;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.Repository;
 
@@ -93,5 +94,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	Collection<String> getReservedNames();
 	
 	MimeFileInfo getSiteFileInfo(Long projectId, String siteFilePath);
+
+	void checkGitConfig(Long projectId, GitPackConfig gitPackConfig);
 	
 }

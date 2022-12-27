@@ -54,7 +54,7 @@ import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.infomanager.VisitInfoManager;
-import io.onedev.server.model.support.BranchProtection;
+import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.LastUpdate;

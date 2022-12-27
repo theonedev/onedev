@@ -16,10 +16,10 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
-import io.onedev.server.git.config.CurlConfig;
-import io.onedev.server.git.config.GitConfig;
-import io.onedev.server.git.config.SystemCurl;
-import io.onedev.server.git.config.SystemGit;
+import io.onedev.server.git.location.CurlLocation;
+import io.onedev.server.git.location.GitLocation;
+import io.onedev.server.git.location.SystemCurl;
+import io.onedev.server.git.location.SystemGit;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -35,9 +35,9 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private String sshRootUrl;
 
-	private GitConfig gitConfig = new SystemGit();
+	private GitLocation gitLocation = new SystemGit();
 	
-	private CurlConfig curlConfig = new SystemCurl();
+	private CurlLocation curlLocation = new SystemCurl();
 	
 	private boolean gravatarEnabled;
 	
@@ -91,23 +91,23 @@ public class SystemSetting implements Serializable, Validatable {
 			+ "LFS files in build job")
 	@Valid
 	@NotNull(message="may not be empty")
-	public GitConfig getGitConfig() {
-		return gitConfig;
+	public GitLocation getGitLocation() {
+		return gitLocation;
 	}
 
-	public void setGitConfig(GitConfig gitConfig) {
-		this.gitConfig = gitConfig;
+	public void setGitLocation(GitLocation gitLocation) {
+		this.gitLocation = gitLocation;
 	}
 
 	@Editable(order=250, name="curl Command Line", description="OneDev configures git hooks to communicate with itself via curl")
 	@Valid
 	@NotNull(message="may not be empty")
-	public CurlConfig getCurlConfig() {
-		return curlConfig;
+	public CurlLocation getCurlLocation() {
+		return curlLocation;
 	}
 
-	public void setCurlConfig(CurlConfig curlConfig) {
-		this.curlConfig = curlConfig;
+	public void setCurlLocation(CurlLocation curlLocation) {
+		this.curlLocation = curlLocation;
 	}
 	
 	@Editable(order=500, description="Whether or not to enable user gravatar (https://gravatar.com)")

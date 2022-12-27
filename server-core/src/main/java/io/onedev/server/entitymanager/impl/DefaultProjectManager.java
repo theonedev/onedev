@@ -5,15 +5,7 @@ import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -30,6 +22,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.ws.rs.core.MediaType;
 
+import io.onedev.server.model.support.code.GitPackConfig;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -106,8 +99,8 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -311,9 +304,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	updateManager.save(update);
     	project.setUpdate(update);
     	dao.persist(project);
-    	FileUtils.cleanDir(storageManager.getProjectDir(project.getId()));
+		
+		var gitDir = storageManager.getProjectDir(project.getId());
+    	FileUtils.cleanDir(gitDir);
        	checkGitDir(project.getId());
-       	checkGitHooksAndConfig(project.getId());
+
+		HookUtils.checkHooks(gitDir);
+		checkGitConfig(project.getId(), project.getGitPackConfig());
+		   
        	UserAuthorization authorization = new UserAuthorization();
        	authorization.setProject(project);
        	authorization.setUser(SecurityUtils.getUser());
@@ -514,6 +512,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	String fromPath = from.getPath();
     	Long toId = to.getId();
     	
+		GitPackConfig gitPackConfig = to.getGitPackConfig();
     	runOnProjectServer(toId, new ClusterTask<Void>() {
 
 			private static final long serialVersionUID = 1L;
@@ -568,8 +567,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		        	});
 		        	
 		        }
-		        
-		        checkGitHooksAndConfig(toId);
+
+				HookUtils.checkHooks(toGitDir);
+				checkGitConfig(toId, gitPackConfig);
+
 		        commitInfoManager.cloneInfo(fromId, toId);
 		        avatarManager.copyProjectAvatar(fromId, toId);
 				return null;
@@ -663,25 +664,58 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         } 
 	}
 	
-	private void checkGitHooksAndConfig(Long projectId) {
-		File gitDir = storageManager.getProjectGitDir(projectId);
-		HookUtils.checkHooks(gitDir);
+	private boolean updateStoredConfig(StoredConfig storedConfig, String section, 
+									   String name, @Nullable String value) {
+		if (value != null) {
+			if (!value.equals(storedConfig.getString(section, "null", name))) {
+				storedConfig.setString(section, null, name, value);
+				return true;
+			}
+		} else {
+			if (storedConfig.getString(section, null, name) != null) {
+				storedConfig.unset(section, null, name);
+				return true;
+			}
+		}
+		return false;
+	}
 
+	@Override
+	public void checkGitConfig(Long projectId, GitPackConfig gitPackConfig) {
 		try {
-			StoredConfig config = getRepository(projectId).getConfig();
+			StoredConfig storedConfig = getRepository(projectId).getConfig();
 			boolean changed = false;
-			if (config.getEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, ConfigConstants.CONFIG_KEY_ALGORITHM, 
+			if (storedConfig.getEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, ConfigConstants.CONFIG_KEY_ALGORITHM,
 					SupportedAlgorithm.MYERS) != SupportedAlgorithm.HISTOGRAM) {
-				config.setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, ConfigConstants.CONFIG_KEY_ALGORITHM, 
+				storedConfig.setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, ConfigConstants.CONFIG_KEY_ALGORITHM,
 						SupportedAlgorithm.HISTOGRAM);
 				changed = true;
 			}
-			if (!config.getBoolean("uploadpack", "allowAnySHA1InWant", false)) {
-				config.setBoolean("uploadpack", null, "allowAnySHA1InWant", true);
+			if (!storedConfig.getBoolean("uploadpack", "allowAnySHA1InWant", false)) {
+				storedConfig.setBoolean("uploadpack", null, "allowAnySHA1InWant", true);
 				changed = true;
 			}
+
+			var packSection = "pack";
+			if (updateStoredConfig(storedConfig, packSection, "windowMemory",
+					gitPackConfig.getWindowMemory())) {
+				changed = true;
+			}
+			if (updateStoredConfig(storedConfig, packSection, "packSizeLimit",
+					gitPackConfig.getPackSizeLimit())) {
+				changed = true;
+			}
+			if (updateStoredConfig(storedConfig, packSection, "threads",
+					gitPackConfig.getThreads())) {
+				changed = true;
+			}
+			if (updateStoredConfig(storedConfig, packSection, "window",
+					gitPackConfig.getWindow())) {
+				changed = true;
+			}
+
 			if (changed)
-				config.save();				
+				storedConfig.save();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -701,11 +735,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public void on(SystemStarted event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
         cache = new ProjectCache(hazelcastInstance.getReplicatedMap("projectCache"));
+
+		Map<Long, Project> projects = new HashMap<>();
 		for (Project project: query()) {
 			String path = project.getPath();
 			if (!path.equals(project.calcPath()))
 				project.setPath(path);
 			cache.put(project.getId(), project.getFacade());
+			projects.put(project.getId(), project);
 		}
 
 		logger.info("Checking projects...");
@@ -714,11 +751,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		
 		storageServers.addEntryListener(new StorageEntryListener(), true);
 		UUID localServerUUID = clusterManager.getLocalServerUUID();
-		for (File file: storageManager.getProjectsDir().listFiles()) {
-			Long projectId = Long.valueOf(file.getName());
-			if (cache.get(projectId) != null) {
+		for (var file: storageManager.getProjectsDir().listFiles()) {
+			var projectId = Long.valueOf(file.getName());
+			var project = projects.get(projectId);
+			if (project != null) {
 				checkGitDir(projectId);
-				checkGitHooksAndConfig(projectId);
+
+				HookUtils.checkHooks(storageManager.getProjectGitDir(projectId));
+				checkGitConfig(projectId, project.getGitPackConfig());
 				storageServers.put(projectId, new ProjectServer(localServerUUID, Lists.newArrayList()));
 			}
 		}

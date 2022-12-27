@@ -141,10 +141,10 @@ public class EditableUtils {
 		Editable editable = element.getAnnotation(Editable.class);
 		Project project = Project.get();
 		if (project != null && project.getParent() == null) {
-			String placeholder = editable.rootProjectPlaceholder();
+			String placeholder = editable.rootPlaceholder();
 			if (placeholder.length() != 0) {
 				return placeholder;
-			} else if (editable.rootProjectPlaceholderProvider().length() != 0) {
+			} else if (editable.rootPlaceholderProvider().length() != 0) {
 				Class<?> clazz;
 				if (element instanceof Class) 
 					clazz = (Class<?>) element;
@@ -152,7 +152,7 @@ public class EditableUtils {
 					clazz = ((Method) element).getDeclaringClass();
 				else 
 					throw new RuntimeException("Unexpected element type: " + element);
-				return (String) ReflectionUtils.invokeStaticMethod(clazz, editable.rootProjectPlaceholderProvider());
+				return (String) ReflectionUtils.invokeStaticMethod(clazz, editable.rootPlaceholderProvider());
 			}
 		}
 		String placeholder = editable.placeholder();

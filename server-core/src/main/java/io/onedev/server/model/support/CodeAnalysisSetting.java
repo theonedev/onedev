@@ -12,7 +12,7 @@ public class CodeAnalysisSetting implements Serializable {
 
 	private String analysisFiles;
 	
-	@Editable(order=100, name="Files to Be Analyzed", placeholder="Inherit from parent", rootProjectPlaceholder="All files", description="OneDev analyzes repository files for code search, "
+	@Editable(order=100, name="Files to Be Analyzed", placeholder="Inherit from parent", rootPlaceholder ="All files", description="OneDev analyzes repository files for code search, "
 			+ "line statistics, and code contribution statistics. This setting tells which files should be analyzed, and expects space-separated "
 			+ "<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path patterns</a>. A pattern can be excluded by prefixing with '-', for "
 			+ "instance <code>-**/vendors/**</code> will exclude all files with vendors in path. <b>NOTE: </b> Changing this setting only affects new "

@@ -44,7 +44,7 @@ import io.onedev.k8shelper.RunContainerFacade;
 import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.job.AgentInfo;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
@@ -204,7 +204,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 							try {
 								CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
 								jobLogger.log("Checking out code...");
-								Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
+								Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());	
 								
 								checkoutFacade.setupWorkingDir(git, workspaceDir);
 								
@@ -284,7 +284,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
-		Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());
+		Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
 		testCommands(git, testData.getCommands(), jobLogger);
 	}
 	

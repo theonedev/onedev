@@ -17,7 +17,7 @@ public class DefaultRoleBean implements Serializable {
 
 	private String roleName;
 
-	@Editable(name="Default Role", placeholder="Inherit from parent", rootProjectPlaceholder="No default role", description="Default role determines default "
+	@Editable(name="Default Role", placeholder="Inherit from parent", rootPlaceholder ="No default role", description="Default role determines default "
 			+ "permissions granted to everyone in the system. A permission is default permission of the project, "
 			+ "if it is contained in any default role of the project hierarchy (current and all ancestor projects)")
 	@RoleChoice

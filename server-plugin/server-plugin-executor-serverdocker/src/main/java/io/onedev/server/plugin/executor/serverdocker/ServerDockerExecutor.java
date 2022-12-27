@@ -64,7 +64,7 @@ import io.onedev.k8shelper.ServerSideFacade;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.job.AgentInfo;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
@@ -408,7 +408,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										jobLogger.log("Checking out code...");
 										if (hostAuthInfoHome.get() == null)
 											hostAuthInfoHome.set(FileUtils.createTempDir());
-										Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
+										Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());	
 										
 										checkoutFacade.setupWorkingDir(git, hostWorkspace);
 										git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
@@ -649,7 +649,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			}).checkReturnCode();
 		}
 		
-		Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());
+		Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
 		KubernetesHelper.testGitLfsAvailability(git, jobLogger);
 	}
 	

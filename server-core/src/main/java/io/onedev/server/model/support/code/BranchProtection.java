@@ -1,4 +1,4 @@
-package io.onedev.server.model.support;
+package io.onedev.server.model.support.code;
 
 import java.io.Serializable;
 import java.util.ArrayList;

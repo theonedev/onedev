@@ -14,19 +14,19 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final boolean issueManagement;
 	
-	private final Long roleId;
+	private final Long defaultRoleId;
 	
 	private final Long parentId;
 	
-	public ProjectFacade(Long id, String name, String path, 
-			@Nullable String serviceDeskName, boolean issueManagement, 
-			@Nullable Long roleId, @Nullable Long parentId) {
+	public ProjectFacade(Long id, String name, String path,
+						 @Nullable String serviceDeskName, boolean issueManagement,
+						 @Nullable Long defaultRoleId, @Nullable Long parentId) {
 		super(id);
 		this.name = name;
 		this.path = path;
 		this.serviceDeskName = serviceDeskName;
 		this.issueManagement = issueManagement;
-		this.roleId = roleId;
+		this.defaultRoleId = defaultRoleId;
 		this.parentId = parentId;
 	}
 
@@ -50,7 +50,7 @@ public class ProjectFacade extends EntityFacade {
 
 	@Nullable
 	public Long getDefaultRoleId() {
-		return roleId;
+		return defaultRoleId;
 	}
 
 	@Nullable

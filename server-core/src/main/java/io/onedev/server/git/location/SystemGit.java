@@ -1,4 +1,4 @@
-package io.onedev.server.git.config;
+package io.onedev.server.git.location;
 
 import java.io.File;
 
@@ -7,7 +7,7 @@ import org.apache.commons.lang3.SystemUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="Use Git in System Path", order=100)
-public class SystemGit extends GitConfig {
+public class SystemGit extends GitLocation {
 
 	private static final long serialVersionUID = 1L;
 

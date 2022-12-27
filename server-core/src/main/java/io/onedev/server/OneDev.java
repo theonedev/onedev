@@ -251,31 +251,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		} 
 		
 		if (serverUrl == null) {
-			String host;
-			if (Bootstrap.isInDocker()) {
-				host = "localhost";
-			} else try {
-				if (SystemUtils.IS_OS_MAC_OSX) {
-					try (Socket socket = new Socket()) {
-						socket.connect(new InetSocketAddress("microsoft.com", 80));
-						host = StringUtils.stripStart(socket.getLocalAddress().toString(), "/");					
-					} 
-				} else {
-					try (DatagramSocket socket = new DatagramSocket()) {
-						socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-						host = socket.getLocalAddress().getHostAddress();
-					} 
-				}
-			} catch (Exception e) {
-				try {
-					host = InetAddress.getLocalHost().getHostName();
-				} catch (UnknownHostException e2) {
-					host = "localhost";
-				}
-			}
-			
 			ServerConfig serverConfig = serverConfigProvider.get();
-            serverUrl = buildServerUrl(host, "http", serverConfig.getHttpPort());
+            serverUrl = buildServerUrl("localhost", "http", serverConfig.getHttpPort());
 		}
 		
 		return UrlUtils.toString(serverUrl);
