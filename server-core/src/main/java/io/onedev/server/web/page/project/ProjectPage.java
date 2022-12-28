@@ -276,8 +276,11 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					TagProtectionsPage.class, TagProtectionsPage.paramsOf(getProject())));
 			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Code Analysis", 
 					CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject())));
-			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Git Pack Config",
-					GitPackConfigPage.class, GitPackConfigPage.paramsOf(getProject())));
+			
+			if (getProject().isCodeManagement()) {
+				codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Git Pack Config",
+						GitPackConfigPage.class, GitPackConfigPage.paramsOf(getProject())));
+			}
 
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Code", codeSettingMenuItems));
 			
@@ -302,13 +305,34 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Web Hooks", 
 					WebHooksPage.class, WebHooksPage.paramsOf(getProject())));
 			
+			List<Class<? extends ContributedProjectSetting>> contributedSettingClasses = new ArrayList<>();
 			for (ProjectSettingContribution contribution:OneDev.getExtensions(ProjectSettingContribution.class)) {
-				for (Class<? extends ContributedProjectSetting> settingClass: contribution.getSettingClasses()) {
-					settingMenuItems.add(new SidebarMenuItem.Page(
-							null, 
-							EditableUtils.getDisplayName(settingClass), 
-							ContributedProjectSettingPage.class, 
-							ContributedProjectSettingPage.paramsOf(getProject(), settingClass)));
+				for (Class<? extends ContributedProjectSetting> settingClass: contribution.getSettingClasses()) 
+					contributedSettingClasses.add(settingClass);
+			}
+			contributedSettingClasses.sort(Comparator.comparingInt(EditableUtils::getOrder));
+			
+			Map<String, List<SidebarMenuItem>> contributedSettingMenuItems = new HashMap<>();
+			for (var contributedSettingClass: contributedSettingClasses) {
+				var group = EditableUtils.getGroup(contributedSettingClass);
+				if (group == null)
+					group = "";
+				var contributedSettingMenuItemsOfGroup = contributedSettingMenuItems.get(group);
+				if (contributedSettingMenuItemsOfGroup == null) {
+					contributedSettingMenuItemsOfGroup = new ArrayList<>();
+					contributedSettingMenuItems.put(group, contributedSettingMenuItemsOfGroup);
+				}
+				contributedSettingMenuItemsOfGroup.add(new SidebarMenuItem.Page(
+						null,
+						EditableUtils.getDisplayName(contributedSettingClass),
+						ContributedProjectSettingPage.class,
+						ContributedProjectSettingPage.paramsOf(getProject(), contributedSettingClass)));
+			}
+			for (var entry: contributedSettingMenuItems.entrySet()) {
+				if (entry.getKey().length() == 0) {
+					settingMenuItems.addAll(entry.getValue());
+				} else {
+					settingMenuItems.add(new SidebarMenuItem.SubMenu(null, entry.getKey(), entry.getValue()));
 				}
 			}
 			
