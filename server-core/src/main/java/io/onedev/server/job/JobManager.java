@@ -3,9 +3,12 @@ package io.onedev.server.job;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.TaskLogger;
@@ -34,6 +37,10 @@ public interface JobManager {
 	void cancel(Build build);
 	
 	void resume(Build build);
+
+	void runJob(UUID serverUUID, ClusterRunnable runnable);
+
+	void runJobLocal(JobContext jobContext, JobRunnable runnable);
 	
 	WebShell openShell(Long buildId, Terminal terminal);
 	

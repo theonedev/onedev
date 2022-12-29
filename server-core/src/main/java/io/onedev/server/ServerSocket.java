@@ -19,7 +19,7 @@ import io.onedev.agent.AgentData;
 import io.onedev.agent.CallData;
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
-import io.onedev.agent.WaitingForAgentResourceToBeReleased;
+import io.onedev.agent.WantToDisconnectAgent;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -188,9 +188,9 @@ public class ServerSocket {
     
     private Serializable service(Serializable request) {
 		try {
-			if (request instanceof WaitingForAgentResourceToBeReleased) {
+			if (request instanceof WantToDisconnectAgent) {
 				if (agentId != null)
-					OneDev.getInstance(ResourceAllocator.class).waitingForAgentResourceToBeReleased(agentId);
+					OneDev.getInstance(ResourceAllocator.class).wantToDisconnectAgent(agentId);
 				return null;
 			} else {
 				throw new ExplicitException("Unknown request: " + request.getClass());

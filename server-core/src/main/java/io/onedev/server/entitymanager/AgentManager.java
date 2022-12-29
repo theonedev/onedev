@@ -29,9 +29,9 @@ public interface AgentManager extends EntityManager<Agent> {
 
 	Map<Long, UUID> getAgentServers();
 
-	List<String> getOsNames();
+	Collection<String> getOsNames();
 	
-	List<String> getOsArchs();
+	Collection<String> getOsArchs();
 	
 	List<Agent> query(EntityQuery<Agent> agentQuery, int firstResult, int maxResults);
 	

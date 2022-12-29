@@ -1,42 +1,10 @@
 package io.onedev.server.buildspec;
 
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-import java.util.function.Function;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.wicket.Component;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.SequenceNode;
-import org.yaml.snakeyaml.nodes.Tag;
-
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -62,6 +30,18 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.wicket.Component;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.nodes.*;
+
+import javax.annotation.Nullable;
+import javax.validation.*;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.function.Function;
 
 @Editable
 @ClassValidating
@@ -1425,6 +1405,32 @@ public class BuildSpec implements Serializable, Validatable {
 				}				
 			}
 		}			
-	}	
-	
+	}
+
+	private void migrate19(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (var it = jobNode.getValue().iterator(); it.hasNext();) {
+						String jobTupleKey = ((ScalarNode)it.next().getKeyNode()).getValue();
+						if (jobTupleKey.equals("cpuRequirement") || jobTupleKey.equals("memoryRequirement"))
+							it.remove();
+					}
+				}
+			} else if (specObjectKey.equals("services")) {
+				SequenceNode servicesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node servicesNodeItem: servicesNode.getValue()) {
+					MappingNode serviceNode = (MappingNode) servicesNodeItem;
+					for (var it = serviceNode.getValue().iterator(); it.hasNext();) {
+						String serviceTupleKey = ((ScalarNode)it.next().getKeyNode()).getValue();
+						if (serviceTupleKey.equals("cpuRequirement") || serviceTupleKey.equals("memoryRequirement"))
+							it.remove();
+					}
+				}
+			}
+		}
+	}
 }

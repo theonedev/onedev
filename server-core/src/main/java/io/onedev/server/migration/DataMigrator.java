@@ -4580,7 +4580,21 @@ public class DataMigrator {
 									"io.onedev.server.git.location.");
 							curlConfigElement.addAttribute("class", clazz);
 						}
+					} else if (key.equals("PERFORMANCE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							int cpuIntensiveTaskConcurrency;
+							try {
+								HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
+								cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount();
+							} catch (Exception e) {
+								cpuIntensiveTaskConcurrency = 4;
+							}
+							valueElement.addElement("cpuIntensiveTaskConcurrency")
+									.setText(String.valueOf(cpuIntensiveTaskConcurrency));
+						}
 					}
+
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
@@ -4596,6 +4610,15 @@ public class DataMigrator {
 					for (var tagProtectionElement: element.element("tagProtections").elements()) {
 						tagProtectionElement.setName("io.onedev.server.model.support.code.TagProtection");
 					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Agents.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					element.element("memory").detach();
+					Element cpuElement = element.element("cpu");
+					cpuElement.setName("cpus");
+					cpuElement.setText(String.valueOf(Integer.parseInt(cpuElement.getTextTrim())/1000));
 				}
 				dom.writeToFile(file, false);
 			}

@@ -1,20 +1,15 @@
 package io.onedev.server.job;
 
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.search.entity.agent.AgentQuery;
 
 public interface ResourceAllocator {
-	
-	static final String CPU = "cpu";
-	
-	static final String MEMORY = "memory";
 
-	void run(ResourceRunnable runnable, @Nullable AgentQuery agentQuery, 
-			Map<String, Integer> resourceRequirements);
+	void runServerJob(String resourceHolder, int total, int required, ClusterRunnable runnable);
+
+	void runAgentJob(AgentQuery agentQuery, String resourceHolder, int total, int required, 
+					 AgentRunnable runnable);
 	
-	void waitingForAgentResourceToBeReleased(Long agentId);
+	void wantToDisconnectAgent(Long agentId);
 	
 }

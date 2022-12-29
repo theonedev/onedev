@@ -1,39 +1,9 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jetty.websocket.api.Session;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-
 import com.google.common.base.Splitter;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
 import com.hazelcast.core.HazelcastInstance;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.agent.AgentData;
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
@@ -68,6 +38,25 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.AttributeNameValidator;
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.websocket.api.Session;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultAgentManager extends BaseEntityManager<Agent> implements AgentManager, Serializable {
@@ -200,8 +189,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setOsVersion(data.getOsInfo().getOsVersion());
 				agent.setOsArch(data.getOsInfo().getOsArch());
 				agent.setName(data.getName());
-				agent.setCpu(data.getCpu());
-				agent.setMemory(data.getMemory());
+				agent.setCpus(data.getCpus());
 				agent.setTemporal(data.isTemporal());
 				agent.setIpAddress(data.getIpAddress());
 				save(agent);
@@ -221,8 +209,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setOsVersion(data.getOsInfo().getOsVersion());
 				agent.setOsArch(data.getOsInfo().getOsArch());
 				agent.setIpAddress(data.getIpAddress());
-				agent.setCpu(data.getCpu());
-				agent.setMemory(data.getMemory());
+				agent.setCpus(data.getCpus());
 				agent.setTemporal(data.isTemporal());
 				save(agent);
 				attributeManager.syncAttributes(agent, data.getAttributes());
@@ -290,23 +277,19 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 
 	@Override
 	public Map<Long, UUID> getAgentServers() {
-		return new HashMap<>(agentServers);
+		return agentServers;
 	}
 
 	@Sessional
 	@Override
-	public List<String> getOsNames() {
-		List<String> osNames = new ArrayList<>(this.osNames.keySet());
-		Collections.sort(osNames);
-		return osNames;
+	public Collection<String> getOsNames() {
+		return osNames.keySet();
 	}
 	
 	@Sessional
 	@Override
-	public List<String> getOsArchs() {
-		List<String> osArchs = new ArrayList<>(this.osArchs.keySet());
-		Collections.sort(osArchs);
-		return osArchs;
+	public Collection<String> getOsArchs() {
+		return osArchs.keySet();
 	}
 	
 	private CriteriaQuery<Agent> buildCriteriaQuery(org.hibernate.Session session, EntityQuery<Agent> agentQuery) {

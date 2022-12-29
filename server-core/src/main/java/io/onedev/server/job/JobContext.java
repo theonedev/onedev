@@ -1,17 +1,15 @@
 package io.onedev.server.job;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import org.eclipse.jgit.lib.ObjectId;
-
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.LeafFacade;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import org.eclipse.jgit.lib.ObjectId;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 public class JobContext implements Serializable {
 	
@@ -41,14 +39,12 @@ public class JobContext implements Serializable {
 	
 	private final List<Service> services;
 	
-	private final Map<String, Integer> resourceRequirements;
-	
 	private final int retried;
 	
 	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, String projectPath, 
 			String projectGitDir, Long buildId, Long buildNumber, List<Action> actions, 
 			String refName, ObjectId commitId, Collection<CacheSpec> caches, 
-			List<Service> services, Map<String, Integer> resourceRequirements, int retried) {
+			List<Service> services, int retried) {
 		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
 		this.projectId = projectId;
@@ -61,7 +57,6 @@ public class JobContext implements Serializable {
 		this.commitId = commitId;
 		this.cacheSpecs = caches;
 		this.services = services;
-		this.resourceRequirements = resourceRequirements;
 		this.retried = retried;
 	}
 	
@@ -95,10 +90,6 @@ public class JobContext implements Serializable {
 
 	public List<Service> getServices() {
 		return services;
-	}
-
-	public Map<String, Integer> getResourceRequirements() {
-		return resourceRequirements;
 	}
 
 	public Long getProjectId() {

@@ -1,29 +1,5 @@
 package io.onedev.server.search.entity.agent;
 
-import static io.onedev.server.model.Agent.NAME_CPU;
-import static io.onedev.server.model.Agent.NAME_IP_ADDRESS;
-import static io.onedev.server.model.Agent.NAME_MEMORY;
-import static io.onedev.server.model.Agent.NAME_NAME;
-import static io.onedev.server.model.Agent.NAME_OS_NAME;
-import static io.onedev.server.model.Agent.NAME_OS_ARCH;
-import static io.onedev.server.model.Agent.NAME_OS_VERSION;
-import static io.onedev.server.model.Agent.ORDER_FIELDS;
-import static io.onedev.server.model.Agent.QUERY_FIELDS;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -32,20 +8,19 @@ import io.onedev.server.model.Agent;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.agent.AgentQueryParser.AndCriteriaContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.CriteriaContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.FieldOperatorValueCriteriaContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.NotCriteriaContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.OperatorCriteriaContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.OperatorValueCriteriaContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.OrCriteriaContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.OrderContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.ParensCriteriaContext;
-import io.onedev.server.search.entity.agent.AgentQueryParser.QueryContext;
+import io.onedev.server.search.entity.agent.AgentQueryParser.*;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
+import org.antlr.v4.runtime.*;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static io.onedev.server.model.Agent.*;
 
 public class AgentQuery extends EntityQuery<Agent> {
 
@@ -154,19 +129,9 @@ public class AgentQuery extends EntityQuery<Agent> {
 								return new OsArchCriteria(value);
 							case NAME_IP_ADDRESS:
 								return new IpAddressCriteria(value);
-							case NAME_CPU:
-								return new CpuCriteria(value, operator);
-							case NAME_MEMORY:
-								return new MemoryCriteria(value, operator);
 							default: 
 								return new AttributeCriteria(fieldName, value);
 							}
-						case AgentQueryLexer.IsGreaterThan:
-						case AgentQueryLexer.IsLessThan:
-							if (fieldName.equals(NAME_CPU))
-								return new CpuCriteria(value, operator);
-							else
-								return new MemoryCriteria(value, operator);
 						default:
 							throw new IllegalStateException();
 						}
@@ -227,15 +192,6 @@ public class AgentQuery extends EntityQuery<Agent> {
 		Collection<String> attributeNames = OneDev.getInstance(AgentAttributeManager.class).getAttributeNames();
 		if (!QUERY_FIELDS.contains(fieldName) && !attributeNames.contains(fieldName))
 			throw new ExplicitException("Attribute not found: " + fieldName);
-		switch (operator) {
-		case AgentQueryLexer.IsGreaterThan:
-		case AgentQueryLexer.IsLessThan:
-			if (!fieldName.equals(NAME_CPU) 
-					&& !fieldName.equals(NAME_MEMORY)) { 
-				throw newOperatorException(fieldName, operator);
-			}
-			break;
-		}
 	}
 	
 	public static String getRuleName(int rule) {

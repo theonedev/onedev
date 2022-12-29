@@ -2,13 +2,13 @@ package io.onedev.server.job;
 
 import javax.annotation.Nullable;
 
-public class CancellerAwareCancellationException extends java.util.concurrent.CancellationException {
+public class CancellationException extends java.util.concurrent.CancellationException {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final Long cancellerId;
 	
-	public CancellerAwareCancellationException(@Nullable Long cancellerId) {
+	public CancellationException(@Nullable Long cancellerId) {
 		this.cancellerId = cancellerId;
 	}
 	

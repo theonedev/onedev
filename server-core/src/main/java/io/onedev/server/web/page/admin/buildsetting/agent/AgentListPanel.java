@@ -846,46 +846,6 @@ class AgentListPanel extends Panel {
 			
 		});
 		
-		columns.add(new AbstractColumn<Agent, Void>(Model.of("CPU")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
-				Agent agent = rowModel.getObject();
-				cellItem.add(new Label(componentId, agent.getCpu()));
-			}
-
-			@Override
-			public String getCssClass() {
-				return "d-none d-xl-table-cell";
-			}
-
-			@Override
-			public Component getHeader(String componentId) {
-				return new Fragment(componentId, "cpuHeaderFrag", AgentListPanel.this);
-			}
-			
-		});
-		
-		columns.add(new AbstractColumn<Agent, Void>(Model.of("Memory")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Agent>> cellItem, String componentId, IModel<Agent> rowModel) {
-				Agent agent = rowModel.getObject();
-				cellItem.add(new Label(componentId, agent.getMemory()));
-			}
-			
-			@Override
-			public String getCssClass() {
-				return "d-none d-xl-table-cell";
-			}
-			
-			@Override
-			public Component getHeader(String componentId) {
-				return new Fragment(componentId, "memoryHeaderFrag", AgentListPanel.this);
-			}
-			
-		});
-		
 		columns.add(new AbstractColumn<Agent, Void>(Model.of("Temporal")) {
 
 			@Override

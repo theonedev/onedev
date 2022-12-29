@@ -19,27 +19,32 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.server.ServerConfig;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.security.SecurityUtils;
 
 @Singleton
 public class DefaultWorkExecutor implements WorkExecutor {
 
+	private final SettingManager settingManager;
+	
 	private final ExecutorService executorService;
 	
 	private final Map<String, Collection<PrioritizedCallable<?>>> runnings = new HashMap<>();
 	
 	private final Map<String, Collection<WorkFuture<?>>> waitings = new HashMap<>();
 
-	private final int concurrency;
-	
 	@Inject
-	public DefaultWorkExecutor(ExecutorService executorService, ServerConfig serverConfig) {
+	public DefaultWorkExecutor(ExecutorService executorService, SettingManager settingManager) {
 		this.executorService = executorService;
-		concurrency = serverConfig.getServerCpu() / 1000;
+		this.settingManager = settingManager;
+	}
+	
+	private int getConcurrency() {
+		return settingManager.getPerformanceSetting().getCpuIntensiveTaskConcurrency();
 	}
 
 	private synchronized void check() {
-		if (concurrency > runnings.size()) {
+		if (getConcurrency() > runnings.size()) {
 			Map<String, Integer> averagePriorities = new HashMap<>();
 			for (Map.Entry<String, Collection<WorkFuture<?>>> entry: waitings.entrySet()) {
 				int totalPriorities = 0;
@@ -64,7 +69,7 @@ public class DefaultWorkExecutor implements WorkExecutor {
 					runningsOfGroup.add(future.callable);
 				}
 				runnings.put(groupId, runningsOfGroup);
-				if (runnings.size() == concurrency)
+				if (runnings.size() == getConcurrency())
 					break;
 			}
 		}

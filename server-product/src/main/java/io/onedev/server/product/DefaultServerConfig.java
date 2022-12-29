@@ -1,27 +1,21 @@
 package io.onedev.server.product;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import com.google.common.base.Splitter;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.server.ServerConfig;
+import io.onedev.server.persistence.HibernateConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.internal.guava.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Splitter;
-
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.ServerConfig;
-import io.onedev.server.persistence.HibernateConfig;
-import oshi.SystemInfo;
-import oshi.hardware.HardwareAbstractionLayer;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.List;
 
 @Singleton
 public class DefaultServerConfig implements ServerConfig {
@@ -37,10 +31,6 @@ public class DefaultServerConfig implements ServerConfig {
 	private static final String PROP_CLUSTER_IP = "cluster_ip";
 	
 	private static final String PROP_CLUSTER_PORT = "cluster_port";
-	
-	private static final String PROP_SERVER_CPU = "server_cpu";
-	
-	private static final String PROP_SERVER_MEMORY = "server_memory";
 	
 	private int httpPort;
 	
@@ -138,54 +128,6 @@ public class DefaultServerConfig implements ServerConfig {
 			clusterPort = 5701;
 		else
 			clusterPort = Integer.parseInt(clusterPortStr.trim());
-		
-		HardwareAbstractionLayer hardware = null;
-		try {
-			hardware = new SystemInfo().getHardware();
-		} catch (Exception e) {
-			logger.debug("Error calling oshi", e);
-		}
-		
-		String cpuString = System.getenv(PROP_SERVER_CPU);
-		if (StringUtils.isBlank(cpuString))
-			cpuString = props.getProperty(PROP_SERVER_CPU);
-		if (StringUtils.isBlank(cpuString)) {
-			if (hardware != null) {
-				serverCpu = hardware.getProcessor().getLogicalProcessorCount()*1000;
-			} else {
-				serverCpu = 4000;
-				logger.warn("Unable to call oshi to get default cpu quota (cpu cores x 1000). Assuming as 4000. "
-						+ "Configure it manually via environment variable or server property '" + PROP_SERVER_CPU 
-						+ "' if you do not want to use this value");
-			}
-		} else {
-			try {
-				serverCpu = Integer.parseInt(cpuString);
-			} catch (NumberFormatException e) {
-				throw new ExplicitException("Property '" + PROP_SERVER_CPU + "' should be a number");
-			}
-		}
-
-		String memoryString = System.getenv(PROP_SERVER_MEMORY);
-		if (StringUtils.isBlank(memoryString))
-			memoryString = props.getProperty(PROP_SERVER_MEMORY);
-		if (StringUtils.isBlank(memoryString)) {
-			if (hardware != null) {
-				serverMemory = (int) (hardware.getMemory().getTotal()/1024/1024); 
-			} else {
-				serverMemory = 8000;
-				logger.warn("Unable to call oshi to get default memory quota (mega bytes of physical memory). "
-						+ "Assuming as 8000. Configure it manually via environment variable or server property "
-						+ "'" + PROP_SERVER_MEMORY + "' if you do not want to use this value");
-			}
-		} else {
-			try {
-				serverMemory = Integer.parseInt(memoryString);
-			} catch (NumberFormatException e) {
-				throw new ExplicitException("Property '" + PROP_SERVER_MEMORY + "' should be a number");
-			}
-		}
-		
 	}
 	
 	@Override
@@ -223,14 +165,4 @@ public class DefaultServerConfig implements ServerConfig {
 		return clusterPort;
 	}
 
-	@Override
-	public int getServerCpu() {
-		return serverCpu;
-	}
-
-	@Override
-	public int getServerMemory() {
-		return serverMemory;
-	}
-	
 }

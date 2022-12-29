@@ -102,10 +102,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	private List<CacheSpec> caches = new ArrayList<>();
 
-	private int cpuRequirement = 250;
-	
-	private int memoryRequirement = 256;
-	
 	private long timeout = 3600;
 	
 	private List<PostBuildAction> postBuildActions = new ArrayList<>();
@@ -286,25 +282,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.retryDelay = retryDelay;
 	}
 	
-	@Editable(order=10050, name="CPU Requirement", group="More Settings", description="Specify CPU requirement of the job in millis. "
-			+ "1000 millis means a single CPU core")
-	public int getCpuRequirement() {
-		return cpuRequirement;
-	}
-
-	public void setCpuRequirement(int cpuRequirement) {
-		this.cpuRequirement = cpuRequirement;
-	}
-
-	@Editable(order=10060, group="More Settings", description="Specify memory requirement of the job in mega bytes")
-	public int getMemoryRequirement() {
-		return memoryRequirement;
-	}
-
-	public void setMemoryRequirement(int memoryRequirement) {
-		this.memoryRequirement = memoryRequirement;
-	}
-
 	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. "
 			+ "For instance for Java Maven projects executed by various docker executors, you may cache folder "
 			+ "<tt>/root/.m2/repository</tt> to avoid downloading dependencies for subsequent executions.<br>"

@@ -47,7 +47,7 @@ public class JobExecution {
 		if (isTimedout())
 			throw new TimeoutException();
 		else if (cancellerId != null)
-			throw new CancellerAwareCancellationException(cancellerId);
+			throw new CancellationException(cancellerId);
 		else
 			future.get();
 	}

@@ -1,13 +1,7 @@
 package io.onedev.server.web.behavior;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
@@ -26,6 +20,11 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class AgentQueryBehavior extends ANTLRAssistBehavior {
@@ -46,6 +45,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
+						AgentManager agentManager = OneDev.getInstance(AgentManager.class);
 						AgentAttributeManager attributeManager = OneDev.getInstance(AgentAttributeManager.class);
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>(Agent.QUERY_FIELDS);
@@ -73,14 +73,19 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = AgentQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {
 									AgentQuery.checkField(fieldName, operator);
-									if (fieldName.equals(Agent.NAME_OS_NAME)) 
-										return SuggestionUtils.suggest(OneDev.getInstance(AgentManager.class).getOsNames(), matchWith);
-									else if (fieldName.equals(Agent.NAME_NAME)) 
+									if (fieldName.equals(Agent.NAME_OS_NAME)) {
+										var osNames = new ArrayList<>(agentManager.getOsNames());
+										Collections.sort(osNames);
+										return SuggestionUtils.suggest(osNames, matchWith);
+									} else if (fieldName.equals(Agent.NAME_NAME)) {
 										return SuggestionUtils.suggestAgents(matchWith);
-									else if (fieldName.equals(Agent.NAME_OS_ARCH))
-										return SuggestionUtils.suggest(OneDev.getInstance(AgentManager.class).getOsArchs(), matchWith);
-									else 
+									} else if (fieldName.equals(Agent.NAME_OS_ARCH)) {
+										var osArchs = new ArrayList<>(agentManager.getOsArchs());
+										Collections.sort(osArchs);
+										return SuggestionUtils.suggest(osArchs, matchWith);
+									} else {
 										return null;
+									}
 								} catch (ExplicitException ex) {
 								}
 							}

@@ -34,8 +34,4 @@ public interface ServerConfig {
 	
 	int getClusterPort();
 	
-	int getServerCpu();
-	
-	int getServerMemory();
-	
 }

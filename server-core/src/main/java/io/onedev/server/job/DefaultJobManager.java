@@ -1,87 +1,18 @@
 package io.onedev.server.job;
 
-import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
-import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.subject.Subject;
-import org.eclipse.jgit.lib.ObjectId;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.Action;
-import io.onedev.k8shelper.CacheAllocationRequest;
-import io.onedev.k8shelper.CacheInstance;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.k8shelper.LeafFacade;
-import io.onedev.k8shelper.ServerSideFacade;
+import io.onedev.commons.utils.*;
+import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecParseException;
 import io.onedev.server.buildspec.Service;
-import io.onedev.server.buildspec.job.CacheSpec;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobDependency;
-import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
-import io.onedev.server.buildspec.job.JobTriggerMatch;
-import io.onedev.server.buildspec.job.SubmitReason;
+import io.onedev.server.buildspec.job.*;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
 import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
@@ -95,27 +26,16 @@ import io.onedev.server.buildspec.param.spec.SecretParam;
 import io.onedev.server.buildspec.step.ServerSideStep;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.DefaultBranchChanged;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.ScheduledTimeReaches;
-import io.onedev.server.event.project.build.BuildEvent;
-import io.onedev.server.event.project.build.BuildFinished;
-import io.onedev.server.event.project.build.BuildPending;
-import io.onedev.server.event.project.build.BuildRetrying;
-import io.onedev.server.event.project.build.BuildRunning;
-import io.onedev.server.event.project.build.BuildSubmitted;
-import io.onedev.server.event.project.build.BuildUpdated;
+import io.onedev.server.event.project.build.*;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -127,13 +47,8 @@ import io.onedev.server.job.authorization.JobAuthorization;
 import io.onedev.server.job.authorization.JobAuthorization.Context;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.LogTask;
-import io.onedev.server.model.Build;
+import io.onedev.server.model.*;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.BuildDependence;
-import io.onedev.server.model.BuildParam;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -161,6 +76,37 @@ import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Interpolative;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.subject.Subject;
+import org.eclipse.jgit.lib.ObjectId;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
+import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, Serializable {
@@ -175,7 +121,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final Map<String, List<Action>> jobActions = new ConcurrentHashMap<>();
 	
-	private final Map<String, JobExecutor> jobExecutors = new ConcurrentHashMap<>();
+	private final Map<String, JobRunnable> jobRunnables = new ConcurrentHashMap<>();
 	
 	private final Map<Long, Collection<String>> scheduledTasks = new ConcurrentHashMap<>();
 	
@@ -557,163 +503,142 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
 		
 		JobExecutor jobExecutor = getJobExecutor(build, jobExecutorName, jobLogger);
-		if (jobExecutor != null) {
-			Long projectId = build.getProject().getId();
-			String projectPath = build.getProject().getPath();
-			String projectGitDir = storageManager.getProjectGitDir(build.getProject().getId()).getAbsolutePath();
-			Long buildId = build.getId();
-			Long buildNumber = build.getNumber();
-			String refName = build.getRefName();
-			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-			BuildSpec buildSpec = build.getSpec();
-			
-			AtomicInteger maxRetries = new AtomicInteger(0);
-			AtomicInteger retryDelay = new AtomicInteger(0);
-			List<CacheSpec> caches = new ArrayList<>();
-			List<Service> services = new ArrayList<>();
-			List<Action> actions = new ArrayList<>();
-			
-			Job job;
-			
-			JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
-			Build.push(build);
-			try {
-				job = build.getJob();
-				
-				for (Step step: job.getSteps()) {
-					step = interpolator.interpolateProperties(step);
-					actions.add(step.getAction(build, jobToken, build.getParamCombination()));
-				}
-				
-				for (CacheSpec cache: job.getCaches()) 
-					caches.add(interpolator.interpolateProperties(cache));
-				
-				for (String serviceName: job.getRequiredServices()) {
-					Service service = buildSpec.getServiceMap().get(serviceName);
-					services.add(interpolator.interpolateProperties(service));
-				}
-				
-				maxRetries.set(job.getMaxRetries());
-				retryDelay.set(job.getRetryDelay());
-			} finally {
-				Build.pop();
-				JobSecretAuthorizationContext.pop();
-			}
+		Long projectId = build.getProject().getId();
+		String projectPath = build.getProject().getPath();
+		String projectGitDir = storageManager.getProjectGitDir(build.getProject().getId()).getAbsolutePath();
+		Long buildId = build.getId();
+		Long buildNumber = build.getNumber();
+		String refName = build.getRefName();
+		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
+		BuildSpec buildSpec = build.getSpec();
 
-			int cpuRequirement = 0, memoryRequirement = 0;
-			cpuRequirement = job.getCpuRequirement();
-			memoryRequirement = job.getMemoryRequirement();
+		AtomicInteger maxRetries = new AtomicInteger(0);
+		AtomicInteger retryDelay = new AtomicInteger(0);
+		List<CacheSpec> caches = new ArrayList<>();
+		List<Service> services = new ArrayList<>();
+		List<Action> actions = new ArrayList<>();
+
+		Job job;
+
+		JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
+		Build.push(build);
+		try {
+			job = build.getJob();
+			
+			for (Step step: job.getSteps()) {
+				step = interpolator.interpolateProperties(step);
+				actions.add(step.getAction(build, jobToken, build.getParamCombination()));
+			}
+			
+			for (CacheSpec cache: job.getCaches()) 
+				caches.add(interpolator.interpolateProperties(cache));
 			
 			for (String serviceName: job.getRequiredServices()) {
 				Service service = buildSpec.getServiceMap().get(serviceName);
-				if (service != null) {
-					cpuRequirement += service.getCpuRequirement();
-					memoryRequirement += service.getMemoryRequirement();
-				}
+				services.add(interpolator.interpolateProperties(service));
 			}
-			Map<String, Integer> resourceRequirements = new HashMap<>();
-			resourceRequirements.put(ResourceAllocator.CPU, cpuRequirement);
-			resourceRequirements.put(ResourceAllocator.MEMORY, memoryRequirement);
+			
+			maxRetries.set(job.getMaxRetries());
+			retryDelay.set(job.getRetryDelay());
+		} finally {
+			Build.pop();
+			JobSecretAuthorizationContext.pop();
+		}
 
-			AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
-			executionRef.set(new JobExecution(executorService.submit(new Runnable() {
+		AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
+		executionRef.set(new JobExecution(executorService.submit(new Runnable() {
 
-				@Override
-				public void run() {
-					AtomicInteger retried = new AtomicInteger(0);
-					while (true) {
-						JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath, 
-								projectGitDir, buildId, buildNumber, actions, refName, commitId, caches, services, 
-								resourceRequirements, retried.get());
-						// Store original job actions as the copy in job context will be fetched from cluster and 
-						// some transient fields (such as step object in ServerSideFacade) will not be preserved 
-						jobActions.put(jobToken, actions);
-						jobContexts.put(jobToken, jobContext);
-						logManager.addJobLogger(jobToken, jobLogger);
-						serverStepThreads.put(jobToken, new ArrayList<>());
-						try {
-							jobLogger.log("Waiting for resources...");
-							resourceAllocator.run(
-									new JobRunnable(jobToken), jobExecutor.getAgentRequirement(), resourceRequirements);
-							break;
-						} catch (Throwable e) {
-							if (retried.getAndIncrement() < maxRetries.get() && sessionManager.call(new Callable<Boolean>() {
+			@Override
+			public void run() {
+				AtomicInteger retried = new AtomicInteger(0);
+				while (true) {
+					JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath, 
+							projectGitDir, buildId, buildNumber, actions, refName, commitId, caches, services, 
+							retried.get());
+					// Store original job actions as the copy in job context will be fetched from cluster and 
+					// some transient fields (such as step object in ServerSideFacade) will not be preserved 
+					jobActions.put(jobToken, actions);
+					jobContexts.put(jobToken, jobContext);
+					logManager.addJobLogger(jobToken, jobLogger);
+					serverStepThreads.put(jobToken, new ArrayList<>());
+					try {
+						jobExecutor.execute(jobContext);
+						break;
+					} catch (Throwable e) {
+						if (retried.getAndIncrement() < maxRetries.get() && sessionManager.call(new Callable<Boolean>() {
+
+							@Override
+							public Boolean call() {
+								RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
+								
+								AtomicReference<String> errorMessage = new AtomicReference<>(null);
+								log(e, new TaskLogger() {
+
+									@Override
+									public void log(String message, String sessionId) {
+										errorMessage.set(message);
+									}
+									
+								});
+								return retryCondition.matches(new RetryContext(buildManager.load(buildId), errorMessage.get()));
+							}
+							
+						})) {
+							log(e, jobLogger);
+							jobLogger.warning("Job will be retried after a while...");
+							transactionManager.run(new Runnable() {
 
 								@Override
-								public Boolean call() {
-									RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
-									
-									AtomicReference<String> errorMessage = new AtomicReference<>(null);
-									log(e, new TaskLogger() {
-
-										@Override
-										public void log(String message, String sessionId) {
-											errorMessage.set(message);
-										}
-										
-									});
-									return retryCondition.matches(new RetryContext(buildManager.load(buildId), errorMessage.get()));
+								public void run() {
+									Build build = buildManager.load(buildId);
+									build.setRunningDate(null);
+									build.setPendingDate(null);
+									build.setRetryDate(new Date());
+									build.setStatus(Status.WAITING);
+									listenerRegistry.post(new BuildRetrying(build));
+									buildManager.save(build);
 								}
 								
-							})) {
-								log(e, jobLogger);
-								jobLogger.warning("Job will be retried after a while...");
-								transactionManager.run(new Runnable() {
+							});
+							try {						
+								Thread.sleep(retryDelay.get() * (long)(Math.pow(2, retried.get())) * 1000L);
+							} catch (InterruptedException e2) {
+								throw new RuntimeException(e2);
+							}
+							transactionManager.run(new Runnable() {
 
-									@Override
-									public void run() {
-										Build build = buildManager.load(buildId);
-										build.setRunningDate(null);
-										build.setPendingDate(null);
-										build.setRetryDate(new Date());
-										build.setStatus(Build.Status.WAITING);
-										listenerRegistry.post(new BuildRetrying(build));
-										buildManager.save(build);
-									}
-									
-								});
-								try {						
-									Thread.sleep(retryDelay.get() * (long)(Math.pow(2, retried.get())) * 1000L);
-								} catch (InterruptedException e2) {
-									throw new RuntimeException(e2);
+								@Override
+								public void run() {
+									JobExecution execution = executionRef.get();
+									if (execution != null)
+										execution.updateBeginTime();
+									Build build = buildManager.load(buildId);
+									build.setPendingDate(new Date());
+									build.setStatus(Status.PENDING);
+									listenerRegistry.post(new BuildPending(build));
+									buildManager.save(build);
 								}
-								transactionManager.run(new Runnable() {
-
-									@Override
-									public void run() {
-										JobExecution execution = executionRef.get();
-										if (execution != null)
-											execution.updateBeginTime();
-										Build build = buildManager.load(buildId);
-										build.setPendingDate(new Date());
-										build.setStatus(Build.Status.PENDING);
-										listenerRegistry.post(new BuildPending(build));
-										buildManager.save(build);
-									}
-									
-								});
-							} else {
-								throw ExceptionUtils.unchecked(e);
-							}
-						} finally {
-							Collection<Thread> threads = serverStepThreads.remove(jobToken);
-							synchronized (threads) {
-								for (Thread thread: threads)
-									thread.interrupt();
-							}
-							logManager.removeJobLogger(jobToken);
-							jobContexts.remove(jobToken);
-							jobActions.remove(jobToken);
+								
+							});
+						} else {
+							throw ExceptionUtils.unchecked(e);
 						}
-					}							
-				}			
-				
-			}), job.getTimeout()*1000L));
+					} finally {
+						Collection<Thread> threads = serverStepThreads.remove(jobToken);
+						synchronized (threads) {
+							for (Thread thread: threads)
+								thread.interrupt();
+						}
+						logManager.removeJobLogger(jobToken);
+						jobContexts.remove(jobToken);
+						jobActions.remove(jobToken);
+					}
+				}							
+			}			
 			
-			return executionRef.get();
-		} else {
-			throw new ExplicitException("No applicable job executor");
-		}
+		}), job.getTimeout()*1000L));
+
+		return executionRef.get();
 	}
 	
 	private void log(Throwable e, TaskLogger logger) {
@@ -896,9 +821,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					public Void call() throws Exception {
 						JobContext jobContext = getJobContext(buildId);
 						if (jobContext != null) {
-							JobExecutor jobExecutor = jobExecutors.get(jobContext.getJobToken());
-							if (jobExecutor != null)
-								jobExecutor.resume(jobContext);
+							JobRunnable jobRunnable = jobRunnables.get(jobContext.getJobToken());
+							if (jobRunnable != null)
+								jobRunnable.resume(jobContext);
 						}
 						return null;
 					}
@@ -925,9 +850,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						@Override
 						public Void call() throws Exception {
 							JobContext jobContext = getJobContext(jobToken, true);
-							JobExecutor jobExecutor = jobExecutors.get(jobContext.getJobToken());
-							if (jobExecutor != null) {
-								Shell shell = jobExecutor.openShell(jobContext, terminal);
+							JobRunnable jobRunnable = jobRunnables.get(jobContext.getJobToken());
+							if (jobRunnable != null) {
+								Shell shell = jobRunnable.openShell(jobContext, terminal);
 								jobShells.put(terminal.getSessionId(), shell);
 							} else {
 								throw new ExplicitException("Job shell not ready");
@@ -1181,7 +1106,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			} catch (InterruptedException e) {
 			}
 		}
-		scheduledTasks.values().stream().forEach(it1->it1.stream().forEach(it2->taskScheduler.unschedule(it2)));
+		scheduledTasks.values().forEach(it1-> it1.forEach(taskScheduler::unschedule));
 		scheduledTasks.clear();
 	}
 
@@ -1294,9 +1219,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									jobLogger.log("Job finished");
 								} catch (TimeoutException e) {
 									build.setStatus(Build.Status.TIMED_OUT);
-								} catch (CancellationException e) {
-									if (e instanceof CancellerAwareCancellationException) {
-										Long cancellerId = ((CancellerAwareCancellationException) e).getCancellerId();
+								} catch (java.util.concurrent.CancellationException e) {
+									if (e instanceof CancellationException) {
+										Long cancellerId = ((CancellationException) e).getCancellerId();
 										if (cancellerId != null)
 											build.setCanceller(userManager.load(cancellerId));
 									}
@@ -1308,7 +1233,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										jobLogger.error(explicitException.getMessage());
 									else if (ExceptionUtils.find(e, FailedException.class) == null)
 										jobLogger.error("Error running job", e);
-								} catch (InterruptedException e) {
+								} catch (InterruptedException ignored) {
 								} finally {
 									build.setFinishDate(new Date());
 									buildManager.save(build);
@@ -1449,28 +1374,51 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		});
 	}
 
-	private void runJobLocal(String jobToken, AgentInfo agentInfo) {
-		JobContext jobContext = getJobContext(jobToken, true);
-		Long buildId = jobContext.getBuildId();
-		
-		transactionManager.run(new Runnable() {
+	@Override
+	public void runJob(UUID serverUUID, ClusterRunnable runnable) {
+		Future<?> future = null;
+		try {
+			future = clusterManager.submitToServer(serverUUID, new ClusterTask<Void>() {
 
-			@Override
-			public void run() {
-				Build build = buildManager.load(buildId);
-				build.setStatus(Build.Status.RUNNING);
-				build.setRunningDate(new Date());
-				if (agentInfo != null)
-					build.setAgent(agentManager.load(agentInfo.getId()));
-				buildManager.save(build);
-				listenerRegistry.post(new BuildRunning(build));
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Void call() throws Exception {
+					runnable.run();
+					return null;
+				}
+
+			});
+
+			// future.get() here does not respond to thread interruption
+			while (!future.isDone())
+				Thread.sleep(1000);
+			future.get(); // call get() to throw possible execution exceptions
+		} catch (InterruptedException e) {
+			if (future != null)
+				future.cancel(true);
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	@Override
+	public void runJobLocal(JobContext jobContext, JobRunnable runnable) {
+		while (thread == null) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
 			}
+		}
 			
-		});
+		Long buildId = jobContext.getBuildId();
 
+		String jobToken = jobContext.getJobToken();
 		jobServers.put(jobToken, clusterManager.getLocalServerUUID());
-		JobExecutor jobExecutor = jobContext.getJobExecutor();
-		jobExecutors.put(jobToken, jobExecutor);
+		
+		jobRunnables.put(jobToken, runnable);
 		try {
 			TaskLogger jobLogger = logManager.getJobLogger(jobToken);
 			if (jobLogger == null) {
@@ -1478,21 +1426,21 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 					@Override
 					public void log(String message, String sessionId) {
-						projectManager.runOnProjectServer(jobContext.getProjectId(), new LogTask(jobToken, message, sessionId)); 
+						projectManager.runOnProjectServer(jobContext.getProjectId(), new LogTask(jobToken, message, sessionId));
 					}
-					
+
 				};
 				logManager.addJobLogger(jobToken, jobLogger);
 				try {
-					jobExecutor.execute(jobContext, jobLogger, agentInfo);
+					runnable.run(jobLogger);
 				} finally {
 					logManager.removeJobLogger(jobToken);
 				}
 			} else {
-				jobExecutor.execute(jobContext, jobLogger, agentInfo);
+				runnable.run(jobLogger);
 			}
 		} finally {
-			jobExecutors.remove(jobToken);
+			jobRunnables.remove(jobToken);
 			jobServers.remove(jobToken);
 		}
 	}
@@ -1637,23 +1585,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			return KubernetesHelper.runServerStep(serverUrl, jobContext.getJobToken(), stepPosition, 
 					inputDir, Lists.newArrayList("**"), Lists.newArrayList(), placeholderValues, logger);
 		}
-	}
-	
-	private static class JobRunnable implements ResourceRunnable {
-
-		private static final long serialVersionUID = 1L;
-
-		private final String jobToken;
-		
-		public JobRunnable(String jobToken) {
-			this.jobToken = jobToken;
-		}
-		
-		@Override
-		public void run(AgentInfo agentInfo) {
-			OneDev.getInstance(DefaultJobManager.class).runJobLocal(jobToken, agentInfo);
-		}
-		
 	}
 	
 }

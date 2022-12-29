@@ -32,10 +32,6 @@ public class Service implements NamedElement, Serializable {
 	
 	private String readinessCheckCommand;
 	
-	private int cpuRequirement = 250;
-	
-	private int memoryRequirement = 256;
-	
 	@Editable(order=100, description="Specify name of the service, which will be used as host name to access the service")
 	@SuggestionProvider("getNameSuggestions")
 	@DnsName
@@ -104,25 +100,6 @@ public class Service implements NamedElement, Serializable {
 		this.readinessCheckCommand = readinessCheckCommand;
 	}
 	
-	@Editable(order=10000, name="CPU Requirement", group="More Settings", description="Specify CPU requirement of the service in millis. "
-			+ "1000 millis means a single CPU core")
-	public int getCpuRequirement() {
-		return cpuRequirement;
-	}
-
-	public void setCpuRequirement(int cpuRequirement) {
-		this.cpuRequirement = cpuRequirement;
-	}
-
-	@Editable(order=10100, group="More Settings", description="Specify memory requirement of the service in mega bytes")
-	public int getMemoryRequirement() {
-		return memoryRequirement;
-	}
-
-	public void setMemoryRequirement(int memoryRequirement) {
-		this.memoryRequirement = memoryRequirement;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false, false);
@@ -134,8 +111,6 @@ public class Service implements NamedElement, Serializable {
 		serviceMap.put("name", getName());
 		serviceMap.put("image", getImage());
 		serviceMap.put("readinessCheckCommand", getReadinessCheckCommand());
-		serviceMap.put("cpuRequirement", getCpuRequirement());
-		serviceMap.put("memoryRequirement", getMemoryRequirement());
 		serviceMap.put("arguments", getArguments());
 		Map<String, String> envVars = new HashMap<>();
 		for (EnvVar var: getEnvVars())
