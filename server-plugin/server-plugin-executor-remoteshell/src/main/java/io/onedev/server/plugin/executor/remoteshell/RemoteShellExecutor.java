@@ -77,7 +77,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	}
 	
 	@Override
-	public void execute(JobContext jobContext) {
+	public void execute(JobContext jobContext, TaskLogger jobLogger) {
 		AgentRunnable runnable = (agentId) -> {
 			getJobManager().runJobLocal(jobContext, new JobRunnable() {
 
@@ -138,7 +138,8 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				
 			});
 		};
-		
+
+		jobLogger.log("Pending resource allocation...");
 		getResourceAllocator().runAgentJob(AgentQuery.parse(agentQuery, true), getName(), 
 				getConcurrencyNumber(), 1, runnable);
 	}
@@ -173,7 +174,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 		getLogManager().addJobLogger(jobToken, jobLogger);
 		try {
 			UUID localServerUUID = getClusterManager().getLocalServerUUID();
-			jobLogger.log("Waiting for resources...");
+			jobLogger.log("Pending resource allocation...");
 			AgentRunnable runnable = agentId -> {
 				TaskLogger currentJobLogger = new TaskLogger() {
 

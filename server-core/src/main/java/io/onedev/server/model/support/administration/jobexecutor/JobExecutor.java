@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.entitymanager.AgentManager;
@@ -124,7 +125,7 @@ public abstract class JobExecutor implements Serializable {
 		this.cacheTTL = cacheTTL;
 	}
 	
-	public abstract void execute(JobContext jobContext);
+	public abstract void execute(JobContext jobContext, TaskLogger jobLogger);
 	
 	public boolean isPlaceholderAllowed() {
 		return true;

@@ -562,7 +562,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					logManager.addJobLogger(jobToken, jobLogger);
 					serverStepThreads.put(jobToken, new ArrayList<>());
 					try {
-						jobExecutor.execute(jobContext);
+						jobExecutor.execute(jobContext, jobLogger);
 						break;
 					} catch (Throwable e) {
 						if (retried.getAndIncrement() < maxRetries.get() && sessionManager.call(new Callable<Boolean>() {

@@ -86,7 +86,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	}
 	
 	@Override
-	public void execute(JobContext jobContext) {
+	public void execute(JobContext jobContext, TaskLogger jobLogger) {
 		AgentRunnable runnable = (agentId) -> {
 			getJobManager().runJobLocal(jobContext, new JobRunnable() {
 				
@@ -147,7 +147,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				
 			});
 		};
-		
+
+		jobLogger.log("Pending resource allocation...");
 		getResourceAllocator().runAgentJob(
 				AgentQuery.parse(agentQuery, true), getName(), getConcurrencyNumber(),
 				jobContext.getServices().size()+1, runnable);
@@ -171,7 +172,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		getLogManager().addJobLogger(jobToken, jobLogger);
 		try {
 			UUID localServerUUID = getClusterManager().getLocalServerUUID();
-			jobLogger.log("Waiting for resources...");
+			jobLogger.log("Pending resource allocation...");
 			
 			AgentRunnable runnable = agentId -> {
 				TaskLogger currentJobLogger = new TaskLogger() {

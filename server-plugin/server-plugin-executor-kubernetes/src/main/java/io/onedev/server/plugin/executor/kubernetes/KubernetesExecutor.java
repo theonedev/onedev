@@ -231,7 +231,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 
 	@Override
-	public void execute(JobContext jobContext) {
+	public void execute(JobContext jobContext, TaskLogger jobLogger) {
 		var servers = new ArrayList<>(OneDev.getInstance(ClusterManager.class)
 				.getHazelcastInstance().getCluster().getMembers());
 		var serverUUID = servers.get(RandomUtils.nextInt(0, servers.size())).getUuid();

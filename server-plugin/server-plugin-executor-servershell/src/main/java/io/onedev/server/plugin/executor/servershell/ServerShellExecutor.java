@@ -103,7 +103,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	}
 	
 	@Override
-	public void execute(JobContext jobContext) {
+	public void execute(JobContext jobContext, TaskLogger jobLogger) {
 		ClusterRunnable runnable = () -> {
 			getJobManager().runJobLocal(jobContext, new JobRunnable() {
 
@@ -315,6 +315,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 				
 			});			
 		};
+		jobLogger.log("Pending resource allocation...");
 		getResourceAllocator().runServerJob(getName(), getConcurrencyNumber(), 1, runnable);
 	}
 

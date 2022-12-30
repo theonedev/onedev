@@ -34,6 +34,7 @@ import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.*;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.tools.ant.Task;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -212,7 +213,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 	
 	@Override
-	public void execute(JobContext jobContext) {
+	public void execute(JobContext jobContext, TaskLogger jobLogger) {
 		ClusterRunnable runnable = () -> {
 			getJobManager().runJobLocal(jobContext, new JobRunnable() {
 
@@ -550,6 +551,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 			});
 		};
+		jobLogger.log("Pending resource allocation...");
 		getResourceAllocator().runServerJob(getName(), getConcurrencyNumber(),
 				jobContext.getServices().size() + 1, runnable);
 	}
