@@ -902,6 +902,7 @@ public abstract class IssueListPanel extends Panel {
 													issues.add(it.next());
 												}
 												OneDev.getInstance(IssueManager.class).move(getTargetProject(), issues);
+												dataProvider.detach();
 												selectionColumn.getSelections().clear();
 												target.add(body);
 											}
@@ -967,6 +968,7 @@ public abstract class IssueListPanel extends Panel {
 										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) 
 											issues.add(it.next());
 										OneDev.getInstance(IssueManager.class).delete(issues);
+										dataProvider.detach();
 										selectionColumn.getSelections().clear();
 										target.add(body);
 									}

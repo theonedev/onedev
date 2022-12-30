@@ -648,6 +648,7 @@ public class ProjectListPanel extends Panel {
 													for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
 														projects.add(it.next());
 													getProjectManager().move(projects, getTargetProject());
+													dataProvider.detach();
 													target.add(body);
 													selectionColumn.getSelections().clear();
 													Session.get().success("Projects moved");
@@ -733,6 +734,7 @@ public class ProjectListPanel extends Panel {
 												for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
 													projects.add(it.next());
 												getProjectManager().move(projects, null);
+												dataProvider.detach();
 												target.add(body);
 												selectionColumn.getSelections().clear();
 												Session.get().success("Projects modified");
@@ -810,6 +812,7 @@ public class ProjectListPanel extends Panel {
 											for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
 												projects.add(it.next());
 											getProjectManager().delete(projects);
+											dataProvider.detach();
 											selectionColumn.getSelections().clear();
 											target.add(body);
 										}

@@ -240,6 +240,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						
 						OneDev.getInstance(CodeCommentStatusChangeManager.class).save(changes, note);
 						selectionColumn.getSelections().clear();
+						dataProvider.detach();
 						target.add(body);
 						
 						close();
@@ -426,17 +427,11 @@ public abstract class CodeCommentListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								
-								changeStatus(target, new Provider<Collection<CodeComment>>() {
-
-									@SuppressWarnings("unchecked")
-									@Override
-									public Collection<CodeComment> get() {
-										Collection<CodeComment> comments = new ArrayList<>();
-										for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
-											comments.add(it.next());
-										return comments;
-									}
-									
+								changeStatus(target, (Provider<Collection<CodeComment>>) () -> {
+									Collection<CodeComment> comments = new ArrayList<>();
+									for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
+										comments.add(it.next());
+									return comments;
 								}, true);
 							}
 							
@@ -476,17 +471,11 @@ public abstract class CodeCommentListPanel extends Panel {
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
 								
-								changeStatus(target, new Provider<Collection<CodeComment>>() {
-
-									@SuppressWarnings("unchecked")
-									@Override
-									public Collection<CodeComment> get() {
-										Collection<CodeComment> comments = new ArrayList<>();
-										for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
-											comments.add(it.next());
-										return comments;
-									}
-									
+								changeStatus(target, (Provider<Collection<CodeComment>>) () -> {
+									Collection<CodeComment> comments = new ArrayList<>();
+									for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
+										comments.add(it.next());
+									return comments;
 								}, false);
 							}
 							
@@ -536,6 +525,7 @@ public abstract class CodeCommentListPanel extends Panel {
 											for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
 												comments.add(it.next());
 											OneDev.getInstance(CodeCommentManager.class).delete(comments);
+											dataProvider.detach();
 											selectionColumn.getSelections().clear();
 											target.add(body);
 										}

@@ -651,6 +651,7 @@ public abstract class BuildListPanel extends Panel {
 											builds.add(it.next());
 										}
 										OneDev.getInstance(BuildManager.class).delete(builds);
+										dataProvider.detach();
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}

@@ -421,6 +421,7 @@ public abstract class PullRequestListPanel extends Panel {
 										protected void onConfirm(AjaxRequestTarget target) {
 											for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();)
 												OneDev.getInstance(PullRequestManager.class).discard(it.next(), null);
+											dataProvider.detach();
 											target.add(body);
 											selectionColumn.getSelections().clear();
 										}
@@ -485,6 +486,7 @@ public abstract class PullRequestListPanel extends Panel {
 										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();)
 											requests.add(it.next());
 										OneDev.getInstance(PullRequestManager.class).delete(requests);
+										dataProvider.detach();
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}

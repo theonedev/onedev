@@ -34,8 +34,9 @@ public class PerformanceSetting implements Serializable {
 		}
 	}
 
-	@Editable(order=100, name="CPU Intensive Task Concurrency", description="Specify max concurrent CPU intensive "
-			+ "tasks, such as Git repository pull/push, repository index, etc.")
+	@Editable(order=100, name="CPU Intensive Task Concurrency", description="" +
+			"Specify max number of CPU intensive tasks the server can run concurrently, " +
+			"such as Git repository pull/push, repository index, etc.")
 	public int getCpuIntensiveTaskConcurrency() {
 		return cpuIntensiveTaskConcurrency;
 	}
