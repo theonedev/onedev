@@ -895,8 +895,12 @@ public class ImportServer implements Serializable, Validatable {
 									List<JsonNode> attachmentNodes = new ArrayList<>();
 									for (JsonNode attachmentNode: commentNode.get("attachments"))
 										attachmentNodes.add(attachmentNode);
-									comment.setContent(processAttachments(issue.getUUID(), readableId, 
-											commentContent, attachmentNodes, tooLargeAttachments));
+									String processedContent = processAttachments(issue.getUUID(), readableId,
+											commentContent, attachmentNodes, tooLargeAttachments);
+									if (processedContent != null)
+										comment.setContent(processedContent);
+									else 
+										continue;
 								}
 								comment.setDate(new Date(commentNode.get("created").asLong(System.currentTimeMillis())));
 								if (commentNode.hasNonNull("author")) {
