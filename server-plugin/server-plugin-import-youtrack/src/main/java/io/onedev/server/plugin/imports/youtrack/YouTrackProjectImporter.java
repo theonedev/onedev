@@ -1,13 +1,12 @@
 package io.onedev.server.plugin.imports.youtrack;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.web.util.ImportStep;
+
+import java.io.Serializable;
+import java.util.List;
 
 public class YouTrackProjectImporter implements ProjectImporter {
 
@@ -41,7 +40,12 @@ public class YouTrackProjectImporter implements ProjectImporter {
 		@Override
 		protected ImportProjects newSetting() {
 			ImportProjects projects = new ImportProjects();
-			projects.server = serverStep.getSetting();
+			for (String project: serverStep.getSetting().listProjects()) {
+				ProjectMapping mapping = new ProjectMapping();
+				mapping.setYouTrackProject(project);
+				mapping.setOneDevProject(project.replace(' ', '-'));
+				projects.getProjectMappings().add(mapping);
+			}
 			return projects;
 		}
 		

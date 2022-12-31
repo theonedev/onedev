@@ -1,15 +1,10 @@
 package io.onedev.server.plugin.imports.youtrack;
 
-import java.io.Serializable;
-import java.util.List;
+import io.onedev.server.util.validation.annotation.ProjectPath;
+import io.onedev.server.web.editable.annotation.Editable;
 
 import javax.validation.constraints.NotEmpty;
-
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.validation.annotation.ProjectPath;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
+import java.io.Serializable;
 
 @Editable
 public class ProjectMapping implements Serializable {
@@ -24,7 +19,6 @@ public class ProjectMapping implements Serializable {
 	
 	@Editable(order=100, name="YouTrack Project", description="Issues will be imported from specified "
 			+ "YouTrack project")
-	@ChoiceProvider("getProjectChoices")
 	@NotEmpty
 	public String getYouTrackProject() {
 		return youTrackProject;
@@ -44,13 +38,6 @@ public class ProjectMapping implements Serializable {
 
 	public void setOneDevProject(String oneDevProject) {
 		this.oneDevProject = oneDevProject;
-	}
-
-	@SuppressWarnings("unused")
-	private static List<String> getProjectChoices() {
-		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
-		ImportProjects setting = (ImportProjects) editor.getModelObject();
-		return setting.server.listProjects();
 	}
 	
 }
