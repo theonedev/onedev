@@ -1,59 +1,16 @@
 package io.onedev.server.plugin.imports.github;
 
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-
-import org.apache.http.client.utils.URIBuilder;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.MilestoneManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.git.command.LsRemoteCommand;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.IssueField;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
@@ -66,6 +23,27 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
+import org.apache.http.client.utils.URIBuilder;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Editable
 @ClassValidating
@@ -344,23 +322,26 @@ public class ImportServer implements Serializable, Validatable {
 						String apiEndpoint = getApiEndpoint("/repos/" + gitHubRepo 
 								+ "/issues/" + oldNumber + "/comments");
 						for (JsonNode commentNode: list(client, apiEndpoint, logger)) {
-							IssueComment comment = new IssueComment();
-							comment.setIssue(issue);
-							comment.setContent(commentNode.get("body").asText(null));
-							comment.setDate(ISODateTimeFormat.dateTimeNoMillis()
-									.parseDateTime(commentNode.get("created_at").asText())
-									.toDate());
-							
-							login = commentNode.get("user").get("login").asText();
-							user = getUser(client, users, login, logger);
-							if (user != null) {
-								comment.setUser(user);
-							} else {
-								comment.setUser(OneDev.getInstance(UserManager.class).getUnknown());
-								nonExistentLogins.add(login);
-							}
+							String commentContent = commentNode.get("body").asText(null);
+							if (StringUtils.isNotBlank(commentContent)) {
+								IssueComment comment = new IssueComment();
+								comment.setIssue(issue);
+								comment.setContent(commentContent);
+								comment.setDate(ISODateTimeFormat.dateTimeNoMillis()
+										.parseDateTime(commentNode.get("created_at").asText())
+										.toDate());
 
-							issue.getComments().add(comment);
+								login = commentNode.get("user").get("login").asText();
+								user = getUser(client, users, login, logger);
+								if (user != null) {
+									comment.setUser(user);
+								} else {
+									comment.setUser(OneDev.getInstance(UserManager.class).getUnknown());
+									nonExistentLogins.add(login);
+								}
+
+								issue.getComments().add(comment);
+							}
 						}
 						
 						issue.setCommentCount(issue.getComments().size());

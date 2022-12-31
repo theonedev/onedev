@@ -246,9 +246,7 @@ public class DefaultClusterManager implements ClusterManager {
 				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);
 				}
-			} else {
-//				logger.info("Waiting for cluster leader...");
-			}
+			} 
 		}
 	}
 	

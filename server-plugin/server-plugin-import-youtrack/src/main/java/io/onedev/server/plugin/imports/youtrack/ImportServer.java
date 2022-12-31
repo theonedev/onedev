@@ -25,6 +25,8 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
@@ -888,7 +890,7 @@ public class ImportServer implements Serializable, Validatable {
 						
 						for (JsonNode commentNode: issueNode.get("comments")) {
 							String commentContent = commentNode.get("text").asText(null);
-							if (commentContent != null || !commentNode.get("attachments").isEmpty()) {
+							if (StringUtils.isNotBlank(commentContent) || !commentNode.get("attachments").isEmpty()) {
 								IssueComment comment = new IssueComment();
 								comment.setIssue(issue);
 								if (!dryRun) {
@@ -897,10 +899,14 @@ public class ImportServer implements Serializable, Validatable {
 										attachmentNodes.add(attachmentNode);
 									String processedContent = processAttachments(issue.getUUID(), readableId,
 											commentContent, attachmentNodes, tooLargeAttachments);
-									if (processedContent != null)
+									if (StringUtils.isNotBlank(processedContent))
 										comment.setContent(processedContent);
 									else 
 										continue;
+								} else if (StringUtils.isNotBlank(commentContent)) {
+									comment.setContent(commentContent);
+								} else {
+									continue;
 								}
 								comment.setDate(new Date(commentNode.get("created").asLong(System.currentTimeMillis())));
 								if (commentNode.hasNonNull("author")) {
@@ -981,18 +987,23 @@ public class ImportServer implements Serializable, Validatable {
 						dao.persist(comment);
 					}
 				}
-				
+
+				Set<Triple<Long, Long, Long>> linkTriples = new HashSet<>();
 				for (Map.Entry<Long, Pair<LinkSpec, List<Long>>> entry: issueLinkInfo.entrySet()) {
 					Issue source = issueMappings.get(entry.getKey());
 					if (source != null) {
 						for (Long targetNumber: entry.getValue().getSecond()) {
 							Issue target = issueMappings.get(targetNumber);
 							if (target != null) {
-								IssueLink link = new IssueLink();
-								link.setSource(source);
-								link.setTarget(target);
-								link.setSpec(entry.getValue().getFirst());
-								OneDev.getInstance(IssueLinkManager.class).save(link);
+								var triple = new ImmutableTriple<>(source.getId(), target.getId(), 
+										entry.getValue().getFirst().getId());
+								if (linkTriples.add(triple)) {
+									IssueLink link = new IssueLink();
+									link.setSource(source);
+									link.setTarget(target);
+									link.setSpec(entry.getValue().getFirst());
+									OneDev.getInstance(IssueLinkManager.class).save(link);
+								}
 							}
 						}
 					}

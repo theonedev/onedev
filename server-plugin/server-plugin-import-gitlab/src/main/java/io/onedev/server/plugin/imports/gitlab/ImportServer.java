@@ -606,10 +606,12 @@ public class ImportServer implements Serializable, Validatable {
 						for (JsonNode noteNode: list(client, apiEndpoint, logger)) {
 							if (!noteNode.get("system").asBoolean()) {
 								String commentContent = noteNode.get("body").asText(null); 
-								if (commentContent != null) {
+								if (StringUtils.isNotBlank(commentContent)) {
 									if (!dryRun) {
 										commentContent = processAttachments(issue.getUUID(), issueFQN, 
 												commentContent, attachmentRootUrl, tooLargeAttachments);
+										if (StringUtils.isBlank(commentContent))
+											continue;
 									}
 									
 									IssueComment comment = new IssueComment();

@@ -394,7 +394,7 @@ public class ImportServer implements Serializable, Validatable {
 								+ "/issues/" + oldNumber + "/comments");
 						for (JsonNode commentNode: list(client, apiEndpoint, logger)) {
 							String commentContent = commentNode.get("body").asText(null); 
-							if (commentContent != null) {
+							if (StringUtils.isNotBlank(commentContent)) {
 								IssueComment comment = new IssueComment();
 								comment.setIssue(issue);
 								comment.setContent(commentContent);
