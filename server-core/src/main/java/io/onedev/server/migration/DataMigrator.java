@@ -4590,7 +4590,17 @@ public class DataMigrator {
 									issuerUrlElement.setText(issuerUrlElement.getText().trim() + "/.well-known/openid-configuration"); 
 								}
 							}
-						}						
+						}
+					} else if (key.equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement: valueElement.elements()) {
+								if (executorElement.getName().contains("KubernetesExecutor")) {
+									executorElement.addElement("cpuRequest").setText("250m");
+									executorElement.addElement("memoryRequest").setText("256Mi");
+								}
+							}
+						}
 					} else if (key.equals("PERFORMANCE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
