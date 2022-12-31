@@ -33,8 +33,8 @@ public class GitHubConnector extends OpenIdConnector {
 	}
 
 	@Override
-	public String getIssuerUrl() {
-		return super.getIssuerUrl();
+	public String getConfigurationDiscoveryUrl() {
+		return super.getConfigurationDiscoveryUrl();
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 
+import io.onedev.agent.*;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -15,12 +16,6 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.agent.AgentData;
-import io.onedev.agent.CallData;
-import io.onedev.agent.Message;
-import io.onedev.agent.MessageTypes;
-import io.onedev.agent.WantToDisconnectAgent;
-import io.onedev.agent.WebsocketUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -188,7 +183,7 @@ public class ServerSocket {
     
     private Serializable service(Serializable request) {
 		try {
-			if (request instanceof WantToDisconnectAgent) {
+			if (request instanceof WantToDisconnectAgent || request instanceof WaitingForAgentResourceToBeReleased) {
 				if (agentId != null)
 					OneDev.getInstance(ResourceAllocator.class).wantToDisconnectAgent(agentId);
 				return null;

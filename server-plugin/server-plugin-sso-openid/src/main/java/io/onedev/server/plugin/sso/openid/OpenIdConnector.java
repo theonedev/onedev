@@ -1,38 +1,11 @@
 package io.onedev.server.plugin.sso.openid;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.wicket.Session;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import javax.validation.constraints.NotEmpty;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.common.contenttype.ContentType;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
-import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.TokenRequest;
-import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -41,17 +14,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
-import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
-import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoRequest;
-
+import com.nimbusds.openid.connect.sdk.*;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -65,6 +28,23 @@ import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.wicket.Session;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotEmpty;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Editable(name="OpenID", order=10000, description="Refer to this <a href='https://docs.onedev.io/tutorials/security/sso-with-okta/' target='_blank'>tutorial</a> for an example setup")
 public class OpenIdConnector extends SsoConnector {
@@ -81,7 +61,7 @@ public class OpenIdConnector extends SsoConnector {
 	
 	private String clientSecret;
 	
-	private String issuerUrl;
+	private String configurationDiscoveryUrl;
 	
 	private String groupsClaim;
 	
@@ -109,17 +89,17 @@ public class OpenIdConnector extends SsoConnector {
 		super.setName(name);
 	}
 	
-	@Editable(order=200, description="Specify issuer url of your OpenID provider. OpenID endpoints "
-			+ "discovery url will be constructed from this by appending <i>/.well-known/openid-configuration</i>. "
-			+ "Make sure to use HTTPS protocol as OneDev relies on TLS encryption to ensure "
-			+ "token validity")
+	@Editable(order=200, description="Specify configuration discovery url of your OpenID provider, " +
+			"for instance: <code>https://openid.example.com/.well-known/openid-configuration</code>. " +
+			"Make sure to use HTTPS protocol as OneDev relies on TLS encryption to ensure token " +
+			"validity")
 	@NotEmpty
-	public String getIssuerUrl() {
-		return issuerUrl;
+	public String getConfigurationDiscoveryUrl() {
+		return configurationDiscoveryUrl;
 	}
 
-	public void setIssuerUrl(String issuerUrl) {
-		this.issuerUrl = issuerUrl;
+	public void setConfigurationDiscoveryUrl(String configurationDiscoveryUrl) {
+		this.configurationDiscoveryUrl = configurationDiscoveryUrl;
 	}
 
 	@Editable(order=1000, description="OpenID client identification will be assigned by your OpenID "
@@ -311,7 +291,7 @@ public class OpenIdConnector extends SsoConnector {
 	protected ProviderMetadata discoverProviderMetadata() {
 		try {
 			JsonNode json = OneDev.getInstance(ObjectMapper.class).readTree(
-					new URI(getIssuerUrl() + "/.well-known/openid-configuration").toURL());
+					new URI(getConfigurationDiscoveryUrl()).toURL());
 			return new ProviderMetadata(
 					json.get("issuer").asText(),
 					json.get("authorization_endpoint").asText(),

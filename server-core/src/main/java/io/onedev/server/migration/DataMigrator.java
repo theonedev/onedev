@@ -4569,7 +4569,7 @@ public class DataMigrator {
 							var gitConfigElement = valueElement.element("gitConfig");
 							gitConfigElement.setName("gitLocation");
 							var clazz = gitConfigElement.attributeValue("class").replace(
-									"io.onedev.server.git.config.", 
+									"io.onedev.server.git.config.",
 									"io.onedev.server.git.location.");
 							gitConfigElement.addAttribute("class", clazz);
 
@@ -4580,6 +4580,17 @@ public class DataMigrator {
 									"io.onedev.server.git.location.");
 							curlConfigElement.addAttribute("class", clazz);
 						}
+					} else if (key.equals("SSO_CONNECTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element connectorElement: valueElement.elements()) {
+								if (connectorElement.getName().contains("OpenIdConnector")) {
+									Element issuerUrlElement = connectorElement.element("issuerUrl");
+									issuerUrlElement.setName("configurationDiscoveryUrl");
+									issuerUrlElement.setText(issuerUrlElement.getText().trim() + "/.well-known/openid-configuration"); 
+								}
+							}
+						}						
 					} else if (key.equals("PERFORMANCE")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -4594,7 +4605,6 @@ public class DataMigrator {
 									.setText(String.valueOf(cpuIntensiveTaskConcurrency));
 						}
 					}
-
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
