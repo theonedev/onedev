@@ -167,7 +167,9 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 						int operator = ctx.operator.getType();
 						if (validate) 
 							checkField(fieldName, operator, option);
-						if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
+						if (fieldName.equals(Issue.NAME_PROJECT)) {
+							return new ProjectIsCurrentCriteria();
+						} else if (fieldName.equals(IssueSchedule.NAME_MILESTONE)) {
 							return new MilestoneIsEmptyCriteria();
 						} else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -393,9 +395,10 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsCurrent:
-			if (!(fieldSpec instanceof BuildChoiceField && option.withCurrentBuildCriteria() 
-					|| fieldSpec instanceof PullRequestChoiceField && option.withCurrentPullRequestCriteria())
-					|| fieldSpec instanceof CommitField && option.withCurrentCommitCriteria())
+			if (!(fieldName.equals(Issue.NAME_PROJECT) && option.withCurrentProjectCriteria() 
+					|| fieldSpec instanceof BuildChoiceField && option.withCurrentBuildCriteria() 
+					|| fieldSpec instanceof PullRequestChoiceField && option.withCurrentPullRequestCriteria()
+					|| fieldSpec instanceof CommitField && option.withCurrentCommitCriteria()))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsPrevious:

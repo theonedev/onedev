@@ -14,6 +14,8 @@ import io.onedev.server.util.validation.IssueQueryValidator;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=IssueQueryValidator.class) 
 public @interface IssueQuery {
+	boolean withCurrentProjectCriteria() default false;
+	
 	boolean withCurrentUserCriteria() default false;
 
 	boolean withCurrentIssueCriteria() default false;

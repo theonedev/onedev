@@ -65,6 +65,7 @@ public class IssueQueryEditSupport implements EditSupport {
         			IssueQuery issueQuery = Preconditions.checkNotNull(
         					getDescriptor().getPropertyGetter().getAnnotation(IssueQuery.class));
         			IssueQueryParseOption option = new IssueQueryParseOption()
+							.withCurrentProjectCriteria(issueQuery.withCurrentProjectCriteria())
         					.withCurrentBuildCriteria(issueQuery.withCurrentBuildCriteria())
         					.withCurrentCommitCriteria(issueQuery.withCurrentCommitCriteria())
         					.withCurrentIssueCriteria(issueQuery.withCurrentIssueCriteria())

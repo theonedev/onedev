@@ -6,6 +6,8 @@ public class IssueQueryParseOption implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private boolean withCurrentProjectCriteria;
+	
 	private boolean withCurrentUserCriteria;
 	
 	private boolean withCurrentIssueCriteria;
@@ -17,6 +19,15 @@ public class IssueQueryParseOption implements Serializable {
 	private boolean withCurrentCommitCriteria;
 	
 	private boolean withOrder = true;
+	
+	public boolean withCurrentProjectCriteria() {
+		return withCurrentProjectCriteria;
+	}
+
+	public IssueQueryParseOption withCurrentProjectCriteria(boolean withCurrentProjectCriteria) {
+		this.withCurrentProjectCriteria = withCurrentProjectCriteria;
+		return this;
+	}
 	
 	public boolean withCurrentUserCriteria() {
 		return withCurrentUserCriteria;
@@ -73,6 +84,7 @@ public class IssueQueryParseOption implements Serializable {
 	}
 
 	public IssueQueryParseOption enableAll(boolean enabled) {
+		withCurrentProjectCriteria = enabled;
 		withCurrentBuildCriteria = enabled;
 		withCurrentCommitCriteria = enabled;
 		withCurrentIssueCriteria = enabled;

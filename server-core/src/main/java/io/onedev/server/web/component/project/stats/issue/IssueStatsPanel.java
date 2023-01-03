@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
+import io.onedev.server.search.entity.issue.ProjectIsCurrentCriteria;
+import io.onedev.server.util.criteria.AndCriteria;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -52,8 +55,9 @@ public class IssueStatsPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		PageParameters params = ProjectIssueListPage.paramsOf(getProject(), null, 0);
+
+		IssueQuery query = new IssueQuery(new ProjectIsCurrentCriteria());
+		PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), 0);
 		Link<Void> issuesLink = new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, params);
 		issuesLink.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
@@ -80,7 +84,9 @@ public class IssueStatsPanel extends Panel {
 				Project project = getProject();
 				Map.Entry<Integer, Long> entry = item.getModelObject();
 				StateSpec stateSpec = getIssueSetting().getStateSpecs().get(entry.getKey());
-				IssueQuery query = new IssueQuery(new StateCriteria(stateSpec.getName(), IssueQueryLexer.Is));
+				IssueQuery query = new IssueQuery(new AndCriteria<>(Lists.newArrayList(
+						new ProjectIsCurrentCriteria(),
+						new StateCriteria(stateSpec.getName(), IssueQueryLexer.Is))));
 				PageParameters params = ProjectIssueListPage.paramsOf(project, query.toString(), 0);
 				Link<Void> stateLink = new BookmarkablePageLink<Void>("link", ProjectIssueListPage.class, params);
 				stateLink.add(new Label("label", entry.getValue() + " " + stateSpec.getName()));

@@ -177,6 +177,8 @@ public abstract class IssueListPanel extends Panel {
 	@Nullable
 	private Object parse(@Nullable String queryString, IssueQuery baseQuery) {
 		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+		if (getProject() != null)
+			option.withCurrentProjectCriteria(true);
 		try {
 			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, option, true));
 		} catch (Exception e) {
@@ -379,6 +381,8 @@ public abstract class IssueListPanel extends Panel {
 		queryInput = new TextField<String>("input", queryStringModel);
 		
 		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+		if (getProject() != null)
+			option.withCurrentProjectCriteria(true);
 		
 		queryInput.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
@@ -1337,6 +1341,7 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});
+		body.add(new WebMarkupContainer("tips").setVisible(getProject() != null));
 		
 		if (getPagingHistorySupport() != null)
 			issuesTable.setCurrentPage(getPagingHistorySupport().getCurrentPage());
