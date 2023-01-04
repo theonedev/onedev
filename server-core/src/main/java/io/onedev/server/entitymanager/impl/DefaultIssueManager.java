@@ -169,7 +169,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final SequenceGenerator numberGenerator;
 	
-	private volatile Map<ProjectScopedNumber, Long> issueIds;
+	private volatile Map<String, Long> issueIds;
 	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldManager fieldManager, 
@@ -219,7 +219,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			Long issueId = (Long) fields[0];
 			Long projectId = (Long)fields[1];
 			Long issueNumber = (Long) fields[2];
-			issueIds.put(new ProjectScopedNumber(projectId, issueNumber), issueId);
+			issueIds.put(projectId + ":" + issueNumber, issueId);
 		}
 	}
 	
@@ -294,7 +294,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 			@Override
 			public void run() {
-				issueIds.put(new ProjectScopedNumber(projectId, issueNumber), issueId);
+				issueIds.put(projectId + ":" + issueNumber, issueId);
 			}
 			
 		});
@@ -962,8 +962,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				@Override
 				public void run() {
 					for (var key: issueIds.entrySet().stream()
-							.filter(it->it.getKey().getProjectId().equals(projectId))
-							.map(it->it.getKey())
+							.filter(it->it.getKey().startsWith(projectId + ":"))
+							.map(Map.Entry::getKey)
 							.collect(Collectors.toSet())) {
 						issueIds.remove(key);
 					}
@@ -973,7 +973,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	}
 
 	private Long getIssueId(Long projectId, Long issueNumber) {
-		return issueIds.get(new ProjectScopedNumber(projectId, issueNumber));
+		return issueIds.get(projectId + ":" + issueNumber);
 	}
 	
 	@Sessional

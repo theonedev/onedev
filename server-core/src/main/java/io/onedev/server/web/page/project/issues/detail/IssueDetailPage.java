@@ -1,17 +1,21 @@
 package io.onedev.server.web.page.project.issues.detail;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ValidationException;
 
+import com.google.common.collect.Lists;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -141,31 +145,59 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			}
 
 		});
-
-		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new IssueTab("Activities", IssueActivitiesPage.class) {
-
+		
+		add(new Tabbable("issueTabs", new LoadableDetachableModel<List<? extends Tab>>() {
+			
 			@Override
-			protected Component renderOptions(String componentId) {
-				IssueActivitiesPage page = (IssueActivitiesPage) getPage();
-				return page.renderOptions(componentId);
+			protected List<? extends Tab> load() {
+				List<Tab> tabs = new ArrayList<>();
+				tabs.add(new IssueTab("Activities", IssueActivitiesPage.class) {
+
+					@Override
+					protected Component renderOptions(String componentId) {
+						IssueActivitiesPage page = (IssueActivitiesPage) getPage();
+						return page.renderOptions(componentId);
+					}
+
+				});
+
+				if (!getIssue().getCommits().isEmpty()) {
+					if (SecurityUtils.canReadCode(getProject())) {
+						tabs.add(new IssueTab("Fixing Commits", IssueCommitsPage.class));
+						if (!getIssue().getPullRequests().isEmpty())
+							tabs.add(new IssueTab("Pull Requests", IssuePullRequestsPage.class));
+					}
+					// Do not calculate fix builds now as it might be slow
+					tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
+				}
+				if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue()))
+					tabs.add(new IssueTab("Authorizations", IssueAuthorizationsPage.class));
+				
+				return tabs;
 			}
 			
-		});
-		
-		if (!getIssue().getCommits().isEmpty()) {
-			if (SecurityUtils.canReadCode(getProject())) {
-				tabs.add(new IssueTab("Fixing Commits", IssueCommitsPage.class));
-				if (!getIssue().getPullRequests().isEmpty())
-					tabs.add(new IssueTab("Pull Requests", IssuePullRequestsPage.class));
+		}) {
+			@Override
+			public void onInitialize() {
+				super.onInitialize();
+				
+				add(new WebSocketObserver() {
+
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+
+					@Override
+					public Collection<String> getObservables() {
+						return Lists.newArrayList(Issue.getWebSocketObservable(getIssue().getId()));
+					}
+
+				});
+				
+				setOutputMarkupId(true);
 			}
-			// Do not calculate fix builds now as it might be slow
-			tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
-		}
-		if (getIssue().isConfidential() && SecurityUtils.canModify(getIssue()))
-			tabs.add(new IssueTab("Authorizations", IssueAuthorizationsPage.class));
-		
-		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
+		});
 		
 		add(new SideInfoPanel("side") {
 
