@@ -276,7 +276,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 						}
 					}
 				}
-				request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT);
+				
+				request.setMergeStrategy(target.getProject().findDefaultMergeStrategy());
 			}
 			
 			requestModel = new LoadableDetachableModel<PullRequest>() {

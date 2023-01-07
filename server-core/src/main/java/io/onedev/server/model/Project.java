@@ -30,6 +30,7 @@ import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.rest.annotation.Api;
@@ -1596,6 +1597,17 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} while (current != null);
 
 		return PatternSet.parse("**");
+	}
+
+	public MergeStrategy findDefaultMergeStrategy() {
+		Project current = this;
+		do {
+			if (current.getPullRequestSetting().getDefaultMergeStrategy() != null)
+				return current.getPullRequestSetting().getDefaultMergeStrategy();
+			current = current.getParent();
+		} while (current != null);
+
+		return MergeStrategy.CREATE_MERGE_COMMIT;
 	}
 	
 	public String getSiteLockName() {

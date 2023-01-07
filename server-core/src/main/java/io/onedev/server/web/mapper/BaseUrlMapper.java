@@ -1,6 +1,7 @@
 package io.onedev.server.web.mapper;
 
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
+import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.markup.html.pages.BrowserInfoPage;
 import org.apache.wicket.protocol.http.WebApplication;
@@ -369,6 +370,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/tag-protection", TagProtectionsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/code-analysis", CodeAnalysisSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/git-pack-config", GitPackConfigPage.class));
+		add(new ProjectPageMapper("${project}/~settings/pull-request", PullRequestSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/job-secrets", JobSecretsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/action-authorizations", ActionAuthorizationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/build-preserve-rules", BuildPreservationsPage.class));

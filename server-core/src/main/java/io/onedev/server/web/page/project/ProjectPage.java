@@ -11,6 +11,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
+import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -276,12 +277,13 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					TagProtectionsPage.class, TagProtectionsPage.paramsOf(getProject())));
 			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Code Analysis", 
 					CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject())));
-			
 			if (getProject().isCodeManagement()) {
 				codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Git Pack Config",
 						GitPackConfigPage.class, GitPackConfigPage.paramsOf(getProject())));
 			}
-
+			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request",
+					PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject())));
+			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Code", codeSettingMenuItems));
 			
 			List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
