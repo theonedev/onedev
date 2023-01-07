@@ -1,7 +1,7 @@
 #! /bin/sh
 
 #
-# Copyright (c) 1999, 2021 Tanuki Software, Ltd.
+# Copyright (c) 1999, 2022 Tanuki Software, Ltd.
 # http://www.tanukisoftware.com
 # All rights reserved.
 #
@@ -12,7 +12,7 @@
 #
 # Java Service Wrapper sh script.  Suitable for starting and stopping
 #  wrapped Java applications on UNIX platforms.
-# Optimized for use with version 3.5.48-st of the Wrapper.
+# Optimized for use with version 3.5.51-st of the Wrapper.
 #
 
 #-----------------------------------------------------------------------------
@@ -1722,7 +1722,7 @@ launchinternal() {
     if [ "X$pid" = "X" ]
     then 
         # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.48 $ADDITIONAL_PARA"
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.51 $ADDITIONAL_PARA"
         eval "$COMMAND_LINE"
     else
         eval echo `gettext '$APP_LONG_NAME is already running.'`
@@ -1797,7 +1797,7 @@ console() {
         prepAdditionalParams "$@"
 
         # The string passed to eval must handles spaces in paths correctly.
-        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" $APPNAMEPROP $ANCHORPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.48 $ADDITIONAL_PARA"
+        COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" $APPNAMEPROP $ANCHORPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.51 $ADDITIONAL_PARA"
         eval "$COMMAND_LINE"
         COMMAND_EXIT_CODE=$?
         if [ $COMMAND_EXIT_CODE -ne 0 ] ; then
@@ -2235,7 +2235,7 @@ start() {
     prepAdditionalParams "$@"
 
     # The string passed to eval must handles spaces in paths correctly.
-    COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.48 $ADDITIONAL_PARA"
+    COMMAND_LINE="$CMDNICE \"$WRAPPER_CMD\" \"$WRAPPER_CONF\" wrapper.syslog.ident=\"$APP_NAME\" wrapper.pidfile=\"$PIDFILE\" wrapper.daemonize=TRUE $APPNAMEPROP $ANCHORPROP $IGNOREPROP $STATUSPROP $COMMANDPROP $LOCKPROP wrapper.script.version=3.5.51 $ADDITIONAL_PARA"
     eval "$COMMAND_LINE"
     
     startwait

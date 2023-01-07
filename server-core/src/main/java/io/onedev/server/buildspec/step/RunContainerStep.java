@@ -29,7 +29,7 @@ public class RunContainerStep extends Step {
 	private static final long serialVersionUID = 1L;
 
 	private String image;
-	
+	 
 	private String args;
 	
 	private List<EnvVar> envVars = new ArrayList<>();
@@ -75,7 +75,7 @@ public class RunContainerStep extends Step {
 		this.args = args;
 	}
 
-	@Editable(order=200, name="Working Directory", description="Optionally specify working directory of the container. "
+	@Editable(order=300, name="Working Directory", description="Optionally specify working directory of the container. "
 			+ "Leave empty to use default working directory of the container")
 	@SafePath
 	@Interpolative(variableSuggester="suggestVariables")
