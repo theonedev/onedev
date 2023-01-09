@@ -106,10 +106,14 @@ public class DefaultServerConfig implements ServerConfig {
 					String tempStr = StringUtils.substringAfter(dbUrl, "//");
 					dbHost = StringUtils.substringBefore(tempStr, ":");
 					tempStr = StringUtils.substringAfter(tempStr, ":");
-					if (dbUrl.startsWith("sqlserver"))
+					if (dbUrl.startsWith("sqlserver")) {
 						dbPort = Integer.parseInt(StringUtils.substringBefore(tempStr, ";"));
-					else
-						dbPort = Integer.parseInt(StringUtils.substringBefore(tempStr, "/"));
+					} else {
+						tempStr = StringUtils.substringBefore(tempStr, "/");
+						// Fix issue https://code.onedev.io/onedev/server/~issues/1086
+						tempStr = StringUtils.substringBefore(tempStr, ",");
+						dbPort = Integer.parseInt(tempStr);
+					}
 				}
 				
 				try (Socket socket = new Socket()) {
