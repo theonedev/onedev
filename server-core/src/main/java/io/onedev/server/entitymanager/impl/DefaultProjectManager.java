@@ -797,7 +797,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			
 		});
 	}
-
+	
 	@Transactional
 	@Override
 	public void onDeleteBranch(Project project, String branchName) {
@@ -1074,108 +1074,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public File getLfsObjectsDir(Long projectId) {
 		return new File(storageManager.getProjectGitDir(projectId), "lfs/objects");
 	}
-
-	private class StorageEntryListener implements EntryAddedListener<Long, ProjectServer>, 
-			EntryRemovedListener<Long, ProjectServer>, EntryUpdatedListener<Long, ProjectServer>, Serializable {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void entryUpdated(EntryEvent<Long, ProjectServer> event) {
-			Long projectId = event.getKey();
-			UUID oldServerUUID = event.getOldValue().getPrimary();
-			Member oldServer = clusterManager.getServer(oldServerUUID, false);
-			if (oldServer != null) {
-				clusterManager.submitToServer(oldServer, new ClusterTask<Void>() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Void call() throws Exception {
-						sessionManager.run(new Runnable() {
-
-							@Override
-							public void run() {
-								jobManager.unschedule(load(projectId));
-							}
-							
-						});
-						return null;
-					}
-					
-				});
-			}
-			clusterManager.submitToServer(event.getValue().getPrimary(), new ClusterTask<Void>() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public Void call() throws Exception {
-					sessionManager.run(new Runnable() {
-
-						@Override
-						public void run() {
-							jobManager.schedule(load(projectId));
-						}
-						
-					});
-					return null;
-				}
-				
-			});
-		}
-
-		@Override
-		public void entryRemoved(EntryEvent<Long, ProjectServer> event) {
-			Long projectId = event.getKey();			
-			UUID oldServerUUID = event.getOldValue().getPrimary();
-			Member oldServer = clusterManager.getServer(oldServerUUID, false);
-			if (oldServer != null) {
-				clusterManager.submitToServer(oldServer, new ClusterTask<Void>() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Void call() throws Exception {
-						sessionManager.run(new Runnable() {
-
-							@Override
-							public void run() {
-								jobManager.unschedule(load(projectId));
-							}
-							
-						});
-						return null;
-					}
-					
-				});
-			}
-		}
-
-		@Override
-		public void entryAdded(EntryEvent<Long, ProjectServer> event) {
-			Long projectId = event.getKey();
-			clusterManager.submitToServer(event.getValue().getPrimary(), new ClusterTask<Void>() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public Void call() throws Exception {
-					sessionManager.run(new Runnable() {
-
-						@Override
-						public void run() {
-							jobManager.schedule(load(projectId));
-						}
-						
-					});
-					return null;
-				}
-				
-			});
-		}
-		
-	}
 	
 	@Override
 	public Collection<String> getReservedNames() {
@@ -1206,5 +1104,74 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			
 		});
 	}
-	
+
+	private class StorageEntryListener implements EntryAddedListener<Long, ProjectServer>,
+			EntryRemovedListener<Long, ProjectServer>, EntryUpdatedListener<Long, ProjectServer>, Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void entryUpdated(EntryEvent<Long, ProjectServer> event) {
+			Long projectId = event.getKey();
+			UUID oldServerUUID = event.getOldValue().getPrimary();
+			Member oldServer = clusterManager.getServer(oldServerUUID, false);
+			if (oldServer != null && oldServer.equals(clusterManager.getLocalServerUUID())) {
+				sessionManager.run(new Runnable() {
+
+					@Override
+					public void run() {
+						jobManager.unschedule(load(projectId));
+					}
+
+				});
+			}
+			
+			if (event.getValue().getPrimary().equals(clusterManager.getLocalServerUUID())) {
+				sessionManager.run(new Runnable() {
+
+					@Override
+					public void run() {
+						jobManager.schedule(load(projectId));
+					}
+
+				});
+			}
+		}
+
+		@Override
+		public void entryRemoved(EntryEvent<Long, ProjectServer> event) {
+			Long projectId = event.getKey();
+			UUID oldServerUUID = event.getOldValue().getPrimary();
+			Member oldServer = clusterManager.getServer(oldServerUUID, false);
+			if (oldServer != null && oldServer.getUuid().equals(clusterManager.getLocalServerUUID())) {
+				sessionManager.run(new Runnable() {
+
+					@Override
+					public void run() {
+						jobManager.unschedule(load(projectId));
+					}
+
+				});
+				
+			}
+		}
+
+		@Override
+		public void entryAdded(EntryEvent<Long, ProjectServer> event) {
+			Long projectId = event.getKey();
+
+			if (event.getValue().getPrimary().equals(clusterManager.getLocalServerUUID())) {
+				sessionManager.run(new Runnable() {
+
+					@Override
+					public void run() {
+						jobManager.schedule(load(projectId));
+					}
+
+				});
+			}
+		}
+
+	}
+
 }
