@@ -1,57 +1,12 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.ws.rs.core.MediaType;
-
-import io.onedev.server.model.support.code.GitPackConfig;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.shiro.authz.Permission;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.ConfigConstants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.StoredConfig;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
-import com.hazelcast.cluster.Member;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
-import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import com.hazelcast.map.listener.EntryAddedListener;
-import com.hazelcast.map.listener.EntryRemovedListener;
-import com.hazelcast.map.listener.EntryUpdatedListener;
-
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -59,16 +14,10 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.cluster.ProjectServer;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.ProjectUpdateManager;
-import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserAuthorizationManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -87,21 +36,11 @@ import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.job.JobManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.GroupAuthorization;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.ProjectUpdate;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.Role;
-import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.model.support.code.BranchProtection;
-import io.onedev.server.model.support.code.TagProtection;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
+import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.model.support.code.GitPackConfig;
+import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -125,6 +64,37 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarManager;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.ConfigConstants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.*;
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultProjectManager extends BaseEntityManager<Project> 
@@ -329,12 +299,27 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		Project project = (Project) event.getEntity();
     		Long projectId = project.getId();
     		
-    		transactionManager.runAfterCommit(new Runnable() {
+    		transactionManager.runAfterCommit(new ClusterRunnable() {
+
+				private static final long serialVersionUID = 1L;
 
 				@Override
 				public void run() {
 					cache.remove(projectId);
-					storageServers.remove(projectId);
+					ProjectServer server = storageServers.remove(projectId);
+					if (server != null) {
+						clusterManager.submitToServer(server.getPrimary(), new ClusterTask<Void>() {
+							
+							private static final long serialVersionUID = 1L;
+
+							@Override
+							public Void call() throws Exception {
+								jobManager.unschedule(projectId);
+								return null;
+							}
+							
+						});
+					}
 				}
     			
     		});
@@ -749,7 +734,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		
 		storageServers = hazelcastInstance.getMap("projectStorageServers");
 		
-		storageServers.addEntryListener(new StorageEntryListener(), true);
 		UUID localServerUUID = clusterManager.getLocalServerUUID();
 		for (var file: storageManager.getProjectsDir().listFiles()) {
 			var projectId = Long.valueOf(file.getName());
@@ -1049,6 +1033,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		else
 			return null;
 	}
+	
+	@Override
+	public Map<Long, ProjectServer> getStorageServers() {
+		return storageServers;
+	}
 
 	@Override
 	public <T> T runOnProjectServer(Long projectId, ClusterTask<T> task) {
@@ -1103,75 +1092,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			}
 			
 		});
-	}
-
-	private class StorageEntryListener implements EntryAddedListener<Long, ProjectServer>,
-			EntryRemovedListener<Long, ProjectServer>, EntryUpdatedListener<Long, ProjectServer>, Serializable {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public void entryUpdated(EntryEvent<Long, ProjectServer> event) {
-			Long projectId = event.getKey();
-			UUID oldServerUUID = event.getOldValue().getPrimary();
-			Member oldServer = clusterManager.getServer(oldServerUUID, false);
-			if (oldServer != null && oldServer.equals(clusterManager.getLocalServerUUID())) {
-				sessionManager.run(new Runnable() {
-
-					@Override
-					public void run() {
-						jobManager.unschedule(load(projectId));
-					}
-
-				});
-			}
-			
-			if (event.getValue().getPrimary().equals(clusterManager.getLocalServerUUID())) {
-				sessionManager.run(new Runnable() {
-
-					@Override
-					public void run() {
-						jobManager.schedule(load(projectId));
-					}
-
-				});
-			}
-		}
-
-		@Override
-		public void entryRemoved(EntryEvent<Long, ProjectServer> event) {
-			Long projectId = event.getKey();
-			UUID oldServerUUID = event.getOldValue().getPrimary();
-			Member oldServer = clusterManager.getServer(oldServerUUID, false);
-			if (oldServer != null && oldServer.getUuid().equals(clusterManager.getLocalServerUUID())) {
-				sessionManager.run(new Runnable() {
-
-					@Override
-					public void run() {
-						jobManager.unschedule(load(projectId));
-					}
-
-				});
-				
-			}
-		}
-
-		@Override
-		public void entryAdded(EntryEvent<Long, ProjectServer> event) {
-			Long projectId = event.getKey();
-
-			if (event.getValue().getPrimary().equals(clusterManager.getLocalServerUUID())) {
-				sessionManager.run(new Runnable() {
-
-					@Override
-					public void run() {
-						jobManager.schedule(load(projectId));
-					}
-
-				});
-			}
-		}
-
 	}
 
 }

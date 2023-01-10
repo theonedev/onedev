@@ -25,7 +25,7 @@ public interface JobManager {
 	
 	void schedule(Project project);
 	
-	void unschedule(Project project);
+	void unschedule(Long projectId);
 	
 	@Nullable
 	Build submit(Project project, ObjectId commitId, String jobName, 

@@ -31,10 +31,7 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.DefaultBranchChanged;
-import io.onedev.server.event.project.ProjectEvent;
-import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.event.project.ScheduledTimeReaches;
+import io.onedev.server.event.project.*;
 import io.onedev.server.event.project.build.*;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
@@ -168,8 +165,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private volatile Map<String, UUID> jobServers;
 	
 	private volatile Map<String, Collection<String>> allocatedCaches;
-	
-	private final Collection<Long> projectIdsToScheduleAtStart = ConcurrentHashMap.newKeySet();
 	
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
@@ -659,6 +654,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		buildManager.save(build);
 		listenerRegistry.post(new BuildFinished(build));
 	}
+
+	@Listen
+	public void on(ProjectCreated event) {
+		schedule(event.getProject());
+	}
 	
 	@Sessional
 	@Listen
@@ -986,13 +986,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		allocatedCaches = clusterManager.getHazelcastInstance().getMap("allocatedCaches");
 		jobServers = clusterManager.getHazelcastInstance().getMap("jobRunServers");
 		
-		thread = new Thread(this);
-		thread.start();	
-		
-		for (Long projectId: projectIdsToScheduleAtStart) {
-			schedule(projectManager.load(projectId));
+		for (var entry: projectManager.getStorageServers().entrySet()) {
+			if (entry.getValue().getPrimary().equals(clusterManager.getLocalServerUUID())) {
+				schedule(projectManager.load(entry.getKey()));
+			}
 		}
-		projectIdsToScheduleAtStart.clear();
+
+		thread = new Thread(this);
+		thread.start();
 	}
 	
 	@Listen
@@ -1012,62 +1013,54 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Sessional
 	@Override
 	public void schedule(Project project) {
-		if (thread != null) {
-			Collection<String> tasksOfProject = new HashSet<>();
-			try {
-				String defaultBranch = project.getDefaultBranch();
-				if (defaultBranch != null) {
-					ObjectId commitId = project.getObjectId(defaultBranch, false);
-					if (commitId != null) {
-						JobSecretAuthorizationContext.push(new JobSecretAuthorizationContext(project, commitId, null));
-						try {
-							BuildSpec buildSpec = project.getBuildSpec(commitId);
-							if (buildSpec != null) {
-								validateBuildSpec(project, commitId, buildSpec);
-								ScheduledTimeReaches event = new ScheduledTimeReaches(project);
-								for (Job job : buildSpec.getJobMap().values()) {
-									for (JobTrigger trigger : job.getTriggers()) {
-										if (trigger instanceof ScheduleTrigger) {
-											ScheduleTrigger scheduledTrigger = (ScheduleTrigger) trigger;
-											SubmitReason reason = trigger.matches(event, job);
-											if (reason != null) {
-												String taskId = taskScheduler.schedule(newSchedulableTask(project, commitId, job, scheduledTrigger, reason));
-												tasksOfProject.add(taskId);
-											}
+		Collection<String> tasksOfProject = new HashSet<>();
+		try {
+			String defaultBranch = project.getDefaultBranch();
+			if (defaultBranch != null) {
+				ObjectId commitId = project.getObjectId(defaultBranch, false);
+				if (commitId != null) {
+					JobSecretAuthorizationContext.push(new JobSecretAuthorizationContext(project, commitId, null));
+					try {
+						BuildSpec buildSpec = project.getBuildSpec(commitId);
+						if (buildSpec != null) {
+							validateBuildSpec(project, commitId, buildSpec);
+							ScheduledTimeReaches event = new ScheduledTimeReaches(project);
+							for (Job job : buildSpec.getJobMap().values()) {
+								for (JobTrigger trigger : job.getTriggers()) {
+									if (trigger instanceof ScheduleTrigger) {
+										ScheduleTrigger scheduledTrigger = (ScheduleTrigger) trigger;
+										SubmitReason reason = trigger.matches(event, job);
+										if (reason != null) {
+											String taskId = taskScheduler.schedule(newSchedulableTask(project, commitId, job, scheduledTrigger, reason));
+											tasksOfProject.add(taskId);
 										}
 									}
 								}
 							}
-						} catch (BuildSpecParseException e) {
-							logger.warn("Malformed build spec (project: {}, branch: {})",
-									project.getPath(), defaultBranch);
-						} finally {
-							JobSecretAuthorizationContext.pop();
 						}
+					} catch (BuildSpecParseException e) {
+						logger.warn("Malformed build spec (project: {}, branch: {})",
+								project.getPath(), defaultBranch);
+					} finally {
+						JobSecretAuthorizationContext.pop();
 					}
 				}
-			} catch (Exception e) {
-				logger.error("Error scheduling project '" + project.getPath() + "'", e);
-			} finally {
-				tasksOfProject = scheduledTasks.put(project.getId(), tasksOfProject);
-				if (tasksOfProject != null)
-					tasksOfProject.stream().forEach(it -> taskScheduler.unschedule(it));
 			}
-		} else {
-			projectIdsToScheduleAtStart.add(project.getId());
+		} catch (Exception e) {
+			logger.error("Error scheduling project '" + project.getPath() + "'", e);
+		} finally {
+			tasksOfProject = scheduledTasks.put(project.getId(), tasksOfProject);
+			if (tasksOfProject != null)
+				tasksOfProject.forEach(taskScheduler::unschedule);
 		}
 	}
 
 	@Sessional
 	@Override
-	public void unschedule(Project project) {
-		if (thread != null) {
-			var tasksOfProject = scheduledTasks.remove(project.getId());
-			if (tasksOfProject != null)
-				tasksOfProject.stream().forEach(it -> taskScheduler.unschedule(it));
-		} else {
-			projectIdsToScheduleAtStart.remove(project.getId());
-		}
+	public void unschedule(Long projectId) {
+		var tasksOfProject = scheduledTasks.remove(projectId);
+		if (tasksOfProject != null)
+			tasksOfProject.forEach(taskScheduler::unschedule);
 	}
 	
 	private SchedulableTask newSchedulableTask(Project project, ObjectId commitId, Job job, 

@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
@@ -11,6 +12,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.cluster.ProjectServer;
 import io.onedev.server.model.support.code.GitPackConfig;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.Repository;
@@ -72,6 +74,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	void delete(Collection<Project> projects);
 	
 	Collection<Long> getIds();
+	
+	Map<Long, ProjectServer> getStorageServers();
 	
 	Collection<Long> getSubtreeIds(Long projectId);
 	
