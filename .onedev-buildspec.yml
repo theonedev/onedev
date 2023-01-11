@@ -1,4 +1,4 @@
-version: 18
+version: 19
 jobs:
 - name: CI
   steps:
@@ -43,8 +43,6 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  cpuRequirement: 250
-  memoryRequirement: 128
   caches:
   - key: maven-cache
     path: /root/.m2/repository
@@ -117,6 +115,7 @@ jobs:
         server-plugin-archetype-${buildVersion}/pom.xml
       - cp -r server-plugin/server-plugin-archetype/src server-plugin-archetype-${buildVersion}
       - zip -r server-plugin-archetype-${buildVersion}.zip server-plugin-archetype-${buildVersion}
+      - tar zcvf server-plugin-archetype-${buildVersion}.tar.gz server-plugin-archetype-${buildVersion}
       - ''
       - echo "Creating release tag..."
       - git config --global user.name "Robin Shen"
@@ -146,11 +145,14 @@ jobs:
       - '  curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d
         "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId'
       - fi
+      - ''
+      - unzip onedev-${buildVersion}.zip
+      - tar zcvf onedev-${buildVersion}.tar.gz onedev-${buildVersion}
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifact
-    artifacts: '*.zip'
+    artifacts: '*.zip *.tar.gz'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishMarkdownReportStep
     name: publish markdown report
@@ -168,8 +170,6 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  cpuRequirement: 250
-  memoryRequirement: 128
   caches:
   - key: maven-cache
     path: /root/.m2/repository
@@ -200,6 +200,4 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  cpuRequirement: 250
-  memoryRequirement: 128
   timeout: 3600
