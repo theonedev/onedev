@@ -67,7 +67,9 @@ public interface IssueManager extends EntityManager<Issue> {
 	@Override
 	void delete(Issue issue);
 	
-	void move(Project targetProject, Collection<Issue> issues);
+	void move(Collection<Issue> issues, Project targetProject);
+
+	void copy(Collection<Issue> issues, Project targetProject);
 	
 	void delete(Collection<Issue> issues);
 	

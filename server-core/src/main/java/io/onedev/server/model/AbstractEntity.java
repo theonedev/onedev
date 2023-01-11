@@ -1,24 +1,21 @@
 package io.onedev.server.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.util.facade.EntityFacade;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.proxy.HibernateProxy;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.util.facade.EntityFacade;
+import javax.annotation.Nullable;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @MappedSuperclass
 @JsonIgnoreProperties("handler")
@@ -148,5 +145,5 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 	public EntityFacade getFacade() {
 		return null;
 	}
-	
+
 }

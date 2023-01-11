@@ -11,7 +11,10 @@ public interface AttachmentManager {
 	File getAttachmentGroupDirLocal(Long projectId, String attachmentGroup);
 	
     void moveAttachmentGroupTargetLocal(Long targetProjectId, Long sourceProjectId, String attachmentGroup);
-    
+
+	void copyAttachmentGroupTargetLocal(Long targetProjectId, String targetAttachmentGroup, 
+										Long sourceProjectId, String sourceAttachmentGroup);
+	
 	String saveAttachment(Long projectId, String attachmentGroup, String suggestedAttachmentName, 
 			InputStream attachmentStream);
 	

@@ -84,8 +84,7 @@ public interface EntityManager<T extends AbstractEntity> {
 	/**
 	 * This method expects to lookup a single entity with specified criteria
 	 * 
-	 * @param detachedCriteria
-	 * 			Hibernate {@link DetachedCriteria}
+	 * @param entityCriteria
 	 * @return
 	 * 			the first matching entity, or null if not found 
 	 */

@@ -13,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -663,7 +664,7 @@ public abstract class IssueListPanel extends Panel {
 				
 									@Override
 									protected List<Project> load() {
-										return getTargetProjects();
+										return getTargetProjects(true);
 									}
 									
 								}) {
@@ -685,9 +686,10 @@ public abstract class IssueListPanel extends Panel {
 												Collection<Issue> issues = new ArrayList<>();
 												for (IModel<Issue> each: selectionColumn.getSelections())
 													issues.add(each.getObject());
-												OneDev.getInstance(IssueManager.class).move(getTargetProject(), issues);
-												selectionColumn.getSelections().clear();
-												target.add(body);
+												OneDev.getInstance(IssueManager.class).move(issues, getTargetProject());
+												setResponsePage(ProjectIssueListPage.class,
+														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
+												Session.get().success("Issues moved");
 											}
 											
 											@Override
@@ -725,6 +727,88 @@ public abstract class IssueListPanel extends Panel {
 						};	
 					}
 					
+				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Copy Selected Issues To...";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new DropdownLink(id) {
+
+							@Override
+							protected Component newContent(String id, FloatingPanel dropdown2) {
+								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
+
+									@Override
+									protected List<Project> load() {
+										return getTargetProjects(false);
+									}
+
+								}) {
+
+									@Override
+									protected void onSelect(AjaxRequestTarget target, Project project) {
+										dropdown.close();
+										dropdown2.close();
+
+										Long projectId = project.getId();
+										new ConfirmModalPanel(target) {
+
+											private Project getTargetProject() {
+												return OneDev.getInstance(ProjectManager.class).load(projectId);
+											}
+
+											@Override
+											protected void onConfirm(AjaxRequestTarget target) {
+												Collection<Issue> issues = new ArrayList<>();
+												for (IModel<Issue> each: selectionColumn.getSelections())
+													issues.add(each.getObject());
+												OneDev.getInstance(IssueManager.class).copy(issues, getTargetProject());
+												setResponsePage(ProjectIssueListPage.class,
+														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
+												Session.get().success("Issues copied");
+											}
+
+											@Override
+											protected String getConfirmMessage() {
+												return "Type <code>yes</code> below to copy selected issues to project '" + getTargetProject() + "'";
+											}
+
+											@Override
+											protected String getConfirmInput() {
+												return "yes";
+											}
+
+										};
+									}
+
+								}.add(AttributeAppender.append("class", "no-current"));
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select issues to copy");
+								}
+							}
+
+						};
+					}
+
 				});
 				
 				menuItems.add(new MenuItem() {
@@ -881,7 +965,7 @@ public abstract class IssueListPanel extends Panel {
 				
 									@Override
 									protected List<Project> load() {
-										return getTargetProjects();
+										return getTargetProjects(true);
 									}
 									
 								}) {
@@ -905,10 +989,10 @@ public abstract class IssueListPanel extends Panel {
 												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) {
 													issues.add(it.next());
 												}
-												OneDev.getInstance(IssueManager.class).move(getTargetProject(), issues);
-												dataProvider.detach();
-												selectionColumn.getSelections().clear();
-												target.add(body);
+												OneDev.getInstance(IssueManager.class).move(issues, getTargetProject());
+												setResponsePage(ProjectIssueListPage.class, 
+														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
+												Session.get().success("Issues moved");
 											}
 											
 											@Override
@@ -947,7 +1031,91 @@ public abstract class IssueListPanel extends Panel {
 					}
 					
 				});
-				
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Copy All Queried Issues To...";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new DropdownLink(id) {
+
+							@Override
+							protected Component newContent(String id, FloatingPanel dropdown2) {
+								return new ProjectSelector(id, new LoadableDetachableModel<List<Project>>() {
+
+									@Override
+									protected List<Project> load() {
+										return getTargetProjects(false);
+									}
+
+								}) {
+
+									@SuppressWarnings("unchecked")
+									@Override
+									protected void onSelect(AjaxRequestTarget target, Project project) {
+										dropdown.close();
+										dropdown2.close();
+
+										Long projectId = project.getId();
+										new ConfirmModalPanel(target) {
+
+											private Project getTargetProject() {
+												return OneDev.getInstance(ProjectManager.class).load(projectId);
+											}
+
+											@Override
+											protected void onConfirm(AjaxRequestTarget target) {
+												Collection<Issue> issues = new ArrayList<>();
+												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) {
+													issues.add(it.next());
+												}
+												OneDev.getInstance(IssueManager.class).copy(issues, getTargetProject());
+												setResponsePage(ProjectIssueListPage.class,
+														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
+												Session.get().success("Issues copied");
+											}
+
+											@Override
+											protected String getConfirmMessage() {
+												return "Type <code>yes</code> below to copy all queried issues to project '" + getTargetProject() + "'";
+											}
+
+											@Override
+											protected String getConfirmInput() {
+												return "yes";
+											}
+
+										};
+									}
+
+								}.add(AttributeAppender.append("class", "no-current"));
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(issuesTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No issues to copy");
+								}
+							}
+
+						};
+					}
+
+				});
+
 				menuItems.add(new MenuItem() {
 
 					@Override
@@ -1014,7 +1182,7 @@ public abstract class IssueListPanel extends Panel {
 				return menuItems;
 			}
 			
-			private List<Project> getTargetProjects() {
+			private List<Project> getTargetProjects(boolean excludeCurrent) {
 				Collection<Project> collection = getProjectManger().getPermittedProjects(new AccessProject());
 				ProjectCache cache = getProjectManger().cloneCache();
 				
@@ -1026,7 +1194,9 @@ public abstract class IssueListPanel extends Panel {
 					}
 					
 				});
-				collection.remove(getProject());
+				
+				if (excludeCurrent)
+					collection.remove(getProject());
 				
 				List<Project> list = new ArrayList<>(collection);
 				list.sort(cache.comparingPath());

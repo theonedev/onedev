@@ -128,28 +128,8 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			}
 		} else {
 			FileUtils.createDir(targetGroupDir);
-			
-			Client client = ClientBuilder.newClient();
-			try {
-				String fromServerUrl = clusterManager.getServerUrl(sourceStorageServerUUID);
-				WebTarget target = client.target(fromServerUrl).path("/~api/cluster/attachments")
-						.queryParam("projectId", sourceProjectId)
-						.queryParam("attachmentGroup", attachmentGroup);
-				Invocation.Builder builder = target.request();
-				builder.header(HttpHeaders.AUTHORIZATION, 
-						KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
-				
-				try (Response response = builder.get()) {
-					KubernetesHelper.checkStatus(response);
-					try (InputStream is = response.readEntity(InputStream.class)) {
-						FileUtils.untar(is, targetGroupDir, false);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					} 
-				} 
-			} finally {
-				client.close();
-			}
+			downloadAttachments(targetGroupDir, sourceStorageServerUUID,
+					sourceProjectId, attachmentGroup);
 			
 			projectManager.runOnProjectServer(sourceProjectId, new ClusterTask<Void>() {
 
@@ -164,6 +144,53 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 				}
 				
 			});
+		}
+	}
+
+	public void copyAttachmentGroupTargetLocal(Long targetProjectId, String targetAttachmentGroup, 
+											   Long sourceProjectId, String sourceAttachmentGroup) {
+		File targetBaseDir = storageManager.getProjectAttachmentDir(targetProjectId);
+		File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, targetAttachmentGroup);
+
+		UUID sourceStorageServerUUID = projectManager.getStorageServerUUID(sourceProjectId, true);
+		if (sourceStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+			File sourceBaseDir = storageManager.getProjectAttachmentDir(sourceProjectId);
+			File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, sourceAttachmentGroup);
+			FileUtils.createDir(targetGroupDir.getParentFile());
+			try {
+				FileUtils.copyDirectory(sourceGroupDir, targetGroupDir);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			FileUtils.createDir(targetGroupDir);
+			downloadAttachments(targetGroupDir, sourceStorageServerUUID, 
+					sourceProjectId, sourceAttachmentGroup);
+		}
+	}
+	
+	private void downloadAttachments(File targetDir, UUID sourceStorageServerUUID,
+									 Long sourceProjectId, String sourceAttachmentGroup) {
+		Client client = ClientBuilder.newClient();
+		try {
+			String fromServerUrl = clusterManager.getServerUrl(sourceStorageServerUUID);
+			WebTarget target = client.target(fromServerUrl).path("/~api/cluster/attachments")
+					.queryParam("projectId", sourceProjectId)
+					.queryParam("attachmentGroup", sourceAttachmentGroup);
+			Invocation.Builder builder = target.request();
+			builder.header(HttpHeaders.AUTHORIZATION,
+					KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+
+			try (Response response = builder.get()) {
+				KubernetesHelper.checkStatus(response);
+				try (InputStream is = response.readEntity(InputStream.class)) {
+					FileUtils.untar(is, targetDir, false);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		} finally {
+			client.close();
 		}
 	}
 

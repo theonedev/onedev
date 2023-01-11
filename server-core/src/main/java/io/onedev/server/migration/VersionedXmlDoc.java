@@ -562,4 +562,8 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 		}
 	}
 	
+	public static <T> T cloneBean(T bean) {
+		return (T) VersionedXmlDoc.fromBean(bean).toBean();	
+	}
+	
 }

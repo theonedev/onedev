@@ -88,8 +88,6 @@ public interface Dao {
 	/**
 	 * This method expects to lookup a single entity with specified criteria
 	 * 
-	 * @param detachedCriteria
-	 * 			Hibernate {@link DetachedCriteria}
 	 * @return
 	 * 			the first matching entity, or null if not found 
 	 */
@@ -106,4 +104,5 @@ public interface Dao {
 	SessionManager getSessionManager();
 
 	Session getSession();
+
 }
