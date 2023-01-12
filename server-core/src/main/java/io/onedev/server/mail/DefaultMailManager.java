@@ -681,6 +681,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 		}
 	}
 	
+	private String decorateContent(String content) {
+		// Add double line breaks in the beginning and ending as otherwise plain text content 
+		// with multiple paragraphs received from email may not be formatted correctly with 
+		// our markdown renderer. 
+		return String.format("<div class='%s'>\n\n", COMMENT_MARKER) + content + "\n\n</div>";
+	}
+	
 	private void addComment(MailSendSetting sendSetting, Issue issue, Message message, InternetAddress author, 
 			Collection<String> receiverEmailAddresses, @Nullable User user, 
 			@Nullable SenderAuthorization authorization) throws IOException, MessagingException {
@@ -692,7 +699,9 @@ public class DefaultMailManager implements MailManager, Serializable {
 		comment.setUser(user);
 		String content = stripQuotation(sendSetting, readText(issue.getProject(), issue.getUUID(), message));
 		if (content != null) {
-			comment.setContent(String.format("<div class='%s'>", COMMENT_MARKER) + content + "</div>");
+			// Add double line breaks in the beginning and ending as otherwise plain text content 
+			// received from email may not be formatted correctly with our markdown renderer. 
+			comment.setContent(decorateContent(content));
 			issueCommentManager.save(comment, receiverEmailAddresses);
 		}
 	}
@@ -708,7 +717,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		comment.setUser(user);
 		String content = stripQuotation(sendSetting, readText(pullRequest.getProject(), pullRequest.getUUID(), message, null));
 		if (content != null) {
-			comment.setContent("<div class='no-color'>" + content + "</div>");
+			comment.setContent(decorateContent(content));
 			pullRequestCommentManager.save(comment, receiverEmailAddresses);
 		}
 	}
@@ -738,7 +747,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 
 		String description = readText(project, issue.getUUID(), message);
 		if (StringUtils.isNotBlank(description)) 
-			issue.setDescription("<div class='no-color'>" + description + "</div>");
+			issue.setDescription(decorateContent(description));
 
 		if (user == null)
 			user = createUser(submitter, project, authorization.getAuthorizedRole());
