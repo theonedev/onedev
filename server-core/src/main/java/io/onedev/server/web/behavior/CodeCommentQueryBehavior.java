@@ -1,18 +1,7 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.search.entity.codecomment.CodeCommentQuery.*;
-import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
@@ -20,15 +9,23 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.model.CodeComment;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.onedev.server.search.entity.codecomment.CodeCommentQuery.getRuleName;
+import static io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer.*;
 
 @SuppressWarnings("serial")
 public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
@@ -77,7 +74,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = CodeCommentQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == CodeCommentQueryLexer.CreatedBy) 
+								if (operator == Mentioned || operator == CreatedBy) 
 									return SuggestionUtils.suggestUsers(matchWith);
 								else 
 									return null;
@@ -115,7 +112,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !withCurrentUserCriteria && suggestedLiteral.equals(getRuleName(CreatedByMe))) {
+				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(CreatedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)))) {
 			return null;
 		}
 		

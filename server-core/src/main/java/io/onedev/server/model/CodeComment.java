@@ -123,6 +123,9 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	private CompareContext compareContext;
 	
 	private boolean resolved;
+
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	private Collection<CodeCommentMention> mentions = new ArrayList<>();
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
@@ -241,6 +244,14 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 
 	public void setResolved(boolean resolved) {
 		this.resolved = resolved;
+	}
+
+	public Collection<CodeCommentMention> getMentions() {
+		return mentions;
+	}
+
+	public void setMentions(Collection<CodeCommentMention> mentions) {
+		this.mentions = mentions;
 	}
 
 	public boolean isVisitedAfter(Date date) {

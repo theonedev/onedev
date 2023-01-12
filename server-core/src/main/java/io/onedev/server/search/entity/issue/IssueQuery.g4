@@ -7,8 +7,8 @@ query
     ;
 
 criteria
-    : operator=(Confidential|SubmittedByMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
-    | operator=(SubmittedBy|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=Quoted #OperatorValueCriteria
+    : operator=(Confidential|SubmittedByMe|MentionedMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest|CurrentIssue) #OperatorCriteria
+    | operator=(SubmittedBy|Mentioned|FixedInCommit|FixedInBuild|FixedInPullRequest|HasAny) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince|IsAfter|IsBefore|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
@@ -94,6 +94,14 @@ IsMe
 Contains
 	: 'contains'
 	;
+
+Mentioned
+    : 'mentioned'
+    ;
+
+MentionedMe
+    : 'mentioned' WS+ 'me'
+    ;
 
 IsGreaterThan
 	: 'is' WS+ 'greater' WS+ 'than'

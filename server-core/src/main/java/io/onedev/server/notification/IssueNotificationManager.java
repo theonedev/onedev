@@ -10,15 +10,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.server.entitymanager.*;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.server.entitymanager.IssueAuthorizationManager;
-import io.onedev.server.entitymanager.IssueWatchManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.issue.IssueChanged;
@@ -57,16 +54,22 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	
 	private final VisitInfoManager userInfoManager;
 	
+	private final IssueMentionManager mentionManager;
+	
 	@Inject
-	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager,
-			IssueWatchManager watchManager, VisitInfoManager userInfoManager, UserManager userManager, 
-			SettingManager settingManager, IssueAuthorizationManager authorizationManager) {
+	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager, 
+									IssueWatchManager watchManager, VisitInfoManager userInfoManager, 
+									UserManager userManager, SettingManager settingManager, 
+									IssueAuthorizationManager authorizationManager, 
+									IssueMentionManager mentionManager) {
 		super(markdownManager, settingManager);
+		
 		this.mailManager = mailManager;
 		this.watchManager = watchManager;
 		this.userInfoManager = userInfoManager;
 		this.userManager = userManager;
 		this.authorizationManager = authorizationManager;
+		this.mentionManager = mentionManager;
 	}
 	
 	@Transactional
@@ -209,6 +212,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			for (String userName: new MentionParser().parseMentions(markdown.getRendered())) {
 				User mentionedUser = userManager.findByName(userName);
 				if (mentionedUser != null) {
+					mentionManager.mention(issue, mentionedUser);
 					watchManager.watch(issue, mentionedUser, true);
 					authorizationManager.authorize(issue, mentionedUser);
 					if (!isNotified(notifiedEmailAddresses, mentionedUser)) {

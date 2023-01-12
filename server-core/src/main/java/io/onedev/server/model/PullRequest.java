@@ -306,6 +306,9 @@ public class PullRequest extends ProjectBelonging
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
+
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestMention> mentions = new ArrayList<>();
 	
 	@OneToMany(mappedBy="compareContext.pullRequest")
 	private Collection<CodeComment> codeComments = new ArrayList<>();
@@ -482,6 +485,14 @@ public class PullRequest extends ProjectBelonging
 
 	public void setChanges(Collection<PullRequestChange> changes) {
 		this.changes = changes;
+	}
+
+	public Collection<PullRequestMention> getMentions() {
+		return mentions;
+	}
+
+	public void setMentions(Collection<PullRequestMention> mentions) {
+		this.mentions = mentions;
 	}
 
 	@Override

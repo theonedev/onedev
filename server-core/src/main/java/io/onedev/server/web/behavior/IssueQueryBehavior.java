@@ -1,44 +1,8 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.model.Issue.NAME_COMMENT;
-import static io.onedev.server.model.Issue.NAME_COMMENT_COUNT;
-import static io.onedev.server.model.Issue.NAME_DESCRIPTION;
-import static io.onedev.server.model.Issue.NAME_NUMBER;
-import static io.onedev.server.model.Issue.NAME_PROJECT;
-import static io.onedev.server.model.Issue.NAME_STATE;
-import static io.onedev.server.model.Issue.NAME_SUBMIT_DATE;
-import static io.onedev.server.model.Issue.NAME_TITLE;
-import static io.onedev.server.model.Issue.NAME_UPDATE_DATE;
-import static io.onedev.server.model.Issue.NAME_VOTE_COUNT;
-import static io.onedev.server.search.entity.EntityQuery.getValue;
-import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
-import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
-import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.CurrentIssue;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentCommit;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentPullRequest;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInPullRequest;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.HasAny;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.OrderBy;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.Component;
-import org.apache.wicket.model.IModel;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
@@ -55,20 +19,7 @@ import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.spec.BooleanField;
-import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
-import io.onedev.server.model.support.issue.field.spec.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.CommitField;
-import io.onedev.server.model.support.issue.field.spec.DateField;
-import io.onedev.server.model.support.issue.field.spec.DateTimeField;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
-import io.onedev.server.model.support.issue.field.spec.IntegerField;
-import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
-import io.onedev.server.model.support.issue.field.spec.MilestoneChoiceField;
-import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
-import io.onedev.server.model.support.issue.field.spec.TextField;
-import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
+import io.onedev.server.model.support.issue.field.spec.*;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
@@ -77,6 +28,19 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.model.IModel;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static io.onedev.server.model.Issue.*;
+import static io.onedev.server.search.entity.EntityQuery.getValue;
+import static io.onedev.server.search.entity.issue.IssueQuery.*;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.*;
 
 @SuppressWarnings("serial")
 public class IssueQueryBehavior extends ANTLRAssistBehavior {
@@ -155,7 +119,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == SubmittedBy)
+								if (operator == Mentioned || operator == SubmittedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else if (operator == FixedInBuild)
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
@@ -251,7 +215,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!option.withOrder() && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !option.withCurrentUserCriteria() && suggestedLiteral.equals(getRuleName(SubmittedByMe))
+				|| !option.withCurrentUserCriteria() && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)))
 				|| !option.withCurrentBuildCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
 				|| !option.withCurrentPullRequestCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
 				|| !option.withCurrentCommitCriteria() && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))

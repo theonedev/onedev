@@ -24,6 +24,9 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.markdown.MentionParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -4643,6 +4646,146 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
+	}
+
+	private Set<String> getMentioned108(Map<String, String> userIds, String content) {
+		Set<String> mentioned = new HashSet<>();
+		MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
+		for (String userName: new MentionParser().parseMentions(markdownManager.render(content))) {
+			String userId = userIds.get(userName);
+			if (userId != null)
+				mentioned.add(userId);
+		}
+		return mentioned;
+	}
+	
+	private void migrate108(File dataDir, Stack<Integer> versions) {
+		Set<Pair<String, String>> issueMentions = new HashSet<>();
+		Set<Pair<String, String>> pullRequestMentions = new HashSet<>();
+		Set<Pair<String, String>> codeCommentMentions = new HashSet<>();
+
+		Map<String, String> userIds = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					userIds.put(element.elementText("name").trim(), 
+							element.elementTextTrim("id"));
+				}
+			}
+		}
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String issueId = element.elementTextTrim("id");
+					Element descriptionElement = element.element("description");
+					if (descriptionElement != null) {
+						getMentioned108(userIds, descriptionElement.getText()).forEach(userId -> {
+							issueMentions.add(new Pair<>(issueId, userId));		
+						});
+					}
+				}
+			} else if (file.getName().startsWith("IssueComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String issueId = element.elementTextTrim("issue");
+					Element contentElement = element.element("content");
+					if (contentElement != null) {
+						getMentioned108(userIds, contentElement.getText()).forEach(userId -> {
+							issueMentions.add(new Pair<>(issueId, userId));
+						});
+					}
+				}
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String requestId = element.elementTextTrim("id");
+					Element descriptionElement = element.element("description");
+					if (descriptionElement != null) {
+						getMentioned108(userIds, descriptionElement.getText()).forEach(userId -> {
+							pullRequestMentions.add(new Pair<>(requestId, userId));
+						});
+					}
+				}
+			} else if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String requestId = element.elementTextTrim("request");
+					Element contentElement = element.element("content");
+					if (contentElement != null) {
+						getMentioned108(userIds, contentElement.getText()).forEach(userId -> {
+							pullRequestMentions.add(new Pair<>(requestId, userId));
+						});
+					}
+				}
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String commentId = element.elementTextTrim("id");
+					Element contentElement = element.element("content");
+					if (contentElement != null) {
+						getMentioned108(userIds, contentElement.getText()).forEach(userId -> {
+							codeCommentMentions.add(new Pair<>(commentId, userId));
+						});
+					}
+				}
+			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String commentId = element.elementTextTrim("comment");
+					Element contentElement = element.element("content");
+					if (contentElement != null) {
+						getMentioned108(userIds, contentElement.getText()).forEach(userId -> {
+							codeCommentMentions.add(new Pair<>(commentId, userId));
+						});
+					}
+				}
+			}
+		}
+
+		VersionedXmlDoc mentionsDom;
+		File mentionsFile = new File(dataDir, "IssueMentions.xml");
+		mentionsDom = new VersionedXmlDoc();
+		Element mentionsElement = mentionsDom.addElement("list");
+
+		Long id = 1L;
+		for (Pair<String, String> issueMention : issueMentions) {
+			Element mentionElement = mentionsElement.addElement("io.onedev.server.model.IssueMention");
+			mentionElement.addElement("id").setText(String.valueOf(id++));
+			mentionElement.addAttribute("revision", "0.0");
+			mentionElement.addElement("issue").setText(issueMention.getFirst());
+			mentionElement.addElement("user").setText(issueMention.getSecond());
+		}
+		mentionsDom.writeToFile(mentionsFile, true);
+
+		mentionsFile = new File(dataDir, "PullRequestMentions.xml");
+		mentionsDom = new VersionedXmlDoc();
+		mentionsElement = mentionsDom.addElement("list");
+
+		id = 1L;
+		for (Pair<String, String> it : pullRequestMentions) {
+			Element mentionElement = mentionsElement.addElement("io.onedev.server.model.PullRequestMention");
+			mentionElement.addElement("id").setText(String.valueOf(id++));
+			mentionElement.addAttribute("revision", "0.0");
+			mentionElement.addElement("request").setText(it.getFirst());
+			mentionElement.addElement("user").setText(it.getSecond());
+		}
+		mentionsDom.writeToFile(mentionsFile, true);
+
+		mentionsFile = new File(dataDir, "CodeCommentMentions.xml");
+		mentionsDom = new VersionedXmlDoc();
+		mentionsElement = mentionsDom.addElement("list");
+
+		id = 1L;
+		for (Pair<String, String> it : codeCommentMentions) {
+			Element mentionElement = mentionsElement.addElement("io.onedev.server.model.CodeCommentMention");
+			mentionElement.addElement("id").setText(String.valueOf(id++));
+			mentionElement.addAttribute("revision", "0.0");
+			mentionElement.addElement("comment").setText(it.getFirst());
+			mentionElement.addElement("user").setText(it.getSecond());
+		}
+		mentionsDom.writeToFile(mentionsFile, true);
 	}
 	
 }

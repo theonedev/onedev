@@ -307,6 +307,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWatch> watches = new ArrayList<>();
+
+	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
+	private Collection<IssueMention> mentions = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -504,6 +507,14 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		} else {
 			return super.getWatch(user, false);
 		}
+	}
+
+	public Collection<IssueMention> getMentions() {
+		return mentions;
+	}
+
+	public void setMentions(Collection<IssueMention> mentions) {
+		this.mentions = mentions;
 	}
 
 	public Collection<IssueAuthorization> getAuthorizations() {

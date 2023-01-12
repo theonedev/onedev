@@ -265,6 +265,7 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Blocked Issues", "any \"Blocked By\" matching(\"State\" is \"Open\") or any \"Child Issue\" matching(\"State\" is \"Open\")"));
 		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is since \"last week\""));
+		namedQueries.add(new NamedIssueQuery("Mentioned me", "mentioned me"));
 		namedQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is since \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));

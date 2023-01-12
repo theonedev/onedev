@@ -5,14 +5,7 @@ import static io.onedev.server.search.entity.EntityQuery.getValue;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.checkField;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getOperator;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getRuleName;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ApprovedByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.AssignedToMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesCommit;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesIssue;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.OrderBy;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.RequestedForChangesByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.SubmittedByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,7 +155,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(SubmittedByMe)) 
+				|| !withCurrentUserCriteria && ((suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe))) 
 						|| suggestedLiteral.equals(getRuleName(ToBeReviewedByMe))
 						|| suggestedLiteral.equals(getRuleName(RequestedForChangesByMe))
 						|| suggestedLiteral.equals(getRuleName(ApprovedByMe))

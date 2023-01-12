@@ -51,9 +51,9 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 	private static final long serialVersionUID = 1L;
 
 	private final Criteria<CodeComment> criteria;
-	
+
 	private final List<EntitySort> sorts;
-	
+
 	public CodeCommentQuery(@Nullable Criteria<CodeComment> criteria, List<EntitySort> sorts) {
 		this.criteria = criteria;
 		this.sorts = sorts;
@@ -62,25 +62,25 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 	public CodeCommentQuery(@Nullable Criteria<CodeComment> criteria) {
 		this(criteria, new ArrayList<>());
 	}
-	
+
 	public CodeCommentQuery() {
 		this(null);
 	}
-	
-	public static CodeCommentQuery parse(Project project, @Nullable String queryString, 
-			boolean withCurrentUserCriteria) {
+
+	public static CodeCommentQuery parse(Project project, @Nullable String queryString,
+										 boolean withCurrentUserCriteria) {
 		if (queryString != null) {
-			CharStream is = CharStreams.fromString(queryString); 
+			CharStream is = CharStreams.fromString(queryString);
 			CodeCommentQueryLexer lexer = new CodeCommentQueryLexer(is);
 			lexer.removeErrorListeners();
 			lexer.addErrorListener(new BaseErrorListener() {
 
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
-						int charPositionInLine, String msg, RecognitionException e) {
+										int charPositionInLine, String msg, RecognitionException e) {
 					throw new RuntimeException("Malformed code comment query", e);
 				}
-				
+
 			});
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			CodeCommentQueryParser parser = new CodeCommentQueryParser(tokens);
@@ -95,29 +95,35 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					@Override
 					public Criteria<CodeComment> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
-						case CodeCommentQueryLexer.Resolved:
-							return new ResolvedCriteria();
-						case CodeCommentQueryLexer.Unresolved:
-							return new UnresolvedCriteria();
-						default:
-							if (!withCurrentUserCriteria)
-								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
-							return new CreatedByMeCriteria();
+							case CodeCommentQueryLexer.Resolved:
+								return new ResolvedCriteria();
+							case CodeCommentQueryLexer.Unresolved:
+								return new UnresolvedCriteria();
+							case CodeCommentQueryLexer.MentionedMe:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new MentionedMeCriteria();
+							default:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new CreatedByMeCriteria();
 						}
 					}
-					
+
 					@Override
 					public Criteria<CodeComment> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						int operator = ctx.operator.getType();
 						String value = getValue(ctx.Quoted().getText());
-						if (operator == CodeCommentQueryLexer.CreatedBy) {
+						if (operator == CodeCommentQueryLexer.Mentioned) {
+							return new MentionedCriteria(getUser(value));
+						} else if (operator == CodeCommentQueryLexer.CreatedBy) {
 							return new CreatedByCriteria(getUser(value));
 						} else {
-							ProjectScopedCommit commitId = getCommitId(project, value); 
+							ProjectScopedCommit commitId = getCommitId(project, value);
 							return new OnCommitCriteria(commitId.getProject(), commitId.getCommitId());
 						}
 					}
-					
+
 					@Override
 					public Criteria<CodeComment> visitParensCriteria(ParensCriteriaContext ctx) {
 						return (Criteria<CodeComment>) visit(ctx.criteria()).withParens(true);
@@ -129,49 +135,49 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
-						
+
 						switch (operator) {
-						case CodeCommentQueryLexer.IsUntil:
-						case CodeCommentQueryLexer.IsSince:
-							Date dateValue = getDateValue(value);
-							switch (fieldName) {
-							case NAME_CREATE_DATE:
-								return new CreateDateCriteria(dateValue, value, operator);
-							case NAME_UPDATE_DATE:
-								return new UpdateDateCriteria(dateValue, value, operator);
-							default:
-								throw new IllegalStateException();
-							}
-						case CodeCommentQueryLexer.IsLessThan:
-						case CodeCommentQueryLexer.IsGreaterThan:
-							return new ReplyCountCriteria(getIntValue(value), operator);
-						case CodeCommentQueryLexer.Contains:
-							switch (fieldName) {
-							case NAME_CONTENT:
-								return new ContentCriteria(value);
-							case NAME_REPLY:
-								return new ReplyCriteria(value);
-							default:
-								throw new IllegalStateException();
-							}
-						case CodeCommentQueryLexer.Is:
-							switch (fieldName) {
-							case NAME_PATH:
-								return new PathCriteria(value);
-							case NAME_REPLY_COUNT:
+							case CodeCommentQueryLexer.IsUntil:
+							case CodeCommentQueryLexer.IsSince:
+								Date dateValue = getDateValue(value);
+								switch (fieldName) {
+									case NAME_CREATE_DATE:
+										return new CreateDateCriteria(dateValue, value, operator);
+									case NAME_UPDATE_DATE:
+										return new UpdateDateCriteria(dateValue, value, operator);
+									default:
+										throw new IllegalStateException();
+								}
+							case CodeCommentQueryLexer.IsLessThan:
+							case CodeCommentQueryLexer.IsGreaterThan:
 								return new ReplyCountCriteria(getIntValue(value), operator);
-							default: 
+							case CodeCommentQueryLexer.Contains:
+								switch (fieldName) {
+									case NAME_CONTENT:
+										return new ContentCriteria(value);
+									case NAME_REPLY:
+										return new ReplyCriteria(value);
+									default:
+										throw new IllegalStateException();
+								}
+							case CodeCommentQueryLexer.Is:
+								switch (fieldName) {
+									case NAME_PATH:
+										return new PathCriteria(value);
+									case NAME_REPLY_COUNT:
+										return new ReplyCountCriteria(getIntValue(value), operator);
+									default:
+										throw new IllegalStateException();
+								}
+							default:
 								throw new IllegalStateException();
-							}
-						default:
-							throw new IllegalStateException();
 						}
 					}
-					
+
 					@Override
 					public Criteria<CodeComment> visitOrCriteria(OrCriteriaContext ctx) {
 						List<Criteria<CodeComment>> childCriterias = new ArrayList<>();
-						for (CriteriaContext childCtx: ctx.criteria())
+						for (CriteriaContext childCtx : ctx.criteria())
 							childCriterias.add(visit(childCtx));
 						return new OrCriteria<CodeComment>(childCriterias);
 					}
@@ -179,7 +185,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					@Override
 					public Criteria<CodeComment> visitAndCriteria(AndCriteriaContext ctx) {
 						List<Criteria<CodeComment>> childCriterias = new ArrayList<>();
-						for (CriteriaContext childCtx: ctx.criteria())
+						for (CriteriaContext childCtx : ctx.criteria())
 							childCriterias.add(visit(childCtx));
 						return new AndCriteria<CodeComment>(childCriterias);
 					}
@@ -195,11 +201,11 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 			}
 
 			List<EntitySort> commentSorts = new ArrayList<>();
-			for (OrderContext order: queryContext.order()) {
+			for (OrderContext order : queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!ORDER_FIELDS.containsKey(fieldName)) 
+				if (!ORDER_FIELDS.containsKey(fieldName))
 					throw new ExplicitException("Can not order by field: " + fieldName);
-				
+
 				EntitySort commentSort = new EntitySort();
 				commentSort.setField(fieldName);
 				if (order.direction != null && order.direction.getText().equals("desc"))
@@ -208,50 +214,50 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					commentSort.setDirection(Direction.ASCENDING);
 				commentSorts.add(commentSort);
 			}
-			
+
 			return new CodeCommentQuery(commentCriteria, commentSorts);
 		} else {
 			return new CodeCommentQuery();
 		}
 	}
-	
+
 	public static void checkField(Project project, String fieldName, int operator) {
 		if (!QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case CodeCommentQueryLexer.IsUntil:
-		case CodeCommentQueryLexer.IsSince:
-			if (!fieldName.equals(NAME_CREATE_DATE) && !fieldName.equals(NAME_UPDATE_DATE)) 
-				throw newOperatorException(fieldName, operator);
-			break;
-		case CodeCommentQueryLexer.IsGreaterThan:
-		case CodeCommentQueryLexer.IsLessThan:
-			if (!fieldName.equals(NAME_REPLY_COUNT))
-				throw newOperatorException(fieldName, operator);
-			break;
-		case CodeCommentQueryLexer.Contains:
-			if (!fieldName.equals(NAME_CONTENT) && !fieldName.equals(NAME_REPLY))
-				throw newOperatorException(fieldName, operator);
-			break;
-		case CodeCommentQueryLexer.Is:
-			if (!fieldName.equals(NAME_REPLY_COUNT) && !fieldName.equals(NAME_PATH)) 
-				throw newOperatorException(fieldName, operator);
-			break;
+			case CodeCommentQueryLexer.IsUntil:
+			case CodeCommentQueryLexer.IsSince:
+				if (!fieldName.equals(NAME_CREATE_DATE) && !fieldName.equals(NAME_UPDATE_DATE))
+					throw newOperatorException(fieldName, operator);
+				break;
+			case CodeCommentQueryLexer.IsGreaterThan:
+			case CodeCommentQueryLexer.IsLessThan:
+				if (!fieldName.equals(NAME_REPLY_COUNT))
+					throw newOperatorException(fieldName, operator);
+				break;
+			case CodeCommentQueryLexer.Contains:
+				if (!fieldName.equals(NAME_CONTENT) && !fieldName.equals(NAME_REPLY))
+					throw newOperatorException(fieldName, operator);
+				break;
+			case CodeCommentQueryLexer.Is:
+				if (!fieldName.equals(NAME_REPLY_COUNT) && !fieldName.equals(NAME_PATH))
+					throw newOperatorException(fieldName, operator);
+				break;
 		}
 	}
-	
+
 	private static ExplicitException newOperatorException(String fieldName, int operator) {
 		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
-	
+
 	public static String getRuleName(int rule) {
 		return AntlrUtils.getLexerRuleName(CodeCommentQueryLexer.ruleNames, rule);
 	}
-	
+
 	public static int getOperator(String operatorName) {
 		return AntlrUtils.getLexerRule(CodeCommentQueryLexer.ruleNames, operatorName);
 	}
-	
+
 	@Override
 	public Criteria<CodeComment> getCriteria() {
 		return criteria;
@@ -261,5 +267,5 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 	public List<EntitySort> getSorts() {
 		return sorts;
 	}
-	
+
 }
