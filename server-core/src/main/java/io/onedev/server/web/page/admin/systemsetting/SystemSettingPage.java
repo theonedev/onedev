@@ -40,7 +40,7 @@ public class SystemSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveSystemSetting(systemSetting);
-				getSession().success("System setting has been saved");
+				getSession().success("System settings have been saved");
 				
 				setResponsePage(SystemSettingPage.class);
 			}
@@ -61,7 +61,7 @@ public class SystemSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "System Setting");
+		return new Label(componentId, "System Settings");
 	}
 
 }

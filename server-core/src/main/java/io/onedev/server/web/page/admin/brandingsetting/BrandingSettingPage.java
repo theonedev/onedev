@@ -61,7 +61,7 @@ public class BrandingSettingPage extends AdministrationPage {
 					}
 				}
 				OneDev.getInstance(SettingManager.class).saveBrandingSetting(setting);
-				getSession().success("Branding setting has been saved");
+				getSession().success("Branding settings saved");
 			}
 			
 		};

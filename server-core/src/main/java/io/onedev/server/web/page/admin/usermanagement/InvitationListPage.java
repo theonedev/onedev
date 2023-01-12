@@ -169,7 +169,7 @@ public class InvitationListPage extends AdministrationPage {
 							getInvitationManager().sendInvitationEmail(invitation);
 							Session.get().success("Invitation sent to '" + invitation.getEmailAddress() + "'");
 						} else {
-							Session.get().error("Mail setting not specified");
+							Session.get().error("Mail settings not specified");
 						}
 					}
 					

@@ -52,7 +52,7 @@ public class ProjectServiceDeskSettingPage extends ProjectSettingPage {
 					getProject().setServiceDeskName(bean.getServiceDeskName());
 					projectManager.save(getProject());
 					setResponsePage(ProjectServiceDeskSettingPage.class, ProjectServiceDeskSettingPage.paramsOf(getProject()));
-					Session.get().success("Service desk setting updated");
+					Session.get().success("Service desk settings updated");
 				}
 			}
 			
@@ -64,7 +64,7 @@ public class ProjectServiceDeskSettingPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "<span class='text-truncate'>Service Desk Setting</span>").setEscapeModelStrings(false);
+		return new Label(componentId, "<span class='text-truncate'>Service Desk Settings</span>").setEscapeModelStrings(false);
 	}
 
 	@Override

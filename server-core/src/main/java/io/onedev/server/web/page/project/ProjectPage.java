@@ -263,7 +263,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		
 		if (SecurityUtils.canManage(getProject())) {
 			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();
-			settingMenuItems.add(new SidebarMenuItem.Page(null, "General Setting", 
+			settingMenuItems.add(new SidebarMenuItem.Page(null, "General Settings", 
 					GeneralProjectSettingPage.class, GeneralProjectSettingPage.paramsOf(getProject())));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Edit Avatar", 
 					AvatarEditPage.class, AvatarEditPage.paramsOf(getProject())));

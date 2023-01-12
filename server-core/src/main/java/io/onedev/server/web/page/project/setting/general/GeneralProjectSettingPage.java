@@ -139,7 +139,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 							}
 							
 						});
-						Session.get().success("General setting has been updated");
+						Session.get().success("General settings updated");
 						setResponsePage(GeneralProjectSettingPage.class, paramsOf(project));
 					}
 				}

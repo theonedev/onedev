@@ -135,7 +135,7 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 				usedInProject.add(protection.onDeleteGroup(group.getName()));
 			for (TagProtection protection: project.getTagProtections()) 
 				usedInProject.add(protection.onDeleteGroup(group.getName()));
-			usedInProject.prefix("project '" + project.getPath() + "': setting");
+			usedInProject.prefix("project '" + project.getPath() + "': settings");
 			usage.add(usedInProject);
 		}
 

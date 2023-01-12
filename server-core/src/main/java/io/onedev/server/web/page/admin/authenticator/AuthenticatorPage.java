@@ -57,7 +57,7 @@ public class AuthenticatorPage extends AdministrationPage {
 				super.onSubmit();
 				
 				OneDev.getInstance(SettingManager.class).saveAuthenticator(bean.getAuthenticator());
-				getSession().success("External authentication setting has been saved");
+				getSession().success("External authentication settings saved");
 			}
 			
 		};

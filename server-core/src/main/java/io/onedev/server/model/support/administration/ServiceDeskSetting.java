@@ -186,7 +186,7 @@ public class ServiceDeskSetting implements Serializable {
 				usage.add("issue creation setting #" + index + ": applicable projects");
 			index++;
 		}
-		return usage.prefix("service desk setting");
+		return usage.prefix("service desk settings");
 	}
 
 	public Set<String> getUndefinedIssueFields() {

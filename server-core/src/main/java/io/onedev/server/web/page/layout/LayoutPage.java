@@ -146,9 +146,9 @@ public abstract class LayoutPage extends BasePage {
 				List<SidebarMenuItem> menuItems = new ArrayList<>(customization.getMainMenuItems());
 				if (SecurityUtils.isAdministrator()) {
 					List<SidebarMenuItem> administrationMenuItems = new ArrayList<>();
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "System Setting", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "System Settings", 
 							SystemSettingPage.class, new PageParameters()));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Security Setting", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Security Settings", 
 							SecuritySettingPage.class, new PageParameters()));
 					List<SidebarMenuItem> userManagementMenuItems = new ArrayList<>();
 					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Users", UserListPage.class, 
@@ -193,17 +193,17 @@ public abstract class LayoutPage extends BasePage {
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates", 
 							IssueTemplateListPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Setting", issueSettingMenuItems));
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Settings", issueSettingMenuItems));
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors", 
 							JobExecutorsPage.class, new PageParameters()));
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Agents", 
 							AgentListPage.class, AgentListPage.paramsOf(0), Lists.newArrayList(AgentDetailPage.class)));
 					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Setting", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Settings", 
 							MailSettingPage.class, new PageParameters()));
 					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Setting", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Settings", 
 							ServiceDeskSettingPage.class, new PageParameters()));
 					
 					List<SidebarMenuItem> notificationTemplateSettingMenuItems = new ArrayList<>();
@@ -218,7 +218,7 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Label Management", 
 							LabelManagementPage.class, new PageParameters()));
 					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Performance Setting", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Performance Settings", 
 							PerformanceSettingPage.class, new PageParameters()));
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts", 

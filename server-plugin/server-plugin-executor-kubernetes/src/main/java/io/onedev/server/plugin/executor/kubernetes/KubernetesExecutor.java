@@ -67,7 +67,7 @@ import static io.onedev.k8shelper.KubernetesHelper.*;
 @Editable(order=KubernetesExecutor.ORDER, description="This executor runs build jobs as pods in a kubernetes cluster. "
 		+ "No any agents are required."
 		+ "<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system "
-		+ "setting as job pods need to access it to download source and artifacts")
+		+ "settings as job pods need to access it to download source and artifacts")
 @Horizontal
 public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
 

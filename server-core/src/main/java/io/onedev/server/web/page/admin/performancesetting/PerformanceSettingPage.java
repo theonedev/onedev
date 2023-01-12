@@ -30,7 +30,7 @@ public class PerformanceSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).savePerformanceSetting(performanceSetting);
-				getSession().success("Performance setting has been saved");
+				getSession().success("Performance settings have been saved");
 				
 				setResponsePage(PerformanceSettingPage.class);
 			}
@@ -43,7 +43,7 @@ public class PerformanceSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Performance Setting");
+		return new Label(componentId, "Performance Settings");
 	}
 
 }

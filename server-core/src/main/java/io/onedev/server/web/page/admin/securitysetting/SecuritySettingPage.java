@@ -30,7 +30,7 @@ public class SecuritySettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveSecuritySetting(securitySetting);
-				getSession().success("Security setting has been updated");
+				getSession().success("Security settings have been updated");
 				
 				setResponsePage(SecuritySettingPage.class);
 			}
@@ -43,7 +43,7 @@ public class SecuritySettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "General Security Setting");
+		return new Label(componentId, "Security Settings");
 	}
 
 }

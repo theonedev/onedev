@@ -550,7 +550,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (FieldSpec field: getFieldSpecs())
 			usage.add(field.onDeleteUser(userName));
 		
-		return usage.prefix("issue setting");
+		return usage.prefix("issue settings");
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
@@ -564,7 +564,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (FieldSpec field: getFieldSpecs())
 			usage.add(field.onDeleteGroup(groupName));
 		
-		return usage.prefix("issue setting");
+		return usage.prefix("issue settings");
 	}
 	
 	public void onMoveProject(String oldPath, String newPath) {
@@ -603,7 +603,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (IssueTemplate template: getIssueTemplates()) 
 			usage.add(template.getQueryUpdater().onDeleteProject(projectPath).prefix("description template #" + index++));
 		
-		return usage.prefix("issue setting");
+		return usage.prefix("issue settings");
 		
 	}
 	
@@ -619,7 +619,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (TransitionSpec transition: getTransitionSpecs())
 			usage.add(transition.onDeleteRole(roleName).prefix("state transition #" + index++));
 		
-		return usage.prefix("issue setting");
+		return usage.prefix("issue settings");
 	}
 	
 	public void onRenameLink(String oldName, String newName) {
@@ -660,7 +660,7 @@ public class GlobalIssueSetting implements Serializable {
 		if (listLinks.contains(linkName))
 			usage.add(new Usage().add("fields & links").prefix("-> issues"));
 		
-		return usage.prefix("issue setting");
+		return usage.prefix("issue settings");
 	}
 	
 	public StateSpec getInitialStateSpec() {

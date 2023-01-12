@@ -38,7 +38,7 @@ public class SshServerKeyPage extends AdministrationPage {
             protected void onSubmit() {
                 super.onSubmit();
                 OneDev.getInstance(SettingManager.class).saveSshSetting(sshSetting);
-                getSession().success("SSH setting has been saved");
+                getSession().success("SSH settings have been saved");
                 
                 setResponsePage(SshServerKeyPage.class);
             }

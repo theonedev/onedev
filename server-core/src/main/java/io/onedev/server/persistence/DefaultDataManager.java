@@ -916,7 +916,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null) {
 			settingManager.saveMailSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
-			manualConfigs.add(new ManualConfig("Specify Mail Setting", null, setting.getValue()) {
+			manualConfigs.add(new ManualConfig("Specify Mail Settings", null, setting.getValue()) {
 
 				@Override
 				public void complete() {

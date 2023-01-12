@@ -125,7 +125,7 @@ public class PasswordResetPage extends SimplePage {
 							
 							return "Please check your email " + emailAddressValue + " for the reset password";
 						} else {
-							throw new ExplicitException("Unable to send password reset email as smtp setting is not defined");
+							throw new ExplicitException("Unable to send password reset email as smtp settings are not defined");
 						}
 					}
 				} finally {

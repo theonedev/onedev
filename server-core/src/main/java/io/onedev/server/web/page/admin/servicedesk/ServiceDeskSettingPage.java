@@ -39,7 +39,7 @@ public class ServiceDeskSettingPage extends AdministrationPage {
 				super.onSubmit();
 				
 				OneDev.getInstance(SettingManager.class).saveServiceDeskSetting(serviceDeskSettingHolder.getServiceDeskSetting());
-				getSession().success("Service desk setting has been saved");
+				getSession().success("Service desk settings have been saved");
 			}
 			
 		};
@@ -54,7 +54,7 @@ public class ServiceDeskSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Service Desk Setting");
+		return new Label(componentId, "Service Desk Settings");
 	}
 
 }

@@ -90,7 +90,7 @@ public class SecuritySetting implements Serializable {
 		Usage usage = new Usage();
 		if (groupName.equals(defaultLoginGroupName))
 			usage.add("default group for sign-in users");
-		return usage.prefix("security setting");
+		return usage.prefix("security settings");
 	}
 	
 }

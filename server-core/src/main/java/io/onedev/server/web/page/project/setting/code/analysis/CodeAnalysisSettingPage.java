@@ -37,7 +37,7 @@ public class CodeAnalysisSettingPage extends ProjectSettingPage {
 				getProject().setCodeAnalysisSetting(bean);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 				setResponsePage(CodeAnalysisSettingPage.class, CodeAnalysisSettingPage.paramsOf(getProject()));
-				Session.get().success("Code analysis setting updated");
+				Session.get().success("Code analysis settings updated");
 			}
 			
 		};

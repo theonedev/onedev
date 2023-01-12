@@ -63,7 +63,7 @@ public class MailSettingPage extends AdministrationPage {
 				super.onSubmit();
 				
 				OneDev.getInstance(SettingManager.class).saveMailSetting(mailSettingHolder.getMailSetting());
-				getSession().success("Mail setting has been saved");
+				getSession().success("Mail settings have been saved");
 			}
 			
 		};
@@ -133,11 +133,11 @@ public class MailSettingPage extends AdministrationPage {
 							
 							logger.log("Received test mail");
 							
-							return "Great, your mail setting is working";
+							return "Great, your mail settings are working";
 						} else {
 							io.onedev.server.model.EmailAddress emailAddress = SecurityUtils.getUser().getPrimaryEmailAddress();
 							if (emailAddress != null) {
-								String body = "Great, your mail setting is working!";
+								String body = "Great, your mail settings are working!";
 								mailManager.sendMail(mailSettingHolder.getMailSetting().getSendSetting(), Sets.newHashSet(emailAddress.getValue()), 
 										Lists.newArrayList(), Lists.newArrayList(), "[Test] Test Email From OneDev", 
 										body, body, null, null);
@@ -177,7 +177,7 @@ public class MailSettingPage extends AdministrationPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Mail Setting");
+		return new Label(componentId, "Mail Settings");
 	}
 
 }
