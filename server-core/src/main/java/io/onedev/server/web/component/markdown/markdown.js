@@ -1089,7 +1089,7 @@ onedev.server.markdown = {
 			}).text(state);
 			$tooltip.find(".title").text(title);
 		} else {
-			$tooltip.empty().append("<i>Permission denied</i>");			
+			$tooltip.empty().append("<i>Issue not exist or access denied</i>");			
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
@@ -1103,7 +1103,7 @@ onedev.server.markdown = {
 			$tooltip.find(".status").addClass(statusCss).text(status);
 			$tooltip.find(".title").text(title);
 		} else {
-			$tooltip.empty().append("<i>Permission denied</i>");			
+			$tooltip.empty().append("<i>Pull request not exist or access denied</i>");			
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
@@ -1116,7 +1116,7 @@ onedev.server.markdown = {
 					"</div>");
 			$tooltip.find(".title").text(title);
 		} else {
-			$tooltip.empty().append("<i>Permission denied</i>");			
+			$tooltip.empty().append("<i>Build not exist or access denied</i>");			
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
@@ -1140,7 +1140,7 @@ onedev.server.markdown = {
 			$tooltip.find(".date").text(date);
 			$tooltip.find(".body").text(commitMessage);
 		} else {
-			$tooltip.empty().append("<i>Permission denied</i>");			
+			$tooltip.empty().append("<i>Commit not exist or access denied</i>");			
 		}
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
