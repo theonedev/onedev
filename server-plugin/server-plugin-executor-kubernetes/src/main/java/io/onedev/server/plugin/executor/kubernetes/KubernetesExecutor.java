@@ -75,6 +75,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	static final int ORDER = 40;
 	
+	private static final int POD_WATCH_TIMEOUT = 60;
+	
 	private static final Logger logger = LoggerFactory.getLogger(KubernetesExecutor.class);
 	
 	private static final long NAMESPACE_DELETION_TIMEOUT = 120;
@@ -243,7 +245,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 				@Override
 				public void run(TaskLogger jobLogger) {
-					execute(jobLogger, jobContext);					
+					execute(jobLogger, jobContext);
 				}
 
 				@Override
@@ -1395,6 +1397,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		StringBuilder json = new StringBuilder();
 		kubectl.addArgs("get", "pod", POD_NAME, "-n", namespace, "--watch", "-o", "json");
+		kubectl.timeout(POD_WATCH_TIMEOUT);
 		
 		Thread thread = Thread.currentThread();
 		

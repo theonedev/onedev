@@ -126,7 +126,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 
 					try {
 						WebsocketUtils.call(agentSession, jobData, 0);
-					} catch (InterruptedException | TimeoutException e) {
+					} catch (InterruptedException|TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
 					}
 				}

@@ -5,6 +5,7 @@ import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
@@ -251,12 +252,13 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 												@Override
 												public Map<String, byte[]> run(File inputDir, Map<String, String> placeholderValues) {
 													return getJobManager().runServerStep(jobContext, position, inputDir,
-															placeholderValues, jobLogger);
+															placeholderValues, false, jobLogger);
 												}
 
 											});
 										} catch (Exception e) {
-											jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+											if (ExceptionUtils.find(e, InterruptedException.class) == null)
+												jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 											return false;
 										}
 									}

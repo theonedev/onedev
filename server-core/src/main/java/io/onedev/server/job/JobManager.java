@@ -59,6 +59,6 @@ public interface JobManager {
 	void copyDependencies(JobContext jobContext, File targetDir);
 	
 	Map<String, byte[]> runServerStep(JobContext jobContext, List<Integer> stepPosition, File inputDir, 
-			Map<String, String> placeholderValues, TaskLogger logger);
+			Map<String, String> placeholderValues, boolean callByAgent, TaskLogger logger);
 	
 }

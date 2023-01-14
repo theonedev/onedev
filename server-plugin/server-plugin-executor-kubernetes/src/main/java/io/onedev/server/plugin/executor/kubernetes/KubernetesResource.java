@@ -116,7 +116,7 @@ public class KubernetesResource {
 						
 						JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
 						Map<String, byte[]> outputFiles = jobManager.runServerStep(jobContext, 
-								stepPosition, filesDir, placeholderValues, new TaskLogger() {
+								stepPosition, filesDir, placeholderValues, true, new TaskLogger() {
 
 							@Override
 							public void log(String message, String sessionId) {

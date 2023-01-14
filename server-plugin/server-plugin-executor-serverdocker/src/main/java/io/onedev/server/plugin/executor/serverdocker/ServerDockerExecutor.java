@@ -470,12 +470,13 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 														@Override
 														public Map<String, byte[]> run(File inputDir, Map<String, String> placeholderValues) {
 															return getJobManager().runServerStep(jobContext, position, inputDir,
-																	placeholderValues, jobLogger);
+																	placeholderValues, false, jobLogger);
 														}
 
 													});
 												} catch (Exception e) {
-													jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+													if (ExceptionUtils.find(e, InterruptedException.class) == null)
+														jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 													return false;
 												}
 											}
