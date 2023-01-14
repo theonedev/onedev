@@ -269,11 +269,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	if (parent != null && parent.isNew())
     		create(parent);
     	project.setPath(project.calcPath());
-    	ProjectUpdate update = new ProjectUpdate();
-    	update.setProject(project);
-    	updateManager.save(update);
-    	project.setUpdate(update);
+		ProjectUpdate update = new ProjectUpdate();
+		update.setProject(project);
+		project.setUpdate(update);
     	dao.persist(project);
+
+		updateManager.save(update);
 		
 		var gitDir = storageManager.getProjectDir(project.getId());
     	FileUtils.cleanDir(gitDir);

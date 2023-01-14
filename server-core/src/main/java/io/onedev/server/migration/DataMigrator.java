@@ -4787,5 +4787,34 @@ public class DataMigrator {
 		}
 		mentionsDom.writeToFile(mentionsFile, true);
 	}
+
+	private void migrate109(File dataDir, Stack<Integer> versions) {
+		Map<String, String> projectIds = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementTextTrim("id");
+					Element updateElement = element.element("update");
+					projectIds.put(updateElement.getTextTrim(), id);
+					updateElement.detach();
+				}
+			}
+		}
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("ProjectUpdates.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementTextTrim("id");
+					String projectId = projectIds.get(id);
+					if (projectId != null)
+						element.addElement("project").setText(projectId);
+					else 
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }
