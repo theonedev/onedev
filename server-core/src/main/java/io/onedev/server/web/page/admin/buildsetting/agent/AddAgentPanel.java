@@ -89,7 +89,8 @@ class AddAgentPanel extends Panel {
 	
 	private Component newBareMetalInstructions() {
 		Fragment fragment = new Fragment("instructions", "bareMetalInstructionsFrag", this);
-		fragment.add(new ExternalLink("agent", "/~downloads/agent.zip"));
+		fragment.add(new ExternalLink("agentZip", "/~downloads/agent.zip"));
+		fragment.add(new ExternalLink("agentTgz", "/~downloads/agent.tar.gz"));
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}

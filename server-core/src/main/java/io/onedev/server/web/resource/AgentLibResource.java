@@ -54,7 +54,7 @@ public class AgentLibResource extends AbstractResource {
 						}
 						
 						OutputStream os = attributes.getResponse().getOutputStream();
-						FileUtils.tar(tempDir, Lists.newArrayList("**"), new ArrayList<>(), os, false);
+						FileUtils.tar(tempDir, os, false);
 					} finally {
 						FileUtils.deleteDir(tempDir);
 					}

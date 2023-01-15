@@ -162,7 +162,7 @@ public class KubernetesResource {
 				File tempDir = FileUtils.createTempDir();
 				try {
 					jobManager.copyDependencies(jobContext, tempDir);
-					FileUtils.tar(tempDir, Lists.newArrayList("**"), new ArrayList<>(), output, false);
+					FileUtils.tar(tempDir, output, false);
 					output.flush();
 				} finally {
 					FileUtils.deleteDir(tempDir);

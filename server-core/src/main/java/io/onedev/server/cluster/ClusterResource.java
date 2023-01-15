@@ -250,7 +250,7 @@ public class ClusterResource {
 				File tempDir = FileUtils.createTempDir("commit-info"); 
 				try {
 					commitInfoManager.export(projectId, tempDir);
-					FileUtils.tar(tempDir, Sets.newHashSet("**"), Sets.newHashSet(), output, false);
+					FileUtils.tar(tempDir, output, false);
 				} finally {
 					FileUtils.deleteDir(tempDir);
 				}

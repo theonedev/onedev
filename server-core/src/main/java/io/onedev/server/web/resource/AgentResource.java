@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Properties;
 import java.util.UUID;
 
+import com.google.common.collect.Sets;
+import io.onedev.commons.utils.StringUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.mime.MimeTypes;
@@ -41,7 +43,10 @@ public class AgentResource extends AbstractResource {
 		ResourceResponse response = new ResourceResponse();
 		response.setContentType(MimeTypes.OCTET_STREAM);
 		response.disableCaching();
-		response.setFileName("agent.zip");
+		
+		String fileName = StringUtils.substringAfterLast(
+				attributes.getRequest().getUrl().getPath(), "/");
+		response.setFileName(fileName);
 		
 		response.setWriteCallback(new WriteCallback() {
 
@@ -100,10 +105,16 @@ public class AgentResource extends AbstractResource {
 						if (agentLibs.contains(file.getName())) 
 							FileUtils.copyFileToDirectory(file, new File(agentDir, "agent/lib/" + agentVersion));
 					}
-					
-					File zipFile = new File(tempDir, "agent.zip");
-					FileUtils.zip(agentDir, zipFile, "agent/boot/wrapper-*, agent/bin/*.sh");
-					IOUtils.copy(zipFile, attributes.getResponse().getOutputStream());
+
+					if (fileName.endsWith("zip")) {
+						File packageFile = new File(tempDir, fileName);
+						FileUtils.zip(agentDir, packageFile, "agent/boot/wrapper-*, agent/bin/*.sh");
+						IOUtils.copy(packageFile, attributes.getResponse().getOutputStream());
+					} else {
+						FileUtils.tar(agentDir, Sets.newHashSet("**"), Sets.newHashSet(), 
+								Sets.newHashSet("agent/boot/wrapper-*", "agent/bin/*.sh"),
+								attributes.getResponse().getOutputStream(), true);
+					}
 				} finally {
 					FileUtils.deleteDir(tempDir);
 				}
