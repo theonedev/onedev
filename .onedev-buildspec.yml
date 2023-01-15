@@ -156,7 +156,7 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifact
-    artifacts: '*.zip *.tar.gz'
+    artifacts: '*.zip *.tar.gz *.checksum'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishMarkdownReportStep
     name: publish markdown report
