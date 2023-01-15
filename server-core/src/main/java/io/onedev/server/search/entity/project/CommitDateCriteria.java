@@ -1,19 +1,14 @@
 package io.onedev.server.search.entity.project;
 
-import java.util.Date;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
 import io.onedev.server.model.Project;
-import io.onedev.server.model.ProjectUpdate;
+import io.onedev.server.model.ProjectDynamics;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
 
-public class UpdateDateCriteria extends Criteria<Project> {
+import javax.persistence.criteria.*;
+import java.util.Date;
+
+public class CommitDateCriteria extends Criteria<Project> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -23,7 +18,7 @@ public class UpdateDateCriteria extends Criteria<Project> {
 	
 	private final Date date;
 	
-	public UpdateDateCriteria(String value, int operator) {
+	public CommitDateCriteria(String value, int operator) {
 		date = EntityQuery.getDateValue(value);
 		this.operator = operator;
 		this.value = value;
@@ -31,7 +26,7 @@ public class UpdateDateCriteria extends Criteria<Project> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
-		Path<Date> attribute = ProjectQuery.getPath(from, Project.PROP_UPDATE + "." + ProjectUpdate.PROP_DATE);
+		Path<Date> attribute = ProjectQuery.getPath(from, Project.PROP_DYNAMICS + "." + ProjectDynamics.PROP_LAST_COMMIT_DATE);
 		if (operator == ProjectQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
@@ -40,15 +35,19 @@ public class UpdateDateCriteria extends Criteria<Project> {
 
 	@Override
 	public boolean matches(Project project) {
-		if (operator == ProjectQueryLexer.IsUntil)
-			return project.getUpdate().getDate().before(date);
-		else
-			return project.getUpdate().getDate().after(date);
+		if (project.getDynamics().getLastCommitDate() != null) {
+			if (operator == ProjectQueryLexer.IsUntil)
+				return project.getDynamics().getLastCommitDate().before(date);
+			else
+				return project.getDynamics().getLastCommitDate().after(date);
+		} else {
+			return false;
+		}
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return Criteria.quote(Project.NAME_UPDATE_DATE) + " " 
+		return Criteria.quote(Project.NAME_LAST_COMMIT_DATE) + " " 
 				+ ProjectQuery.getRuleName(operator) + " " 
 				+ Criteria.quote(value);
 	}

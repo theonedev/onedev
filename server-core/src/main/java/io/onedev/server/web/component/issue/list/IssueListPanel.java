@@ -68,7 +68,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueLink;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
@@ -1432,14 +1432,14 @@ public abstract class IssueListPanel extends Panel {
 				}	
 				fragment.add(fieldsView);
 				
-				LastUpdate lastUpdate = issue.getLastUpdate();
-				if (lastUpdate.getUser() != null) 
-					fragment.add(new UserIdentPanel("user", lastUpdate.getUser(), Mode.NAME));
+				LastActivity lastActivity = issue.getLastActivity();
+				if (lastActivity.getUser() != null) 
+					fragment.add(new UserIdentPanel("user", lastActivity.getUser(), Mode.NAME));
 				else 
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
-				fragment.add(new Label("activity", lastUpdate.getActivity()));
-				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate()))
-					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastUpdate.getDate()))));
+				fragment.add(new Label("activity", lastActivity.getDescription()));
+				fragment.add(new Label("date", DateUtils.formatAge(lastActivity.getDate()))
+					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastActivity.getDate()))));
 
 				fragment.add(new ListView<Issue>("linkedIssues", new LoadableDetachableModel<List<Issue>>() {
 
@@ -1506,7 +1506,7 @@ public abstract class IssueListPanel extends Panel {
 				Item<Issue> item = super.newRowItem(id, index, model);
 				Issue issue = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(issue.getLastUpdate().getDate())?"issue":"issue new"));
+						issue.isVisitedAfter(issue.getLastActivity().getDate())?"issue":"issue new"));
 				return item;
 			}
 			

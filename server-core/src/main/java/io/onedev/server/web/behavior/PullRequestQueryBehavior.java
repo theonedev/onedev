@@ -98,7 +98,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 								try {
 									checkField(fieldName, operator);
 									if (fieldName.equals(PullRequest.NAME_SUBMIT_DATE) 
-											|| fieldName.equals(PullRequest.NAME_UPDATE_DATE)
+											|| fieldName.equals(PullRequest.NAME_LAST_ACTIVITY_DATE)
 											|| fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;

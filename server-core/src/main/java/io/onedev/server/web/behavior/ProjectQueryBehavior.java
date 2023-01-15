@@ -82,7 +82,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									ProjectQuery.checkField(fieldName, operator);
-									if (fieldName.equals(Project.NAME_UPDATE_DATE)) {
+									if (fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE) || fieldName.equals(Project.NAME_LAST_COMMIT_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
 									} else if (fieldName.equals(Project.NAME_NAME)) {

@@ -9,10 +9,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.util.criteria.Criteria;
 
-public class UpdateDateCriteria extends Criteria<CodeComment>  {
+public class LastActivityDateCriteria extends Criteria<CodeComment>  {
 
 	private static final long serialVersionUID = 1L;
 
@@ -22,7 +22,7 @@ public class UpdateDateCriteria extends Criteria<CodeComment>  {
 	
 	private final String rawValue;
 	
-	public UpdateDateCriteria(Date value, String rawValue, int operator) {
+	public LastActivityDateCriteria(Date value, String rawValue, int operator) {
 		this.operator = operator;
 		this.value = value;
 		this.rawValue = rawValue;
@@ -30,7 +30,7 @@ public class UpdateDateCriteria extends Criteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<CodeComment, CodeComment> from, CriteriaBuilder builder) {
-		Path<Date> attribute = CodeCommentQuery.getPath(from, CodeComment.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
+		Path<Date> attribute = CodeCommentQuery.getPath(from, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);
 		if (operator == CodeCommentQueryLexer.IsUntil)
 			return builder.lessThan(attribute, value);
 		else
@@ -40,14 +40,14 @@ public class UpdateDateCriteria extends Criteria<CodeComment>  {
 	@Override
 	public boolean matches(CodeComment comment) {
 		if (operator == CodeCommentQueryLexer.IsUntil)
-			return comment.getLastUpdate().getDate().before(value);
+			return comment.getLastActivity().getDate().before(value);
 		else
-			return comment.getLastUpdate().getDate().after(value);
+			return comment.getLastActivity().getDate().after(value);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(CodeComment.NAME_UPDATE_DATE) + " " 
+		return quote(CodeComment.NAME_LAST_ACTIVITY_DATE) + " " 
 				+ CodeCommentQuery.getRuleName(operator) + " " 
 				+ quote(rawValue);
 	}

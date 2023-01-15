@@ -138,7 +138,10 @@ public class ProjectQuery extends EntityQuery<Project> {
 							return new DescriptionCriteria(value);
 						case ProjectQueryLexer.IsUntil:
 						case ProjectQueryLexer.IsSince:
-							return new UpdateDateCriteria(value, operator);
+							if (fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE))
+								return new LastActivityDateCriteria(value, operator);
+							else 
+								return new CommitDateCriteria(value, operator);
 						default:
 							throw new ExplicitException("Unexpected operator " + getRuleName(operator));
 						}
@@ -213,8 +216,10 @@ public class ProjectQuery extends EntityQuery<Project> {
 			break;
 		case ProjectQueryLexer.IsUntil:
 		case ProjectQueryLexer.IsSince:
-			if (!fieldName.equals(Project.NAME_UPDATE_DATE)) 
+			if (!fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE) 
+					&& !fieldName.equals(Project.NAME_LAST_COMMIT_DATE)) {
 				throw newOperatorException(fieldName, operator);
+			}
 			break;
 		}
 	}

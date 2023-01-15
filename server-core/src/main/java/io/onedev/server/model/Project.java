@@ -82,7 +82,7 @@ import static io.onedev.server.model.Project.PROP_NAME;
 @Table(
 		indexes={
 				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"),
-				@Index(columnList="o_update_id"), @Index(columnList=PROP_NAME)
+				@Index(columnList="o_dynamics_id"), @Index(columnList=PROP_NAME)
 		}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
 )
@@ -110,9 +110,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	public static final String PROP_FORKED_FROM = "forkedFrom";
 	
-	public static final String NAME_UPDATE_DATE = "Update Date";
+	public static final String NAME_LAST_ACTIVITY_DATE = "Last Activity Date";
+
+	public static final String NAME_LAST_COMMIT_DATE = "Last Commit Date";
 	
-	public static final String PROP_UPDATE = "update";
+	public static final String PROP_DYNAMICS = "dynamics";
 	
 	public static final String NAME_LABEL = "Label";
 	
@@ -133,13 +135,14 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static final String NULL_SERVICE_DESK_PREFIX = "<$NullServiceDesk$>";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_NAME, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
+			NAME_NAME, NAME_PATH, NAME_LABEL, NAME_SERVICE_DESK_NAME, NAME_DESCRIPTION, NAME_LAST_ACTIVITY_DATE, NAME_LAST_COMMIT_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_PATH, PROP_PATH,
 			NAME_NAME, PROP_NAME, 
 			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,
-			NAME_UPDATE_DATE, PROP_UPDATE + "." + ProjectUpdate.PROP_DATE);
+			NAME_LAST_ACTIVITY_DATE, PROP_DYNAMICS + "." + ProjectDynamics.PROP_LAST_ACTIVITY_DATE,
+			NAME_LAST_COMMIT_DATE, PROP_DYNAMICS + "." + ProjectDynamics.PROP_LAST_COMMIT_DATE);
 	
 	static ThreadLocal<Stack<Project>> stack =  new ThreadLocal<Stack<Project>>() {
 
@@ -174,7 +177,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(unique=true, nullable=false)
-	private ProjectUpdate update;
+	private ProjectDynamics dynamics;
 
 	@Column(nullable=false)
 	private String name;
@@ -406,12 +409,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.createDate = createDate;
 	}
 
-	public ProjectUpdate getUpdate() {
-		return update;
+	public ProjectDynamics getDynamics() {
+		return dynamics;
 	}
 
-	public void setUpdate(ProjectUpdate update) {
-		this.update = update;
+	public void setDynamics(ProjectDynamics dynamics) {
+		this.dynamics = dynamics;
 	}
 
 	public Collection<PullRequest> getIncomingRequests() {
@@ -976,7 +979,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Mentioned me", "mentioned me"));
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is since \"last week\""));
-			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is since \"last week\""));
+			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Has activity recently", "\"Last Activity Date\" is since \"last week\""));
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Resolved", "resolved"));
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("All", null));
 		}

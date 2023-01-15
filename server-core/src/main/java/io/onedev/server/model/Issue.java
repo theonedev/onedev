@@ -63,7 +63,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
@@ -88,7 +88,7 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_NO_SPACE_TITLE),  
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
-				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList=LastUpdate.COLUMN_DATE), 
+				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList= LastActivity.COLUMN_DATE), 
 				@Index(columnList="o_numberScope_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
@@ -142,9 +142,9 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	public static final String PROP_COMMENT_COUNT = "commentCount";
 	
-	public static final String NAME_UPDATE_DATE = "Update Date";
+	public static final String NAME_LAST_ACTIVITY_DATE = "Last Activity Date";
 	
-	public static final String PROP_LAST_UPDATE = "lastUpdate";
+	public static final String PROP_LAST_ACTIVITY = "lastActivity";
 	
 	public static final String PROP_FIELDS = "fields";
 	
@@ -164,12 +164,12 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
-			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, 
+			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, 
 			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_MILESTONE);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_DESCRIPTION, 
-			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, NAME_VOTE_COUNT, 
+			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_LAST_ACTIVITY_DATE, NAME_VOTE_COUNT, 
 			NAME_COMMENT_COUNT, NAME_MILESTONE);
 
 	public static final Map<String, SortField<Issue>> ORDER_FIELDS = new LinkedHashMap<>();
@@ -223,11 +223,11 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 			}
 			
 		}));
-		ORDER_FIELDS.put(NAME_UPDATE_DATE, new SortField<Issue>(PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE, new Comparator<Issue>() {
+		ORDER_FIELDS.put(NAME_LAST_ACTIVITY_DATE, new SortField<Issue>(PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE, new Comparator<Issue>() {
 
 			@Override
 			public int compare(Issue o1, Issue o2) {
-				return o1.getLastUpdate().getDate().compareTo(o2.getLastUpdate().getDate());
+				return o1.getLastActivity().getDate().compareTo(o2.getLastActivity().getDate());
 			}
 			
 		}));	
@@ -284,7 +284,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	private String threadingReference;
 	
 	@Embedded
-	private LastUpdate lastUpdate;
+	private LastActivity lastActivity;
 	
 	// used for title search in markdown editor
 	@Column(nullable=false)
@@ -428,12 +428,12 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		this.number = number;
 	}
 
-	public LastUpdate getLastUpdate() {
-		return lastUpdate;
+	public LastActivity getLastActivity() {
+		return lastActivity;
 	}
 
-	public void setLastUpdate(LastUpdate lastUpdate) {
-		this.lastUpdate = lastUpdate;
+	public void setLastActivity(LastActivity lastActivity) {
+		this.lastActivity = lastActivity;
 	}
 
 	public User getSubmitter() {

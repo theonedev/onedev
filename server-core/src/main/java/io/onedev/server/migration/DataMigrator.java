@@ -1,5 +1,28 @@
 package io.onedev.server.migration;
 
+import com.google.common.base.Preconditions;
+import com.thoughtworks.xstream.core.JVM;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.markdown.MentionParser;
+import io.onedev.server.model.*;
+import io.onedev.server.util.Pair;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.dom4j.Element;
+import org.dom4j.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import oshi.SystemInfo;
+import oshi.hardware.HardwareAbstractionLayer;
+
+import javax.annotation.Nullable;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,48 +32,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-import javax.inject.Singleton;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.markdown.MentionParser;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.tuple.Triple;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-import com.thoughtworks.xstream.core.JVM;
-
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.User;
-import io.onedev.server.util.Pair;
-import oshi.SystemInfo;
-import oshi.hardware.HardwareAbstractionLayer;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -4794,16 +4778,54 @@ public class DataMigrator {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					updateIds.add(element.elementTextTrim("update"));
+					Element updateElement = element.element("update");
+					updateIds.add(updateElement.getTextTrim());
+					updateElement.setName("dynamics");
 				}
+				dom.writeToFile(file, false);
 			}
 		}
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("ProjectUpdates.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					if (!updateIds.contains(element.elementTextTrim("id")))
+					if (!updateIds.contains(element.elementTextTrim("id"))) {
 						element.detach();
+					} else {
+						element.element("date").setName("lastActivityDate");
+						element.setName("io.onedev.server.model.ProjectDynamics");
+					}
+				}
+				FileUtils.deleteFile(file);
+				String newFileName = file.getName().replace("Update", "Dynamics");
+				dom.writeToFile(new File(file.getParent(), newFileName), false);
+			} else if (file.getName().startsWith("Issues.xml") 
+					|| file.getName().startsWith("CodeComments.xml") 
+					|| file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element lastUpdateElement = element.element("lastUpdate");
+					lastUpdateElement.setName("lastActivity");
+					lastUpdateElement.element("activity").setName("description");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().contains(".xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				List<Node> selectedNodes = new ArrayList<>();
+				selectedNodes.addAll(dom.selectNodes("//io.onedev.server.model.support.pullrequest.NamedPullRequestQuery"));
+				selectedNodes.addAll(dom.selectNodes("//io.onedev.server.model.support.issue.NamedIssueQuery"));
+				selectedNodes.addAll(dom.selectNodes("//io.onedev.server.model.support.NamedCodeCommentQuery"));
+				selectedNodes.addAll(dom.selectNodes("//io.onedev.server.model.support.NamedProjectQuery"));
+				for (Node node : selectedNodes) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						Element queryElement = element.element("query");
+						if (queryElement != null)
+							queryElement.setText(queryElement.getText().trim().replace("\"Update Date\"", "\"Last Activity Date\""));
+					}
 				}
 				dom.writeToFile(file, false);
 			}

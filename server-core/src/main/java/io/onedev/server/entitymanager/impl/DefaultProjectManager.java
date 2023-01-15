@@ -74,6 +74,7 @@ import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -270,8 +271,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		create(parent);
     	project.setPath(project.calcPath());
 		
-		ProjectUpdate update = new ProjectUpdate();
-		project.setUpdate(update);
+		ProjectDynamics update = new ProjectDynamics();
+		project.setDynamics(update);
 		updateManager.save(update);
     	dao.persist(project);
 
@@ -396,7 +397,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		buildManager.delete(build);
     	
     	dao.remove(project);
-		updateManager.delete(project.getUpdate());
+		updateManager.delete(project.getDynamics());
     	
     	synchronized (repositoryCache) {
 			Repository repository = repositoryCache.remove(project.getId());
@@ -493,7 +494,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     @Transactional
 	@Override
-	public void fork(Project from, Project to) {    	
+	public void fork(Project from, Project to) {   
+		to.getDynamics().setLastCommitDate(from.getDynamics().getLastCommitDate());
     	Long fromId = from.getId();
     	String fromPath = from.getPath();
     	Long toId = to.getId();
@@ -730,6 +732,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			cache.put(project.getId(), project.getFacade());
 			projects.put(project.getId(), project);
 		}
+		
+		Map<Long, ProjectDynamics> updates = new HashMap<>();
+		for (ProjectDynamics update: updateManager.query())
+			updates.put(update.getId(), update);
 
 		logger.info("Checking projects...");
 		
@@ -741,7 +747,15 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			var project = projects.get(projectId);
 			if (project != null) {
 				checkGitDir(projectId);
-
+				
+				if (project.isCodeManagement()) {
+					ProjectDynamics update = updates.get(project.getDynamics().getId());
+					if (update.getLastCommitDate() == null) {
+						RevCommit lastCommit = GitUtils.getLastCommit(getRepository(projectId));
+						if (lastCommit != null)
+							update.setLastCommitDate(lastCommit.getCommitterIdent().getWhen());
+					}
+				}
 				HookUtils.checkHooks(storageManager.getProjectGitDir(projectId));
 				checkGitConfig(projectId, project.getGitPackConfig());
 				storageServers.put(projectId, new ProjectServer(localServerUUID, Lists.newArrayList()));

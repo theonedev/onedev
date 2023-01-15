@@ -140,7 +140,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else {
 										FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 										if (fieldSpec instanceof DateField || fieldSpec instanceof DateTimeField 
-												|| fieldName.equals(NAME_SUBMIT_DATE) || fieldName.equals(NAME_UPDATE_DATE)) {
+												|| fieldName.equals(NAME_SUBMIT_DATE) || fieldName.equals(NAME_LAST_ACTIVITY_DATE)) {
 											List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 											return !suggestions.isEmpty()? suggestions: null;
 										} else if (fieldSpec instanceof UserChoiceField) {

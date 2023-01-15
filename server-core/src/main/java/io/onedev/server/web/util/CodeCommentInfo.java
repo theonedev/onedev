@@ -21,7 +21,7 @@ public class CodeCommentInfo implements Serializable {
 	
 	public CodeCommentInfo(CodeComment comment, PlanarRange range) {
 		id = comment.getId();
-		updated = !comment.isVisitedAfter(comment.getLastUpdate().getDate());
+		updated = !comment.isVisitedAfter(comment.getLastActivity().getDate());
 		this.range = range;
 	}
 

@@ -11,7 +11,7 @@ import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.*;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -297,11 +297,11 @@ public class ImportServer implements Serializable, Validatable {
 								.parseDateTime(issueNode.get("created_at").asText())
 								.toDate());
 						
-						LastUpdate lastUpdate = new LastUpdate();
-						lastUpdate.setActivity("Opened");
-						lastUpdate.setDate(issue.getSubmitDate());
-						lastUpdate.setUser(issue.getSubmitter());
-						issue.setLastUpdate(lastUpdate);
+						LastActivity lastActivity = new LastActivity();
+						lastActivity.setDescription("Opened");
+						lastActivity.setDate(issue.getSubmitDate());
+						lastActivity.setUser(issue.getSubmitter());
+						issue.setLastActivity(lastActivity);
 
 						for (JsonNode assigneeNode: issueNode.get("assignees")) {
 							IssueField assigneeField = new IssueField();

@@ -102,7 +102,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.code.FileProtection;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
@@ -359,11 +359,11 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		request.setNumberScope(request.getTargetProject().getForkRoot());
 		request.setNumber(numberGenerator.getNextSequence(request.getNumberScope()));
 		
-		LastUpdate lastUpdate = new LastUpdate();
-		lastUpdate.setUser(request.getSubmitter());
-		lastUpdate.setActivity("opened");
-		lastUpdate.setDate(request.getSubmitDate());
-		request.setLastUpdate(lastUpdate);
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setUser(request.getSubmitter());
+		lastActivity.setDescription("opened");
+		lastActivity.setDate(request.getSubmitDate());
+		request.setLastActivity(lastActivity);
 		
 		dao.persist(request);
 
@@ -600,16 +600,16 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		if (event instanceof PullRequestUpdated) {
 			Collection<User> committers = ((PullRequestUpdated) event).getCommitters();
 			if (committers.size() == 1) {
-				LastUpdate lastUpdate = new LastUpdate();
-				lastUpdate.setUser(committers.iterator().next());
-				lastUpdate.setActivity("added commits");
-				lastUpdate.setDate(event.getDate());
-				event.getRequest().setLastUpdate(lastUpdate);
+				LastActivity lastActivity = new LastActivity();
+				lastActivity.setUser(committers.iterator().next());
+				lastActivity.setDescription("added commits");
+				lastActivity.setDate(event.getDate());
+				event.getRequest().setLastActivity(lastActivity);
 			} else {
-				LastUpdate lastUpdate = new LastUpdate();
-				lastUpdate.setActivity("Commits added");
-				lastUpdate.setDate(event.getDate());
-				event.getRequest().setLastUpdate(lastUpdate);
+				LastActivity lastActivity = new LastActivity();
+				lastActivity.setDescription("Commits added");
+				lastActivity.setDate(event.getDate());
+				event.getRequest().setLastActivity(lastActivity);
 			}
 		} else {
 			boolean minorChange = false;
@@ -629,7 +629,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 					|| event instanceof PullRequestReviewRequested
 					|| event instanceof PullRequestReviewerRemoved
 					|| minorChange)) {
-				event.getRequest().setLastUpdate(event.getLastUpdate());
+				event.getRequest().setLastActivity(event.getLastUpdate());
 				if (event instanceof PullRequestCodeCommentEvent)
 					event.getRequest().setCodeCommentsUpdateDate(event.getDate());
 			}
@@ -865,7 +865,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		}
 
 		if (orders.isEmpty()) 
-			orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
+			orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		
 		query.orderBy(orders);
 		

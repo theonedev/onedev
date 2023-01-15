@@ -241,8 +241,8 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 							case IssueQueryLexer.IsSince:
 								if (fieldName.equals(Issue.NAME_SUBMIT_DATE))
 									return new SubmitDateCriteria(value, operator);
-								else if (fieldName.equals(Issue.NAME_UPDATE_DATE))
-									return new UpdateDateCriteria(value, operator);
+								else if (fieldName.equals(Issue.NAME_LAST_ACTIVITY_DATE))
+									return new LastActivityDateCriteria(value, operator);
 								else
 									return new DateFieldCriteria(fieldName, value, operator);
 							case IssueQueryLexer.Contains:
@@ -414,7 +414,7 @@ public class IssueQuery extends EntityQuery<Issue> implements Comparator<Issue> 
 			case IssueQueryLexer.IsUntil:
 			case IssueQueryLexer.IsSince:
 				if (!fieldName.equals(Issue.NAME_SUBMIT_DATE)
-						&& !fieldName.equals(Issue.NAME_UPDATE_DATE)
+						&& !fieldName.equals(Issue.NAME_LAST_ACTIVITY_DATE)
 						&& !(fieldSpec instanceof DateField)
 						&& !(fieldSpec instanceof DateTimeField)) {
 					throw newOperatorException(fieldName, operator);

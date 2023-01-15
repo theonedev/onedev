@@ -83,7 +83,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 								try {
 									CodeCommentQuery.checkField(project, fieldName, operator);
 									if (fieldName.equals(CodeComment.NAME_CREATE_DATE) 
-											|| fieldName.equals(CodeComment.NAME_UPDATE_DATE)) {
+											|| fieldName.equals(CodeComment.NAME_LAST_ACTIVITY_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
 									} else if (fieldName.equals(CodeComment.NAME_PATH)) {

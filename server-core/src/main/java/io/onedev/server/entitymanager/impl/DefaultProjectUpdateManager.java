@@ -5,7 +5,8 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ProjectCreated;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.model.ProjectUpdate;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.ProjectDynamics;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -15,7 +16,7 @@ import javax.inject.Singleton;
 import java.util.Date;
 
 @Singleton
-public class DefaultProjectUpdateManager extends BaseEntityManager<ProjectUpdate> implements ProjectUpdateManager {
+public class DefaultProjectUpdateManager extends BaseEntityManager<ProjectDynamics> implements ProjectUpdateManager {
 
 	@Inject
 	public DefaultProjectUpdateManager(Dao dao) {
@@ -25,9 +26,14 @@ public class DefaultProjectUpdateManager extends BaseEntityManager<ProjectUpdate
 	@Transactional
 	@Listen
 	public void on(ProjectEvent event) {
-		if (event instanceof RefUpdated 
-				|| !(event instanceof ProjectCreated) && event.getUser() != null && !event.getUser().isSystem()) {
-			event.getProject().getUpdate().setDate(new Date());
+		Project project = event.getProject();
+		if (event instanceof RefUpdated) {
+			project.getDynamics().setLastActivityDate(new Date());
+			project.getDynamics().setLastCommitDate(new Date());
+		} else if (!(event instanceof ProjectCreated) 
+				&& event.getUser() != null 
+				&& !event.getUser().isSystem()) {
+			project.getDynamics().setLastActivityDate(new Date());
 		}
 	}
 	

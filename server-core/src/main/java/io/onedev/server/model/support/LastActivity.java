@@ -15,17 +15,15 @@ import org.hibernate.annotations.OptimisticLock;
 import io.onedev.server.model.User;
 
 @Embeddable
-public class LastUpdate implements Serializable {
+public class LastActivity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String COLUMN_USER = "LAST_UPDATE_USER";
+	public static final String COLUMN_USER = "LAST_ACTIVITY_USER";
 	
-	public static final String COLUMN_USER_NAME = "LAST_UPDATE_USER_NAME";
+	public static final String COLUMN_DATE = "LAST_ACTIVITY_DATE";
 	
-	public static final String COLUMN_DATE = "LAST_UPDATE_DATE";
-	
-	public static final String COLUMN_ACTIVITY = "LAST_UPDATE_ACTIVITY";
+	public static final String COLUMN_DESCRIPTION = "LAST_ACTIVITY_DESCRIPTION";
 
 	public static final String PROP_DATE = "date";
 	
@@ -38,9 +36,9 @@ public class LastUpdate implements Serializable {
 	@OptimisticLock(excluded=true)
 	private Date date;
 	
-	@Column(name=COLUMN_ACTIVITY, nullable=false)
+	@Column(name= COLUMN_DESCRIPTION, nullable=false)
 	@OptimisticLock(excluded=true)
-	private String activity;
+	private String description;
 
 	@Nullable
 	public User getUser() {
@@ -59,12 +57,12 @@ public class LastUpdate implements Serializable {
 		this.date = date;
 	}
 
-	public String getActivity() {
-		return activity;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setActivity(String activity) {
-		this.activity = activity;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

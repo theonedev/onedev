@@ -9,11 +9,11 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
 
-public class UpdateDateCriteria extends Criteria<PullRequest> {
+public class LastActivityDateCriteria extends Criteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -23,7 +23,7 @@ public class UpdateDateCriteria extends Criteria<PullRequest> {
 	
 	private final Date date;
 	
-	public UpdateDateCriteria(String value, int operator) {
+	public LastActivityDateCriteria(String value, int operator) {
 		this.operator = operator;
 		this.value = value;
 		date = EntityQuery.getDateValue(value);
@@ -31,7 +31,7 @@ public class UpdateDateCriteria extends Criteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<PullRequest, PullRequest> from, CriteriaBuilder builder) {
-		Path<Date> attribute = PullRequestQuery.getPath(from, PullRequest.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
+		Path<Date> attribute = PullRequestQuery.getPath(from, PullRequest.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE);
 		if (operator == PullRequestQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
@@ -41,14 +41,14 @@ public class UpdateDateCriteria extends Criteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		if (operator == PullRequestQueryLexer.IsUntil)
-			return request.getLastUpdate().getDate().before(date);
+			return request.getLastActivity().getDate().before(date);
 		else
-			return request.getLastUpdate().getDate().after(date);
+			return request.getLastActivity().getDate().after(date);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(PullRequest.NAME_UPDATE_DATE) + " " 
+		return quote(PullRequest.NAME_LAST_ACTIVITY_DATE) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

@@ -87,7 +87,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.StateCriteria;
-import io.onedev.server.search.entity.issue.UpdateDateCriteria;
+import io.onedev.server.search.entity.issue.LastActivityDateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScope;
@@ -566,7 +566,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 					if (query.getCriteria() != null)
 						criterias.add(query.getCriteria());
 					
-					criterias.add(new UpdateDateCriteria(
+					criterias.add(new LastActivityDateCriteria(
 							new DateTime().minusDays(trigger.getDays()).toDate(), 
 							IssueQueryLexer.IsUntil));
 					

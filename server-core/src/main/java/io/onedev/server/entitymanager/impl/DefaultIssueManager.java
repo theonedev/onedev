@@ -23,7 +23,7 @@ import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
@@ -226,11 +226,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issue.setNumberScope(issue.getProject().getForkRoot());
 		issue.setNumber(getNextNumber(issue.getNumberScope()));
 		
-		LastUpdate lastUpdate = new LastUpdate();
-		lastUpdate.setUser(issue.getSubmitter());
-		lastUpdate.setActivity("opened");
-		lastUpdate.setDate(issue.getSubmitDate());
-		issue.setLastUpdate(lastUpdate);
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setUser(issue.getSubmitter());
+		lastActivity.setDescription("opened");
+		lastActivity.setDate(issue.getSubmitDate());
+		issue.setLastActivity(lastActivity);
 		
 		save(issue);
 
@@ -285,7 +285,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
+			orders.add(builder.desc(IssueQuery.getPath(root, Issue.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		
 		return orders;
 	}
@@ -328,7 +328,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		}
 
 		if (!(event instanceof IssueOpened || minorChange))
-			event.getIssue().setLastUpdate(event.getLastUpdate());
+			event.getIssue().setLastActivity(event.getLastUpdate());
 	}
 	
 	@Sessional

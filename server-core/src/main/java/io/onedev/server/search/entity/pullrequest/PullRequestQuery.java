@@ -172,8 +172,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								switch (fieldName) {
 									case PullRequest.NAME_SUBMIT_DATE:
 										return new SubmitDateCriteria(value, operator);
-									case PullRequest.NAME_UPDATE_DATE:
-										return new UpdateDateCriteria(value, operator);
+									case PullRequest.NAME_LAST_ACTIVITY_DATE:
+										return new LastActivityDateCriteria(value, operator);
 									default:
 										throw new IllegalStateException();
 								}
@@ -284,7 +284,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 			case PullRequestQueryLexer.IsUntil:
 			case PullRequestQueryLexer.IsSince:
 				if (!fieldName.equals(PullRequest.NAME_SUBMIT_DATE)
-						&& !fieldName.equals(PullRequest.NAME_UPDATE_DATE)
+						&& !fieldName.equals(PullRequest.NAME_LAST_ACTIVITY_DATE)
 						&& !fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {
 					throw newOperatorException(fieldName, operator);
 				}

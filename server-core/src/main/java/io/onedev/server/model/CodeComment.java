@@ -32,7 +32,7 @@ import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.security.SecurityUtils;
@@ -43,7 +43,7 @@ import io.onedev.server.util.CollectionUtils;
 		@Index(columnList="o_project_id"), @Index(columnList="o_user_id"),
 		@Index(columnList="o_pullRequest_id"),
 		@Index(columnList=Mark.PROP_COMMIT_HASH), @Index(columnList=Mark.PROP_PATH), 
-		@Index(columnList=PROP_CREATE_DATE), @Index(columnList=LastUpdate.COLUMN_DATE)})
+		@Index(columnList=PROP_CREATE_DATE), @Index(columnList= LastActivity.COLUMN_DATE)})
 public class CodeComment extends ProjectBelonging implements AttachmentStorageSupport {
 	
 	private static final long serialVersionUID = 1L;
@@ -72,9 +72,9 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	
 	public static final String PROP_CREATE_DATE = "createDate";
 	
-	public static final String NAME_UPDATE_DATE = "Update Date";
+	public static final String NAME_LAST_ACTIVITY_DATE = "Last Activity Date";
 	
-	public static final String PROP_LAST_UPDATE = "lastUpdate";
+	public static final String PROP_LAST_ACTIVITY = "lastActivity";
 	
 	public static final String NAME_RESOLVED = "Status";
 	
@@ -89,12 +89,12 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	public static final String PROP_UUID = "uuid";
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_CONTENT, NAME_REPLY, NAME_PATH, NAME_CREATE_DATE, NAME_UPDATE_DATE, NAME_REPLY_COUNT);
+			NAME_CONTENT, NAME_REPLY, NAME_PATH, NAME_CREATE_DATE, NAME_LAST_ACTIVITY_DATE, NAME_REPLY_COUNT);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_RESOLVED, PROP_RESOLVED, 
 			NAME_CREATE_DATE, PROP_CREATE_DATE,
-			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
+			NAME_LAST_ACTIVITY_DATE, PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE,
 			NAME_REPLY_COUNT, PROP_REPLY_COUNT);
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -112,7 +112,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	private Date createDate = new Date();
 
 	@Embedded
-	private LastUpdate lastUpdate;
+	private LastActivity lastActivity;
 	
 	private int replyCount;
 
@@ -230,12 +230,12 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 		this.compareContext = compareContext;
 	}
 
-	public LastUpdate getLastUpdate() {
-		return lastUpdate;
+	public LastActivity getLastActivity() {
+		return lastActivity;
 	}
 
-	public void setLastUpdate(LastUpdate lastUpdate) {
-		this.lastUpdate = lastUpdate;
+	public void setLastActivity(LastActivity lastActivity) {
+		this.lastActivity = lastActivity;
 	}
 
 	public boolean isResolved() {

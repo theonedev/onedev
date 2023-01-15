@@ -55,7 +55,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestLabel;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestReview.Status;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entitytext.PullRequestTextManager;
@@ -779,14 +779,14 @@ public abstract class PullRequestListPanel extends Panel {
 				
 				fragment.add(new RequestStatusBadge("status", rowModel));
 				
-				LastUpdate lastUpdate = request.getLastUpdate();
-				if (lastUpdate.getUser() != null) 
-					fragment.add(new UserIdentPanel("user", lastUpdate.getUser(), Mode.NAME));
+				LastActivity lastActivity = request.getLastActivity();
+				if (lastActivity.getUser() != null) 
+					fragment.add(new UserIdentPanel("user", lastActivity.getUser(), Mode.NAME));
 				else 
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
-				fragment.add(new Label("activity", lastUpdate.getActivity()));
-				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate()))
-					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastUpdate.getDate()))));
+				fragment.add(new Label("activity", lastActivity.getDescription()));
+				fragment.add(new Label("date", DateUtils.formatAge(lastActivity.getDate()))
+					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastActivity.getDate()))));
 				
 				cellItem.add(fragment);
 			}
@@ -853,7 +853,7 @@ public abstract class PullRequestListPanel extends Panel {
 				Item<PullRequest> item = super.newRowItem(id, index, model);
 				PullRequest request = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						request.isVisitedAfter(request.getLastUpdate().getDate())?"request":"request new"));
+						request.isVisitedAfter(request.getLastActivity().getDate())?"request":"request new"));
 				return item;
 			}
 			

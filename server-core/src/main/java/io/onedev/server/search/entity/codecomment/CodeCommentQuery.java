@@ -5,7 +5,7 @@ import static io.onedev.server.model.CodeComment.NAME_CREATE_DATE;
 import static io.onedev.server.model.CodeComment.NAME_PATH;
 import static io.onedev.server.model.CodeComment.NAME_REPLY;
 import static io.onedev.server.model.CodeComment.NAME_REPLY_COUNT;
-import static io.onedev.server.model.CodeComment.NAME_UPDATE_DATE;
+import static io.onedev.server.model.CodeComment.NAME_LAST_ACTIVITY_DATE;
 import static io.onedev.server.model.CodeComment.ORDER_FIELDS;
 import static io.onedev.server.model.CodeComment.QUERY_FIELDS;
 
@@ -143,8 +143,8 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 								switch (fieldName) {
 									case NAME_CREATE_DATE:
 										return new CreateDateCriteria(dateValue, value, operator);
-									case NAME_UPDATE_DATE:
-										return new UpdateDateCriteria(dateValue, value, operator);
+									case NAME_LAST_ACTIVITY_DATE:
+										return new LastActivityDateCriteria(dateValue, value, operator);
 									default:
 										throw new IllegalStateException();
 								}
@@ -227,7 +227,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 		switch (operator) {
 			case CodeCommentQueryLexer.IsUntil:
 			case CodeCommentQueryLexer.IsSince:
-				if (!fieldName.equals(NAME_CREATE_DATE) && !fieldName.equals(NAME_UPDATE_DATE))
+				if (!fieldName.equals(NAME_CREATE_DATE) && !fieldName.equals(NAME_LAST_ACTIVITY_DATE))
 					throw newOperatorException(fieldName, operator);
 				break;
 			case CodeCommentQueryLexer.IsGreaterThan:

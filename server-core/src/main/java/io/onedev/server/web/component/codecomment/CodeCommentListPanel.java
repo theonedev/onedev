@@ -56,7 +56,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entitytext.CodeCommentTextManager;
@@ -810,15 +810,15 @@ public abstract class CodeCommentListPanel extends Panel {
 				
 				Fragment fragment = new Fragment(componentId, "lastUpdateFrag", CodeCommentListPanel.this);
 				
-				LastUpdate lastUpdate = comment.getLastUpdate();
-				if (lastUpdate.getUser() != null) {
-					fragment.add(new UserIdentPanel("user", lastUpdate.getUser(), Mode.NAME));
+				LastActivity lastActivity = comment.getLastActivity();
+				if (lastActivity.getUser() != null) {
+					fragment.add(new UserIdentPanel("user", lastActivity.getUser(), Mode.NAME));
 				} else {
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
 				}
-				fragment.add(new Label("activity", lastUpdate.getActivity()));
-				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate()))
-					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastUpdate.getDate()))));
+				fragment.add(new Label("activity", lastActivity.getDescription()));
+				fragment.add(new Label("date", DateUtils.formatAge(lastActivity.getDate()))
+					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastActivity.getDate()))));
 				
 				cellItem.add(fragment);
 			}
@@ -838,7 +838,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				Item<CodeComment> item = super.newRowItem(id, index, model);
 				CodeComment comment = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						comment.isVisitedAfter(comment.getLastUpdate().getDate())?"comment":"comment new"));
+						comment.isVisitedAfter(comment.getLastActivity().getDate())?"comment":"comment new"));
 				return item;
 			}
 		});

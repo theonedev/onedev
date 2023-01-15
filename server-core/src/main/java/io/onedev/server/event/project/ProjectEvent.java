@@ -12,7 +12,7 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.commenttext.CommentText;
 
@@ -66,12 +66,12 @@ public abstract class ProjectEvent implements Serializable {
 		return null;
 	}
 	
-	public LastUpdate getLastUpdate() {
-		LastUpdate lastUpdate = new LastUpdate();
-		lastUpdate.setUser(getUser());
-		lastUpdate.setActivity(getActivity());
-		lastUpdate.setDate(getDate());
-		return lastUpdate;
+	public LastActivity getLastUpdate() {
+		LastActivity lastActivity = new LastActivity();
+		lastActivity.setUser(getUser());
+		lastActivity.setDescription(getActivity());
+		lastActivity.setDate(getDate());
+		return lastActivity;
 	}
 	
 	@Nullable

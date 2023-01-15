@@ -20,7 +20,7 @@ public class DiffCodeCommentInfo implements Serializable {
 	
 	public DiffCodeCommentInfo(CodeComment comment, @Nullable DiffPlanarRange range) {
 		id = comment.getId();
-		updated = !comment.isVisitedAfter(comment.getLastUpdate().getDate());
+		updated = !comment.isVisitedAfter(comment.getLastActivity().getDate());
 		this.range = range;
 	}
 

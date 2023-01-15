@@ -53,7 +53,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -91,17 +91,17 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	@Override
 	public void save(CodeComment comment) {
 		if (comment.isNew()) {
-			LastUpdate lastUpdate = new LastUpdate();
-			lastUpdate.setUser(comment.getUser());
-			lastUpdate.setActivity("added");
-			lastUpdate.setDate(comment.getCreateDate());
-			comment.setLastUpdate(lastUpdate);
+			LastActivity lastActivity = new LastActivity();
+			lastActivity.setUser(comment.getUser());
+			lastActivity.setDescription("added");
+			lastActivity.setDate(comment.getCreateDate());
+			comment.setLastActivity(lastActivity);
 			dao.persist(comment);
 			
 			listenerRegistry.post(new CodeCommentCreated(comment));
 			
 			PullRequest request = comment.getCompareContext().getPullRequest();
-			if (request != null && comment.getCreateDate().after(request.getLastUpdate().getDate())) 
+			if (request != null && comment.getCreateDate().after(request.getLastActivity().getDate())) 
 				listenerRegistry.post(new PullRequestCodeCommentCreated(request, comment));
 		} else {
 			dao.persist(comment);
@@ -113,7 +113,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	@Listen
 	public void on(CodeCommentEvent event) {
 		if (!(event instanceof CodeCommentCreated))
-			event.getComment().setLastUpdate(event.getLastUpdate());
+			event.getComment().setLastActivity(event.getLastUpdate());
 	}
 	
 	@Sessional
@@ -273,7 +273,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		}
 
 		if (orders.isEmpty()) 
-			orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
+			orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.PROP_LAST_ACTIVITY + "." + LastActivity.PROP_DATE)));
 		query.orderBy(orders);
 		
 		return query;

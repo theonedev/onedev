@@ -1,26 +1,6 @@
 package io.onedev.server.commandhandler;
 
-import static org.hibernate.cfg.AvailableSettings.DIALECT;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.inject.Singleton;
-
-import org.apache.commons.lang3.SystemUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Joiner;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.FileUtils;
@@ -32,6 +12,24 @@ import io.onedev.server.migration.DataMigrator;
 import io.onedev.server.migration.MigrationHelper;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.hibernate.cfg.AvailableSettings.DIALECT;
 
 @Singleton
 public class Upgrade extends AbstractPlugin {
@@ -145,6 +143,37 @@ public class Upgrade extends AbstractPlugin {
 			return new Properties();
 	}
 	
+	private int getDataVersion(File upgradeDir) {
+		AtomicInteger oldDataVersion = new AtomicInteger(0);
+
+		int ret = buildCommandline(upgradeDir, "check-data-version").execute(new LineConsumer() {
+
+			 @Override
+			 public void consume(String line) {
+				 String prefix = "Data version: ";
+				 if (line.startsWith(prefix)) {
+					 oldDataVersion.set(Integer.parseInt(line.substring(prefix.length())));
+					 logger.info("Data version: " + oldDataVersion.get());
+				 } else {
+					 logger.info(prefixUpgradeTargetLog(line));
+				 }
+			 }
+
+		 }, new LineConsumer() {
+
+			 @Override
+			 public void consume(String line) {
+				 logger.error(prefixUpgradeTargetLog(line));
+			 }
+			 
+		}).getReturnCode();
+		
+		if (ret != 0)
+			return -1;
+		else 
+			return oldDataVersion.get();
+	}
+	
 	@Override
 	public void start() {
 		SecurityUtils.bindAsSystem();
@@ -212,39 +241,16 @@ public class Upgrade extends AbstractPlugin {
 				if (statusDir.exists())
 					FileUtils.cleanDir(statusDir);
 				
-				AtomicInteger oldDataVersion = new AtomicInteger(0);
-				
-				int ret = buildCommandline(upgradeDir, "check-data-version").execute(new LineConsumer() {
-					
-					@Override
-					public void consume(String line) {
-						String prefix = "Data version: ";
-						if (line.startsWith(prefix)) {
-							oldDataVersion.set(Integer.parseInt(line.substring(prefix.length())));
-							logger.info("Old data version: " + oldDataVersion.get());
-						} else {
-							logger.info(prefixUpgradeTargetLog(line));
-						}
-					}
-					
-				}, new LineConsumer() {
-
-					@Override
-					public void consume(String line) {
-						logger.error(prefixUpgradeTargetLog(line));
-					}}
-				
-				).getReturnCode();
-				
-				if (ret != 0) {
+				int oldDataVersion = getDataVersion(upgradeDir);
+				if (oldDataVersion == -1) {
 					logger.error("Unable to upgrade specified installation due to above error");
 					System.exit(1);
 				}
 				
 				int newDataVersion = Integer.parseInt(MigrationHelper.getVersion(DataMigrator.class));
 				
-				if (oldDataVersion.get() > newDataVersion) {
-					logger.error("App is too old, please use a newer version");
+				if (oldDataVersion > newDataVersion) {
+					logger.error("OneDev program is too old, please use a newer version");
 					System.exit(1);
 				}
 				
@@ -270,12 +276,12 @@ public class Upgrade extends AbstractPlugin {
 				boolean dbChanged = false;
 				boolean dbCleaned = false;
 				try {
-					if (oldDataVersion.get() != newDataVersion) {
+					if (oldDataVersion != newDataVersion) {
 						logger.info("Backing up database as {}...", dbBackupFile.getAbsolutePath());
 						
 						FileUtils.createDir(dbBackupFile.getParentFile());
 
-						ret = buildCommandline(upgradeDir, "backup-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
+						int ret = buildCommandline(upgradeDir, "backup-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
 
 							@Override
 							public void consume(String line) {
@@ -320,9 +326,8 @@ public class Upgrade extends AbstractPlugin {
 						
 						if (ret == 0) {
 							logger.info("Updating program files...");
-							updateProgramFiles(upgradeDir, oldDataVersion.get());
+							updateProgramFiles(upgradeDir, oldDataVersion);
 
-							dbCleaned = false;
 							logger.info("Restoring database with new program...");
 							ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
 
@@ -343,11 +348,14 @@ public class Upgrade extends AbstractPlugin {
 						
 						if (ret != 0) {
 							logger.error("Failed to upgrade {}", upgradeDir.getAbsolutePath());
+							dbCleaned = getDataVersion(upgradeDir) == -1;
 							failed = true;
-						} 
+						} else {
+							dbCleaned = false;
+						}
 					} else {
 						logger.info("Copying new program files into {}...", upgradeDir.getAbsolutePath());
-						updateProgramFiles(upgradeDir, oldDataVersion.get());
+						updateProgramFiles(upgradeDir, oldDataVersion);
 					}
 				} catch (Exception e) {
 					logger.error("Error upgrading " + upgradeDir.getAbsolutePath(), e);
@@ -395,7 +403,7 @@ public class Upgrade extends AbstractPlugin {
 							}
 						}
 						
-						if (oldDataVersion.get() <= 102) 
+						if (oldDataVersion <= 102) 
 							FileUtils.createDir(new File(upgradeDir, "site/assets/root"));
 						
 						restoreExecutables(upgradeDir);
@@ -447,7 +455,7 @@ public class Upgrade extends AbstractPlugin {
 				} else {
 					logger.info("********** Successfully upgraded {} **********", upgradeDir.getAbsolutePath());
 					
-					if (oldDataVersion.get() <= 5) {
+					if (oldDataVersion <= 5) {
 						logger.warn("\n"
 								+ "************************* IMPORTANT NOTICE *************************\n"
 								+ "* OneDev password hash algorithm has been changed for security    *\n"
