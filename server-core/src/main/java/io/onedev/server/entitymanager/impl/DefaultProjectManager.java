@@ -269,13 +269,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	if (parent != null && parent.isNew())
     		create(parent);
     	project.setPath(project.calcPath());
+		
 		ProjectUpdate update = new ProjectUpdate();
-		update.setProject(project);
 		project.setUpdate(update);
+		updateManager.save(update);
     	dao.persist(project);
 
-		updateManager.save(update);
-		
 		var gitDir = storageManager.getProjectDir(project.getId());
     	FileUtils.cleanDir(gitDir);
        	checkGitDir(project.getId());
@@ -397,6 +396,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		buildManager.delete(build);
     	
     	dao.remove(project);
+		updateManager.delete(project.getUpdate());
     	
     	synchronized (repositoryCache) {
 			Repository repository = repositoryCache.remove(project.getId());

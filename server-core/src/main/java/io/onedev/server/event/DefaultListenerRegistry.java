@@ -1,34 +1,24 @@
 package io.onedev.server.event;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.event.project.ProjectCreated;
 import io.onedev.server.event.project.ProjectEvent;
-import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
@@ -112,11 +102,7 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 	public void post(Object event) {
 		if (event instanceof ProjectEvent) {
 			ProjectEvent projectEvent = (ProjectEvent) event;
-			Project project = projectEvent.getProject();
-			if (!(event instanceof ProjectCreated)) 
-				project.getUpdate().setDate(projectEvent.getDate());
-			
-			Long projectId = project.getId();
+			Long projectId = projectEvent.getProject().getId();
 			
 			transactionManager.runAfterCommit(new ClusterRunnable() {
 

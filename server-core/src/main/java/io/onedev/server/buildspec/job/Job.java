@@ -1,32 +1,5 @@
 package io.onedev.server.buildspec.job;
 
-import static io.onedev.server.model.Build.NAME_BRANCH;
-import static io.onedev.server.model.Build.NAME_COMMIT;
-import static io.onedev.server.model.Build.NAME_JOB;
-import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
-import static io.onedev.server.model.Build.NAME_TAG;
-import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.InPipelineOf;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-
-import org.apache.wicket.Component;
-import org.eclipse.jgit.lib.ObjectId;
-
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -53,14 +26,25 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.RetryCondition;
-import io.onedev.server.web.editable.annotation.SuggestionProvider;
+import io.onedev.server.web.editable.annotation.*;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.wicket.Component;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.onedev.server.model.Build.*;
+import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.*;
 
 @Editable
 @ClassValidating

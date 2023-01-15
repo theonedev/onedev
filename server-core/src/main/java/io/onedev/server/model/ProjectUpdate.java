@@ -1,36 +1,27 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.ProjectUpdate.PROP_DATE;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.util.Date;
 
-import javax.persistence.*;
-
-import io.onedev.server.web.editable.annotation.Editable;
+import static io.onedev.server.model.ProjectUpdate.PROP_DATE;
 
 @Entity
-@Table(indexes={@Index(columnList="o_project_id"), @Index(columnList=PROP_DATE)})
-@Editable
+@Table(indexes={@Index(columnList=PROP_DATE)})
+@Cache(usage= CacheConcurrencyStrategy.READ_WRITE)
 public class ProjectUpdate extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROP_DATE = "date";
 	
-	@OneToOne
-	@JoinColumn(unique=true, nullable=false)
-	private Project project; 
-
 	@Column(nullable=false)
 	private Date date = new Date();
-
-	public Project getProject() {
-		return project;
-	}
-
-	public void setProject(Project project) {
-		this.project = project;
-	}
 
 	public Date getDate() {
 		return date;

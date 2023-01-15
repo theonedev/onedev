@@ -82,7 +82,7 @@ import static io.onedev.server.model.Project.PROP_NAME;
 @Table(
 		indexes={
 				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"),
-				@Index(columnList=PROP_NAME)
+				@Index(columnList="o_update_id"), @Index(columnList=PROP_NAME)
 		}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
 )
@@ -171,8 +171,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@JoinColumn(nullable=true)
 	@Api(description="Represents the parent project. Remove this property if the project does not have a parent project")
 	private Project parent;
-	
-	@OneToOne(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(unique=true, nullable=false)
 	private ProjectUpdate update;
 
 	@Column(nullable=false)

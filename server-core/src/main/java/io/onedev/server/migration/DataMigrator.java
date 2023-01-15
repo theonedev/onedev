@@ -4789,15 +4789,12 @@ public class DataMigrator {
 	}
 
 	private void migrate109(File dataDir, Stack<Integer> versions) {
-		Map<String, String> projectIds = new HashMap<>();
+		var updateIds = new HashSet<>();
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					String id = element.elementTextTrim("id");
-					Element updateElement = element.element("update");
-					projectIds.put(updateElement.getTextTrim(), id);
-					updateElement.detach();
+					updateIds.add(element.elementTextTrim("update"));
 				}
 			}
 		}
@@ -4805,11 +4802,7 @@ public class DataMigrator {
 			if (file.getName().startsWith("ProjectUpdates.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					String id = element.elementTextTrim("id");
-					String projectId = projectIds.get(id);
-					if (projectId != null)
-						element.addElement("project").setText(projectId);
-					else 
+					if (!updateIds.contains(element.elementTextTrim("id")))
 						element.detach();
 				}
 				dom.writeToFile(file, false);
