@@ -148,11 +148,15 @@ jobs:
       - ''
       - unzip onedev-${buildVersion}.zip
       - tar zcvf onedev-${buildVersion}.tar.gz onedev-${buildVersion}
+      - sha256sum onedev-${buildVersion}.zip > onedev-${buildVersion}.zip.checksum
+      - sha256sum onedev-${buildVersion}.tar.gz > onedev-${buildVersion}.tar.gz.checksum
+      - sha256sum server-plugin-archetype-${buildVersion}.zip > server-plugin-archetype-${buildVersion}.zip.checksum
+      - sha256sum server-plugin-archetype-${buildVersion}.tar.gz > server-plugin-archetype-${buildVersion}.tar.gz.checksum
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifact
-    artifacts: '*.zip *.tar.gz'
+    artifacts: '*.zip *.tar.gz *.checksum'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishMarkdownReportStep
     name: publish markdown report
