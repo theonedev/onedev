@@ -700,6 +700,9 @@ public class Upgrade extends AbstractPlugin {
 						+ "\r\nwrapper.java.additional.32=--add-opens=java.management/sun.management=ALL-UNNAMED"
 						+ "\r\nwrapper.java.additional.33=--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED";
 			}
+			if (!wrapperConf.contains("java.base/sun.nio.fs=ALL-UNNAMED")) {
+				wrapperConf += "\r\nwrapper.java.additional.50=--add-opens=java.base/sun.nio.fs=ALL-UNNAMED";
+			}
 			
 			if (!wrapperConf.contains("wrapper.disable_console_input")) 
 				wrapperConf += "\r\nwrapper.disable_console_input=TRUE";

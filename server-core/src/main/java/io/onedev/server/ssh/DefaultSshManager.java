@@ -145,16 +145,15 @@ public class DefaultSshManager implements SshManager {
 		if (client != null) {
 			if (client.isStarted())
 				client.stop();
-			try {
-				client.close();
-			} catch (IOException e) {
-			}
+			client.close();
 			client = null;
 		}
-    	if (server != null && server.isStarted()) {
-    		server.stop(true);
-    		server = null;
-    	}
+		if (server != null) {
+			if (server.isStarted())			
+				server.stop();
+			server.close();
+			server = null;
+		}
     }
     
 	@Override
