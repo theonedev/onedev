@@ -4,14 +4,7 @@ import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -29,6 +22,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 import javax.ws.rs.core.MediaType;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Session;
@@ -1065,6 +1059,16 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 										file.isFile()? file.length(): -1, file.lastModified()));
 							}
 						}
+
+						Collections.sort(files, (Comparator<FileInfo>) (o1, o2) -> {
+							if (o1.isFile() && o2.isFile() || !o1.isFile() && !o2.isFile())
+								return o1.getPath().compareTo(o2.getPath());
+							else if (o1.isFile())
+								return 1;
+							else
+								return -1;
+						});
+						
 						return files;
 					}
 					

@@ -1,11 +1,20 @@
 package io.onedev.server.web.page.project.builds.detail.artifacts;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.FileInfo;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+import io.onedev.server.web.resource.ArtifactResource;
+import io.onedev.server.web.resource.ArtifactResourceReference;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -32,22 +41,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.FileInfo;
-import io.onedev.server.web.behavior.NoRecordsBehavior;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import io.onedev.server.web.resource.ArtifactResource;
-import io.onedev.server.web.resource.ArtifactResourceReference;
-import io.onedev.server.web.util.ConfirmClickModifier;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class BuildArtifactsPage extends BuildDetailPage {
@@ -152,21 +149,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			@Override
 			public Iterator<? extends FileInfo> getChildren(FileInfo node) {
 				String artifactPath = node != null? node.getPath(): null;
-				List<FileInfo> files = getBuildManager().listArtifacts(getBuild(), artifactPath);
-				Collections.sort(files, new Comparator<FileInfo>() {
-
-					@Override
-					public int compare(FileInfo o1, FileInfo o2) {
-						if (o1.isFile() && o2.isFile() || !o1.isFile() && !o2.isFile()) 
-							return o1.getPath().compareTo(o2.getPath());
-						else if (o1.isFile()) 
-							return 1;
-						else 
-							return -1;
-					}
-
-				});
-				return files.iterator();
+				return getBuildManager().listArtifacts(getBuild(), artifactPath).iterator();
 			}
 			
 			@Override
