@@ -179,12 +179,6 @@
 	background: #8950FC;
 	color: white !important;
 }
-.blob-text-diff>tbody>tr>td.content>span.content-mark.insert {
-	background: var(--success);
-}
-.blob-text-diff>tbody>tr>td.content>span.content-mark.delete {
-	background: var(--danger);
-}
 
 .blob-text-diff>tbody>tr>td.number>.comment-indicator,
 .blob-text-diff>tbody>tr>td.number>.problem-trigger {

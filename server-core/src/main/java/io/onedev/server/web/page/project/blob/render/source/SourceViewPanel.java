@@ -308,7 +308,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		if (cookie != null) 
 			commentWidth = Float.parseFloat(cookie.getValue());
 		else 
-			commentWidth = 300;
+			commentWidth = 360;
 		
 		commentContainer.add(AttributeAppender.append("style", "width:" + commentWidth + "px"));
 		

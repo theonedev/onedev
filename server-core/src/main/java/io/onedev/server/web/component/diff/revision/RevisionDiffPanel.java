@@ -292,7 +292,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		
 	};
 	
-	private float commentWidth = 300;
+	private float commentWidth = 360;
 	
 	private WebMarkupContainer commentContainer;
 
