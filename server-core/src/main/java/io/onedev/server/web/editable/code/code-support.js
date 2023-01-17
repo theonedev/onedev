@@ -9,7 +9,7 @@ onedev.server.codeSupport = {
 			height = maxHeight;
 		if (height < minHeight)
 			height = minHeight;
-		$input.parent().height(height + 20);
+		$input.parent().height(height);
 	},
 	onEditorLoad: function(inputId, modeName, varQueryCallback) {
 		let cm = CodeMirror.fromTextArea(document.getElementById(inputId), {
@@ -18,6 +18,7 @@ onedev.server.codeSupport = {
 			tabSize: 4,
 			theme: "eclipse",
 			lineNumbers: true,
+			lineWrapping: true,
 			styleActiveLine: true,
 			styleSelectedText: true,
 			foldGutter: true,
@@ -35,12 +36,10 @@ onedev.server.codeSupport = {
 		cm.on("change", function() {
 			cm.save();
 			onedev.server.form.markDirty($input.closest("form"));
-			setTimeout(function() {
-				onedev.server.codeSupport.adjustHeight($input);				
-			}, 0);
 		});
 		
 		onedev.server.codeSupport.adjustHeight($input);
+		cm.refresh();
 			
 		function getLineBeforeCursor(cm) {
 	    	var cursor = cm.getCursor();
@@ -118,6 +117,7 @@ onedev.server.codeSupport = {
 			tabSize: 4,
 			theme: "eclipse",
             lineNumbers: true,
+			lineWrapping: true,
 			styleActiveLine: true,
 			styleSelectedText: true,
 			foldGutter: true,
@@ -129,5 +129,6 @@ onedev.server.codeSupport = {
 
         onedev.server.codemirror.setModeByName(cm, modeName);
 		onedev.server.codeSupport.adjustHeight($("#" + inputId));
+		cm.refresh();
 	}
 }
