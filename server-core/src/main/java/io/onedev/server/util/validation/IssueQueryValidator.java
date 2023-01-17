@@ -12,6 +12,8 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 
 	private String message;
 	
+	private boolean withCurrentProjectCriteria;
+	
 	private boolean withCurrentUserCriteria;
 	
 	private boolean withCurrentBuildCriteria;
@@ -25,6 +27,7 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 	@Override
 	public void initialize(IssueQuery constaintAnnotation) {
 		message = constaintAnnotation.message();
+		withCurrentProjectCriteria = constaintAnnotation.withCurrentProjectCriteria();
 		withCurrentUserCriteria = constaintAnnotation.withCurrentUserCriteria();
 		withCurrentBuildCriteria = constaintAnnotation.withCurrentBuildCriteria();
 		withCurrentPullRequestCriteria = constaintAnnotation.withCurrentPullRequestCriteria();
@@ -40,6 +43,7 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 			Project project = Project.get();
 			try {
 				IssueQueryParseOption option = new IssueQueryParseOption()
+						.withCurrentProjectCriteria(withCurrentProjectCriteria)
 						.withCurrentUserCriteria(withCurrentUserCriteria)
 						.withCurrentBuildCriteria(withCurrentBuildCriteria)
 						.withCurrentCommitCriteria(withCurrentCommitCriteria)
