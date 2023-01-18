@@ -8,6 +8,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.model.support.issue.field.spec.TextField;
+import io.onedev.server.web.component.MultilineLabel;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -317,13 +319,15 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						valueContainer.add(new Label("value", value));
 					}
 				} else {
-					Label label;
-					if (getField().getType().equals(ParamSpec.SECRET))
+					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
+					Component label;
+					if (getField().getType().equals(FieldSpec.SECRET))
 						label = new Label("value", SecretInput.MASK);
+					else if (fieldSpec instanceof TextField && ((TextField) fieldSpec).isMultiline())
+						label = new MultilineLabel("value", value);
 					else 
 						label = new Label("value", value);
 					
-					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
 					if (fieldSpec != null && fieldSpec instanceof ChoiceField) {
 						ChoiceProvider choiceProvider = ((ChoiceField)fieldSpec).getChoiceProvider();
 						ComponentContext.push(new ComponentContext(this));
