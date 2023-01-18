@@ -1,18 +1,5 @@
 package io.onedev.server.markdown;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-
 import com.vladsch.flexmark.ext.anchorlink.AnchorLinkExtension;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.definition.DefinitionExtension;
@@ -28,19 +15,28 @@ import com.vladsch.flexmark.formatter.NodeFormatterFactory;
 import com.vladsch.flexmark.formatter.NodeFormattingHandler;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.parser.ParserEmulationProfile;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import com.vladsch.flexmark.util.misc.Extension;
-
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.resource.AttachmentResource;
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 @Singleton
 public class DefaultMarkdownManager implements MarkdownManager {
@@ -76,7 +72,6 @@ public class DefaultMarkdownManager implements MarkdownManager {
 				.set(AnchorLinkExtension.ANCHORLINKS_WRAP_TEXT, false)
 				.set(AnchorLinkExtension.ANCHORLINKS_TEXT_PREFIX, "<span class='header-anchor'></span>")
 				.set(Parser.SPACE_IN_LINK_URLS, true)
-				.setFrom(ParserEmulationProfile.GITHUB_DOC)
 				.set(TablesExtension.COLUMN_SPANS, false)
 				.set(TablesExtension.APPEND_MISSING_COLUMNS, true)
 				.set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
@@ -88,7 +83,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	@Override
 	public String render(String markdown) {
 		Node node = parse(markdown);
-		return HtmlRenderer.builder(setupOptions()).softBreak("<br>").build().render(node);
+		return HtmlRenderer.builder(setupOptions()).build().render(node);
 	}
 
 	@Override
