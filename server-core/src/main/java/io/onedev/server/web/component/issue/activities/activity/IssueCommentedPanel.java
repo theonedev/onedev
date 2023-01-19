@@ -102,7 +102,14 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 
 			@Override
 			protected ContentVersionSupport getContentVersionSupport() {
-				return null;
+				return new ContentVersionSupport() {
+
+					@Override
+					public long getVersion() {
+						return 0;
+					}
+
+				};
 			}
 
 			@Override
