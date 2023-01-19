@@ -167,14 +167,16 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	@Api(description="Represents the project from which this project is forked. Remove this property if "
-			+ "the project is not a fork when create/update the project")
+			+ "the project is not a fork when create/update the project. May be null")
 	private Project forkedFrom;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
-	@Api(description="Represents the parent project. Remove this property if the project does not have a parent project")
+	@Api(description="Represents the parent project. Remove this property if the project does not " +
+			"have a parent project. May be null")
 	private Project parent;
 
+	@JsonIgnore
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(unique=true, nullable=false)
 	private ProjectDynamics dynamics;
@@ -187,6 +189,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private String path;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
+	@Api(description = "May be null")
 	private String description;
 	
     @OneToMany(mappedBy="project")
@@ -235,7 +238,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	@Api(description="This represents default role of the project. Remove this property if the project should not "
-			+ "have a default role when create/update the project")
+			+ "have a default role when create/update the project. May be null.")
     private Role defaultRole;
     
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)

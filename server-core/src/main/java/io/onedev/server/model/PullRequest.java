@@ -213,6 +213,7 @@ public class PullRequest extends ProjectBelonging
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
 	@OptimisticLock(excluded=true)
+	@Api(description = "May be null")
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -232,6 +233,7 @@ public class PullRequest extends ProjectBelonging
 	private String targetBranch;
 
 	@ManyToOne(fetch=FetchType.LAZY)
+	@Api(description = "Null if source project is deleted")
 	private Project sourceProject;
 	
 	@Column(nullable=false)

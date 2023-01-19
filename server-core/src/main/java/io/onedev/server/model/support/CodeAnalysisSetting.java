@@ -1,15 +1,18 @@
 package io.onedev.server.model.support;
 
-import java.io.Serializable;
-
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Patterns;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
 
 @Editable
 public class CodeAnalysisSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@Api(description = "May be null")
 	private String analysisFiles;
 	
 	@Editable(order=100, name="Files to Be Analyzed", placeholder="Inherit from parent", rootPlaceholder ="All files", description="OneDev analyzes repository files for code search, "
@@ -21,11 +24,12 @@ public class CodeAnalysisSetting implements Serializable {
 			+ "repository will be re-analyzed when server is started"
 		)
 	@Patterns
+	@Nullable
 	public String getAnalyzeFiles() {
 		return analysisFiles;
 	}
 
-	public void setAnalyzeFiles(String analyzeFiles) {
+	public void setAnalyzeFiles(@Nullable String analyzeFiles) {
 		this.analysisFiles = analyzeFiles;
 	}
 	

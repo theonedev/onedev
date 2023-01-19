@@ -40,6 +40,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import io.onedev.server.rest.annotation.Api;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -252,6 +253,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	private String title;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
+	@Api(description = "May be null")
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
