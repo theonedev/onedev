@@ -6,7 +6,9 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.FileInfo;
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.artifact.DirectoryInfo;
+import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -90,35 +92,38 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 		});
 		
-		List<IColumn<FileInfo, Void>> columns = new ArrayList<>();
+		List<IColumn<ArtifactInfo, Void>> columns = new ArrayList<>();
 		
-		columns.add(new TreeColumn<FileInfo, Void>(Model.of("Name")));
-		columns.add(new AbstractColumn<FileInfo, Void>(Model.of("Size")) {
+		columns.add(new TreeColumn<ArtifactInfo, Void>(Model.of("Name")));
+		columns.add(new AbstractColumn<ArtifactInfo, Void>(Model.of("Size")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<FileInfo>> cellItem, String componentId, IModel<FileInfo> rowModel) {
-				FileInfo file = rowModel.getObject();
-				if (!file.isFile())
+			public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
+				ArtifactInfo artifact = rowModel.getObject();
+				if (artifact instanceof DirectoryInfo) {
 					cellItem.add(new Label(componentId, ""));
-				else
-					cellItem.add(new Label(componentId, FileUtils.byteCountToDisplaySize(file.getLength())));
+				} else {
+					cellItem.add(new Label(
+							componentId, 
+							FileUtils.byteCountToDisplaySize(((FileInfo) artifact).getLength())));
+				}
 			}
 			
 		});
-		columns.add(new AbstractColumn<FileInfo, Void>(Model.of("Last Modified")) {
+		columns.add(new AbstractColumn<ArtifactInfo, Void>(Model.of("Last Modified")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<FileInfo>> cellItem, String componentId, IModel<FileInfo> rowModel) {
-				FileInfo file = rowModel.getObject();
-				cellItem.add(new Label(componentId, DateUtils.formatAge(new Date(file.getLastModified()))));
+			public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
+				ArtifactInfo artifact = rowModel.getObject();
+				cellItem.add(new Label(componentId, DateUtils.formatAge(new Date(artifact.getLastModified()))));
 			}
 			
 		});
 		if (SecurityUtils.canManage(getBuild())) {
-			columns.add(new AbstractColumn<FileInfo, Void>(Model.of("")) {
+			columns.add(new AbstractColumn<ArtifactInfo, Void>(Model.of("")) {
 
 				@Override
-				public void populateItem(Item<ICellPopulator<FileInfo>> cellItem, String componentId, IModel<FileInfo> rowModel) {
+				public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
 					Fragment fragment = new Fragment(componentId, "deleteFrag", BuildArtifactsPage.this);
 					AjaxLink<?> link = new AjaxLink<Void>("link") { 
 
@@ -129,7 +134,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 						}
 						
 					};
-					if (!rowModel.getObject().isFile())
+					if (rowModel.getObject() instanceof DirectoryInfo)
 						link.add(new ConfirmClickModifier("Do you really want to delete this directory?"));
 					else
 						link.add(new ConfirmClickModifier("Do you really want to delete this file?"));
@@ -140,36 +145,38 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			});
 		}
 		
-		ITreeProvider<FileInfo> dataProvider = new ITreeProvider<FileInfo>() {
+		ITreeProvider<ArtifactInfo> dataProvider = new ITreeProvider<ArtifactInfo>() {
 
 			@Override
 			public void detach() {
 			}
 
 			@Override
-			public Iterator<? extends FileInfo> getChildren(FileInfo node) {
+			public Iterator<? extends ArtifactInfo> getChildren(ArtifactInfo node) {
 				String artifactPath = node != null? node.getPath(): null;
-				return getBuildManager().listArtifacts(getBuild(), artifactPath).iterator();
+				DirectoryInfo directory = ((DirectoryInfo)getBuildManager()
+						.getArtifactInfo(getBuild(), artifactPath));
+				return directory.getChildren().iterator();
 			}
 			
 			@Override
-			public Iterator<? extends FileInfo> getRoots() {
+			public Iterator<? extends ArtifactInfo> getRoots() {
 				return getBuild().getRootArtifacts().iterator();
 			}
 
 			@Override
-			public boolean hasChildren(FileInfo node) {
-				return !node.isFile() && getChildren(node).hasNext();
+			public boolean hasChildren(ArtifactInfo node) {
+				return node instanceof DirectoryInfo && getChildren(node).hasNext();
 			}
 
 			@Override
-			public IModel<FileInfo> model(FileInfo object) {
+			public IModel<ArtifactInfo> model(ArtifactInfo object) {
 				return Model.of(object);
 			}
 			
 		};
 		
-		add(new TableTree<FileInfo, Void>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new TableTree<ArtifactInfo, Void>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -190,34 +197,38 @@ public class BuildArtifactsPage extends BuildDetailPage {
 			}
 
 			@Override
-			protected Item<FileInfo> newRowItem(String id, int index, IModel<FileInfo> model) {
-				return new OddEvenItem<FileInfo>(id, index, model);
+			protected Item<ArtifactInfo> newRowItem(String id, int index, IModel<ArtifactInfo> model) {
+				return new OddEvenItem<ArtifactInfo>(id, index, model);
 			}
 
 			@Override
-			public void expand(FileInfo file) {
-				super.expand(file);
+			public void expand(ArtifactInfo artifact) {
+				super.expand(artifact);
 				
-				String artifactPath = file != null? file.getPath(): null;
-				List<FileInfo> files = getBuildManager().listArtifacts(getBuild(), artifactPath);
-				if (files.size() == 1 && !files.get(0).isFile())
-					expand(files.get(0));
+				String artifactPath = artifact != null? artifact.getPath(): null;
+				DirectoryInfo directory = ((DirectoryInfo) getBuildManager()
+						.getArtifactInfo(getBuild(), artifactPath));
+				if (directory != null 
+						&& directory.getChildren().size() == 1 
+						&& directory.getChildren().get(0) instanceof DirectoryInfo) {
+					expand(directory.getChildren().get(0));
+				}
 			}
 
 			@Override
-			protected Component newContentComponent(String id, IModel<FileInfo> model) {
+			protected Component newContentComponent(String id, IModel<ArtifactInfo> model) {
 				Fragment fragment = new Fragment(id, "artifactFrag", BuildArtifactsPage.this);
-				FileInfo file = model.getObject();
+				ArtifactInfo artifact = model.getObject();
 				WebMarkupContainer link;
-				if (!file.isFile()) {
+				if (artifact instanceof DirectoryInfo) {
 					link = new AjaxLink<Void>("link") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							if (getState(file) == State.EXPANDED)
-								collapse(file);
+							if (getState(artifact) == State.EXPANDED)
+								collapse(artifact);
 							else
-								expand(file);
+								expand(artifact);
 						}
 						
 					};
@@ -225,12 +236,12 @@ public class BuildArtifactsPage extends BuildDetailPage {
 					link.add(AttributeAppender.append("class", "folder"));
 				} else {
 					PageParameters params = ArtifactResource.paramsOf(
-							getBuild().getProject().getId(), getBuild().getNumber(), file.getPath()); 
+							getBuild().getProject().getId(), getBuild().getNumber(), artifact.getPath()); 
 					link = new ResourceLink<Void>("link", new ArtifactResourceReference(), params);
 					link.add(new SpriteImage("icon", "file"));
 					link.add(AttributeAppender.append("class", "file"));
 				}
-				String fileName = file.getPath();
+				String fileName = artifact.getPath();
 				if (fileName.contains("/"))
 					fileName = StringUtils.substringAfterLast(fileName, "/");
 				link.add(new Label("label", fileName));

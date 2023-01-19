@@ -1,45 +1,9 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.io.File;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.ws.rs.core.MediaType;
-
-import edu.emory.mathcs.backport.java.util.Collections;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
-
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
@@ -47,29 +11,14 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildDependenceManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.Agent;
-import io.onedev.server.model.Build;
+import io.onedev.server.model.*;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.BuildDependence;
-import io.onedev.server.model.BuildParam;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.GroupAuthorization;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.Role;
-import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.persistence.SequenceGenerator;
 import io.onedev.server.persistence.SessionManager;
@@ -86,15 +35,42 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
-import io.onedev.server.util.FileInfo;
-import io.onedev.server.util.MimeFileInfo;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.artifact.DirectoryInfo;
+import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.*;
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultBuildManager extends BaseEntityManager<Build> implements BuildManager, SchedulableTask, Serializable {
@@ -977,36 +953,63 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	}
 
 	@Override
-	public MimeFileInfo getArtifactInfo(Build build, String artifactPath) {
+	@Nullable
+	public ArtifactInfo getArtifactInfo(Build build, @Nullable String artifactPath) {
 		Long projectId = build.getProject().getId();
 		Long buildNumber = build.getNumber();
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<MimeFileInfo>() {
+		return projectManager.runOnProjectServer(projectId, new ClusterTask<ArtifactInfo>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public MimeFileInfo call() throws Exception {
+			public ArtifactInfo call() throws Exception {
 				File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-				File artifactFile = new File(artifactsDir, artifactPath);
+				File artifactFile;
+				if (artifactPath != null)
+					artifactFile = new File(artifactsDir, artifactPath);
+				else 
+					artifactFile = artifactsDir;
 				
-				if (artifactFile.exists() && artifactFile.isFile()) {
-					String mimeType = Files.probeContentType(artifactFile.toPath());
-					if (mimeType == null)
-						mimeType = MediaType.APPLICATION_OCTET_STREAM;
-					return new MimeFileInfo(artifactPath, artifactFile.length(), 
-							artifactFile.lastModified(), mimeType);
+				if (artifactFile.exists()) {
+					if (artifactFile.isFile()) {
+						String mediaType = Files.probeContentType(artifactFile.toPath());
+						if (mediaType == null)
+							mediaType = MediaType.APPLICATION_OCTET_STREAM;
+						return new FileInfo(artifactPath, artifactFile.lastModified(),
+								artifactFile.length(), mediaType);
+					} else {
+						List<ArtifactInfo> children = new ArrayList<>();
+						int baseLen = artifactsDir.getAbsolutePath().length() + 1;
+						for (File child: artifactFile.listFiles()) {
+							var relativePath = child.getAbsolutePath().substring(baseLen);
+							if (child.isFile()) {
+								children.add(new FileInfo(relativePath, child.lastModified(), 
+										child.length(), null));
+							} else {
+								children.add(new DirectoryInfo(relativePath, child.lastModified(), null));
+							}
+						}
+						Collections.sort(children, (Comparator<ArtifactInfo>) (o1, o2) -> {
+							if (o1 instanceof FileInfo && o2 instanceof FileInfo 
+									|| (o1 instanceof DirectoryInfo) && (o2 instanceof DirectoryInfo)) {
+								return o1.getPath().compareTo(o2.getPath());
+							} else if (o1 instanceof FileInfo) {
+								return 1;
+							} else {
+								return -1;
+							}
+						});
+						return new DirectoryInfo(artifactPath, artifactFile.lastModified(), children);
+					}
 				} else {
-					String errorMessage = String.format(
-							"Specified artifact path does not exist or is a directory (project: %s, build number: %d, path: %s)", 
-							projectId, buildNumber, artifactPath);
-					throw new ExplicitException(errorMessage);
+					return null;
 				}
 			}
 		});
 	}
-
+	
 	@Override
-	public void deleteArtifact(Build build, String artifactPath) {
+	public void deleteArtifact(Build build, @Nullable String artifactPath) {
 		Long projectId = build.getProject().getId();
 		Long buildNumber = build.getNumber();
 		projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
@@ -1020,56 +1023,23 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 					@Override
 					public Void call() throws Exception {
 						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-						File artifactFile = new File(artifactsDir, artifactPath);
-						FileUtils.forceDelete(artifactFile);
-						return null;
-					}
-					
-				});				
-			}
-			
-		});
-	}
-
-	@Override
-	public List<FileInfo> listArtifacts(Build build, String artifactPath) {
-		Long projectId = build.getProject().getId();
-		Long buildNumber = build.getNumber();
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<FileInfo>>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public List<FileInfo> call() throws Exception {
-				return LockUtils.read(Build.getArtifactsLockName(projectId, buildNumber), new Callable<List<FileInfo>>() {
-
-					@Override
-					public List<FileInfo> call() throws Exception {
-						List<FileInfo> files = new ArrayList<>();
-						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-						
-						File directory = artifactsDir;
-						if (artifactPath != null)
-							directory = new File(artifactsDir, artifactPath);
-						
-						if (directory.exists()) {
-							int baseLen = artifactsDir.getAbsolutePath().length() + 1;
-							for (File file: directory.listFiles()) {
-								files.add(new FileInfo(file.getAbsolutePath().substring(baseLen), 
-										file.isFile()? file.length(): -1, file.lastModified()));
+						if (artifactPath != null) {
+							File artifactFile = new File(artifactsDir, artifactPath);
+							if (artifactFile.exists()) {
+								if (artifactFile.isFile())
+									FileUtils.deleteFile(artifactFile);
+								else 
+									FileUtils.deleteDir(artifactsDir);
+							} else {
+								String errorMessage = String.format(
+										"Unable to find specified artifact (project: %s, build number: %d, artifact path: %s)",
+										projectId, buildNumber, artifactPath);
+								throw new ExplicitException(errorMessage);
 							}
+						} else {
+							FileUtils.cleanDir(artifactsDir);
 						}
-
-						Collections.sort(files, (Comparator<FileInfo>) (o1, o2) -> {
-							if (o1.isFile() && o2.isFile() || !o1.isFile() && !o2.isFile())
-								return o1.getPath().compareTo(o2.getPath());
-							else if (o1.isFile())
-								return 1;
-							else
-								return -1;
-						});
-						
-						return files;
+						return null;
 					}
 					
 				});				

@@ -1,5 +1,10 @@
 package io.onedev.server.util;
 
+import com.google.common.base.Preconditions;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
+
+import javax.annotation.Nullable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -8,11 +13,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.base.Preconditions;
-
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.WordUtils;
 
 public class BeanUtils {
 	
@@ -64,6 +64,7 @@ public class BeanUtils {
 		return new ArrayList<Field>(fields.values());
 	}
 	
+	@Nullable
 	/**
 	 * Get suffix of accessor method name for specified property. For instance, 
 	 * getter suffix for property &quot;value&quot; would be &quot;Value&quot;.

@@ -1,40 +1,5 @@
 package io.onedev.server.attachment;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectStreamException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.commons.compress.utils.IOUtils;
-import org.glassfish.jersey.client.ClientProperties;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -56,9 +21,30 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.AttachmentTooLargeException;
-import io.onedev.server.util.FileInfo;
+import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
+import org.apache.commons.compress.utils.IOUtils;
+import org.glassfish.jersey.client.ClientProperties;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+
+import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
 @Singleton
 public class DefaultAttachmentManager implements AttachmentManager, SchedulableTask, Serializable {
@@ -423,7 +409,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 				File attachmentFile = new File(getAttachmentGroupDirLocal(projectId, attachmentGroup), attachment);
 				if (!attachmentFile.exists()) 
 					throw new RuntimeException("Attachment not found: " + attachment);
-				return new FileInfo(attachment, attachmentFile.length(), attachmentFile.lastModified());
+				return new FileInfo(attachment, attachmentFile.lastModified(), attachmentFile.length(), null);
 			}
 			
 		});
@@ -458,7 +444,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 				File attachmentGroupDir = getAttachmentGroupDirLocal(projectId, attachmentGroup);
 				if (attachmentGroupDir.exists()) {
 					for (File file: attachmentGroupDir.listFiles())
-						attachments.add(new FileInfo(file.getName(), file.length(), file.lastModified()));
+						attachments.add(new FileInfo(file.getName(), file.lastModified(), file.length(), null));
 				}
 				return attachments;
 			}

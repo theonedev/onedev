@@ -1,35 +1,7 @@
 package io.onedev.server.web.resource;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-
-import javax.persistence.EntityNotFoundException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.AbstractResource;
-import org.eclipse.jetty.io.EofException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
@@ -42,9 +14,30 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.LongRange;
-import io.onedev.server.util.MimeFileInfo;
+import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+import org.eclipse.jetty.io.EofException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.persistence.EntityNotFoundException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 
 public class SiteFileResource extends AbstractResource {
 
@@ -82,10 +75,10 @@ public class SiteFileResource extends AbstractResource {
 		ResourceResponse response = new ResourceResponse();
 		response.setAcceptRange(ContentRangeType.BYTES);
 		
-		MimeFileInfo mimeFileInfo = getProjectManager().getSiteFileInfo(projectId, filePath);
-		response.setContentType(mimeFileInfo.getMediaType());
+		FileInfo fileInfo = getProjectManager().getSiteFileInfo(projectId, filePath);
+		response.setContentType(fileInfo.getMediaType());
 		
-		response.setContentLength(mimeFileInfo.getLength());
+		response.setContentLength(fileInfo.getLength());
 		
 		try {
 			response.setFileName(URLEncoder.encode(filePath, StandardCharsets.UTF_8.name()));
@@ -105,7 +98,7 @@ public class SiteFileResource extends AbstractResource {
 			
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				LongRange range = WicketUtils.getRequestContentRange(mimeFileInfo.getLength());
+				LongRange range = WicketUtils.getRequestContentRange(fileInfo.getLength());
 				
 				UUID storageServerUUID = getProjectManager().getStorageServerUUID(projectId, true);
 				if (storageServerUUID.equals(getClusterManager().getLocalServerUUID())) {

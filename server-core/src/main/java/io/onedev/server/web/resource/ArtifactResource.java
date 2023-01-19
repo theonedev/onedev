@@ -25,6 +25,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.util.artifact.FileInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.io.IOUtils;
 import org.apache.tika.mime.MimeTypes;
@@ -47,7 +48,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.MimeFileInfo;
 import io.onedev.server.web.util.MimeUtils;
 
 public class ArtifactResource extends AbstractResource {
@@ -66,7 +66,7 @@ public class ArtifactResource extends AbstractResource {
 		Long buildNumber = params.get(PARAM_BUILD).toOptionalLong();
 		
 		if (buildNumber == null)
-			throw new IllegalArgumentException("build number has to be specified");
+			throw new IllegalArgumentException("Build number has to be specified");
 		
 		List<String> pathSegments = new ArrayList<>();
 
@@ -81,7 +81,7 @@ public class ArtifactResource extends AbstractResource {
 		
 		String artifactPath = Joiner.on("/").join(pathSegments);
 		
-		MimeFileInfo fileInfo = null;
+		FileInfo fileInfo = null;
 		if (!SecurityUtils.getUserId().equals(User.SYSTEM_ID)) {
 			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 			
@@ -96,7 +96,7 @@ public class ArtifactResource extends AbstractResource {
 			if (!SecurityUtils.canAccess(build))
 				throw new UnauthorizedException();
 			
-			fileInfo = getBuildManager().getArtifactInfo(build, artifactPath);
+			fileInfo = (FileInfo) getBuildManager().getArtifactInfo(build, artifactPath);
 		}
 		
 		ResourceResponse response = new ResourceResponse();

@@ -110,6 +110,41 @@ public class ClusterResource {
 		};
 		return Response.ok(os).build();
 	}
+
+	@Path("/artifact")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadArtifact(@QueryParam("projectId") Long projectId,
+									  @QueryParam("buildNumber") Long buildNumber,
+									  @QueryParam("artifactPath") String artifactPath) {
+		if (!SecurityUtils.getUser().isSystem())
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+
+		StreamingOutput os = new StreamingOutput() {
+
+			@Override
+			public void write(OutputStream output) throws IOException {
+				LockUtils.read(Build.getArtifactsLockName(projectId, buildNumber), new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+						File artifactFile = new File(artifactsDir, artifactPath);
+						try (
+								InputStream is = new BufferedInputStream(new FileInputStream(artifactFile), 
+										BUFFER_SIZE);
+								OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
+							IOUtils.copy(is, os);
+						}
+						return null;
+					}
+
+				});
+			}
+
+		};
+		return Response.ok(os).build();
+	}
 	
 	@Path("/blob")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)

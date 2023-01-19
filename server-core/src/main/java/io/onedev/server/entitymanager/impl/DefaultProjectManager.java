@@ -56,8 +56,8 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.MimeFileInfo;
 import io.onedev.server.util.ProjectNameReservation;
+import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -1086,22 +1086,22 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
-	public MimeFileInfo getSiteFileInfo(Long projectId, String filePath) {
-		return runOnProjectServer(projectId, new ClusterTask<MimeFileInfo>() {
+	public FileInfo getSiteFileInfo(Long projectId, String filePath) {
+		return runOnProjectServer(projectId, new ClusterTask<FileInfo>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public MimeFileInfo call() throws Exception {
-				return LockUtils.read(Project.getSiteLockName(projectId), new Callable<MimeFileInfo>() {
-
+			public FileInfo call() throws Exception {
+				return LockUtils.read(Project.getSiteLockName(projectId), new Callable<FileInfo>() {
+					
 					@Override
-					public MimeFileInfo call() throws Exception {
+					public FileInfo call() throws Exception {
 						File siteFile = new File(storageManager.getProjectSiteDir(projectId), filePath);
-						String mimeType = Files.probeContentType(siteFile.toPath());
-						if (mimeType == null)
-							mimeType = MediaType.APPLICATION_OCTET_STREAM;
-						return new MimeFileInfo(filePath, siteFile.length(), siteFile.lastModified(), mimeType);
+						String mediaType = Files.probeContentType(siteFile.toPath());
+						if (mediaType == null)
+							mediaType = MediaType.APPLICATION_OCTET_STREAM;
+						return new FileInfo(filePath, siteFile.length(), siteFile.lastModified(), mediaType);
 					}
 
 				});

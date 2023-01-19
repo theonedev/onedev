@@ -1,27 +1,20 @@
 package io.onedev.server.web.page.help;
 
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityCreate;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -41,22 +34,19 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
+import javax.annotation.Nullable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 public class ExampleValuePanel extends Panel {
@@ -488,29 +478,31 @@ public class ExampleValuePanel extends Panel {
 					List<MenuItem> items = new ArrayList<>();
 					
 					for (Class<?> clazz: ApiHelpUtils.getImplementations(getDeclaredClass())) {
-						items.add(new MenuItem() {
+						if (clazz != getValue().getClass()) {
+							items.add(new MenuItem() {
 
-							@Override
-							public String getLabel() {
-								return clazz.getSimpleName();
-							}
+								@Override
+								public String getLabel() {
+									return clazz.getSimpleName();
+								}
 
-							@Override
-							public WebMarkupContainer newLink(String id) {
-								return new AjaxLink<Void>(id) {
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return new AjaxLink<Void>(id) {
 
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										Serializable newValue = ApiHelpUtils.getExampleValue(clazz, getValueOrigin());
-										valueModel.setObject(newValue);
-										target.add(ExampleValuePanel.this);
-										send(getPage(), Broadcast.BREADTH, new ExampleValueChanged(target));
-									}
-									
-								};
-							}
-							
-						});
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											Serializable newValue = ApiHelpUtils.getExampleValue(clazz, getValueOrigin());
+											valueModel.setObject(newValue);
+											target.add(ExampleValuePanel.this);
+											send(getPage(), Broadcast.BREADTH, new ExampleValueChanged(target));
+										}
+
+									};
+								}
+
+							});
+						}
 					}
 					return items;
 				}
@@ -553,6 +545,7 @@ public class ExampleValuePanel extends Panel {
 					}
 					
 				};
+				
 				item.add(new ExampleValuePanel("value", new IModel<Serializable>() {
 
 					@Override
@@ -567,7 +560,7 @@ public class ExampleValuePanel extends Panel {
 							return (Serializable) field.get(getValue());
 						} catch (IllegalArgumentException | IllegalAccessException e) {
 							throw new RuntimeException(e);
-						}
+						} 
 					}
 
 					@Override

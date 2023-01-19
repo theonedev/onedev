@@ -50,14 +50,16 @@
 			</table>
 			</dd>
 			</wicket:enclosure>
-			<wicket:enclosure child="requestBodyExample">
+			<wicket:enclosure child="contentType">
 			<dt>Request Body</dt>
 			<dd>
 				<dl>
 					<dt>Content Type</dt>
-					<dd>application/json</dd>
-					<dt>Example <a wicket:id="copyRequestBodyExample" class="ml-1" title="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
-					<dd wicket:id="requestBodyExample"></dd>
+					<dd wicket:id="contentType">application/json</dd>
+					<wicket:enclosure child="requestBodyExample">
+						<dt>Example <a wicket:id="copyRequestBodyExample" class="ml-1" title="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
+						<dd wicket:id="requestBodyExample"></dd>
+					</wicket:enclosure>
 				</dl>
 			</dd>
 			</wicket:enclosure>
@@ -100,9 +102,11 @@
 	<wicket:fragment wicket:id="hasResponseBodyFrag">
 		<dl>
 			<dt>Content Type</dt>
-			<dd>application/json</dd>
-			<dt>Example <a wicket:id="copyExample" class="ml-1" title="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
-			<dd wicket:id="example"></dd>
+			<dd wicket:id="contentType">application/json</dd>
+			<wicket:enclosure child="example">
+				<dt>Example <a wicket:id="copyExample" class="ml-1" title="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
+				<dd wicket:id="example"></dd>
+			</wicket:enclosure>
 		</dl>
 	</wicket:fragment>
 </wicket:extend>

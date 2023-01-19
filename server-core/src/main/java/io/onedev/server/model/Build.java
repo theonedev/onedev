@@ -43,6 +43,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.artifact.DirectoryInfo;
+import io.onedev.server.util.validation.annotation.Directory;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -83,7 +86,6 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Day;
-import io.onedev.server.util.FileInfo;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
@@ -373,7 +375,7 @@ public class Build extends ProjectBelonging
 	
 	private transient JobSecretAuthorizationContext jobSecretAuthorizationContext;
 	
-	private transient List<FileInfo> rootArtifacts;
+	private transient List<ArtifactInfo> rootArtifacts;
 	
 	public Project getNumberScope() {
 		return numberScope;
@@ -995,9 +997,15 @@ public class Build extends ProjectBelonging
 		return "build-" + buildId + "-serial";
 	}
 	
-	public List<FileInfo> getRootArtifacts() {
-		if (rootArtifacts == null)
-			rootArtifacts = OneDev.getInstance(BuildManager.class).listArtifacts(this, null);
+	public List<ArtifactInfo> getRootArtifacts() {
+		if (rootArtifacts == null) {
+			DirectoryInfo directory = (DirectoryInfo) getBuildManager()
+					.getArtifactInfo(this, null);
+			if (directory != null)
+				rootArtifacts = directory.getChildren();
+			else 
+				rootArtifacts = new ArrayList<>();
+		}
 		return rootArtifacts;
 	}
 	

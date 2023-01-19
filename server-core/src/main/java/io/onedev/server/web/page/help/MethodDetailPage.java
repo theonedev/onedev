@@ -1,20 +1,16 @@
 package io.onedev.server.web.page.help;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.rest.TriggerJobResource;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.jersey.ParamCheckFilter;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.util.TextUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -28,17 +24,23 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.rest.TriggerJobResource;
-import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.jersey.ParamCheckFilter;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.util.TextUtils;
+import javax.annotation.Nullable;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
 
 @SuppressWarnings("serial")
 public class MethodDetailPage extends ApiHelpPage {
@@ -118,53 +120,63 @@ public class MethodDetailPage extends ApiHelpPage {
 		
 		Parameter param = getRequestBodyParam();
 		
-		if (param != null) { 
-			Serializable exampleValue = new ExampleProvider(resourceClass, param.getAnnotation(Api.class)).getExample(); 
-			if (exampleValue == null) 
-				exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType(), ValueInfo.Origin.REQUEST_BODY);
-			requestBodyClass = exampleValue.getClass();
-			IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+		if (param != null) {
+			if (InputStream.class.isAssignableFrom(param.getType())) {
+				add(new Label("contentType", MediaType.APPLICATION_OCTET_STREAM));
+				add(new WebMarkupContainer("requestBodyExample").setVisible(false));
+				add(new WebMarkupContainer("copyRequestBodyExample").setVisible(false));
+				requestBodyClass = InputStream.class;
+			} else {
+				add(new Label("contentType", MediaType.APPLICATION_JSON));
+				Serializable exampleValue = new ExampleProvider(resourceClass, param.getAnnotation(Api.class)).getExample();
+				if (exampleValue == null)
+					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType(), ValueInfo.Origin.REQUEST_BODY);
+				requestBodyClass = exampleValue.getClass();
+				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
 
-				@Override
-				protected ValueInfo load() {
-					return new ValueInfo(ValueInfo.Origin.REQUEST_BODY, 
-							getRequestBodyParam().getParameterizedType(), null);
-				}
-				
-			};
-			
-			Model<Serializable> valueModel = Model.of(exampleValue);
-			
-			ExampleValuePanel valuePanel = new ExampleValuePanel("requestBodyExample", valueModel, 
-					valueInfoModel, requestBodyClass);
-			add(valuePanel);
-			
-			add(new CopyToClipboardLink("copyRequestBodyExample", new LoadableDetachableModel<String>() {
+					@Override
+					protected ValueInfo load() {
+						return new ValueInfo(ValueInfo.Origin.REQUEST_BODY,
+								getRequestBodyParam().getParameterizedType(), null);
+					}
 
-				@Override
-				protected String load() {
-					return valuePanel.getValueAsJson();
-				}
-				
-			}) {
-				
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(!valuePanel.isScalarValue());
-				}
+				};
 
-				@Override
-				public void onEvent(IEvent<?> event) {
-					super.onEvent(event);
-					if (event.getPayload() instanceof ExampleValueChanged)
-						((ExampleValueChanged)event.getPayload()).getHandler().add(this);
-				}
-				
-			}.setOutputMarkupId(true));
+				Model<Serializable> valueModel = Model.of(exampleValue);
+
+				ExampleValuePanel valuePanel = new ExampleValuePanel("requestBodyExample", valueModel,
+						valueInfoModel, requestBodyClass);
+				add(valuePanel);
+
+				add(new CopyToClipboardLink("copyRequestBodyExample", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						return valuePanel.getValueAsJson();
+					}
+
+				}) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!valuePanel.isScalarValue());
+					}
+
+					@Override
+					public void onEvent(IEvent<?> event) {
+						super.onEvent(event);
+						if (event.getPayload() instanceof ExampleValueChanged)
+							((ExampleValueChanged)event.getPayload()).getHandler().add(this);
+					}
+
+				}.setOutputMarkupId(true));					
+			}
 		} else { 
 			requestBodyClass = null;
+			add(new WebMarkupContainer("contentType").setVisible(false));
 			add(new WebMarkupContainer("requestBodyExample").setVisible(false));
+			add(new WebMarkupContainer("copyRequestBodyExample").setVisible(false));
 		}
 		
 		String resourcePathValue = resourceClass.getAnnotation(Path.class).value();
@@ -280,51 +292,60 @@ public class MethodDetailPage extends ApiHelpPage {
 		});
 		
 		if (method.getReturnType() == Response.class) {
-			add(new Label("successResponseBody", "No response body if successful; error"));
+			add(new Label("successResponseBody", "No response body"));
 		} else {
 			Fragment fragment = new Fragment("successResponseBody", "hasResponseBodyFrag", MethodDetailPage.this);
-			Serializable exampleValue = new ExampleProvider(resourceClass, method.getAnnotation(Api.class)).getExample();
-			if (exampleValue == null) 
-				exampleValue = ApiHelpUtils.getExampleValue(method.getGenericReturnType(), ValueInfo.Origin.RESPONSE_BODY);
 			
-			IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+			if (StreamingOutput.class.isAssignableFrom(method.getReturnType())) {
+				fragment.add(new Label("contentType", MediaType.APPLICATION_OCTET_STREAM));
+				fragment.add(new WebMarkupContainer("example").setVisible(false));
+				fragment.add(new WebMarkupContainer("copyExample").setVisible(false));
+			} else {
+				fragment.add(new Label("contentType", MediaType.APPLICATION_JSON));
+				
+				Serializable exampleValue = new ExampleProvider(resourceClass, method.getAnnotation(Api.class)).getExample();
+				if (exampleValue == null) 
+					exampleValue = ApiHelpUtils.getExampleValue(method.getGenericReturnType(), ValueInfo.Origin.RESPONSE_BODY);
+			
+				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
 
-				@Override
-				protected ValueInfo load() {
-					return new ValueInfo(ValueInfo.Origin.RESPONSE_BODY, 
-							getResourceMethod().getGenericReturnType(), null);
-				}
-				
-			};
-			
-			IModel<Serializable> valueModel = Model.of(exampleValue);
-			
-			ExampleValuePanel valuePanel = new ExampleValuePanel("example", valueModel, valueInfoModel, requestBodyClass);
-			fragment.add(valuePanel);
-			
-			fragment.add(new CopyToClipboardLink("copyExample", new LoadableDetachableModel<String>() {
+					@Override
+					protected ValueInfo load() {
+						return new ValueInfo(ValueInfo.Origin.RESPONSE_BODY,
+								getResourceMethod().getGenericReturnType(), null);
+					}
 
-				@Override
-				protected String load() {
-					return valuePanel.getValueAsJson();
-				}
-				
-			}) {
-				
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(!valuePanel.isScalarValue());
-				}
-				
-				@Override
-				public void onEvent(IEvent<?> event) {
-					super.onEvent(event);
-					if (event.getPayload() instanceof ExampleValueChanged)
-						((ExampleValueChanged)event.getPayload()).getHandler().add(this);
-				}
-				
-			}.setOutputMarkupPlaceholderTag(true));
+				};
+
+				IModel<Serializable> valueModel = Model.of(exampleValue);
+
+				ExampleValuePanel valuePanel = new ExampleValuePanel("example", valueModel, valueInfoModel, requestBodyClass);
+				fragment.add(valuePanel);
+
+				fragment.add(new CopyToClipboardLink("copyExample", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						return valuePanel.getValueAsJson();
+					}
+
+				}) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!valuePanel.isScalarValue());
+					}
+
+					@Override
+					public void onEvent(IEvent<?> event) {
+						super.onEvent(event);
+						if (event.getPayload() instanceof ExampleValueChanged)
+							((ExampleValueChanged)event.getPayload()).getHandler().add(this);
+					}
+
+				}.setOutputMarkupPlaceholderTag(true));
+			}
 
 			add(fragment);
 		}
@@ -335,7 +356,9 @@ public class MethodDetailPage extends ApiHelpPage {
 				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample(); 
 				if (exampleValue == null)
 					exampleValue = ApiHelpUtils.getExampleValue(pathParam.getParameterizedType(), ValueInfo.Origin.PATH_PLACEHOLDER);
-				endPoint = endPoint.replace("{" + pathParam.getAnnotation(PathParam.class).value() + "}", String.valueOf(exampleValue));
+				endPoint = endPoint.replaceFirst(
+						"\\{" + pathParam.getAnnotation(PathParam.class).value() + ".*?\\}",
+						Matcher.quoteReplacement(String.valueOf(exampleValue)));
 			}
 		}
 		
@@ -361,20 +384,25 @@ public class MethodDetailPage extends ApiHelpPage {
 		
 		if (!queryParams.isEmpty())
 			curlExample.append("-G ");
+		if (StreamingOutput.class.isAssignableFrom(method.getReturnType()))
+			curlExample.append("-O ");
 		
-		switch (getHttpMethod(method)) {
+		switch (httpMethod) {
 		case "DELETE":
 			curlExample.append("-X DELETE ");
 			break;
 		case "PUT":
-			curlExample.append("-X PUT -d@request-body.json -H \"Content-Type: application/json\" ");
-			break;
 		case "POST":
-			if (resourceClass != TriggerJobResource.class)
-				curlExample.append("-d@request-body.json -H \"Content-Type: application/json\" ");
-			else
-				curlExample.append("-X POST -H \"Content-Type: application/json\" ");
-				
+			if (resourceClass == TriggerJobResource.class) {
+				curlExample.append(String.format("-X %s -H \"Content-Type: %s\" ", 
+						httpMethod, MediaType.APPLICATION_JSON));
+			} else if (InputStream.class.isAssignableFrom(requestBodyClass)) {
+				curlExample.append(String.format("-X %s --data-binary \"@upload-file\" -H \"Content-Type: %s\" ",
+						httpMethod, MediaType.APPLICATION_OCTET_STREAM));
+			} else {
+				curlExample.append(String.format("-X %s -d@request-body.json -H \"Content-Type: %s\" ", 
+						httpMethod, MediaType.APPLICATION_JSON));
+			}				
 			break;
 		}
 		
