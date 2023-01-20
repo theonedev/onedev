@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxCallListener;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -229,7 +230,19 @@ public abstract class IssueSidePanel extends Panel {
 	private Component newConfidentialContainer() {
 		CheckBox confidentialInput = new CheckBox("confidential", new PropertyModel<Boolean>(this, "confidential"));
 		confidentialInput.add(new AjaxFormComponentUpdatingBehavior("change") {
-			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				
+				String precondition = "" +
+						"if (onedev.server.form.confirmLeave())" +
+						"	return true;" +
+						"if ($(this).is(':checkbox'))" +
+						"  this.checked = !this.checked;" +
+						"return false;";
+				attributes.getAjaxCallListeners().add(new AjaxCallListener().onPrecondition(precondition));
+			}
+
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				OneDev.getInstance(IssueChangeManager.class).changeConfidential(getIssue(), confidential);
