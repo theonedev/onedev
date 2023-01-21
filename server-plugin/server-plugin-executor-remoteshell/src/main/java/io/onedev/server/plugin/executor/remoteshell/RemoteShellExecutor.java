@@ -31,7 +31,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 @Editable(order=500, name="Remote Shell Executor", description=""
-		+ "This executor runs build jobs with remote machines's shell facility via <a href='/administration/agents' target='_blank'>agents</a><br>"
+		+ "This executor runs build jobs with remote machines's shell facility via <a href='/~administration/agents' target='_blank'>agents</a><br>"
 		+ "<b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission "
 		+ "as corresponding agent process. Make sure it can only be used by trusted jobs via job "
 		+ "authorization setting")
