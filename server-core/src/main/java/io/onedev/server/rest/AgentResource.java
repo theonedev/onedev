@@ -65,7 +65,7 @@ public class AgentResource {
 	@Api(order=300)
 	@GET
     public List<Agent> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/administration/agents'>agent management page</a>", example="\"Name\" is \"agentName\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~administration/agents'>agent management page</a>", example="\"Name\" is \"agentName\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
     	if (!SecurityUtils.isAdministrator()) 
