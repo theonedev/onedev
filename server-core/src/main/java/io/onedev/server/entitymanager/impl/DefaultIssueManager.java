@@ -17,6 +17,7 @@ import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.project.issue.IssueCommitsAttached;
 import io.onedev.server.event.project.issue.IssueChanged;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.issue.IssueOpened;
@@ -321,7 +322,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Listen
 	public void on(IssueEvent event) {
 		boolean minorChange = false;
-		if (event instanceof IssueChanged) {
+		if (event instanceof IssueCommitsAttached) {
+			minorChange = true;
+		} else if (event instanceof IssueChanged) {
 			IssueChangeData changeData = ((IssueChanged)event).getChange().getData();
 			if (changeData instanceof ReferencedFromAware) 
 				minorChange = true;

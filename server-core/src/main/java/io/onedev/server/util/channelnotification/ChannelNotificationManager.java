@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import io.onedev.server.event.project.issue.IssueCommitsAttached;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -60,170 +61,147 @@ import io.onedev.server.util.ReflectionUtils;
 public abstract class ChannelNotificationManager<T extends ChannelNotificationSetting> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChannelNotificationManager.class);
-	
+
 	private final ObjectMapper objectMapper;
-	
+
 	private final Class<T> settingClass;
-	
+
 	@SuppressWarnings("unchecked")
 	@Inject
 	public ChannelNotificationManager(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
-		
+
 		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ChannelNotificationManager.class, getClass());
 		if (typeArguments.size() == 1 && ChannelNotificationSetting.class.isAssignableFrom(typeArguments.get(0))) {
 			settingClass = (Class<T>) typeArguments.get(0);
 		} else {
-			throw new RuntimeException("Super class of channel notification manager implementation must "
-					+ "be ChannelNotificationManager and must realize the type argument <T>");
+			throw new RuntimeException("Super class of channel notification manager implementation must " + "be ChannelNotificationManager and must realize the type argument <T>");
 		}
-	} 
-	
+	}
+
 	@Sessional
 	@Listen
 	public void on(IssueEvent event) {
-		if (!(event instanceof IssueChanged) 
-				|| !(((IssueChanged) event).getChange().getData() instanceof ReferencedFromAware)) {
+		if (!(event instanceof IssueCommitsAttached) && (!(event instanceof IssueChanged) || !(((IssueChanged) event).getChange().getData() instanceof ReferencedFromAware))) {
 			Issue issue = event.getIssue();
 			User user = event.getUser();
-			
-			String issueInfo = String.format("[Issue] (%s - %s)", issue.getFQN(), issue.getTitle()); 
-			
-			String eventDescription; 
-			if (user != null)
-				eventDescription = user.getDisplayName() + " " + event.getActivity();
-			else
-				eventDescription = StringUtils.capitalize(event.getActivity());
-			
+
+			String issueInfo = String.format("[Issue] (%s - %s)", issue.getFQN(), issue.getTitle());
+
+			String eventDescription;
+			if (user != null) eventDescription = user.getDisplayName() + " " + event.getActivity();
+			else eventDescription = StringUtils.capitalize(event.getActivity());
+
 			postIfApplicable(issueInfo + " " + eventDescription, event);
 		}
-		
+
 	}
-	
+
 	@Sessional
 	@Listen
 	public void on(PullRequestEvent event) {
 		boolean significantChange = false;
 		if (event instanceof PullRequestChanged) {
 			PullRequestChangeData changeData = ((PullRequestChanged) event).getChange().getData();
-			if (changeData instanceof PullRequestApproveData 
-					|| changeData instanceof PullRequestRequestedForChangesData 
-					|| changeData instanceof PullRequestMergeData 
-					|| changeData instanceof PullRequestDiscardData
-					|| changeData instanceof PullRequestReopenData) {
+			if (changeData instanceof PullRequestApproveData || changeData instanceof PullRequestRequestedForChangesData || changeData instanceof PullRequestMergeData || changeData instanceof PullRequestDiscardData || changeData instanceof PullRequestReopenData) {
 				significantChange = true;
 			}
-		} else if (!(event instanceof PullRequestMergePreviewCalculated 
-				|| event instanceof PullRequestBuildEvent
-				|| event instanceof PullRequestReviewRequested
-				|| event instanceof PullRequestReviewerRemoved
-				|| event instanceof PullRequestAssigned
-				|| event instanceof PullRequestUnassigned)) {
+		} else if (!(event instanceof PullRequestMergePreviewCalculated || event instanceof PullRequestBuildEvent || event instanceof PullRequestReviewRequested || event instanceof PullRequestReviewerRemoved || event instanceof PullRequestAssigned || event instanceof PullRequestUnassigned)) {
 			significantChange = true;
 		}
-		
+
 		if (significantChange) {
 			PullRequest request = event.getRequest();
 			User user = event.getUser();
-			
-			String pullRequestInfo = String.format("[Pull Request] (%s - %s)", request.getFQN(), request.getTitle()); 
-			
-			String eventDescription; 
-			if (user != null)
-				eventDescription = user.getDisplayName() + " " + event.getActivity();
-			else
-				eventDescription = StringUtils.capitalize(event.getActivity());
+
+			String pullRequestInfo = String.format("[Pull Request] (%s - %s)", request.getFQN(), request.getTitle());
+
+			String eventDescription;
+			if (user != null) eventDescription = user.getDisplayName() + " " + event.getActivity();
+			else eventDescription = StringUtils.capitalize(event.getActivity());
 
 			postIfApplicable(pullRequestInfo + " " + eventDescription, event);
 		}
-		
+
 	}
-	
+
 	@Sessional
 	@Listen
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
 
 		String eventDescription = build.getStatus().toString();
-		if (build.getVersion() != null)
-			eventDescription = build.getVersion() + " " + eventDescription;
-			
+		if (build.getVersion() != null) eventDescription = build.getVersion() + " " + eventDescription;
+
 		String buildInfo = String.format("[Build] (%s - %s)", build.getFQN(), build.getJobName());
 		postIfApplicable(buildInfo + " " + eventDescription, event);
 	}
-	
+
 	@Sessional
 	@Listen
 	public void on(RefUpdated event) {
-		if (!event.getNewCommitId().equals(ObjectId.zeroId())) { 
+		if (!event.getNewCommitId().equals(ObjectId.zeroId())) {
 			Project project = event.getProject();
 			RevCommit commit = project.getRevCommit(event.getNewCommitId(), false);
 			if (commit != null) {
 				String target = GitUtils.ref2branch(event.getRefName());
 				if (target == null) {
 					target = GitUtils.ref2tag(event.getRefName());
-					if (target == null) 
-						target = event.getRefName();
+					if (target == null) target = event.getRefName();
 				}
-				
-				String commitInfo = String.format("[Commit] (%s:%s - %s)", 
-						project.getPath(), GitUtils.abbreviateSHA(commit.name()), target);
+
+				String commitInfo = String.format("[Commit] (%s:%s - %s)", project.getPath(), GitUtils.abbreviateSHA(commit.name()), target);
 				postIfApplicable(commitInfo + " " + commit.getShortMessage(), event);
 			}
 		}
 	}
-	
+
 	@Sessional
 	@Listen
 	public void on(CodeCommentEvent event) {
 		if (!(event instanceof CodeCommentUpdated)) {
 			CodeComment comment = event.getComment();
 
-			String commentInfo = String.format("[Code Comment] (%s:%s)", 
-					event.getProject().getPath(), comment.getMark().getPath());
-			
-			String eventDescription = String.format("%s %s", 
-					event.getUser().getDisplayName(), event.getActivity());
-			
+			String commentInfo = String.format("[Code Comment] (%s:%s)", event.getProject().getPath(), comment.getMark().getPath());
+
+			String eventDescription = String.format("%s %s", event.getUser().getDisplayName(), event.getActivity());
+
 			postIfApplicable(commentInfo + " " + eventDescription, event);
 		}
-	}	
-	
+	}
+
 	private Collection<ChannelNotification> getNotifications(Project project) {
 		Map<String, ChannelNotification> notifications = new HashMap<>();
 		do {
 			T setting = project.getContributedSetting(settingClass);
-			for (ChannelNotificationWrapper wrapper: setting.getNotifications()) 
+			for (ChannelNotificationWrapper wrapper : setting.getNotifications())
 				notifications.putIfAbsent(wrapper.getChannelNotification().getWebhookUrl(), wrapper.getChannelNotification());
 			project = project.getParent();
 		} while (project != null);
-		
+
 		return notifications.values();
 	}
-	
+
 	private void postIfApplicable(String title, ProjectEvent event) {
 		Object data = toJsonObject(title, event);
-		
-		for (ChannelNotification notification: getNotifications(event.getProject())) {
+
+		for (ChannelNotification notification : getNotifications(event.getProject())) {
 			if (notification.matches(event)) {
 				try (CloseableHttpClient client = HttpClientBuilder.create().useSystemProperties().build()) {
 					HttpPost post = new HttpPost(notification.getWebhookUrl());
-					
-					StringEntity requestEntity = new StringEntity(objectMapper.writeValueAsString(data), ContentType.APPLICATION_JSON);			
+
+					StringEntity requestEntity = new StringEntity(objectMapper.writeValueAsString(data), ContentType.APPLICATION_JSON);
 					post.setEntity(requestEntity);
-					
+
 					try (CloseableHttpResponse response = client.execute(post)) {
-						if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK 
-								&& response.getStatusLine().getStatusCode() != HttpStatus.SC_NO_CONTENT) {
+						if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK && response.getStatusLine().getStatusCode() != HttpStatus.SC_NO_CONTENT) {
 							HttpEntity responseEntity = response.getEntity();
 							String errorMessage;
 							if (responseEntity != null) {
 								String content = IOUtils.readInputStreamToString(responseEntity.getContent());
-								errorMessage = String.format("Error sending channel notification (status code: %d, response: %s)", 
-										response.getStatusLine().getStatusCode(), content);
+								errorMessage = String.format("Error sending channel notification (status code: %d, response: %s)", response.getStatusLine().getStatusCode(), content);
 							} else {
-								errorMessage = String.format("Error sending channel notification (status code: %d)", 
-										response.getStatusLine().getStatusCode());
+								errorMessage = String.format("Error sending channel notification (status code: %d)", response.getStatusLine().getStatusCode());
 							}
 							logger.error(errorMessage);
 						}
@@ -234,7 +212,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 			}
 		}
 	}
-	
+
 	protected abstract Object toJsonObject(String title, ProjectEvent event);
-	
+
 }

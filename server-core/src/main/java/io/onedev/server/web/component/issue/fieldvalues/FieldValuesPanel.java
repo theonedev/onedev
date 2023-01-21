@@ -153,6 +153,11 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 						}
 
 						@Override
+						protected boolean isDirtyAware() {
+							return false;
+						}
+
+						@Override
 						protected void onSave(AjaxRequestTarget target, Serializable bean) {
 							fieldValues.putAll(FieldUtils.getFieldValues(
 									FieldUtils.newBeanComponentContext(beanDescriptor, bean), 

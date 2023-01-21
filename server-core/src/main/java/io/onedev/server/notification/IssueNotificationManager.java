@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.server.entitymanager.*;
+import io.onedev.server.event.project.issue.*;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
@@ -18,10 +19,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.issue.IssueChanged;
-import io.onedev.server.event.project.issue.IssueCommented;
-import io.onedev.server.event.project.issue.IssueEvent;
-import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
@@ -75,6 +72,9 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
+		if (event instanceof IssueCommitsAttached)
+			return;
+		
 		Issue issue = event.getIssue();
 		User user = event.getUser();
 
