@@ -1,7 +1,7 @@
 version: 19
 properties:
 - name: buildEnvironment
-  value: 1dev/build-environment:1.4
+  value: 1dev/build-environment:1.5
 jobs:
 - name: CI
   steps:
@@ -121,6 +121,8 @@ jobs:
       - tar zcvf server-plugin-archetype-${buildVersion}.tar.gz server-plugin-archetype-${buildVersion}
       - ''
       - echo "Creating release tag..."
+      - '@pause@'
+      - ''
       - git config --global user.name "Robin Shen"
       - git config --global user.email "robin@@onedev.io"
       - ''
@@ -202,7 +204,7 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
-    branches: main
+    branches: disable
     projects: onedev/server
   retryCondition: never
   maxRetries: 3
