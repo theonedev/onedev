@@ -76,7 +76,7 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=200, placeholder="Not specified", description="Optionally specify a base query to "
 			+ "filter/order issues of the board")
-	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true)
+	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true)
 	@Nullable
 	public String getBaseQuery() {
 		return baseQuery;
@@ -88,7 +88,7 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=250, placeholder="Not specified", description="Optionally specify a base query to filter/order issues in backlog. "
 			+ "Backlog issues are those not associating with current milestone")
-	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true)
+	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true)
 	@Nullable
 	public String getBacklogBaseQuery() {
 		return backlogBaseQuery;

@@ -134,7 +134,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	private IssueQuery parse(boolean backlog, @Nullable String baseQueryString, @Nullable String queryString) {
 		contentFrag.getFeedbackMessages().clear(newFeedbackMessageFilter(backlog));
 		
-		IssueQueryParseOption option = new IssueQueryParseOption().withCurrentUserCriteria(true);
+		IssueQueryParseOption option = new IssueQueryParseOption()
+				.withCurrentUserCriteria(true)
+				.withCurrentProjectCriteria(true);
 		
 		IssueQuery query;
 		try {
