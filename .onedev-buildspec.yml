@@ -124,6 +124,7 @@ jobs:
       - ''
       - git config --global user.name "Robin Shen"
       - git config --global user.email "robin@@onedev.io"
+      - git config --global --add safe.directory /onedev-build/workspace
       - ''
       - git tag v$buildVersion -m "Release tag"
       - git push -f origin v$buildVersion:v$buildVersion
