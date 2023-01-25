@@ -1,7 +1,7 @@
 version: 19
 properties:
 - name: buildEnvironment
-  value: 1dev/build-environment:1.5
+  value: 1dev/build-environment:1.4
 jobs:
 - name: CI
   steps:
