@@ -95,11 +95,8 @@ jobs:
         deploy
       - ''
       - cd $projectDir/server-product/docker
+      - docker run --privileged --rm tonistiigi/binfmt --install all
       - ./build.sh
-      - docker push 1dev/server:${buildVersion}
-      - docker tag 1dev/server:${buildVersion} 1dev/server:latest
-      - docker push 1dev/server:latest
-      - docker push 1dev/agent:latest
       - ''
       - cd $projectDir/server-product/helm
       - ./build.sh
