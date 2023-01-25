@@ -1,4 +1,7 @@
 version: 19
+properties:
+- name: buildEnvironment
+  value: 1dev/build-environment:1.5
 jobs:
 - name: CI
   steps:
@@ -12,7 +15,7 @@ jobs:
   - !CommandStep
     name: detect build version
     runInContainer: true
-    image: 1dev/build-environment:1.4
+    image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands:
       - set -e
@@ -29,7 +32,7 @@ jobs:
   - !CommandStep
     name: test
     runInContainer: true
-    image: 1dev/build-environment:1.4
+    image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands:
       - mvn test
@@ -57,9 +60,9 @@ jobs:
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
-    name: 'detect build version '
+    name: detect build version
     runInContainer: true
-    image: 1dev/build-environment:1.4
+    image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands:
       - set -e
@@ -76,7 +79,7 @@ jobs:
   - !CommandStep
     name: build & deploy
     runInContainer: true
-    image: 1dev/build-environment:1.4
+    image: '@property:buildEnvironment@'
     interpreter: !DefaultInterpreter
       commands:
       - set -e
