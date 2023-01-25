@@ -124,6 +124,7 @@ jobs:
       - ''
       - git config --global user.name "Robin Shen"
       - git config --global user.email "robin@@onedev.io"
+      - git config --global --add safe.directory /onedev-build/workspace
       - ''
       - git tag v$buildVersion -m "Release tag"
       - git push -f origin v$buildVersion:v$buildVersion
@@ -160,7 +161,7 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifact
-    artifacts: '*.zip *.tar.gz *.checksum'
+    artifacts: '*.zip *.tar.gz *.sha256'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishMarkdownReportStep
     name: publish markdown report
