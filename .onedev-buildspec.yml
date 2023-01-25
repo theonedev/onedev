@@ -121,7 +121,6 @@ jobs:
       - tar zcvf server-plugin-archetype-${buildVersion}.tar.gz server-plugin-archetype-${buildVersion}
       - ''
       - echo "Creating release tag..."
-      - '@pause@'
       - git config --global user.name "Robin Shen"
       - git config --global user.email "robin@@onedev.io"
       - ''
