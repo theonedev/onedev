@@ -11,7 +11,6 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
@@ -62,7 +61,10 @@ import javax.inject.Singleton;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.internet.MimeMessage.RecipientType;
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.FileTime;
@@ -601,7 +603,6 @@ public class DefaultMailManager implements MailManager, Serializable {
 	}
 
 	private String stripTextSignature(String content) {
-		FileUtils.writeFile(new File("/Users/robin/temp/content"), content, StandardCharsets.UTF_8.name());
 		var lines = new ArrayList<>();
 		for (var line: Splitter.on('\n').split(content)) {
 			if (line.contains(SIGNATURE_PREFIX)) {
