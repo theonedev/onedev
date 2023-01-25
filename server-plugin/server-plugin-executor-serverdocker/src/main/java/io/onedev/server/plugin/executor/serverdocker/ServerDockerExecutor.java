@@ -297,16 +297,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 																 List<Integer> position, boolean useTTY) {
 										// Uninstall symbol links as docker can not process it well
 										cache.uninstallSymbolinks(hostWorkspace);
-										Commandline docker = newDocker();
-										Long uid = null;
-										if (!SystemUtils.IS_OS_WINDOWS && !Bootstrap.isInDocker()) {
-											uid = DockerExecutorUtils.getUid();
-											DockerExecutorUtils.changeOwner(docker, hostWorkspace, 1L);
-										}
 										containerName = network + "-step-" + stringifyStepPosition(position);
 										try {
-											docker.clearArgs();
-											docker = newDocker();
+											Commandline docker = newDocker();
 											docker.addArgs("run", "--name=" + containerName, "--network=" + network);
 											if (getCpuLimit() != null)
 												docker.addArgs("--cpus", getCpuLimit());
@@ -385,8 +378,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 											return result.getReturnCode();
 										} finally {
 											containerName = null;
-											if (uid != null) 
-												DockerExecutorUtils.changeOwner(docker, hostWorkspace, uid);
 											cache.installSymbolinks(hostWorkspace);
 										}
 									}
