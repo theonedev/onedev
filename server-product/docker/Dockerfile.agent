@@ -1,11 +1,11 @@
 # Build the docker image for onedev agent
-FROM ubuntu:22.04 AS build
+FROM ubuntu:18.04 AS build
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://get.docker.com | sh
 
-FROM ubuntu:22.04
+FROM ubuntu:18.04
 COPY agent /agent
-COPY entrypoint_agent.sh /agent/bin/entrypoint.sh
+COPY entrypoint-agent.sh /root/bin/entrypoint.sh
 COPY --from=build /usr/bin/docker /usr/local/bin/docker
 RUN apt-get update && apt-get install -y locales curl git git-lfs openjdk-11-jre-headless && rm -rf /var/lib/apt/lists/*
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -15,4 +15,4 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8 
 WORKDIR /agent/bin
 RUN ["touch", "/agent/IN_DOCKER"]
-CMD ["/agent/bin/entrypoint.sh"]
+CMD ["/root/bin/entrypoint.sh"]

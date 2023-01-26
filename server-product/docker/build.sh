@@ -20,7 +20,11 @@ cp sandbox/site/lib/mysql* sandbox/site/lib/postgresql* docker/app/site/lib
 docker buildx create --name builder
 docker buildx use builder
 
-docker buildx build --push --platform linux/amd64,linux/arm64 -f docker/Dockerfile.server -t 1dev/server:$buildVersion -t 1dev/server:latest docker
-
 cp -r agent docker/
-docker buildx build --push --platform linux/amd64,linux/arm64 -f docker/Dockerfile.agent -t 1dev/agent:latest docker
+if [ "$1" != "release" ] ; then
+  docker buildx build --push --platform linux/amd64,linux/arm64 -f docker/Dockerfile.server -t 1dev/server:test docker
+  docker buildx build --push --platform linux/amd64,linux/arm64 -f docker/Dockerfile.agent -t 1dev/agent:test docker
+else
+  docker buildx build --push --platform linux/amd64,linux/arm64 -f docker/Dockerfile.server -t 1dev/server:$buildVersion -t 1dev/server:latest docker
+  docker buildx build --push --platform linux/amd64,linux/arm64 -f docker/Dockerfile.agent -t 1dev/agent:latest docker
+fi

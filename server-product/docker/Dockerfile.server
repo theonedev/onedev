@@ -1,12 +1,13 @@
 # Build the docker image for onedev server
-FROM ubuntu:22.04 AS build
+FROM ubuntu:18.04 AS build
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://get.docker.com | sh
 
-FROM ubuntu:22.04
+FROM ubuntu:18.04
 ARG TARGETPLATFORM=linux/amd64
 COPY app /app
-COPY entrypoint.sh idle.sh /root/bin/
+COPY entrypoint-server.sh /root/bin/entrypoint.sh
+COPY idle.sh /root/bin/
 RUN apt-get update && apt-get install -y locales iproute2 curl git git-lfs openjdk-11-jre-headless && rm -rf /var/lib/apt/lists/*
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen
