@@ -96,7 +96,7 @@ jobs:
       - ''
       - cd $projectDir/server-product/docker
       - docker run --privileged --rm tonistiigi/binfmt --install all
-      - ./build.sh
+      - ./build.sh release
       - ''
       - cd $projectDir/server-product/helm
       - ./build.sh
