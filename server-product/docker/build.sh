@@ -2,9 +2,11 @@
 
 set -e
 
+BUILDER="builder-$(date +%s)"
+
 function finish {
-  docker buildx stop builder
-  docker buildx rm builder
+  docker buildx stop $BUILDER
+  docker buildx rm $BUILDER
 }
 trap finish EXIT
 
@@ -17,8 +19,8 @@ unzip onedev-$buildVersion.zip -d docker
 mv docker/onedev-$buildVersion docker/app
 cp sandbox/site/lib/mysql* sandbox/site/lib/postgresql* docker/app/site/lib
 
-docker buildx create --name builder
-docker buildx use builder
+docker buildx create --name $BUILDER
+docker buildx use $BUILDER
 
 docker buildx build --push --platform linux/amd64,linux/arm64 -f docker/Dockerfile.server -t 1dev/server:$buildVersion -t 1dev/server:latest docker
 
