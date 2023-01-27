@@ -383,7 +383,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						for (Build unfinished : buildManager.queryUnfinished(project, jobName, reason.getRefName(),
 								Optional.ofNullable(pullRequest), paramMapToQuery)) {
 							if (unfinished.getId() < buildId
-									&& gitService.isMergedInto(project, null, unfinished.getCommitId(), commitId)) {
+									&& (pullRequest != null || gitService.isMergedInto(project, null, unfinished.getCommitId(), commitId))) {
 								cancel(unfinished);
 							}
 						}
@@ -1527,7 +1527,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public Map<String, byte[]> runServerStep(JobContext jobContext, List<Integer> stepPosition,
-											 File inputDir, Map<String, String> placeholderValues, 
+											 File inputDir, Map<String, String> placeholderValues,
 											 boolean callByAgent, TaskLogger logger) {
 		UUID storageServerUUID = projectManager.getStorageServerUUID(jobContext.getProjectId(), true);
 		if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
