@@ -1568,7 +1568,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			if (getMainPageClass() == PullRequestCodeCommentsPage.class) {
 				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", PullRequestDetailPage.this);
 				Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
-						PullRequestCodeCommentsPage.class, paramsOf(getPullRequest()));
+						PullRequestCodeCommentsPage.class, 
+						PullRequestCodeCommentsPage.paramsOf(getPullRequest(), "unresolved"));
 				link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override
