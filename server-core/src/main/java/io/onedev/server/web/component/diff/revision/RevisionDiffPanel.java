@@ -1791,7 +1791,7 @@ public abstract class RevisionDiffPanel extends Panel {
 			@Override
 			public boolean isOutdated() {
 				if (getPullRequest() != null) {
-					if (getPullRequest().isOpen()) {
+					if (getPullRequest().isOpen() && getPullRequest().getSourceHead() != null) {
 						try {
 							new BlobEdits().applySuggestion(getPullRequest().getSourceProject(), mark, 
 									new ArrayList<>(), getPullRequest().getSourceHead());

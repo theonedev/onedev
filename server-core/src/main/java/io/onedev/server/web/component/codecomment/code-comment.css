@@ -5,10 +5,8 @@
 .code-comment-list tr.comment.new td.new-indicator {
 	background: var(--primary);
 }
-@media(max-width: 767px) {
-	.code-comment-list table>thead {
-		display: none;
-	}
+.code-comment-list table>thead {
+	display: none;
 }
 .code-comment>div {
 	border-left: 4px solid white;

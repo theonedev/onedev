@@ -29,10 +29,14 @@
 			</div>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="fileFrag">
-		<a wicket:id="link"><span wicket:id="label"></span></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="lastUpdateFrag">
-		<a wicket:id="user"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
+	<wicket:fragment wicket:id="contentFrag">
+		<div class="primary mb-2">
+			<span wicket:id="status" class="mr-1"></span>
+			<a wicket:id="description" class="font-weight-bold font-size-lg"><span wicket:id="label"></span></a>
+		</div>
+		<div class="secondary font-size-sm text-muted">
+			<a wicket:id="user"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
+			<span wicket:id="file" class="d-none d-lg-inline text-break"></span>
+		</div>
 	</wicket:fragment>
 </wicket:panel>
