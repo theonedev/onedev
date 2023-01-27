@@ -305,7 +305,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestManager.class).to(DefaultPullRequestManager.class);
 		bind(PullRequestUpdateManager.class).to(DefaultPullRequestUpdateManager.class);
 		bind(ProjectManager.class).to(DefaultProjectManager.class);
-		bind(ProjectUpdateManager.class).to(DefaultProjectUpdateManager.class);
+		bind(ProjectDynamicsManager.class).to(DefaultProjectDynamicsManager.class);
 		bind(UserManager.class).to(DefaultUserManager.class);
 		bind(UserInvitationManager.class).to(DefaultUserInvitationManager.class);
 		bind(PullRequestReviewManager.class).to(DefaultPullRequestReviewManager.class);

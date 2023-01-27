@@ -1,52 +1,8 @@
 package io.onedev.server.entitymanager.impl;
 
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
-
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.util.lang.Objects;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
@@ -54,14 +10,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PendingSuggestionApplyManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.entitymanager.PullRequestUpdateManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.Listen;
@@ -69,51 +18,21 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
-import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
-import io.onedev.server.event.project.pullrequest.PullRequestBuildEvent;
-import io.onedev.server.event.project.pullrequest.PullRequestChanged;
-import io.onedev.server.event.project.pullrequest.PullRequestCheckFailed;
-import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentEvent;
-import io.onedev.server.event.project.pullrequest.PullRequestEvent;
-import io.onedev.server.event.project.pullrequest.PullRequestMergePreviewCalculated;
-import io.onedev.server.event.project.pullrequest.PullRequestOpened;
-import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
-import io.onedev.server.event.project.pullrequest.PullRequestReviewerRemoved;
-import io.onedev.server.event.project.pullrequest.PullRequestUnassigned;
-import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
+import io.onedev.server.event.project.pullrequest.*;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequest.Status;
-import io.onedev.server.model.PullRequestAssignment;
-import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.code.FileProtection;
 import io.onedev.server.model.support.LastActivity;
+import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.model.support.code.FileProtection;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchDeleteData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchRestoreData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.*;
 import io.onedev.server.persistence.SequenceGenerator;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -133,6 +52,30 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.util.lang.Objects;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.*;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
 
 @Singleton
 public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> 
@@ -490,16 +433,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
-	    	for (PullRequest request: project.getOutgoingRequests()) {
-	    		if (!request.getTargetProject().equals(project) && request.isOpen())
-	        		discard(request, "Source project is deleted.");
-	    	}
-	    	
-	    	Query<?> query = getSession().createQuery("update PullRequest set sourceProject=null where "
-	    			+ "sourceProject=:project");
-	    	query.setParameter("project", project);
-	    	query.executeUpdate();
-	    	
 	    	if (project.getForkRoot().equals(project))
 	    		numberGenerator.removeNextSequence(project);
 		}

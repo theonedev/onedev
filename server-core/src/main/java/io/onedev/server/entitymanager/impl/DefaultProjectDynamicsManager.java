@@ -1,6 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
-import io.onedev.server.entitymanager.ProjectUpdateManager;
+import io.onedev.server.entitymanager.ProjectDynamicsManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ProjectCreated;
 import io.onedev.server.event.project.ProjectEvent;
@@ -16,10 +16,10 @@ import javax.inject.Singleton;
 import java.util.Date;
 
 @Singleton
-public class DefaultProjectUpdateManager extends BaseEntityManager<ProjectDynamics> implements ProjectUpdateManager {
+public class DefaultProjectDynamicsManager extends BaseEntityManager<ProjectDynamics> implements ProjectDynamicsManager {
 
 	@Inject
-	public DefaultProjectUpdateManager(Dao dao) {
+	public DefaultProjectDynamicsManager(Dao dao) {
 		super(dao);
 	}
 

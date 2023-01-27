@@ -116,12 +116,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	private final TransactionManager transactionManager;
 
 	private final IssueManager issueManager;
+	
+	private final PullRequestManager pullRequestManager;
 
 	private final LinkSpecManager linkSpecManager;
 
 	private final JobManager jobManager;
 
-	private final ProjectUpdateManager updateManager;
+	private final ProjectDynamicsManager dynamicsManager;
 
 	private final ListenerRegistry listenerRegistry;
 
@@ -152,7 +154,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								 UserAuthorizationManager userAuthorizationManager, RoleManager roleManager,
 								 JobManager jobManager, IssueManager issueManager, LinkSpecManager linkSpecManager,
 								 StorageManager storageManager, ClusterManager clusterManager, GitService gitService,
-								 ProjectUpdateManager updateManager, Set<ProjectNameReservation> nameReservations) {
+								 ProjectDynamicsManager dynamicsManager, PullRequestManager pullRequestManager, 
+								 Set<ProjectNameReservation> nameReservations) {
 		super(dao);
 
 		this.commitInfoManager = commitInfoManager;
@@ -170,7 +173,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		this.storageManager = storageManager;
 		this.clusterManager = clusterManager;
 		this.gitService = gitService;
-		this.updateManager = updateManager;
+		this.dynamicsManager = dynamicsManager;
+		this.pullRequestManager = pullRequestManager;
 
 		for (ProjectNameReservation reservation : nameReservations)
 			reservedNames.addAll(reservation.getReserved());
@@ -273,7 +277,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 		ProjectDynamics update = new ProjectDynamics();
 		project.setDynamics(update);
-		updateManager.save(update);
+		dynamicsManager.save(update);
 		dao.persist(project);
 
 		var projectDir = storageManager.getProjectDir(project.getId());
@@ -361,25 +365,25 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		usage.checkInUse("Project '" + project.getPath() + "'");
 
 		for (Project fork : project.getForks()) {
-			Collection<Project> descendants = fork.getForkChildren();
-			descendants.add(fork);
-			for (Project descendant : descendants) {
+			Collection<Project> forkChildren = fork.getForkChildren();
+			forkChildren.add(fork);
+			for (Project forkChild : forkChildren) {
 				Query<?> query = getSession().createQuery(String.format("update Issue set %s=:fork where %s=:descendant",
 						Issue.PROP_NUMBER_SCOPE, Issue.PROP_PROJECT));
 				query.setParameter("fork", fork);
-				query.setParameter("descendant", descendant);
+				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
 
 				query = getSession().createQuery(String.format("update Build set %s=:fork where %s=:descendant",
 						Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
 				query.setParameter("fork", fork);
-				query.setParameter("descendant", descendant);
+				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
 
 				query = getSession().createQuery(String.format("update PullRequest set %s=:fork where %s=:descendant",
 						PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
 				query.setParameter("fork", fork);
-				query.setParameter("descendant", descendant);
+				query.setParameter("descendant", forkChild);
 				query.executeUpdate();
 			}
 		}
@@ -389,6 +393,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		query.setParameter("forkedFrom", project);
 		query.executeUpdate();
 
+		for (PullRequest request: project.getOutgoingRequests()) {
+			if (!request.getTargetProject().equals(project) && request.isOpen())
+				pullRequestManager.discard(request, "Source project is deleted.");
+		}
+		
 		query = getSession().createQuery(String.format("update PullRequest set %s=null where %s=:sourceProject",
 				PullRequest.PROP_SOURCE_PROJECT, PullRequest.PROP_SOURCE_PROJECT));
 		query.setParameter("sourceProject", project);
@@ -398,7 +407,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			buildManager.delete(build);
 
 		dao.remove(project);
-		updateManager.delete(project.getDynamics());
+		dynamicsManager.delete(project.getDynamics());
 
 		synchronized (repositoryCache) {
 			Repository repository = repositoryCache.remove(project.getId());
@@ -735,7 +744,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		}
 
 		Map<Long, ProjectDynamics> updates = new HashMap<>();
-		for (ProjectDynamics update : updateManager.query())
+		for (ProjectDynamics update : dynamicsManager.query())
 			updates.put(update.getId(), update);
 
 		logger.info("Checking projects...");
