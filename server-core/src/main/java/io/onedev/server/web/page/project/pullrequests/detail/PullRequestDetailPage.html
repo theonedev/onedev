@@ -78,7 +78,12 @@
 					</div>
 					<wicket:enclosure child="untriggeredJobs">
 					<div class="untriggered-builds text-warning">
-						<wicket:svg href="warning" class="icon"></wicket:svg> <span wicket:id="untriggeredJobs"></span>
+						<wicket:svg href="warning" class="icon"></wicket:svg> 
+						Jobs required to be successful on merge commit: 
+						<span wicket:id="untriggeredJobs" class="d-inline-block mr-2">
+							<span wicket:id="jobName"></span>
+							<a wicket:id="runJob" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
+						</span>
 					</div>
 					</wicket:enclosure>
 					<div wicket:id="mergeableByCodeWriters" class="mergeable-by-code-writers text-info">
@@ -192,14 +197,14 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="cloneFrag">
 		<div class="p-4">
-			<h6>Checkout Pull Request Head</h6>
-			<div class="code">  
+			<div class="font-weight-bolder font-size-lg mb-2">Checkout Pull Request Head</div>
+			<div class="code font-size-sm">  
 				<div>git fetch origin <span wicket:id="headRef"></span></div>
 				<div>git checkout FETCH_HEAD</div>
 			</div>
 			<wicket:enclosure child="mergeRef">
-			<h6 class="mt-4">Checkout Pull Request Merge Preview</h6>
-			<div class="code">  
+			<div class="font-weight-bolder font-size-lg mt-4 mb-2">Checkout Pull Request Merge Preview</div>
+			<div class="code font-size-sm">  
 				<div>git fetch origin <span wicket:id="mergeRef"></span></div>
 				<div>git checkout FETCH_HEAD</div>
 			</div>

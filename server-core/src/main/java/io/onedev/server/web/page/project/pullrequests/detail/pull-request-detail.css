@@ -34,12 +34,18 @@
 	margin-left: -2px;
 	margin-right: 4px;
 }
+.pull-request-detail>.card-body>.main>.summary .untriggered-builds .icon {
+	width: 16px;
+	height: 16px;
+	margin-bottom: 1px;
+}
 .pull-request-detail>.card-body>.main>.summary>.contribution {
 	border-top: 1px dashed var(--light-gray);
 	padding-top: 1rem;
 	margin-top: 1rem;
 	font-size: 1rem !important;
 }
+
 .dark-mode .pull-request-detail>.card-body>.main>.summary>.contribution {
 	border-top-color: var(--dark-mode-dark-gray);
 }

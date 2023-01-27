@@ -968,7 +968,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public Collection<CodeProblem> getOldProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
 		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
-		for (Build build: getBuilds(buildCommitId)) {
+		for (Build build: getProject().getBuilds(buildCommitId)) {
 			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
 				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
 					if (!buildCommitId.equals(getComparisonBase())) {
@@ -990,16 +990,23 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public Collection<CodeProblem> getNewProblems(String blobPath) {
 		ObjectId buildCommitId;
+		Collection<Build> builds;
 		MergePreview preview = getPullRequest().getMergePreview();
 		if (preview != null && preview.getMergeCommitHash() != null 
-				&& state.newCommitHash.equals(preview.getHeadCommitHash())) {
+				&& state.newCommitHash.equals(preview.getHeadCommitHash())
+				&& !getPullRequest().getCurrentBuilds().isEmpty()) {
 			buildCommitId = ObjectId.fromString(preview.getMergeCommitHash());
+			builds = getProject().getBuilds(buildCommitId);
 		} else {
 			buildCommitId = ObjectId.fromString(state.newCommitHash);
+			if (getPullRequest().getSourceProject() != null)
+				builds = getPullRequest().getSourceProject().getBuilds(buildCommitId);
+			else 
+				builds = new ArrayList<>();
 		}
-		
+
 		Set<CodeProblem> problems = new HashSet<>();
-		for (Build build: getBuilds(buildCommitId)) {
+		for (Build build: builds) {
 			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
 				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
 					if (!state.newCommitHash.equals(buildCommitId.name())) {
@@ -1023,7 +1030,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
-		for (Build build: getBuilds(buildCommitId)) {
+		for (Build build: getProject().getBuilds(buildCommitId)) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
 				for (Map.Entry<Integer, CoverageStatus> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
 					if (!buildCommitId.equals(getComparisonBase())) {
@@ -1042,21 +1049,28 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 	@Override
 	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
-		ObjectId commitId;
+		ObjectId buildCommitId;
+		Collection<Build> builds;
 		MergePreview preview = getPullRequest().getMergePreview();
 		if (preview != null && preview.getMergeCommitHash() != null 
-				&& state.newCommitHash.equals(preview.getHeadCommitHash())) {
-			commitId = ObjectId.fromString(preview.getMergeCommitHash());
+				&& state.newCommitHash.equals(preview.getHeadCommitHash())
+				&& !getPullRequest().getCurrentBuilds().isEmpty()) {
+			buildCommitId = ObjectId.fromString(preview.getMergeCommitHash());
+			builds = getProject().getBuilds(buildCommitId);
 		} else {
-			commitId = ObjectId.fromString(state.newCommitHash);
+			buildCommitId = ObjectId.fromString(state.newCommitHash);
+			if (getPullRequest().getSourceProject() != null)
+				builds = getPullRequest().getSourceProject().getBuilds(buildCommitId);
+			else 
+				builds = new ArrayList<>();
 		}
 		
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
-		for (Build build: getBuilds(commitId)) {
+		for (Build build: builds) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
 				for (Map.Entry<Integer, CoverageStatus> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
-					if (!state.newCommitHash.equals(commitId.name())) {
-						Map<Integer, Integer> lineMapping = getLineMapping(commitId, 
+					if (!state.newCommitHash.equals(buildCommitId.name())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, 
 								ObjectId.fromString(state.newCommitHash), blobPath);
 						Integer mappedLine = lineMapping.get(entry.getKey());
 						if (mappedLine != null)

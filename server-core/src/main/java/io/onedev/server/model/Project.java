@@ -344,6 +344,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private transient List<Milestone> sortedMilestones;
 	
 	private transient Optional<UUID> storageServerUUID;
+
+	private transient Map<ObjectId, Collection<Build>> buildsCache;
 	
 	@Editable(order=100)
 	@ProjectName
@@ -1624,5 +1626,17 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public static String getSiteLockName(Long projectId) {
 		return "project-site:" + projectId;
 	}
-	
+
+	public Collection<Build> getBuilds(ObjectId commitId) {
+		if (buildsCache == null)
+			buildsCache = new HashMap<>();
+		Collection<Build> builds = buildsCache.get(commitId);
+		if (builds == null) {
+			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+			builds = buildManager.query(this, commitId, null, null, null, new HashMap<>(), null);
+			buildsCache.put(commitId, builds);
+		}
+		return builds;
+	}
+
 }

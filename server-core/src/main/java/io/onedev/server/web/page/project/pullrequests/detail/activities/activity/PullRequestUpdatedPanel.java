@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -101,16 +102,35 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					}
 					
 				});
-				item.add(new CommitStatusLink("buildStatus", commit.copy(), null) {
+				
+				String refName = getUpdate().getRequest().getSourceRef();
+				item.add(new CommitStatusLink("buildStatus", commit.copy(), refName) {
 					
 					@Override
 					protected Project getProject() {
-						return getUpdate().getRequest().getTarget().getProject();
+						return getUpdate().getRequest().getSourceProject();
 					}
 
 					@Override
 					protected PullRequest getPullRequest() {
 						return null;
+					}
+
+					@Override
+					protected Collection<String> getWebSocketObservables() {
+						if (getUpdate().getRequest().getSourceProject() != null)
+							return super.getWebSocketObservables();
+						else 
+							return new ArrayList<>();
+					}
+
+					@Override
+					protected void onConfigure() {
+						if (getUpdate().getRequest().getSourceProject() != null) {
+							super.onConfigure();
+						} else {
+							setVisible(false);
+						}
 					}
 					
 				});

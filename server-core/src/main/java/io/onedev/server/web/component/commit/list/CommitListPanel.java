@@ -260,6 +260,10 @@ public abstract class CommitListPanel extends Panel {
 	
 	protected abstract Project getProject();
 	
+	protected String getRefName() {
+		return null;
+	}
+	
 	@Nullable
 	protected String getCompareWith() {
 		return null;
@@ -658,7 +662,7 @@ public abstract class CommitListPanel extends Panel {
 				
 			});
 			
-			item.add(new CommitStatusLink("buildStatus", commit.copy(), null) {
+			item.add(new CommitStatusLink("buildStatus", commit.copy(), getRefName()) {
 
 				@Override
 				protected Project getProject() {

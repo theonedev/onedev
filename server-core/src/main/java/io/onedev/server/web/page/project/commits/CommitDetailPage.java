@@ -788,7 +788,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	@Override
 	public Collection<CodeProblem> getOldProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
-		for (Build build: getBuilds(getCompareWith())) {
+		for (Build build: getProject().getBuilds(getCompareWith())) {
 			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
 				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
 		}
@@ -798,7 +798,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	@Override
 	public Collection<CodeProblem> getNewProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
-		for (Build build: getBuilds(getCommit())) {
+		for (Build build: getProject().getBuilds(getCommit())) {
 			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
 				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
 		}
@@ -808,7 +808,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	@Override
 	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
-		for (Build build: getBuilds(getCompareWith())) {
+		for (Build build: getProject().getBuilds(getCompareWith())) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
 				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
 					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
@@ -821,7 +821,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	@Override
 	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
-		for (Build build: getBuilds(getCommit())) {
+		for (Build build: getProject().getBuilds(getCommit())) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
 				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
 					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));

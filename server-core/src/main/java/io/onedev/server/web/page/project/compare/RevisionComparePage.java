@@ -256,8 +256,8 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 
 		if (leftCommitId != null && rightCommitId != null) {
 			mergeBase = getGitService().getMergeBase(
-					state.leftSide.getProject(), leftCommitId, 
-					state.rightSide.getProject(), rightCommitId);
+					state.rightSide.getProject(), rightCommitId,
+					state.leftSide.getProject(), leftCommitId);
 		}
 	}
 	
@@ -708,7 +708,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 
 				@Override
 				protected Project getProject() {
-					return RevisionComparePage.this.getProject();
+					return state.rightSide.getProject();
 				}
 				
 			};
@@ -931,7 +931,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	public Collection<CodeProblem> getOldProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
 		ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
-		for (Build build: getBuilds(oldCommitId)) {
+		for (Build build: state.leftSide.getProject().getBuilds(oldCommitId)) {
 			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
 				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
 		}
@@ -941,7 +941,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	@Override
 	public Collection<CodeProblem> getNewProblems(String blobPath) {
 		Set<CodeProblem> problems = new HashSet<>();
-		for (Build build: getBuilds(rightCommitId)) {
+		for (Build build: state.rightSide.getProject().getBuilds(rightCommitId)) {
 			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
 				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
 		}
@@ -952,7 +952,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
-		for (Build build: getBuilds(oldCommitId)) {
+		for (Build build: state.leftSide.getProject().getBuilds(oldCommitId)) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
 				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
 					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
@@ -965,7 +965,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	@Override
 	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
 		Map<Integer, CoverageStatus> coverages = new HashMap<>();
-		for (Build build: getBuilds(rightCommitId)) {
+		for (Build build: state.rightSide.getProject().getBuilds(rightCommitId)) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
 				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
 					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));

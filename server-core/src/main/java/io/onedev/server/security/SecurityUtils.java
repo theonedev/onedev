@@ -327,6 +327,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canModify(PullRequest request) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(request.getSubmitter()) 
+				|| user != null && request.getAssignees().contains(user)
 				|| canManagePullRequests(request.getTargetProject());
 	}
 	
