@@ -15,7 +15,7 @@ public class FetchCommand {
 	
 	private final File workingDir;
 	
-    private final String from;
+    private final String remoteUrl;
     
     private boolean force;
     
@@ -23,9 +23,9 @@ public class FetchCommand {
     
     private String[] refspec = new String[0];
     
-	public FetchCommand(File workingDir, String from) {
+	public FetchCommand(File workingDir, String remoteUrl) {
 		this.workingDir = workingDir;
-		this.from = from;
+		this.remoteUrl = remoteUrl;
 	}
 	
 	public FetchCommand refspec(String... refspec) {
@@ -48,7 +48,7 @@ public class FetchCommand {
 	}
 	
 	public void run() {
-		Commandline git = newGit().workingDir(workingDir).addArgs("fetch", from);
+		Commandline git = newGit().workingDir(workingDir).addArgs("fetch", remoteUrl);
 		if (force)
 			git.addArgs("--force");
 		if (quiet)

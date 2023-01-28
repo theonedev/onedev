@@ -264,7 +264,7 @@ public class MethodDetailPage extends ApiHelpPage {
 					item.add(new Label("description", api.description()).setEscapeModelStrings(false));
 				else
 					item.add(new Label("description", StringUtils.capitalize(WordUtils.uncamel(queryParam.value()).toLowerCase())));
-				item.add(new Label("required", TextUtils.describe(ParamCheckFilter.isRequired(param))));
+				item.add(new Label("required", TextUtils.getDisplayValue(ParamCheckFilter.isRequired(param))));
 
 				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample();
 				if (exampleValue == null)

@@ -1,65 +1,9 @@
 package io.onedev.server.git;
 
-import static io.onedev.server.util.CollectionUtils.newHashMap;
-import static javax.servlet.http.HttpServletResponse.SC_CONFLICT;
-import static javax.servlet.http.HttpServletResponse.SC_CREATED;
-import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_ACCEPTABLE;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_IMPLEMENTED;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.tika.mime.MimeTypes;
-import org.glassfish.jersey.client.ClientProperties;
-import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
-
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
@@ -73,6 +17,35 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.ProjectFacade;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.mime.MimeTypes;
+import org.glassfish.jersey.client.ClientProperties;
+import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
+
+import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.server.util.CollectionUtils.newHashMap;
+import static javax.servlet.http.HttpServletResponse.*;
 
 @Singleton
 public class GitLfsFilter implements Filter {
@@ -319,7 +292,7 @@ public class GitLfsFilter implements Filter {
 								return true;
 							}
 							
-						});
+						}, clusterManager.getCredentialValue());
 					} else {
 						httpResponse.setStatus(SC_NOT_IMPLEMENTED);
 					}
@@ -334,6 +307,11 @@ public class GitLfsFilter implements Filter {
 					} else {
 						httpResponse.setContentType(CONTENT_TYPE);
 						if (pathInfo.endsWith("/batch")) {
+							String accessToken;
+							if (SecurityUtils.getUser() != null)
+								accessToken = SecurityUtils.getUser().getAccessToken();
+							else 
+								accessToken = null;
 							processBatch(httpRequest, httpResponse, project.getFacade(), new BooleanSupplier() {
 
 								@Override
@@ -348,7 +326,7 @@ public class GitLfsFilter implements Filter {
 									return SecurityUtils.canWriteCode(project);
 								}
 								
-							});
+							}, accessToken);
 						} else if (pathInfo.endsWith("/locks")) {
 							if (httpRequest.getMethod().equals("POST")) {
 								if (SecurityUtils.canWriteCode(project)) {
@@ -513,7 +491,8 @@ public class GitLfsFilter implements Filter {
 	}
 	
 	private void processBatch(HttpServletRequest httpRequest, HttpServletResponse httpResponse, 
-			ProjectFacade project, BooleanSupplier readCheck, BooleanSupplier writeCheck) {
+							  ProjectFacade project, BooleanSupplier readCheck, 
+							  BooleanSupplier writeCheck, @Nullable String accessToken) {
 		JsonNode batchRequestNode;
 		try (InputStream is = httpRequest.getInputStream()) {
 			batchRequestNode = objectMapper.readTree(is);
@@ -567,7 +546,7 @@ public class GitLfsFilter implements Filter {
 						String objectId = objectNode.get("oid").asText();
 						long objectSize = objectNode.get("size").asLong();
 						objectsResponse.add(getObjectResponse(
-								httpRequest, project, upload, objectId, objectSize));
+								httpRequest, project, upload, objectId, objectSize, accessToken));
 					}
 					
 					Map<String, Object> batchResponse = new HashMap<>();
@@ -604,19 +583,21 @@ public class GitLfsFilter implements Filter {
 						"name", lock.getOwner().getDisplayName()));
 	}
 
-	private Map<Object, Object> getActionResponse(HttpServletRequest request, ProjectFacade project, String objectId) {
+	private Map<Object, Object> getActionResponse(HttpServletRequest request, ProjectFacade project, 
+												  String objectId, @Nullable String accessToken) {
 		Map<Object, Object> actionResponse = newHashMap(
 				"href", getObjectUrl(request, project.getPath(), objectId));
-		User user = SecurityUtils.getUser();
-		if (user != null)
+		if (accessToken != null) {
 			actionResponse.put(
 					"header", newHashMap(
-							"Authorization", KubernetesHelper.BEARER + " " + user.getAccessToken()));
+							"Authorization", KubernetesHelper.BEARER + " " + accessToken));
+		}
 		return actionResponse;
 	}
 	
-	private Map<String, Object> getObjectResponse(HttpServletRequest request, ProjectFacade project, boolean upload, 
-			String objectId, long objectSize) {
+	private Map<String, Object> getObjectResponse(HttpServletRequest request, ProjectFacade project, 
+												  boolean upload, String objectId, long objectSize, 
+												  @Nullable String accessToken) {
 		Map<String, Object> objectResponse = new HashMap<>();
 		objectResponse.put("oid", objectId);
 		objectResponse.put("size", objectSize);
@@ -629,12 +610,12 @@ public class GitLfsFilter implements Filter {
 			if (!lfsObject.exists()) {
 				objectResponse.put(
 						"actions", newHashMap(
-								"upload", getActionResponse(request, project, objectId)));
+								"upload", getActionResponse(request, project, objectId, accessToken)));
 			}
 		} else if (lfsObject.exists()) {
 			objectResponse.put(
 					"actions", newHashMap(
-							"download", getActionResponse(request, project, objectId)));
+							"download", getActionResponse(request, project, objectId, accessToken)));
 		} else {
 			objectResponse.put("error", newHashMap(
 					"code", SC_NOT_FOUND, 

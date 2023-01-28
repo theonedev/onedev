@@ -45,8 +45,14 @@ public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullReque
 		super.save(update);
 		PullRequest request = update.getRequest();
 		if (!request.getTargetProject().equals(request.getSourceProject())) {
-			gitService.push(request.getSourceProject(), request.getTargetProject(),  
-					update.getHeadCommitHash() + ":" + update.getHeadRef());
+			if (request.getTargetProject().findPullRequestWithLFS()) {
+				gitService.pushLfsObjects(
+						request.getSourceProject(), request.getSourceRef(),
+						request.getTargetProject(), update.getHeadRef(),
+						ObjectId.fromString(update.getHeadCommitHash()));
+			}
+			gitService.push(request.getSourceProject(), update.getHeadCommitHash(), 
+					request.getTargetProject(), update.getHeadRef());
 		} else {
 			ObjectId headCommitId = ObjectId.fromString(update.getHeadCommitHash());
 			gitService.updateRef(request.getTargetProject(), update.getHeadRef(), headCommitId, null);

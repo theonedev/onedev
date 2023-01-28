@@ -33,7 +33,7 @@ public class BooleanEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return new Label(id, TextUtils.describe(model.getObject()));
+								return new Label(id, TextUtils.getDisplayValue(model.getObject()));
 							} else {
 								return new EmptyValueLabel(id) {
 

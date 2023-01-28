@@ -1,26 +1,20 @@
 package io.onedev.server.git.service;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.server.git.*;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.model.Project;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.git.BlameBlock;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobEdits;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.BlobIdentFilter;
-import io.onedev.server.git.command.RevListOptions;
-import io.onedev.server.model.Project;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public interface GitService {
 
@@ -57,9 +51,14 @@ public interface GitService {
 	
 	void deleteTag(Project project, String tagName);
 	
-	void fetch(Project sourceProject, Project targetProject, String... refSpecs);
+	void fetch(Project targetProject, Project sourceProject, String... refSpecs);
 	
-	void push(Project targetProject, Project sourceProject, String... refSpecs);
+	void push(Project sourceProject, String sourceRev, 
+			  Project targetProject, String targetRev);
+
+	void pushLfsObjects(Project sourceProject, String sourceRef, 
+						Project targetProject, String targetRef,
+						ObjectId commitId);
 	
 	void updateRef(Project project, String refName, ObjectId newObjectId, 
 			@Nullable ObjectId expectedOldObjectId);

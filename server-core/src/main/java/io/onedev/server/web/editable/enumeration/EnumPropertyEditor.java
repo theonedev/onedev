@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.onedev.server.web.util.TextUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -30,10 +31,6 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 		enumClass = (Class<Enum>) propertyDescriptor.getPropertyGetter().getReturnType();		
 	}
 
-	private String getDisplayValue(String choice) {
-		return StringUtils.capitalize(choice.replace('_', ' ').toLowerCase());
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -51,7 +48,7 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 				Map<String, String> choices = new LinkedHashMap<>();
 		        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
 		            Enum<?> value = (Enum<?>) it.next();
-		            choices.put(value.name(), getDisplayValue(value.toString()));
+		            choices.put(value.name(), TextUtils.getDisplayValue(value));
 		        }
 		        return choices;
 			}

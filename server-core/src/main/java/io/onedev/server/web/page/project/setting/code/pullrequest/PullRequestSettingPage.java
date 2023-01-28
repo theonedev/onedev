@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.setting.code.pullrequest;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.CodeAnalysisSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
@@ -33,7 +32,6 @@ public class PullRequestSettingPage extends ProjectSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				
 				getProject().setPullRequestSetting(bean);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 				setResponsePage(PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject()));

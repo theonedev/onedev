@@ -14,7 +14,7 @@ import io.onedev.server.web.util.TextUtils;
 public class BooleanInput {
 
 	public static List<String> getPossibleValues() {
-		return Lists.newArrayList(TextUtils.describe(true), TextUtils.describe(false));
+		return Lists.newArrayList(TextUtils.getDisplayValue(true), TextUtils.getDisplayValue(false));
 	}
 	
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
@@ -35,9 +35,9 @@ public class BooleanInput {
 			return false;
 		} else if (strings.size() == 1) {
 			String string = strings.iterator().next();
-			if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase(TextUtils.describe(true)))
+			if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase(TextUtils.getDisplayValue(true)))
 				return true;
-			else if (string.equalsIgnoreCase("false") || string.equalsIgnoreCase(TextUtils.describe(false)))
+			else if (string.equalsIgnoreCase("false") || string.equalsIgnoreCase(TextUtils.getDisplayValue(false)))
 				return false;
 			else
 				throw new ValidationException("Invalid boolean value");
@@ -48,9 +48,9 @@ public class BooleanInput {
 
 	public static List<String> convertToStrings(Object value) {
 		if (value instanceof Boolean)
-			return Lists.newArrayList(TextUtils.describe((Boolean)value));
+			return Lists.newArrayList(TextUtils.getDisplayValue((Boolean)value));
 		else
-			return Lists.newArrayList(TextUtils.describe(false));
+			return Lists.newArrayList(TextUtils.getDisplayValue(false));
 	}
 
 }

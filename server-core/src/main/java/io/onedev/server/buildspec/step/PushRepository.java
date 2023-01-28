@@ -59,6 +59,21 @@ public class PushRepository extends SyncRepository {
 			if (remoteCommitId.get() != null) {
 				git.clearArgs();
 				git.addArgs("fetch", remoteUrl, remoteCommitId.get());
+				git.execute(new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.log(line);
+					}
+
+				}, new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.warning(line);
+					}
+
+				}).checkReturnCode();
 				
 				Repository repository = OneDev.getInstance(ProjectManager.class)
 						.getRepository(project.getId());

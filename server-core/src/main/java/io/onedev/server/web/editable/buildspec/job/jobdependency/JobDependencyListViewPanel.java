@@ -71,7 +71,7 @@ class JobDependencyListViewPanel extends Panel {
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
 				JobDependency dependency = rowModel.getObject();
-				cellItem.add(new Label(componentId, TextUtils.describe(dependency.isRequireSuccessful())));
+				cellItem.add(new Label(componentId, TextUtils.getDisplayValue(dependency.isRequireSuccessful())));
 			}
 			
 		});		

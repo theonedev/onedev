@@ -15,7 +15,7 @@ public class CloneCommand {
 	
 	private final File workingDir;
 	
-	private final String from;
+	private final String remotUrl;
 	
 	private boolean bare;
 	
@@ -29,9 +29,9 @@ public class CloneCommand {
 	
 	private String branch;
 	
-	public CloneCommand(File workingDir, String from) {
+	public CloneCommand(File workingDir, String remotUrl) {
 		this.workingDir = workingDir;
-		this.from = from;
+		this.remotUrl = remotUrl;
 	}
 
 	public CloneCommand bare(boolean bare) {
@@ -84,7 +84,7 @@ public class CloneCommand {
 		if (noLfs)
 			git.environments().put("GIT_LFS_SKIP_SMUDGE", "1");
 		
-		git.addArgs(from);
+		git.addArgs(remotUrl);
 		git.addArgs(".");
 		
 		git.execute(new LineConsumer() {

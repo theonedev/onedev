@@ -853,7 +853,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	public void setCodeManagement(boolean codeManagement) {
 		this.codeManagement = codeManagement;
 	}
-	
+
 	@Editable(order=300, description="Whether or not to enable issue management for the project")
 	public boolean isIssueManagement() {
 		return issueManagement;
@@ -1617,6 +1617,17 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} while (current != null);
 
 		return MergeStrategy.CREATE_MERGE_COMMIT;
+	}
+
+	public boolean findPullRequestWithLFS() {
+		Project current = this;
+		do {
+			if (current.getPullRequestSetting().isWithLFS() != null)
+				return current.getPullRequestSetting().isWithLFS();
+			current = current.getParent();
+		} while (current != null);
+
+		return false;
 	}
 	
 	public String getSiteLockName() {

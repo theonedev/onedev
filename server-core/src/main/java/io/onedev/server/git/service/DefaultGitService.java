@@ -6,6 +6,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.*;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -41,11 +42,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
 
@@ -528,7 +528,8 @@ public class DefaultGitService implements GitService, Serializable {
 	
 	@Sessional
 	@Override
-	public void push(Project sourceProject, Project targetProject, String... refSpecs) {
+	public void push(Project sourceProject, String sourceRev, 
+					 Project targetProject, String targetRev) {
 		Long targetProjectId = targetProject.getId();
 		Long sourceProjectId = sourceProject.getId();
 		String targetProjectPath = targetProject.getPath();
@@ -543,21 +544,132 @@ public class DefaultGitService implements GitService, Serializable {
 				
 				// Do not optimize to push to local directory when source and target are on same host, as otherwise
 				// environments in git pre/post receive hooks will not be set
-				CommandUtils.callWithClusterCredential(new GitTask<Void>() {
-
-					@Override
-					public Void call(Commandline git) {
-						git.workingDir(getGitDir(sourceProjectId));
-						git.addArgs("push", "--quiet", clusterManager.getServerUrl(targetStorageServerUUID) + "/" + targetProjectPath);
-						git.addArgs(refSpecs);
-						git.execute(newInfoLogger(), newErrorLogger()).checkReturnCode();
-						return null;
-					}
-					
+				CommandUtils.callWithClusterCredential((GitTask<Void>) git -> {
+					git.workingDir(getGitDir(sourceProjectId));
+					git.addArgs("push", "--quiet", clusterManager.getServerUrl(targetStorageServerUUID) + "/" + targetProjectPath);
+					git.addArgs(sourceRev + ":" + targetRev);
+					git.execute(newInfoLogger(), newErrorLogger()).checkReturnCode();
+					return null;
 				});
 				return null;
 			}
 			
+		});
+	}
+
+	@Override
+	@Sessional
+	public void pushLfsObjects(Project sourceProject, String sourceRef,
+							   Project targetProject, String targetRef,
+							   ObjectId commitId) {
+		Long targetProjectId = targetProject.getId();
+		Long sourceProjectId = sourceProject.getId();
+		String targetProjectPath = targetProject.getPath();
+
+		runOnProjectServer(sourceProjectId, new ClusterTask<Void>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Void call() throws Exception {
+				UUID targetStorageServerUUID = projectManager.getStorageServerUUID(targetProjectId, true);
+
+				CommandUtils.callWithClusterCredential((GitTask<Void>) git -> {
+					git.workingDir(getGitDir(sourceProjectId));
+					
+					String remoteUrl = clusterManager.getServerUrl(targetStorageServerUUID) + "/" + targetProjectPath;						
+					AtomicReference<String> remoteCommitId = new AtomicReference<>(null);
+					git.addArgs("ls-remote", remoteUrl, "HEAD", targetRef);
+					git.execute(new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							String refName = line.substring(40).trim();
+							if (refName.equals("HEAD")) {
+								if (remoteCommitId.get() == null)
+									remoteCommitId.set(line.substring(0, 40));
+							} else {
+								remoteCommitId.set(line.substring(0, 40));
+							}
+						}
+
+					}, new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							logger.warn(line);
+						}
+
+					});
+
+					if (remoteCommitId.get() != null) {
+						git.clearArgs();
+						git.addArgs("fetch", "--quiet", remoteUrl, remoteCommitId.get());
+						git.execute(new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								logger.debug(line);
+							}
+
+						}, new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								logger.warn(line);
+							}
+
+						}).checkReturnCode();
+
+						Repository repository = projectManager.getRepository(sourceProjectId);
+						String mergeBaseId = GitUtils.getMergeBase(repository,
+								ObjectId.fromString(remoteCommitId.get()), commitId).name();
+
+						if (!mergeBaseId.equals(commitId.name())) {
+							String input = String.format("%s %s %s %s\n", sourceRef, commitId.name(),
+									targetRef, remoteCommitId.get());
+							git.clearArgs();
+							git.addArgs("lfs", "pre-push", remoteUrl, remoteUrl);
+							git.execute(new LineConsumer() {
+
+								@Override
+								public void consume(String line) {
+									logger.debug(line);
+								}
+
+							}, new LineConsumer() {
+
+								@Override
+								public void consume(String line) {
+									logger.warn(line);
+								}
+
+							}, new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8))).checkReturnCode();
+						}
+					} else {
+						git.clearArgs();
+						git.addArgs("lfs", "push", "--all", remoteUrl, commitId.name());
+						git.execute(new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								logger.debug(line);
+							}
+
+						}, new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								logger.warn(line);
+							}
+
+						}).checkReturnCode();
+					}
+					return null;
+				});
+				return null;
+			}
+
 		});
 	}
 	
