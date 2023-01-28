@@ -1,12 +1,23 @@
 package io.onedev.server.web.page.project.blob.search.quick;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.server.search.code.query.FileQuery;
+import io.onedev.server.search.code.query.SymbolQuery;
+import io.onedev.server.search.code.query.TooGeneralQueryException;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.RunTaskBehavior;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -32,23 +43,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Project;
-import io.onedev.server.search.code.CodeSearchManager;
-import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.query.BlobQuery;
-import io.onedev.server.search.code.query.FileQuery;
-import io.onedev.server.search.code.query.SymbolQuery;
-import io.onedev.server.search.code.query.TooGeneralQueryException;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.RunTaskBehavior;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public abstract class QuickSearchPanel extends Panel {
@@ -132,10 +131,9 @@ public abstract class QuickSearchPanel extends Panel {
 				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
 			}
 			
-		} catch (TooGeneralQueryException e) {
-			symbolHits = new ArrayList<>();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
+		} catch (Exception e) {
+			if (ExceptionUtils.find(e, TooGeneralQueryException.class) != null)
+				symbolHits = new ArrayList<>();
 		}
 		return symbolHits;
 	}
