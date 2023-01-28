@@ -1,9 +1,9 @@
 # Build the docker image for onedev agent
-FROM ubuntu:18.04 AS build
+FROM ubuntu:22.04 AS build
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://get.docker.com | sh
 
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 COPY agent /agent
 COPY entrypoint-agent.sh /root/bin/entrypoint.sh
 COPY --from=build /usr/bin/docker /usr/local/bin/docker
