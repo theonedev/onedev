@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
+import org.apache.wicket.request.resource.ContentDisposition;
 import org.eclipse.jetty.io.EofException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -50,6 +52,8 @@ import io.onedev.server.web.util.WicketUtils;
 public class RawBlobResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final String PARAM_DISPOSITION = "disposition";
 	
 	private static final Logger logger = LoggerFactory.getLogger(RawBlobResource.class);
 
@@ -99,7 +103,11 @@ public class RawBlobResource extends AbstractResource {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-
+		
+		String disposition = params.get(PARAM_DISPOSITION).toOptionalString();
+		if (disposition != null)
+			response.setContentDisposition(ContentDisposition.valueOf(disposition));
+		
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override
@@ -179,10 +187,17 @@ public class RawBlobResource extends AbstractResource {
 	private ClusterManager getClusterManager() {
 		return OneDev.getInstance(ClusterManager.class);
 	}
-	
+
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
+		return paramsOf(project, blobIdent, null);
+	}
+	
+	public static PageParameters paramsOf(Project project, BlobIdent blobIdent, 
+										  @Nullable ContentDisposition disposition) {
 		PageParameters params = new PageParameters();
 		params.set(ProjectMapperUtils.PARAM_PROJECT, project.getPath());
+		if (disposition != null)
+			params.add(PARAM_DISPOSITION, disposition.name());
 		
 		int index = 0;
 		for (String segment: Splitter.on("/").split(blobIdent.revision)) {

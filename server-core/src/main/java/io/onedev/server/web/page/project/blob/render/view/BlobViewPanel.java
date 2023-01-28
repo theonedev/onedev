@@ -34,6 +34,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.resource.RawBlobResource;
 import io.onedev.server.web.resource.RawBlobResourceReference;
+import org.apache.wicket.request.resource.ContentDisposition;
 
 @SuppressWarnings("serial")
 public abstract class BlobViewPanel extends Panel {
@@ -229,8 +230,8 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(newFormats("formats"));
 		
-		add(new ResourceLink<Void>("raw", new RawBlobResourceReference(), 
-				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent())));
+		add(new ResourceLink<Void>("download", new RawBlobResourceReference(), 
+				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent(), ContentDisposition.ATTACHMENT)));
 		add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW && context.isViewPlain())) {
 			
 			@Override
