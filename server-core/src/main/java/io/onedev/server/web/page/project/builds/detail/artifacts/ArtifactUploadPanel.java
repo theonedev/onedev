@@ -1,29 +1,17 @@
 package io.onedev.server.web.page.project.builds.detail.artifacts;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.FilenameUtils;
+import io.onedev.server.web.component.dropzonefield.DropzoneField;
+import io.onedev.server.web.util.FileUpload;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -37,18 +25,18 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 import org.glassfish.jersey.client.ClientProperties;
 
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.FilenameUtils;
-import io.onedev.server.web.component.dropzonefield.DropzoneField;
-import io.onedev.server.web.util.FileUpload;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+
+import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
 @SuppressWarnings("serial")
 public abstract class ArtifactUploadPanel extends Panel {
@@ -130,7 +118,7 @@ public abstract class ArtifactUploadPanel extends Panel {
 									FileUtils.createDir(file.getParentFile());
 									try (	InputStream is = upload.getInputStream();
 											OutputStream os = new FileOutputStream(file)) {
-										IOUtils.copy(is, os);
+										IOUtils.copy(is, os, BUFFER_SIZE);
 									} finally {
 										upload.release();
 									}
@@ -159,10 +147,10 @@ public abstract class ArtifactUploadPanel extends Panel {
 
 									@Override
 									public void write(OutputStream output) throws IOException {
-										try (
-												InputStream is = new BufferedInputStream(upload.getInputStream(), BUFFER_SIZE);
-												OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
-											IOUtils.copy(is, os);
+										try (InputStream is = upload.getInputStream()) {
+											IOUtils.copy(is, output, BUFFER_SIZE);
+										} finally {
+											output.close();
 										}
 									}				   
 								   

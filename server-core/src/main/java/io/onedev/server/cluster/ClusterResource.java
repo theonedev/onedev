@@ -1,38 +1,6 @@
 package io.onedev.server.cluster;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-
 import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.attachment.AttachmentManager;
@@ -53,6 +21,23 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.patternset.PatternSet;
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.*;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
+import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
 @Api(internal=true)
 @Path("/cluster")
@@ -130,11 +115,10 @@ public class ClusterResource {
 					public Void call() throws Exception {
 						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
 						File artifactFile = new File(artifactsDir, artifactPath);
-						try (
-								InputStream is = new BufferedInputStream(new FileInputStream(artifactFile), 
-										BUFFER_SIZE);
-								OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
-							IOUtils.copy(is, os);
+						try (InputStream is = new FileInputStream(artifactFile)) {
+							IOUtils.copy(is, output, BUFFER_SIZE);
+						} finally {
+							output.close();
 						}
 						return null;
 					}
@@ -159,12 +143,10 @@ public class ClusterResource {
 			@Override
 		   public void write(OutputStream output) throws IOException {
 				Repository repository = projectManager.getRepository(projectId);
-				try (
-						InputStream is = new BufferedInputStream(
-								GitUtils.getInputStream(repository, ObjectId.fromString(revId), path), 
-								BUFFER_SIZE);
-						OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE)) {
-					IOUtils.copy(is, os);
+				try (InputStream is = GitUtils.getInputStream(repository, ObjectId.fromString(revId), path)) {
+					IOUtils.copy(is, output, BUFFER_SIZE);
+				} finally {
+					output.close();
 				}
 		   }				   
 		   
@@ -188,10 +170,10 @@ public class ClusterResource {
 					@Override
 					public Void call() throws Exception {
 						File file = new File(storageManager.getProjectSiteDir(projectId), filePath);
-						try (
-								InputStream is = new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE);
-								OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE)) {
-							IOUtils.copy(is, os);
+						try (InputStream is = new FileInputStream(file)) {
+							IOUtils.copy(is, output, BUFFER_SIZE);
+						} finally {
+							output.close();
 						}
 						return null;
 					}
@@ -306,12 +288,10 @@ public class ClusterResource {
 
 			@Override
 		   public void write(OutputStream output) throws IOException {
-				try (
-						InputStream is = new BufferedInputStream(
-								new LfsObject(projectId, objectId).getInputStream(), 
-								BUFFER_SIZE);
-						OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
-					IOUtils.copy(is, os);
+				try (InputStream is = new LfsObject(projectId, objectId).getInputStream()) {
+					IOUtils.copy(is, output, BUFFER_SIZE);
+				} finally {
+					output.close();
 				}
 		   }				   
 		   
@@ -327,14 +307,15 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		try (
-				InputStream is = new BufferedInputStream(input, BUFFER_SIZE);
-				OutputStream os = new BufferedOutputStream(
-						new LfsObject(projectId, objectId).getOutputStream(), 
-						BUFFER_SIZE);) {
-			IOUtils.copy(is, os);
+		try (OutputStream os = new LfsObject(projectId, objectId).getOutputStream()) {
+			IOUtils.copy(input, os, BUFFER_SIZE);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			try {
+				input.close();
+			} catch (IOException ignore) {
+			}
 		}
 		return Response.ok().build();
 	}
@@ -388,12 +369,12 @@ public class ClusterResource {
 				storageManager.initArtifactsDir(projectId, buildNumber);
 				File artifactFile = new File(Build.getArtifactsDir(projectId, buildNumber), artifactPath);
 				FileUtils.createDir(artifactFile.getParentFile());
-				try (
-						InputStream is = new BufferedInputStream(input, BUFFER_SIZE);
-						OutputStream os = new BufferedOutputStream(new FileOutputStream(artifactFile), BUFFER_SIZE);) {
-					IOUtils.copy(is, os);
+				try (OutputStream os = new FileOutputStream(artifactFile)) {
+					IOUtils.copy(input, os, BUFFER_SIZE);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
+				} finally {
+					input.close();
 				}
 				return null;
 			}

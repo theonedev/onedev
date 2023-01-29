@@ -1,32 +1,5 @@
 package io.onedev.server.web.resource;
 
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-
-import javax.persistence.EntityNotFoundException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.tika.io.IOUtils;
-import org.apache.tika.mime.MimeTypes;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.AbstractResource;
-
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -37,6 +10,29 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IOUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.tika.mime.MimeTypes;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+
+import javax.persistence.EntityNotFoundException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
+import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
 public class BuildLogResource extends AbstractResource {
 
@@ -90,9 +86,9 @@ public class BuildLogResource extends AbstractResource {
 				LogManager logManager = OneDev.getInstance(LogManager.class);
 				if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
 					try (
-							InputStream is = new BufferedInputStream(logManager.openLogStream(projectId, buildNumber), BUFFER_SIZE);
-							OutputStream os = new BufferedOutputStream(attributes.getResponse().getOutputStream(), BUFFER_SIZE)) {
-						IOUtils.copy(is, os);
+							InputStream is = logManager.openLogStream(projectId, buildNumber);
+							OutputStream os = attributes.getResponse().getOutputStream()) {
+						IOUtils.copy(is, os, BUFFER_SIZE);
 					}
 				} else {
 	    			Client client = ClientBuilder.newClient();
@@ -110,11 +106,9 @@ public class BuildLogResource extends AbstractResource {
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);
 	    					try (
-	    							InputStream is = new BufferedInputStream(
-	    									response.readEntity(InputStream.class), BUFFER_SIZE);
-	    							OutputStream os = new BufferedOutputStream(
-	    									attributes.getResponse().getOutputStream(), BUFFER_SIZE)) {
-	    						IOUtils.copy(is, os);
+	    							InputStream is = response.readEntity(InputStream.class);
+	    							OutputStream os = attributes.getResponse().getOutputStream()) {
+	    						IOUtils.copy(is, os, BUFFER_SIZE);
 	    					} 
 	    				} 
 	    			} finally {

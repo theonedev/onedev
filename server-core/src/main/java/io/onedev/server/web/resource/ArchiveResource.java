@@ -1,24 +1,12 @@
 package io.onedev.server.web.resource;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
-
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -35,13 +23,21 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
+import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
 public class ArchiveResource extends AbstractResource {
 
@@ -138,9 +134,9 @@ public class ArchiveResource extends AbstractResource {
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);
 	    					try (
-	    							InputStream is = new BufferedInputStream(response.readEntity(InputStream.class), BUFFER_SIZE);
-	    							OutputStream os = new BufferedOutputStream(attributes.getResponse().getOutputStream(), BUFFER_SIZE)) {
-	    						IOUtils.copy(is, os);
+	    							InputStream is = response.readEntity(InputStream.class);
+	    							OutputStream os = attributes.getResponse().getOutputStream()) {
+	    						IOUtils.copy(is, os, BUFFER_SIZE);
 	    					} 
 	    				} 
 	    			} finally {

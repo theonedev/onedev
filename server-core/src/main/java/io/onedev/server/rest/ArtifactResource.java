@@ -23,7 +23,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
@@ -101,11 +103,10 @@ public class ArtifactResource {
 
 				try (Response response = builder.get()) {
 					KubernetesHelper.checkStatus(response);
-					try (
-							InputStream is = new BufferedInputStream(
-									response.readEntity(InputStream.class), BUFFER_SIZE);
-							OutputStream os1 = new BufferedOutputStream(output, BUFFER_SIZE);) {
-						IOUtils.copy(is, os1);
+					try (InputStream is = response.readEntity(InputStream.class)) {
+						IOUtils.copy(is, output, BUFFER_SIZE);
+					} finally {
+						output.close();
 					}
 				}
 			} finally {
@@ -146,10 +147,11 @@ public class ArtifactResource {
 
 				@Override
 				public void write(OutputStream output) throws IOException {
-					try (
-							InputStream is = new BufferedInputStream(input, BUFFER_SIZE);
-							OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
-						IOUtils.copy(is, os);
+					try {
+						IOUtils.copy(input, output, BUFFER_SIZE);
+					} finally {
+						input.close();
+						output.close();
 					}
 				}
 

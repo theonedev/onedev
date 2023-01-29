@@ -1,50 +1,6 @@
 package io.onedev.server.git;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
-import io.onedev.server.util.ExceptionUtils;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.http.server.GitSmartHttpTools;
-import org.eclipse.jgit.http.server.ServletUtils;
-import org.eclipse.jgit.transport.PacketLineOut;
-import org.glassfish.jersey.client.ClientProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
-
-import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -60,11 +16,42 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.facade.ProjectFacade;
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.http.server.GitSmartHttpTools;
+import org.eclipse.jgit.http.server.ServletUtils;
+import org.eclipse.jgit.transport.PacketLineOut;
+import org.glassfish.jersey.client.ClientProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
 @Singleton
 public class GitFilter implements Filter {
@@ -358,11 +345,10 @@ public class GitFilter implements Filter {
 						KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
 				try (Response gitResponse = builder.get()) {
 					KubernetesHelper.checkStatus(gitResponse);
-					try (
-							InputStream is = new BufferedInputStream(
-									gitResponse.readEntity(InputStream.class), BUFFER_SIZE);
-							OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
-						IOUtils.copy(is, os);
+					try (InputStream is = gitResponse.readEntity(InputStream.class)) {
+						IOUtils.copy(is, output, BUFFER_SIZE);
+					} finally {
+						output.close();
 					}
 				}
 			} finally {

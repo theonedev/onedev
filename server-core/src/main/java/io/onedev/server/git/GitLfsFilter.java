@@ -37,7 +37,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -156,9 +158,9 @@ public class GitLfsFilter implements Filter {
 					}
 					if (storageServerUUID == null) {
 						try (
-								InputStream is = new BufferedInputStream(lfsObject.getInputStream(), BUFFER_SIZE);
-								OutputStream os = new BufferedOutputStream(httpResponse.getOutputStream(), BUFFER_SIZE);) {
-							IOUtils.copy(is, os);
+								InputStream is = lfsObject.getInputStream();
+								OutputStream os = httpResponse.getOutputStream()) {
+							IOUtils.copy(is, os, BUFFER_SIZE);
 						}
 					} else {
 						Client client = ClientBuilder.newClient();
@@ -174,11 +176,9 @@ public class GitLfsFilter implements Filter {
 							try (Response lfsResponse = builder.get()){
 								KubernetesHelper.checkStatus(lfsResponse);
 								try (
-										InputStream is = new BufferedInputStream(
-												lfsResponse.readEntity(InputStream.class), BUFFER_SIZE);
-										OutputStream os = new BufferedOutputStream(
-												httpResponse.getOutputStream(), BUFFER_SIZE);) {
-									IOUtils.copy(is, os);
+										InputStream is = lfsResponse.readEntity(InputStream.class);
+										OutputStream os = httpResponse.getOutputStream()) {
+									IOUtils.copy(is, os, BUFFER_SIZE);
 								}
 							}
 						} finally {
@@ -216,11 +216,9 @@ public class GitLfsFilter implements Filter {
 						if (storageServerUUID == null) {
 							try (
 									HashingInputStream is = new HashingInputStream(
-											Hashing.sha256(), 
-											new BufferedInputStream(httpRequest.getInputStream(), BUFFER_SIZE));
-									OutputStream os = new BufferedOutputStream(
-											lfsObject.getOutputStream(), BUFFER_SIZE);) {
-								IOUtils.copy(is, os);
+											Hashing.sha256(), httpRequest.getInputStream());
+									OutputStream os = lfsObject.getOutputStream()) {
+								IOUtils.copy(is, os, BUFFER_SIZE);
 								hash.set(Hex.encodeHexString(is.hash().asBytes()));
 							}
 						} else {
@@ -240,13 +238,12 @@ public class GitLfsFilter implements Filter {
 
 									@Override
 									public void write(OutputStream output) throws IOException {
-										try (
-												HashingInputStream is = new HashingInputStream(
-														Hashing.sha256(),
-														new BufferedInputStream(httpRequest.getInputStream(), BUFFER_SIZE));
-												OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
-											IOUtils.copy(is, os);
+										try (HashingInputStream is = new HashingInputStream(
+												Hashing.sha256(), httpRequest.getInputStream())) {
+											IOUtils.copy(is, output, BUFFER_SIZE);
 											hash.set(Hex.encodeHexString(is.hash().asBytes()));
+										} finally {
+											output.close();
 										}
 									}
 

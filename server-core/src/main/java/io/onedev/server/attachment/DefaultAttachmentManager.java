@@ -330,10 +330,11 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 					@Override
 					public void write(OutputStream output) throws IOException {
-						try (
-								InputStream is = new BufferedInputStream(attachmentStream, BUFFER_SIZE);
-								OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
-							IOUtils.copy(is, os);
+						try {
+							IOUtils.copy(attachmentStream, output, BUFFER_SIZE);
+						} finally {
+							attachmentStream.close();
+							output.close();
 						}
 					}				   
 				   
