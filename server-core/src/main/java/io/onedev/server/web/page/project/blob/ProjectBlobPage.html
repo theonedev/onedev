@@ -29,7 +29,12 @@
 	</div>
 	<wicket:fragment wicket:id="binaryOrLargeFileFrag">
 		<div class="border-bottom d-flex align-items-center px-3 py-2 justify-content-between">
+			<span class="text-gray">
 			<span wicket:id="size"></span>
+				<wicket:enclosure child="lfsHint">
+					<span wicket:id="lfsHint" class="text-muted">|</span> Stored with Git LFS
+				</wicket:enclosure>
+			</span>
 			<span>
 				<a wicket:id="download" class="btn btn-icon btn-xs btn-light btn-hover-primary ml-4" title="Download"><wicket:svg href="download" class="icon"/></a>
 				<span wicket:id="delete" class="ml-1">

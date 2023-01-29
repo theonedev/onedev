@@ -1,61 +1,9 @@
 package io.onedev.server.web.page.project.blob;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-
-import java.io.Serializable;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.wicket.Component;
-import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.ResourceLink;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.IRequestParameters;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.flow.RedirectToUrlException;
-import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
@@ -65,12 +13,7 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.project.CommitIndexed;
-import io.onedev.server.git.BlobContent;
-import io.onedev.server.git.BlobEdits;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.LfsObject;
-import io.onedev.server.git.LfsPointer;
+import io.onedev.server.git.*;
 import io.onedev.server.git.exception.BlobEditException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
@@ -127,6 +70,49 @@ import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.FileUpload;
 import io.onedev.server.web.websocket.WebSocketManager;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.wicket.Component;
+import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.ResourceLink;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
@@ -737,6 +723,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		return advancedSearchPanel;
 	}
 	
+	private Blob getBlob(boolean mustExist) {
+		return getProject().getBlob(getBlobIdent(), mustExist);
+	}
+	
 	private void newBlobContent(@Nullable AjaxRequestTarget target) {
 		Component blobContent = null;
 		if (getMode() == Mode.VIEW && getBlobIdent().revision == null) {
@@ -749,7 +739,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			blobContent = new NoNameEditPanel(BLOB_CONTENT_ID, this);
 		} else {
 			if (getMode() == Mode.VIEW) {
-				LfsPointer lfsPointer = getProject().getBlob(getBlobIdent(), true).getLfsPointer();
+				LfsPointer lfsPointer = getBlob(true).getLfsPointer();
 				if (lfsPointer != null && !new LfsObject(getProject().getId(), lfsPointer.getObjectId()).exists()) 
 					blobContent = new Fragment(BLOB_CONTENT_ID, "lfsObjectMissingFrag", this);
 			}
@@ -765,27 +755,32 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			if (blobContent == null) {
 				if (getMode() == Mode.ADD 
 						|| getMode() == Mode.EDIT 
-								&& getProject().getBlob(getBlobIdent(), true).getText() != null
-								&& getProject().getBlob(getBlobIdent(), true).getLfsPointer() == null
-								&& !getProject().getBlob(getBlobIdent(), true).isPartial()) {
+								&& getBlob(true).getText() != null
+								&& getBlob(true).getLfsPointer() == null
+								&& !getBlob(true).isPartial()) {
 					blobContent = new SourceEditPanel(BLOB_CONTENT_ID, this);
 				} else if ((getMode() == Mode.VIEW || getMode() == Mode.BLAME) 
 						&& getBlobIdent().isFile() 
-						&& getProject().getBlob(getBlobIdent(), true).getText() != null
-						&& getProject().getBlob(getBlobIdent(), true).getLfsPointer() == null) {
+						&& getBlob(true).getText() != null
+						&& getBlob(true).getLfsPointer() == null) {
 					blobContent = new SourceViewPanel(BLOB_CONTENT_ID, this, false);
 				} else {
 					Fragment fragment = new Fragment(BLOB_CONTENT_ID, "binaryOrLargeFileFrag", this);
-					
-					if (getProject().getBlob(getBlobIdent(), true).getText() == null 
-							|| getProject().getBlob(getBlobIdent(), true).getLfsPointer() != null) {
+
+					Blob blob = getBlob(true);
+					if (blob.getText() == null || blob.getLfsPointer() != null) {
 						fragment.add(new Label("message", "Binary file"));
 					} else {
 						fragment.add(new Label("message", "File is too large"));
 					}
-					
-					long size = getProject().getBlob(getBlobIdent(), true).getSize();
+
+					long size;
+					if (blob.getLfsPointer() != null)
+						size = blob.getLfsPointer().getObjectSize();
+					else
+						size = blob.getSize();
 					fragment.add(new Label("size", FileUtils.byteCountToDisplaySize(size)));
+					fragment.add(new WebMarkupContainer("lfsHint").setVisible(blob.getLfsPointer() != null));
 					
 					fragment.add(new ResourceLink<Void>("download", new RawBlobResourceReference(), 
 							RawBlobResource.paramsOf(getProject(), getBlobIdent())));
@@ -936,7 +931,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				if (resolvedRevision != null && isOnBranch() && state.blobIdent.path == null && state.mode == Mode.VIEW) {
 					BlobIdent oldBlobIdent = new BlobIdent(resolvedRevision.name(), ".onedev-buildspec", FileMode.TYPE_FILE);
 					BlobIdent blobIdent = new BlobIdent(resolvedRevision.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE);
-					setVisible(getProject().getBlob(blobIdent, false) == null && getProject().getBlob(oldBlobIdent, false) == null);
+					setVisible(getProject().getBlob(blobIdent, false) == null 
+							&& getProject().getBlob(oldBlobIdent, false) == null);
 				} else {
 					setVisible(false);
 				}

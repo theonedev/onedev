@@ -22,6 +22,7 @@ import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ContentDetector;
+import org.jetbrains.annotations.NotNull;
 
 public class LfsObject implements Serializable {
 	
@@ -115,6 +116,10 @@ public class LfsObject implements Serializable {
 		writeLock.lock();
 		try {
 			return new FilterOutputStream(new FileOutputStream(getFile())) {
+				@Override
+				public void write(@NotNull byte[] b, int off, int len) throws IOException {
+					out.write(b, off, len);
+				}
 
 				@Override
 				public void close() throws IOException {
