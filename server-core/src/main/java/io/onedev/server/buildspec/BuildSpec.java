@@ -163,7 +163,7 @@ public class BuildSpec implements Serializable, Validatable {
 					newProjectChain.add(aImport.getProjectPath());
 					try {
 						BuildSpec importedBuildSpec = aImport.getBuildSpec();
-						RevCommit commit = aImport.getProject().getRevCommit(aImport.getTag(), true);
+						RevCommit commit = aImport.getProject().getRevCommit(aImport.getRevision(), true);
 						JobSecretAuthorizationContext.push(new JobSecretAuthorizationContext(aImport.getProject(), commit, null));
 						try {
 							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newProjectChain));
@@ -1439,4 +1439,22 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		}
 	}
+
+	private void migrate20(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specTupleKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specTupleKey.equals("imports")) {
+				SequenceNode importsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node importsNodeItem: importsNode.getValue()) {
+					MappingNode importNode = (MappingNode) importsNodeItem;
+					for (Iterator<NodeTuple> itImportTuple = importNode.getValue().iterator(); itImportTuple.hasNext();) {
+						NodeTuple importTuple = itImportTuple.next();
+						ScalarNode importTupleKeyNode = (ScalarNode)importTuple.getKeyNode();
+						if (importTupleKeyNode.getValue().equals("tag"))
+							importTupleKeyNode.setValue("revision");
+					}
+				}
+			}
+		}
+	}	
 }

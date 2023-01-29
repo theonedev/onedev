@@ -128,7 +128,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 											
 											if (aImport != null) {
 												ProjectBlobPage.State state = new ProjectBlobPage.State();
-												state.blobIdent = new BlobIdent(aImport.getTag(), BuildSpec.BLOB_PATH, 
+												state.blobIdent = new BlobIdent(aImport.getRevision(), BuildSpec.BLOB_PATH, 
 														FileMode.REGULAR_FILE.getBits());
 												state.position = BuildSpecRenderer.getPosition("properties");
 												Project project = aImport.getProject();
@@ -687,7 +687,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 			
 			if (aImport != null) {
 				ProjectBlobPage.State state = new ProjectBlobPage.State();
-				state.blobIdent = new BlobIdent(aImport.getTag(), BuildSpec.BLOB_PATH, 
+				state.blobIdent = new BlobIdent(aImport.getRevision(), BuildSpec.BLOB_PATH, 
 						FileMode.REGULAR_FILE.getBits());
 				String urlSegment = BuildSpecRenderer.getUrlSegment(elementClass);
 				state.position = BuildSpecRenderer.getPosition(urlSegment+"s/" + elementName);
@@ -705,7 +705,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 				};
 				link.setEnabled(SecurityUtils.canReadCode(project));
 				add(link);
-				link.add(new Label("label", project.getPath() + ":" + aImport.getTag()));
+				link.add(new Label("label", project.getPath() + ":" + aImport.getRevision()));
 			} else {
 				WebMarkupContainer link = new WebMarkupContainer("link");
 				link.add(new WebMarkupContainer("label"));

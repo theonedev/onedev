@@ -198,7 +198,9 @@ public class Upgrade extends AbstractPlugin {
 		
 		boolean isEmpty = true;
 		for (File file: upgradeDir.listFiles()) {
-			if (!file.getName().equals("lost+found") && !file.getName().equals("site")) {
+			if (!file.getName().equals("lost+found") 
+					&& !file.getName().equals("site") 
+					&& !file.getName().startsWith(".")) {
 				isEmpty = false;
 				break;
 			}

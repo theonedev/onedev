@@ -149,6 +149,32 @@ public class SuggestionUtils {
 			
 		}, ":");
 	}
+
+	public static List<InputSuggestion> suggestRevisions(@Nullable Project project, String matchWith) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
+
+			@Override
+			public List<InputSuggestion> suggest(Project project, String matchWith) {
+				if (SecurityUtils.canReadCode(project)) {
+					List<String> revisions = new ArrayList<>();
+					revisions.addAll(project.getBranchRefs()
+							.stream()
+							.map(it->GitUtils.ref2branch(it.getName()))
+							.sorted()
+							.collect(Collectors.toList()));
+					revisions.addAll(project.getTagRefs()
+							.stream()
+							.map(it->GitUtils.ref2tag(it.getName()))
+							.sorted()
+							.collect(Collectors.toList()));
+					return SuggestionUtils.suggest(revisions, matchWith);
+				} else {
+					return new ArrayList<>();
+				}
+			}
+
+		}, ":");
+	}
 	
 	public static List<InputSuggestion> suggestCommits(@Nullable Project project, String matchWith) {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {

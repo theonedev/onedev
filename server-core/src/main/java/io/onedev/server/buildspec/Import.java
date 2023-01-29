@@ -54,7 +54,7 @@ public class Import implements Serializable, Validatable {
 
 	private String projectPath;
 	
-	private String tag;
+	private String revision;
 	
 	private String accessTokenSecret;
 	
@@ -109,15 +109,16 @@ public class Import implements Serializable, Validatable {
 		return null;
 	}
 	
-	@Editable(order=200, description="Specify tag in above project to import build spec from")
-	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestTags")
+	@Editable(order=200, description="Specify branch, tag or commit in above project to import " +
+			"build spec from")
+	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestRevisions")
 	@NotEmpty
-	public String getTag() {
-		return tag;
+	public String getRevision() {
+		return revision;
 	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
+	public void setRevision(String revision) {
+		this.revision = revision;
 	}
 
 	@SuppressWarnings("unused")
@@ -126,10 +127,10 @@ public class Import implements Serializable, Validatable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestTags(String matchWith) {
+	private static List<InputSuggestion> suggestRevisions(String matchWith) {
 		Project project = getInputProject();
 		if (project != null)
-			return SuggestionUtils.suggestTags(project, matchWith);
+			return SuggestionUtils.suggestRevisions(project, matchWith);
 		else
 			return new ArrayList<>();
 	}
@@ -199,12 +200,12 @@ public class Import implements Serializable, Validatable {
 				buildSpec = project.getBuildSpec(commit);
 			} catch (BuildSpecParseException e) {
 				String errorMessage = String.format("Malformed build spec (import project: %s, tag: %s)", 
-						projectPath, tag);
+						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}
 			if (buildSpec == null) {
 				String errorMessage = String.format("Build spec not defined (import project: %s, tag: %s)", 
-						projectPath, tag);
+						projectPath, revision);
 				throw new ExplicitException(errorMessage);
 			}
 			
@@ -265,10 +266,10 @@ public class Import implements Serializable, Validatable {
 	}
 	
 	public RevCommit getCommit() {
-		RevCommit commit = getProject().getRevCommit(tag, false);
+		RevCommit commit = getProject().getRevCommit(revision, false);
 		if (commit == null) {
-			String errorMessage = String.format("Unable to find tag to import build spec (import project: %s, tag: %s)", 
-					projectPath, tag);
+			String errorMessage = String.format("Unable to find commit to import build spec (import project: %s, revision: %s)", 
+					projectPath, revision);
 			throw new ExplicitException(errorMessage);
 		}
 		return commit;
