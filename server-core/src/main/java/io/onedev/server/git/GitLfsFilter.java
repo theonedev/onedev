@@ -212,55 +212,58 @@ public class GitLfsFilter implements Filter {
 					}
 					
 					var hash = new AtomicReference<String>(null);
-					if (storageServerUUID == null) {
-						try (
-								HashingInputStream is = new HashingInputStream(
-										Hashing.sha256(), 
-										new BufferedInputStream(httpRequest.getInputStream(), BUFFER_SIZE));
-								OutputStream os = new BufferedOutputStream(
-										lfsObject.getOutputStream(), BUFFER_SIZE);) {
-							IOUtils.copy(is, os);
-							hash.set(Hex.encodeHexString(is.hash().asBytes()));
-						}
-					} else {
-						Client client = ClientBuilder.newClient();
-						client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
-						try {
-							String serverUrl = clusterManager.getServerUrl(storageServerUUID);
-							WebTarget target = client.target(serverUrl)
-									.path("~api/cluster/lfs")
-									.queryParam("projectId", lfsObject.getProjectId())
-									.queryParam("objectId", lfsObject.getObjectId());
-							Invocation.Builder builder =  target.request();
-							builder.header(HttpHeaders.AUTHORIZATION, 
-									KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
-							
-							StreamingOutput os = new StreamingOutput() {
-
-								@Override
-								public void write(OutputStream output) throws IOException {
-									try (
-											HashingInputStream is = new HashingInputStream(
-													Hashing.sha256(), 
-													new BufferedInputStream(httpRequest.getInputStream(), BUFFER_SIZE));
-											OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
-										IOUtils.copy(is, os);
-										hash.set(Hex.encodeHexString(is.hash().asBytes()));
-									}
-								}				   
-							   
-							};
-							
-							try (Response lfsResponse = builder.post(Entity.entity(os, MediaType.APPLICATION_OCTET_STREAM))) {
-								KubernetesHelper.checkStatus(lfsResponse);
+					try {
+						if (storageServerUUID == null) {
+							try (
+									HashingInputStream is = new HashingInputStream(
+											Hashing.sha256(), 
+											new BufferedInputStream(httpRequest.getInputStream(), BUFFER_SIZE));
+									OutputStream os = new BufferedOutputStream(
+											lfsObject.getOutputStream(), BUFFER_SIZE);) {
+								IOUtils.copy(is, os);
+								hash.set(Hex.encodeHexString(is.hash().asBytes()));
 							}
-						} finally {
-							client.close();
+						} else {
+							Client client = ClientBuilder.newClient();
+							client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
+							try {
+								String serverUrl = clusterManager.getServerUrl(storageServerUUID);
+								WebTarget target = client.target(serverUrl)
+										.path("~api/cluster/lfs")
+										.queryParam("projectId", lfsObject.getProjectId())
+										.queryParam("objectId", lfsObject.getObjectId());
+								Invocation.Builder builder = target.request();
+								builder.header(HttpHeaders.AUTHORIZATION,
+										KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+
+								StreamingOutput os = new StreamingOutput() {
+
+									@Override
+									public void write(OutputStream output) throws IOException {
+										try (
+												HashingInputStream is = new HashingInputStream(
+														Hashing.sha256(),
+														new BufferedInputStream(httpRequest.getInputStream(), BUFFER_SIZE));
+												OutputStream os = new BufferedOutputStream(output, BUFFER_SIZE);) {
+											IOUtils.copy(is, os);
+											hash.set(Hex.encodeHexString(is.hash().asBytes()));
+										}
+									}
+
+								};
+
+								try (Response lfsResponse = builder.post(Entity.entity(os, MediaType.APPLICATION_OCTET_STREAM))) {
+									KubernetesHelper.checkStatus(lfsResponse);
+								}
+							} finally {
+								client.close();
+							}
 						}
-					}
-					if (!objectId.equals(hash.get())) {
-						lfsObject.delete();
-						throw new RuntimeException("Invalid uploaded content: hash not equals to object id");
+					} finally {
+						if (!objectId.equals(hash.get())) {
+							lfsObject.delete();
+							throw new RuntimeException("Invalid uploaded content: hash not equals to object id");
+						}
 					}
 				}
 			}				
