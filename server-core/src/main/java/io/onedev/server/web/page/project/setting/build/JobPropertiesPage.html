@@ -1,0 +1,16 @@
+<wicket:extend>
+	<div class="alert alert-notice bg-white shadow mb-5 text-gray">
+		<wicket:svg href="bulb" class="icon mr-2"/> 
+		Define properties to be used in build spec. Properties will be inherited by 
+		child projects, and can be overridden by child properties with same name.
+	</div>
+	<div class="card">
+		<div class="card-body">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="feedback" class="mb-4"></div>
+				<div wicket:id="editor"></div>		
+				<input type="submit" value="Save" class="dirty-aware btn btn-primary mt-4">
+			</form>
+		</div>
+	</div>
+</wicket:extend>

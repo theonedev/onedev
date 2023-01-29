@@ -54,6 +54,7 @@ import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.Permission;
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.util.encoding.UrlEncoder;
@@ -161,7 +162,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		stack.get().pop();
 	}
 	
-	private static final ReferenceMap<ObjectId, Optional<BuildSpec>> buildSpecCache = 
+	private static final ReferenceMap<ObjectId, Optional<byte[]>> buildSpecCache = 
 			new ReferenceMap<>(ReferenceStrength.HARD, ReferenceStrength.SOFT);
     
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -739,26 +740,35 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	 */
 	@Nullable
 	public BuildSpec getBuildSpec(ObjectId commitId) {
-		Optional<BuildSpec> buildSpec;
+		Optional<byte[]> buildSpecBytes;
 		synchronized (buildSpecCache) {
-			buildSpec = buildSpecCache.get(commitId);
+			buildSpecBytes = buildSpecCache.get(commitId);
 		}
-		if (buildSpec == null) {
+		if (buildSpecBytes == null) {
 			Blob blob = getBlob(new BlobIdent(commitId.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
+			BuildSpec buildSpec;
 			if (blob != null) {  
-				buildSpec = Optional.fromNullable(BuildSpec.parse(blob.getBytes()));
+				buildSpec = BuildSpec.parse(blob.getBytes());
 			} else { 
 				Blob oldBlob = getBlob(new BlobIdent(commitId.name(), ".onedev-buildspec", FileMode.TYPE_FILE), false);
 				if (oldBlob != null)
-					buildSpec = Optional.fromNullable(BuildSpec.parse(oldBlob.getBytes()));
+					buildSpec = BuildSpec.parse(oldBlob.getBytes());
 				else
-					buildSpec = Optional.absent();
+					buildSpec = null;
 			}
+			if (buildSpec != null)
+				buildSpecBytes = Optional.of(SerializationUtils.serialize(buildSpec));
+			else
+				buildSpecBytes = Optional.absent();
 			synchronized (buildSpecCache) {
-				buildSpecCache.put(commitId, buildSpec);
+				buildSpecCache.put(commitId, buildSpecBytes);
 			}
+			return buildSpec;
+		} else if (buildSpecBytes.isPresent()) {
+			return SerializationUtils.deserialize(buildSpecBytes.get());
+		} else {
+			return null;
 		}
-		return buildSpec.orNull();
 	}
 	
 	public List<String> getJobNames() {
@@ -920,6 +930,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			}
 		}
 		return jobSecrets;
+	}
+
+	public List<JobProperty> getHierarchyJobProperties() {
+		List<JobProperty> jobProperties = new ArrayList<>(getBuildSetting().getJobProperties());
+		if (getParent() != null) {
+			Set<String> names = jobProperties.stream().map(it->it.getName()).collect(Collectors.toSet());
+			for (JobProperty jobProperty : getParent().getHierarchyJobProperties()) {
+				if (!names.contains(jobProperty.getName()))
+					jobProperties.add(jobProperty);
+			}
+		}
+		return jobProperties;
 	}
 	
 	public List<ActionAuthorization> getHierarchyActionAuthorizations() {
@@ -1365,8 +1387,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	
 	@Nullable
 	public static Project get() {
-		if (!stack.get().isEmpty()) { 
+		if (!stack.get().isEmpty()) {
 			return stack.get().peek();
+		} else if (Build.get() != null) {
+			return Build.get().getProject();
 		} else {
 			ComponentContext componentContext = ComponentContext.get();
 			if (componentContext != null) {

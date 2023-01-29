@@ -30,8 +30,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import io.onedev.server.util.ExceptionUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.eclipse.jgit.http.server.ServletUtils;
@@ -394,11 +396,12 @@ public class GitFilter implements Filter {
 				chain.doFilter(request, response);
 			}
 		} catch (SystemNotReadyException e) {
-			logger.debug("Unable to serve git request as system is not ready yet");
 			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_SERVICE_UNAVAILABLE, e.getMessage());
-		} catch (GitException|InterruptedException|ExecutionException e) {
+		} catch (UnauthorizedException|AuthenticationException e) {
+			throw e;
+		} catch (Exception e) {
 			logger.error("Error serving git request", e);
-			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 	

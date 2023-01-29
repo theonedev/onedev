@@ -1,5 +1,6 @@
 package io.onedev.server.web.mapper;
 
+import io.onedev.server.web.page.project.setting.build.*;
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
 import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
@@ -121,10 +122,6 @@ import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRe
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
-import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
-import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
-import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
-import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
@@ -373,6 +370,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/git-pack-config", GitPackConfigPage.class));
 		add(new ProjectPageMapper("${project}/~settings/pull-request", PullRequestSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/job-secrets", JobSecretsPage.class));
+		add(new ProjectPageMapper("${project}/~settings/build/job-properties", JobPropertiesPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/action-authorizations", ActionAuthorizationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/build-preserve-rules", BuildPreservationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));

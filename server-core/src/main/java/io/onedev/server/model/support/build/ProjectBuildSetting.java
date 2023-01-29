@@ -33,6 +33,8 @@ public class ProjectBuildSetting implements Serializable {
 	private List<String> listParams;
 	
 	private List<NamedBuildQuery> namedQueries;
+
+	private List<JobProperty> jobProperties = new ArrayList<>();
 	
 	private List<JobSecret> jobSecrets = new ArrayList<>();
 	
@@ -48,7 +50,15 @@ public class ProjectBuildSetting implements Serializable {
 		actionAuthorizations.add(new CloseMilestoneAuthorization());
 		actionAuthorizations.add(new CreateTagAuthorization());
 	}
-	
+
+	public List<JobProperty> getJobProperties() {
+		return jobProperties;
+	}
+
+	public void setJobProperties(List<JobProperty> jobProperties) {
+		this.jobProperties = jobProperties;
+	}
+
 	public List<JobSecret> getJobSecrets() {
 		return jobSecrets;
 	}

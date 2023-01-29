@@ -22,6 +22,8 @@ import io.onedev.server.buildspec.step.StepTemplate;
 import io.onedev.server.buildspec.step.UseTemplateStep;
 import io.onedev.server.migration.VersionedYamlDoc;
 import io.onedev.server.migration.XmlBuildSpecMigrator;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.validation.Validatable;
@@ -84,7 +86,7 @@ public class BuildSpec implements Serializable, Validatable {
 
 	private List<Service> services = new ArrayList<>();
 	
-	private List<Property> properties = new ArrayList<>();
+	private List<JobProperty> properties = new ArrayList<>();
 	
 	private List<Import> imports = new ArrayList<>();
 	
@@ -96,7 +98,7 @@ public class BuildSpec implements Serializable, Validatable {
 	
 	private transient Map<String, Service> serviceMap;
 	
-	private transient Map<String, Property> propertyMap;
+	private transient Map<String, JobProperty> propertyMap;
 	
 	@Editable
 	@Valid
@@ -132,11 +134,11 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
-	public List<Property> getProperties() {
+	public List<JobProperty> getProperties() {
 		return properties;
 	}
 
-	public void setProperties(List<Property> properties) {
+	public void setProperties(List<JobProperty> properties) {
 		this.properties = properties;
 		propertyMap = null;
 	}
@@ -192,14 +194,18 @@ public class BuildSpec implements Serializable, Validatable {
 		return jobMap;
 	}
 	
-	public Map<String, Property> getPropertyMap() {
+	public Map<String, JobProperty> getPropertyMap() {
 		if (propertyMap == null) { 
 			propertyMap = new LinkedHashMap<>();
-			for (BuildSpec buildSpec: getImportedBuildSpecs(new HashSet<>())) { 
-				for (Property property: buildSpec.getProperties())
+			if (Project.get() != null) {
+				for (JobProperty property : Project.get().getHierarchyJobProperties())
 					propertyMap.put(property.getName(), property);
 			}
-			for (Property property: getProperties())
+			for (BuildSpec buildSpec: getImportedBuildSpecs(new HashSet<>())) { 
+				for (JobProperty property : buildSpec.getProperties())
+					propertyMap.put(property.getName(), property);
+			}
+			for (JobProperty property : getProperties())
 				propertyMap.put(property.getName(), property);
 		}
 		return propertyMap;
@@ -306,7 +312,7 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		}
 		Set<String> propertyNames = new HashSet<>();
-		for (Property property: properties) {
+		for (JobProperty property : properties) {
 			if (!propertyNames.add(property.getName())) {
 				context.buildConstraintViolationWithTemplate("Duplicate property name (" + property.getName() + ")")
 							.addPropertyNode(PROP_PROPERTIES).addConstraintViolation();
@@ -517,7 +523,7 @@ public class BuildSpec implements Serializable, Validatable {
 			LinearRange match = LinearRange.match(each, matchWith);
 			if (match != null) { 
 				completions.add(new InputCompletion(each, each + status.getContentAfterCaret(), 
-						each.length(), "override imported", match));
+						each.length(), "override", match));
 			}
 		}
 		

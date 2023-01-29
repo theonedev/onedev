@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import io.onedev.server.model.support.build.JobProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -50,7 +51,6 @@ import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.Import;
 import io.onedev.server.buildspec.NamedElement;
 import io.onedev.server.buildspec.ParamSpecAware;
-import io.onedev.server.buildspec.Property;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
@@ -507,7 +507,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						public void onEvent(Component component, IEvent<?> event) {
 							super.onEvent(component, event);
 							if (event.getPayload() instanceof FormSubmitted) 
-								buildSpec.setProperties((List<Property>) propertiesEditor.getConvertedInput());
+								buildSpec.setProperties((List<JobProperty>) propertiesEditor.getConvertedInput());
 						}
 
 						@Override

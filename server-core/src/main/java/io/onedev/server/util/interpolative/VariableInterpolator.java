@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.Property;
+import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
@@ -91,7 +91,7 @@ public class VariableInterpolator {
 					else
 						propertyName = t.substring("properties:".length());
 						
-					Property property = build.getSpec().getPropertyMap().get(propertyName);
+					JobProperty property = build.getSpec().getPropertyMap().get(propertyName);
 					if (property != null)
 						return property.getValue();
 					else
