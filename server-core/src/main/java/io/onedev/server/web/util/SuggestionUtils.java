@@ -136,12 +136,13 @@ public class SuggestionUtils {
 			@Override
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) {
-					List<String> tagNames = project.getTagRefs()
+					List<String> tags = project.getTagRefs()
 							.stream()
-							.map(it->GitUtils.ref2tag(it.getName()))
 							.sorted()
+							.map(it->GitUtils.ref2tag(it.getName()))
 							.collect(Collectors.toList());
-					return SuggestionUtils.suggest(tagNames, matchWith);
+					Collections.reverse(tags);
+					return SuggestionUtils.suggest(tags, matchWith);
 				} else {
 					return new ArrayList<>();
 				}
@@ -156,17 +157,28 @@ public class SuggestionUtils {
 			@Override
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) {
-					List<String> revisions = new ArrayList<>();
-					revisions.addAll(project.getBranchRefs()
+					List<String> branches = project.getBranchRefs()
 							.stream()
+							.sorted()
 							.map(it->GitUtils.ref2branch(it.getName()))
-							.sorted()
-							.collect(Collectors.toList()));
-					revisions.addAll(project.getTagRefs()
+							.collect(Collectors.toList());
+					Collections.reverse(branches);
+					if (project.getDefaultBranch() != null) {
+						branches.remove(project.getDefaultBranch());
+						branches.add(0, project.getDefaultBranch());
+					}
+					
+					List<String> tags = project.getTagRefs()
 							.stream()
-							.map(it->GitUtils.ref2tag(it.getName()))
 							.sorted()
-							.collect(Collectors.toList()));
+							.map(it->GitUtils.ref2tag(it.getName()))
+							.collect(Collectors.toList());
+					Collections.reverse(tags);
+					
+					List<String> revisions = new ArrayList<>();
+					revisions.addAll(branches);
+					revisions.addAll(tags);
+					
 					return SuggestionUtils.suggest(revisions, matchWith);
 				} else {
 					return new ArrayList<>();
