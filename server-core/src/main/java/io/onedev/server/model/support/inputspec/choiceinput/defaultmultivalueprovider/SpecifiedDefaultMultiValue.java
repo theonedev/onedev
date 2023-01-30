@@ -1,51 +1,48 @@
 package io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.validation.Validator;
-
-import javax.validation.constraints.NotEmpty;
-
-import com.google.common.collect.Lists;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.EditContext;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 
-@Editable(order=100, name="Use specified default value")
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
+
+@Editable(order=100, name="Use specified default value",
+		description = "For a particular project, the first matching entry will be used")
 public class SpecifiedDefaultMultiValue implements DefaultMultiValueProvider {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<String> value;
+	private List<DefaultMultiValue> defaultValues = new ArrayList<>();
 
-	@Editable(name="Literal default value")
-	@io.onedev.server.web.editable.annotation.ChoiceProvider("getValueChoices")
-	@NotEmpty
+	@Editable
+	@Size(min=1, message="At least one entry should be specified")
 	@OmitName
-	public List<String> getValue() {
-		return value;
+	public List<DefaultMultiValue> getDefaultValues() {
+		return defaultValues;
 	}
 
-	public void setValue(List<String> value) {
-		this.value = value;
+	public void setDefaultValues(List<DefaultMultiValue> defaultValues) {
+		this.defaultValues = defaultValues;
 	}
 
 	@Override
 	public List<String> getDefaultValue() {
-		return getValue();
+		Project project = Project.get();
+		if (project != null) {
+			Matcher matcher = new PathMatcher();
+			for (DefaultMultiValue defaultValue : getDefaultValues()) {
+				if (defaultValue.getApplicableProjects() == null
+						|| PatternSet.parse(defaultValue.getApplicableProjects()).matches(matcher, project.getPath())) {
+					return defaultValue.getValue();
+				}
+			}
+		}
+		return new ArrayList<>();
 	}
 
-	@SuppressWarnings("unused")
-	private static List<String> getValueChoices() {
-		ChoiceProvider choiceProvider = (ChoiceProvider) EditContext.get(1).getInputValue("choiceProvider");
-		if (choiceProvider != null && OneDev.getInstance(Validator.class).validate(choiceProvider).isEmpty())
-			return new ArrayList<>(choiceProvider.getChoices(true).keySet());
-		else
-			return Lists.newArrayList();
-	}
-	
 }

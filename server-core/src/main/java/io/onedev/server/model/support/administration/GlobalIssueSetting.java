@@ -21,6 +21,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValue;
 import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
 import io.onedev.server.model.support.inputspec.showcondition.ValueIsOneOf;
@@ -108,7 +109,10 @@ public class GlobalIssueSetting implements Serializable {
 		type.setChoiceProvider(specifiedChoices);
 		
 		SpecifiedDefaultValue specifiedDefaultValue = new SpecifiedDefaultValue();
-		specifiedDefaultValue.setValue("Bug");
+		DefaultValue defaultValue = new DefaultValue();
+		defaultValue.setValue("New Feature");
+		specifiedDefaultValue.getDefaultValues().add(defaultValue);
+		
 		type.setDefaultValueProvider(specifiedDefaultValue);
 		
 		fieldSpecs.add(type);
@@ -143,7 +147,9 @@ public class GlobalIssueSetting implements Serializable {
 		priority.setChoiceProvider(specifiedChoices);
 		
 		specifiedDefaultValue = new SpecifiedDefaultValue();
-		specifiedDefaultValue.setValue("Normal");
+		defaultValue = new DefaultValue();
+		defaultValue.setValue("Normal");
+		specifiedDefaultValue.getDefaultValues().add(defaultValue);
 		priority.setDefaultValueProvider(specifiedDefaultValue);
 		
 		fieldSpecs.add(priority);

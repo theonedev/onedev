@@ -4841,8 +4841,38 @@ public class DataMigrator {
 					buildSettingElement.addElement("jobProperties");
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
+								if (fieldSpecElement.getName().equals("io.onedev.server.model.support.issue.field.spec.ChoiceField")) {
+									Element defaultValueProviderElement = fieldSpecElement.element("defaultValueProvider");
+									if (defaultValueProviderElement != null 
+											&& defaultValueProviderElement.attributeValue("class").contains("SpecifiedDefaultValue")) {
+										Element defaultValueElement = defaultValueProviderElement.element("value");
+										Element defaultValuesElement = defaultValueProviderElement.addElement("defaultValues");
+										defaultValueElement.detach();
+										defaultValuesElement.addElement("io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValue").add(defaultValueElement);
+									}
+									Element defaultMultiValueProviderElement = fieldSpecElement.element("defaultMultiValueProvider");
+									if (defaultMultiValueProviderElement != null
+											&& defaultMultiValueProviderElement.attributeValue("class").contains("SpecifiedDefaultMultiValue")) {
+										Element defaultValueElement = defaultMultiValueProviderElement.element("value");
+										Element defaultValuesElement = defaultMultiValueProviderElement.addElement("defaultValues");
+										defaultValueElement.detach();
+										defaultValuesElement.addElement("io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValue").add(defaultValueElement);
+									}
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}
-	
+
 }
