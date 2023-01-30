@@ -148,13 +148,9 @@ public class Build extends ProjectBelonging
 	
 	public static final String PROP_SUBMITTER = "submitter";
 	
-	public static final String PROP_SUBMITTER_NAME = "submitterName";
-	
 	public static final String NAME_CANCELLER = "Canceller";
 	
 	public static final String PROP_CANCELLER = "canceller";
-	
-	public static final String PROP_CANCELLER_NAME = "cancellerName";
 	
 	public static final String NAME_SUBMIT_DATE = "Submit Date";
 	
@@ -712,9 +708,9 @@ public class Build extends ProjectBelonging
 	public Collection<Long> getFixedIssueIds() {
 		if (fixedIssueIds == null) {
 			fixedIssueIds = new HashSet<>();
-			Build prevBuild = getStreamPrevious(null);
-			if (prevBuild != null) {
-				for (RevCommit commit: getCommits(null)) 
+			Build prevSuccessfulBuild = getStreamPrevious(Status.SUCCESSFUL);
+			if (prevSuccessfulBuild != null) {
+				for (RevCommit commit: getCommits(Status.SUCCESSFUL)) 
 					fixedIssueIds.addAll(getProject().parseFixedIssueIds(commit.getFullMessage()));
 			} 
 		}

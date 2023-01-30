@@ -39,8 +39,8 @@ public class FixedIssuesPage extends BuildDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (getBuild().getStreamPrevious(null) != null) {
-			Fragment fragment = new Fragment("content", "hasPreviousBuildFrag", this);
+		if (getBuild().getStreamPrevious(Build.Status.SUCCESSFUL) != null) {
+			Fragment fragment = new Fragment("content", "hasPreviousSuccessfulBuildFrag", this);
 			
 			fragment.add(issueList = new IssueListPanel("issues", new IModel<String>() {
 
@@ -98,7 +98,7 @@ public class FixedIssuesPage extends BuildDetailPage {
 			
 			add(fragment);
 		} else {
-			add(new Fragment("content", "noPreviousBuildFrag", this));
+			add(new Fragment("content", "noPreviousSuccessfulBuildFrag", this));
 		}
 	}
 

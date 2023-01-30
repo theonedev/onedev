@@ -1,10 +1,10 @@
 <wicket:extend>
     <div wicket:id="content" class="issues"></div>
-    <wicket:fragment wicket:id="hasPreviousBuildFrag">
+    <wicket:fragment wicket:id="hasPreviousSuccessfulBuildFrag">
         <div wicket:id="issues"></div>
-        <div class="font-size-sm text-muted mt-4"><wicket:svg href="bulb" class="icon mt-n1 mr-1"/> This page lists fixed issues since previous build on <a href="https://docs.onedev.io/concepts#build-stream" class="link-primary" target="_blank">same stream</a></div>
+        <div class="font-size-sm text-muted mt-4"><wicket:svg href="bulb" class="icon icon-sm mt-n1"/> This page lists fixed issues since previous successful build on <a href="https://docs.onedev.io/concepts#build-stream" class="link-primary" target="_blank">same stream</a></div>
     </wicket:fragment>
-    <wicket:fragment wicket:id="noPreviousBuildFrag">
-        <div class="alert alert-light-warning">Fixed issues not available for first build of a job</div>
+    <wicket:fragment wicket:id="noPreviousSuccessfulBuildFrag">
+        <div class="alert alert-light-warning">No previous successful build on <a href="https://docs.onedev.io/concepts#build-stream" class="link-primary" target="_blank">same stream</a> to calculate fixed issues since</div>
     </wicket:fragment>
 </wicket:extend>
