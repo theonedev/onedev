@@ -225,15 +225,16 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											environments.put("HOME", userDir.getAbsolutePath());
 											git.environments(environments);
 
-											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-
-											cloneInfo.writeAuthData(userDir, git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-
 											List<String> trustCertContent = getTrustCertContent();
 											if (!trustCertContent.isEmpty()) {
 												installGitCert(new File(userDir, "trust-cert.pem"), trustCertContent,
 														git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 											}
+
+											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
+											cloneInfo.writeAuthData(userDir, git, false, 
+													ExecutorUtils.newInfoLogger(jobLogger), 
+													ExecutorUtils.newWarningLogger(jobLogger));
 
 											int cloneDepth = checkoutFacade.getCloneDepth();
 

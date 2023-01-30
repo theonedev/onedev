@@ -34,7 +34,6 @@ import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.*;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.tools.ant.Task;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -435,29 +434,23 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 													checkoutFacade.setupWorkingDir(git, hostWorkspace);
 													git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
 
-													CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-
-													cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-													try {
-														List<String> trustCertContent = getTrustCertContent();
-														if (!trustCertContent.isEmpty()) {
-															installGitCert(new File(hostAuthInfoHome.get(), "trust-cert.pem"), trustCertContent,
-																	git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-														}
-
-														int cloneDepth = checkoutFacade.getCloneDepth();
-
-														cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
-																jobContext.getRefName(), jobContext.getCommitId().name(),
-																checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
-																cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-													} finally {
-														git.clearArgs();
-														git.addArgs("config", "--global", "--unset", "core.sshCommand");
-														ExecutionResult result = git.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-														if (result.getReturnCode() != 5 && result.getReturnCode() != 0)
-															result.checkReturnCode();
+													List<String> trustCertContent = getTrustCertContent();
+													if (!trustCertContent.isEmpty()) {
+														installGitCert(new File(hostAuthInfoHome.get(), "trust-cert.pem"), trustCertContent,
+																git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 													}
+													
+													CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
+													cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, true, 
+															ExecutorUtils.newInfoLogger(jobLogger), 
+															ExecutorUtils.newWarningLogger(jobLogger));
+
+													int cloneDepth = checkoutFacade.getCloneDepth();
+
+													cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
+															jobContext.getRefName(), jobContext.getCommitId().name(),
+															checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
+															cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 												} catch (Exception e) {
 													jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 													return false;
