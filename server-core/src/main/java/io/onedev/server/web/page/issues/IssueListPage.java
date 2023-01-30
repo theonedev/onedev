@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentityAware;
+import io.onedev.server.util.script.identity.SiteAdministrator;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -37,7 +40,7 @@ import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
-public class IssueListPage extends LayoutPage {
+public class IssueListPage extends LayoutPage implements ScriptIdentityAware {
 
 	private static final String PARAM_PAGE = "page";
 	
@@ -251,6 +254,12 @@ public class IssueListPage extends LayoutPage {
 	@Override
 	protected String getPageTitle() {
 		return "Issues - OneDev";
+	}
+
+	@org.jetbrains.annotations.Nullable
+	@Override
+	public ScriptIdentity getScriptIdentity() {
+		return new SiteAdministrator();
 	}
 	
 }
