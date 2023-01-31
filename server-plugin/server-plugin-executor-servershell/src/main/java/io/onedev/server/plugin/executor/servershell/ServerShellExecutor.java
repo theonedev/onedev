@@ -217,13 +217,14 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 										try {
 											CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
 											jobLogger.log("Checking out code...");
+											
 											Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
-
-											checkoutFacade.setupWorkingDir(git, workspaceDir);
 
 											Map<String, String> environments = new HashMap<>();
 											environments.put("HOME", userDir.getAbsolutePath());
 											git.environments(environments);
+
+											checkoutFacade.setupWorkingDir(git, workspaceDir);
 
 											List<String> trustCertContent = getTrustCertContent();
 											if (!trustCertContent.isEmpty()) {

@@ -426,9 +426,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												try {
 													CheckoutFacade checkoutFacade = (CheckoutFacade) facade;
 													jobLogger.log("Checking out code...");
+													
+													Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
+													
 													if (hostAuthInfoHome.get() == null)
 														hostAuthInfoHome.set(FileUtils.createTempDir());
-													Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
 													git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
 
 													checkoutFacade.setupWorkingDir(git, hostWorkspace);
