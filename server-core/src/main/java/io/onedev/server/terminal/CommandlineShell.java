@@ -67,7 +67,7 @@ public class CommandlineShell implements Shell {
                         }
 
                     });
-                    ProcessKiller processKiller = new ProcessTreeKiller() {
+                    cmdline.processKiller(new ProcessTreeKiller() {
 
                         @Override
                         public void kill(Process process, String executionId) {
@@ -76,8 +76,8 @@ public class CommandlineShell implements Shell {
 	                        super.kill(process, executionId);
                         }
 
-                    };
-                    ExecutionResult result = cmdline.execute(outputHandler, errorHandler, shellInput, processKiller);
+                    });
+                    ExecutionResult result = cmdline.execute(outputHandler, errorHandler, shellInput);
                     if (result.getReturnCode() != 0)
                     	terminal.sendError("Shell exited");
                     else

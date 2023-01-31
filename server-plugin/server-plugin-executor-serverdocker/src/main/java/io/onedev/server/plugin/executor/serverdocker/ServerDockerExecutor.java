@@ -370,10 +370,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 											docker.addArgs(image);
 											docker.addArgs(arguments.toArray(new String[arguments.size()]));
-
+											docker.processKiller(newDockerKiller(newDocker(), containerName, jobLogger));
 											ExecutionResult result = docker.execute(ExecutorUtils.newInfoLogger(jobLogger),
-													ExecutorUtils.newWarningLogger(jobLogger), null, newDockerKiller(newDocker(),
-															containerName, jobLogger));
+													ExecutorUtils.newWarningLogger(jobLogger), null);
 											return result.getReturnCode();
 										} finally {
 											containerName = null;
@@ -430,9 +429,13 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 													if (hostAuthInfoHome.get() == null)
 														hostAuthInfoHome.set(FileUtils.createTempDir());
 													Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
+													git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
 
 													checkoutFacade.setupWorkingDir(git, hostWorkspace);
-													git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
+													if (!Bootstrap.isInDocker()) {
+														checkoutFacade.setupSafeDirectory(git, containerWorkspace,
+																newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+													}
 
 													List<String> trustCertContent = getTrustCertContent();
 													if (!trustCertContent.isEmpty()) {
@@ -446,7 +449,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 															ExecutorUtils.newWarningLogger(jobLogger));
 
 													int cloneDepth = checkoutFacade.getCloneDepth();
-
+			
 													cloneRepository(git, jobContext.getProjectGitDir(), cloneInfo.getCloneUrl(),
 															jobContext.getRefName(), jobContext.getCommitId().name(),
 															checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
