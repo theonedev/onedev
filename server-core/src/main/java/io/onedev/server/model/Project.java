@@ -162,9 +162,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		stack.get().pop();
 	}
 	
-	private static final ReferenceMap<ObjectId, Optional<byte[]>> buildSpecCache = 
+	private static final ReferenceMap<ObjectId, Optional<byte[]>> buildSpecBytesCache = 
 			new ReferenceMap<>(ReferenceStrength.HARD, ReferenceStrength.SOFT);
-    
+
+	private transient Map<ObjectId, Optional<BuildSpec>> buildSpecCache;
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	@Api(description="Represents the project from which this project is forked. Remove this property if "
@@ -739,10 +741,10 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	 * 			Exception when build spec is defined but not valid
 	 */
 	@Nullable
-	public BuildSpec getBuildSpec(ObjectId commitId) {
+	private BuildSpec loadBuildSpec(ObjectId commitId) {
 		Optional<byte[]> buildSpecBytes;
-		synchronized (buildSpecCache) {
-			buildSpecBytes = buildSpecCache.get(commitId);
+		synchronized (buildSpecBytesCache) {
+			buildSpecBytes = buildSpecBytesCache.get(commitId);
 		}
 		if (buildSpecBytes == null) {
 			Blob blob = getBlob(new BlobIdent(commitId.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
@@ -760,8 +762,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 				buildSpecBytes = Optional.of(SerializationUtils.serialize(buildSpec));
 			else
 				buildSpecBytes = Optional.absent();
-			synchronized (buildSpecCache) {
-				buildSpecCache.put(commitId, buildSpecBytes);
+			synchronized (buildSpecBytesCache) {
+				buildSpecBytesCache.put(commitId, buildSpecBytes);
 			}
 			return buildSpec;
 		} else if (buildSpecBytes.isPresent()) {
@@ -769,6 +771,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		} else {
 			return null;
 		}
+	}
+	
+	@Nullable
+	public BuildSpec getBuildSpec(ObjectId commitId) {
+		if (buildSpecCache == null)
+			buildSpecCache = new HashMap<>();
+		Optional<BuildSpec> buildSpec = buildSpecCache.get(commitId);
+		if (buildSpec == null) {
+			buildSpec = Optional.fromNullable(loadBuildSpec(commitId));
+			buildSpecCache.put(commitId, buildSpec);
+		}
+		return buildSpec.orNull();
 	}
 	
 	public List<String> getJobNames() {
