@@ -31,6 +31,10 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private static final long serialVersionUID = 1;
 	
+	public static final String PROP_GIT_LOCATION = "gitLocation";
+	
+	public static final String PROP_CURL_LOCATION = "curlLocation";
+	
 	private String serverUrl;
 	
 	private String sshRootUrl;

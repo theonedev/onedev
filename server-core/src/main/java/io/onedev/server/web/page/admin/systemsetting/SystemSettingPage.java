@@ -48,8 +48,8 @@ public class SystemSettingPage extends AdministrationPage {
 		};
 		Collection<String> excludedProps = new HashSet<>();
 		if (new File(Bootstrap.installDir, "IN_DOCKER").exists()) {
-			excludedProps.add("gitConfig");
-			excludedProps.add("curlConfig");
+			excludedProps.add(SystemSetting.PROP_GIT_LOCATION);
+			excludedProps.add(SystemSetting.PROP_CURL_LOCATION);
 		}
 		if (OneDev.getInstance().getIngressUrl() != null)
 			excludedProps.add("serverUrl");
