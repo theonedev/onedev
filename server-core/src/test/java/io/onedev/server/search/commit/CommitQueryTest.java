@@ -35,12 +35,12 @@ public class CommitQueryTest extends AbstractGitTest {
 		git.checkout().setCreateBranch(true).setName("dev").call();
 		addFileAndCommit("dev/file1", "", "dev1");
 		addFileAndCommit("dev/file2", "", "dev2");
-		git.checkout().setName("master").call();
+		git.checkout().setName("main").call();
 		
 		user = new PersonIdent("bar", "bar@example.com");
 		
-		addFileAndCommit("master/file1", "", "master1");
-		addFileAndCommit("master/file2", "", "master2");
+		addFileAndCommit("main/file1", "", "main1");
+		addFileAndCommit("main/file2", "", "main2");
 		
 		GitService gitService = mock(GitService.class);
 		when(OneDev.getInstance(GitService.class)).thenReturn(gitService);
@@ -59,7 +59,7 @@ public class CommitQueryTest extends AbstractGitTest {
 
 			@Override
 			public String getDefaultBranch() {
-				return "master";
+				return "main";
 			}
 
 			@Override
@@ -80,9 +80,9 @@ public class CommitQueryTest extends AbstractGitTest {
 			}
 			
 		};
-		ObjectId newCommitId = git.getRepository().resolve("master");
-		ObjectId oldCommitId = git.getRepository().resolve("master~1");
-		RefUpdated event = new RefUpdated(project, "refs/heads/master", oldCommitId, newCommitId) {
+		ObjectId newCommitId = git.getRepository().resolve("main");
+		ObjectId oldCommitId = git.getRepository().resolve("main~1");
+		RefUpdated event = new RefUpdated(project, "refs/heads/main", oldCommitId, newCommitId) {
 
 			private static final long serialVersionUID = 1L;
 
@@ -107,12 +107,12 @@ public class CommitQueryTest extends AbstractGitTest {
 			assertTrue(CommitQuery.parse(project, null, true).matches(event));
 			assertFalse(CommitQuery.parse(project, "branch(dev)", true).matches(event));
 			assertTrue(CommitQuery.parse(project, "default-branch", true).matches(event));
-			assertTrue(CommitQuery.parse(project, "branch(master) path(master/*)", true).matches(event));
-			assertFalse(CommitQuery.parse(project, "path(master/file)", true).matches(event));
-			assertTrue(CommitQuery.parse(project, "path(master/)", true).matches(event));
-			assertTrue(CommitQuery.parse(project, "path(master/file) path(master/file*)", true).matches(event));
-			assertTrue(CommitQuery.parse(project, "message(dev) message(master)", true).matches(event));
-			assertTrue(CommitQuery.parse(project, "message(dev) message(m*s)", true).matches(event));
+			assertTrue(CommitQuery.parse(project, "branch(main) path(main/*)", true).matches(event));
+			assertFalse(CommitQuery.parse(project, "path(main/file)", true).matches(event));
+			assertTrue(CommitQuery.parse(project, "path(main/)", true).matches(event));
+			assertTrue(CommitQuery.parse(project, "path(main/file) path(main/file*)", true).matches(event));
+			assertTrue(CommitQuery.parse(project, "message(dev) message(main)", true).matches(event));
+			assertTrue(CommitQuery.parse(project, "message(dev) message(m*n)", true).matches(event));
 			assertTrue(CommitQuery.parse(project, "authored-by-me author(foo@example.com)", true).matches(event));
 			assertFalse(CommitQuery.parse(project, "authored-by-me committer(foo@example.com)", true).matches(event));
 			assertTrue(CommitQuery.parse(project, "authored-by-me committer(bar@example.com)", true).matches(event));

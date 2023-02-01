@@ -96,7 +96,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
 		BlobEdits edits = new BlobEdits(Sets.newHashSet("/server/src/com/example/a//a.java"), Maps.newHashMap());
@@ -123,7 +123,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		BlobEdits edits = new BlobEdits(
@@ -149,7 +149,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		Set<String> oldPaths = Sets.newHashSet("server/src/com/example/a/a.java", 
@@ -182,7 +182,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
 		Map<String, BlobContent> newBlobs = new HashMap<>();
@@ -208,7 +208,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
 		Map<String, BlobContent> newBlobs = new HashMap<>();
@@ -236,7 +236,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		Map<String, BlobContent> newBlobs = new HashMap<>();
@@ -280,7 +280,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 	public void testAddDuplicates() throws IOException {
 		addFileAndCommit("file", "", "first commit");
 				
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		Map<String, BlobContent> newBlobs = new HashMap<>();
@@ -303,7 +303,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		createDir("client/security");
 		addFileAndCommit("client/security/file", "a", "add a");
 				
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		Map<String, BlobContent> newBlobs = new HashMap<>();
@@ -360,7 +360,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		addFileAndCommit("a.b/file1.java", "", "add a.b/file.java");
 		addFileAndCommit("a.b/file1", "", "add a.b/file.java");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		List<String> oldPaths = new ArrayList<>();
@@ -400,7 +400,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 		addFileAndCommit("server/src/com/example/a/a.java", "a", "add a");
 		addFileAndCommit("server/src/com/example/b/b.java", "b", "add b");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 
 		Set<String> oldPaths = Sets.newHashSet("server/src/com/example/b/b.java");
@@ -438,7 +438,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 	public void testObsoleteOldCommit() throws IOException {
 		addFileAndCommit("a.java", "a", "add a");
 		
-		String refName = "refs/heads/master";
+		String refName = "refs/heads/main";
 		ObjectId oldCommitId = git.getRepository().resolve(refName);
 		
 		addFileAndCommit("b.java", "b", "add b");

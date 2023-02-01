@@ -20,7 +20,7 @@ public class JobRunOnCommit extends JobRun {
 	@Api(order=200)
 	private String commitHash;
 
-	@Api(order=300, description="Git ref to run build against, for instance <i>refs/heads/master</i>. "
+	@Api(order=300, description="Git ref to run build against, for instance <i>refs/heads/main</i>. "
 			+ "Specified commit must be reachable from the ref")
 	private String refName;
 	

@@ -28,7 +28,7 @@ public class BlameCommandTest extends AbstractGitTest {
 				+ "9th line\n", 
 				"initial commit");
 		
-		ObjectId commitId = git.getRepository().resolve("master");
+		ObjectId commitId = git.getRepository().resolve("main");
 		Collection<BlameBlock> blames = new BlameCommand(git.getRepository().getDirectory(), commitId, "file")
 				.run();
 		assertEquals(1, blames.size());
@@ -47,14 +47,14 @@ public class BlameCommandTest extends AbstractGitTest {
 				+ "nineth line\n",
 				"second commit");
 		
-		commitId = git.getRepository().resolve("master");
+		commitId = git.getRepository().resolve("main");
 		blames = new BlameCommand(git.getRepository().getDirectory(), commitId, "file")
 				.range(new LinearRange(5, 8))
 				.run();
 		assertEquals(2, blames.size());
 		
 		assertEquals(commitId.name() + ": 8-8", getBlock(blames, commitId.name()).toString());
-		commitId = git.getRepository().resolve("master~1");
+		commitId = git.getRepository().resolve("main~1");
 		assertEquals(commitId.name() + ": 5-7", getBlock(blames, commitId.name()).toString());
 		
 		addFileAndCommit(
@@ -62,11 +62,11 @@ public class BlameCommandTest extends AbstractGitTest {
 				"first line\n"
 				+ "nineth line\n", 
 				"third commit");
-		commitId = git.getRepository().resolve("master");
+		commitId = git.getRepository().resolve("main");
 		blames = new BlameCommand(git.getRepository().getDirectory(), commitId, "file")
 				.run();
 		
-		commitId = git.getRepository().resolve("master~1");
+		commitId = git.getRepository().resolve("main~1");
 		
 		assertEquals(1, blames.size());
 		assertEquals(commitId.name() + ": 0-1", getBlock(blames, commitId.name()).toString());

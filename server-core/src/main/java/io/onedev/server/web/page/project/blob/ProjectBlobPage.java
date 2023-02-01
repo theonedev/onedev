@@ -895,7 +895,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				if (state.blobIdent.revision != null)
 					branch = state.blobIdent.revision;
 				else
-					branch = "master";
+					branch = "main";
 				add(new ViewStateAwareAjaxLink<Void>("addFile") {
 
 					@Override
@@ -952,7 +952,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		String revision = state.blobIdent.revision;
 		boolean canCreateRef;
 		if (revision == null) {
-			revision = "master";
+			revision = "main";
 			canCreateRef = false;
 		} else {
 			canCreateRef = true;
@@ -1385,9 +1385,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	public void onCommitted(@Nullable AjaxRequestTarget target, ObjectId commitId) {
 		Project project = getProject();
 		if (state.blobIdent.revision == null) {
-			state.blobIdent.revision = "master";
+			state.blobIdent.revision = "main";
 			resolvedRevision = commitId;
-			project.setDefaultBranch("master");
+			project.setDefaultBranch("main");
 		}
 		String branch = state.blobIdent.revision;
 		
@@ -1540,7 +1540,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		}
 
 		BlobEdits blobEdits = new BlobEdits(Sets.newHashSet(), newBlobs);
-		String refName = blobIdent.revision!=null?GitUtils.branch2ref(blobIdent.revision):"refs/heads/master";
+		String refName = blobIdent.revision!=null?GitUtils.branch2ref(blobIdent.revision):"refs/heads/main";
 
 		ObjectId prevCommitId;
 		if (blobIdent.revision != null)

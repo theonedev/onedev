@@ -772,7 +772,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			firstParentIds.add(ObjectId.fromString(commitHash));
 
 		/*
-		 * Instead of collecting information of master branch all at once, we identify some
+		 * Instead of collecting information of main branch all at once, we identify some
 		 * intermediate commits and collect the information using these intermediate commits
 		 * multiple times for two reasons:
 		 * 1. Use less memory

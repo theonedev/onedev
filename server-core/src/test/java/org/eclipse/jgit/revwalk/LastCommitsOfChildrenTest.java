@@ -18,14 +18,14 @@ public class LastCommitsOfChildrenTest extends AbstractGitTest {
 		addFileAndCommit("initial", "", "initial commit");
 		git.checkout().setName("dev").setCreateBranch(true).call();
 		addFileAndCommit("d", "", "add a file to dev branch");
-		git.checkout().setName("master").call();
-		addFileAndCommit("m", "", "add a file to master branch");
+		git.checkout().setName("main").call();
+		addFileAndCommit("m", "", "add a file to main branch");
 		git.merge().include(git.getRepository().resolve("dev")).setCommit(true).call();
 		
-		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(git.getRepository(), git.getRepository().resolve("master"));
-		assertEquals(git.getRepository().resolve("master~1"), lastCommits.get("m").getId());
+		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(git.getRepository(), git.getRepository().resolve("main"));
+		assertEquals(git.getRepository().resolve("main~1"), lastCommits.get("m").getId());
 		assertEquals(git.getRepository().resolve("dev"), lastCommits.get("d").getId());
-		assertEquals(git.getRepository().resolve("master~2"), lastCommits.get("initial").getId());
+		assertEquals(git.getRepository().resolve("main~2"), lastCommits.get("initial").getId());
 	}
 
 	@Test
@@ -33,12 +33,12 @@ public class LastCommitsOfChildrenTest extends AbstractGitTest {
 		addFileAndCommit("file", "1\n2\n3\n4\n5\n", "initial commit");
 		git.checkout().setName("dev").setCreateBranch(true).call();
 		addFileAndCommit("file", "0\n1\n2\n3\n4\n5\n", "add first line");
-		git.checkout().setName("master").call();
+		git.checkout().setName("main").call();
 		addFileAndCommit("file", "1\n2\n3\n4\n5\n6\n", "add last line");
 		git.merge().include(git.getRepository().resolve("dev")).setCommit(true).call();
 		
-		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(git.getRepository(), git.getRepository().resolve("master"));
-		assertEquals(git.getRepository().resolve("master"), lastCommits.get("file").getId());
+		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(git.getRepository(), git.getRepository().resolve("main"));
+		assertEquals(git.getRepository().resolve("main"), lastCommits.get("file").getId());
 	}
 
 	@Test
@@ -50,11 +50,11 @@ public class LastCommitsOfChildrenTest extends AbstractGitTest {
 		addFileAndCommit("dir/dir1/subdir/file", "", "commit");
 		addFileAndCommit("dir/file", "", "commit");
 		
-		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(git.getRepository(), git.getRepository().resolve("master"), "dir");
+		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(git.getRepository(), git.getRepository().resolve("main"), "dir");
 		assertEquals(3, lastCommits.size());
-		assertEquals(git.getRepository().resolve("master~1"), lastCommits.get("dir1").getId());
-		assertEquals(git.getRepository().resolve("master~2"), lastCommits.get("dir2").getId());
-		assertEquals(git.getRepository().resolve("master"), lastCommits.get("file").getId());
+		assertEquals(git.getRepository().resolve("main~1"), lastCommits.get("dir1").getId());
+		assertEquals(git.getRepository().resolve("main~2"), lastCommits.get("dir2").getId());
+		assertEquals(git.getRepository().resolve("main"), lastCommits.get("file").getId());
 	}
 	
 	@Test
@@ -62,11 +62,11 @@ public class LastCommitsOfChildrenTest extends AbstractGitTest {
 		addFileAndCommit("initial", "", "initial commit");
 		git.checkout().setName("feature1").setCreateBranch(true).call();
 		addFileAndCommit("feature1", "", "add feature1");
-		git.checkout().setName("master").call();
-		addFileAndCommit("master", "", "add master");
+		git.checkout().setName("main").call();
+		addFileAndCommit("main", "", "add main");
 		git.merge().include(git.getRepository().resolve("feature1")).setCommit(true).call();
 		
-		final ObjectId oldId = git.getRepository().resolve("master");
+		final ObjectId oldId = git.getRepository().resolve("main");
 		final LastCommitsOfChildren oldLastCommits = new LastCommitsOfChildren(git.getRepository(), oldId);
 		Cache cache = new Cache() {
 
@@ -83,10 +83,10 @@ public class LastCommitsOfChildrenTest extends AbstractGitTest {
 		
 		git.checkout().setName("feature2").setCreateBranch(true).call();
 		addFileAndCommit("initial", "hello", "modify initial");
-		git.checkout().setName("master").call();
+		git.checkout().setName("main").call();
 		git.merge().include(git.getRepository().resolve("feature2")).setCommit(true).call();
 
-		ObjectId newId = git.getRepository().resolve("master");
+		ObjectId newId = git.getRepository().resolve("main");
 		assertEquals(new LastCommitsOfChildren(git.getRepository(), newId), new LastCommitsOfChildren(git.getRepository(), newId, cache));
 	}
 	

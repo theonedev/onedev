@@ -169,7 +169,7 @@ public class Import implements Serializable, Validatable {
 							&& (page.getMode() == Mode.ADD || page.getMode() == Mode.EDIT)) {
 						String branchName = page.getBlobIdent().revision;
 						if (branchName == null)
-							branchName = "master";
+							branchName = "main";
 						accessToken = context.getSecretValue(branchName, accessTokenSecret);
 					} else {
 						accessToken = context.getSecretValue(accessTokenSecret);

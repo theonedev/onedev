@@ -1344,7 +1344,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			}
 			return false;
 		} else {
-			return PatternSet.parse(branches).matches(matcher, "master");
+			return PatternSet.parse(branches).matches(matcher, "main");
 		}
 	}
 	

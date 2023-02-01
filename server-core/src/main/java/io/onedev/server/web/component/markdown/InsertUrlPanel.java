@@ -170,7 +170,7 @@ abstract class InsertUrlPanel extends Panel {
 		 */
 		String revision = context.getBlobIdent().revision;
 		if (revision == null)
-			revision = "master";
+			revision = "main";
 		GitService gitService = OneDev.getInstance(GitService.class);
 		return gitService.resolve(context.getProject(), revision, false);
 	}

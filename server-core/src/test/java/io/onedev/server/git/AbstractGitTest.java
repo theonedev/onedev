@@ -39,7 +39,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 		gitDir = FileUtils.createTempDir();
 		
 		try {
-			git = Git.init().setInitialBranch("master").setBare(false).setDirectory(gitDir).call();
+			git = Git.init().setInitialBranch("main").setBare(false).setDirectory(gitDir).call();
 		} catch (IllegalStateException | GitAPIException e) {
 			throw new RuntimeException(e);
 		}

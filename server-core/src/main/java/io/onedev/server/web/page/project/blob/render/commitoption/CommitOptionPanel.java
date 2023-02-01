@@ -253,7 +253,7 @@ public class CommitOptionPanel extends Panel {
 				prevCommitId = ObjectId.zeroId();
 
 			if (revision == null)
-				revision = "master";
+				revision = "main";
 			
 			String refName = GitUtils.branch2ref(revision);
 			

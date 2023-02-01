@@ -84,8 +84,8 @@ public abstract class RevisionPicker extends DropdownLink {
 		if (projectModel.getObject() != null) {
 			String icon;
 			String label;
-			if ("master".equals(revision)) { // default to use master branch when project is empty
-				label = "master";
+			if ("main".equals(revision)) { // default to use main branch when project is empty
+				label = "main";
 				icon = "branch";
 			} else if (revision != null) {
 				ProjectAndRevision projectAndRevision = new ProjectAndRevision(projectModel.getObject(), revision);

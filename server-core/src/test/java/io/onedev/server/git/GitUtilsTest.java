@@ -31,11 +31,11 @@ public class GitUtilsTest extends AbstractGitTest {
 		git.checkout().setCreateBranch(true).setName("dev").call();
 		addFileAndCommit("dev1", "", "dev1");
 		addFileAndCommit("dev2", "", "dev2");
-		git.checkout().setName("master").call();
-		addFileAndCommit("master1", "", "master1");
-		addFileAndCommit("master2", "", "master2");
-		ObjectId masterId = git.getRepository().resolve("master");
-		ObjectId newCommitId = GitUtils.rebase(git.getRepository(), git.getRepository().resolve("dev"), masterId, user);
+		git.checkout().setName("main").call();
+		addFileAndCommit("main1", "", "main1");
+		addFileAndCommit("main2", "", "main2");
+		ObjectId mainId = git.getRepository().resolve("main");
+		ObjectId newCommitId = GitUtils.rebase(git.getRepository(), git.getRepository().resolve("dev"), mainId, user);
 		try (	RevWalk revWalk = new RevWalk(git.getRepository());
 				TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
 			RevCommit newCommit = revWalk.parseCommit(newCommitId);
@@ -44,7 +44,7 @@ public class GitUtilsTest extends AbstractGitTest {
 			while (treeWalk.next()) {
 				files.add(treeWalk.getPathString());
 			}
-			assertEquals(Sets.newHashSet("initial", "dev1", "dev2", "master1", "master2"), files);
+			assertEquals(Sets.newHashSet("initial", "dev1", "dev2", "main1", "main2"), files);
 			assertEquals("dev2", newCommit.getFullMessage());
 			assertEquals(1, newCommit.getParentCount());
 			
@@ -55,11 +55,11 @@ public class GitUtilsTest extends AbstractGitTest {
 			while (treeWalk.next()) {
 				files.add(treeWalk.getPathString());
 			}
-			assertEquals(Sets.newHashSet("initial", "dev1", "master1", "master2"), files);
+			assertEquals(Sets.newHashSet("initial", "dev1", "main1", "main2"), files);
 			assertEquals("dev1", newCommit.getFullMessage());
 			assertEquals(1, newCommit.getParentCount());
 			
-			assertEquals(masterId, newCommit.getParent(0));
+			assertEquals(mainId, newCommit.getParent(0));
 		}
 	}
 
@@ -69,8 +69,8 @@ public class GitUtilsTest extends AbstractGitTest {
 		git.checkout().setCreateBranch(true).setName("dev").call();
 		String commitHash1 = addFileAndCommit("dev1", "", "dev1");
 		String commitHash2 = addFileAndCommit("dev2", "", "dev2");
-		ObjectId masterId = git.getRepository().resolve("master");
-		ObjectId newCommitId = GitUtils.rebase(git.getRepository(), git.getRepository().resolve("dev"), masterId, user);
+		ObjectId mainId = git.getRepository().resolve("main");
+		ObjectId newCommitId = GitUtils.rebase(git.getRepository(), git.getRepository().resolve("dev"), mainId, user);
 		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
 			assertEquals(commitHash2, newCommitId.name());
 			assertEquals(commitHash1, revWalk.parseCommit(newCommitId).getParent(0).name());
@@ -83,11 +83,11 @@ public class GitUtilsTest extends AbstractGitTest {
 		git.checkout().setCreateBranch(true).setName("dev").call();
 		addFileAndCommit("dev1", "", "dev1");
 		addFileAndCommit("conflict", "1", "dev2");
-		git.checkout().setName("master").call();
-		addFileAndCommit("master1", "", "master1");
-		addFileAndCommit("conflict", "2", "master2");
+		git.checkout().setName("main").call();
+		addFileAndCommit("main1", "", "main1");
+		addFileAndCommit("conflict", "2", "main2");
 		assertNull(GitUtils.rebase(git.getRepository(), git.getRepository().resolve("dev"), 
-				git.getRepository().resolve("master"), user));
+				git.getRepository().resolve("main"), user));
 	}
 	
 	@Test
@@ -97,11 +97,11 @@ public class GitUtilsTest extends AbstractGitTest {
 		addFileAndCommit("dev1", "", "dev1");
 		git.commit().setAllowEmpty(true).setMessage("empty").call();
 		addFileAndCommit("dev2", "", "dev2");
-		git.checkout().setName("master").call();
-		addFileAndCommit("master1", "", "master1");
-		addFileAndCommit("master2", "", "master2");
-		ObjectId masterId = git.getRepository().resolve("master");
-		ObjectId newCommitId = GitUtils.rebase(git.getRepository(), git.getRepository().resolve("dev"), masterId, user);
+		git.checkout().setName("main").call();
+		addFileAndCommit("main1", "", "main1");
+		addFileAndCommit("main2", "", "main2");
+		ObjectId mainId = git.getRepository().resolve("main");
+		ObjectId newCommitId = GitUtils.rebase(git.getRepository(), git.getRepository().resolve("dev"), mainId, user);
 		try (	RevWalk revWalk = new RevWalk(git.getRepository());
 				TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
 			RevCommit newCommit = revWalk.parseCommit(newCommitId);
@@ -110,7 +110,7 @@ public class GitUtilsTest extends AbstractGitTest {
 			while (treeWalk.next()) {
 				files.add(treeWalk.getPathString());
 			}
-			assertEquals(Sets.newHashSet("initial", "dev1", "dev2", "master1", "master2"), files);
+			assertEquals(Sets.newHashSet("initial", "dev1", "dev2", "main1", "main2"), files);
 			assertEquals("dev2", newCommit.getFullMessage());
 			assertEquals(1, newCommit.getParentCount());
 			
@@ -121,11 +121,11 @@ public class GitUtilsTest extends AbstractGitTest {
 			while (treeWalk.next()) {
 				files.add(treeWalk.getPathString());
 			}
-			assertEquals(Sets.newHashSet("initial", "dev1", "master1", "master2"), files);
+			assertEquals(Sets.newHashSet("initial", "dev1", "main1", "main2"), files);
 			assertEquals("dev1", newCommit.getFullMessage());
 			assertEquals(1, newCommit.getParentCount());
 			
-			assertEquals(masterId, newCommit.getParent(0));
+			assertEquals(mainId, newCommit.getParent(0));
 		}
 	}
 	
@@ -135,12 +135,12 @@ public class GitUtilsTest extends AbstractGitTest {
 		git.checkout().setCreateBranch(true).setName("dev").call();
 		addFileAndCommit("dev1", "", "dev1");
 		addFileAndCommit("dev2", "", "dev2");
-		git.checkout().setName("master").call();
-		addFileAndCommit("master1", "", "master1");
-		addFileAndCommit("master2", "", "master2");
-		ObjectId masterId = git.getRepository().resolve("master");
+		git.checkout().setName("main").call();
+		addFileAndCommit("main1", "", "main1");
+		addFileAndCommit("main2", "", "main2");
+		ObjectId mainId = git.getRepository().resolve("main");
 		ObjectId devId = git.getRepository().resolve("dev");
-		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), masterId, devId, false, 
+		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), mainId, devId, false, 
 				user, user, "merge commit", false);
 		try (	RevWalk revWalk = new RevWalk(git.getRepository());
 				TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
@@ -150,9 +150,9 @@ public class GitUtilsTest extends AbstractGitTest {
 			while (treeWalk.next()) {
 				files.add(treeWalk.getPathString());
 			}
-			assertEquals(Sets.newHashSet("initial", "dev1", "dev2", "master1", "master2"), files);
+			assertEquals(Sets.newHashSet("initial", "dev1", "dev2", "main1", "main2"), files);
 			assertEquals(2, mergeCommit.getParentCount());
-			assertEquals(masterId, mergeCommit.getParent(0));
+			assertEquals(mainId, mergeCommit.getParent(0));
 			assertEquals(devId, mergeCommit.getParent(1));
 		}
 	}
@@ -163,13 +163,13 @@ public class GitUtilsTest extends AbstractGitTest {
 		git.checkout().setCreateBranch(true).setName("dev").call();
 		addFileAndCommit("dev1", "", "dev1");
 		addFileAndCommit("conflict", "1", "dev2");
-		git.checkout().setName("master").call();
-		addFileAndCommit("master1", "", "master1");
-		addFileAndCommit("conflict", "2", "master2");
-		assertNull(GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+		git.checkout().setName("main").call();
+		addFileAndCommit("main1", "", "main1");
+		addFileAndCommit("conflict", "2", "main2");
+		assertNull(GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", false));
 		
-		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
@@ -188,13 +188,13 @@ public class GitUtilsTest extends AbstractGitTest {
 		addFileAndCommit("file", "", "initial commit");
 		git.checkout().setCreateBranch(true).setName("dev").call();
 		removeFileAndCommit("file", "remove file");
-		git.checkout().setName("master").call();
-		addFileAndCommit("file", "1", "master");
+		git.checkout().setName("main").call();
+		addFileAndCommit("file", "1", "main");
 
-		assertNull(GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+		assertNull(GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", false));
 		
-		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
@@ -223,7 +223,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		addFileAndCommit("dir2/file", "111\n222\n333\n444\n555\n", "add dir2/file");
 		
-		git.checkout().setName("master").call();
+		git.checkout().setName("main").call();
 		
 		createDir("dir1");
 		file = new File(gitDir, "dir1/file");
@@ -236,10 +236,10 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		addFileAndCommit("dir2/file", "111\n222\n333\n444\n555\naaa\n", "add dir2/file");
 		
-		assertNull(GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+		assertNull(GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", false));
 		
-		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
@@ -257,7 +257,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		}
 		
 		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-				git.getRepository().resolve("master"), false, user, user, "merge commit", true);
+				git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
 		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
@@ -279,7 +279,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		addFileAndCommit("file", "", "initial commit");
 		git.checkout().setCreateBranch(true).setName("dev").call();
 		
-		git.checkout().setName("master").call();
+		git.checkout().setName("main").call();
 		createDir("newpath");
 		addFileAndCommit("newpath/file", "1", "new path");
 		
@@ -288,12 +288,12 @@ public class GitUtilsTest extends AbstractGitTest {
 
 		ObjectId mergeCommitId;
 
-		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", false);
 		
 		assertNull(mergeCommitId);
 		
-		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 				git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
@@ -309,7 +309,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		}
 		
 		mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-				git.getRepository().resolve("master"), false, user, user, "merge commit", true);
+				git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 		assertNotNull(mergeCommitId);
 		
 		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
@@ -331,12 +331,12 @@ public class GitUtilsTest extends AbstractGitTest {
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 						git.getRepository().resolve("dev"), false, user, user, "merge commit", false);
 				
 				assertNull(mergeCommitId);
 
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 						git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
@@ -366,12 +366,12 @@ public class GitUtilsTest extends AbstractGitTest {
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 						git.getRepository().resolve("dev"), false, user, user, "merge commit", false);
 				
 				assertNull(mergeCommitId);
 				
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 						git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
@@ -387,7 +387,7 @@ public class GitUtilsTest extends AbstractGitTest {
 				}
 				
 				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-						git.getRepository().resolve("master"), false, user, user, "merge commit", true);
+						git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
 				
@@ -415,12 +415,12 @@ public class GitUtilsTest extends AbstractGitTest {
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 						git.getRepository().resolve("dev"), false, user, user, "merge commit", false);
 				
 				assertNull(mergeCommitId);
 				
-				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("master"), 
+				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("main"), 
 						git.getRepository().resolve("dev"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
@@ -436,7 +436,7 @@ public class GitUtilsTest extends AbstractGitTest {
 				}
 				
 				mergeCommitId = GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-						git.getRepository().resolve("master"), false, user, user, "merge commit", true);
+						git.getRepository().resolve("main"), false, user, user, "merge commit", true);
 				
 				assertNotNull(mergeCommitId);
 				
