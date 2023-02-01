@@ -14,10 +14,13 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.LongRange;
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jetty.io.EofException;
@@ -25,11 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.URLEncoder;
@@ -38,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SiteFileResource extends AbstractResource {
 
@@ -66,18 +72,40 @@ public class SiteFileResource extends AbstractResource {
 				filePathSegments.add(segment);
 		}
 		
-		String filePath;
-		if (!filePathSegments.isEmpty())
-			filePath = Joiner.on("/").join(filePathSegments);
-		else
+		FileInfo fileInfo;
+		String filePath = Joiner.on("/").join(filePathSegments);
+		if (filePath.length() != 0) {
+			ArtifactInfo artifactInfo = getProjectManager().getSiteArtifactInfo(projectId, filePath);
+			if (artifactInfo instanceof DirectoryInfo) {
+				if (attributes.getRequest().getUrl().getPath().endsWith("/")) {
+					filePath += "/index.html";
+					artifactInfo = getProjectManager().getSiteArtifactInfo(projectId, filePath);
+					if (artifactInfo instanceof FileInfo)
+						fileInfo = (FileInfo) artifactInfo;
+					else						
+						return newNotFoundResponse(filePath);
+				} else {
+					throw new RedirectToUrlException(attributes.getRequest().getUrl().getPath() + "/");
+				}
+			} else if (artifactInfo instanceof FileInfo) {
+				fileInfo = (FileInfo) artifactInfo;
+			} else {
+				return newNotFoundResponse(filePath);
+			}
+		} else if (attributes.getRequest().getUrl().getPath().endsWith("/")) {
 			filePath = "index.html";
-
+			ArtifactInfo artifactInfo = getProjectManager().getSiteArtifactInfo(projectId, filePath);
+			if (artifactInfo instanceof FileInfo)
+				fileInfo = (FileInfo) artifactInfo;
+			else
+				return newNotFoundResponse(filePath);
+		} else {
+			throw new RedirectToUrlException(attributes.getRequest().getUrl().getPath() + "/");
+		}
+		
 		ResourceResponse response = new ResourceResponse();
 		response.setAcceptRange(ContentRangeType.BYTES);
-		
-		FileInfo fileInfo = getProjectManager().getSiteFileInfo(projectId, filePath);
 		response.setContentType(fileInfo.getMediaType());
-		
 		response.setContentLength(fileInfo.getLength());
 		
 		try {
@@ -86,6 +114,7 @@ public class SiteFileResource extends AbstractResource {
 			throw new RuntimeException(e);
 		}
 
+		String finalFilePath = filePath;
 		response.setWriteCallback(new WriteCallback() {
 
 			private void handle(Exception e) {
@@ -106,7 +135,7 @@ public class SiteFileResource extends AbstractResource {
 
 						@Override
 						public Void call() {
-							File file = new File(getStorageManager().getProjectSiteDir(projectId), filePath);
+							File file = new File(getStorageManager().getProjectSiteDir(projectId), finalFilePath);
 							try (InputStream is = new FileInputStream(file)) {
 								IOUtils.copyRange(is, attributes.getResponse().getOutputStream(), range);
 							} catch (IOException e) {
@@ -123,7 +152,7 @@ public class SiteFileResource extends AbstractResource {
 						WebTarget target = client.target(serverUrl);
 						target = target.path("~api/cluster/site")
 								.queryParam("projectId", project.getId())
-								.queryParam("filePath", filePath);
+								.queryParam("filePath", finalFilePath);
 						Invocation.Builder builder =  target.request();
 						builder.header(HttpHeaders.AUTHORIZATION, 
 								KubernetesHelper.BEARER + " " + getClusterManager().getCredentialValue());
@@ -145,6 +174,19 @@ public class SiteFileResource extends AbstractResource {
 		});
 
 		return response;
+	}
+	
+	private ResourceResponse newNotFoundResponse(String filePath) {
+		ResourceResponse response = new ResourceResponse();
+		response.setStatusCode(HttpServletResponse.SC_NOT_FOUND).setContentType(MediaType.TEXT_PLAIN);
+		return new ResourceResponse().setWriteCallback(new WriteCallback() {
+			@Override
+			public void writeData(Attributes attributes) throws IOException {
+				attributes.getResponse().write("Site file not found: " + filePath);
+			}
+			
+		});
+				
 	}
 
 	private ProjectManager getProjectManager() {

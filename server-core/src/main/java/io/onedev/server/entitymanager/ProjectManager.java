@@ -1,30 +1,28 @@
 package io.onedev.server.entitymanager;
 
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.cluster.ProjectServer;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.code.GitPackConfig;
+import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.util.facade.ProjectFacade;
+import org.apache.shiro.authz.Permission;
+import org.eclipse.jgit.lib.Repository;
+
+import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
-
-import javax.annotation.Nullable;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
-import io.onedev.server.cluster.ProjectServer;
-import io.onedev.server.model.support.code.GitPackConfig;
-import io.onedev.server.util.artifact.FileInfo;
-import org.apache.shiro.authz.Permission;
-import org.eclipse.jgit.lib.Repository;
-
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.util.facade.ProjectFacade;
 
 public interface ProjectManager extends EntityManager<Project> {
 	
@@ -97,7 +95,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Collection<String> getReservedNames();
 	
-	FileInfo getSiteFileInfo(Long projectId, String siteFilePath);
+	@Nullable
+	ArtifactInfo getSiteArtifactInfo(Long projectId, String siteArtifactPath);
 
 	void checkGitConfig(Long projectId, GitPackConfig gitPackConfig);
 	

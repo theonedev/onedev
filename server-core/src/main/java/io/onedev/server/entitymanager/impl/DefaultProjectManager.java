@@ -57,6 +57,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ProjectNameReservation;
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
@@ -1094,23 +1096,32 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return reservedNames;
 	}
 
+	@Nullable
 	@Override
-	public FileInfo getSiteFileInfo(Long projectId, String filePath) {
-		return runOnProjectServer(projectId, new ClusterTask<FileInfo>() {
+	public ArtifactInfo getSiteArtifactInfo(Long projectId, String siteArtifactPath) {
+		return runOnProjectServer(projectId, new ClusterTask<ArtifactInfo>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public FileInfo call() throws Exception {
-				return LockUtils.read(Project.getSiteLockName(projectId), new Callable<FileInfo>() {
+			public ArtifactInfo call() throws Exception {
+				return LockUtils.read(Project.getSiteLockName(projectId), new Callable<ArtifactInfo>() {
 					
 					@Override
-					public FileInfo call() throws Exception {
-						File siteFile = new File(storageManager.getProjectSiteDir(projectId), filePath);
-						String mediaType = Files.probeContentType(siteFile.toPath());
-						if (mediaType == null)
-							mediaType = MediaType.APPLICATION_OCTET_STREAM;
-						return new FileInfo(filePath, siteFile.length(), siteFile.lastModified(), mediaType);
+					public ArtifactInfo call() throws Exception {
+						File siteArtifact = new File(storageManager.getProjectSiteDir(projectId), siteArtifactPath);
+						if (siteArtifact.exists()) {
+							if (siteArtifact.isFile()) {
+								String mediaType = Files.probeContentType(siteArtifact.toPath());
+								if (mediaType == null)
+									mediaType = MediaType.APPLICATION_OCTET_STREAM;
+								return new FileInfo(siteArtifactPath, siteArtifact.length(), siteArtifact.lastModified(), mediaType);
+							} else {
+								return new DirectoryInfo(siteArtifactPath, siteArtifact.lastModified(), null);
+							}
+						} else {
+							return null;
+						}
 					}
 
 				});
