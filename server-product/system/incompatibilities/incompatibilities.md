@@ -1,3 +1,7 @@
+# 8.0.0
+
+1. Project site published via public site step in build spec now can be publicly accessible. Previously it is only accessible to users able to access the project 
+
 # 7.8.0
 
 To use consistent project url for web and git access, OneDev now uses project path instead of project id to access projects via web UI, for instance `https://code.onedev.io/projects/160` has been changed to `https://code.onedev.io/onedev/server`. To avoid conflicting with this url scheme, 

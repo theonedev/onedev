@@ -9,7 +9,6 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.IOUtils;
@@ -19,7 +18,6 @@ import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
@@ -43,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SiteFileResource extends AbstractResource {
 
@@ -62,9 +59,6 @@ public class SiteFileResource extends AbstractResource {
 		
 		Long projectId = project.getId();
 		
-		if (!SecurityUtils.canAccess(project))
-			throw new UnauthorizedException();
-
 		List<String> filePathSegments = new ArrayList<>();
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			String segment = params.get(i).toString();
