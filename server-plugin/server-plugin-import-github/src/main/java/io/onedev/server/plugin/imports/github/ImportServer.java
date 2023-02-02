@@ -9,6 +9,8 @@ import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.issue.IssuesImported;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
@@ -412,7 +414,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), "#"));
 					
-					issueManager.save(issue);
+					dao.persist(issue);
 					for (IssueSchedule schedule: issue.getSchedules())
 						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
@@ -428,9 +430,10 @@ public class ImportServer implements Serializable, Validatable {
 			result.nonExistentLogins.addAll(nonExistentLogins);
 			result.nonExistentMilestones.addAll(nonExistentMilestones);
 			result.unmappedIssueLabels.addAll(unmappedIssueLabels);
+			result.importedIssues.addAll(issues);
 			
-			if (numOfImportedIssues.get() != 0)
-				result.issuesImported = true;
+			if (!dryRun && !issues.isEmpty())
+				OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(oneDevProject, issues));
 			
 			return result;
 		} finally {
@@ -592,8 +595,7 @@ public class ImportServer implements Serializable, Validatable {
 					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 					result.nonExistentMilestones.addAll(currentResult.nonExistentMilestones);
 					result.unmappedIssueLabels.addAll(currentResult.unmappedIssueLabels);
-
-					result.issuesImported |= currentResult.issuesImported;
+					result.importedIssues.addAll(currentResult.importedIssues);
 				}
 			}
 			

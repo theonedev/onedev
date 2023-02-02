@@ -7,6 +7,10 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueCommentManager extends EntityManager<IssueComment> {
 
-	void save(IssueComment comment, Collection<String> notifiedEmailAddresses);
+	void create(IssueComment comment, Collection<String> notifiedEmailAddresses);
+	
+	void delete(IssueComment comment);
+	
+	void update(IssueComment comment);
 	
 }

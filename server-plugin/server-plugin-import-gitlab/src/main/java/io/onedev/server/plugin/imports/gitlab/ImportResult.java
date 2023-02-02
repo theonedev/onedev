@@ -1,13 +1,8 @@
 package io.onedev.server.plugin.imports.gitlab;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.unbescape.html.HtmlEscape;
+
+import java.util.*;
 
 public class ImportResult {
 
@@ -22,7 +17,7 @@ public class ImportResult {
 	Set<String> tooLargeAttachments = new LinkedHashSet<>();
 	
 	Set<String> errorAttachments = new LinkedHashSet<>();
-
+	
 	private String getEntryFeedback(String entryDescription, Collection<String> entries) {
 		if (entries.size() > MAX_DISPLAY_ENTRIES) {
 			List<String> entriesToDisplay = new ArrayList<>(entries).subList(0, MAX_DISPLAY_ENTRIES);

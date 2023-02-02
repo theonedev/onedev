@@ -1,18 +1,17 @@
 package io.onedev.server.plugin.imports.gitlab;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.web.util.ImportStep;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class GitLabIssueImporter implements IssueImporter {
 
@@ -81,8 +80,9 @@ public class GitLabIssueImporter implements IssueImporter {
 		IssueImportOption option = optionStep.getSetting();
 		logger.log("Importing issues from project " + gitLabProject + "...");
 		Map<String, Optional<User>> users = new HashMap<>();
-		return server.importIssues(gitLabProject, project, option, users, dryRun, logger)
-				.toHtml("Issues imported successfully");
+		
+		ImportResult result = server.importIssues(gitLabProject, project, option, users, dryRun, logger);
+		return result.toHtml("Issues imported successfully");
 	}
 
 	@Override

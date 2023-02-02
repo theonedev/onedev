@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.servlet.http.Cookie;
 
+import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -121,7 +122,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 					} else if (referencedFromAware.getReferencedFrom() != null) {
 						otherActivities.add(new IssueChangeActivity(change));
 					}
-				} else {
+				} else if (!(change.getData() instanceof IssueDescriptionChangeData)) {
 					otherActivities.add(new IssueChangeActivity(change));
 				}
 			}
@@ -265,7 +266,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 						comment.setUser(SecurityUtils.getUser());
 						comment.setDate(new Date());
 						comment.setIssue(getIssue());
-						OneDev.getInstance(IssueCommentManager.class).save(comment);
+						OneDev.getInstance(IssueCommentManager.class).create(comment, new ArrayList<>());
 						
 						input.clearMarkdown();
 						

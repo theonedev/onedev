@@ -42,6 +42,11 @@ public class IssueReferencedFromCodeCommentData extends IssueChangeData implemen
 	}
 
 	@Override
+	public boolean isMinor() {
+		return true;
+	}
+
+	@Override
 	public boolean affectsListing() {
 		return false;
 	}

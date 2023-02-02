@@ -21,5 +21,10 @@ public class IssueCommitsAttached extends IssueEvent {
 	public String getActivity() {
 		return "commits attached";
 	}
+
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
 	
 }

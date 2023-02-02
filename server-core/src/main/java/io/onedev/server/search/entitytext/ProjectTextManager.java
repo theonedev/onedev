@@ -1,20 +1,27 @@
 package io.onedev.server.search.entitytext;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.support.ProjectBelonging;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
+import io.onedev.server.util.concurrent.Prioritized;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.WordlistLoader;
@@ -38,21 +45,11 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexFormatTooOldException;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.*;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.SearcherManager;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.TotalHitCountCollector;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.IOUtils;
@@ -60,32 +57,12 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.WordUtils;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.ProjectBelonging;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.concurrent.BatchWorkManager;
-import io.onedev.server.util.concurrent.BatchWorker;
-import io.onedev.server.util.concurrent.Prioritized;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 public abstract class ProjectTextManager<T extends ProjectBelonging> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -136,7 +113,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	private final Class<T> entityClass;
 
-	private final Dao dao;
+	protected final Dao dao;
 
 	private final StorageManager storageManager;
 
@@ -146,7 +123,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	
 	protected final ProjectManager projectManager;
 	
-	private final ClusterManager clusterManager;
+	protected final ClusterManager clusterManager;
 
 	private volatile SearcherManager searcherManager;
 	
@@ -232,137 +209,35 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			}
 		}
 	}
+	
+	protected void deleteEntitiesLocal(Collection<Long> entityIds) {
+		doWithWriter(new WriterRunnable() {
 
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (entityClass.isAssignableFrom(event.getEntity().getClass())) {
-			ProjectBelonging projectBelonging = ((ProjectBelonging)event.getEntity());
-			Long entityId;
-			if (!event.isNew())
-				entityId = event.getEntity().getId();
-			else
-				entityId = null;
-			Long projectId = projectBelonging.getProject().getId();
-			UUID projectServerUUID = projectManager.getStorageServerUUID(projectId, true);
-			
-			UUID oldProjectServerUUID;
-			if (projectBelonging.getOldVersion() != null) {
-				oldProjectServerUUID = projectManager.getStorageServerUUID(
-						projectBelonging.getOldVersion().getProjectId(), true);
-			} else {
-				oldProjectServerUUID = null;
+			@Override
+			public void run(IndexWriter writer) throws IOException {
+				for (Long entityId: entityIds)
+					writer.deleteDocuments(getTerm(FIELD_ENTITY_ID, String.valueOf(entityId)));
 			}
-			transactionManager.runAfterCommit(new ClusterRunnable() {
 
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void run() {
-					if (oldProjectServerUUID != null && !oldProjectServerUUID.equals(projectServerUUID)) {
-						clusterManager.submitToServer(oldProjectServerUUID, new ClusterTask<Void>() {
-
-							private static final long serialVersionUID = 1L;
-
-							@Override
-							public Void call() throws Exception {
-								doWithWriter(new WriterRunnable() {
-
-									@Override
-									public void run(IndexWriter writer) throws IOException {
-										writer.deleteDocuments(getTerm(FIELD_ENTITY_ID, String.valueOf(entityId)));
-									}
-
-								});
-								return null;
-							}
-							
-						});
-					}
-					clusterManager.submitToServer(projectServerUUID, new ClusterTask<Void>() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public Void call() throws Exception {
-							batchWorkManager.submit(getBatchWorker(), new IndexWork(INDEXING_PRIORITY, entityId));
-							return null;
-						}
-						
-					});
-				}
-
-			});
-		}
+		});
 	}
 
-	@Transactional
+	@Sessional
 	@Listen
-	public void on(EntityRemoved event) {
-		if (entityClass.isAssignableFrom(event.getEntity().getClass())) {
-			Long entityId = event.getEntity().getId();
-			Long projectId = ((ProjectBelonging)event.getEntity()).getProject().getId();
-			transactionManager.runAfterCommit(new ClusterRunnable() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void run() {
-					projectManager.submitToProjectServer(projectId, new ClusterTask<Void>() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public Void call() throws Exception {
-							doWithWriter(new WriterRunnable() {
-
-								@Override
-								public void run(IndexWriter writer) throws IOException {
-									writer.deleteDocuments(getTerm(FIELD_ENTITY_ID, String.valueOf(entityId)));
-								}
-
-							});
-							return null;
-						}
-						
-					});
-				}
-
-			});
-		} else if (event.getEntity() instanceof Project) {
-			Long projectId = event.getEntity().getId();
-			UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, false);
-			transactionManager.runAfterCommit(new ClusterRunnable() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void run() {
-					if (storageServerUUID != null) {
-						clusterManager.submitToServer(storageServerUUID, new ClusterTask<Void>() {
+	public void on(ProjectDeleted event) {
+		Long projectId = event.getProjectId();
+		doWithWriter(new WriterRunnable() {
 	
-							private static final long serialVersionUID = 1L;
+			@Override
+			public void run(IndexWriter writer) throws IOException {
+				writer.deleteDocuments(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectId));
+			}
 	
-							@Override
-							public Void call() throws Exception {
-								doWithWriter(new WriterRunnable() {
+		});
+	}
 	
-									@Override
-									public void run(IndexWriter writer) throws IOException {
-										writer.deleteDocuments(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectId));
-									}
-									
-								});
-								return null;
-							}
-							
-						});
-					}
-				}
-				
-			});
-		}
-
+	protected void requestIndexLocal(T entity) {
+		batchWorkManager.submit(getBatchWorker(), new IndexWork(INDEXING_PRIORITY, entity.getId()));
 	}
 	
 	protected void doWithWriter(WriterRunnable runnable) {
@@ -417,7 +292,6 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			@Override
 			public void doWorks(Collection<Prioritized> works) {
 				String entityName = WordUtils.uncamel(entityClass.getSimpleName()).toLowerCase();
-				logger.debug("Indexing {}s...", entityName);
 
 				boolean checkNewEntities = false;
 				Collection<Long> entityIds = new HashSet<>();

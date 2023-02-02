@@ -1,23 +1,6 @@
 package io.onedev.server.infomanager;
 
-import java.io.File;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.commons.lang.SerializationUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.cluster.ClusterManager;
@@ -28,16 +11,17 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.project.issue.*;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.concurrent.BatchWorkManager;
@@ -45,11 +29,20 @@ import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
-import jetbrains.exodus.env.TransactionalExecutable;
+import jetbrains.exodus.env.*;
+import org.apache.commons.lang.SerializationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager 
@@ -87,11 +80,14 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	
 	private final ClusterManager clusterManager;
 	
+	private final Dao dao;
+	
 	@Inject
-	public DefaultIssueInfoManager(TransactionManager transactionManager, 
-			StorageManager storageManager, IssueManager issueManager, 
-			IssueChangeManager issueChangeManager, BatchWorkManager batchWorkManager, 
-			ProjectManager projectManager, ClusterManager clusterManager) {
+	public DefaultIssueInfoManager(Dao dao, TransactionManager transactionManager,
+								   StorageManager storageManager, IssueManager issueManager,
+								   IssueChangeManager issueChangeManager, BatchWorkManager batchWorkManager,
+								   ProjectManager projectManager, ClusterManager clusterManager) {
+		this.dao = dao;
 		this.storageManager = storageManager;
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
@@ -294,51 +290,61 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 			
 		});
 	}
-
-	@Transactional
+	
+	@Sessional
 	@Listen
-	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Issue) {
-			Issue issue = (Issue) event.getEntity();
-			Long projectId = issue.getProject().getId(); 
-			Long issueId = issue.getId();
-			transactionManager.runAfterCommit(new ClusterRunnable() {
+	public void on(ProjectDeleted event) {
+		removeEnv(event.getProjectId().toString());
+	}
 
-				private static final long serialVersionUID = 1L;
+	@Sessional
+	@Listen
+	public void on(IssueOpened event) {
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+	}
 
-				@Override
-				public void run() {
-					projectManager.submitToProjectServer(projectId, new ClusterTask<Void>() {
+	@Sessional
+	@Listen
+	public void on(IssuesCopied event) {
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+	}
 
-						private static final long serialVersionUID = 1L;
+	@Sessional
+	@Listen
+	public void on(IssuesImported event) {
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+	}
 
-						@Override
-						public Void call() throws Exception {
-							remove(projectId, issueId);
-							return null;
-						}
-						
-					});
-				}
-				
-			});
-		} else if (event.getEntity() instanceof Project) {
-			Long projectId = event.getEntity().getId();
-			UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, false);
-			if (storageServerUUID != null) {
-				clusterManager.runOnServer(storageServerUUID, new ClusterTask<Void>() {
+	@Sessional
+	@Listen
+	public void on(IssueChanged event) {
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+	}
+	
+	@Sessional
+	@Listen
+	public void on(IssuesDeleted event) {
+		for (var issueId: event.getIssueIds()) 
+			remove(event.getProject().getId(), issueId);
+	}
+	
+	@Sessional
+	@Listen
+	public void on(IssuesMoved event) {
+		Long sourceProjectId = event.getSourceProject().getId();
+		projectManager.submitToProjectServer(sourceProjectId, new ClusterTask<Void>() {
 
-					private static final long serialVersionUID = 1L;
+			private static final long serialVersionUID = 1L;
 
-					@Override
-					public Void call() throws Exception {
-						removeEnv(projectId.toString());
-						return null;
-					}
-					
-				});
+			@Override
+			public Void call() throws Exception {
+				event.getIssueIds().forEach(it->remove(sourceProjectId, it));
+				return null;
 			}
-		} 
+
+		});
+		
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
 	}
 	
 	@Sessional

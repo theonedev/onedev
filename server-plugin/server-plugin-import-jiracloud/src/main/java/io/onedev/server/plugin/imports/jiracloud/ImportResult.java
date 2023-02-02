@@ -1,13 +1,8 @@
 package io.onedev.server.plugin.imports.jiracloud;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.unbescape.html.HtmlEscape;
+
+import java.util.*;
 
 public class ImportResult {
 

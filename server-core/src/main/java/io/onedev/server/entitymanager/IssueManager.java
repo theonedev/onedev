@@ -1,11 +1,5 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -20,6 +14,11 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public interface IssueManager extends EntityManager<Issue> {
 	
@@ -62,16 +61,14 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	void fixStateAndFieldOrdinals();
 	
-	void saveDescription(Issue issue, @Nullable String description);
-	
 	@Override
 	void delete(Issue issue);
 	
-	void move(Collection<Issue> issues, Project targetProject);
+	void move(Collection<Issue> issues, Project sourceProject, Project targetProject);
 
-	void copy(Collection<Issue> issues, Project targetProject);
+	void copy(Collection<Issue> issues, Project sourceProject, Project targetProject);
 	
-	void delete(Collection<Issue> issues);
+	void delete(Collection<Issue> issues, Project project);
 	
 	Collection<MilestoneAndIssueState> queryMilestoneAndIssueStates(Project project, Collection<Milestone> milestones);
 	

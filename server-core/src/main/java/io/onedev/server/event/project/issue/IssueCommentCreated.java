@@ -1,7 +1,5 @@
 package io.onedev.server.event.project.issue;
 
-import java.util.Collection;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.UrlManager;
@@ -9,7 +7,9 @@ import io.onedev.server.model.IssueComment;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class IssueCommented extends IssueEvent {
+import java.util.Collection;
+
+public class IssueCommentCreated extends IssueEvent {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,7 @@ public class IssueCommented extends IssueEvent {
 	
 	private final Collection<String> notifiedEmailAddresses;
 	
-	public IssueCommented(IssueComment comment, Collection<String> notifiedEmailAddresses) {
+	public IssueCommentCreated(IssueComment comment, Collection<String> notifiedEmailAddresses) {
 		super(comment.getUser(), comment.getDate(), comment.getIssue());
 		commentId = comment.getId();
 		this.notifiedEmailAddresses = notifiedEmailAddresses;
@@ -50,5 +50,5 @@ public class IssueCommented extends IssueEvent {
 	public String getUrl() {
 		return OneDev.getInstance(UrlManager.class).urlFor(getComment());
 	}
-	
+
 }

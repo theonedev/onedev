@@ -14,11 +14,15 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.project.issue.IssuesCopied;
+import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.model.Issue;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.artifact.FileInfo;
@@ -39,10 +43,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
@@ -56,6 +57,8 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	private static final String PERMANENT = "permanent";
 	
 	private static final String TEMP = "temp";
+	
+	private final Dao dao;
 	
 	private final StorageManager storageManager;
 	
@@ -72,9 +75,10 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
     private String taskId;
     
 	@Inject
-	public DefaultAttachmentManager(StorageManager storageManager, TransactionManager transactionManager, 
-			TaskScheduler taskScheduler, SettingManager settingManager, ProjectManager projectManager, 
-			ClusterManager clusterManager) {
+	public DefaultAttachmentManager(Dao dao, StorageManager storageManager, TransactionManager transactionManager,
+									TaskScheduler taskScheduler, SettingManager settingManager, 
+									ProjectManager projectManager, ClusterManager clusterManager) {
+		this.dao = dao;
 		this.storageManager = storageManager;
 		this.transactionManager = transactionManager;
 		this.taskScheduler = taskScheduler;
@@ -97,26 +101,40 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			return new File(baseDir, TEMP + "/" + attachmentGroup); 
 	}
 
-	@Override
-	public void moveAttachmentGroupTargetLocal(Long targetProjectId, Long sourceProjectId, String attachmentGroup) {
+	@Sessional
+	@Listen
+	public void on(IssuesMoved event) {
+		Long sourceProjectId = event.getSourceProject().getId();
+		Long targetProjectId = event.getProject().getId();
 		File targetBaseDir = storageManager.getProjectAttachmentDir(targetProjectId);
-		File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, attachmentGroup);
 		
 		UUID sourceStorageServerUUID = projectManager.getStorageServerUUID(sourceProjectId, true);
 		if (sourceStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
 			File sourceBaseDir = storageManager.getProjectAttachmentDir(sourceProjectId);
-			File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, attachmentGroup);
-			FileUtils.createDir(targetGroupDir.getParentFile());
-			try {
-				FileUtils.moveDirectory(sourceGroupDir, targetGroupDir);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			for (Long issueId: event.getIssueIds()) {
+				Issue issue = dao.load(Issue.class, issueId);
+				String attachmentGroup = issue.getAttachmentGroup();
+				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, attachmentGroup);
+				File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, attachmentGroup);
+				FileUtils.createDir(targetGroupDir.getParentFile());
+				try {
+					FileUtils.moveDirectory(sourceGroupDir, targetGroupDir);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}			
 		} else {
-			FileUtils.createDir(targetGroupDir);
-			downloadAttachments(targetGroupDir, sourceStorageServerUUID,
-					sourceProjectId, attachmentGroup);
-			
+			Collection<String> attachmentGroups = new HashSet<>();
+			for (Long issueId: event.getIssueIds()) {
+				Issue issue = dao.load(Issue.class, issueId);
+				String attachmentGroup = issue.getAttachmentGroup();
+				attachmentGroups.add(attachmentGroup);
+				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, attachmentGroup);
+				
+				FileUtils.createDir(targetGroupDir);
+				downloadAttachments(targetGroupDir, sourceStorageServerUUID,
+						sourceProjectId, attachmentGroup);
+			}
 			projectManager.runOnProjectServer(sourceProjectId, new ClusterTask<Void>() {
 
 				private static final long serialVersionUID = 1L;
@@ -124,35 +142,51 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 				@Override
 				public Void call() throws Exception {
 					File sourceBaseDir = storageManager.getProjectAttachmentDir(sourceProjectId);
-					File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, attachmentGroup);
-					FileUtils.deleteDir(sourceGroupDir);
+					for (var attachmentGroup: attachmentGroups)
+						FileUtils.deleteDir(getPermanentAttachmentGroupDir(sourceBaseDir, attachmentGroup));
 					return null;
 				}
-				
-			});
-		}
-	}
 
-	public void copyAttachmentGroupTargetLocal(Long targetProjectId, String targetAttachmentGroup, 
-											   Long sourceProjectId, String sourceAttachmentGroup) {
+			});
+		}			
+	}	
+	
+	@Sessional
+	@Listen
+	public void on(IssuesCopied event) {
+		Long sourceProjectId = event.getSourceProject().getId();
+		Long targetProjectId = event.getProject().getId();
+		
 		File targetBaseDir = storageManager.getProjectAttachmentDir(targetProjectId);
-		File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, targetAttachmentGroup);
 
 		UUID sourceStorageServerUUID = projectManager.getStorageServerUUID(sourceProjectId, true);
 		if (sourceStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
 			File sourceBaseDir = storageManager.getProjectAttachmentDir(sourceProjectId);
-			File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, sourceAttachmentGroup);
-			FileUtils.createDir(targetGroupDir.getParentFile());
-			try {
-				FileUtils.copyDirectory(sourceGroupDir, targetGroupDir);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			for (var entry: event.getIssueIdMapping().entrySet()) {
+				Issue sourceIssue = dao.load(Issue.class, entry.getKey());
+				Issue targetIssue = dao.load(Issue.class, entry.getValue());
+				File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, sourceIssue.getAttachmentGroup());
+				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, targetIssue.getAttachmentGroup());
+
+				FileUtils.createDir(targetGroupDir.getParentFile());
+				try {
+					FileUtils.copyDirectory(sourceGroupDir, targetGroupDir);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		} else {
-			FileUtils.createDir(targetGroupDir);
-			downloadAttachments(targetGroupDir, sourceStorageServerUUID, 
-					sourceProjectId, sourceAttachmentGroup);
-		}
+			for (var entry: event.getIssueIdMapping().entrySet()) {
+				Issue sourceIssue = dao.load(Issue.class, entry.getKey());
+				Issue targetIssue = dao.load(Issue.class, entry.getValue());
+				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, targetIssue.getAttachmentGroup());
+
+				FileUtils.createDir(targetGroupDir);
+				downloadAttachments(targetGroupDir, sourceStorageServerUUID,
+						sourceProjectId, sourceIssue.getAttachmentGroup());
+			}
+		}		
+		
 	}
 	
 	private void downloadAttachments(File targetDir, UUID sourceStorageServerUUID,

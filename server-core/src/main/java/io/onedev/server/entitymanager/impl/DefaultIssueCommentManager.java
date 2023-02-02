@@ -1,25 +1,23 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Collection;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.google.common.collect.Lists;
-
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.issue.IssueCommented;
+import io.onedev.server.event.project.issue.IssueCommentCreated;
+import io.onedev.server.event.project.issue.IssueCommentDeleted;
+import io.onedev.server.event.project.issue.IssueCommentUpdated;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
-@Singleton
-public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment>
-		implements IssueCommentManager {
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
 
+@Singleton
+public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment> implements IssueCommentManager {
+	
 	private final ListenerRegistry listenerRegistry;
 	
 	private final SessionManager sessionManager;
@@ -33,35 +31,26 @@ public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment>
 
 	@Transactional
 	@Override
-	public void save(IssueComment comment) {
-		save(comment, Lists.newArrayList());
+	public void update(IssueComment comment) {
+		dao.persist(comment);
+		listenerRegistry.post(new IssueCommentUpdated(comment));
 	}
 
 	@Transactional
 	@Override
 	public void delete(IssueComment comment) {
-		super.delete(comment);
+		dao.remove(comment);
+		
 		comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()-1);
+		listenerRegistry.post(new IssueCommentDeleted(comment));
 	}
 
 	@Transactional
 	@Override
-	public void save(IssueComment comment, Collection<String> notifiedEmailAddresses) {
-		boolean isNew = comment.isNew();
+	public void create(IssueComment comment, Collection<String> notifiedEmailAddresses) {
 		dao.persist(comment);
-		if (isNew) {
-			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
-			
-			Long commentId = comment.getId();
-			sessionManager.runAsyncAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					listenerRegistry.post(new IssueCommented(load(commentId), notifiedEmailAddresses));
-				}
-				
-			});
-		}		
+		comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
+		listenerRegistry.post(new IssueCommentCreated(comment, notifiedEmailAddresses));
 	}
 
 }

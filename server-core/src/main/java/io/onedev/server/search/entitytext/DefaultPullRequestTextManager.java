@@ -12,6 +12,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.PullRequestComment;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -49,20 +51,25 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	private static final String FIELD_TITLE = "title";
 	
 	private static final String FIELD_DESCRIPTION = "description";
+
+	private static final String FIELD_COMMENTS = "comments";
 	
 	private final PullRequestReviewManager reviewManager;
 	
 	private final BuildManager buildManager;
 	
+	private final UserManager userManager;
+	
 	@Inject
-	public DefaultPullRequestTextManager(Dao dao, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, TransactionManager transactionManager, 
-			ProjectManager projectManager, PullRequestReviewManager reviewManager, 
-			BuildManager buildManager, ClusterManager clusterManager) {
+	public DefaultPullRequestTextManager(Dao dao, StorageManager storageManager, UserManager userManager,
+										 BatchWorkManager batchWorkManager, TransactionManager transactionManager,
+										 ProjectManager projectManager, PullRequestReviewManager reviewManager,
+										 BuildManager buildManager, ClusterManager clusterManager) {
 		super(dao, storageManager, batchWorkManager, transactionManager, projectManager, 
 				clusterManager);
 		this.reviewManager = reviewManager;
 		this.buildManager = buildManager;
+		this.userManager = userManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -71,7 +78,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	
 	@Override
 	protected int getIndexVersion() {
-		return 2;
+		return 3;
 	}
 
 	@Override
@@ -80,6 +87,13 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 		document.add(new TextField(FIELD_TITLE, entity.getTitle(), Store.NO));
 		if (entity.getDescription() != null)
 			document.add(new TextField(FIELD_DESCRIPTION, entity.getDescription(), Store.NO));
+		StringBuilder builder = new StringBuilder();
+		for (PullRequestComment comment: entity.getComments()) {
+			if (!comment.getUser().equals(userManager.getSystem()))
+				builder.append(comment.getContent()).append("\n");
+		}
+		if (builder.length() != 0)
+			document.add(new TextField(FIELD_COMMENTS, builder.toString(), Store.NO));
 	}
 
 	@Nullable
@@ -114,8 +128,9 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 			Map<String, Float> boosts = new HashMap<>();
 			boosts.put(FIELD_TITLE, 0.75f);
 			boosts.put(FIELD_DESCRIPTION, 0.5f);
+			boosts.put(FIELD_COMMENTS, 0.25f);
 			MultiFieldQueryParser parser = new MultiFieldQueryParser(
-					new String[] {FIELD_TITLE, FIELD_DESCRIPTION}, analyzer, boosts);
+					new String[] {FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENTS}, analyzer, boosts);
 			contentQueryBuilder.add(parser.parse(LuceneUtils.escape(queryString)), Occur.SHOULD);
 		} catch (ParseException e) {
 			throw new RuntimeException(e);

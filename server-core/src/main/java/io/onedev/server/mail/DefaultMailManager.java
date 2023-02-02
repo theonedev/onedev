@@ -680,7 +680,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 			// Add double line breaks in the beginning and ending as otherwise plain text content 
 			// received from email may not be formatted correctly with our markdown renderer. 
 			comment.setContent(decorateContent(content));
-			issueCommentManager.save(comment, receiverEmailAddresses);
+			issueCommentManager.create(comment, receiverEmailAddresses);
 		}
 	}
 	

@@ -3,9 +3,11 @@ package io.onedev.server.event;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -29,15 +31,18 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 	
 	private final SessionManager sessionManager;
 	
+	private final ClusterManager clusterManager;
+	
 	private volatile Map<Object, Collection<Method>> listenerMethods;
 	
 	private final Map<Class<?>, List<Listener>> listeners = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultListenerRegistry(ProjectManager projectManager, 
-			TransactionManager transactionManager, SessionManager sessionManager) {
+	public DefaultListenerRegistry(ProjectManager projectManager, ClusterManager clusterManager,
+								   TransactionManager transactionManager, SessionManager sessionManager) {
 		this.projectManager = projectManager;
 		this.transactionManager = transactionManager;
+		this.clusterManager = clusterManager;
 		this.sessionManager = sessionManager;
 	}
 
@@ -103,7 +108,7 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 		if (event instanceof ProjectEvent) {
 			ProjectEvent projectEvent = (ProjectEvent) event;
 			Long projectId = projectEvent.getProject().getId();
-			
+
 			transactionManager.runAfterCommit(new ClusterRunnable() {
 
 				private static final long serialVersionUID = 1L;
@@ -128,11 +133,11 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 											public void run() {
 												invokeListeners(event);
 											}
-											
+
 										});
 										return null;
 									}
-									
+
 								});
 							} else {
 								sessionManager.run(new Runnable() {
@@ -141,16 +146,49 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 									public void run() {
 										invokeListeners(event);
 									}
-									
+
 								});
 							}
 							return null;
 						}
-						
+
 					});
 				}
-				
+
 			});
+		} else if (event instanceof ProjectDeleted) {
+			ProjectDeleted projectDeleted = (ProjectDeleted) event;
+			Long projectId = projectDeleted.getProjectId();
+			UUID projectStorageServerUUID = projectManager.getStorageServerUUID(projectId, false);
+			if (projectStorageServerUUID != null) {
+				transactionManager.runAfterCommit(new ClusterRunnable() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public void run() {
+						clusterManager.submitToServer(projectStorageServerUUID, new ClusterTask<Void>() {
+
+							private static final long serialVersionUID = 1L;
+
+							@Override
+							public Void call() throws Exception {
+								sessionManager.run(new Runnable() {
+
+									@Override
+									public void run() {
+										invokeListeners(event);
+									}
+
+								});
+								return null;
+							}
+
+						});
+					}
+
+				});
+			}
 		} else {
 			invokeListeners(event);
 		}

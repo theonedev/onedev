@@ -1,29 +1,34 @@
 package io.onedev.server.model.support.issue.changedata;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.ActivityDetail;
 
-public class IssueTitleChangeData extends IssueChangeData {
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+public class IssueDescriptionChangeData extends IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String oldTitle;
+	private final String oldDescription;
 	
-	private final String newTitle;
+	private final String newDescription;
 	
-	public IssueTitleChangeData(String oldTitle, String newTitle) {
-		this.oldTitle = oldTitle;
-		this.newTitle = newTitle;
+	public IssueDescriptionChangeData(@Nullable String oldDescription, @Nullable String newDescription) {
+		if (oldDescription == null)
+			oldDescription = "";
+		this.oldDescription = oldDescription;
+		if (newDescription == null)
+			newDescription = "";
+		this.newDescription = newDescription;
 	}
 	
 	@Override
 	public String getActivity() {
-		return "changed title";
+		return "changed description";
 	}
 
 	@Override
@@ -49,9 +54,9 @@ public class IssueTitleChangeData extends IssueChangeData {
 	@Override
 	public ActivityDetail getActivityDetail() {
 		Map<String, String> oldFieldValues = new HashMap<>();
-		oldFieldValues.put("Title", oldTitle);
+		oldFieldValues.put("Description", oldDescription);
 		Map<String, String> newFieldValues = new HashMap<>();
-		newFieldValues.put("Title", newTitle);
+		newFieldValues.put("Description", newDescription);
 		return ActivityDetail.compare(oldFieldValues, newFieldValues, true);
 	}
 	

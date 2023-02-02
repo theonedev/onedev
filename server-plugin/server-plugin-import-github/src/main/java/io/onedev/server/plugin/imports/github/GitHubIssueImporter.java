@@ -1,18 +1,18 @@
 package io.onedev.server.plugin.imports.github;
 
+import com.google.common.collect.Lists;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.event.project.issue.IssuesImported;
+import io.onedev.server.imports.IssueImporter;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.web.util.ImportStep;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import com.google.common.collect.Lists;
-
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.imports.IssueImporter;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.web.util.ImportStep;
 
 public class GitHubIssueImporter implements IssueImporter {
 
@@ -79,7 +79,7 @@ public class GitHubIssueImporter implements IssueImporter {
 		logger.log("Importing issues from repository " + repositoryStep.getSetting().getRepository() + "...");
 		Map<String, Optional<User>> users = new HashMap<>();
 		
-		ImportResult result = serverStep.getSetting().importIssues(repositoryStep.getSetting().getRepository(), 
+		ImportResult result = serverStep.getSetting().importIssues(repositoryStep.getSetting().getRepository(),
 				project, optionStep.getSetting(), users, dryRun, logger);
 		return result.toHtml("Issues imported successfully");
 	}

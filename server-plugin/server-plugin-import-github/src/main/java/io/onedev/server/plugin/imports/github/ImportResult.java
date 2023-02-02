@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.onedev.server.model.Issue;
 import org.unbescape.html.HtmlEscape;
 
 public class ImportResult {
@@ -18,7 +19,7 @@ public class ImportResult {
 	
 	Set<String> nonExistentMilestones = new HashSet<>();
 	
-	boolean issuesImported = false;
+	Set<Issue> importedIssues = new HashSet<>();
 	
 	private String getEntryFeedback(String entryDescription, Collection<String> entries) {
 		if (entries.size() > MAX_DISPLAY_ENTRIES) {
@@ -35,7 +36,7 @@ public class ImportResult {
 		boolean hasNotice = false;
 		
 		if (!nonExistentMilestones.isEmpty() || !unmappedIssueLabels.isEmpty() 
-				|| !nonExistentLogins.isEmpty() || issuesImported) {
+				|| !nonExistentLogins.isEmpty() || !importedIssues.isEmpty()) {
 			hasNotice = true;
 		}
 		
@@ -53,7 +54,7 @@ public class ImportResult {
 					nonExistentLogins));
 		}
 		
-		if (issuesImported)
+		if (!importedIssues.isEmpty())
 			feedback.append("<li> Attachments in issue description and comments are not imported due to GitHub limitation");
 		
 		if (hasNotice)

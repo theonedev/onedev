@@ -1,18 +1,14 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.entityreference.EntityReferenceManager;
+import io.onedev.server.model.support.issue.changedata.*;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -56,17 +52,6 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
-import io.onedev.server.model.support.issue.changedata.IssueConfidentialChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueLinkAddData;
-import io.onedev.server.model.support.issue.changedata.IssueLinkChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueLinkRemoveData;
-import io.onedev.server.model.support.issue.changedata.IssueMilestoneAddData;
-import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueMilestoneRemoveData;
-import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
 import io.onedev.server.model.support.issue.transitiontrigger.BranchUpdateTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.DiscardPullRequestTrigger;
@@ -124,13 +109,16 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	
 	private final ClusterManager clusterManager;
 	
+	private final EntityReferenceManager entityReferenceManager;
+	
 	private String taskId;
 	
 	@Inject
 	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager, IssueFieldManager issueFieldManager,
-			ProjectManager projectManager,  ListenerRegistry listenerRegistry, TaskScheduler taskScheduler, 
-			IssueScheduleManager issueScheduleManager, IssueLinkManager issueLinkManager, 
-			ClusterManager clusterManager) {
+									 ProjectManager projectManager, ListenerRegistry listenerRegistry, 
+									 TaskScheduler taskScheduler, IssueScheduleManager issueScheduleManager, 
+									 IssueLinkManager issueLinkManager, ClusterManager clusterManager, 
+									 EntityReferenceManager entityReferenceManager) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
@@ -140,11 +128,12 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		this.issueScheduleManager = issueScheduleManager;
 		this.issueLinkManager = issueLinkManager;
 		this.clusterManager = clusterManager;
+		this.entityReferenceManager = entityReferenceManager;
 	}
 
 	@Transactional
 	@Override
-	public void save(IssueChange change, String note) {
+	public void create(IssueChange change, @Nullable String note) {
 		dao.persist(change);
 		if (note != null) {
 			IssueComment comment = new IssueComment();
@@ -159,11 +148,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		listenerRegistry.post(new IssueChanged(change, note));
 	}
 	
-	@Override
-	public void save(IssueChange change) {
-		save(change, null);
-	}
-	
 	@Transactional
 	@Override
 	public void changeTitle(Issue issue, String title) {
@@ -175,7 +159,25 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			change.setIssue(issue);
 			change.setUser(SecurityUtils.getUser());
 			change.setData(new IssueTitleChangeData(prevTitle, issue.getTitle()));
-			save(change);
+			create(change, null);
+			dao.persist(issue);
+		}
+	}
+
+	@Override
+	public void changeDescription(Issue issue, @Nullable String description) {
+		String prevDescription = issue.getDescription();
+		if (!Objects.equals(description, prevDescription)) {
+			if (description != null && description.length() > Issue.MAX_DESCRIPTION_LEN)
+				throw new ExplicitException("Description too long");
+			issue.setDescription(description);
+			entityReferenceManager.addReferenceChange(issue, description);
+
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueDescriptionChangeData(prevDescription, issue.getDescription()));
+			create(change, null);
 			dao.persist(issue);
 		}
 	}
@@ -191,7 +193,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			change.setIssue(issue);
 			change.setUser(SecurityUtils.getUser());
 			change.setData(new IssueConfidentialChangeData(prevConfidential, issue.isConfidential()));
-			save(change);
+			create(change, null);
 			dao.persist(issue);
 		}
 	}
@@ -205,7 +207,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setIssue(issue);
 		change.setData(new IssueMilestoneAddData(milestone.getName()));
 		change.setUser(SecurityUtils.getUser());
-		save(change);
+		create(change, null);
 	}
 	
 	@Transactional
@@ -218,7 +220,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			change.setIssue(issue);
 			change.setData(new IssueMilestoneRemoveData(milestone.getName()));
 			change.setUser(SecurityUtils.getUser());
-			save(change);
+			create(change, null);
 		}
 	}
 	
@@ -234,7 +236,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			change.setIssue(issue);
 			change.setUser(SecurityUtils.getUser());
 			change.setData(new IssueFieldChangeData(prevFields, issue.getFieldInputs()));
-			save(change);
+			create(change, null);
 		}
 	}
 	
@@ -256,7 +258,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		change.setUser(SecurityUtils.getUser());
 		change.setData(new IssueStateChangeData(prevState, issue.getState(), 
 				prevFields, issue.getFieldInputs()));
-		save(change, comment);
+		create(change, comment);
 	}
 	
 	@Transactional
@@ -296,7 +298,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				change.setData(new IssueBatchUpdateData(prevState, issue.getState(), 
 						prevConfidential, issue.isConfidential(), prevMilestoneList, 
 						currentMilestoneList, prevFields, issue.getFieldInputs()));
-				save(change, comment);
+				create(change, comment);
 			}
 		}
 	}
@@ -622,7 +624,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			List<Milestone> currentMilestoneList = new ArrayList<>(milestones);
 			currentMilestoneList.sort(new Milestone.DatesAndStatusComparator());
 			change.setData(new IssueMilestoneChangeData(prevMilestoneList, currentMilestoneList));
-			save(change);
+			create(change, null);
 		}
 		
 	}
@@ -645,7 +647,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				getLinkedIssueInfo(issue, prevLinkedIssue), 
 				getLinkedIssueInfo(issue, linkedIssue));
 		change.setData(data);
-		save(change);
+		create(change, null);
 		
 		logLinkedSideChange(spec, issue, prevLinkedIssue, linkedIssue, opposite);
 	}
@@ -670,7 +672,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				change.setData(new IssueLinkRemoveData(linkName, prevIssueSummary));
 			else
 				change.setData(new IssueLinkChangeData(linkName, prevIssueSummary, null));
-			save(change);
+			create(change, null);
 		} 
 		if (linkedIssue != null) {
 			IssueChange change = new IssueChange();
@@ -681,7 +683,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				change.setData(new IssueLinkAddData(linkName, issueSummary));
 			else
 				change.setData(new IssueLinkChangeData(linkName, null, issueSummary));
-			save(change);
+			create(change, null);
 		}
 	}
 	
@@ -711,7 +713,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		String linkName = spec.getName(opposite);
 		IssueLinkAddData data = new IssueLinkAddData(linkName, getLinkedIssueInfo(issue, linkedIssue));
 		change.setData(data);
-		save(change);
+		create(change, null);
 		
 		logLinkedSideChange(spec, issue, null, linkedIssue, opposite);
 	}
@@ -730,7 +732,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		String linkName = spec.getName(opposite);
 		IssueLinkRemoveData data = new IssueLinkRemoveData(linkName, getLinkedIssueInfo(issue, linkedIssue));
 		change.setData(data);
-		save(change);
+		create(change, null);
 		
 		logLinkedSideChange(spec, issue, linkedIssue, null, opposite);
 	}

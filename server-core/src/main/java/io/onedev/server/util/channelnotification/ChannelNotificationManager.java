@@ -82,7 +82,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(IssueEvent event) {
-		if (!(event instanceof IssueCommitsAttached) && (!(event instanceof IssueChanged) || !(((IssueChanged) event).getChange().getData() instanceof ReferencedFromAware))) {
+		if (!event.isMinor()) {
 			Issue issue = event.getIssue();
 			User user = event.getUser();
 
@@ -94,7 +94,6 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 
 			postIfApplicable(issueInfo + " " + eventDescription, event);
 		}
-
 	}
 
 	@Sessional

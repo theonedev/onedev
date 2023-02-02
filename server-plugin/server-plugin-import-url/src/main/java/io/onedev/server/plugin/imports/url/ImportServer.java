@@ -1,15 +1,5 @@
 package io.onedev.server.plugin.imports.url;
 
-import java.io.Serializable;
-import java.net.URISyntaxException;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
-
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.shiro.authz.UnauthorizedException;
-
 import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -24,6 +14,14 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authz.UnauthorizedException;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.net.URISyntaxException;
 
 @Editable
 @ClassValidating
@@ -116,7 +114,8 @@ public class ImportServer implements Serializable, Validatable {
 					if (dryRun) {
 						new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 					} else {
-						if (project.isNew())
+						boolean newlyCreated = project.isNew();
+						if (newlyCreated)
 							getProjectManager().create(project);
 						getProjectManager().clone(project, builder.build().toString());
 					}

@@ -67,7 +67,7 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 				if (comment.length() > IssueComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
 				IssueCommentedPanel.this.getComment().setContent(comment);
-				OneDev.getInstance(IssueCommentManager.class).save(IssueCommentedPanel.this.getComment());
+				OneDev.getInstance(IssueCommentManager.class).update(IssueCommentedPanel.this.getComment());
 			}
 
 			@Override

@@ -22,6 +22,10 @@ public abstract class IssueChangeData implements Serializable {
 	
 	public abstract boolean affectsListing();
 
+	public boolean isMinor() {
+		return false;
+	}
+	
 	@Nullable
 	public ActivityDetail getActivityDetail() {
 		return null;

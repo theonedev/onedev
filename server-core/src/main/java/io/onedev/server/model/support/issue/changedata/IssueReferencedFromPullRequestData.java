@@ -52,6 +52,11 @@ public class IssueReferencedFromPullRequestData extends IssueChangeData implemen
 	}
 
 	@Override
+	public boolean isMinor() {
+		return true;
+	}
+	
+	@Override
 	public ActivityDetail getActivityDetail() {
 		return ActivityDetail.referencedFrom(getReferencedFrom());
 	}

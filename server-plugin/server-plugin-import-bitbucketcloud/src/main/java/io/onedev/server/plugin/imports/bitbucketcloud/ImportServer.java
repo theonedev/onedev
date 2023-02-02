@@ -1,29 +1,6 @@
 package io.onedev.server.plugin.imports.bitbucketcloud;
 
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-
-import org.apache.http.client.utils.URIBuilder;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import io.onedev.commons.bootstrap.SensitiveMasker;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -39,6 +16,26 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
+import org.apache.http.client.utils.URIBuilder;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Editable
 @ClassValidating
@@ -188,7 +185,8 @@ public class ImportServer implements Serializable, Validatable {
 				if (!isPrivate && option.getPublicRole() != null)
 					project.setDefaultRole(option.getPublicRole());
 
-				if (project.isNew() || project.getDefaultBranch() == null) {
+				boolean newlyCreated = project.isNew();
+				if (newlyCreated || project.getDefaultBranch() == null) {
 					logger.log("Cloning code from repository " + projectMapping.getBitbucketRepo() + "...");
 					
 					String cloneUrl = null;
@@ -216,7 +214,7 @@ public class ImportServer implements Serializable, Validatable {
 						if (dryRun) {
 							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
 						} else {
-							if (project.isNew())
+							if (newlyCreated)
 								projectManager.create(project);
 							projectManager.clone(project, builder.build().toString());
 						}
@@ -227,7 +225,6 @@ public class ImportServer implements Serializable, Validatable {
 					logger.warning("Skipping code clone as the project already has code");
 				}
 			}
-			
 			return "Repositories imported successfully";
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);

@@ -9,6 +9,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.issue.IssuesImported;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -255,7 +257,7 @@ public class ImportServer implements Serializable, Validatable {
 		return option;
 	}
 	
-	private ImportResult importIssues(String youTrackProjectId, Project oneDevProject,  
+	private ImportResult doImportIssues(String youTrackProjectId, Project oneDevProject,  
 			ImportOption option, boolean dryRun, TaskLogger logger) {
 		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
 		Client client = newClient();
@@ -977,7 +979,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), youTrackProjectShortName + "-"));
 					
-					issueManager.save(issue);
+					dao.persist(issue);
 					for (IssueSchedule schedule: issue.getSchedules())
 						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
@@ -1018,6 +1020,9 @@ public class ImportServer implements Serializable, Validatable {
 			result.unmappedIssueStates.addAll(unmappedIssueStates);
 			result.unmappedIssueLinks.addAll(unmappedIssueLinks);
 			result.unmappedIssueTags.addAll(unmappedIssueTags);
+			
+			if (!dryRun && !issues.isEmpty())
+				OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(oneDevProject, issues));
 			
 			return result;
 		} finally {
@@ -1070,20 +1075,21 @@ public class ImportServer implements Serializable, Validatable {
 				project.setDescription(youTrackProjectDescriptions.get(projectMapping.getYouTrackProject()));
 				project.setIssueManagement(true);
 				
-		       	if (!dryRun && project.isNew()) 
+				boolean newlyCreated = project.isNew();
+		       	if (!dryRun && newlyCreated) 
 					projectManager.create(project);
 
-		       	ImportResult currentResult = importIssues(youTrackProjectId, project, 
-		       			option, dryRun, logger);
-		       	result.mismatchedIssueFields.putAll(currentResult.mismatchedIssueFields);
-		       	result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
-		       	result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
-		       	result.unmappedIssueFields.addAll(currentResult.unmappedIssueFields);
-		       	result.unmappedIssueStates.addAll(currentResult.unmappedIssueStates);
-		       	result.unmappedIssueLinks.addAll(currentResult.unmappedIssueLinks);
-		       	result.unmappedIssueTags.addAll(currentResult.unmappedIssueTags);
+				ImportResult currentResult = doImportIssues(youTrackProjectId, project,
+						option, dryRun, logger);
+				result.mismatchedIssueFields.putAll(currentResult.mismatchedIssueFields);
+				result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
+				result.tooLargeAttachments.addAll(currentResult.tooLargeAttachments);
+				result.unmappedIssueFields.addAll(currentResult.unmappedIssueFields);
+				result.unmappedIssueStates.addAll(currentResult.unmappedIssueStates);
+				result.unmappedIssueLinks.addAll(currentResult.unmappedIssueLinks);
+				result.unmappedIssueTags.addAll(currentResult.unmappedIssueTags);
 			}		       	
-
+			
 			return result.toHtml("Projects imported successfully");
 		} finally {
 			client.close();
@@ -1125,7 +1131,7 @@ public class ImportServer implements Serializable, Validatable {
 			String apiEndpoint = getApiEndpoint("/admin/projects?fields=id,name");
 			for (JsonNode projectNode: list(client, apiEndpoint, logger)) {
 				if (youTrackProject.equals(projectNode.get("name").asText())) { 
-					ImportResult result = importIssues(projectNode.get("id").asText(), 
+					ImportResult result = doImportIssues(projectNode.get("id").asText(), 
 							project, option, dryRun, logger);
 					return result.toHtml("Issues imported successfully");
 				}

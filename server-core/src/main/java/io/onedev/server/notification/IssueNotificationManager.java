@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.Listen;
 import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
@@ -72,7 +71,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
-		if (event instanceof IssueCommitsAttached)
+		if (event.isMinor())
 			return;
 		
 		Issue issue = event.getIssue();
@@ -202,8 +201,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		}
 		
 		Collection<String> notifiedEmailAddresses;
-		if (event instanceof IssueCommented)
-			notifiedEmailAddresses = ((IssueCommented) event).getNotifiedEmailAddresses();
+		if (event instanceof IssueCommentCreated)
+			notifiedEmailAddresses = ((IssueCommentCreated) event).getNotifiedEmailAddresses();
 		else
 			notifiedEmailAddresses = new ArrayList<>();
 		
@@ -233,36 +232,33 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 		}
 
-		if (!(event instanceof IssueChanged) 
-				|| !(((IssueChanged) event).getChange().getData() instanceof ReferencedFromAware)) {
-			Collection<String> bccEmailAddresses = new HashSet<>();
-			
-			for (IssueWatch watch: issue.getWatches()) {
-				Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
-				if (watch.isWatching()
-						&& (visitDate == null || visitDate.before(event.getDate()))
-						&& !notifiedUsers.contains(watch.getUser())
-						&& !isNotified(notifiedEmailAddresses, watch.getUser())
-						&& SecurityUtils.canAccess(watch.getUser().asSubject(), issue)) {
-					EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
-					if (emailAddress != null && emailAddress.isVerified())
-						bccEmailAddresses.add(emailAddress.getValue());
-				}
+		Collection<String> bccEmailAddresses = new HashSet<>();
+		
+		for (IssueWatch watch: issue.getWatches()) {
+			Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
+			if (watch.isWatching()
+					&& (visitDate == null || visitDate.before(event.getDate()))
+					&& !notifiedUsers.contains(watch.getUser())
+					&& !isNotified(notifiedEmailAddresses, watch.getUser())
+					&& SecurityUtils.canAccess(watch.getUser().asSubject(), issue)) {
+				EmailAddress emailAddress = watch.getUser().getPrimaryEmailAddress();
+				if (emailAddress != null && emailAddress.isVerified())
+					bccEmailAddresses.add(emailAddress.getValue());
 			}
-	
-			if (!bccEmailAddresses.isEmpty()) {
-				String subject = String.format("[Issue %s] (%s) %s", 
-						issue.getFQN(), (event instanceof IssueOpened)?"Opened":"Updated", issue.getTitle()); 
-	
-				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
-				String htmlBody = getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
-				String textBody = getTextBody(event, summary, event.getTextBody(), url, replyable, unsubscribable);
-	
-				String threadingReferences = issue.getEffectiveThreadingReference();
-				mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
-						bccEmailAddresses, subject, htmlBody, textBody, 
-						replyAddress, threadingReferences);
-			}
+		}
+
+		if (!bccEmailAddresses.isEmpty()) {
+			String subject = String.format("[Issue %s] (%s) %s", 
+					issue.getFQN(), (event instanceof IssueOpened)?"Opened":"Updated", issue.getTitle()); 
+
+			Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
+			String htmlBody = getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
+			String textBody = getTextBody(event, summary, event.getTextBody(), url, replyable, unsubscribable);
+
+			String threadingReferences = issue.getEffectiveThreadingReference();
+			mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
+					bccEmailAddresses, subject, htmlBody, textBody, 
+					replyAddress, threadingReferences);
 		}
 	}
 	

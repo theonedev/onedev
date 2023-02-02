@@ -47,6 +47,11 @@ public class IssueReferencedFromIssueData extends IssueChangeData implements Ref
 	}
 
 	@Override
+	public boolean isMinor() {
+		return true;
+	}
+
+	@Override
 	public Issue getReferencedFrom() {
 		return OneDev.getInstance(IssueManager.class).get(issueId);
 	}

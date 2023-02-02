@@ -22,6 +22,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	void removeLink(LinkSpec spec, Issue issue, Issue linkedIssue, boolean opposite);
 	
 	void changeTitle(Issue issue, String title);
+
+	void changeDescription(Issue issue, String description);
 	
 	void changeConfidential(Issue issue, boolean confidential);
 	
@@ -29,7 +31,7 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 
 	void changeMilestones(Issue issue, Collection<Milestone> milestones);
 	
-	void save(IssueChange change, @Nullable String note);
+	void create(IssueChange change, @Nullable String note);
 	
 	void addSchedule(Issue issue, Milestone milestone);
 	

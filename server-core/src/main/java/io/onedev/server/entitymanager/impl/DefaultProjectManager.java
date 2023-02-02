@@ -20,6 +20,7 @@ import io.onedev.server.cluster.ProjectServer;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.ProjectCreated;
@@ -416,6 +417,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			if (repository != null)
 				repository.close();
 		}
+		
+		listenerRegistry.post(new ProjectDeleted(SecurityUtils.getUser(), new Date(), project));
 	}
 
 	@Override

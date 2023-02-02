@@ -3,6 +3,7 @@ package io.onedev.server.web.component.issue.activities.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.onedev.server.entitymanager.IssueChangeManager;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
@@ -49,7 +50,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				OneDev.getInstance(IssueManager.class).saveDescription(getIssue(), comment);
+				OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), comment);
 			}
 
 			@Override

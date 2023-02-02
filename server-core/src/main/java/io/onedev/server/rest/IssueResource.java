@@ -266,7 +266,7 @@ public class IssueResource {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canModify(issue))
 			throw new UnauthorizedException();
-		issueManager.saveDescription(issue, description);
+		issueChangeManager.changeDescription(issue, description);
 		return Response.ok().build();
     }
 	

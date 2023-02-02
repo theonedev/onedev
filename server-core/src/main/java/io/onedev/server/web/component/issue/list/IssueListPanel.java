@@ -675,7 +675,7 @@ public abstract class IssueListPanel extends Panel {
 												Collection<Issue> issues = new ArrayList<>();
 												for (IModel<Issue> each: selectionColumn.getSelections())
 													issues.add(each.getObject());
-												OneDev.getInstance(IssueManager.class).move(issues, getTargetProject());
+												OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
 												setResponsePage(ProjectIssueListPage.class,
 														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
 												Session.get().success("Issues moved");
@@ -757,7 +757,7 @@ public abstract class IssueListPanel extends Panel {
 												Collection<Issue> issues = new ArrayList<>();
 												for (IModel<Issue> each: selectionColumn.getSelections())
 													issues.add(each.getObject());
-												OneDev.getInstance(IssueManager.class).copy(issues, getTargetProject());
+												OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
 												setResponsePage(ProjectIssueListPage.class,
 														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
 												Session.get().success("Issues copied");
@@ -821,7 +821,7 @@ public abstract class IssueListPanel extends Panel {
 										Collection<Issue> issues = new ArrayList<>();
 										for (IModel<Issue> each: selectionColumn.getSelections())
 											issues.add(each.getObject());
-										OneDev.getInstance(IssueManager.class).delete(issues);
+										OneDev.getInstance(IssueManager.class).delete(issues, getProject());
 										selectionColumn.getSelections().clear();
 										target.add(body);
 									}
@@ -978,7 +978,7 @@ public abstract class IssueListPanel extends Panel {
 												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) {
 													issues.add(it.next());
 												}
-												OneDev.getInstance(IssueManager.class).move(issues, getTargetProject());
+												OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
 												setResponsePage(ProjectIssueListPage.class, 
 														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
 												Session.get().success("Issues moved");
@@ -1062,7 +1062,7 @@ public abstract class IssueListPanel extends Panel {
 												for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) {
 													issues.add(it.next());
 												}
-												OneDev.getInstance(IssueManager.class).copy(issues, getTargetProject());
+												OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
 												setResponsePage(ProjectIssueListPage.class,
 														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
 												Session.get().success("Issues copied");
@@ -1128,7 +1128,7 @@ public abstract class IssueListPanel extends Panel {
 										Collection<Issue> issues = new ArrayList<>();
 										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) 
 											issues.add(it.next());
-										OneDev.getInstance(IssueManager.class).delete(issues);
+										OneDev.getInstance(IssueManager.class).delete(issues, getProject());
 										dataProvider.detach();
 										selectionColumn.getSelections().clear();
 										target.add(body);

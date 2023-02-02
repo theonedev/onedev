@@ -33,6 +33,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.issue.IssuesImported;
+import io.onedev.server.security.SecurityUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -337,7 +340,6 @@ public class ImportServer implements Serializable, Validatable {
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
 			ImportResult result = new ImportResult();
-			
 			for (ProjectMapping projectMapping: projects.getProjectMappings()) {
 				String jiraProject = projectMapping.getJiraProject();
 				JsonNode projectNode = projectNodes.get(jiraProject);
@@ -821,7 +823,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), jiraProjectKey + "-"));
 					
-					issueManager.save(issue);
+					dao.persist(issue);
 					for (IssueSchedule schedule: issue.getSchedules())
 						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
@@ -840,6 +842,9 @@ public class ImportServer implements Serializable, Validatable {
 			result.nonExistentLogins.addAll(nonExistentLogins);
 			result.tooLargeAttachments.addAll(tooLargeAttachments);
 			result.errorAttachments.addAll(errorAttachments);
+			
+			if (!dryRun && !issues.isEmpty())
+				OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(oneDevProject, issues));
 			
 			return result;
 		} catch (UnsupportedEncodingException e) {

@@ -113,4 +113,8 @@ public abstract class ProjectEvent implements Serializable {
 		return null;
 	}
 	
+	public boolean isMinor() {
+		return false;
+	}
+	
 }

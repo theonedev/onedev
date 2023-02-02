@@ -1,23 +1,37 @@
 package io.onedev.server.plugin.imports.gitlab;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.databind.JsonNode;
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.bootstrap.SensitiveMasker;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.entityreference.ReferenceMigrator;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.issue.IssuesImported;
+import io.onedev.server.git.command.LsRemoteCommand;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.LastActivity;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.*;
+import io.onedev.server.util.JerseyUtils.PageDataConsumer;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Password;
+import org.apache.http.client.utils.URIBuilder;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
+import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -27,53 +41,15 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-
-import org.apache.http.client.utils.URIBuilder;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
-import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.bootstrap.SensitiveMasker;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.MilestoneManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entityreference.ReferenceMigrator;
-import io.onedev.server.git.command.LsRemoteCommand;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.IssueField;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.inputspec.InputSpec;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.AttachmentTooLargeException;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.JerseyUtils;
-import io.onedev.server.util.JerseyUtils.PageDataConsumer;
-import io.onedev.server.util.Pair;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Password;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Editable
 @ClassValidating
@@ -342,7 +318,7 @@ public class ImportServer implements Serializable, Validatable {
 					result.errorAttachments.addAll(currentResult.errorAttachments);
 				}
 			}
-			
+
 			return result.toHtml("Projects imported successfully");
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
@@ -679,7 +655,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (issue.getDescription() != null) 
 						issue.setDescription(migrator.migratePrefixed(issue.getDescription(), "#"));
 					
-					issueManager.save(issue);
+					dao.persist(issue);
 					for (IssueSchedule schedule: issue.getSchedules())
 						dao.persist(schedule);
 					for (IssueField field: issue.getFields())
@@ -697,6 +673,9 @@ public class ImportServer implements Serializable, Validatable {
 			result.unmappedIssueLabels.addAll(unmappedIssueLabels);
 			result.tooLargeAttachments.addAll(tooLargeAttachments);
 			result.errorAttachments.addAll(errorAttachments);
+			
+			if (!dryRun && !issues.isEmpty())
+				OneDev.getInstance(ListenerRegistry.class).post(new IssuesImported(oneDevProject, issues));
 			
 			return result;
 		} finally {

@@ -72,5 +72,9 @@ public class IssueChanged extends IssueEvent {
 	public String getUrl() {
 		return OneDev.getInstance(UrlManager.class).urlFor(getChange());
 	}
-	
+
+	@Override
+	public boolean isMinor() {
+		return getChange().isMinor();
+	}
 }

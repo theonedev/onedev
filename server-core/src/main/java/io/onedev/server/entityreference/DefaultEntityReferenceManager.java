@@ -19,7 +19,7 @@ import io.onedev.server.event.project.codecomment.CodeCommentReplied;
 import io.onedev.server.event.project.codecomment.CodeCommentStatusChanged;
 import io.onedev.server.event.project.codecomment.CodeCommentUpdated;
 import io.onedev.server.event.project.issue.IssueChanged;
-import io.onedev.server.event.project.issue.IssueCommented;
+import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestCommented;
@@ -78,7 +78,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						change.setUser(SecurityUtils.getUser());
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
-						issueChangeManager.save(change);
+						issueChangeManager.create(change, null);
 					}
 				}
 			}
@@ -139,7 +139,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						change.setUser(SecurityUtils.getUser());
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
-						issueChangeManager.save(change);
+						issueChangeManager.create(change, null);
 					}
 				}
 			}
@@ -200,7 +200,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						change.setUser(SecurityUtils.getUser());
 						change.setIssue(referencedIssue);
 						referencedIssue.getChanges().add(change);
-						issueChangeManager.save(change);
+						issueChangeManager.create(change, null);
 					}
 				}
 			}
@@ -236,7 +236,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	
 	@Transactional
 	@Listen
-	public void on(IssueCommented event) {
+	public void on(IssueCommentCreated event) {
 		addReferenceChange(event.getIssue(), event.getComment().getContent());
 	}
 

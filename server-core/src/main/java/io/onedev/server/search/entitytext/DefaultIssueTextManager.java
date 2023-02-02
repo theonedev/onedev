@@ -1,17 +1,32 @@
 package io.onedev.server.search.entitytext;
 
-import java.io.ObjectStreamException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.IssueFieldManager;
+import io.onedev.server.entitymanager.IssueLinkManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.issue.*;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.changedata.IssueChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.lucene.BooleanQueryBuilder;
+import io.onedev.server.util.lucene.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -24,23 +39,12 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.IssueFieldManager;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.concurrent.BatchWorkManager;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.lucene.BooleanQueryBuilder;
-import io.onedev.server.util.lucene.LuceneUtils;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.ObjectStreamException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultIssueTextManager extends ProjectTextManager<Issue> implements IssueTextManager {
@@ -53,19 +57,27 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	
 	private static final String FIELD_DESCRIPTION = "description";
 	
+	private static final String FIELD_COMMENTS = "comments";
+	
 	private final IssueFieldManager fieldManager;
+	
+	private final UserManager userManager;
 	
 	private final IssueLinkManager linkManager;
 	
+	private final SessionManager sessionManager;
+	
 	@Inject
-	public DefaultIssueTextManager(Dao dao, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, TransactionManager transactionManager, 
-			ProjectManager projectManager, IssueFieldManager fieldManager, 
-			IssueLinkManager linkManager, ClusterManager clusterManager) {
-		super(dao, storageManager, batchWorkManager, transactionManager, 
-				projectManager, clusterManager);
+	public DefaultIssueTextManager(Dao dao, StorageManager storageManager, BatchWorkManager batchWorkManager, 
+								   TransactionManager transactionManager, ProjectManager projectManager, 
+								   IssueFieldManager fieldManager, IssueLinkManager linkManager, 
+								   ClusterManager clusterManager, UserManager userManager, 
+								   SessionManager sessionManager) {
+		super(dao, storageManager, batchWorkManager, transactionManager, projectManager, clusterManager);
 		this.fieldManager = fieldManager;
 		this.linkManager = linkManager;
+		this.userManager = userManager;
+		this.sessionManager = sessionManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -74,7 +86,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	
 	@Override
 	protected int getIndexVersion() {
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -84,8 +96,92 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 		document.add(new TextField(FIELD_TITLE, entity.getTitle(), Store.NO));
 		if (entity.getDescription() != null)
 			document.add(new TextField(FIELD_DESCRIPTION, entity.getDescription(), Store.NO));
+		StringBuilder builder = new StringBuilder();
+		for (IssueComment comment: entity.getComments()) {
+			if (!comment.getUser().equals(userManager.getSystem()))
+				builder.append(comment.getContent()).append("\n");
+		}
+		if (builder.length() != 0)
+			document.add(new TextField(FIELD_COMMENTS, builder.toString(), Store.NO));
+	}
+	
+	@Sessional
+	@Listen
+	public void on(IssueOpened event) {
+		requestIndexLocal(event.getIssue());
+	}
+	
+	@Sessional
+	@Listen
+	public void on(IssueChanged event) {
+		IssueChangeData data = event.getChange().getData();
+		if (data instanceof IssueTitleChangeData || data instanceof IssueDescriptionChangeData)
+			requestIndexLocal(event.getIssue());
 	}
 
+	@Sessional
+	@Listen
+	public void on(IssueCommentCreated event) {
+		requestIndexLocal(event.getIssue());
+	}
+
+	@Sessional
+	@Listen
+	public void on(IssueCommentUpdated event) {
+		requestIndexLocal(event.getIssue());
+	}
+
+	@Sessional
+	@Listen
+	public void on(IssueCommentDeleted event) {
+		requestIndexLocal(event.getIssue());
+	}
+	
+	@Sessional
+	@Listen
+	public void on(IssuesDeleted event) {
+		deleteEntitiesLocal(event.getIssueIds());
+	}
+	
+	@Sessional
+	@Listen
+	public void on(IssuesMoved event) {
+		UUID sourceProjectServerUUID = projectManager.getStorageServerUUID(
+				event.getSourceProject().getId(), true);
+		UUID targetProjectServerUUID = projectManager.getStorageServerUUID(
+				event.getTargetProject().getId(), true);
+		if (!sourceProjectServerUUID.equals(targetProjectServerUUID)) {
+			clusterManager.submitToServer(sourceProjectServerUUID, new ClusterTask<Void>() {
+				
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Void call() throws Exception {
+					deleteEntitiesLocal(event.getIssueIds());
+					return null;
+				}
+				
+			});
+		}
+		
+		for (Long issueId: event.getIssueIds())
+			requestIndexLocal(dao.load(Issue.class, issueId));
+	}
+	
+	@Sessional
+	@Listen
+	public void on(IssuesCopied event) {
+		for (Long issueId: event.getIssueIdMapping().values())
+			requestIndexLocal(dao.load(Issue.class, issueId));
+	}
+	
+	@Sessional
+	@Listen
+	public void on(IssuesImported event) {
+		for (Long issueId: event.getIssueIds())
+			requestIndexLocal(dao.load(Issue.class, issueId));
+	}
+	
 	@Nullable
 	private Query buildQuery(@Nullable ProjectScope projectScope, String queryString) {
 		BooleanQueryBuilder queryBuilder = new BooleanQueryBuilder();
@@ -134,8 +230,9 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 			Map<String, Float> boosts = new HashMap<>();
 			boosts.put(FIELD_TITLE, 0.75f);
 			boosts.put(FIELD_DESCRIPTION, 0.5f);
+			boosts.put(FIELD_COMMENTS, 0.25f);
 			MultiFieldQueryParser parser = new MultiFieldQueryParser(
-					new String[] {FIELD_TITLE, FIELD_DESCRIPTION}, analyzer, boosts);
+					new String[] {FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENTS}, analyzer, boosts);
 			contentQueryBuilder.add(parser.parse(LuceneUtils.escape(queryString)), Occur.SHOULD);
 		} catch (ParseException e) {
 			throw new RuntimeException(e);

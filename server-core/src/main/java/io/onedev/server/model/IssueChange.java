@@ -75,4 +75,8 @@ public class IssueChange extends AbstractEntity {
 		return data.affectsListing();
 	}
 
+	public boolean isMinor() {
+		return getData().isMinor();
+	}
+	
 }

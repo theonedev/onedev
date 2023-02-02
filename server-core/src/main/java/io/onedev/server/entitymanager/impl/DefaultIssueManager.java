@@ -5,22 +5,13 @@ import com.google.common.collect.Lists;
 import com.hazelcast.core.HazelcastInstance;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.entityreference.ReferenceMigrator;
-import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.project.issue.IssueCommitsAttached;
-import io.onedev.server.event.project.issue.IssueChanged;
-import io.onedev.server.event.project.issue.IssueEvent;
-import io.onedev.server.event.project.issue.IssueOpened;
+import io.onedev.server.event.project.issue.*;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
@@ -29,7 +20,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.changedata.IssueChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueProjectChangeData;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.SequenceGenerator;
@@ -47,7 +37,10 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.util.*;
+import io.onedev.server.util.MilestoneAndIssueState;
+import io.onedev.server.util.ProjectIssueStats;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.ProjectPathValidator;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -55,9 +48,6 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.wicket.util.lang.Objects;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -68,7 +58,6 @@ import org.unbescape.java.JavaEscape;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.*;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -104,10 +93,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final IssueQueryPersonalizationManager queryPersonalizationManager;
 	
-	private final AttachmentManager attachmentManager;
-	
-	private final IssueCommentManager commentManager;
-	
 	private final SettingManager settingManager;
 	
 	private final ProjectManager projectManager;
@@ -118,8 +103,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final TransactionManager transactionManager;
 	
-	private final EntityReferenceManager entityReferenceManager;
-	
 	private final RoleManager roleManager;
 	
 	private final LinkSpecManager linkSpecManager;
@@ -127,10 +110,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	private final IssueLinkManager linkManager;
 	
 	private final ClusterManager clusterManager;
-	
-	private final IssueChangeManager changeManager;
-	
-	private final IssueScheduleManager scheduleManager;
 	
 	private final SequenceGenerator numberGenerator;
 	
@@ -141,11 +120,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 							   IssueQueryPersonalizationManager queryPersonalizationManager, 
 							   SettingManager settingManager, ListenerRegistry listenerRegistry,
 							   ProjectManager projectManager, UserManager userManager, ClusterManager clusterManager,
-							   RoleManager roleManager, AttachmentManager attachmentStorageManager, 
-							   IssueCommentManager commentManager, EntityReferenceManager entityReferenceManager, 
-							   LinkSpecManager linkSpecManager, IssueLinkManager linkManager, 
-							   IssueAuthorizationManager authorizationManager, IssueChangeManager changeManager, 
-							   IssueScheduleManager scheduleManager) {
+							   RoleManager roleManager, LinkSpecManager linkSpecManager, IssueLinkManager linkManager, 
+							   IssueAuthorizationManager authorizationManager) {
 		super(dao);
 		this.fieldManager = fieldManager;
 		this.queryPersonalizationManager = queryPersonalizationManager;
@@ -157,13 +133,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.roleManager = roleManager;
 		this.linkSpecManager = linkSpecManager;
 		this.linkManager = linkManager;
-		this.attachmentManager = attachmentStorageManager;
-		this.commentManager = commentManager;
-		this.entityReferenceManager = entityReferenceManager;
 		this.authorizationManager = authorizationManager;
 		this.clusterManager = clusterManager;
-		this.changeManager = changeManager;
-		this.scheduleManager = scheduleManager;
 		
 		numberGenerator = new SequenceGenerator(Issue.class, clusterManager, dao);
 	}
@@ -186,7 +157,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			Long issueId = (Long) fields[0];
 			Long projectId = (Long)fields[1];
 			Long issueNumber = (Long) fields[2];
-			issueIds.put(projectId + ":" + issueNumber, issueId);
+			issueIds.put(getCacheKey(projectId, issueNumber), issueId);
 		}
 	}
 	
@@ -233,7 +204,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		lastActivity.setDate(issue.getSubmitDate());
 		issue.setLastActivity(lastActivity);
 		
-		save(issue);
+		dao.persist(issue);
 
 		fieldManager.saveFields(issue);
 		for (IssueSchedule schedule: issue.getSchedules())
@@ -245,26 +216,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issue.getAuthorizations().add(authorization);
 		authorizationManager.save(authorization);
 		
+		updateCacheAfterCommit(Lists.newArrayList(issue));
 		listenerRegistry.post(new IssueOpened(issue));
-	}
-
-	@Transactional
-	@Override
-	public void save(Issue issue) {
-		super.save(issue);
-		
-		Long projectId = issue.getProject().getId();
-		Long issueId = issue.getId();
-		Long issueNumber = issue.getNumber();
-		
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				issueIds.put(projectId + ":" + issueNumber, issueId);
-			}
-			
-		});
 	}
 
 	private List<javax.persistence.criteria.Order> getOrders(List<EntitySort> sorts, CriteriaBuilder builder, Root<Issue> root) {
@@ -321,16 +274,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
-		boolean minorChange = false;
-		if (event instanceof IssueCommitsAttached) {
-			minorChange = true;
-		} else if (event instanceof IssueChanged) {
-			IssueChangeData changeData = ((IssueChanged)event).getChange().getData();
-			if (changeData instanceof ReferencedFromAware) 
-				minorChange = true;
-		}
-
-		if (!(event instanceof IssueOpened || minorChange))
+		if (!(event instanceof IssueOpened || event.isMinor()))
 			event.getIssue().setLastActivity(event.getLastUpdate());
 	}
 	
@@ -904,19 +848,51 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Transactional
 	@Override
 	public void delete(Issue issue) {
-		super.delete(issue);
+		dao.remove(issue);
 	
-		Long projectId = issue.getProject().getId();
-		Long issueNumber = issue.getNumber();
+		removeFromCacheAfterCommit(Lists.newArrayList(issue));
+		listenerRegistry.post(new IssuesDeleted(issue.getProject(), Lists.newArrayList(issue)));
+	}
+	
+	private String getCacheKey(Issue issue) {
+		return getCacheKey(issue.getProject().getId(), issue.getNumber());
+	}
+	
+	private String getCacheKey(Long projectId, Long issueNumber) {
+		return projectId + ":" + issueNumber;
+	}
+	
+	private void removeFromCacheAfterCommit(Collection<Issue> issues) {
+		Collection<String> cacheKeysToDelete = new ArrayList<>();
+		for (Issue issue: issues)
+			cacheKeysToDelete.add(getCacheKey(issue));
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				issueIds.remove(new ProjectScopedNumber(projectId, issueNumber));
+				for (var issueKey: cacheKeysToDelete)
+					issueIds.remove(issueKey);
 			}
+			
 		});
 	}
+	
+	private void updateCacheAfterCommit(Collection<Issue> issues) {
+		Map<String, Long> cacheEntriesToUpdate = new HashMap<>();
+		for (Issue issue: issues)
+			cacheEntriesToUpdate.put(getCacheKey(issue), issue.getId());
+		transactionManager.runAfterCommit(new Runnable() {
 
+			@Override
+			public void run() {
+				for (var entry: cacheEntriesToUpdate.entrySet())
+					issueIds.put(entry.getKey(), entry.getValue());
+			}
+
+		});
+		
+	}
+	
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
@@ -940,9 +916,16 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			});
 		}
 	}
+	
+	@Listen
+	@Sessional
+	public void on(IssuesImported event) {
+		for (var issueId: event.getIssueIds())
+			issueIds.put(getCacheKey(dao.load(Issue.class, issueId)), issueId);			
+	}
 
 	private Long getIssueId(Long projectId, Long issueNumber) {
-		return issueIds.get(projectId + ":" + issueNumber);
+		return issueIds.get(getCacheKey(projectId, issueNumber));
 	}
 	
 	@Sessional
@@ -992,12 +975,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	@Transactional
 	@Override
-	public void copy(Collection<Issue> issues, Project targetProject) {
+	public void copy(Collection<Issue> issues, Project sourceProject, Project targetProject) {
 		List<Issue> sortedIssues = new ArrayList<>(issues);
 		Collections.sort(sortedIssues);
 		Map<Issue, Issue> cloneMapping = new HashMap<>();
 		Map<Long, Long> numberMapping = new HashMap<>();
-		List<Triple<Long, String, String>> attachmentGroupInfos = new ArrayList<>();
 
 		sortedIssues.forEach(issue -> {
 			Issue clonedIssue = VersionedXmlDoc.cloneBean(issue);
@@ -1009,10 +991,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			clonedIssue.setNumber(getNextNumber(numberScope));
 			cloneMapping.put(issue, clonedIssue);
 			numberMapping.put(issue.getNumber(), clonedIssue.getNumber());
-			attachmentGroupInfos.add(new ImmutableTriple<>(
-					issue.getAttachmentProject().getId(),
-					issue.getAttachmentGroup(),
-					clonedIssue.getAttachmentGroup()));
 		});
 
 		cloneMapping.forEach((key, value) -> {
@@ -1025,17 +1003,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 						.migratePrefixed(description, "#");
 				value.setDescription(description);
 			}
-			save(value);
+			dao.persist(value);
 			
-			for (IssueSchedule schedule: key.getSchedules()) {
-				if (schedule.getMilestone().getProject().isSelfOrAncestorOf(targetProject)) {
-					IssueSchedule clonedSchedule = VersionedXmlDoc.cloneBean(schedule);
-					clonedSchedule.setId(null);
-					clonedSchedule.setIssue(value);
-					dao.persist(clonedSchedule);
-				}
-			}
-
 			key.getComments().forEach(comment -> {
 				var clonedComment = VersionedXmlDoc.cloneBean(comment);
 				clonedComment.setId(null);
@@ -1050,13 +1019,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				dao.persist(clonedComment);
 			});
 
-			key.getChanges().forEach(change -> {
-				var clonedChange = VersionedXmlDoc.cloneBean(change);
-				clonedChange.setId(null);
-				clonedChange.setIssue(value);
-				dao.persist(clonedChange);
-			});
-			
 			key.getFields().forEach(field -> {
 				var clonedField = VersionedXmlDoc.cloneBean(field);
 				clonedField.setId(null);
@@ -1093,52 +1055,26 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				}
 			});
 		});
-
-		Long targetProjectId = targetProject.getId();
-		transactionManager.runAfterCommit(new ClusterRunnable() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void run() {
-				projectManager.runOnProjectServer(targetProjectId, new ClusterTask<Void>() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Void call() throws Exception {
-						for (var attachmentGroupInfo: attachmentGroupInfos) {
-							attachmentManager.copyAttachmentGroupTargetLocal(targetProjectId, 
-									attachmentGroupInfo.getRight(), attachmentGroupInfo.getLeft(), 
-									attachmentGroupInfo.getMiddle());
-						}
-						return null;
-					}
-
-				});
-			}
-
-		});		
+		
+		updateCacheAfterCommit(cloneMapping.values());
+		listenerRegistry.post(new IssuesCopied(sourceProject, targetProject, cloneMapping));
 	}
 	
 	@Transactional
 	@Override
-	public void move(Collection<Issue> issues, Project targetProject) {
-		List<Pair<Long, String>> attachmentGroupInfos = new ArrayList<>();
+	public void move(Collection<Issue> issues, Project sourceProject, Project targetProject) {
 		Map<Long, Long> numberMapping = new HashMap<>();
 		List<Issue> sortedIssues = new ArrayList<>(issues);
 		Collections.sort(sortedIssues);
 		for (Issue issue: sortedIssues) {
-			attachmentGroupInfos.add(new Pair<>(issue.getAttachmentProject().getId(), issue.getAttachmentGroup()));
-			
 			if (issue.getDescription() != null) {
 				issue.setDescription(issue.getDescription().replace(
-						issue.getAttachmentProject().getId() + "/attachments/" + issue.getAttachmentGroup(), 
+						sourceProject.getId() + "/attachments/" + issue.getAttachmentGroup(), 
 						targetProject.getId() + "/attachments/" + issue.getAttachmentGroup()));
 			}
 			for (IssueComment comment: issue.getComments()) {
 				comment.setContent(comment.getContent().replace(
-						issue.getAttachmentProject().getId() + "/attachments/" + issue.getAttachmentGroup(), 
+						sourceProject.getId() + "/attachments/" + issue.getAttachmentGroup(), 
 						targetProject.getId() + "/attachments/" + issue.getAttachmentGroup()));
 			}
  
@@ -1163,7 +1099,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			change.setIssue(issue);
 			change.setUser(SecurityUtils.getUser());
 			change.setData(new IssueProjectChangeData(oldProject.getPath(), targetProject.getPath()));
-			changeManager.save(change);
+			dao.persist(change);
 		}
 		
 		for (Issue issue: sortedIssues) {
@@ -1175,53 +1111,22 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			for (IssueComment comment: issue.getComments()) {
 				comment.setContent(new ReferenceMigrator(Issue.class, numberMapping)
 						.migratePrefixed(comment.getContent(), "#"));
-				commentManager.save(comment);
+				dao.persist(comment);
 			}
-			save(issue);
+			dao.persist(issue);
 		}
 		
-		Long targetProjectId = targetProject.getId();
-		transactionManager.runAfterCommit(new ClusterRunnable() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void run() {
-				projectManager.runOnProjectServer(targetProjectId, new ClusterTask<Void>() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Void call() throws Exception {
-						for (var attachmentGroupInfo: attachmentGroupInfos) 
-							attachmentManager.moveAttachmentGroupTargetLocal(targetProjectId, attachmentGroupInfo.getFirst(), attachmentGroupInfo.getSecond());
-						return null;
-					}
-					
-				});
-			}
-			
-		});
+		updateCacheAfterCommit(issues);
+		listenerRegistry.post(new IssuesMoved(sourceProject, targetProject, issues));
 	}
 	
 	@Transactional
 	@Override
-	public void saveDescription(Issue issue, @Nullable String description) {
-		String prevDescription = issue.getDescription();
-		if (!Objects.equal(description, prevDescription)) {
-			if (description != null && description.length() > Issue.MAX_DESCRIPTION_LEN)
-				throw new ExplicitException("Description too long"); 
-			issue.setDescription(description);
-			entityReferenceManager.addReferenceChange(issue, description);
-			save(issue);
-		}
-	}
-	
-	@Transactional
-	@Override
-	public void delete(Collection<Issue> issues) {
+	public void delete(Collection<Issue> issues, Project project) {
 		for (Issue issue: issues)
-			delete(issue);
+			dao.remove(issue);
+		removeFromCacheAfterCommit(issues);
+		listenerRegistry.post(new IssuesDeleted(project, issues));
 	}
 	
 	@Transactional
