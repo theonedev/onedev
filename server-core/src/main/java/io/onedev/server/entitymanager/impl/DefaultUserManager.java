@@ -181,7 +181,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set lastUpdate.user=:unknown where lastUpdate.user=:user");
+    	query = getSession().createQuery("update PullRequest set lastActivity.user=:unknown where lastActivity.user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
@@ -201,7 +201,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeComment set lastUpdate.user=:unknown where lastUpdate.user=:user");
+    	query = getSession().createQuery("update CodeComment set lastActivity.user=:unknown where lastActivity.user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
@@ -221,7 +221,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Issue set lastUpdate.user=:unknown where lastUpdate.user=:user");
+    	query = getSession().createQuery("update Issue set lastActivity.user=:unknown where lastActivity.user=:user");
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
