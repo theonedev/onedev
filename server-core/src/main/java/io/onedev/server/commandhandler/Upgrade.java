@@ -242,7 +242,25 @@ public class Upgrade extends AbstractPlugin {
 				File statusDir = new File(upgradeDir, "status");
 				if (statusDir.exists())
 					FileUtils.cleanDir(statusDir);
-				
+
+				try {
+					if (new File(upgradeDir, "sampledb").exists() 
+							&& !new File(upgradeDir, "internaldb").exists()) { 
+						FileUtils.moveDirectory(
+								new File(upgradeDir, "sampledb"), 
+								new File(upgradeDir, "internaldb"));
+					}
+
+					File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
+					String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, StandardCharsets.UTF_8);
+					if (hibernateProps.contains("sampledb")) {
+						hibernateProps = StringUtils.replace(hibernateProps, "sampledb", "internaldb");
+						FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, StandardCharsets.UTF_8);
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+
 				int oldDataVersion = getDataVersion(upgradeDir);
 				if (oldDataVersion == -1) {
 					logger.error("Unable to upgrade specified installation due to above error");
@@ -263,10 +281,13 @@ public class Upgrade extends AbstractPlugin {
 				logger.info("Backing up old program files as {}...", programBackup.getAbsolutePath());
 				try {
 					for (File each: upgradeDir.listFiles()) {
-						if (each.isFile()) 
+						if (each.isFile()) {
 							FileUtils.copyFileToDirectory(each, programBackup);
-						else if (!each.getName().equals("temp") && !each.getName().equals("site") && !each.getName().equals("sampledb"))
+						} else if (!each.getName().equals("temp") 
+								&& !each.getName().equals("site") 
+								&& !each.getName().equals("internaldb")) {
 							FileUtils.copyDirectoryToDirectory(each, programBackup);
+						}
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -274,6 +295,7 @@ public class Upgrade extends AbstractPlugin {
 				restoreExecutables(programBackup);
 				
 				File dbBackupFile = new File(upgradeDir, "site/" + DB_BACKUP_DIR + "/" + timestamp + ".zip");
+				boolean isHSQL = HibernateConfig.isHSQLDialect(getDialect(upgradeDir));
 				boolean failed = false;
 				boolean dbChanged = false;
 				boolean dbCleaned = false;
@@ -301,8 +323,8 @@ public class Upgrade extends AbstractPlugin {
 						
 						if (ret == 0) {
 							dbChanged = true;
-							if (HibernateConfig.isHSQLDialect(getDialect(upgradeDir))) { 
-								FileUtils.deleteDir(new File(upgradeDir, "sampledb"), 3);
+							if (isHSQL) { 
+								FileUtils.deleteDir(new File(upgradeDir, "internaldb"), 3);
 							} else {
 								logger.info("Cleaning database with old program...");
 								
@@ -444,7 +466,7 @@ public class Upgrade extends AbstractPlugin {
 						}
 					}
 					
-					logger.error("!!!!!!!!! Failed to upgrade {} !!!!!!!!!!!", upgradeDir.getAbsolutePath());
+					logger.error("️!! Failed to upgrade {}", upgradeDir.getAbsolutePath());
 					if (dbChanged) {
 						logger.warn("OneDev is unable to restore old database, please do it manually by first resetting it (delete and create), and then running below command:");
 						if (SystemUtils.IS_OS_WINDOWS) {
@@ -455,7 +477,7 @@ public class Upgrade extends AbstractPlugin {
 					}
 					System.exit(1);
 				} else {
-					logger.info("********** Successfully upgraded {} **********", upgradeDir.getAbsolutePath());
+					logger.info("Successfully upgraded {}", upgradeDir.getAbsolutePath());
 					
 					if (oldDataVersion <= 5) {
 						logger.warn("\n"
@@ -471,7 +493,7 @@ public class Upgrade extends AbstractPlugin {
 					System.exit(0);
 				}			
 			} else {
-				logger.info("*********** Successfully checked {} ************", upgradeDir.getAbsolutePath());
+				logger.info("Successfully checked {}", upgradeDir.getAbsolutePath());
 				System.exit(0);
 			}
 		} else {
@@ -486,10 +508,10 @@ public class Upgrade extends AbstractPlugin {
 				FileUtils.copyDirectory(Bootstrap.installDir, upgradeDir);
 				FileUtils.cleanDir(new File(upgradeDir, "logs"));
 				restoreExecutables(upgradeDir);
-				logger.info("*********** Successfully populated {} ************", upgradeDir.getAbsolutePath());
+				logger.info("Successfully populated {}", upgradeDir.getAbsolutePath());
 				System.exit(0);
 			} catch (Exception e) {
-				logger.error("!!!!!!! Error populating " + upgradeDir.getAbsolutePath() + " !!!!!!!!", e);
+				logger.error("!! Error populating " + upgradeDir.getAbsolutePath(), e);
 				FileUtils.cleanDir(upgradeDir);
 				System.exit(1);
 			}
@@ -708,6 +730,8 @@ public class Upgrade extends AbstractPlugin {
 			
 			if (!wrapperConf.contains("wrapper.disable_console_input")) 
 				wrapperConf += "\r\nwrapper.disable_console_input=TRUE";
+
+			wrapperConf = wrapperConf.replaceAll("\r\n(\r\n)+\r\n", "\r\n\r\n");
 			
 			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, StandardCharsets.UTF_8);
 			
@@ -717,10 +741,18 @@ public class Upgrade extends AbstractPlugin {
 					"hibernate.hikari.autoCommit=true");
 			hibernateProps = StringUtils.replace(hibernateProps, "GitPlex", "OneDev");
 			hibernateProps = StringUtils.replace(hibernateProps, "TurboDev", "OneDev");
-			
+
 			if (!hibernateProps.contains("hsqldb.lob_file_scale")) {
-				hibernateProps = StringUtils.replace(hibernateProps, "sampledb/onedev;", 
-						"sampledb/onedev;hsqldb.lob_file_scale=4;");
+				hibernateProps = StringUtils.replace(hibernateProps, "internaldb/onedev;", 
+						"internaldb/onedev;hsqldb.lob_file_scale=4;");
+			}
+			if (!hibernateProps.contains("hsqldb.lob_compressed")) {
+				hibernateProps = StringUtils.replace(hibernateProps, "internaldb/onedev;",
+						"internaldb/onedev;hsqldb.lob_compressed=true;");
+			}
+			if (!hibernateProps.contains("hsqldb.tx")) {
+				hibernateProps = StringUtils.replace(hibernateProps, "internaldb/onedev;",
+						"internaldb/onedev;hsqldb.tx=mvcc;");
 			}
 			
 			if (!hibernateProps.contains("hibernate.connection.autocommit=true")) {
@@ -750,6 +782,8 @@ public class Upgrade extends AbstractPlugin {
 			hibernateProps = StringUtils.replace(hibernateProps, 
 					"org.hibernate.dialect.Oracle12cDialect", 
 					"io.onedev.server.persistence.OracleDialect");
+			
+			hibernateProps = hibernateProps.replaceAll("\r\n(\r\n)+\r\n", "\r\n\r\n");
 			
 			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, StandardCharsets.UTF_8);
 			
