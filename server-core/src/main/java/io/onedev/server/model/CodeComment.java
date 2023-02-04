@@ -48,7 +48,7 @@ public class CodeComment extends ProjectBelonging implements AttachmentStorageSu
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final int MAX_CONTENT_LEN = 14000;
+	public static final int MAX_CONTENT_LEN = 100000;
 	
 	public static final String PROP_PROJECT = "project";
 	

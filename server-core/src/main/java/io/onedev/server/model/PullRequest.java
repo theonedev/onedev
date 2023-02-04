@@ -89,7 +89,7 @@ public class PullRequest extends ProjectBelonging
 	
 	public static final int MAX_TITLE_LEN = 255;
 	
-	public static final int MAX_DESCRIPTION_LEN = 12000;
+	public static final int MAX_DESCRIPTION_LEN = 100000;
 	
 	public static final String NAME_STATUS = "Status";
 	

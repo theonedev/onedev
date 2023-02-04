@@ -267,7 +267,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			fieldManager.populateFields(issues);
 			linkManager.populateLinks(issues);
 		}
-		
 		return issues;
 	}
 	

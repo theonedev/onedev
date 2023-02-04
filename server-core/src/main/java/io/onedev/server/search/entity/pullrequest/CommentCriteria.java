@@ -1,16 +1,10 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.util.criteria.Criteria;
+
+import javax.persistence.criteria.*;
 
 public class CommentCriteria extends Criteria<PullRequest> {
 

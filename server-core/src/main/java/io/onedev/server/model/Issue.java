@@ -1,57 +1,8 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
-import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
-import static io.onedev.server.model.Issue.PROP_NO_SPACE_TITLE;
-import static io.onedev.server.model.Issue.PROP_STATE;
-import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
-import static io.onedev.server.model.Issue.PROP_TITLE;
-import static io.onedev.server.model.Issue.PROP_UUID;
-import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
-import static io.onedev.server.model.IssueSchedule.NAME_MILESTONE;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import io.onedev.server.rest.annotation.Api;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.DynamicUpdate;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
@@ -69,6 +20,7 @@ import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
@@ -80,6 +32,22 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.util.IssueAware;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
+import static io.onedev.server.model.Issue.*;
+import static io.onedev.server.model.IssueSchedule.NAME_MILESTONE;
 
 @Entity
 @Table(
@@ -101,7 +69,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	public static final int MAX_TITLE_LEN = 255;
 	
-	public static final int MAX_DESCRIPTION_LEN = 14000;
+	public static final int MAX_DESCRIPTION_LEN = 100000;
 
 	public static final String NAME_PROJECT = "Project";
 	

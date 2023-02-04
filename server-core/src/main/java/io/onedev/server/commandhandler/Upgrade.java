@@ -747,6 +747,9 @@ public class Upgrade extends AbstractPlugin {
 			hibernateProps = StringUtils.replace(hibernateProps, 
 					"hibernate.javax.cache.missing_cache_strategy=create", 
 					"");
+			hibernateProps = StringUtils.replace(hibernateProps, 
+					"org.hibernate.dialect.Oracle12cDialect", 
+					"io.onedev.server.persistence.OracleDialect");
 			
 			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, StandardCharsets.UTF_8);
 			
