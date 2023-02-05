@@ -32,7 +32,6 @@ import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -619,11 +618,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private String createTrustCertsConfigMap(String namespace, TaskLogger jobLogger) {
 		Map<String, String> configMapData = new LinkedHashMap<>();
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
-		File keystoreFile = serverConfig.getKeystoreFile();
-		if (keystoreFile != null) {
-			String password = serverConfig.getKeystorePassword();
-			configMapData.putAll(new PKCS12CertExtractor(keystoreFile, password).extact());
-		}
 		File trustCertsDir = serverConfig.getTrustCertsDir();
 		if (trustCertsDir != null) {
 			for (File file: trustCertsDir.listFiles()) {

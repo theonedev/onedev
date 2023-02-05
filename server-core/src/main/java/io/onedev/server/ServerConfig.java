@@ -1,8 +1,7 @@
 package io.onedev.server;
 
-import java.io.File;
-
 import javax.annotation.Nullable;
+import java.io.File;
 
 public interface ServerConfig {
 	
@@ -13,11 +12,6 @@ public interface ServerConfig {
 	 * 			http port of the server, or <i>0</i> if http port is not defined
 	 */
 	int getHttpPort();
-	
-	@Nullable
-	File getKeystoreFile();
-	
-	String getKeystorePassword();
 	
 	@Nullable
 	File getTrustCertsDir();

@@ -38,17 +38,9 @@ public class DefaultServerConfig implements ServerConfig {
 	
 	private File trustCertsDir;
 	
-	private File keystoreFile;
-	
-	private String keystorePassword;
-	
 	private String clusterIp;
 	
 	private int clusterPort;
-	
-	private int serverCpu;
-	
-	private int serverMemory;
 	
 	@Inject
 	public DefaultServerConfig(ServerProperties props, HibernateConfig hibernateConfig) {
@@ -137,16 +129,6 @@ public class DefaultServerConfig implements ServerConfig {
 	@Override
 	public int getHttpPort() {
 		return httpPort;
-	}
-
-	@Override
-	public File getKeystoreFile() {
-		return keystoreFile;
-	}
-
-	@Override
-	public String getKeystorePassword() {
-		return keystorePassword;
 	}
 
 	@Override

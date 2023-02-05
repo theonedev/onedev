@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.administration.jobexecutor;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.FileUtils;
@@ -16,7 +15,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.ExceptionUtils;
-import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -32,7 +30,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -183,12 +180,6 @@ public abstract class JobExecutor implements Serializable {
 	protected List<String> getTrustCertContent() {
 		List<String> trustCertContent = new ArrayList<>();
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
-		File keystoreFile = serverConfig.getKeystoreFile();
-		if (keystoreFile != null) {
-			String password = serverConfig.getKeystorePassword();
-			for (Map.Entry<String, String> entry: new PKCS12CertExtractor(keystoreFile, password).extact().entrySet()) 
-				trustCertContent.addAll(Splitter.on('\n').trimResults().splitToList(entry.getValue()));
-		}
 		if (serverConfig.getTrustCertsDir() != null) {
 			for (File file: serverConfig.getTrustCertsDir().listFiles()) {
 				if (file.isFile()) {
