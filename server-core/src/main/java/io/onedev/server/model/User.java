@@ -192,7 +192,19 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<GpgKey> gpgKeys = new ArrayList<>();
-    
+
+	@OneToMany(mappedBy=CodeCommentMention.PROP_USER, cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<CodeCommentMention> codeCommentMentions = new ArrayList<>();
+
+	@OneToMany(mappedBy=IssueMention.PROP_USER, cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<IssueMention> issueMentions = new ArrayList<>();
+
+	@OneToMany(mappedBy=PullRequestMention.PROP_USER, cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<PullRequestMention> pullRequestMentions = new ArrayList<>();
+	
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
