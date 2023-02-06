@@ -241,7 +241,7 @@ public class BranchProtection implements Serializable {
 				break;
 			}
 		}
-		return usage.prefix("branch protection '" + getBranches() + "'");
+		return usage.prefix("code: branch protection '" + getBranches() + "'");
 	}
 	
 	/**

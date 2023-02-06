@@ -55,10 +55,14 @@ import io.onedev.server.security.permission.ConfidentialIssuePermission;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultUserManager.class);
+	
     private final ProjectManager projectManager;
     
     private final SettingManager settingManager;
@@ -152,14 +156,18 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	public void delete(User user) {
     	Usage usage = new Usage();
 		for (Project project: projectManager.query()) {
-			Usage usedInProject = new Usage();
-			for (BranchProtection protection: project.getBranchProtections()) 
-				usedInProject.add(protection.onDeleteUser(user.getName()));
-			for (TagProtection protection: project.getTagProtections()) 
-				usedInProject.add(protection.onDeleteUser(user.getName()));
-			usedInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
-			usedInProject.prefix("project '" + project.getPath() + "': settings");
-			usage.add(usedInProject);
+			try {
+				Usage usedInProject = new Usage();
+				for (BranchProtection protection : project.getBranchProtections())
+					usedInProject.add(protection.onDeleteUser(user.getName()));
+				for (TagProtection protection : project.getTagProtections())
+					usedInProject.add(protection.onDeleteUser(user.getName()));
+				usedInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
+				usedInProject.prefix("project '" + project.getPath() + "': settings");
+				usage.add(usedInProject);
+			} catch (Exception e) {
+				logger.error("Failed to check user reference in project: {}", project.getPath());
+			}
 		}
 
 		usage.add(settingManager.onDeleteUser(user.getName()));
