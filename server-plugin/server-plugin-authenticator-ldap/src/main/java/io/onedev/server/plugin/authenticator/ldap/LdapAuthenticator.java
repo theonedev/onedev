@@ -1,35 +1,5 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-
-import javax.annotation.Nullable;
-import javax.naming.AuthenticationException;
-import javax.naming.CompositeName;
-import javax.naming.Context;
-import javax.naming.InvalidNameException;
-import javax.naming.Name;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.PartialResultException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
-import org.apache.shiro.authc.AccountException;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -37,6 +7,18 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.editable.annotation.ShowCondition;
+import org.apache.shiro.authc.AccountException;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.naming.*;
+import javax.naming.directory.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.*;
 
 @Editable(name="Generic LDAP", order=200)
 public class LdapAuthenticator extends Authenticator {
@@ -227,6 +209,8 @@ public class LdapAuthenticator extends Authenticator {
         searchControls.setReturningObjFlag(true);
 
         Hashtable<String, String> ldapEnv = new Hashtable<>();
+		if (getLdapUrl().trim().startsWith("ldaps"))
+			ldapEnv.put("java.naming.ldap.factory.socket", LdapSSLSocketFactory.class.getName());
         ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         ldapEnv.put(Context.PROVIDER_URL, getLdapUrl());
         ldapEnv.put(Context.SECURITY_AUTHENTICATION, "simple");

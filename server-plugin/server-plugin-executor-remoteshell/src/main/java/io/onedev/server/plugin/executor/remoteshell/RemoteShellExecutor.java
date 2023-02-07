@@ -26,7 +26,6 @@ import io.onedev.server.web.editable.annotation.Numeric;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.File;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -110,10 +109,9 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 					}
 
 					String jobToken = jobContext.getJobToken();
-					List<String> trustCertContent = getTrustCertContent();
 					ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
-							jobContext.getBuildNumber(), jobContext.getActions(), trustCertContent);
+							jobContext.getBuildNumber(), jobContext.getActions());
 
 					try {
 						WebsocketUtils.call(agentSession, jobData, 0);

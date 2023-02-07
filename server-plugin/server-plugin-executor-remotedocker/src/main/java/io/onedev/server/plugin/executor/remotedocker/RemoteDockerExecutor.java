@@ -117,11 +117,10 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 						services.add(service.toMap());
 
 					String jobToken = jobContext.getJobToken();
-					List<String> trustCertContent = getTrustCertContent();
 					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(),
-							services, registryLogins, isMountDockerSock(), getDockerSockPath(), trustCertContent,
+							services, registryLogins, isMountDockerSock(), getDockerSockPath(),
 							getCpuLimit(), getMemoryLimit(), getRunOptions());
 
 					try {

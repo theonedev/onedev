@@ -63,7 +63,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	
 	private transient volatile LeafFacade runningStep;
 	
-	private transient volatile File buildDir;
+	private transient volatile File buildHome;
 
 	@Editable(order=1000, placeholder = "Number of server cpu", 
 			description = "Specify max number of jobs this executor can run concurrently")
@@ -123,8 +123,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								+ "directly on bare metal/virtual machine");
 					}
 
-					buildDir = FileUtils.createTempDir("onedev-build");
-					File workspaceDir = new File(buildDir, "workspace");
+					buildHome = FileUtils.createTempDir("onedev-build");
+					File workspaceDir = new File(buildHome, "workspace");
 					try {
 						Member server = getClusterManager().getHazelcastInstance().getCluster().getLocalMember();
 						jobLogger.log(String.format("Executing job (executor: %s, server: %s)...", getName(),
@@ -161,8 +161,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						jobLogger.log("Copying job dependencies...");
 						getJobManager().copyDependencies(jobContext, workspaceDir);
 
-						File userDir = new File(buildDir, "user");
-						FileUtils.createDir(userDir);
+						File userHome = new File(buildHome, "user");
+						FileUtils.createDir(userHome);
 
 						getJobManager().reportJobWorkspace(jobContext, workspaceDir.getAbsolutePath());
 
@@ -186,13 +186,13 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 													+ "remote docker executor, or kubernetes executor");
 										}
 
-										commandFacade.generatePauseCommand(buildDir);
+										commandFacade.generatePauseCommand(buildHome);
 
-										File jobScriptFile = new File(buildDir, "job-commands" + commandFacade.getScriptExtension());
+										File jobScriptFile = new File(buildHome, "job-commands" + commandFacade.getScriptExtension());
 										try {
 											FileUtils.writeLines(
 													jobScriptFile,
-													new ArrayList<>(replacePlaceholders(execution.getCommands(), buildDir)),
+													new ArrayList<>(replacePlaceholders(execution.getCommands(), buildHome)),
 													commandFacade.getEndOfLine());
 										} catch (IOException e) {
 											throw new RuntimeException(e);
@@ -200,7 +200,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 										Commandline interpreter = commandFacade.getScriptInterpreter();
 										Map<String, String> environments = new HashMap<>();
-										environments.put("GIT_HOME", userDir.getAbsolutePath());
+										environments.put("GIT_HOME", userHome.getAbsolutePath());
 										environments.put("ONEDEV_WORKSPACE", workspaceDir.getAbsolutePath());
 										interpreter.workingDir(workspaceDir).environments(environments);
 										interpreter.addArgs(jobScriptFile.getAbsolutePath());
@@ -221,19 +221,19 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
 
 											Map<String, String> environments = new HashMap<>();
-											environments.put("HOME", userDir.getAbsolutePath());
+											environments.put("HOME", userHome.getAbsolutePath());
 											git.environments(environments);
 
 											checkoutFacade.setupWorkingDir(git, workspaceDir);
 
-											List<String> trustCertContent = getTrustCertContent();
-											if (!trustCertContent.isEmpty()) {
-												installGitCert(new File(userDir, "trust-cert.pem"), trustCertContent,
-														git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-											}
+											File trustCertsFile = new File(buildHome, "trust-certs.pem");
+											installGitCert(git, Bootstrap.getTrustCertsDir(), trustCertsFile, 
+													trustCertsFile.getAbsolutePath(), 
+													ExecutorUtils.newInfoLogger(jobLogger), 
+													ExecutorUtils.newWarningLogger(jobLogger));
 
 											CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-											cloneInfo.writeAuthData(userDir, git, false, 
+											cloneInfo.writeAuthData(userHome, git, false, 
 													ExecutorUtils.newInfoLogger(jobLogger), 
 													ExecutorUtils.newWarningLogger(jobLogger));
 
@@ -249,7 +249,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									} else {
 										ServerSideFacade serverSideFacade = (ServerSideFacade) facade;
 										try {
-											serverSideFacade.execute(buildDir, new ServerSideFacade.Runner() {
+											serverSideFacade.execute(buildHome, new ServerSideFacade.Runner() {
 
 												@Override
 												public Map<String, byte[]> run(File inputDir, Map<String, String> placeholderValues) {
@@ -284,23 +284,23 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						// Fix https://code.onedev.io/onedev/server/~issues/597
 						if (SystemUtils.IS_OS_WINDOWS && workspaceDir.exists())
 							FileUtils.deleteDir(workspaceDir);
-						synchronized (buildDir) {
-							FileUtils.deleteDir(buildDir);
+						synchronized (buildHome) {
+							FileUtils.deleteDir(buildHome);
 						}
 					}
 				}
 
 				@Override
 				public void resume(JobContext jobContext) {
-					if (buildDir != null) synchronized (buildDir) {
-						if (buildDir.exists())
-							FileUtils.touchFile(new File(buildDir, "continue"));
+					if (buildHome != null) synchronized (buildHome) {
+						if (buildHome.exists())
+							FileUtils.touchFile(new File(buildHome, "continue"));
 					}
 				}
 
 				@Override
 				public Shell openShell(JobContext jobContext, Terminal terminal) {
-					if (buildDir != null) {
+					if (buildHome != null) {
 						Commandline shell;
 						if (runningStep instanceof CommandFacade) {
 							CommandFacade commandStep = (CommandFacade) runningStep;
@@ -310,7 +310,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						} else {
 							shell = new Commandline("sh");
 						}
-						shell.workingDir(new File(buildDir, "workspace"));
+						shell.workingDir(new File(buildHome, "workspace"));
 						return new CommandlineShell(terminal, shell);
 					} else {
 						throw new ExplicitException("Shell not ready");

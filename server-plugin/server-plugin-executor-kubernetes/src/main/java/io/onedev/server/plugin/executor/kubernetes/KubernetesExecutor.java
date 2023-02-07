@@ -8,13 +8,13 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.agent.job.FailedException;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.*;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
-import io.onedev.server.ServerConfig;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.cluster.ClusterManager;
@@ -617,14 +617,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	@Nullable
 	private String createTrustCertsConfigMap(String namespace, TaskLogger jobLogger) {
 		Map<String, String> configMapData = new LinkedHashMap<>();
-		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
-		File trustCertsDir = serverConfig.getTrustCertsDir();
-		if (trustCertsDir != null) {
+		File trustCertsDir = new File(Bootstrap.getConfDir(), "trust-certs");
+		if (trustCertsDir.exists()) {
 			for (File file: trustCertsDir.listFiles()) {
-				if (file.isFile()) {
+				if (file.isFile() && !file.isHidden()) {
 					try {
-						configMapData.put("specified-cert-" + file.getName(), 
-								FileUtils.readFileToString(file, StandardCharsets.UTF_8));
+						byte[] fileContent = FileUtils.readFileToByteArray(file);
+						configMapData.put(file.getName(), Base64.encodeBase64String(fileContent));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -638,7 +637,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"metadata", CollectionUtils.newLinkedHashMap(
 							"name", "trust-certs", 
 							"namespace", namespace), 
-					"data", configMapData);
+					"binaryData", configMapData);
 			return createResource(configMapDef, new HashSet<>(), jobLogger);			
 		} else {
 			return null;
@@ -865,10 +864,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				List<Map<Object, Object>> containerSpecs = new ArrayList<>();
 				
 				String containerBuildHome;
-				String containerCommandHome;
+				String containerCommandDir;
 				String containerCacheHome;
-				String containerAuthInfoHome;
-				String trustCertsHome;
+				String containerAuthInfoDir;
+				String containerTrustCertsDir;
 				String dockerSock;
 				String containerdSock;
 				String containerWorkspace;
@@ -876,18 +875,18 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					containerBuildHome = "C:\\onedev-build";
 					containerWorkspace = containerBuildHome + "\\workspace";
 					containerCacheHome = containerBuildHome + "\\cache";
-					containerCommandHome = containerBuildHome + "\\command";
-					containerAuthInfoHome = "C:\\Users\\ContainerAdministrator\\auth-info";
-					trustCertsHome = containerBuildHome + "\\trust-certs";
+					containerCommandDir = containerBuildHome + "\\command";
+					containerAuthInfoDir = "C:\\Users\\ContainerAdministrator\\auth-info";
+					containerTrustCertsDir = containerBuildHome + "\\trust-certs";
 					dockerSock = "\\\\.\\pipe\\docker_engine";
 					containerdSock = "\\\\.\\pipe\\containerd-containerd";
 				} else {
 					containerBuildHome = "/onedev-build";
 					containerWorkspace = containerBuildHome +"/workspace";
 					containerCacheHome = containerBuildHome + "/cache";
-					containerCommandHome = containerBuildHome + "/command";
-					containerAuthInfoHome = "/root/auth-info";
-					trustCertsHome = containerBuildHome + "/trust-certs";
+					containerCommandDir = containerBuildHome + "/command";
+					containerAuthInfoDir = "/root/auth-info";
+					containerTrustCertsDir = containerBuildHome + "/trust-certs";
 					dockerSock = "/var/run/docker.sock";
 					containerdSock = "/run/containerd/containerd.sock";
 				}
@@ -896,20 +895,20 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"name", "build-home", 
 						"mountPath", containerBuildHome);
 				Map<String, String> authInfoMount = CollectionUtils.newLinkedHashMap(
-						"name", "auth-info-home", 
-						"mountPath", containerAuthInfoHome);
+						"name", "auth-info", 
+						"mountPath", containerAuthInfoDir);
 				
 				// Windows nanoserver default user is ContainerUser
 				Map<String, String> authInfoMount2 = CollectionUtils.newLinkedHashMap(
-						"name", "auth-info-home", 
+						"name", "auth-info", 
 						"mountPath", "C:\\Users\\ContainerUser\\auth-info");
 				
 				Map<String, String> cacheHomeMount = CollectionUtils.newLinkedHashMap(
 						"name", "cache-home", 
 						"mountPath", containerCacheHome);
 				Map<String, String> trustCertsMount = CollectionUtils.newLinkedHashMap(
-						"name", "trust-certs-home", 
-						"mountPath", trustCertsHome);
+						"name", "trust-certs", 
+						"mountPath", containerTrustCertsDir);
 				Map<String, String> dockerSockMount = CollectionUtils.newLinkedHashMap(
 						"name", "docker-sock", 
 						"mountPath", dockerSock);
@@ -1041,10 +1040,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						String positionStr = stringifyStepPosition(position);
 						if (osInfo.isLinux()) {
 							stepContainerSpec.put("command", Lists.newArrayList("sh"));
-							stepContainerSpec.put("args", Lists.newArrayList(containerCommandHome + "/" + positionStr + ".sh"));
+							stepContainerSpec.put("args", Lists.newArrayList(containerCommandDir + "/" + positionStr + ".sh"));
 						} else {
 							stepContainerSpec.put("command", Lists.newArrayList("cmd"));
-							stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandHome + "\\" + positionStr + ".bat"));
+							stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandDir + "\\" + positionStr + ".bat"));
 						}
 
 						Map<Object, Object> requestsSpec = CollectionUtils.newLinkedHashMap(
@@ -1132,7 +1131,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"name", "build-home", 
 						"emptyDir", CollectionUtils.newLinkedHashMap());
 				Map<Object, Object> userHomeVolume = CollectionUtils.newLinkedHashMap(
-						"name", "auth-info-home", 
+						"name", "auth-info", 
 						"emptyDir", CollectionUtils.newLinkedHashMap());
 				Map<Object, Object> cacheHomeVolume = CollectionUtils.newLinkedHashMap(
 						"name", "cache-home", 
@@ -1142,7 +1141,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, userHomeVolume, cacheHomeVolume);
 				if (trustCertsConfigMapName != null) {
 					volumes.add(CollectionUtils.newLinkedHashMap(
-							"name", "trust-certs-home", 
+							"name", "trust-certs", 
 							"configMap", CollectionUtils.newLinkedHashMap(
 									"name", trustCertsConfigMapName)));
 				}

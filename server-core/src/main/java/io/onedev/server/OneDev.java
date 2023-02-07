@@ -1,42 +1,8 @@
 package io.onedev.server;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.sql.Connection;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-
-import io.onedev.server.exception.SystemNotReadyException;
-import org.apache.commons.lang.math.RandomUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.wicket.request.Url;
-import org.eclipse.jgit.util.FS.FileStoreAttributes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Provider;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
-
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
@@ -50,18 +16,38 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.exception.SystemNotReadyException;
 import io.onedev.server.jetty.JettyLauncher;
-import io.onedev.server.persistence.ConnectionCallable;
-import io.onedev.server.persistence.DataManager;
-import io.onedev.server.persistence.IdManager;
-import io.onedev.server.persistence.SessionFactoryManager;
-import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.*;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.schedule.TaskScheduler;
+import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.request.Url;
+import org.eclipse.jgit.util.FS.FileStoreAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.net.ServerSocket;
+import java.nio.charset.Charset;
+import java.sql.Connection;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 
@@ -112,7 +98,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.idManager = idManager;
 		this.settingManager = settingManager;
 		this.sessionFactoryManager = sessionFactoryManager;
-		
+
 		initStage = new InitStage("Server is Starting...");
 	}
 	

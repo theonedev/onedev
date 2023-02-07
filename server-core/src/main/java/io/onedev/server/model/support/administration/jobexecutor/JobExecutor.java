@@ -2,10 +2,8 @@ package io.onedev.server.model.support.administration.jobexecutor;
 
 import com.google.common.base.Throwables;
 import io.onedev.commons.loader.ExtensionPoint;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.ServerConfig;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
@@ -24,14 +22,8 @@ import io.onedev.server.web.editable.annotation.ShowCondition;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ExtensionPoint
 @Editable
@@ -175,23 +167,6 @@ public abstract class JobExecutor implements Serializable {
 			buildManager.save(build);
 			OneDev.getInstance(ListenerRegistry.class).post(new BuildRunning(build));
 		});
-	}
-	
-	protected List<String> getTrustCertContent() {
-		List<String> trustCertContent = new ArrayList<>();
-		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
-		if (serverConfig.getTrustCertsDir() != null) {
-			for (File file: serverConfig.getTrustCertsDir().listFiles()) {
-				if (file.isFile()) {
-					try {
-						trustCertContent.addAll(FileUtils.readLines(file, UTF_8));
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		}
-		return trustCertContent;
 	}
 	
 	protected String getErrorMessage(Exception exception) {

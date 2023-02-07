@@ -28,8 +28,10 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entitymanager.impl.*;
+import nl.altindag.ssl.SSLFactory;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.guice.aop.ShiroAopModule;
 import org.apache.shiro.mgt.RememberMeManager;
@@ -286,15 +288,16 @@ public class CoreModule extends AbstractPluginModule {
 		configureSecurity();
 		configureRestful();
 		configureWeb();
-		configureSsh();
 		configureGit();
 		configureBuild();
 		configureCluster();
-		
+
 		/*
 		 * Declare bindings explicitly instead of using ImplementedBy annotation as
 		 * HK2 to guice bridge can only search in explicit bindings in Guice   
 		 */
+		bind(SshAuthenticator.class).to(DefaultSshAuthenticator.class);
+		bind(SshManager.class).to(DefaultSshManager.class);
 		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		
 		bind(StorageManager.class).to(DefaultStorageManager.class);
 		bind(SettingManager.class).to(DefaultSettingManager.class);
@@ -462,11 +465,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(ClusterManager.class).to(DefaultClusterManager.class);
 	}
 	
-	private void configureSsh() {
-		bind(SshAuthenticator.class).to(DefaultSshAuthenticator.class);
-		bind(SshManager.class).to(DefaultSshManager.class);
-	}
-	
 	private void configureSecurity() {
 		contributeFromPackage(Realm.class, AbstractAuthorizingRealm.class);
 
@@ -490,6 +488,10 @@ public class CoreModule extends AbstractPluginModule {
             
         });
         contributeFromPackage(Authenticator.class, Authenticator.class);
+		
+		bind(SSLFactory.class).toProvider(() -> {
+			return KubernetesHelper.buildSSLFactory(Bootstrap.getTrustCertsDir());
+		}).in(Singleton.class);
 	}
 	
 	private void configureGit() {

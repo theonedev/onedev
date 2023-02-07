@@ -73,6 +73,7 @@ import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Interpolative;
+import nl.altindag.ssl.SSLFactory;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
@@ -157,6 +158,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final StorageManager storageManager;
 
 	private final GitService gitService;
+	
+	private final SSLFactory sslFactory;
 
 	private volatile Thread thread;
 
@@ -172,7 +175,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							 ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager,
 							 ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler,
 							 ClusterManager clusterManager, CodeIndexManager codeIndexManager, StorageManager storageManager,
-							 PullRequestManager pullRequestManager, GitService gitService) {
+							 PullRequestManager pullRequestManager, GitService gitService, SSLFactory sslFactory) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -190,6 +193,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.storageManager = storageManager;
 		this.pullRequestManager = pullRequestManager;
 		this.gitService = gitService;
+		this.sslFactory = sslFactory;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -1531,7 +1535,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											 boolean callByAgent, TaskLogger logger) {
 		UUID storageServerUUID = projectManager.getStorageServerUUID(jobContext.getProjectId(), true);
 		if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
-
 			// Some steps need the commit to be indexed, for instance various 
 			// report publishing steps need to query the full blob path based 
 			// on a partial path (java package/class etc)
@@ -1584,8 +1587,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			});
 		} else {
 			String serverUrl = clusterManager.getServerUrl(storageServerUUID);
-			return KubernetesHelper.runServerStep(serverUrl, jobContext.getJobToken(), stepPosition,
-					inputDir, Lists.newArrayList("**"), Lists.newArrayList(), placeholderValues, logger);
+			return KubernetesHelper.runServerStep(sslFactory, serverUrl, jobContext.getJobToken(), 
+					stepPosition, inputDir, Lists.newArrayList("**"), Lists.newArrayList(), 
+					placeholderValues, logger);
 		}
 	}
 

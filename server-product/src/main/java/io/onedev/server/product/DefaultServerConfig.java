@@ -1,17 +1,14 @@
 package io.onedev.server.product;
 
 import com.google.common.base.Splitter;
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.persistence.HibernateConfig;
 import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.internal.guava.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -26,8 +23,6 @@ public class DefaultServerConfig implements ServerConfig {
 	
 	private static final String PROP_SSH_PORT = "ssh_port";
 	
-	private static final String PROP_TRUST_CERTS = "trust_certs";
-	
 	private static final String PROP_CLUSTER_IP = "cluster_ip";
 	
 	private static final String PROP_CLUSTER_PORT = "cluster_port";
@@ -35,8 +30,6 @@ public class DefaultServerConfig implements ServerConfig {
 	private int httpPort;
 	
 	private int sshPort;
-	
-	private File trustCertsDir;
 	
 	private String clusterIp;
 	
@@ -63,17 +56,6 @@ public class DefaultServerConfig implements ServerConfig {
         	logger.warn(PROP_SSH_PORT + " not specified, default to 6611");
         	sshPort = 6611;
         }
-		
-		String trustCerts = System.getenv(PROP_TRUST_CERTS);
-		if (StringUtils.isBlank(trustCerts))
-			trustCerts = props.getProperty(PROP_TRUST_CERTS);
-		if (StringUtils.isNotBlank(trustCerts)) {
-			trustCertsDir = new File(trustCerts.trim());
-			if (!trustCertsDir.isAbsolute())
-				trustCertsDir = new File(Bootstrap.getConfDir(), trustCerts);
-			Preconditions.checkState(trustCertsDir.exists(), 
-					"Trust certs directory not exist: " + trustCertsDir.getAbsolutePath());
-		}
 		
 		clusterIp = System.getenv(PROP_CLUSTER_IP);
 		if (StringUtils.isBlank(clusterIp))
@@ -129,11 +111,6 @@ public class DefaultServerConfig implements ServerConfig {
 	@Override
 	public int getHttpPort() {
 		return httpPort;
-	}
-
-	@Override
-	public File getTrustCertsDir() {
-		return trustCertsDir;
 	}
 
 	@Override

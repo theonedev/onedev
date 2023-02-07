@@ -269,7 +269,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							File hostWorkspace = new File(hostBuildHome, "workspace");
 							FileUtils.createDir(hostWorkspace);
 
-							AtomicReference<File> hostAuthInfoHome = new AtomicReference<>(null);
+							AtomicReference<File> hostAuthInfoDir = new AtomicReference<>(null);
 							try {
 								cache.installSymbolinks(hostWorkspace);
 
@@ -278,12 +278,15 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 								String containerBuildHome;
 								String containerWorkspace;
+								String containerTrustCerts;
 								if (SystemUtils.IS_OS_WINDOWS) {
 									containerBuildHome = "C:\\onedev-build";
 									containerWorkspace = "C:\\onedev-build\\workspace";
+									containerTrustCerts = "C:\\onedev-build\\trust-certs.pem";
 								} else {
 									containerBuildHome = "/onedev-build";
 									containerWorkspace = "/onedev-build/workspace";
+									containerTrustCerts = "/onedev-build/trust-certs.pem";
 								}
 
 								getJobManager().reportJobWorkspace(jobContext, containerWorkspace);
@@ -344,8 +347,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												}
 											}
 
-											if (hostAuthInfoHome.get() != null) {
-												String hostPath = getHostPath(hostAuthInfoHome.get().getAbsolutePath());
+											if (hostAuthInfoDir.get() != null) {
+												String hostPath = getHostPath(hostAuthInfoDir.get().getAbsolutePath());
 												if (SystemUtils.IS_OS_WINDOWS) {
 													docker.addArgs("-v", hostPath + ":C:\\Users\\ContainerAdministrator\\auth-info");
 													docker.addArgs("-v", hostPath + ":C:\\Users\\ContainerUser\\auth-info");
@@ -397,7 +400,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												}
 
 												Commandline entrypoint = DockerExecutorUtils.getEntrypoint(
-														hostBuildHome, commandFacade, osInfo, hostAuthInfoHome.get() != null);
+														hostBuildHome, commandFacade, osInfo, hostAuthInfoDir.get() != null);
 
 												int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(),
 														entrypoint.arguments(), new HashMap<>(), null, new HashMap<>(),
@@ -429,9 +432,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 													
 													Commandline git = new Commandline(AppLoader.getInstance(GitLocation.class).getExecutable());
 													
-													if (hostAuthInfoHome.get() == null)
-														hostAuthInfoHome.set(FileUtils.createTempDir());
-													git.environments().put("HOME", hostAuthInfoHome.get().getAbsolutePath());
+													if (hostAuthInfoDir.get() == null)
+														hostAuthInfoDir.set(FileUtils.createTempDir());
+													git.environments().put("HOME", hostAuthInfoDir.get().getAbsolutePath());
 
 													checkoutFacade.setupWorkingDir(git, hostWorkspace);
 													if (!Bootstrap.isInDocker()) {
@@ -439,16 +442,19 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 																newInfoLogger(jobLogger), newErrorLogger(jobLogger));
 													}
 
-													List<String> trustCertContent = getTrustCertContent();
-													if (!trustCertContent.isEmpty()) {
-														installGitCert(new File(hostAuthInfoHome.get(), "trust-cert.pem"), trustCertContent,
-																git, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
-													}
-													
-													CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
-													cloneInfo.writeAuthData(hostAuthInfoHome.get(), git, true, 
+													File trustCertsFile = new File(hostBuildHome, "trust-certs.pem");
+													installGitCert(git, Bootstrap.getTrustCertsDir(),
+															trustCertsFile, containerTrustCerts,
 															ExecutorUtils.newInfoLogger(jobLogger), 
 															ExecutorUtils.newWarningLogger(jobLogger));
+													
+													CloneInfo cloneInfo = checkoutFacade.getCloneInfo();
+													cloneInfo.writeAuthData(hostAuthInfoDir.get(), git, true, 
+															ExecutorUtils.newInfoLogger(jobLogger), 
+															ExecutorUtils.newWarningLogger(jobLogger));
+
+													if (trustCertsFile.exists())
+														git.addArgs("-c", "http.sslCAInfo=" + trustCertsFile.getAbsolutePath());
 
 													int cloneDepth = checkoutFacade.getCloneDepth();
 			
@@ -499,8 +505,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								// Fix https://code.onedev.io/onedev/server/~issues/597
 								if (SystemUtils.IS_OS_WINDOWS)
 									FileUtils.deleteDir(hostWorkspace);
-								if (hostAuthInfoHome.get() != null)
-									FileUtils.deleteDir(hostAuthInfoHome.get());
+								if (hostAuthInfoDir.get() != null)
+									FileUtils.deleteDir(hostAuthInfoDir.get());
 							}
 						} finally {
 							deleteNetwork(newDocker(), network, jobLogger);
