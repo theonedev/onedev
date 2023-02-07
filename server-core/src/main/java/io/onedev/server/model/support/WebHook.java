@@ -1,20 +1,18 @@
 package io.onedev.server.model.support;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
-
-import org.apache.commons.lang3.RandomStringUtils;
-
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
+import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.editable.annotation.Editable;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Editable
 public class WebHook implements Serializable {
@@ -70,7 +68,7 @@ public class WebHook implements Serializable {
 	
 	private List<EventType> eventTypes = new ArrayList<>();
 	
-	private String secret = RandomStringUtils.randomAlphanumeric(20);
+	private String secret = CryptoUtils.generateSecret();
 
 	@Editable(order=100, description="The URL of the server endpoint that will receive the webhook POST requests")
 	@NotEmpty

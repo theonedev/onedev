@@ -1,3 +1,7 @@
+# 7.9.12
+
+All access tokens of users are re-generated with cryto strong random string. As a result of this, all places using previous access token should be replaced with the new access token. This may include restful api authentication, CI/CD checkout step using access token etc.  
+
 # 7.8.0
 
 To use consistent project url for web and git access, OneDev now uses project path instead of project id to access projects via web UI, for instance `https://code.onedev.io/projects/160` has been changed to `https://code.onedev.io/onedev/server`. To avoid conflicting with this url scheme, 

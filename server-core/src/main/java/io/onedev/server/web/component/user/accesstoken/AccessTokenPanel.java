@@ -1,18 +1,17 @@
 package io.onedev.server.web.component.user.accesstoken;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public abstract class AccessTokenPanel extends Panel {
@@ -50,7 +49,7 @@ public abstract class AccessTokenPanel extends Panel {
 
 			@Override
 			public void onClick() {
-				getUser().setAccessToken(RandomStringUtils.randomAlphanumeric(User.ACCESS_TOKEN_LEN));
+				getUser().setAccessToken(CryptoUtils.generateSecret());
 				OneDev.getInstance(UserManager.class).save(getUser());
 				Session.get().success("Access token regenerated");
 				setResponsePage(getPage());
