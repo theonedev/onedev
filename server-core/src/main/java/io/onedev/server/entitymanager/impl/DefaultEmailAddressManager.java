@@ -224,7 +224,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 				serverUrl, emailAddress.getId(), emailAddress.getVerificationCode());
 		String htmlBody = String.format("Hello,"
 			+ "<p style='margin: 16px 0;'>"
-			+ "The account \"%s\" at \"%s\" tries to use email address '%s', please visit below link to verify if this is you:<br><br>"
+			+ "The account \"%s\" at \"%s\" tries to use email address \"%s\", please visit below link to verify if this is you:<br><br>"
 			+ "<a href='%s'>%s</a>",
 			user.getName(), serverUrl, emailAddress.getValue(), verificationUrl, verificationUrl);
 
