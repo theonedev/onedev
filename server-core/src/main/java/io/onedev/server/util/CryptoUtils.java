@@ -1,22 +1,24 @@
 package io.onedev.server.util;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.crypto.AesCipherService;
 import org.apache.sshd.common.digest.BaseDigest;
 import org.apache.sshd.common.digest.Digest;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 public class CryptoUtils {
-
+	
+	private static final int DEFAULT_SECRET_LEN = 40;
+	
     public static final Digest DIGEST_FORMAT = new BaseDigest("MD5", 512);
 	
 	private static volatile KeyPair keyPair;
@@ -40,7 +42,16 @@ public class CryptoUtils {
 		} 
 		return keyPair.getCipherKey();
 	}
+	
+	public static String generateSecret(int count) {
+		return RandomStringUtils.random(count, 0, 0, true, true, null, 
+				new SecureRandom());		
+	}
 
+	public static String generateSecret() {
+		return generateSecret(DEFAULT_SECRET_LEN);
+	}
+	
 	public static byte[] encrypt(byte[] data) {
 		return cipherService.encrypt(data, getCipherKey()).getBytes();
 	}

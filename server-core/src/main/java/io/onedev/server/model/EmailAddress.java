@@ -1,23 +1,15 @@
 package io.onedev.server.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.web.editable.annotation.Editable;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 
 @Editable
 @Entity
@@ -35,7 +27,7 @@ public class EmailAddress extends AbstractEntity {
     private String value;
     
     @JsonIgnore
-    private String verificationCode = RandomStringUtils.randomAlphanumeric(16);
+    private String verificationCode = CryptoUtils.generateSecret();
     
     private boolean primary;
     

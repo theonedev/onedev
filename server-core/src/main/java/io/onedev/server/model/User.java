@@ -1,41 +1,7 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.User.PROP_ACCESS_TOKEN;
-import static io.onedev.server.model.User.PROP_FULL_NAME;
-import static io.onedev.server.model.User.PROP_NAME;
-import static io.onedev.server.model.User.PROP_SSO_CONNECTOR;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.subject.SimplePrincipalCollection;
-import org.apache.shiro.subject.Subject;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import javax.validation.constraints.NotEmpty;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -51,12 +17,28 @@ import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.Subject;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.onedev.server.model.User.*;
 
 @Entity
 @Table(
@@ -67,8 +49,6 @@ import io.onedev.server.web.editable.annotation.Password;
 public class User extends AbstractEntity implements AuthenticationInfo {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final int ACCESS_TOKEN_LEN = 40;
 	
 	public static final Long UNKNOWN_ID = -2L;
 	
@@ -117,7 +97,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Column(unique=true, nullable=false)
 	@JsonIgnore
-	private String accessToken = RandomStringUtils.randomAlphanumeric(ACCESS_TOKEN_LEN);
+	private String accessToken = CryptoUtils.generateSecret();
 	
 	@JsonIgnore
 	@Lob
@@ -192,7 +172,19 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<GpgKey> gpgKeys = new ArrayList<>();
-    
+
+	@OneToMany(mappedBy=CodeCommentMention.PROP_USER, cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<CodeCommentMention> codeCommentMentions = new ArrayList<>();
+
+	@OneToMany(mappedBy=IssueMention.PROP_USER, cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<IssueMention> issueMentions = new ArrayList<>();
+
+	@OneToMany(mappedBy=PullRequestMention.PROP_USER, cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<PullRequestMention> pullRequestMentions = new ArrayList<>();
+	
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)

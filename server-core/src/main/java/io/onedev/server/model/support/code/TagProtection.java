@@ -137,7 +137,7 @@ public class TagProtection implements Serializable {
 		Usage usage = new Usage();
 		if (UserMatch.isUsingUser(userMatch, userName))
 			usage.add("applicable users");
-		return usage.prefix("tag protection '" + getTags() + "'");
+		return usage.prefix("code: tag protection '" + getTags() + "'");
 	}
 
 	public Usage getTagUsage(String tagName) {

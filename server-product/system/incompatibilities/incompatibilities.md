@@ -1,6 +1,10 @@
 # 8.0.0
 
-1. Project site published via public site step in build spec now can be publicly accessible. Previously it is only accessible to users able to access the project 
+Project site published via public site step in build spec now can be publicly accessible. Previously it is only accessible to users able to access the project 
+
+# 7.9.12
+
+All access tokens of users are re-generated with cryto strong random string. As a result of this, all places using previous access token should be replaced with the new access token. This may include restful api authentication, CI/CD checkout step using access token etc.  
 
 # 7.8.0
 

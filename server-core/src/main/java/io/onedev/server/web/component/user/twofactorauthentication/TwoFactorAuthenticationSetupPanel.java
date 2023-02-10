@@ -1,12 +1,13 @@
 package io.onedev.server.web.component.user.twofactorauthentication;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.TwoFactorAuthentication;
+import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.web.page.simple.security.LoginPage;
 import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.tika.mime.MediaType;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -26,12 +27,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.apache.wicket.request.resource.ContentDisposition;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.TwoFactorAuthentication;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<User> {
@@ -50,7 +49,7 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 		
 		List<String> scratchCodes = new ArrayList<>();
 		for (int i=0; i<16; i++) 
-			scratchCodes.add(RandomStringUtils.randomAlphanumeric(12));
+			scratchCodes.add(CryptoUtils.generateSecret());
 		
 		TwoFactorAuthentication authentication = new TwoFactorAuthentication(secretKey, scratchCodes);
 
@@ -119,12 +118,8 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 					
 					Fragment fragment = new Fragment("content", "verifiedFrag", TwoFactorAuthenticationSetupPanel.this);
 					RepeatingView recoveryCodesView = new RepeatingView("recoveryCodes");
-					for (int i=0; i<authentication.getScratchCodes().size()/2; i++) {
-						WebMarkupContainer container = new WebMarkupContainer(recoveryCodesView.newChildId());
-						container.add(new Label("left", authentication.getScratchCodes().get(i*2)));
-						container.add(new Label("right", authentication.getScratchCodes().get(i*2+1)));
-						recoveryCodesView.add(container);
-					}
+					for (String scratchCode: authentication.getScratchCodes())
+						recoveryCodesView.add(new Label(recoveryCodesView.newChildId(), scratchCode));
 					fragment.add(recoveryCodesView);
 					fragment.add(new ResourceLink<Void>("download", new AbstractResource() {
 

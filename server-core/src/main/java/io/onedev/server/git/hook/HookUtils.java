@@ -1,5 +1,14 @@
 package io.onedev.server.git.hook;
 
+import com.google.common.base.Preconditions;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.ServerConfig;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.util.CryptoUtils;
+import org.apache.commons.io.IOUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,20 +16,9 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-
-import com.google.common.base.Preconditions;
-
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.ServerConfig;
-import io.onedev.server.entitymanager.SettingManager;
-
 public class HookUtils {
 
-	public static final String HOOK_TOKEN = RandomStringUtils.randomAlphanumeric(20); 
+	public static final String HOOK_TOKEN = CryptoUtils.generateSecret(); 
 	
 	private static final String gitReceiveHook;
 	

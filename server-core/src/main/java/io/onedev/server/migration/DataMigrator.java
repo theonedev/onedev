@@ -10,9 +10,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.*;
+import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.Pair;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -2146,7 +2146,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					element.addElement("accessToken").setText(RandomStringUtils.randomAlphanumeric(40));
+					element.addElement("accessToken").setText(CryptoUtils.generateSecret());
 					element.addElement("ssoInfo").addElement("subject").setText(UUID.randomUUID().toString());
 				}
 				dom.writeToFile(file, false);
@@ -2692,7 +2692,7 @@ public class DataMigrator {
 					element.addElement("ssoInfo").addElement("subject").setText(UUID.randomUUID().toString());
 					element.addElement("email").setText("unknown email");
 					element.addElement("alternateEmails");
-					element.addElement("accessToken").setText(RandomStringUtils.randomAlphanumeric(User.ACCESS_TOKEN_LEN));
+					element.addElement("accessToken").setText(CryptoUtils.generateSecret());
 					element.addElement("userProjectQueries");
 					element.addElement("userIssueQueries");
 					element.addElement("userIssueQueryWatches");
@@ -4831,8 +4831,21 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
 	private void migrate110(File dataDir, Stack<Integer> versions) {
+		var updateIds = new HashSet<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("accessToken").setText(CryptoUtils.generateSecret());
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
+	private void migrate111(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);

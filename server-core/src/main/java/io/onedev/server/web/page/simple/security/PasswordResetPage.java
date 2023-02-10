@@ -1,20 +1,6 @@
 package io.onedev.server.web.page.simple.security;
 
-import java.util.Arrays;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
@@ -25,8 +11,20 @@ import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.page.simple.SimplePage;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.util.Arrays;
 
 @SuppressWarnings("serial")
 public class PasswordResetPage extends SimplePage {
@@ -83,7 +81,7 @@ public class PasswordResetPage extends SimplePage {
 					} else {
 						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 						if (settingManager.getMailSetting() != null) {
-							String password = RandomStringUtils.random(10, true, true);								
+							String password = CryptoUtils.generateSecret();								
 							user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
 							userManager.save(user);
 							
