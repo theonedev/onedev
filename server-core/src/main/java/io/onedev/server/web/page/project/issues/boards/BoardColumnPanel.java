@@ -29,6 +29,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.hibernate.Hibernate;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -165,9 +166,9 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 								// move issue between board columns
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(Issue.NAME_STATE)) {
-									issue = SerializationUtils.clone(issue);
 									for (TransitionSpec transition: getIssueSetting().getTransitionSpecs()) {
 										if (transition.canTransitManually(issue, getColumn())) {
+											issue = SerializationUtils.clone(issue);
 											issue.setState(getColumn());
 											break;
 										}
@@ -182,6 +183,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							} else if (SecurityUtils.canScheduleIssues(issue.getProject())) { 
 								// move issue between backlog column and board column
 								issue = SerializationUtils.clone(issue);
+								issue.setProject(getProjectScope().getProject());
 								IssueSchedule schedule = new IssueSchedule();
 								schedule.setIssue(issue);
 								schedule.setMilestone(getMilestone());
