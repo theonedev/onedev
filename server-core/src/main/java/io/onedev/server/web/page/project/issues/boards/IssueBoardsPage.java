@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -1061,11 +1062,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	}
 	
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (project.isIssueManagement()) 
-			setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(project));
+			return new ViewStateAwarePageLink<Void>(componentId, IssueBoardsPage.class, IssueBoardsPage.paramsOf(project));
 		else
-			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

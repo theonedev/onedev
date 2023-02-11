@@ -4,9 +4,11 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -113,8 +115,8 @@ public class ProjectChildrenPage extends ProjectPage {
 	}
 
 	@Override
-	protected void navToProject(Project project) {
-		setResponsePage(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(project));
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
+		return new ViewStateAwarePageLink<Void>(componentId, ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(project));
 	}
 	
 }

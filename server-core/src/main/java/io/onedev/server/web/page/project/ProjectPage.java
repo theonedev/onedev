@@ -361,19 +361,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		super.onDetach();
 	}
 
-	protected WebMarkupContainer newProjectLink(String componentId, Long projectId) {
-		
-		return new ViewStateAwareAjaxLink<Void>(componentId) {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				navToProject(getProjectManager().load(projectId));
-			}
-			
-		};
-		
-	}
-
 	@Override
 	protected Component newTopbarTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
@@ -382,7 +369,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 			private Component newItem(String componentId, Project project) {
 				WebMarkupContainer item = new WebMarkupContainer(componentId);
-				WebMarkupContainer link = newProjectLink("link", project.getId());
+				WebMarkupContainer link = navToProject("link", project);
 				link.add(new ProjectAvatar("avatar", project.getId()));
 				link.add(new Label("label", project.getPath()));
 				item.add(link);
@@ -450,7 +437,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			protected void populateItem(ListItem<Project> item) {
 				Project project = item.getModelObject();
 				if (SecurityUtils.canAccess(project)) {
-					WebMarkupContainer link = newProjectLink("link", project.getId());
+					WebMarkupContainer link = navToProject("link", project);
 					link.add(new Label("label", project.getName()));
 					item.add(link);
 					
@@ -465,7 +452,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 									@Override
 									protected WebMarkupContainer newChildLink(String componentId, Long childId) {
-										return newProjectLink(componentId, childId);
+										return navToProject(componentId, ProjectPage.getProjectManager().load(childId));
 									}
 									
 								};
@@ -526,8 +513,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	protected String getPageTitle() {
 		return getProject().getPath();
 	}
-	
-	protected abstract void navToProject(Project project);
+
+	protected abstract BookmarkablePageLink<Void> navToProject(String componentId, Project project);
 	
 	protected static ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);

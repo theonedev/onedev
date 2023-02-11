@@ -839,11 +839,11 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	}
 	
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
-			setResponsePage(ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(project.getId()));
 		else
-			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 	@Nullable

@@ -2,11 +2,13 @@ package io.onedev.server.web.page.project.issues.create;
 
 import java.util.List;
 
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -148,11 +150,11 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 	}
 	
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (project.isIssueManagement()) 
-			setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, 0));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project, 0));
 		else
-			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

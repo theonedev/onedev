@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -245,11 +246,11 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	}
 	
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
-			setResponsePage(ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(project, 0));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(project, 0));
 		else
-			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

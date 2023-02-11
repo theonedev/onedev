@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.pullrequests;
 
 import javax.persistence.EntityNotFoundException;
 
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.basic.Label;
@@ -108,11 +109,11 @@ public class InvalidPullRequestPage extends ProjectPage {
 	}
 
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
-			setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(project, 0));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(project, 0));
 		else
-			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

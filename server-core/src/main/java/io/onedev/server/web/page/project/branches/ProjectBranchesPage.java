@@ -830,11 +830,11 @@ public class ProjectBranchesPage extends ProjectPage {
 	}
 	
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
-			setResponsePage(ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(project));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(project));
 		else
-			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 	
 }

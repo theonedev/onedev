@@ -156,11 +156,11 @@ public abstract class BuildDetailPage extends ProjectPage
 	}
 	
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (project.isCodeManagement()) 
-			setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(project, 0));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(project, 0));
 		else
-			setResponsePage(ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
 	}
 
 	private WebSocketObserver newBuildObserver(Long buildId) {

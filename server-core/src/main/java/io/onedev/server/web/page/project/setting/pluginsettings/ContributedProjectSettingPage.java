@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import javax.annotation.Nullable;
 import javax.validation.Validator;
 
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -14,6 +15,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -174,11 +176,11 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 	}
 	
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (SecurityUtils.canManage(project)) 
-			setResponsePage(ContributedProjectSettingPage.class, paramsOf(project, settingClass));
+			return new ViewStateAwarePageLink<Void>(componentId, ContributedProjectSettingPage.class, paramsOf(project, settingClass));
 		else 
-			setResponsePage(ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
 	}
 	
 }

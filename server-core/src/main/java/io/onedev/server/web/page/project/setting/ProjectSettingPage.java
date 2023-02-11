@@ -1,7 +1,9 @@
 package io.onedev.server.web.page.project.setting;
 
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Project;
@@ -22,11 +24,11 @@ public abstract class ProjectSettingPage extends ProjectPage {
 	}
 	
 	@Override
-	protected void navToProject(Project project) {
+	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
 		if (SecurityUtils.canManage(project))
-			setResponsePage(getPageClass(), paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, getPageClass(), paramsOf(project.getId()));
 		else
-			setResponsePage(ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectPage.paramsOf(project.getId()));
 	}
 
 	@Override
