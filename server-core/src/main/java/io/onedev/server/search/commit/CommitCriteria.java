@@ -15,11 +15,6 @@ public abstract class CommitCriteria implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	protected boolean matches(String value, PersonIdent person) {
-		String formatted = String.format("%s <%s>", person.getName(), person.getEmailAddress());
-		return WildcardUtils.matchString(value, formatted);
-	}
-	
 	public abstract void fill(Project project, RevListOptions options);
 	
 	public abstract boolean matches(RefUpdated event);

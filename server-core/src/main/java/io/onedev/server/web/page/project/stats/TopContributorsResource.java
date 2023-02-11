@@ -6,7 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.search.commit.AfterCriteria;
+import io.onedev.server.search.commit.AuthorCriteria;
+import io.onedev.server.search.commit.BeforeCriteria;
+import io.onedev.server.search.commit.CommitQuery;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
@@ -21,6 +33,9 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Day;
 import io.onedev.server.web.avatar.AvatarManager;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 class TopContributorsResource extends AbstractResource {
 
@@ -55,20 +70,46 @@ class TopContributorsResource extends AbstractResource {
 				if (!SecurityUtils.canReadCode(project))
 					throw new UnauthorizedException();
 
+				DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+				String fromDate = formatter.print(new Day(fromDay).getDate());
+				String toDate = formatter.print(new Day(toDay).getDate().plusDays(1));
+				
 				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoManager.class)
 						.getTopContributors(project.getId(), TOP_CONTRIBUTORS, type, fromDay, toDay);
 				
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
+				EmailAddressManager emailAddressManager = OneDev.getInstance(EmailAddressManager.class);
 
 				List<Map<String, Object>> data = new ArrayList<>();
 				for (GitContributor contributor: topContributors) {
 					Map<String, Object> contributorData = new HashMap<>();
-					contributorData.put("authorName", contributor.getAuthor().getName());
-					contributorData.put("authorEmailAddress", contributor.getAuthor().getEmailAddress());
-					contributorData.put("authorAvatarUrl", avatarManager.getPersonAvatarUrl(contributor.getAuthor()));
+					PersonIdent author = contributor.getAuthor();
+					contributorData.put("authorName", author.getName());
+					contributorData.put("authorEmailAddress", author.getEmailAddress());
+					contributorData.put("authorAvatarUrl", avatarManager.getPersonAvatarUrl(author));
 					contributorData.put("totalCommits", contributor.getTotalContribution().getCommits());
 					contributorData.put("totalAdditions", contributor.getTotalContribution().getAdditions());
 					contributorData.put("totalDeletions", contributor.getTotalContribution().getDeletions());
+
+					AuthorCriteria authorCriteria;
+					EmailAddress emailAddress = emailAddressManager.findByValue(author.getEmailAddress());
+					if (emailAddress != null && emailAddress.isVerified()) {
+						authorCriteria = new AuthorCriteria(Lists.newArrayList(
+								"@" + emailAddress.getOwner().getName()));
+					} else {
+						authorCriteria = new AuthorCriteria(Lists.newArrayList(
+								author.getName() + " <" + author.getEmailAddress() + ">"
+						));
+					}
+					
+					CommitQuery query = new CommitQuery(Lists.newArrayList(
+							authorCriteria,
+							new BeforeCriteria(Lists.newArrayList(toDate)), 
+							new AfterCriteria(Lists.newArrayList(fromDate))
+					));
+
+					contributorData.put("commitsUrl", RequestCycle.get().urlFor(
+							ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(project, query.toString(), null)));
 					
 					Map<Integer, Integer> dailyContributionsData = new HashMap<>();
 					for (Map.Entry<Day, Integer> entry: contributor.getDailyContributions().entrySet()) 

@@ -217,7 +217,7 @@ onedev.server.stats = {
 								$userInfo.append("<div class='font-weight-bold'>" + contributor.authorName + "</div>");
 								var $totalContribution = $("<div class='total-contribution font-size-sm'></div>");
 								$userInfo.append($totalContribution);
-								$totalContribution.append("<span class='commits mr-2'>" + contributor.totalCommits + " commits</span>");
+								$totalContribution.append("<a href='" + contributor.commitsUrl + "' class='commits mr-2'>" + contributor.totalCommits + " commits</a>");
 								$totalContribution.append("<span class='additions mr-2'>" + contributor.totalAdditions + " ++</span>");
 								$totalContribution.append("<span class='deletions'>" + contributor.totalDeletions + " --</span>");
 								$head.append("<div class='ml-auto font-size-h6 font-weight-bold'>#" + (index + 1) + "</div>");
