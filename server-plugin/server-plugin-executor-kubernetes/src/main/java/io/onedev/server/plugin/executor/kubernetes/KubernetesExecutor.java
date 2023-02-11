@@ -619,11 +619,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		Map<String, String> configMapData = new LinkedHashMap<>();
 		File trustCertsDir = new File(Bootstrap.getConfDir(), "trust-certs");
 		if (trustCertsDir.exists()) {
+			int index = 1;
 			for (File file: trustCertsDir.listFiles()) {
 				if (file.isFile() && !file.isHidden()) {
 					try {
 						byte[] fileContent = FileUtils.readFileToByteArray(file);
-						configMapData.put(file.getName(), Base64.encodeBase64String(fileContent));
+						configMapData.put((index++) + ".pem", Base64.encodeBase64String(fileContent));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

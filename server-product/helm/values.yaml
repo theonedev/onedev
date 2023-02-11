@@ -91,3 +91,8 @@ initial:
   ## Server url will be ignored if ingress.host is specified above
   serverUrl: ""  
   sshRootUrl: ""
+
+## Specify a local directory containing certificates to be trusted.
+## Certificate should be in PEM format starting with
+## -----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----
+trustCerts: ""

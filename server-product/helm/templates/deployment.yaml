@@ -33,8 +33,12 @@ spec:
             requests:
               memory: {{ .Values.resources.onedev.memory }}
           volumeMounts:
-          - mountPath: "/opt/onedev"
-            name: onedev
+          - name: onedev
+            mountPath: "/opt/onedev"
+          {{- if .Values.trustCerts }}
+          - name: trust-certs
+            mountPath: "/opt/onedev/conf/trust-certs"
+          {{- end }}
           image: "1dev/server:{{ .Chart.AppVersion }}"
           ports:
             - containerPort: 6610
@@ -91,6 +95,12 @@ spec:
         - name: onedev
           persistentVolumeClaim:
             claimName: {{ include "onedev.fullname" . }}
+        {{- if .Values.trustCerts }}
+        - name: trust-certs
+          configMap:
+            name: {{ include "onedev.fullname" . }}-trust-certs
+        {{- end }}
+
 
 ---
 apiVersion: apps/v1
