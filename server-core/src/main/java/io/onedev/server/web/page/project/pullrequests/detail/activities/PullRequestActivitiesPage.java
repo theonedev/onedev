@@ -58,7 +58,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;

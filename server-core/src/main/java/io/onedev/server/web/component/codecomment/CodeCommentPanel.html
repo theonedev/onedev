@@ -17,11 +17,7 @@
 			<div class="body">
 				<div wicket:id="content"></div>
 			</div>
-			<div wicket:id="foot" class="foot d-flex align-items-center font-size-sm mt-3">
-				<a wicket:id="edit" class="mr-2 text-muted text-hover-primary">Edit</a>
-				<span class="dot mr-2"></span>
-				<a wicket:id="delete" class="text-muted text-hover-primary">Delete</a>
-			</div>
+			<div class="foot d-empty-none d-flex align-items-center font-size-sm mt-3"><wicket:enclosure child="edit"><a wicket:id="edit" class="mr-2 text-muted text-hover-primary">Edit</a><span class="dot d-last-child-none mr-2"></span></wicket:enclosure><wicket:enclosure child="quote"><a wicket:id="quote" class="text-muted text-hover-primary mr-2">Quote</a><span class="d-last-child-none dot mr-2"></span></wicket:enclosure><wicket:enclosure child="delete"><a wicket:id="delete" class="text-muted text-hover-primary mr-2">Delete</a><span class="d-last-child-none dot mr-2"></span></wicket:enclosure></div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="commentOrReplyEditFrag">

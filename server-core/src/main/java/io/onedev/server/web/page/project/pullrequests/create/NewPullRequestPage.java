@@ -97,7 +97,7 @@ import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.pullrequest.assignment.AssignmentListPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
 import io.onedev.server.web.component.svg.SpriteImage;

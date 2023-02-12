@@ -34,7 +34,7 @@ import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 

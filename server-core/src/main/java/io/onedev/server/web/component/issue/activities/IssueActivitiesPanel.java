@@ -1,13 +1,27 @@
 package io.onedev.server.web.component.issue.activities;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.Cookie;
-
+import com.google.common.collect.Lists;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
+import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;
+import io.onedev.server.web.component.issue.activities.activity.IssueCommentedActivity;
+import io.onedev.server.web.component.issue.activities.activity.IssueOpenedActivity;
+import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.util.DeleteCallback;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -32,32 +46,11 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
-import com.google.common.collect.Lists;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entityreference.ReferencedFromAware;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
-import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;
-import io.onedev.server.web.component.issue.activities.activity.IssueCommentedActivity;
-import io.onedev.server.web.component.issue.activities.activity.IssueOpenedActivity;
-import io.onedev.server.web.component.project.comment.CommentInput;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.util.DeleteCallback;
+import javax.servlet.http.Cookie;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class IssueActivitiesPanel extends Panel {
@@ -246,6 +239,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 				}
 				
 			};
+			input.setOutputMarkupId(true);
 			input.setRequired(true).setLabel(Model.of("Comment"));
 			
 			Form<?> form = new Form<Void>("form");

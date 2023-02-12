@@ -26,6 +26,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -542,7 +543,20 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			
 		});
 	}
-	
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		if (event.getPayload() instanceof ContentQuoted) {
+			ContentQuoted contentQuoted = (ContentQuoted) event.getPayload();
+			
+			String script = String.format("onedev.server.markdown.onQuote('%s', '%s');", 
+					container.getMarkupId(), JavaScriptEscape.escapeJavaScript(contentQuoted.getContent()));
+			contentQuoted.getHandler().appendJavaScript(script);			
+			event.stop();
+		}
+	}
+
 	@Override
 	public void convertInput() {
 		setConvertedInput(input.getConvertedInput());

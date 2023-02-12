@@ -24,7 +24,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
-import io.onedev.server.web.component.project.comment.CommentPanel;
+import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
@@ -91,7 +91,7 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 			}
 
 			@Override
-			protected boolean canModifyOrDeleteComment() {
+			protected boolean canManageComment() {
 				return SecurityUtils.canModifyOrDelete(IssueCommentedPanel.this.getComment());
 			}
 

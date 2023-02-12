@@ -107,7 +107,7 @@ import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
 import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;

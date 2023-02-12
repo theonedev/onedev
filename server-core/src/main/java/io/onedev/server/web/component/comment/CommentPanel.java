@@ -1,18 +1,28 @@
-package io.onedev.server.web.component.project.comment;
+package io.onedev.server.web.component.comment;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Sets;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.component.markdown.ContentQuoted;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
+import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.util.DeleteCallback;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -23,20 +33,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.StaleStateException;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.util.DeleteCallback;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class CommentPanel extends Panel {
@@ -100,9 +99,7 @@ public abstract class CommentPanel extends Panel {
 			
 		});
 		
-		WebMarkupContainer actions = new WebMarkupContainer("actions");
-		actions.setVisible(canModifyOrDeleteComment());
-		actions.add(new AjaxLink<Void>("edit") {
+		viewer.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -188,9 +185,29 @@ public abstract class CommentPanel extends Panel {
 				target.add(editor);
 			}
 
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(canManageComment());
+			}
 		});
 		
-		actions.add(new AjaxLink<Void>("delete") {
+		viewer.add(new AjaxLink<Void>("quote") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				send(getPage(), Broadcast.BREADTH, new ContentQuoted(target, getComment()));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.getUser() != null && getComment() != null);
+			}
+			
+		});
+		
+		viewer.add(new AjaxLink<Void>("delete") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -206,12 +223,10 @@ public abstract class CommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getDeleteCallback() != null);
+				setVisible(canManageComment() && getDeleteCallback() != null);
 			}
 			
 		});
-
-		viewer.add(actions);
 		
 		viewer.setOutputMarkupId(true);
 		return viewer;
@@ -237,7 +252,7 @@ public abstract class CommentPanel extends Panel {
 	
 	protected abstract AttachmentSupport getAttachmentSupport();
 	
-	protected abstract boolean canModifyOrDeleteComment();
+	protected abstract boolean canManageComment();
 	
 	@Nullable
 	protected abstract String getRequiredLabel();

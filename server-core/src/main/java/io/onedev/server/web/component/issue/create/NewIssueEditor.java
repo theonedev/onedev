@@ -28,7 +28,7 @@ import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.link.IssueLinkPanel;
 import io.onedev.server.web.component.milestone.choice.MilestoneMultiChoice;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;

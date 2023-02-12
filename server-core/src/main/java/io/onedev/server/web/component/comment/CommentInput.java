@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.project.comment;
+package io.onedev.server.web.component.comment;
 
 import java.util.ArrayList;
 import java.util.List;

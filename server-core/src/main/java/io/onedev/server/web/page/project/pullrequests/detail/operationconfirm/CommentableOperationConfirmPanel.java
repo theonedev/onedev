@@ -20,7 +20,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 
 @SuppressWarnings("serial")
 public abstract class CommentableOperationConfirmPanel extends OperationConfirmPanel {

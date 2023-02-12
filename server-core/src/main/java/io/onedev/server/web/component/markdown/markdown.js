@@ -754,12 +754,13 @@ onedev.server.markdown = {
 			$input.focus();
 			var selected = $input.range();
 			if (selected.length != 0) {
-				document.execCommand("insertText", false, "> " + selected.text);				
-				$input.range(selected.start+2, selected.end+2);
+				document.execCommand("insertText", false, 
+					onedev.server.markdown.getQuoted(selected.text));				
 			} else {
 				document.execCommand("insertText", false, "> quote here");				
 				$input.range(selected.start+2, selected.start+2+"quote here".length);
 			}
+			
 			closeMenu();			
 			onedev.server.markdown.fireInputEvent($input);
 		});
@@ -1226,6 +1227,20 @@ onedev.server.markdown = {
 		$url.on("input", function() {
 			$text.attr("placeholder", onedev.server.util.describeUrl($url.val()));
 		});
+	},
+	getQuoted: function(content) {
+		var quoted = [];
+		content.split('\n').forEach(function(line) {
+			quoted.push("> " + line); 
+		});
+		return quoted.join('\n');
+	},
+	onQuote: function(containerId, content) {
+		var quoted = onedev.server.markdown.getQuoted(content);
+		var $input = $("#" + containerId + ">.body>.edit>textarea");
+		$input.focus();
+		document.execCommand("insertText", false, quoted + "\n\n");
+		onedev.server.markdown.fireInputEvent($input);
 	}
 	
 };

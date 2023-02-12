@@ -47,7 +47,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.behavior.RunTaskBehavior;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;

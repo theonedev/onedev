@@ -8,6 +8,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.component.markdown.ContentQuoted;
+import io.onedev.server.web.component.markdown.MarkdownEditor;
+import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -17,6 +20,8 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -59,9 +64,12 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
+import org.unbescape.javascript.JavaScriptEscape;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentPanel extends Panel {
@@ -155,9 +163,7 @@ public abstract class CodeCommentPanel extends Panel {
 		
 		viewFragment.add(new WebMarkupContainer("anchor").setVisible(false));
 
-		WebMarkupContainer foot = new WebMarkupContainer("foot");
-		foot.setVisible(SecurityUtils.canModifyOrDelete(getComment()));
-		foot.add(new AjaxLink<Void>("edit") {
+		viewFragment.add(new AjaxLink<Void>("edit") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -256,10 +262,30 @@ public abstract class CodeCommentPanel extends Panel {
 				viewFragment.replaceWith(editFragment);
 				target.add(editFragment);
 			}
-			
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canModifyOrDelete(getComment()));
+			}
+		});
+
+		viewFragment.add(new AjaxLink<Void>("quote") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				send(getPage(), Broadcast.BREADTH, new ContentQuoted(target, getComment().getContent()));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.getUser() != null);
+			}
+
 		});
 		
-		foot.add(new AjaxLink<Void>("delete") {
+		viewFragment.add(new AjaxLink<Void>("delete") {
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -279,10 +305,13 @@ public abstract class CodeCommentPanel extends Panel {
 				onDeleteComment(target, getComment());
 				OneDev.getInstance(CodeCommentManager.class).delete(getComment());
 			}
-			
+
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canModifyOrDelete(getComment()));
+			}
 		});
 		
-		viewFragment.add(foot);		
 		return viewFragment;
 	}
 	
@@ -460,7 +489,23 @@ public abstract class CodeCommentPanel extends Panel {
 	@Nullable
 	protected abstract SuggestionSupport getSuggestionSupport();
 
-	private void onAddReply(AjaxRequestTarget target, @Nullable Boolean resolved) {
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		if (event.getPayload() instanceof ContentQuoted) {
+			ContentQuoted contentQuoted = (ContentQuoted) event.getPayload();
+			if (visitChildren(MarkdownEditor.class, new IVisitor<MarkdownEditor, MarkdownEditor>() {
+				@Override
+				public void component(MarkdownEditor object, IVisit<MarkdownEditor> visit) {
+					visit.stop(object);
+				}
+			}) == null) {
+				onAddReply(contentQuoted.getHandler(), null);
+			}
+		}
+	}
+	
+	private void onAddReply(IPartialPageRequestHandler handler, @Nullable Boolean resolved) {
 		Fragment editFragment = new Fragment("actions", "commentOrReplyEditFrag", CodeCommentPanel.this);
 		
 		Form<?> form = new Form<Void>("form");
@@ -582,14 +627,14 @@ public abstract class CodeCommentPanel extends Panel {
 		
 		editFragment.setOutputMarkupId(true);
 		get("actions").replaceWith(editFragment);
-		target.add(editFragment);	
+		handler.add(editFragment);	
 		
 		String script = String.format(""
 				+ "setTimeout(function() {"
 				+ "  document.getElementById('%s').scrollIntoViewIfNeeded(false);"
 				+ "}, 0);", 
 				saveButton.getMarkupId());
-		target.appendJavaScript(script);
+		handler.appendJavaScript(script);
 	}
 	
 	protected abstract void onDeleteComment(AjaxRequestTarget target, CodeComment comment);
@@ -755,10 +800,7 @@ public abstract class CodeCommentPanel extends Panel {
 				
 			});			
 			
-			WebMarkupContainer foot = new WebMarkupContainer("foot");
-			foot.setVisible(SecurityUtils.canModifyOrDelete(reply));
-			
-			foot.add(new AjaxLink<Void>("edit") {
+			viewFragment.add(new AjaxLink<Void>("edit") {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
@@ -852,9 +894,30 @@ public abstract class CodeCommentPanel extends Panel {
 					viewFragment.replaceWith(editFragment);
 					target.add(editFragment);
 				}
-				
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(SecurityUtils.canModifyOrDelete(getReply()));
+				}
 			});
-			foot.add(new AjaxLink<Void>("delete") {
+
+			viewFragment.add(new AjaxLink<Void>("quote") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					send(getPage(), Broadcast.BREADTH, new ContentQuoted(target, getReply().getContent()));
+				}
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(SecurityUtils.getUser() != null);
+				}
+
+			});
+			
+			viewFragment.add(new AjaxLink<Void>("delete") {
 
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -868,10 +931,13 @@ public abstract class CodeCommentPanel extends Panel {
 					OneDev.getInstance(CodeCommentReplyManager.class).delete(getReply());
 					target.appendJavaScript(String.format("$('#%s').remove();", viewFragment.getMarkupId()));
 				}
-				
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(SecurityUtils.canModifyOrDelete(getReply()));
+				}
 			});
-			
-			viewFragment.add(foot);		
 			
 			viewFragment.add(AttributeAppender.append("class", "reply"));
 			

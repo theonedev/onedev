@@ -104,7 +104,7 @@ import io.onedev.server.web.component.markdown.OutdatedSuggestionException;
 import io.onedev.server.web.component.markdown.SuggestionSupport;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.suggestionapply.SuggestionApplyBean;
 import io.onedev.server.web.component.suggestionapply.SuggestionApplyModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;

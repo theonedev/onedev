@@ -13,7 +13,6 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -22,7 +21,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
-import io.onedev.server.web.component.project.comment.CommentPanel;
+import io.onedev.server.web.component.comment.CommentPanel;
 import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
@@ -73,7 +72,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 			}
 
 			@Override
-			protected boolean canModifyOrDeleteComment() {
+			protected boolean canManageComment() {
 				return SecurityUtils.canModify(getIssue());
 			}
 

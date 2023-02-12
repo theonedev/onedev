@@ -783,3 +783,13 @@ span.keycap {
 .row-gap-5 {
 	row-gap: 2rem;
 }
+
+.d-empty-none:empty {
+	display: none !important;
+}
+.d-last-child-none:last-child {
+	display: none !important;
+}
+.d-first-child-none:first-child {
+	display: none !important;
+}
