@@ -25,6 +25,7 @@ import io.onedev.server.search.entity.SortField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -291,7 +292,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	@OneToMany(mappedBy=IssueLink.PROP_SOURCE, cascade=CascadeType.REMOVE)
 	private Collection<IssueLink> targetLinks = new ArrayList<>();
 	
-	private transient List<FixCommit> commits;
+	private transient List<ProjectScopedCommit> commits;
 	
 	private transient List<PullRequest> pullRequests;
 	
@@ -774,8 +775,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 			PullRequestInfoManager infoManager = OneDev.getInstance(PullRequestInfoManager.class); 
 			Collection<Long> pullRequestIds = new HashSet<>();
-			for (FixCommit commit: getCommits()) 
-				pullRequestIds.addAll(infoManager.getPullRequestIds(commit.getProject(), commit.getCommit()));		
+			for (ProjectScopedCommit commit: getCommits()) 
+				pullRequestIds.addAll(infoManager.getPullRequestIds(commit.getProject(), commit.getCommitId()));		
 			
 			for (Long requestId: pullRequestIds) {
 				PullRequest request = OneDev.getInstance(PullRequestManager.class).get(requestId);
@@ -794,7 +795,7 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		return pullRequests;
 	}
 	
-	public List<FixCommit> getCommits() {
+	public List<ProjectScopedCommit> getCommits() {
 		if (commits == null) {
 			commits = new ArrayList<>();
 			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
@@ -803,15 +804,15 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 				for (ObjectId commitId: commitInfoManager.getFixCommits(it.getId(), getId())) {
 					RevCommit commit = it.getRevCommit(commitId, false);
 					if (commit != null)
-						commits.add(new FixCommit(it, commit));
+						commits.add(new ProjectScopedCommit(it, commit.copy()));
 				}
 			});
 			
-			Collections.sort(commits, new Comparator<FixCommit>() {
+			Collections.sort(commits, new Comparator<ProjectScopedCommit>() {
 	
 				@Override
-				public int compare(FixCommit o1, FixCommit o2) {
-					return o2.getCommit().getCommitTime() - o1.getCommit().getCommitTime();
+				public int compare(ProjectScopedCommit o1, ProjectScopedCommit o2) {
+					return o2.getRevCommit().getCommitTime() - o1.getRevCommit().getCommitTime();
 				}
 				
 			});
@@ -938,27 +939,6 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 
 	public static void pop() {
 		stack.get().pop();
-	}
-	
-	public static class FixCommit {
-		
-		private final Project project;
-		
-		private final RevCommit commit;
-		
-		public FixCommit(Project project, RevCommit commit) {
-			this.project = project;
-			this.commit = commit;
-		}
-
-		public Project getProject() {
-			return project;
-		}
-
-		public RevCommit getCommit() {
-			return commit;
-		}
-		
 	}
 	
 }

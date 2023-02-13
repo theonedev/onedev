@@ -24,6 +24,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.util.ProjectScopedCommit;
 import org.apache.shiro.authz.UnauthorizedException;
 import javax.validation.constraints.NotEmpty;
 
@@ -171,10 +172,10 @@ public class IssueResource {
 			throw new UnauthorizedException();
     	
     	List<FixCommit> issueCommits = new ArrayList<>();
-    	for (Issue.FixCommit commit: issue.getCommits()) {
+    	for (ProjectScopedCommit commit: issue.getCommits()) {
     		FixCommit issueCommit = new FixCommit();
     		issueCommit.setProjectId(commit.getProject().getId());
-    		issueCommit.setCommitHash(commit.getCommit().name());
+    		issueCommit.setCommitHash(commit.getCommitId().name());
     		issueCommits.add(issueCommit);
     	}
     	return issueCommits;

@@ -1,26 +1,31 @@
 package io.onedev.server.notification;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
-import org.unbescape.html.HtmlEscape;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.PropertyChange;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.asset.fieldcompare.FieldCompareCssResourceReference;
 import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
+import io.onedev.server.web.component.commit.info.CommitInfoPanel;
 import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
+import io.onedev.server.web.page.project.ProjectPage;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.Model;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.unbescape.html.HtmlEscape;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 public class ActivityDetail implements Serializable {
 
@@ -192,6 +197,31 @@ public class ActivityDetail implements Serializable {
 				return new ReferencedFromPullRequestPanel(componentId, requestId);
 			}
 			
+		};
+	}
+
+	public static ActivityDetail referencedFrom(ProjectScopedCommit commit) {
+		RevCommit revCommit = commit.getProject().getRevCommit(commit.getCommitId(), true);
+		String url = OneDev.getInstance(UrlManager.class).urlFor(commit.getProject(), commit.getCommitId());
+		String htmlVersion = String.format("<div><a href='%s'>[%s] %s</a></div>",
+				url, commit.getFQN(), HtmlEscape.escapeHtml5(revCommit.getShortMessage()));
+		String textVersion = String.format("[%s] %s\n", commit.getFQN(), revCommit.getShortMessage());
+
+		return new ActivityDetail(htmlVersion, textVersion) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Component render(String componentId) {
+				return new CommitInfoPanel(componentId, Model.of(commit)) {
+
+					@Override
+					protected Project getProject() {
+						return ((ProjectPage)getPage()).getProject();
+					}
+				};
+			}
+
 		};
 	}
 	

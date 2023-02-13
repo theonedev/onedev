@@ -1,17 +1,10 @@
 package io.onedev.server.model;
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
+
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(indexes={
@@ -25,7 +18,6 @@ public class IssueChange extends AbstractEntity {
 	private Issue issue;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)
@@ -43,11 +35,12 @@ public class IssueChange extends AbstractEntity {
 		this.issue = issue;
 	}
 
+	@Nullable
 	public User getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(@Nullable User user) {
 		this.user = user;
 	}
 

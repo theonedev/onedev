@@ -1,14 +1,32 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.Cookie;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.onedev.server.OneDev;
+import io.onedev.server.attachment.AttachmentSupport;
+import io.onedev.server.attachment.ProjectAttachmentSupport;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCommitData;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentedActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestOpenedActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdatedActivity;
+import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.util.DeleteCallback;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
@@ -37,38 +55,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentSupport;
-import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entityreference.ReferencedFromAware;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentedActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestOpenedActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdatedActivity;
-import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.util.DeleteCallback;
+import javax.servlet.http.Cookie;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class PullRequestActivitiesPage extends PullRequestDetailPage {
@@ -152,13 +141,12 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			for (PullRequestChange change: getPullRequest().getChanges()) {
 				if (change.getData() instanceof ReferencedFromAware) {
 					ReferencedFromAware<?> referencedFromAware = (ReferencedFromAware<?>) change.getData();
-					if (referencedFromAware.getReferencedFrom() instanceof Issue) {
-						Issue issue = (Issue) referencedFromAware.getReferencedFrom();
-						if (SecurityUtils.canAccess(issue))
-							otherActivities.add(new PullRequestChangeActivity(change));
-					} else if (referencedFromAware.getReferencedFrom() != null) {
+					if (ReferencedFromAware.canDisplay(referencedFromAware))
 						otherActivities.add(new PullRequestChangeActivity(change));
-					}
+				} else if (change.getData() instanceof PullRequestReferencedFromCommitData) {
+					ProjectScopedCommit commit = ((PullRequestReferencedFromCommitData) change.getData()).getCommit();
+					if (commit.canDisplay() && getPullRequest().getUpdates().stream().noneMatch(it->it.getCommits().contains(commit.getCommitId()))) 
+						otherActivities.add(new PullRequestChangeActivity(change));
 				} else {
 					otherActivities.add(new PullRequestChangeActivity(change));
 				}

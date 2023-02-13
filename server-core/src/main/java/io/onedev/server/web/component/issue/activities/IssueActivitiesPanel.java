@@ -9,15 +9,17 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCommitData;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueCommentedActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueOpenedActivity;
-import io.onedev.server.web.component.comment.CommentInput;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.simple.security.LoginPage;
@@ -108,13 +110,12 @@ public abstract class IssueActivitiesPanel extends Panel {
 			for (IssueChange change: getIssue().getChanges()) {
 				if (change.getData() instanceof ReferencedFromAware) {
 					ReferencedFromAware<?> referencedFromAware = (ReferencedFromAware<?>) change.getData();
-					if (referencedFromAware.getReferencedFrom() instanceof Issue) {
-						Issue issue = (Issue) referencedFromAware.getReferencedFrom();
-						if (SecurityUtils.canAccess(issue))
-							otherActivities.add(new IssueChangeActivity(change));
-					} else if (referencedFromAware.getReferencedFrom() != null) {
+					if (ReferencedFromAware.canDisplay(referencedFromAware))
 						otherActivities.add(new IssueChangeActivity(change));
-					}
+				} else if (change.getData() instanceof IssueReferencedFromCommitData) {
+					ProjectScopedCommit commit = ((IssueReferencedFromCommitData) change.getData()).getCommit();
+					if (commit.canDisplay() && !getIssue().getCommits().contains(commit))						
+						otherActivities.add(new IssueChangeActivity(change));
 				} else if (!(change.getData() instanceof IssueDescriptionChangeData)) {
 					otherActivities.add(new IssueChangeActivity(change));
 				}

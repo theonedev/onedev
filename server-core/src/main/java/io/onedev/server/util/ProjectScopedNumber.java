@@ -82,8 +82,12 @@ public class ProjectScopedNumber implements Serializable {
 		return new HashCodeBuilder(17, 37).append(projectId).append(number).toHashCode();
 	}
 	
-	@Override
-	public String toString() {
+	public String getFQN() {
 		return getProject().getPath() + "#" + getNumber();
 	}
+	@Override
+	public String toString() {
+		return getFQN();
+	}
+	
 }

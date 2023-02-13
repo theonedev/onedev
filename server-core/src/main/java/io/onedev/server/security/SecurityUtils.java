@@ -1,15 +1,18 @@
 package io.onedev.server.security;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.*;
+import io.onedev.server.security.permission.*;
+import io.onedev.server.util.concurrent.PrioritizedCallable;
+import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -20,57 +23,14 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.k8shelper.KubernetesHelper;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.GroupAuthorization;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.Role;
-import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.security.permission.AccessBuild;
-import io.onedev.server.security.permission.AccessBuildLog;
-import io.onedev.server.security.permission.AccessBuildReports;
-import io.onedev.server.security.permission.AccessConfidentialIssues;
-import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.security.permission.ConfidentialIssuePermission;
-import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.security.permission.CreateRootProjects;
-import io.onedev.server.security.permission.EditIssueField;
-import io.onedev.server.security.permission.EditIssueLink;
-import io.onedev.server.security.permission.JobPermission;
-import io.onedev.server.security.permission.ManageBuilds;
-import io.onedev.server.security.permission.ManageCodeComments;
-import io.onedev.server.security.permission.ManageIssues;
-import io.onedev.server.security.permission.ManageJob;
-import io.onedev.server.security.permission.ManageProject;
-import io.onedev.server.security.permission.ManagePullRequests;
-import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.security.permission.RunJob;
-import io.onedev.server.security.permission.ScheduleIssues;
-import io.onedev.server.security.permission.SystemAdministration;
-import io.onedev.server.security.permission.WriteCode;
-import io.onedev.server.util.concurrent.PrioritizedCallable;
-import io.onedev.server.util.concurrent.PrioritizedRunnable;
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
@@ -310,18 +270,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(comment.getUser()) 
 				|| canManageIssues(comment.getIssue().getProject());
-	}
-	
-	public static boolean canModifyOrDelete(PullRequestChange change) {
-		User user = SecurityUtils.getUser();
-		return user != null && user.equals(change.getUser()) 
-				|| canManagePullRequests(change.getRequest().getTargetProject());
-	}
-	
-	public static boolean canModifyOrDelete(IssueChange change) {
-		User user = SecurityUtils.getUser();
-		return user != null && user.equals(change.getUser()) 
-				|| canManageIssues(change.getIssue().getProject());
 	}
 
 	public static boolean canModify(PullRequest request) {

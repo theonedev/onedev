@@ -1,14 +1,44 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.*;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.EntityReferenceManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.build.BuildFinished;
+import io.onedev.server.event.project.issue.IssueChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestChanged;
+import io.onedev.server.event.project.pullrequest.PullRequestOpened;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.changedata.*;
+import io.onedev.server.model.support.issue.transitiontrigger.*;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.BaseEntityManager;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.search.entity.issue.*;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Input;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.match.StringMatcher;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -23,67 +53,10 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueFieldManager;
-import io.onedev.server.entitymanager.IssueLinkManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueScheduleManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.RefUpdated;
-import io.onedev.server.event.project.build.BuildFinished;
-import io.onedev.server.event.project.issue.IssueChanged;
-import io.onedev.server.event.project.pullrequest.PullRequestChanged;
-import io.onedev.server.event.project.pullrequest.PullRequestOpened;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.issue.transitiontrigger.BranchUpdateTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.DiscardPullRequestTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.MergePullRequestTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.NoActivityTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequestTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.PullRequestTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.StateTransitionTrigger;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.BaseEntityManager;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
-import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.search.entity.issue.StateCriteria;
-import io.onedev.server.search.entity.issue.LastActivityDateCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.match.StringMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
 
 @Singleton
 public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
@@ -135,7 +108,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Override
 	public void create(IssueChange change, @Nullable String note) {
 		dao.persist(change);
-		if (note != null) {
+		if (note != null && change.getUser() != null) {
 			IssueComment comment = new IssueComment();
 			comment.setContent(note);
 			comment.setUser(change.getUser());

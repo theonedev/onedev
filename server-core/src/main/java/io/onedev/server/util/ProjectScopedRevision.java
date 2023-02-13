@@ -1,13 +1,14 @@
 package io.onedev.server.util;
 
-import java.io.Serializable;
-
-import javax.annotation.Nullable;
-
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
 
 public class ProjectScopedRevision implements Serializable {
 
@@ -47,6 +48,33 @@ public class ProjectScopedRevision implements Serializable {
 			return new ProjectScopedRevision(project, revision);
 		else
 			return null;
+	}
+
+	public String getFQN() {
+		return getProject().getPath() + ":" + revision;
+	}
+
+	@Override
+	public String toString() {
+		return getFQN();
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof ProjectScopedRevision))
+			return false;
+		if (this == other)
+			return true;
+		ProjectScopedRevision projectScopedRevision = (ProjectScopedRevision) other;
+		return new EqualsBuilder()
+				.append(projectId, projectScopedRevision.projectId)
+				.append(revision, projectScopedRevision.revision)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(projectId).append(revision).toHashCode();
 	}
 	
 }

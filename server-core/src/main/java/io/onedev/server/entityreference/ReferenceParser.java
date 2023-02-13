@@ -45,8 +45,27 @@ public class ReferenceParser {
 		pattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
 	}
 	
-	public Collection<ProjectScopedNumber> parseReferences(Project project, String rendered) {
-		return parseReferences(Jsoup.parseBodyFragment(rendered), project);		
+	public Collection<ProjectScopedNumber> parseReferences(String text, @Nullable Project project) {
+		Collection<ProjectScopedNumber> references = new HashSet<>();
+		if (StringUtils.deleteWhitespace(text.toLowerCase()).contains(referenceType.toLowerCase()) 
+				&& text.contains("#")) { // fast scan here, do pattern match later
+			Matcher matcher = pattern.matcher(text);
+			while (matcher.find()) {
+				String referenceProjectName = matcher.group(3);
+				Long referenceNumber = Long.valueOf(matcher.group(5));
+
+				Project referenceProject;
+				if (referenceProjectName != null) {
+					referenceProject = OneDev.getInstance(ProjectManager.class).findByPath(referenceProjectName);
+				} else {
+					referenceProject = project;
+				}
+
+				if (referenceProject != null) 
+					references.add(new ProjectScopedNumber(referenceProject, referenceNumber));
+			}
+		}
+		return references;
 	}
 	
 	public Collection<ProjectScopedNumber> parseReferences(Document document, @Nullable Project project) {

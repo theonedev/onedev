@@ -1,0 +1,10 @@
+.commit-info>.avatar {
+	margin-top: 4px;
+}
+.commit-info .commit-message>.summary {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.commit-info>.detail>.contribution>* {
+	display: inline;
+}

@@ -4,13 +4,3 @@
 .issue-commits>.commit:first-child {
 	border-top: none;
 }
-.issue-commits>.commit>.avatar {
-	margin-top: 4px;
-}
-.issue-commits>.commit .commit-message>.summary {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-.issue-commits>.commit>.detail>.contribution>* {
-	display: inline;
-}

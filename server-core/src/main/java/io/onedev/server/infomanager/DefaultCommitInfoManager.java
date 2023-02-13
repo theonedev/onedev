@@ -13,6 +13,7 @@ import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -154,6 +155,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	private final EmailAddressManager emailAddressManager;
 
 	private final IssueManager issueManager;
+	
+	private final EntityReferenceManager entityReferenceManager;
 
 	private final ListenerRegistry listenerRegistry;
 
@@ -170,7 +173,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 									BatchWorkManager batchWorkManager, SessionManager sessionManager,
 									EmailAddressManager emailAddressManager, UserManager userManager,
 									ClusterManager clusterManager, ListenerRegistry listenerRegistry,
-									IssueManager issueManager) {
+									IssueManager issueManager, EntityReferenceManager entityReferenceManager) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
@@ -180,6 +183,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		this.clusterManager = clusterManager;
 		this.listenerRegistry = listenerRegistry;
 		this.issueManager = issueManager;
+		this.entityReferenceManager = entityReferenceManager;
 	}
 
 	private boolean isCommitCollected(byte[] commitBytes) {
@@ -337,6 +341,9 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 											writeCommits(fixCommitsStore, txn, issueKey, fixingCommits);
 											listenerRegistry.post(new IssueCommitsAttached(issueManager.load(issueId)));
 										}
+										
+										entityReferenceManager.addReferenceChange(
+												new ProjectScopedCommit(project, project.getRevCommit(currentCommitId, true)));
 
 										if (currentCommit.getCommitter() != null)
 											users.add(new NameAndEmail(currentCommit.getCommitter()));
