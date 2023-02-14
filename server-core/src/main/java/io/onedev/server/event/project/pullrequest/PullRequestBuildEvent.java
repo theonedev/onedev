@@ -17,6 +17,11 @@ public class PullRequestBuildEvent extends PullRequestEvent {
 		buildId = build.getId();
 	}
 
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
+	
 	public Build getBuild() {
 		return OneDev.getInstance(BuildManager.class).load(buildId);
 	}

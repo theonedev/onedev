@@ -83,7 +83,7 @@ public class DefaultPendingSuggestionApplyManager extends BaseEntityManager<Pend
 			compareContext.setOldCommitHash(comment.getMark().getCommitHash());
 			compareContext.setNewCommitHash(newCommitId.name());
 			change.setCompareContext(compareContext);
-			OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, "Suggestion applied");
+			OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, "Suggestion applied");
 		}
 
 		return newCommitId;

@@ -17,6 +17,11 @@ public class PullRequestReviewerRemoved extends PullRequestEvent {
 		super(user, date, request);
 		reviewerId = reviewer.getId();
 	}
+
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
 	
 	@Override
 	public String getActivity() {

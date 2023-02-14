@@ -72,7 +72,7 @@ public abstract class SuggestionApplyModalPanel extends BeanEditModalPanel<Sugge
 					compareContext.setOldCommitHash(mark.getCommitHash());
 					compareContext.setNewCommitHash(newCommitId.name());
 					change.setCompareContext(compareContext);
-					OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, "Suggestion applied");
+					OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, "Suggestion applied");
 				}
 
 				if (request != null) {

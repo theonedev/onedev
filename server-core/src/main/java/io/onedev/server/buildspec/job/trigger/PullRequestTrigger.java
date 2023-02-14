@@ -1,16 +1,10 @@
 package io.onedev.server.buildspec.job.trigger;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.eclipse.jgit.lib.Repository;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -20,6 +14,11 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.eclipse.jgit.lib.Repository;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
 
 public abstract class PullRequestTrigger extends JobTrigger {
 
@@ -89,6 +88,8 @@ public abstract class PullRequestTrigger extends JobTrigger {
 		Matcher matcher = new PathMatcher();
 		if ((branches == null || PatternSet.parse(branches).matches(matcher, targetBranch)) 
 				&& touchedFile(request)) {
+			
+			Long requestId = request.getId();
 			return new SubmitReason() {
 
 				@Override
@@ -98,7 +99,7 @@ public abstract class PullRequestTrigger extends JobTrigger {
 
 				@Override
 				public PullRequest getPullRequest() {
-					return request;
+					return OneDev.getInstance(PullRequestManager.class).load(requestId);
 				}
 
 				@Override

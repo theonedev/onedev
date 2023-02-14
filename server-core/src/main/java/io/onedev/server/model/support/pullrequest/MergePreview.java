@@ -1,12 +1,11 @@
 package io.onedev.server.model.support.pullrequest;
 
-import java.io.Serializable;
+import io.onedev.server.model.PullRequest;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-
-import io.onedev.server.model.PullRequest;
+import java.io.Serializable;
 
 @SuppressWarnings("serial")
 @Embeddable
@@ -36,18 +35,6 @@ public class MergePreview implements Serializable {
 	@Column(name=COLUMN_MERGE_COMMIT_HASH)
 	private String mergeCommitHash;
 	
-	@SuppressWarnings("unused")
-	private MergePreview() {
-	}
-	
-	public MergePreview(String targetHeadCommitHash, String headCommitHash, 
-			MergeStrategy mergeStrategy, @Nullable String mergeCommitHash) {
-		this.targetHeadCommitHash = targetHeadCommitHash;
-		this.headCommitHash = headCommitHash;
-		this.mergeStrategy = mergeStrategy;
-		this.mergeCommitHash = mergeCommitHash;
-	}
-
 	public String getTargetHeadCommitHash() {
 		return targetHeadCommitHash;
 	}
@@ -68,7 +55,7 @@ public class MergePreview implements Serializable {
 		this.headCommitHash = headCommitHash;
 	}
 
-	public void setIntegrationStrategy(MergeStrategy mergeStrategy) {
+	public void setMergeStrategy(MergeStrategy mergeStrategy) {
 		this.mergeStrategy = mergeStrategy;
 	}
 

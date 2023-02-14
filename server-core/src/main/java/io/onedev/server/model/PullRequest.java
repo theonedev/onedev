@@ -1,50 +1,8 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
-import static io.onedev.server.model.PullRequest.PROP_NO_SPACE_TITLE;
-import static io.onedev.server.model.PullRequest.PROP_STATUS;
-import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
-import static io.onedev.server.model.PullRequest.PROP_TITLE;
-import static io.onedev.server.model.PullRequest.PROP_UUID;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
-
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OptimisticLock;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
@@ -54,11 +12,12 @@ import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.infomanager.VisitInfoManager;
-import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectBelonging;
+import io.onedev.server.model.support.code.BranchProtection;
+import io.onedev.server.model.support.code.BuildRequirement;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
@@ -69,6 +28,19 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.OptimisticLock;
+
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
+import static io.onedev.server.model.PullRequest.*;
 
 @Entity
 @Table(
@@ -123,14 +95,10 @@ public class PullRequest extends ProjectBelonging
 
 	public static final String PROP_COMMENTS = "comments";
 	
-	public static final String PROP_CHANGES = "changes";
-	
 	public static final String NAME_COMMENT_COUNT = "Comment Count";
 	
 	public static final String PROP_COMMENT_COUNT = "commentCount";
 
-	public static final String NAME_SUBMITTER = "Submitter";
-	
 	public static final String PROP_SUBMITTER = "submitter";
 	
 	public static final String NAME_SUBMIT_DATE = "Submit Date";
@@ -149,7 +117,7 @@ public class PullRequest extends ProjectBelonging
 	
 	public static final String PROP_STATUS = "status";
 	
-	public static final String PROP_LAST_MERGE_PREVIEW = "lastMergePreview";
+	public static final String PROP_MERGE_PREVIEW = "mergePreview";
 	
 	public static final String PROP_REVIEWS = "reviews";
 	
@@ -163,8 +131,6 @@ public class PullRequest extends ProjectBelonging
 
 	public static final String REFS_PREFIX = "refs/pulls/";
 
-	public static final int MAX_CODE_COMMENTS = 1000;
-	
 	private static final int MAX_CHECK_ERROR_LEN = 1024;
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
@@ -242,6 +208,9 @@ public class PullRequest extends ProjectBelonging
 	@Column(nullable=false)
 	private String baseCommitHash;
 	
+	@Column
+	private String buildCommitHash;
+	
 	// used for title search in markdown editor
 	@Column(nullable=false)
 	@JsonIgnore
@@ -250,7 +219,7 @@ public class PullRequest extends ProjectBelonging
 	
 	@JsonIgnore
 	@Embedded
-	private MergePreview lastMergePreview;
+	private MergePreview mergePreview;
 	
 	@Column(nullable=false)
 	@OptimisticLock(excluded=true)
@@ -328,7 +297,7 @@ public class PullRequest extends ProjectBelonging
 	
 	private transient Collection<RevCommit> pendingCommits;
 	
-	private transient Collection<String> requiredJobs;
+	private transient BuildRequirement buildRequirement;
 	
 	private transient Collection<Build> currentBuilds;
 	
@@ -451,7 +420,16 @@ public class PullRequest extends ProjectBelonging
 	public void setBaseCommitHash(String baseCommitHash) {
 		this.baseCommitHash = baseCommitHash;
 	}
-	
+
+	@Nullable
+	public String getBuildCommitHash() {
+		return buildCommitHash;
+	}
+
+	public void setBuildCommitHash(@Nullable String buildCommitHash) {
+		this.buildCommitHash = buildCommitHash;
+	}
+
 	public RevCommit getBaseCommit() {
 		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()), true);
 	}
@@ -552,7 +530,7 @@ public class PullRequest extends ProjectBelonging
 	
 	/**
 	 * Get last merge preview of this pull request. Note that this method may return an 
-	 * outdated merge preview. Refer to {@link this#getLastMergePreview()}
+	 * outdated merge preview. Refer to {@link this#getMergePreview()}
 	 * if you'd like to get an update-to-date merge preview
 	 *  
 	 * @return
@@ -560,16 +538,16 @@ public class PullRequest extends ProjectBelonging
 	 * 			preview has not been calculated yet. 
 	 */
 	@Nullable
-	public MergePreview getLastMergePreview() {
-		return lastMergePreview;
+	public MergePreview getMergePreview() {
+		return mergePreview;
 	}
 	
-	public void setLastMergePreview(MergePreview lastIntegrationPreview) {
-		this.lastMergePreview = lastIntegrationPreview;
+	public void setMergePreview(MergePreview mergePreview) {
+		this.mergePreview = mergePreview;
 	}
 
 	/**
-	 * Get effective merge preview of this pull request.
+	 * Check merge preview of this pull request.
 	 * 
 	 * @return
 	 * 			update to date merge preview of this pull request, or <tt>null</tt> if 
@@ -578,14 +556,14 @@ public class PullRequest extends ProjectBelonging
 	 * 			to get the calculated result 
 	 */
 	@Nullable
-	public MergePreview getMergePreview() {
+	public MergePreview checkMergePreview() {
 		if (isOpen()) {
-			if (lastMergePreview != null && lastMergePreview.isUpToDate(this))
-				return lastMergePreview;
+			if (mergePreview != null && mergePreview.isUpToDate(this))
+				return mergePreview;
 			else
 				return null;
 		} else {
-			return lastMergePreview;
+			return mergePreview;
 		}
 	}
 	
@@ -639,6 +617,11 @@ public class PullRequest extends ProjectBelonging
 		return PullRequest.REFS_PREFIX + getNumber() + "/merge";
 	}
 
+	public String getBuildRef() {
+		Preconditions.checkNotNull(getId());
+		return PullRequest.REFS_PREFIX + getNumber() + "/build";
+	}
+	
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
 		return PullRequest.REFS_PREFIX + getNumber() + "/head";
@@ -684,18 +667,9 @@ public class PullRequest extends ProjectBelonging
 	
 	public Collection<Build> getCurrentBuilds() {
 		if (currentBuilds == null) {
-			currentBuilds = new ArrayList<>();
-			MergePreview preview = getMergePreview();
-			if (preview != null) {
-				currentBuilds.addAll(builds.stream()
-						.filter(it->it.getCommitHash().equals(preview.getMergeCommitHash()))
-						.collect(Collectors.toList()));
-			}
-			if (isDiscarded()) {
-				currentBuilds.addAll(builds.stream()
-						.filter(it->it.getCommitHash().equals(getLatestUpdate().getTargetHeadCommitHash()))
-						.collect(Collectors.toList()));
-			} 
+			currentBuilds = builds.stream()
+						.filter(it->it.getCommitHash().equals(getBuildCommitHash()))
+						.collect(Collectors.toList());
 		} 
 		return currentBuilds;
 	}
@@ -898,16 +872,31 @@ public class PullRequest extends ProjectBelonging
 		return true;
 	}
 	
-	public boolean isRequiredBuildsSuccessful() {
-		Collection<String> requiredJobs = new ArrayList<>(getRequiredJobs());
+	public boolean isBuildCommitOutdated() {
+		MergePreview mergePreview = checkMergePreview();
+		if (getBuildCommitHash() != null) {
+			return mergePreview == null
+					|| mergePreview.getMergeCommitHash() == null
+					|| !mergePreview.getMergeCommitHash().equals(getBuildCommitHash());
+		} else {
+			return mergePreview != null || mergePreview.getMergeCommitHash() != null;
+		}
+	}
+	
+	public boolean isBuildRequirementSatisfied() {
+		BuildRequirement requirement = getBuildRequirement();
+		if (requirement.isStictMode() && !requirement.getRequiredJobs().isEmpty() && isBuildCommitOutdated())
+			return false;
+		
 		for (Build build: getCurrentBuilds()) {
-			if (requiredJobs.contains(build.getJobName()) && build.getStatus() != Build.Status.SUCCESSFUL)
+			if (requirement.getRequiredJobs().contains(build.getJobName()) && build.getStatus() != Build.Status.SUCCESSFUL)
 				return false;
 		}
+		
 		return getCurrentBuilds().stream()
-				.map(it->it.getJobName())
+				.map(it -> it.getJobName())
 				.collect(Collectors.toSet())
-				.containsAll(requiredJobs);
+				.containsAll(requirement.getRequiredJobs());
 	}
 	
 	public boolean isSignatureRequirementSatisfied() {
@@ -967,24 +956,24 @@ public class PullRequest extends ProjectBelonging
 		return "#" + getNumber() + " - " + getTitle();
 	}
 	
-	public Collection<String> getRequiredJobs() {
-		if (requiredJobs == null) {
-			MergePreview preview = getMergePreview();
+	public BuildRequirement getBuildRequirement() {
+		if (buildRequirement == null) {
+			MergePreview preview = checkMergePreview();
 			if (preview != null && preview.getMergeCommitHash() != null) {
 				BranchProtection protection = getTargetProject().getHierarchyBranchProtection(getTargetBranch(), getSubmitter());
 				ObjectId targetCommitId = getTarget().getObjectId(false);
 				ObjectId mergeCommitId = getTargetProject().getObjectId(preview.getMergeCommitHash(), false);
 				if (targetCommitId != null && mergeCommitId != null) {
-					requiredJobs = protection.getRequiredJobs(getTargetProject(), targetCommitId, 
+					buildRequirement = protection.getBuildRequirement(getTargetProject(), targetCommitId, 
 							mergeCommitId, new HashMap<>());
 				} else {
-					requiredJobs = new HashSet<>();
+					buildRequirement = new BuildRequirement(new HashSet<>(), false);
 				}
 			} else {
-				requiredJobs = new HashSet<>();
+				buildRequirement = new BuildRequirement(new HashSet<>(), false);
 			}
 		}
-		return requiredJobs;
+		return buildRequirement;
 	}
 	
 	@Nullable
@@ -994,14 +983,14 @@ public class PullRequest extends ProjectBelonging
     	String checkError = getCheckError();
     	if (checkError != null)
     		return "Pull request is in error: " + checkError;
-    	MergePreview preview = getMergePreview();
+    	MergePreview preview = checkMergePreview();
     	if (preview == null)
     		return "Merge preview not calculated yet";
     	if (preview.getMergeCommitHash() == null)
     		return "There are merge conflicts";
     	if (!isAllReviewsApproved())
     		return "Waiting for approvals";
-    	if (!isRequiredBuildsSuccessful())
+    	if (!isBuildRequirementSatisfied())
     		return "Some required builds not passed";
     	if (!isSignatureRequirementSatisfied())
     		return "No valid signature for head commit";
@@ -1045,7 +1034,7 @@ public class PullRequest extends ProjectBelonging
 			return "Source branch no longer exists";
 		if (getSource().isDefault())
 			return "Source branch is default branch";
-		MergePreview preview = getMergePreview();
+		MergePreview preview = checkMergePreview();
 		if (preview == null)
 			return "Merge preview not calculated yet";
 		if (!getSource().getObjectName().equals(preview.getHeadCommitHash()) 

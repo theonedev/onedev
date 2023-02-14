@@ -1252,7 +1252,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
 		change.setCompareContext(getCompareContext());
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
 	}
 	
 	private SuggestionSupport getSuggestionSupport(Mark mark) {

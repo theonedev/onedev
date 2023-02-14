@@ -1,12 +1,7 @@
 package io.onedev.server.model.support.code;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -62,6 +57,8 @@ public class BranchProtection implements Serializable {
 	private List<String> jobNames = new ArrayList<>();
 	
 	private List<FileProtection> fileProtections = new ArrayList<>();
+	
+	private boolean requireStrictBuilds;
 
 	public boolean isEnabled() {
 		return enabled;
@@ -176,7 +173,19 @@ public class BranchProtection implements Serializable {
 	public void setFileProtections(List<FileProtection> fileProtections) {
 		this.fileProtections = fileProtections;
 	}
-	
+
+	@Editable(order=800, name="Require Strict Pull Request Builds", description = "When target branch of a pull request " +
+			"has new commits, merge commit of the pull request will be recalculated, and this option tells whether or " +
+			"not to accept pull request builds ran on previous merged commit. If enabled, you will need to re-run " +
+			"required builds on the new merge commit. This setting takes effect only when required builds are specified")
+	public boolean isRequireStrictBuilds() {
+		return requireStrictBuilds;
+	}
+
+	public void setRequireStrictBuilds(boolean requireStrictBuilds) {
+		this.requireStrictBuilds = requireStrictBuilds;
+	}
+
 	public FileProtection getFileProtection(String file) {
 		Set<String> jobNames = new HashSet<>();
 		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null, true);
@@ -279,8 +288,6 @@ public class BranchProtection implements Serializable {
 	 *
 	 * @param user
 	 * 			user to be checked
-	 * @param branchName
-	 * 			branchName to be checked
 	 * @param oldObjectId
 	 * 			old object id of the ref
 	 * @param newObjectId
@@ -305,12 +312,12 @@ public class BranchProtection implements Serializable {
 		return false;
 	}
 
-	public Collection<String> getRequiredJobs(Project project, ObjectId oldObjectId, ObjectId newObjectId, 
-			Map<String, String> gitEnvs) {
-		Collection<String> requiredJobs = new HashSet<>(getJobNames());
+	public BuildRequirement getBuildRequirement(Project project, ObjectId oldObjectId, ObjectId newObjectId,
+												Map<String, String> gitEnvs) {
+		Collection<String> requiredJobs = new LinkedHashSet<>(getJobNames());
 		for (String changedFile: getGitService().getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) 
 			requiredJobs.addAll(getFileProtection(changedFile).getJobNames());
-		return requiredJobs;
+		return new BuildRequirement(requiredJobs, isRequireStrictBuilds());
 	}
 	
 	private GitService getGitService() {
@@ -319,15 +326,15 @@ public class BranchProtection implements Serializable {
 	
 	public boolean isBuildRequiredForPush(Project project, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
-		Collection<String> requiredJobNames = getRequiredJobs(project, oldObjectId, newObjectId, gitEnvs);
+		Collection<String> requiredJobs = getBuildRequirement(project, oldObjectId, newObjectId, gitEnvs).getRequiredJobs();
 
 		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId, null);
 		for (Build build: builds) {
-			if (requiredJobNames.contains(build.getJobName()) && build.getStatus() != Status.SUCCESSFUL)
+			if (requiredJobs.contains(build.getJobName()) && build.getStatus() != Status.SUCCESSFUL)
 				return true;
 		}
-		requiredJobNames.removeAll(builds.stream().map(it->it.getJobName()).collect(Collectors.toSet()));
-		return !requiredJobNames.isEmpty();			
+		requiredJobs.removeAll(builds.stream().map(it->it.getJobName()).collect(Collectors.toSet()));
+		return !requiredJobs.isEmpty();			
 	}
 
 }

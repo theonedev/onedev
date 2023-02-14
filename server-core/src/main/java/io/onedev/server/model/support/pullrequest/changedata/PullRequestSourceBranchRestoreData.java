@@ -9,4 +9,9 @@ public class PullRequestSourceBranchRestoreData extends PullRequestChangeData {
 		return "restored source branch";
 	}
 
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
+	
 }

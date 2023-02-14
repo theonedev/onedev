@@ -870,7 +870,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 
 	@Override
 	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
 	}
 	
 	@Override

@@ -32,7 +32,7 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 		String commitMessage = null;
 		String description = null;
 		MergeStrategy mergeStrategy = getPullRequest().getMergeStrategy();
-		MergePreview mergePreview = getPullRequest().getMergePreview();
+		MergePreview mergePreview = getPullRequest().checkMergePreview();
 		if (mergeStrategy == CREATE_MERGE_COMMIT) 
 			commitMessage = "Merge pull request " + request.getNumberAndTitle();
 		else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS)  

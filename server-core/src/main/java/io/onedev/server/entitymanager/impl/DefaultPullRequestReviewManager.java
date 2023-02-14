@@ -103,7 +103,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		else
 			change.setData(new PullRequestRequestedForChangesData());
 		
-		changeManager.save(change, note);
+		changeManager.create(change, note);
 	}
 
 }

@@ -13,6 +13,11 @@ public class PullRequestCheckFailed extends PullRequestEvent {
 	}
 
 	@Override
+	public boolean isMinor() {
+		return true;
+	}
+	
+	@Override
 	public String getActivity() {
 		return "Check failed";
 	}

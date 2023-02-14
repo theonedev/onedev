@@ -9,4 +9,9 @@ public class PullRequestSourceBranchDeleteData extends PullRequestChangeData {
 		return "deleted source branch";
 	}
 
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
+	
 }

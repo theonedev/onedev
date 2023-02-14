@@ -9,8 +9,8 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface CodeCommentStatusChangeManager extends EntityManager<CodeCommentStatusChange> {
 
-	void save(CodeCommentStatusChange change, @Nullable String note);
+	void create(CodeCommentStatusChange change, @Nullable String note);
 	
-	void save(Collection<CodeCommentStatusChange> changes, @Nullable String note);
+	void create(Collection<CodeCommentStatusChange> changes, @Nullable String note);
 	
 }

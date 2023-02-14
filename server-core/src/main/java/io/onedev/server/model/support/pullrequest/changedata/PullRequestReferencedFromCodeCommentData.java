@@ -27,6 +27,11 @@ public class PullRequestReferencedFromCodeCommentData
 	}
 
 	@Override
+	public boolean isMinor() {
+		return true;
+	}
+
+	@Override
 	public CodeComment getReferencedFrom() {
 		return OneDev.getInstance(CodeCommentManager.class).get(commentId);
 	}

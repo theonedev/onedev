@@ -22,7 +22,7 @@ public class ToBeVerifiedByBuildsCriteria extends Criteria<PullRequest> {
 		Join<?, ?> join = from.join(PullRequest.PROP_BUILDS, JoinType.LEFT);
 		Path<?> status = join.get(Build.PROP_STATUS);
 		
-		Path<?> mergeCommit = PullRequestQuery.getPath(from, PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_MERGED_COMMIT_HASH);
+		Path<?> mergeCommit = PullRequestQuery.getPath(from, PullRequest.PROP_MERGE_PREVIEW + "." + MergePreview.PROP_MERGED_COMMIT_HASH);
 		Path<?> buildCommit = join.get(Build.PROP_COMMIT);
 		
 		join.on(builder.and(

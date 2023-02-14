@@ -94,7 +94,7 @@ public class PullRequestResource {
 		PullRequest pullRequest = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
 			throw new UnauthorizedException();
-    	return pullRequest.getMergePreview();
+    	return pullRequest.checkMergePreview();
     }
 	
 	@Api(order=300)

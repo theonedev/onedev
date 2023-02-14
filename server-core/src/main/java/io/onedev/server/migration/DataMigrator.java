@@ -4849,9 +4849,24 @@ public class DataMigrator {
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Projects.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
+				for (Element element : dom.getRootElement().elements()) {
 					Element buildSettingElement = element.element("buildSetting");
 					buildSettingElement.addElement("jobProperties");
+
+					for (Element branchProtectionElement : element.element("branchProtections").elements())
+						branchProtectionElement.addElement("requireStrictBuilds").setText("false");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element lastMergePreviewElement = element.element("lastMergePreview");
+					if (lastMergePreviewElement != null) {
+						lastMergePreviewElement.setName("mergePreview");
+						String mergeCommitHash = lastMergePreviewElement.elementText("mergeCommitHash");
+						if (mergeCommitHash != null)
+							element.addElement("buildCommitHash").setText(mergeCommitHash);
+					}
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Settings.xml")) {

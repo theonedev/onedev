@@ -749,7 +749,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 
 	@Override
 	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
 	}
 	
 	@Override

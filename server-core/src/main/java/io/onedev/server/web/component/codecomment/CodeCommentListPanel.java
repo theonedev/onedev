@@ -31,9 +31,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -242,7 +240,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						
 						String note = bean.getNote();
 						
-						OneDev.getInstance(CodeCommentStatusChangeManager.class).save(changes, note);
+						OneDev.getInstance(CodeCommentStatusChangeManager.class).create(changes, note);
 						selectionColumn.getSelections().clear();
 						dataProvider.detach();
 						target.add(body);

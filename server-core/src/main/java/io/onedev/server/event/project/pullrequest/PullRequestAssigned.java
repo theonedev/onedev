@@ -17,6 +17,11 @@ public class PullRequestAssigned extends PullRequestEvent {
 		super(user, date, request);
 		assigneeId = assignee.getId();
 	}
+
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
 	
 	@Override
 	public String getActivity() {

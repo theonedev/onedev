@@ -1,58 +1,24 @@
 package io.onedev.server.notification;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import io.onedev.server.entitymanager.PullRequestMentionManager;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.WordUtils;
-import org.apache.shiro.authz.Permission;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
+import io.onedev.server.entitymanager.PullRequestMentionManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
-import io.onedev.server.event.project.pullrequest.PullRequestBuildEvent;
-import io.onedev.server.event.project.pullrequest.PullRequestChanged;
-import io.onedev.server.event.project.pullrequest.PullRequestCheckFailed;
-import io.onedev.server.event.project.pullrequest.PullRequestCommented;
-import io.onedev.server.event.project.pullrequest.PullRequestEvent;
-import io.onedev.server.event.project.pullrequest.PullRequestMergePreviewCalculated;
-import io.onedev.server.event.project.pullrequest.PullRequestOpened;
-import io.onedev.server.event.project.pullrequest.PullRequestReviewRequested;
-import io.onedev.server.event.project.pullrequest.PullRequestReviewerRemoved;
-import io.onedev.server.event.project.pullrequest.PullRequestUnassigned;
-import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
+import io.onedev.server.event.project.pullrequest.*;
 import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestAssignment;
-import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
-import io.onedev.server.model.PullRequestWatch;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
@@ -61,6 +27,14 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.commenttext.MarkdownText;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
+import org.apache.shiro.authz.Permission;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class PullRequestNotificationManager extends AbstractNotificationManager {
@@ -295,27 +269,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 		}
 
-		boolean notifyWatchers = false;
-		if (event instanceof PullRequestChanged) {
-			PullRequestChangeData changeData = ((PullRequestChanged) event).getChange().getData();
-			if (changeData instanceof PullRequestApproveData
-					|| changeData instanceof PullRequestRequestedForChangesData
-					|| changeData instanceof PullRequestMergeData
-					|| changeData instanceof PullRequestDiscardData
-					|| changeData instanceof PullRequestReopenData) {
-				notifyWatchers = true;
-			}
-		} else if (!(event instanceof PullRequestMergePreviewCalculated
-				|| event instanceof PullRequestBuildEvent
-				|| event instanceof PullRequestCheckFailed
-				|| event instanceof PullRequestReviewRequested
-				|| event instanceof PullRequestReviewerRemoved
-				|| event instanceof PullRequestAssigned
-				|| event instanceof PullRequestUnassigned)) {
-			notifyWatchers = true;
-		}
-
-		if (notifyWatchers) {
+		if (!event.isMinor()) {
 			Collection<String> bccEmailAddresses = new HashSet<>();
 
 			for (PullRequestWatch watch : request.getWatches()) {

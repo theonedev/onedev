@@ -26,5 +26,10 @@ public class PullRequestReviewRequested extends PullRequestEvent {
 	public User getReviewer() {
 		return OneDev.getInstance(UserManager.class).load(reviewerId);
 	}
+
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
 	
 }

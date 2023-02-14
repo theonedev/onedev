@@ -29,14 +29,9 @@ public class DefaultCodeCommentStatusChangeManager extends BaseEntityManager<Cod
 		this.listenerRegistry = listenerRegistry;
 	}
 
-	@Override
-	public void save(CodeCommentStatusChange change) {
-		save(change, null);
-	}
-
 	@Transactional
 	@Override
-	public void save(CodeCommentStatusChange change, String note) {
+	public void create(CodeCommentStatusChange change, String note) {
 		CodeComment comment = change.getComment();
 		comment.setResolved(change.isResolved());
 		
@@ -62,9 +57,9 @@ public class DefaultCodeCommentStatusChangeManager extends BaseEntityManager<Cod
 	
 	@Transactional
 	@Override
-	public void save(Collection<CodeCommentStatusChange> changes, String note) {
+	public void create(Collection<CodeCommentStatusChange> changes, String note) {
 		for (CodeCommentStatusChange  change: changes)
-			save(change, note);
+			create(change, note);
 	}
 	
 }

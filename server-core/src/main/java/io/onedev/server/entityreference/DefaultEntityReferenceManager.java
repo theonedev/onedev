@@ -105,7 +105,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						change.setUser(SecurityUtils.getUser());
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
-						pullRequestChangeManager.save(change);
+						pullRequestChangeManager.create(change, null);
 					}
 				}
 			}
@@ -158,7 +158,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 					change.setDate(new Date());
 					change.setRequest(referencedRequest);
 					referencedRequest.getChanges().add(change);
-					pullRequestChangeManager.save(change);
+					pullRequestChangeManager.create(change, null);
 				}
 			}
 		}
@@ -214,7 +214,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						change.setUser(SecurityUtils.getUser());
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
-						pullRequestChangeManager.save(change);
+						pullRequestChangeManager.create(change, null);
 					}
 				}
 			}
@@ -271,7 +271,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 						change.setUser(SecurityUtils.getUser());
 						change.setRequest(referencedRequest);
 						referencedRequest.getChanges().add(change);
-						pullRequestChangeManager.save(change);
+						pullRequestChangeManager.create(change, null);
 					}
 				}
 			}

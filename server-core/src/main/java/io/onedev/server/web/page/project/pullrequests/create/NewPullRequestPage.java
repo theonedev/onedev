@@ -879,12 +879,16 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			@Override
 			public Component getLazyLoadComponent(String componentId) {
 				PullRequest request = getPullRequest();
-				MergePreview mergePreview = new MergePreview(request.getTarget().getObjectName(), 
-						request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);
+				MergePreview mergePreview = new MergePreview();
+				mergePreview.setTargetHeadCommitHash(request.getTarget().getObjectName());
+				mergePreview.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
+				mergePreview.setMergeStrategy(request.getMergeStrategy());
 				ObjectId merged = mergePreview.getMergeStrategy().merge(request, "Pull request merge preview");
-				if (merged != null)
+				if (merged != null) {
 					mergePreview.setMergeCommitHash(merged.name());
-				request.setLastMergePreview(mergePreview);
+					request.setBuildCommitHash(merged.name());
+				}
+				request.setMergePreview(mergePreview);
 				
 				if (merged != null) {
 					String html = String.format("<svg class='icon mt-n1 mr-1'><use xlink:href='%s'/></svg> Able to merge without conflicts", 
@@ -1073,7 +1077,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 	
 	@Override
 	public void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {
-		OneDev.getInstance(CodeCommentStatusChangeManager.class).save(change, note);
+		OneDev.getInstance(CodeCommentStatusChangeManager.class).create(change, note);
 	}
 	
 	@Override

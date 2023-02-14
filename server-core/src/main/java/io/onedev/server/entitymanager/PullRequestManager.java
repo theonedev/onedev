@@ -50,7 +50,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     void reopen(PullRequest request, @Nullable String note);
 
-    void checkAsync(PullRequest request, boolean sourceUpdated);
+    void checkAsync(PullRequest request, boolean sourceUpdated, boolean updateBuildCommit);
     
     void merge(PullRequest request, @Nullable String commitMessage);
     

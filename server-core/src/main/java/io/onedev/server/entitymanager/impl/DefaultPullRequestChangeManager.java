@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -34,7 +35,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 
 	@Transactional
 	@Override
-	public void save(PullRequestChange change, String note) {
+	public void create(PullRequestChange change, @Nullable String note) {
 		dao.persist(change);
 		
 		if (note != null && change.getUser() != null) {
@@ -48,11 +49,6 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 		}
 		
 		listenerRegistry.post(new PullRequestChanged(change, note));
-	}
-	
-	@Override
-	public void save(PullRequestChange change) {
-		save(change, null);
 	}
 	
 	@Transactional

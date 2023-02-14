@@ -30,6 +30,11 @@ public class PullRequestReferencedFromCommitData extends PullRequestChangeData {
 	}
 
 	@Override
+	public boolean isMinor() {
+		return true;
+	}
+	
+	@Override
 	public ActivityDetail getActivityDetail() {
 		return ActivityDetail.referencedFrom(getCommit());
 	}

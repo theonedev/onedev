@@ -71,16 +71,16 @@
 						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as it is <a class="more-info d-inline link-primary">pending review</a>
 					</div>
 					<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds text-warning">
-						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">required builds</a> are not successful
+						<wicket:svg href="times-circle" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not successful
 					</div>
 					<div wicket:id="unfinishedBuilds" class="unfinished-builds text-warning">
-						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">required builds</a> are not finished yet
+						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not finished yet
 					</div>
-					<wicket:enclosure child="untriggeredJobs">
-					<div class="untriggered-builds text-warning">
+					<wicket:enclosure child="requiredJobs">
+					<div class="required-jobs text-warning">
 						<wicket:svg href="warning" class="icon"></wicket:svg> 
-						Jobs required to be successful on merge commit: 
-						<span wicket:id="untriggeredJobs" class="d-inline-block mr-2">
+						<span wicket:id="requiredJobsMessage"></span> 
+						<span wicket:id="requiredJobs" class="d-inline-block mr-2">
 							<span wicket:id="jobName"></span>
 							<a wicket:id="runJob" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
 						</span>

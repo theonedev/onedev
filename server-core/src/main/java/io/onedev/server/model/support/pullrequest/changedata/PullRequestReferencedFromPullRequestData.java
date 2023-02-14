@@ -22,6 +22,11 @@ public class PullRequestReferencedFromPullRequestData
 	}
 
 	@Override
+	public boolean isMinor() {
+		return true;
+	}
+	
+	@Override
 	public String getActivity() {
 		return "referenced from other pull request";
 	}

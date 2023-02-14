@@ -51,6 +51,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
@@ -125,10 +126,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private final Map<String, Shell> jobShells = new ConcurrentHashMap<>();
 
+	private final Dao dao;
+	
 	private final ProjectManager projectManager;
 
 	private final BuildManager buildManager;
-
+	
 	private final PullRequestManager pullRequestManager;
 
 	private final ListenerRegistry listenerRegistry;
@@ -175,7 +178,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							 ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager,
 							 ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler,
 							 ClusterManager clusterManager, CodeIndexManager codeIndexManager, StorageManager storageManager,
-							 PullRequestManager pullRequestManager, GitService gitService, SSLFactory sslFactory) {
+							 PullRequestManager pullRequestManager, GitService gitService, SSLFactory sslFactory, Dao dao) {
+		this.dao = dao;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -259,6 +263,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						   Map<String, List<String>> paramMap, String pipeline, SubmitReason reason) {
 		ScriptIdentity.push(new JobIdentity(project, commitId));
 		try {
+			PullRequest request = reason.getPullRequest();
+			if (request != null) {
+				request.setBuildCommitHash(commitId.name());
+				dao.persist(request);
+			}
+			
 			Build build = new Build();
 			build.setProject(project);
 			build.setCommitHash(commitId.name());
@@ -268,7 +278,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setSubmitReason(reason.getDescription());
 			build.setSubmitter(SecurityUtils.getUser());
 			build.setRefName(reason.getRefName());
-			build.setRequest(reason.getPullRequest());
+			build.setRequest(request);
 			build.setPipeline(pipeline);
 
 			ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);

@@ -72,7 +72,7 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 					if (SecurityUtils.canAccess(getPullRequest().getTargetProject(), jobName)) {
 						List<Build> builds = new ArrayList<>(entry.getValue());
 						Collections.sort(builds);
-						boolean required = getPullRequest().getRequiredJobs().contains(jobName);
+						boolean required = getPullRequest().getBuildRequirement().getRequiredJobs().contains(jobName);
 						listOfJobBuildInfo.add(new JobBuildInfo(jobName, required, builds));
 					}
 				}
@@ -121,7 +121,7 @@ public abstract class PullRequestJobsPanel extends GenericPanel<List<JobBuildInf
 							
 							@Override
 							protected Component newListLink(String componentId) {
-								MergePreview mergePreview = getPullRequest().getMergePreview();
+								MergePreview mergePreview = getPullRequest().checkMergePreview();
 								if (mergePreview != null && mergePreview.getMergeCommitHash() != null) {
 									String query = "" 
 											+ quote(NAME_PULL_REQUEST) + " " + getRuleName(Is) + " " + quote("#" + getPullRequest().getNumber())

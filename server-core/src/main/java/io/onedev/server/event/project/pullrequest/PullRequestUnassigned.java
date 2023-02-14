@@ -30,4 +30,9 @@ public class PullRequestUnassigned extends PullRequestEvent {
 		return OneDev.getInstance(UserManager.class).load(assigneeId);
 	}
 
+	@Override
+	public boolean isMinor() {
+		return true;
+	}
+	
 }

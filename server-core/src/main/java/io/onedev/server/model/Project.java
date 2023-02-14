@@ -1165,6 +1165,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		boolean noDeletion = false;
 		boolean noForcedPush = false;
 		boolean signatureRequired = false;
+		boolean requireStrictBuilds = false;
 		
 		Set<String> jobNames = new HashSet<>();
 		List<FileProtection> fileProtections = new ArrayList<>();
@@ -1177,6 +1178,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 				noDeletion = noDeletion || protection.isPreventDeletion();
 				noForcedPush = noForcedPush || protection.isPreventForcedPush();
 				signatureRequired = signatureRequired || protection.isSignatureRequired();
+				requireStrictBuilds = requireStrictBuilds || protection.isRequireStrictBuilds();
 				jobNames.addAll(protection.getJobNames());
 				fileProtections.addAll(protection.getFileProtections());
 				reviewRequirement.mergeWith(protection.getParsedReviewRequirement());
@@ -1190,6 +1192,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		protection.setPreventDeletion(noDeletion);
 		protection.setPreventForcedPush(noForcedPush);
 		protection.setSignatureRequired(signatureRequired);
+		protection.setRequireStrictBuilds(requireStrictBuilds);
 		protection.setParsedReviewRequirement(reviewRequirement);
 		
 		return protection;

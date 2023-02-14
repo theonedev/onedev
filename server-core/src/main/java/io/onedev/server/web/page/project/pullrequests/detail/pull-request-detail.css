@@ -34,7 +34,7 @@
 	margin-left: -2px;
 	margin-right: 4px;
 }
-.pull-request-detail>.card-body>.main>.summary .untriggered-builds .icon {
+.pull-request-detail>.card-body>.main>.summary .required-jobs .icon {
 	width: 16px;
 	height: 16px;
 	margin-bottom: 1px;

@@ -117,7 +117,7 @@ public class JobRunResource {
 			if (!SecurityUtils.canRunJob(pullRequest.getProject(), jobRun.getJobName()))		
 				throw new UnauthorizedException();
 
-			MergePreview preview = pullRequest.getMergePreview();
+			MergePreview preview = pullRequest.checkMergePreview();
 			if (preview == null)
 				throw new ValidationException("Pull request merge preview not calcualted yet");
 			if (preview.getMergeCommitHash() == null)
