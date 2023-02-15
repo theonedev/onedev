@@ -87,7 +87,7 @@ public abstract class MilestoneDetailPage extends ProjectPage implements ScriptI
 				if (redirectUrlAfterDelete != null)
 					throw new RedirectToUrlException(redirectUrlAfterDelete);
 				else
-					setResponsePage(getPageClass(), getPageParameters());
+					setResponsePage(MilestoneListPage.class, MilestoneListPage.paramsOf(getProject()));
 			}
 
 			@Override
