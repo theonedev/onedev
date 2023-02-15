@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.entitymanager.*;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
@@ -28,11 +29,6 @@ import org.unbescape.javascript.JavaScriptEscape;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -254,8 +250,19 @@ public class MarkdownViewer extends GenericPanel<String> {
 					}
 					break;
 				case "commit":
-					RevCommit commit = getProject().getRevCommit(ObjectId.fromString(referenceId), false);
-					if (commit != null && SecurityUtils.canReadCode(getProject())) {
+					Project commitProject = getProject();
+					String commitHash;
+					if (referenceId.contains(":")) {
+						commitProject = OneDev.getInstance(ProjectManager.class)
+								.findByPath(StringUtils.substringBefore(referenceId, ":"));
+						commitHash = StringUtils.substringAfter(referenceId, ":");
+					} else {
+						commitHash = referenceId;
+					}
+					RevCommit commit = null;
+					if (commitProject != null)
+						commit = commitProject.getRevCommit(ObjectId.fromString(commitHash), false);
+					if (commit != null && SecurityUtils.canReadCode(commitProject)) {
 						String script = String.format("onedev.server.markdown.renderCommitTooltip('%s', '%s', '%s');", 
 								JavaScriptEscape.escapeJavaScript(commit.getAuthorIdent().getName()), 
 								JavaScriptEscape.escapeJavaScript(DateUtils.formatAge(commit.getCommitterIdent().getWhen())), 

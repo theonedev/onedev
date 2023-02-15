@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.util.validation.ProjectPathValidator;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jsoup.nodes.Document;
@@ -26,7 +29,8 @@ public class CommitProcessor implements MarkdownProcessor {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "a");
 
-	private static final Pattern PATTERN_COMMIT = Pattern.compile("(^|\\s)([a-z0-9]{40})($|\\s)");
+	private static final Pattern PATTERN_COMMIT = Pattern.compile(
+			"(^|\\W+)((" + ProjectPathValidator.PATTERN.pattern() + "):)?([a-z0-9]{40})($|[^a-z0-9])");
 	
 	@Override
 	public void process(Document document, @Nullable Project project, 
@@ -44,21 +48,33 @@ public class CommitProcessor implements MarkdownProcessor {
 			
 			NodeTraversor.traverse(visitor, document);
 			
+			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 			for (TextNode node : visitor.getMatchedNodes()) {
 				Matcher matcher = PATTERN_COMMIT.matcher(node.getWholeText());
 				while (matcher.find()) {
-					String commitHash = matcher.group(2);
-					String commitTag;
-					ObjectId commitId = ObjectId.fromString(commitHash);
-					if (project.getRevCommit(commitId, false) != null) {
-						CharSequence url = RequestCycle.get().urlFor(
-								CommitDetailPage.class, CommitDetailPage.paramsOf(project, commitId.name())); 
-						commitTag = String.format("<a href='%s' class='commit reference' data-reference='%s'>%s</a>", url, commitId.name(), 
-								GitUtils.abbreviateSHA(commitId.name()));
-					} else {
-						commitTag = commitId.name();
+					String commitReplacement;
+					String commitProjectPath = matcher.group(3);
+					String commitHash = matcher.group(5);
+					Project commitProject = project;
+					String commitPrefix = "";
+					if (commitProjectPath != null) {
+						commitProject = projectManager.findByPath(commitProjectPath);
+						commitPrefix = commitProjectPath + ":";
 					}
-					HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + commitTag + matcher.group(3));
+					if (commitProject != null) {
+						ObjectId commitId = ObjectId.fromString(commitHash);
+						if (commitProject.getRevCommit(commitId, false) != null) {
+							CharSequence url = RequestCycle.get().urlFor(
+									CommitDetailPage.class, CommitDetailPage.paramsOf(commitProject, commitId.name()));
+							commitReplacement = String.format("<a href='%s' class='commit reference' data-reference='%s'>%s</a>", 
+									url, commitPrefix + commitId.name(), commitPrefix + GitUtils.abbreviateSHA(commitId.name()));
+						} else {
+							commitReplacement = commitPrefix + commitHash;
+						}
+					} else {
+						commitReplacement = commitPrefix + commitHash; 
+					}
+					HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + commitReplacement + matcher.group(6));
 				}
 				HtmlUtils.appendTail(matcher, node);
 			}

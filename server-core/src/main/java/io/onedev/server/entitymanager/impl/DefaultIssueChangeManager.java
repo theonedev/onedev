@@ -507,8 +507,12 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 							});
 							try {
 								for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
+									String commitFQN = newCommitId.name();
+									if (!project.equals(issue.getProject()))
+										commitFQN = project.getPath() + ":" + commitFQN;
 									changeState(issue, transition.getToState(), new HashMap<>(), 
-											transition.getRemoveFields(), "State changed as code fixing the issue is committed");
+											transition.getRemoveFields(), 
+											"State changed as code fixing the issue is committed (" + commitFQN + ")");
 								}
 							} finally {
 								ProjectScopedCommit.pop();

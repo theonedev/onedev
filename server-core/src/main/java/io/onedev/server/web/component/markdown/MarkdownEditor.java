@@ -416,14 +416,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				case "referenceQuery":
 					String referenceQuery = params.getParameterValue("param1").toOptionalString();
 					String referenceQueryType = params.getParameterValue("param2").toOptionalString();
-					String referenceProjectName = params.getParameterValue("param3").toOptionalString();
+					String referenceProjectPath = params.getParameterValue("param3").toOptionalString();
 					List<Map<String, String>> referenceList = new ArrayList<>();
 					Project referenceProject;
-					if (StringUtils.isNotBlank(referenceProjectName)) 
-						referenceProject = OneDev.getInstance(ProjectManager.class).findByPath(referenceProjectName);
+					if (StringUtils.isNotBlank(referenceProjectPath)) 
+						referenceProject = OneDev.getInstance(ProjectManager.class).findByPath(referenceProjectPath);
 					else
 						referenceProject = null;
-					if (referenceProject != null || StringUtils.isBlank(referenceProjectName)) {
+					if (referenceProject != null || StringUtils.isBlank(referenceProjectPath)) {
 						if ("issue".equals(referenceQueryType)) {
 							for (Issue issue: getReferenceSupport().findIssues(referenceProject, referenceQuery, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
