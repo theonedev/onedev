@@ -1,14 +1,33 @@
 package io.onedev.server.web.page.admin.usermanagement;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import com.google.common.collect.Sets;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import io.onedev.server.web.component.user.UserAvatar;
+import io.onedev.server.web.page.HomePage;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.PagingHistorySupport;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
@@ -30,28 +49,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Similarities;
-import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.component.user.UserAvatar;
-import io.onedev.server.web.page.HomePage;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class UserListPage extends AdministrationPage {
@@ -59,7 +62,7 @@ public class UserListPage extends AdministrationPage {
 	private static final String PARAM_PAGE = "page";
 	
 	private static final String PARAM_QUERY = "query";
-
+	
 	private final IModel<List<User>> usersModel = new LoadableDetachableModel<List<User>>() {
 
 		@Override
@@ -83,6 +86,10 @@ public class UserListPage extends AdministrationPage {
 	private TextField<String> searchField;
 	
 	private DataTable<User, Void> usersTable;
+
+	private SortableDataProvider<User, Void> dataProvider;
+			
+	private SelectionColumn<User, Void> selectionColumn;
 	
 	private String query;
 	
@@ -101,6 +108,7 @@ public class UserListPage extends AdministrationPage {
 		getPageParameters().set(PARAM_QUERY, query);
 		target.add(searchField);
 		target.add(usersTable);
+		selectionColumn.getSelections().clear();
 	}
 
 	@Override
@@ -141,6 +149,7 @@ public class UserListPage extends AdministrationPage {
 				
 				usersTable.setCurrentPage(0);
 				target.add(usersTable);
+				selectionColumn.getSelections().clear();
 				
 				typing = true;
 			}
@@ -169,8 +178,411 @@ public class UserListPage extends AdministrationPage {
 			}
 			
 		});
+
+		add(new MenuLink("operations") {
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				List<MenuItem> menuItems = new ArrayList<>();
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set Selected Users to Use Internal Authentication";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								new ConfirmModalPanel(target) {
+
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										getUserManager().useInternalAuthentication(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()));
+										target.add(usersTable);
+										selectionColumn.getSelections().clear();
+										Session.get().success("Set to use internal authentication successfully");
+									}
+
+									@Override
+									protected String getConfirmMessage() {
+										return "Passwords of selected users will be reset to use internal authentication. Type <code>yes</code> to confirm";
+									}
+
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+
+								};
+								
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select users to set to use internal authentication");
+								}
+							}
+
+						};
+					}
+
+				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set Selected Users to Use External Authentication";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								new ConfirmModalPanel(target) {
+
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										getUserManager().useExternalAuthentication(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()));
+										target.add(usersTable);
+										selectionColumn.getSelections().clear();
+										Session.get().success("Set to use external authentication successfully");
+									}
+
+									@Override
+									protected String getConfirmMessage() {
+										return "Passwords of selected users will be cleared to use external authentication. Type <code>yes</code> to confirm";
+									}
+
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+
+								};
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select users to set to use external authentication");
+								}
+							}
+
+						};
+					}
+
+				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Delete Selected Users";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								for (var model: selectionColumn.getSelections()) {
+									var user = model.getObject();
+									if (user.isRoot()) {
+										Session.get().error("Can not delete root account");
+										return;
+									} else if (user.equals(SecurityUtils.getUser())) {
+										Session.get().error("Can not delete yourself");
+										return;
+									}
+								}
+								
+								new ConfirmModalPanel(target) {
+
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										getUserManager().delete(selectionColumn.getSelections().stream().map(IModel::getObject).collect(Collectors.toSet()));
+										target.add(usersTable);
+										selectionColumn.getSelections().clear();
+										Session.get().success("Users deleted successfully");
+									}
+
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to confirm deleting selected users";
+									}
+
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+
+								};
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select users to delete");
+								}
+							}
+
+						};
+					}
+
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set All Queried Users to Use Internal Authentication";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+
+								new ConfirmModalPanel(target) {
+
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<User> users = new ArrayList<>();
+										for (Iterator<User> it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
+											users.add(it.next());
+										getUserManager().useInternalAuthentication(users);
+										target.add(usersTable);
+										selectionColumn.getSelections().clear();
+
+										Session.get().success("Set to use internal authentication successfully");
+									}
+
+									@Override
+									protected String getConfirmMessage() {
+										return "Passwords of all queried users will be reset to use internal authentication. Type <code>yes</code> to confirm";
+									}
+
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+
+								};
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(usersTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No users to set to use internal authentication");
+								}
+							}
+
+						};
+					}
+
+				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Set All Queried Users to Use External Authentication";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+
+								new ConfirmModalPanel(target) {
+
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<User> users = new ArrayList<>();
+										for (Iterator<User> it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
+											users.add(it.next());
+										getUserManager().useExternalAuthentication(users);
+										target.add(usersTable);
+										selectionColumn.getSelections().clear();
+
+										Session.get().success("Set to use external authentication successfully");
+									}
+
+									@Override
+									protected String getConfirmMessage() {
+										return "Passwords of all queried users will be cleared to use external authentication. Type <code>yes</code> to confirm";
+									}
+
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+
+								};
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(usersTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No users to set to use external authentication");
+								}
+							}
+
+						};
+					}
+
+				});
+
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Delete All Queried Users";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+
+								for (Iterator<User> it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();) {
+									var user = it.next();
+									if (user.isRoot()) {
+										Session.get().error("Can not delete root account");
+										return;
+									} else if (user.equals(SecurityUtils.getUser())) {
+										Session.get().error("Can not delete yourself");
+										return;
+									}
+								}
+								
+								new ConfirmModalPanel(target) {
+
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<User> users = new ArrayList<>();
+										for (Iterator<User> it = (Iterator<User>) dataProvider.iterator(0, usersTable.getItemCount()); it.hasNext();)
+											users.add(it.next());
+										getUserManager().delete(users);
+										target.add(usersTable);
+										dataProvider.detach();
+										usersModel.detach();
+										selectionColumn.getSelections().clear();
+
+										Session.get().success("Users deleted successfully");
+									}
+
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to confirm deleting all queried users";
+									}
+
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+
+								};
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(usersTable.getItemCount() != 0);
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No users to delete");
+								}
+							}
+
+						};
+					}
+
+				});
+				
+				return menuItems;
+			}
+
+		});		
 		
 		List<IColumn<User, Void>> columns = new ArrayList<>();
+
+		columns.add(selectionColumn = new SelectionColumn<User, Void>());
 		
 		columns.add(new AbstractColumn<User, Void>(Model.of("Login Name")) {
 
@@ -255,47 +667,6 @@ public class UserListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionsFrag", UserListPage.this);
 				
-				fragment.add(new AjaxLink<Void>("delete") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						User user = rowModel.getObject();
-						OneDev.getInstance(UserManager.class).delete(user);
-						Session.get().success("User '" + user.getDisplayName() + "' deleted");
-						
-						target.add(usersTable);
-					}
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						
-						User user = rowModel.getObject();
-						String message = "Do you really want to delete user '" + user.getDisplayName() + "'?";
-						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						if (!isEnabled())
-							tag.put("disabled", "disabled");
-						User user = rowModel.getObject();
-						if (user.isRoot())
-							tag.put("title", "Root user can not be deleted");
-						else if (user.equals(SecurityUtils.getUser()))
-							tag.put("title", "You can not delete yourself");
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						User user = rowModel.getObject();
-						setEnabled(!user.isRoot() && !user.equals(SecurityUtils.getUser()));
-					}
-
-				});
-				
 				fragment.add(new Link<Void>("impersonate") {
 
 					@Override
@@ -316,7 +687,7 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		
-		SortableDataProvider<User, Void> dataProvider = new LoadableDetachableDataProvider<User, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<User, Void>() {
 
 			@Override
 			public Iterator<? extends User> iterator(long first, long count) {

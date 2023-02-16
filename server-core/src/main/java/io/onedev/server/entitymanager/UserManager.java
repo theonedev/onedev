@@ -32,6 +32,12 @@ public interface UserManager extends EntityManager<User> {
 	
 	void delete(User user);
 	
+	void delete(Collection<User> users);
+	
+	void useInternalAuthentication(Collection<User> users);
+	
+	void useExternalAuthentication(Collection<User> users);
+	
 	/**
 	 * Find root user in the system. 
 	 * 

@@ -1,8 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import static io.onedev.server.model.User.PROP_PASSWORD;
-import static io.onedev.server.model.User.PROP_SSO_CONNECTOR;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -14,6 +11,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import io.onedev.server.util.CryptoUtils;
+import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.Permission;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
@@ -58,6 +57,8 @@ import io.onedev.server.util.usage.Usage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.onedev.server.model.User.*;
+
 @Singleton
 public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
 
@@ -78,14 +79,17 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     private final TransactionManager transactionManager;
     
     private final ClusterManager clusterManager;
+	
+	private final PasswordService passwordService;
     
 	private volatile UserCache cache;
 	
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
-    		IssueFieldManager issueFieldManager, IdManager idManager, GroupManager groupManager,
-    		EmailAddressManager emailAddressManager, TransactionManager transactionManager,
-    		ClusterManager clusterManager) {
+							  IssueFieldManager issueFieldManager, IdManager idManager, 
+							  GroupManager groupManager, EmailAddressManager emailAddressManager, 
+							  TransactionManager transactionManager, ClusterManager clusterManager, 
+							  PasswordService passwordService) {
         super(dao);
         
         this.projectManager = projectManager;
@@ -96,6 +100,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
         this.transactionManager = transactionManager;
         this.groupManager = groupManager;
         this.clusterManager = clusterManager;
+		this.passwordService = passwordService;
     }
 
 	@Transactional
@@ -246,7 +251,32 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	
 		dao.remove(user);
     }
+	
+	@Transactional
+	@Override
+	public void delete(Collection<User> users) {
+		for (var user: users)
+			delete(user);
+	}
 
+	@Transactional
+	@Override
+	public void useInternalAuthentication(Collection<User> users) {
+		for (var user: users) {
+			user.setPassword(passwordService.encryptPassword(CryptoUtils.generateSecret()));
+			user.setSsoConnector(null);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void useExternalAuthentication(Collection<User> users) {
+		for (var user: users) {
+			user.setPassword(EXTERNAL_MANAGED);
+			user.setSsoConnector(null);
+		}
+	}
+	
 	@Sessional
     @Override
     public User findByName(String userName) {
