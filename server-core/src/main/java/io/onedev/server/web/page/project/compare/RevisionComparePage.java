@@ -1,37 +1,6 @@
 package io.onedev.server.web.page.project.compare;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.codequality.CodeProblem;
@@ -43,12 +12,7 @@ import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.CodeCommentStatusChange;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.commit.CommitQuery;
@@ -73,6 +37,28 @@ import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPa
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.RevisionDiff;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class RevisionComparePage extends ProjectPage implements RevisionDiff.AnnotationSupport, EditParamsAware {

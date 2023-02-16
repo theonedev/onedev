@@ -1,16 +1,40 @@
 package io.onedev.server.web.component.commit.list;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.command.RevListOptions;
+import io.onedev.server.git.service.GitService;
+import io.onedev.server.git.service.RefFacade;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.search.commit.*;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Constants;
+import io.onedev.server.util.ProjectAndRevision;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.behavior.CommitQueryBehavior;
+import io.onedev.server.web.behavior.RunTaskBehavior;
+import io.onedev.server.web.component.commit.message.CommitMessagePanel;
+import io.onedev.server.web.component.commit.status.CommitStatusLink;
+import io.onedev.server.web.component.commit.status.CommitStatusSupport;
+import io.onedev.server.web.component.contributorpanel.ContributorPanel;
+import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.util.QuerySaveSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -47,46 +71,9 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.RevListOptions;
-import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.search.commit.CommitCriteria;
-import io.onedev.server.search.commit.CommitQuery;
-import io.onedev.server.search.commit.MessageCriteria;
-import io.onedev.server.search.commit.PathCriteria;
-import io.onedev.server.search.commit.Revision;
-import io.onedev.server.search.commit.RevisionCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Constants;
-import io.onedev.server.util.ProjectAndRevision;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.behavior.CommitQueryBehavior;
-import io.onedev.server.web.behavior.RunTaskBehavior;
-import io.onedev.server.web.component.commit.message.CommitMessagePanel;
-import io.onedev.server.web.component.commit.status.CommitStatusLink;
-import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.util.QuerySaveSupport;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 public abstract class CommitListPanel extends Panel {
@@ -260,7 +247,8 @@ public abstract class CommitListPanel extends Panel {
 	
 	protected abstract Project getProject();
 	
-	protected String getRefName() {
+	@Nullable
+	protected CommitStatusSupport getStatusSupport() {
 		return null;
 	}
 	
@@ -662,19 +650,23 @@ public abstract class CommitListPanel extends Panel {
 				
 			});
 			
-			item.add(new CommitStatusLink("buildStatus", commit.copy(), getRefName()) {
+			if (getStatusSupport() != null) {
+				item.add(new CommitStatusLink("buildStatus", commit.copy(), getStatusSupport().getRefName()) {
 
-				@Override
-				protected Project getProject() {
-					return CommitListPanel.this.getProject();
-				}
+					@Override
+					protected Project getProject() {
+						return CommitListPanel.this.getProject();
+					}
 
-				@Override
-				protected PullRequest getPullRequest() {
-					return null;
-				}
-				
-			});
+					@Override
+					protected PullRequest getPullRequest() {
+						return null;
+					}
+
+				});
+			} else {
+				item.add(new WebMarkupContainer("buildStatus").setVisible(false));				
+			}
 			item.add(AttributeAppender.append("class", "commit"));
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);

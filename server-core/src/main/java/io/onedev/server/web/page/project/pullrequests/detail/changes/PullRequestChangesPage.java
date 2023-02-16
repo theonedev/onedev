@@ -947,7 +947,25 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 	@Override
 	public Collection<CodeProblem> getOldProblems(String blobPath) {
-		return new HashSet<>();
+		Set<CodeProblem> problems = new HashSet<>();
+		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
+		for (Build build: getProject().getBuilds(buildCommitId)) {
+			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
+				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
+					if (!buildCommitId.equals(getComparisonBase())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
+						PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
+						if (range != null) {
+							problems.add(new CodeProblem(problem.getSeverity(), problem.getType(), 
+									problem.getBlobPath(), range, problem.getMessage()));
+						}
+					} else {
+						problems.add(problem);
+					}
+				}
+			}
+		}
+		return problems;
 	}
 
 	@Override
@@ -984,7 +1002,23 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 	@Override
 	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
-		return new HashMap<>();
+		Map<Integer, CoverageStatus> coverages = new HashMap<>();
+		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
+		for (Build build: getProject().getBuilds(buildCommitId)) {
+			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
+				for (Map.Entry<Integer, CoverageStatus> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
+					if (!buildCommitId.equals(getComparisonBase())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
+						Integer mappedLine = lineMapping.get(entry.getKey());
+						if (mappedLine != null)
+							coverages.put(mappedLine, entry.getValue());
+					} else {
+						coverages.put(entry.getKey(), entry.getValue());
+					}
+				}
+			}
+		}
+		return coverages;
 	}
 
 	@Override

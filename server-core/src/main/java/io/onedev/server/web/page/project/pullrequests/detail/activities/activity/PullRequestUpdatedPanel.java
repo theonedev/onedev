@@ -1,9 +1,22 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import com.google.common.collect.Sets;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.commit.message.CommitMessagePanel;
+import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.PersonIdentPanel;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.basic.Label;
@@ -19,25 +32,8 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.commit.message.CommitMessagePanel;
-import io.onedev.server.web.component.commit.status.CommitStatusLink;
-import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.PersonIdentPanel;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import java.util.Collection;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
@@ -99,38 +95,6 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					@Override
 					protected RevObject getRevObject() {
 						return item.getModelObject();
-					}
-					
-				});
-				
-				String refName = getUpdate().getRequest().getSourceRef();
-				item.add(new CommitStatusLink("buildStatus", commit.copy(), refName) {
-					
-					@Override
-					protected Project getProject() {
-						return getUpdate().getRequest().getSourceProject();
-					}
-
-					@Override
-					protected PullRequest getPullRequest() {
-						return null;
-					}
-
-					@Override
-					protected Collection<String> getWebSocketObservables() {
-						if (getUpdate().getRequest().getSourceProject() != null)
-							return super.getWebSocketObservables();
-						else 
-							return new ArrayList<>();
-					}
-
-					@Override
-					protected void onConfigure() {
-						if (getUpdate().getRequest().getSourceProject() != null) {
-							super.onConfigure();
-						} else {
-							setVisible(false);
-						}
 					}
 					
 				});
