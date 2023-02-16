@@ -354,7 +354,7 @@ public abstract class PullRequestListPanel extends Panel {
 									
 									@Override
 									protected String getConfirmMessage() {
-										return "Type <code>yes</code> below to delete selected builds";
+										return "Type <code>yes</code> below to delete selected pull requests";
 									}
 									
 									@Override
