@@ -25,6 +25,7 @@ import io.onedev.server.plugin.executor.servershell.ServerShellExecutor.TestData
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
@@ -177,7 +178,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								try {
 									String stepNames = entryFacade.getNamesAsString(position);
 									jobLogger.notice("Running step \"" + stepNames + "\"...");
-
+									
+									long time = System.currentTimeMillis();
 									if (facade instanceof CommandFacade) {
 										CommandFacade commandFacade = (CommandFacade) facade;
 										OsExecution execution = commandFacade.getExecution(osInfo);
@@ -207,7 +209,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 										ExecutionResult result = interpreter.execute(ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 										if (result.getReturnCode() != 0) {
-											jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + result.getReturnCode());
+											long duration = System.currentTimeMillis() - time;
+											jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Command exited with code " + result.getReturnCode());
 											return false;
 										}
 									} else if (facade instanceof RunContainerFacade || facade instanceof BuildImageFacade) {
@@ -243,7 +246,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 													jobContext.getCommitId().name(), checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
 													cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 										} catch (Exception e) {
-											jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+											long duration = System.currentTimeMillis() - time;
+											jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): " + getErrorMessage(e));
 											return false;
 										}
 									} else {
@@ -259,12 +263,15 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 											});
 										} catch (Exception e) {
-											if (ExceptionUtils.find(e, InterruptedException.class) == null)
-												jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+											if (ExceptionUtils.find(e, InterruptedException.class) == null) {
+												long duration = System.currentTimeMillis() - time;
+												jobLogger.error("Step \"" + stepNames + "\" is failed: (" + DateUtils.formatDuration(duration) + ")" + getErrorMessage(e));
+											}
 											return false;
 										}
 									}
-									jobLogger.success("Step \"" + stepNames + "\" is successful");
+									long duration = System.currentTimeMillis() - time;
+									jobLogger.success("Step \"" + stepNames + "\" is successful (" + DateUtils.formatDuration(duration) + ")");
 									return true;
 								} finally {
 									runningStep = null;

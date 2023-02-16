@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.validation.ValidationException;
 
+import io.onedev.agent.ExecutorUtils;
+import io.onedev.k8shelper.KubernetesHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.joda.time.DateTime;
@@ -56,9 +58,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
     
     public static String formatDuration(long durationMillis) {
-    	if (durationMillis < 0)
-    		durationMillis = 0;
-    	return DurationFormatUtils.formatDurationWords(durationMillis, true, true);
+		return ExecutorUtils.formatDuration(durationMillis);
     }
     
 	public static Date parseISO8601Date(String dateString) {

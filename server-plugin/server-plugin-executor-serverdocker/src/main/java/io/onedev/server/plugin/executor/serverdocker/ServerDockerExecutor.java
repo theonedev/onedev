@@ -28,6 +28,7 @@ import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestDa
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -390,6 +391,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 											String stepNames = entryFacade.getNamesAsString(position);
 											jobLogger.notice("Running step \"" + stepNames + "\"...");
 
+											long time = System.currentTimeMillis();
 											if (facade instanceof CommandFacade) {
 												CommandFacade commandFacade = (CommandFacade) facade;
 
@@ -407,7 +409,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 														position, commandFacade.isUseTTY());
 
 												if (exitCode != 0) {
-													jobLogger.error("Step \"" + stepNames + "\" is failed: Command exited with code " + exitCode);
+													long duration = System.currentTimeMillis() - time;
+													jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Command exited with code " + exitCode);
 													return false;
 												}
 											} else if (facade instanceof BuildImageFacade) {
@@ -422,7 +425,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(),
 														container.getWorkingDir(), container.getVolumeMounts(), position, rubContainerFacade.isUseTTY());
 												if (exitCode != 0) {
-													jobLogger.error("Step \"" + stepNames + "\" is failed: Container exited with code " + exitCode);
+													long duration = System.currentTimeMillis() - time;
+													jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Container exited with code " + exitCode);
 													return false;
 												}
 											} else if (facade instanceof CheckoutFacade) {
@@ -463,7 +467,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 															checkoutFacade.isWithLfs(), checkoutFacade.isWithSubmodules(),
 															cloneDepth, ExecutorUtils.newInfoLogger(jobLogger), ExecutorUtils.newWarningLogger(jobLogger));
 												} catch (Exception e) {
-													jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+													long duration = System.currentTimeMillis() - time;
+													jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): " + getErrorMessage(e));
 													return false;
 												}
 											} else {
@@ -479,12 +484,15 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 													});
 												} catch (Exception e) {
-													if (ExceptionUtils.find(e, InterruptedException.class) == null)
-														jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+													if (ExceptionUtils.find(e, InterruptedException.class) == null) {
+														long duration = System.currentTimeMillis() - time;														
+														jobLogger.error("Step \"" + stepNames + "\" is failed: (" + DateUtils.formatDuration(duration) + ")" + getErrorMessage(e));
+													}
 													return false;
 												}
 											}
-											jobLogger.success("Step \"" + stepNames + "\" is successful");
+											long duration = System.currentTimeMillis() - time;
+											jobLogger.success("Step \"" + stepNames + "\" is successful (" + DateUtils.formatDuration(duration) + ")");
 											return true;
 										} finally {
 											runningStep = null;
