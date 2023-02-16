@@ -14,17 +14,17 @@ public interface MailManager {
 	
 	public static final String COMMENT_MARKER = "no-color";
 	
-	void sendMail(Collection<String> toList, Collection<String> ccList, 
-			Collection<String> bccList, String subject, String htmlBody, 
-			String textBody, @Nullable String replyAddress, @Nullable String references);
+	void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
+				  String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
+				  @Nullable String senderName, @Nullable String references);
 	
 	void sendMail(MailSendSetting sendSetting, Collection<String> toList, Collection<String> ccList, 
-			Collection<String> bccList, String subject, String htmlBody, String textBody, 
-			@Nullable String replyAddress, @Nullable String references);
+				  Collection<String> bccList, String subject, String htmlBody, String textBody, 
+				  @Nullable String replyAddress, @Nullable String senderName, @Nullable String references);
 	
 	void sendMailAsync(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
-			String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
-			@Nullable String references);
+					   String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
+					   @Nullable String senderName, @Nullable String references);
 	
 	@Nullable
 	String getReplyAddress(Issue issue);

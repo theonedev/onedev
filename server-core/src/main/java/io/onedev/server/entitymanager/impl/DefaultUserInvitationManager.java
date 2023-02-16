@@ -75,7 +75,7 @@ public class DefaultUserInvitationManager extends BaseEntityManager<UserInvitati
 				Arrays.asList(invitation.getEmailAddress()),
 				Lists.newArrayList(), Lists.newArrayList(), 
 				"[Invitation] You are Invited to Use OneDev", 
-				htmlBody, textBody, null, null);
+				htmlBody, textBody, null, null, null);
 	}
 	
 	private EntityCriteria<UserInvitation> getCriteria(@Nullable String term) {

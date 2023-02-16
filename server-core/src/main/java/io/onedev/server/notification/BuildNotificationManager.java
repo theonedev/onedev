@@ -81,7 +81,7 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 		String htmlBody = getHtmlBody(event, summary, null, url, false, null);
 		String textBody = getTextBody(event, summary, null, url, false, null);
 		mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody, 
-				textBody, null, threadingReferences);
+				textBody, null, null, threadingReferences);
 	}
 	
 	@Sessional

@@ -117,7 +117,8 @@ public class MailSettingPage extends AdministrationPage {
 							logger.log("Sending test mail to " + subAddressed + "...");
 							mailManager.sendMail(mailSetting.getSendSetting(), 
 									Sets.newHashSet(subAddressed), Lists.newArrayList(), Lists.newArrayList(), uuid, 
-									"[Test] Test Email From OneDev", "This is a test email from OneDev", null, null);
+									"[Test] Test Email From OneDev", "This is a test email from OneDev", 
+									null, null, null);
 
 							logger.log("Waiting for test mail to come back...");
 
@@ -140,7 +141,7 @@ public class MailSettingPage extends AdministrationPage {
 								String body = "Great, your mail settings are working!";
 								mailManager.sendMail(mailSettingHolder.getMailSetting().getSendSetting(), Sets.newHashSet(emailAddress.getValue()), 
 										Lists.newArrayList(), Lists.newArrayList(), "[Test] Test Email From OneDev", 
-										body, body, null, null);
+										body, body, null, null, null);
 								return "Test mail has been sent to " + emailAddress.getValue() + ", please check your mail box";
 							} else {
 								throw new ExplicitException("Primary email address of your account is not specified yet");

@@ -1051,7 +1051,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (emailAddress != null && emailAddress.isVerified()) {
 			mailManager.sendMail(Lists.newArrayList(emailAddress.getValue()), Lists.newArrayList(),
 					Lists.newArrayList(), "[Backup] OneDev Database Auto-backup Failed", 
-					htmlBody, textBody, null, null);
+					htmlBody, textBody, null, null, null);
 		}
 	}
 	

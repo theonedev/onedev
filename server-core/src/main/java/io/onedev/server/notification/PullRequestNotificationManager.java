@@ -144,13 +144,18 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 		}
 
+		String senderName;
 		String summary;
-		if (user != null)
+		if (user != null) {
+			senderName = user.getDisplayName();
 			summary = user.getDisplayName() + " " + event.getActivity();
-		else if (committer != null)
+		} else if (committer != null) {
+			senderName = null;
 			summary = committer.getDisplayName() + " " + event.getActivity();
-		else
+		} else {
+			senderName = null;
 			summary = StringUtils.capitalize(event.getActivity());
+		}
 
 		String replyAddress = mailManager.getReplyAddress(request);
 		boolean replyable = replyAddress != null;
@@ -181,7 +186,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 							Lists.newArrayList(), Lists.newArrayList(), subject,
 							getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null),
 							getTextBody(event, summary, event.getTextBody(), url, replyable, null),
-							replyAddress, threadingReferences);
+							replyAddress, senderName, threadingReferences);
 				}
 				notifiedUsers.add(request.getSubmitter());
 			}
@@ -208,7 +213,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 							Lists.newArrayList(), Lists.newArrayList(), subject,
 							getHtmlBody(event, assignmentSummary, event.getHtmlBody(), url, replyable, null),
 							getTextBody(event, assignmentSummary, event.getTextBody(), url, replyable, null),
-							replyAddress, threadingReferences);
+							replyAddress, senderName, threadingReferences);
 				}
 				notifiedUsers.add(assignee);
 			}
@@ -232,7 +237,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 							Lists.newArrayList(), Lists.newArrayList(), subject,
 							getHtmlBody(event, reviewInvitationSummary, event.getHtmlBody(), url, replyable, null),
 							getTextBody(event, reviewInvitationSummary, event.getTextBody(), url, replyable, null),
-							replyAddress, threadingReferences);
+							replyAddress, senderName, threadingReferences);
 				}
 				notifiedUsers.add(reviewer);
 			}
@@ -261,7 +266,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 									Sets.newHashSet(), Sets.newHashSet(), subject,
 									getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null),
 									getTextBody(event, summary, event.getTextBody(), url, replyable, null),
-									replyAddress, threadingReferences);
+									replyAddress, senderName, threadingReferences);
 						}
 						notifiedUsers.add(mentionedUser);
 					}
@@ -297,7 +302,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				mailManager.sendMailAsync(
 						Lists.newArrayList(), Lists.newArrayList(),
 						bccEmailAddresses, subject, htmlBody, textBody,
-						replyAddress, threadingReferences);
+						replyAddress, senderName, threadingReferences);
 			}
 		}
 	}

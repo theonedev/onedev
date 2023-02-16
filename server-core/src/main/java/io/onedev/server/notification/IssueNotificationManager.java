@@ -79,11 +79,15 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 
 		String url = event.getUrl();
 
+		String senderName;
 		String summary; 
-		if (user != null)
+		if (user != null) {
+			senderName = user.getDisplayName();
 			summary = user.getDisplayName() + " " + event.getActivity();
-		else
+		} else {
+			senderName = null;
 			summary = StringUtils.capitalize(event.getActivity());
+		}
 
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
 
@@ -164,7 +168,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 								Lists.newArrayList(), Lists.newArrayList(), subject, 
 								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
 								getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
-								replyAddress, threadingReferences);
+								replyAddress, senderName, threadingReferences);
 					}
 				}
 			}
@@ -188,7 +192,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 								Lists.newArrayList(), Lists.newArrayList(), subject, 
 								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
 								getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
-								replyAddress, threadingReferences);
+								replyAddress, senderName, threadingReferences);
 					}					
 				}
 			}
@@ -224,7 +228,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 									Sets.newHashSet(), Sets.newHashSet(), subject, 
 									getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
 									getTextBody(event, summary, event.getTextBody(), url, replyable, null),
-									replyAddress, threadingReferences);
+									replyAddress, senderName, threadingReferences);
 						}
 						notifiedUsers.add(mentionedUser);
 					}
@@ -258,7 +262,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			String threadingReferences = issue.getEffectiveThreadingReference();
 			mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
 					bccEmailAddresses, subject, htmlBody, textBody, 
-					replyAddress, threadingReferences);
+					replyAddress, senderName, threadingReferences);
 		}
 	}
 	

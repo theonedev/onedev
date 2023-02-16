@@ -128,7 +128,7 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 				mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), notifyEmails, subject, 
 						getHtmlBody(event, summary, event.getHtmlBody(), url, false, null), 
 						getTextBody(event, summary, event.getTextBody(), url, false, null), 
-						null, threadingReferences);
+						null, commit.getAuthorIdent().getName(), threadingReferences);
 			}
 		}
 	}

@@ -119,7 +119,7 @@ public class PasswordResetPage extends SimplePage {
 									Arrays.asList(emailAddressValue),
 									Lists.newArrayList(), Lists.newArrayList(), 
 									"[Password Reset] Your OneDev Password Has Been Reset", 
-									htmlBody, textBody, null, null);
+									htmlBody, textBody, null, null, null);
 							
 							return "Please check your email " + emailAddressValue + " for the reset password";
 						} else {

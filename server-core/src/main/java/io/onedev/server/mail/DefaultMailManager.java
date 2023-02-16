@@ -84,7 +84,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 	
 	private static final int MAX_INBOX_LIFE = 3600;
 	
-	private static final String SENDER_NAME = "~OneDev Notifier";
+	private static final String QUOTE_MARK = "[OneDev]";
 	
 	private static final String SIGNATURE_PREFIX = "-- ";
 	
@@ -160,7 +160,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 	@Sessional
 	@Override
 	public void sendMailAsync(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
-			String subject, String htmlBody, String textBody, String replyAddress, String references) {
+							  String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
+							  @Nullable String senderName, @Nullable String references) {
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
@@ -170,7 +171,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 					@Override
 					public void run() {
 						try {
-							sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, references);
+							sendMail(toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
+									senderName, references);
 						} catch (Exception e) {
 							logger.error("Error sending email (to: " + toList + ", subject: " + subject + ")", e);
 						}		
@@ -219,8 +221,9 @@ public class DefaultMailManager implements MailManager, Serializable {
     
 	@Override
 	public void sendMail(MailSendSetting sendSetting, Collection<String> toList, Collection<String> ccList, 
-			Collection<String> bccList, String subject, String htmlBody, String textBody, 
-			String replyAddress, String references) {
+						 Collection<String> bccList, String subject, String htmlBody, String textBody, 
+						 @Nullable String replyAddress, @Nullable String senderName, 
+						 @Nullable String references) {
 		if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
 			return;
 
@@ -284,7 +287,11 @@ public class DefaultMailManager implements MailManager, Serializable {
 				    	message.addHeader(entry.getKey(), createFoldedHeaderValue(entry.getKey(), entry.getValue()));
 				}
 				
-				message.setFrom(createInetAddress(sendSetting.getSenderAddress(), SENDER_NAME));
+				if (senderName == null)
+					senderName = QUOTE_MARK;
+				else 
+					senderName += " " + QUOTE_MARK;
+				message.setFrom(createInetAddress(sendSetting.getSenderAddress(), senderName));
 				
 				if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
 					throw new ExplicitException("At least one receiver address should be specified");
@@ -314,8 +321,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 
 	@Override
 	public void sendMail(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
-			String subject, String htmlBody, String textBody, String replyAddress, String references) {
-		sendMail(null, toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, references);
+						 String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
+						 @Nullable String senderName, @Nullable String references) {
+		sendMail(null, toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
+				senderName, references);
 	}
 	
 	@Transactional
@@ -456,7 +465,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 													+ "created issues matching those queries. In this case, you will need to login to your account "
 													+ "and unsubscribe those queries.";
 											sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(), 
-													subject, body, body, null, getMessageId(message));
+													subject, body, body, null, null, getMessageId(message));
 										}
 									}
 								} else {
@@ -482,7 +491,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 													+ "get notifications of newly submitted pull request matching those queries. In this case, you "
 													+ "will need to login to your account and unsubscribe those queries.";
 											sendMailAsync(Lists.newArrayList(from.getAddress()), Lists.newArrayList(), Lists.newArrayList(), 
-													subject, body, body, null, getMessageId(message));
+													subject, body, body, null, null, getMessageId(message));
 										}
 									}
 								} else {
@@ -580,8 +589,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 	@Nullable
 	private String stripQuotationAndSignature(MailSendSetting sendSetting, String content) {
 		String quotationMark = null;
-		if (content.contains(SENDER_NAME)) {
-			quotationMark = SENDER_NAME;
+		if (content.contains(QUOTE_MARK)) {
+			quotationMark = QUOTE_MARK;
 		} else if (content.contains(sendSetting.getSenderAddress())) {
 			quotationMark = sendSetting.getSenderAddress();
 		} else if (sendSetting.getSmtpUser() != null 
@@ -758,7 +767,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 			
 			sendMailAsync(Lists.newArrayList(submitter.getAddress()), Lists.newArrayList(), Lists.newArrayList(),
 					"Re: " + issue.getTitle(), htmlBody, textBody, getReplyAddress(issue), 
-					issue.getEffectiveThreadingReference()); 
+					submitter.getPersonal(), issue.getEffectiveThreadingReference()); 
 		}
 		return issue;
 	}
