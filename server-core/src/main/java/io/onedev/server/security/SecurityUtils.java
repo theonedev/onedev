@@ -377,7 +377,9 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	@Nullable
 	public static String getBearerToken(HttpServletRequest request) {
-		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+		String authHeader = request.getHeader(KubernetesHelper.AUTHORIZATION);
+		if (authHeader == null)
+			authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (authHeader != null && authHeader.startsWith(KubernetesHelper.BEARER + " "))
 			return authHeader.substring(KubernetesHelper.BEARER.length() + 1);
 		else

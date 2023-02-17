@@ -9,15 +9,15 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.HttpHeaders;
 
+import io.onedev.k8shelper.KubernetesHelper;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.PathMatchingFilter;
 import org.apache.shiro.web.util.WebUtils;
-
-import com.google.common.net.HttpHeaders;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.UserManager;
@@ -41,7 +41,9 @@ public class BasicAuthenticationFilter extends PathMatchingFilter {
     	Subject subject = SecurityUtils.getSubject();
 		if (!subject.isAuthenticated()) {
 	        HttpServletRequest httpRequest = WebUtils.toHttp(request);
-	        String authzHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+	        String authzHeader = httpRequest.getHeader(KubernetesHelper.AUTHORIZATION);
+			if (authzHeader == null)
+				authzHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
 	        if (authzHeader != null && authzHeader.toLowerCase().startsWith("basic ")) {
             	String authValue = StringUtils.substringAfter(authzHeader, " ");
                 String decoded = Base64.decodeToString(authValue);
