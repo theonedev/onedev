@@ -1,4 +1,10 @@
-**NOTE:** We develop OneDev at <a href="https://code.onedev.io/onedev/server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be submitted there
+<div class='d-none'>
+
+> **Note**
+> 1. Do not worry about security advisories above. They are fixed as soon as discovered and published to notify users</span>
+> 2. We develop OneDev at <a href="https://code.onedev.io/onedev/server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be submitted there
+
+</div>
 
 <div align="center">
 <h1>Self-hosted Git Server with Kanban and CI/CD</h1>
