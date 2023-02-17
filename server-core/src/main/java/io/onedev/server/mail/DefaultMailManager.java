@@ -723,10 +723,15 @@ public class DefaultMailManager implements MailManager, Serializable {
 			ParsedEmailAddress parsedSystemAddress) throws MessagingException, IOException {
 		Issue issue = new Issue();
 		issue.setProject(project);
-		if (StringUtils.isNotBlank(message.getSubject()))
+		if (StringUtils.isNotBlank(message.getSubject())) {
+			if (message.getSubject().trim().toLowerCase().startsWith("re:")) {
+				throw new ExplicitException("This address is intended to open issues, " +
+						"however the message looks like a reply to some other email");
+			}
 			issue.setTitle(message.getSubject());
-		else
-			issue.setTitle("No title");
+		} else {
+			throw new ExplicitException("Subject required to open issue via email");
+		}
 		
 		String messageId = getMessageId(message);
 		if (messageId != null)
@@ -882,7 +887,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 	}
 	
 	@Override
-	public Future<?> monitorInbox(MailCheckSetting checkSetting, MessageListener listener, MailPosition lastPosition) {
+	public Future<?> monitorInbox(MailCheckSetting checkSetting, MessageListener listener, 
+								  MailPosition lastPosition) {
 		return executorService.submit(new Runnable() {
 
 			private void processMessages(IMAPFolder inbox, AtomicInteger messageNumber) throws MessagingException {
@@ -895,6 +901,28 @@ public class DefaultMailManager implements MailManager, Serializable {
 					try {
 						listener.onReceived(message);
 					} catch (Exception e) {
+						try {
+							String[] fromHeader = message.getHeader("From");
+							if (fromHeader != null && fromHeader.length != 0) {
+								InternetAddress from = InternetAddress.parse(fromHeader[0], true)[0];
+								String textBody, htmlBody;
+								if (e.getMessage() != null) {
+									textBody = e.getMessage() + 
+											"\n\nContact site administrator if necessary";
+									htmlBody = HtmlEscape.escapeHtml5(e.getMessage()) + 
+											"<br><br>Contact site administrator if necessary";
+								} else {
+									textBody = "Please contact site administrator";
+									htmlBody = "Please contact site administrator";
+								}
+								
+								sendMailAsync(Lists.newArrayList(from.getAddress()), new ArrayList<>(), 
+										new ArrayList<>(), "OneDev is unable to process your message", 
+										htmlBody, textBody, null, null, null);								
+							}
+						} catch (Exception e2) {
+							logger.error("Error sending mail", e);
+						}
 						logger.error("Error processing message", e);
 					} 
 				}

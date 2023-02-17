@@ -1,27 +1,7 @@
 package io.onedev.server.web.page.admin.mailsetting;
 
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.mail.Message;
-import javax.mail.MessagingException;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.visit.IVisit;
-import org.apache.wicket.util.visit.IVisitor;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
@@ -39,6 +19,23 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import org.apache.wicket.Component;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("serial")
 public class MailSettingPage extends AdministrationPage {

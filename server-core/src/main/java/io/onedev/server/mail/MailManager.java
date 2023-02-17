@@ -1,12 +1,11 @@
 package io.onedev.server.mail;
 
-import java.util.Collection;
-import java.util.concurrent.Future;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.concurrent.Future;
 
 public interface MailManager {
 	
@@ -42,6 +41,6 @@ public interface MailManager {
 	
 	String toPlainText(String mailContent);
 	
-	Future<?> monitorInbox(MailCheckSetting mailCheckSetting, MessageListener listener, MailPosition MailPosition);
+	Future<?> monitorInbox(MailCheckSetting checkSetting, MessageListener listener, MailPosition MailPosition);
 
 }
