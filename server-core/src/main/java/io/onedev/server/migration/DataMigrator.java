@@ -4903,4 +4903,27 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate112(File dataDir, Stack<Integer> versions) {
+		var updateIds = new HashSet<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					if (dataElement.attributeValue("class").contains("IssueReferencedFromCommitData")) 
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					if (dataElement.attributeValue("class").contains("PullRequestReferencedFromCommitData"))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

@@ -41,7 +41,7 @@ public class ProjectScopedCommit implements Serializable {
 
 	public ProjectScopedCommit(Long projectId, ObjectId commitId) {
 		this.projectId = projectId;
-		this.commitId = commitId;
+		this.commitId = commitId.copy();
 	}
 
 	public Project getProject() {
