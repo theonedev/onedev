@@ -25,7 +25,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;

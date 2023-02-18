@@ -19,7 +19,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;

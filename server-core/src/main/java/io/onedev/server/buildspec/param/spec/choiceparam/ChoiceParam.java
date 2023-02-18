@@ -1,4 +1,4 @@
-package io.onedev.server.buildspec.param.spec;
+package io.onedev.server.buildspec.param.spec.choiceparam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,16 +7,17 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.choiceparam.defaultmultivalueprovider.DefaultMultiValueProvider;
+import io.onedev.server.buildspec.param.spec.choiceparam.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.model.support.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
-import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
-@Editable(order=145, name=ParamSpec.ENUMERATION)
+@Editable(order=145, name= ParamSpec.ENUMERATION)
 public class ChoiceParam extends ParamSpec {
 	
 	private static final long serialVersionUID = 1L;

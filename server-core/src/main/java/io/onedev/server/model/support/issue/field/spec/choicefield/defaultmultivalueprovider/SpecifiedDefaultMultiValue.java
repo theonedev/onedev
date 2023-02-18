@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider;
+package io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultivalueprovider;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.Matcher;

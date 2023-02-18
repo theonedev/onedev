@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.field.spec;
+package io.onedev.server.model.support.issue.field.spec.choicefield;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,14 +10,15 @@ import javax.validation.constraints.NotNull;
 import io.onedev.server.model.support.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
-import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultivalueprovider.DefaultMultiValueProvider;
+import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
-@Editable(order=145, name=FieldSpec.ENUMERATION)
+@Editable(order=145, name= FieldSpec.ENUMERATION)
 public class ChoiceField extends FieldSpec {
 	
 	private static final long serialVersionUID = 1L;

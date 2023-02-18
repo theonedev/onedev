@@ -4925,5 +4925,55 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	private void migrate113(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.issue.field.spec.ChoiceField")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						element.setName("io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField");
+					}
+				}
+				for (Node node : dom.selectNodes("//defaultValueProvider")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						String clazz = element.attributeValue("class");
+						if (clazz != null) {
+							clazz = clazz.replace(
+									"io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.",
+									"io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.");
+							element.addAttribute("class", clazz);
+						}
+					}
+				}
+				for (Node node : dom.selectNodes("//defaultMultiValueProvider")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						String clazz = element.attributeValue("class");
+						if (clazz != null) {
+							clazz = clazz.replace(
+									"io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.",
+									"io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultivalueprovider.");
+							element.addAttribute("class", clazz);
+						}
+					}
+				}
+				for (Node node: dom.selectNodes("//io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValue")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						element.setName("io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue");
+					}
+				}
+				for (Node node: dom.selectNodes("//io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValue")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						element.setName("io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultivalueprovider.DefaultMultiValue");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

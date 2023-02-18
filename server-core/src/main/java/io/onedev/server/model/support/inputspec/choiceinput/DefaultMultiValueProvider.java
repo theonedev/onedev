@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider;
+package io.onedev.server.model.support.inputspec.choiceinput;
 
 import java.io.Serializable;
 import java.util.List;

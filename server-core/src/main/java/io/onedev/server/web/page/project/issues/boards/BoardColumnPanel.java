@@ -29,7 +29,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.Hibernate;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -51,7 +50,7 @@ import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;

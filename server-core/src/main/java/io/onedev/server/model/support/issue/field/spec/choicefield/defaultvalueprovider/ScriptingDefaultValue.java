@@ -1,11 +1,11 @@
-package io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider;
-
-import javax.validation.constraints.NotEmpty;
+package io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ScriptChoice;
+
+import javax.validation.constraints.NotEmpty;
 
 @Editable(order=400, name="Evaluate script to get default value")
 public class ScriptingDefaultValue implements DefaultValueProvider {

@@ -46,7 +46,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;

@@ -17,7 +17,7 @@ import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;

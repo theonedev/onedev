@@ -1,10 +1,11 @@
-package io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider;
+package io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultivalueprovider;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -15,22 +16,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Editable(name="Value")
-public class DefaultValue implements Serializable {
+public class DefaultMultiValue implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String value;
+	private List<String> value;
 	
 	private String applicableProjects;
 
-	@Editable(order=100, name="Literal value")
+	@Editable(name="Literal value", order=100)
 	@io.onedev.server.web.editable.annotation.ChoiceProvider("getValueChoices")
 	@NotEmpty
-	public String getValue() {
+	@OmitName
+	public List<String> getValue() {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(List<String> value) {
 		this.value = value;
 	}
 	

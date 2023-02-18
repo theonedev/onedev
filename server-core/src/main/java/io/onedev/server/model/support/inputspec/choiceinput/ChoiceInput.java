@@ -11,8 +11,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
-import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValueProvider;
 
 public class ChoiceInput {
 	

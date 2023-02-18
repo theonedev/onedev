@@ -12,10 +12,10 @@ import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.Size;
 
-import io.onedev.server.buildspec.param.spec.ChoiceParam;
+import io.onedev.server.buildspec.param.spec.choiceparam.ChoiceParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.InputSpec;
-import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;

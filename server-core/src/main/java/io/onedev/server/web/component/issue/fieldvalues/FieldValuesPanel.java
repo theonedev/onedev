@@ -30,7 +30,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -51,7 +50,7 @@ import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ColorUtils;

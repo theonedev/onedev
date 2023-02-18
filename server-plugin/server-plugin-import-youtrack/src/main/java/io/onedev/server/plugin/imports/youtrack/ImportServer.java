@@ -17,6 +17,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.*;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;

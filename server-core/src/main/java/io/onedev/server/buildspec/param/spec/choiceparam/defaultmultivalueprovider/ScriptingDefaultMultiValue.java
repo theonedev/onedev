@@ -1,13 +1,12 @@
-package io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider;
-
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
+package io.onedev.server.buildspec.param.spec.choiceparam.defaultmultivalueprovider;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ScriptChoice;
+
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Editable(order=400, name="Evaluate script to get default value")
 public class ScriptingDefaultMultiValue implements DefaultMultiValueProvider {
