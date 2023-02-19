@@ -364,6 +364,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return cmdline;
 	}
 	
+	private void logKubernetesError(TaskLogger jobLogger, String message) {
+		if (!message.contains("Failed to watch *unstructured.Unstructured: unknown"))
+			jobLogger.error("Kubernetes: " + message);
+		else 
+			logger.error("Kubernetes: " + message);
+	}
+	
 	private String createResource(Map<Object, Object> resourceDef, Collection<String> secretsToMask, TaskLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
 		File file = null;
@@ -391,7 +398,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 				@Override
 				public void consume(String line) {
-					jobLogger.error("Kubernetes: " + line);
+					logKubernetesError(jobLogger, line);
 				}
 				
 			}).checkReturnCode();
@@ -420,7 +427,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 				@Override
 				public void consume(String line) {
-					jobLogger.error("Kubernetes: " + line);
+					logKubernetesError(jobLogger, line);
 				}
 				
 			}).checkReturnCode();
@@ -446,7 +453,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 			@Override
 			public void consume(String line) {
-				jobLogger.error("Kubernetes: " + line);
+				logKubernetesError(jobLogger, line);
 			}
 			
 		}).checkReturnCode();
@@ -468,7 +475,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 			@Override
 			public void consume(String line) {
-				jobLogger.error("Kubernetes: " + line);
+				logKubernetesError(jobLogger, line);
 			}
 			
 		}).checkReturnCode();
@@ -489,7 +496,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 			@Override
 			public void consume(String line) {
-				jobLogger.error("Kubernetes: " + line);
+				logKubernetesError(jobLogger, line);
 			}
 			
 		}).checkReturnCode();
@@ -508,7 +515,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 			@Override
 			public void consume(String line) {
-				jobLogger.error("Kubernetes: " + line);
+				logKubernetesError(jobLogger, line);
 			}
 			
 		}).checkReturnCode();
@@ -590,7 +597,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 			@Override
 			public void consume(String line) {
-				jobLogger.error("Kubernetes: " + line);
+				logKubernetesError(jobLogger, line);
 			}
 			
 		}).checkReturnCode();
@@ -732,7 +739,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 				@Override
 				public void consume(String line) {
-					jobLogger.error("Kubernetes: " + line);
+					logKubernetesError(jobLogger, line);
 				}
 				
 			}).checkReturnCode();
@@ -1453,7 +1460,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 					@Override
 					public void consume(String line) {
-						jobLogger.error("Kubernetes: " + line);
+						logKubernetesError(jobLogger, line);
 					}
 					
 				}).checkReturnCode();
