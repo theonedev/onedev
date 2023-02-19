@@ -11,8 +11,6 @@ import java.util.Date;
 public class PullRequestChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
-
-	public static final int DIFF_CONTEXT_SIZE = 3;
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -63,6 +61,10 @@ public class PullRequestChange extends AbstractEntity {
 
 	public String getAnchor() {
 		return getClass().getSimpleName() + "-" + getId();
+	}
+	
+	public boolean isMinor() {
+		return getData().isMinor();
 	}
 	
 }

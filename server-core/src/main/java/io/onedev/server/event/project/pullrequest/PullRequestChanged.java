@@ -71,4 +71,9 @@ public class PullRequestChanged extends PullRequestEvent implements CommitAware 
 		return OneDev.getInstance(UrlManager.class).urlFor(getChange());
 	}
 
+	@Override
+	public boolean isMinor() {
+		return getChange().isMinor();
+	}
+	
 }
