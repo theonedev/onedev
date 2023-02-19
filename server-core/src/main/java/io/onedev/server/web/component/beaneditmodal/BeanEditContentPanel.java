@@ -83,7 +83,7 @@ abstract class BeanEditContentPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(BeanEditContentPanel.this));
 			}
 
 			@Override
@@ -97,7 +97,7 @@ abstract class BeanEditContentPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(BeanEditContentPanel.this));
 			}
 			
 			@Override
@@ -107,6 +107,8 @@ abstract class BeanEditContentPanel extends Panel {
 			
 		});
 		add(form);
+		
+		setOutputMarkupId(true);
 	}
 
 	protected abstract Serializable getBean();
