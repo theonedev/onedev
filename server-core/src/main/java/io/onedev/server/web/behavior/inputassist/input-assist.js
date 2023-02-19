@@ -112,11 +112,11 @@ onedev.server.inputassist = {
 					setTimeout(tab, 10);
 				} else {
 					tabbing = false;
-					var $active = $dropdown.find("li.active");
+					var $active = $dropdown.find("li.suggestion.active");
 					if ($active.length != 0) {
 						$input.data("update")($active);
-					} else if ($dropdown.find("li").length != 0) {
-						$dropdown.find("li").each(function() {
+					} else if ($dropdown.find("li.suggestion").length != 0) {
+						$dropdown.find("li.suggestion").each(function() {
 							if ($input.data("update")($(this)))
 								return false;
 						});
