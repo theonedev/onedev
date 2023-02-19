@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.list;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
@@ -553,6 +554,14 @@ public abstract class IssueListPanel extends Panel {
 		
 		add(new MenuLink("operations") {
 
+			private String getQueryAfterCopyOrMove() {
+				EntitySort sort = new EntitySort();
+				sort.setField(Issue.NAME_NUMBER);
+				sort.setDirection(EntitySort.Direction.DESCENDING);
+				IssueQuery query = new IssueQuery(null, Lists.newArrayList(sort));
+				return query.toString();
+			}
+			
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
@@ -677,7 +686,7 @@ public abstract class IssueListPanel extends Panel {
 													issues.add(each.getObject());
 												OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
 												setResponsePage(ProjectIssueListPage.class,
-														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
+														ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 												Session.get().success("Issues moved");
 											}
 											
@@ -759,7 +768,7 @@ public abstract class IssueListPanel extends Panel {
 													issues.add(each.getObject());
 												OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
 												setResponsePage(ProjectIssueListPage.class,
-														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
+														ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 												Session.get().success("Issues copied");
 											}
 
@@ -980,7 +989,7 @@ public abstract class IssueListPanel extends Panel {
 												}
 												OneDev.getInstance(IssueManager.class).move(issues, getProject(), getTargetProject());
 												setResponsePage(ProjectIssueListPage.class, 
-														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
+														ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 												Session.get().success("Issues moved");
 											}
 											
@@ -1064,7 +1073,7 @@ public abstract class IssueListPanel extends Panel {
 												}
 												OneDev.getInstance(IssueManager.class).copy(issues, getProject(), getTargetProject());
 												setResponsePage(ProjectIssueListPage.class,
-														ProjectIssueListPage.paramsOf(getTargetProject(), null, 0));
+														ProjectIssueListPage.paramsOf(getTargetProject(), getQueryAfterCopyOrMove(), 0));
 												Session.get().success("Issues copied");
 											}
 

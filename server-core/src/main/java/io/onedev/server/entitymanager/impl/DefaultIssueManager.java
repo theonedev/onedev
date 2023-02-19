@@ -986,6 +986,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			clonedIssue.setUUID(UUID.randomUUID().toString());
 			clonedIssue.setProject(targetProject);
 			Project numberScope = targetProject.getForkRoot();
+			
 			clonedIssue.setNumberScope(numberScope);
 			clonedIssue.setNumber(getNextNumber(numberScope));
 			cloneMapping.put(issue, clonedIssue);
