@@ -10,9 +10,9 @@
 <h1>Self-hosted Git Server with Kanban and CI/CD</h1>
 
 <h2>
-<a href="https://docs.onedev.io/">Quickstart</a> 
+<a href="https://docs.onedev.io/quickstart">Quickstart</a> 
 | <a href="https://docs.onedev.io/category/installation-guide">Installation Guide</a> 
-| <a href="https://docs.onedev.io/concepts/">All Documentation</a> 
+| <a href="https://docs.onedev.io">All Documentation</a> 
 </h2>
 
 <p style="margin-bottom: 20px;">
