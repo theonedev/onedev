@@ -19,10 +19,12 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
@@ -78,7 +80,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	
 	@Override
 	protected int getIndexVersion() {
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -130,7 +132,13 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 			boosts.put(FIELD_DESCRIPTION, 0.5f);
 			boosts.put(FIELD_COMMENTS, 0.25f);
 			MultiFieldQueryParser parser = new MultiFieldQueryParser(
-					new String[] {FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENTS}, analyzer, boosts);
+					new String[] {FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENTS}, analyzer, boosts) {
+				
+				protected Query newTermQuery(Term term, float boost) {
+					return new BoostQuery(new PrefixQuery(term), boost);
+				}
+				
+			};
 			contentQueryBuilder.add(parser.parse(LuceneUtils.escape(queryString)), Occur.SHOULD);
 		} catch (ParseException e) {
 			throw new RuntimeException(e);

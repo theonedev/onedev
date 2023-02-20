@@ -25,7 +25,6 @@ import io.onedev.server.util.concurrent.Prioritized;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.WordlistLoader;
-import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.analysis.da.DanishAnalyzer;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
@@ -39,6 +38,7 @@ import org.apache.lucene.analysis.no.NorwegianAnalyzer;
 import org.apache.lucene.analysis.pt.PortugueseAnalyzer;
 import org.apache.lucene.analysis.ru.RussianAnalyzer;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.sv.SwedishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -99,7 +99,6 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		STOP_WORDS.addAll(RussianAnalyzer.getDefaultStopSet());
 		STOP_WORDS.addAll(SpanishAnalyzer.getDefaultStopSet());
 		STOP_WORDS.addAll(SwedishAnalyzer.getDefaultStopSet());
-		STOP_WORDS.addAll(SmartChineseAnalyzer.getDefaultStopSet());
 
 		try {
 			STOP_WORDS.addAll(WordlistLoader.getSnowballWordSet(IOUtils.getDecodingReader(
@@ -263,7 +262,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	}
 
 	protected Analyzer newAnalyzer() {
-		return new SmartChineseAnalyzer(STOP_WORDS);
+		return new StandardAnalyzer(STOP_WORDS);
 	}
 
 	private int getIndexVersion(IndexSearcher searcher) throws IOException {

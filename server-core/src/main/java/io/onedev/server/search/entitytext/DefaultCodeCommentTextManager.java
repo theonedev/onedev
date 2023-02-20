@@ -23,6 +23,7 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 
@@ -58,7 +59,7 @@ public class DefaultCodeCommentTextManager extends ProjectTextManager<CodeCommen
 	
 	@Override
 	protected int getIndexVersion() {
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -84,7 +85,13 @@ public class DefaultCodeCommentTextManager extends ProjectTextManager<CodeCommen
 			boosts.put(FIELD_COMMENT, 0.75f);
 			boosts.put(FIELD_REPLIES, 0.5f);
 			MultiFieldQueryParser parser = new MultiFieldQueryParser(
-					new String[] {FIELD_COMMENT, FIELD_REPLIES}, analyzer, boosts);
+					new String[] {FIELD_COMMENT, FIELD_REPLIES}, analyzer, boosts) {
+				
+				protected Query newTermQuery(Term term, float boost) {
+					return new BoostQuery(new PrefixQuery(term), boost);
+				}
+				
+			};
 			contentQueryBuilder.add(parser.parse(LuceneUtils.escape(queryString)), Occur.SHOULD);
 		} catch (ParseException e) {
 			throw new RuntimeException(e);
