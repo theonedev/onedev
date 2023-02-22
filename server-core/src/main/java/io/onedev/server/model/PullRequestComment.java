@@ -10,6 +10,8 @@ public class PullRequestComment extends EntityComment {
 	
 	private static final long serialVersionUID = 1L;
 	
+	public static final String PROP_REQUEST = "request";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;

@@ -103,10 +103,16 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new MentionedMeCriteria();
-							default:
+							case CodeCommentQueryLexer.CreatedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new CreatedByMeCriteria();
+							case CodeCommentQueryLexer.RepliedByMe:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new RepliedByMeCriteria();
+							default:
+								throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 						}
 					}
 
@@ -118,6 +124,8 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 							return new MentionedCriteria(getUser(value));
 						} else if (operator == CodeCommentQueryLexer.CreatedBy) {
 							return new CreatedByCriteria(getUser(value));
+						} else if (operator == CodeCommentQueryLexer.RepliedBy) {
+							return new RepliedByCriteria(getUser(value));
 						} else {
 							ProjectScopedCommit commitId = getCommitId(project, value);
 							return new OnCommitCriteria(commitId.getProject(), commitId.getCommitId());

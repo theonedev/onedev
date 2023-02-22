@@ -11,6 +11,8 @@ public class IssueComment extends EntityComment {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_ISSUE = "issue";
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Issue issue;

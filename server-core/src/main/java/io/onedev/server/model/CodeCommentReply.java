@@ -14,6 +14,8 @@ public class CodeCommentReply extends EntityComment {
 	
 	private static final long serialVersionUID = 1L;
 	
+	public static final String PROP_COMMENT = "comment";
+	
 	public static final String PROP_COMPARE_CONTEXT = "compareContext";
 	
 	@ManyToOne(fetch=FetchType.LAZY)

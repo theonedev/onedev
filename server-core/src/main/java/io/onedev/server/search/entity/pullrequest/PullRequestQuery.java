@@ -98,6 +98,10 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 								return new SubmittedByMeCriteria();
+							case PullRequestQueryLexer.CommentedByMe:
+								if (!withCurrentUserCriteria)
+									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								return new CommentedByMeCriteria();
 							case PullRequestQueryLexer.ToBeReviewedByMe:
 								if (!withCurrentUserCriteria)
 									throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
@@ -145,6 +149,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								return new MentionedCriteria(getUser(value));
 							case PullRequestQueryLexer.SubmittedBy:
 								return new SubmittedByCriteria(getUser(value));
+							case PullRequestQueryLexer.CommentedBy:
+								return new CommentedByCriteria(getUser(value));
 							case PullRequestQueryLexer.IncludesCommit:
 								return new IncludesCommitCriteria(project, value);
 							case PullRequestQueryLexer.IncludesIssue:

@@ -155,7 +155,10 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !withCurrentUserCriteria && ((suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe))) 
+				|| !withCurrentUserCriteria &&
+						(suggestedLiteral.equals(getRuleName(SubmittedByMe)) 
+						|| suggestedLiteral.equals(getRuleName(CommentedByMe)) 
+						|| suggestedLiteral.equals(getRuleName(MentionedMe)) 
 						|| suggestedLiteral.equals(getRuleName(ToBeReviewedByMe))
 						|| suggestedLiteral.equals(getRuleName(RequestedForChangesByMe))
 						|| suggestedLiteral.equals(getRuleName(ApprovedByMe))

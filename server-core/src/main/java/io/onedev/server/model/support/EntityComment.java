@@ -16,6 +16,8 @@ public abstract class EntityComment extends AbstractEntity {
 
 	public static final int MAX_CONTENT_LEN = 100000;
 
+	public static final String PROP_USER = "user";
+	
 	public static final String PROP_CONTENT = "content";
 	
 	@Column(nullable=false)

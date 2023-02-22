@@ -74,7 +74,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = CodeCommentQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == Mentioned || operator == CreatedBy) 
+								if (operator == Mentioned || operator == CreatedBy || operator == RepliedBy) 
 									return SuggestionUtils.suggestUsers(matchWith);
 								else 
 									return null;
@@ -112,7 +112,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
-				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(CreatedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)))) {
+				|| !withCurrentUserCriteria && (suggestedLiteral.equals(getRuleName(CreatedByMe)) || suggestedLiteral.equals(getRuleName(RepliedByMe)) || suggestedLiteral.equals(getRuleName(MentionedMe)))) {
 			return null;
 		}
 		
