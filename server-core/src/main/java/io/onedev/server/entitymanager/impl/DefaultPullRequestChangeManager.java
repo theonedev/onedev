@@ -59,7 +59,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 		change.setRequest(request);
 		change.setData(new PullRequestMergeStrategyChangeData(request.getMergeStrategy(), mergeStrategy));
 		change.setUser(SecurityUtils.getUser());
-		save(change);
+		create(change, null);
 		request.setMergeStrategy(mergeStrategy);
 	}
 
@@ -75,7 +75,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			change.setRequest(request);
 			change.setData(new PullRequestTitleChangeData(prevTitle, title));
 			change.setUser(SecurityUtils.getUser());
-			save(change);
+			create(change, null);
 			
 			dao.persist(request);
 		}
@@ -93,7 +93,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 			change.setRequest(request);
 			change.setData(new PullRequestTargetBranchChangeData(prevTargetBranch, targetBranch));
 			change.setUser(SecurityUtils.getUser());
-			save(change);
+			create(change, null);
 			
 			dao.persist(request);
 		}
