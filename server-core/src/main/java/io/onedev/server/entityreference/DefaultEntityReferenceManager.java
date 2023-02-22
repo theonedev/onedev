@@ -121,7 +121,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 				for (IssueChange change: referencedIssue.getChanges()) {
 					if (change.getData() instanceof IssueReferencedFromCommitData) {
 						IssueReferencedFromCommitData referencedFromCommitData = (IssueReferencedFromCommitData) change.getData();
-						if (referencedFromCommitData.getCommit().equals(commit)) {
+						if (referencedFromCommitData.getCommit().getCommitId().equals(commit.getCommitId())) {
 							found = true;
 							break;
 						}
@@ -145,7 +145,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 				for (PullRequestChange change: referencedRequest.getChanges()) {
 					if (change.getData() instanceof PullRequestReferencedFromCommitData) {
 						PullRequestReferencedFromCommitData referencedFromCommitData = (PullRequestReferencedFromCommitData) change.getData();
-						if (referencedFromCommitData.getCommit().equals(commit)) {
+						if (referencedFromCommitData.getCommit().getCommitId().equals(commit.getCommitId())) {
 							found = true;
 							break;
 						}
