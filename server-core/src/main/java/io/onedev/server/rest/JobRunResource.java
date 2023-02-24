@@ -119,7 +119,7 @@ public class JobRunResource {
 
 			MergePreview preview = pullRequest.checkMergePreview();
 			if (preview == null)
-				throw new ValidationException("Pull request merge preview not calcualted yet");
+				throw new ValidationException("Pull request merge preview not calculated yet");
 			if (preview.getMergeCommitHash() == null)
 				throw new ValidationException("Pull request has merge conflicts");
 			
