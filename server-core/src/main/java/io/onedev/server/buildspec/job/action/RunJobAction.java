@@ -1,35 +1,27 @@
 package io.onedev.server.buildspec.job.action;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Valid;
-import javax.validation.ValidationException;
-
-import org.apache.wicket.Component;
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.MatrixRunner;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.ParamSpecProvider;
-import io.onedev.server.web.editable.annotation.VariableOption;
+import io.onedev.server.web.editable.annotation.*;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.wicket.Component;
+
+import javax.validation.Valid;
+import javax.validation.ValidationException;
+import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Editable(name="Run job", order=100)
 public class RunJobAction extends PostBuildAction {
@@ -94,28 +86,10 @@ public class RunJobAction extends PostBuildAction {
 			
 			@Override
 			public void run(Map<String, List<String>> paramMap) {
-				
-				SubmitReason reason = new SubmitReason() {
-
-					@Override
-					public String getRefName() {
-						return build.getRefName();
-					}
-
-					@Override
-					public PullRequest getPullRequest() {
-						return build.getRequest();
-					}
-
-					@Override
-					public String getDescription() {
-						return "Post build action of job '" + build.getJobName() + "'";
-					}
-					
-				};
 				JobManager jobManager = OneDev.getInstance(JobManager.class);
 				jobManager.submit(build.getProject(), build.getCommitId(), getJobName(), 
-						paramMap, build.getPipeline(), reason); 
+						paramMap, build.getPipeline(), build.getRefName(), 
+						build.getSubmitter(), build.getRequest(), "Post build action of job '" + build.getJobName() + "'"); 
 			}
 			
 		}.run();

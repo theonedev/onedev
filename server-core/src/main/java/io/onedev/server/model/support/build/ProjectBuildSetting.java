@@ -1,22 +1,9 @@
 package io.onedev.server.model.support.build;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
-import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
-import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -24,6 +11,10 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.editable.annotation.Editable;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
 
 @Editable
 public class ProjectBuildSetting implements Serializable {
@@ -40,17 +31,10 @@ public class ProjectBuildSetting implements Serializable {
 	
 	private List<BuildPreservation> buildPreservations = new ArrayList<>();
 	
-	private List<ActionAuthorization> actionAuthorizations = new ArrayList<>();
-	
 	private List<DefaultFixedIssueFilter> defaultFixedIssueFilters = new ArrayList<>();
 	
 	private transient GlobalBuildSetting globalSetting;
 	
-	public ProjectBuildSetting() {
-		actionAuthorizations.add(new CloseMilestoneAuthorization());
-		actionAuthorizations.add(new CreateTagAuthorization());
-	}
-
 	public List<JobProperty> getJobProperties() {
 		return jobProperties;
 	}
@@ -73,14 +57,6 @@ public class ProjectBuildSetting implements Serializable {
 
 	public void setBuildPreservations(List<BuildPreservation> buildPreservations) {
 		this.buildPreservations = buildPreservations;
-	}
-
-	public List<ActionAuthorization> getActionAuthorizations() {
-		return actionAuthorizations;
-	}
-
-	public void setActionAuthorizations(List<ActionAuthorization> actionAuthorizations) {
-		this.actionAuthorizations = actionAuthorizations;
 	}
 
 	public List<DefaultFixedIssueFilter> getDefaultFixedIssueFilters() {
@@ -193,5 +169,49 @@ public class ProjectBuildSetting implements Serializable {
 				it.remove();
 		}
 	}	
+	
+	public void onRenameGroup(String oldName, String newName) {
+		for (var jobSecret: getJobSecrets()) {
+			if (jobSecret.getAuthorization() != null) {
+				JobMatch jobMatch = JobMatch.parse(jobSecret.getAuthorization(), false, false);
+				jobMatch.onRenameGroup(oldName, newName);
+				jobSecret.setAuthorization(jobMatch.toString());
+			}
+		}
+	}
+
+	public Usage onDeleteGroup(String name) {
+		Usage usage = new Usage();
+		for (var jobSecret: getJobSecrets()) {
+			if (jobSecret.getAuthorization() != null) {
+				JobMatch jobMatch = JobMatch.parse(jobSecret.getAuthorization(), false, false);
+				if (jobMatch.isUsingGroup(name))
+					usage.add("job secret '" + jobSecret.getName() + "': authorization");
+			}
+		}
+		return usage.prefix("build");
+	}
+
+	public void onRenameUser(String oldName, String newName) {
+		for (var jobSecret: getJobSecrets()) {
+			if (jobSecret.getAuthorization() != null) {
+				JobMatch jobMatch = JobMatch.parse(jobSecret.getAuthorization(), false, false);
+				jobMatch.onRenameUser(oldName, newName);
+				jobSecret.setAuthorization(jobMatch.toString());
+			}
+		}
+	}
+
+	public Usage onDeleteUser(String name) {
+		Usage usage = new Usage();
+		for (var jobSecret: getJobSecrets()) {
+			if (jobSecret.getAuthorization() != null) {
+				JobMatch jobMatch = JobMatch.parse(jobSecret.getAuthorization(), false, false);
+				if (jobMatch.isUsingUser(name))
+					usage.add("job secret '" + jobSecret.getName() + "': authorization");
+			}
+		}
+		return usage.prefix("build");
+	}
 	
 }

@@ -1,22 +1,5 @@
 package io.onedev.server.web.page.issues;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
-import io.onedev.server.util.script.identity.SiteAdministrator;
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -38,9 +21,21 @@ import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.NamedIssueQueriesBean;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
-public class IssueListPage extends LayoutPage implements ScriptIdentityAware {
+public class IssueListPage extends LayoutPage {
 
 	private static final String PARAM_PAGE = "page";
 	
@@ -254,12 +249,6 @@ public class IssueListPage extends LayoutPage implements ScriptIdentityAware {
 	@Override
 	protected String getPageTitle() {
 		return "Issues - OneDev";
-	}
-
-	@org.jetbrains.annotations.Nullable
-	@Override
-	public ScriptIdentity getScriptIdentity() {
-		return new SiteAdministrator();
 	}
 	
 }

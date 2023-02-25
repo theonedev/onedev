@@ -1,29 +1,5 @@
 package io.onedev.server.rest;
 
-import java.io.Serializable;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Valid;
-import javax.validation.ValidationException;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-
-import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -38,6 +14,22 @@ import io.onedev.server.rest.support.JobRun;
 import io.onedev.server.rest.support.JobRunOnCommit;
 import io.onedev.server.rest.support.JobRunOnPullRequest;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.Valid;
+import javax.validation.ValidationException;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
+import java.util.UUID;
 
 @Api(order=3500)
 @Path("/job-runs")
@@ -71,7 +63,8 @@ public class JobRunResource {
     @POST
     public Long runBuild(@NotNull @Valid JobRun jobRun) {
 		Project project;
-		SubmitReason reason;
+		String refName;
+		PullRequest request;
 		ObjectId commitId;
 		
 		if (jobRun instanceof JobRunOnCommit) {
@@ -91,62 +84,30 @@ public class JobRunResource {
 			if (!gitService.isMergedInto(project, null, commitId, refCommit)) 
 				throw new ValidationException("Specified commit is not reachable from specified ref");
 			
-			reason = new SubmitReason() {
-
-				@Override
-				public String getRefName() {
-					return jobRunOnCommit.getRefName();
-				}
-
-				@Override
-				public PullRequest getPullRequest() {
-					return null;
-				}
-
-				@Override
-				public String getDescription() {
-					return jobRun.getReason();
-				}
-				
-			};
+			refName = jobRunOnCommit.getRefName();
+			request = null;
 		} else {
 			JobRunOnPullRequest jobRunOnPullRequest = (JobRunOnPullRequest) jobRun;
-			PullRequest pullRequest = pullRequestManager.load(jobRunOnPullRequest.getPullRequestId());
-			project = pullRequest.getProject();
+			request = pullRequestManager.load(jobRunOnPullRequest.getPullRequestId());
+			refName = request.getMergeRef();
+			project = request.getProject();
 			
-			if (!SecurityUtils.canRunJob(pullRequest.getProject(), jobRun.getJobName()))		
+			if (!SecurityUtils.canRunJob(request.getProject(), jobRun.getJobName()))		
 				throw new UnauthorizedException();
 
-			MergePreview preview = pullRequest.checkMergePreview();
+			MergePreview preview = request.checkMergePreview();
 			if (preview == null)
 				throw new ValidationException("Pull request merge preview not calculated yet");
 			if (preview.getMergeCommitHash() == null)
 				throw new ValidationException("Pull request has merge conflicts");
 			
 			commitId = ObjectId.fromString(preview.getMergeCommitHash());
-			
-			reason = new SubmitReason() {
-
-				@Override
-				public String getRefName() {
-					return pullRequest.getMergeRef();
-				}
-
-				@Override
-				public PullRequest getPullRequest() {
-					return pullRequest;
-				}
-
-				@Override
-				public String getDescription() {
-					return jobRun.getReason();
-				}
-				
-			};
 		}
 		
-		return jobManager.submit(project, commitId, jobRun.getJobName(), 
-				jobRun.getParams(), UUID.randomUUID().toString(), reason).getId();
+		Build build = jobManager.submit(project, commitId, jobRun.getJobName(), 
+				jobRun.getParams(), UUID.randomUUID().toString(), refName, 
+				SecurityUtils.getUser(), request, jobRun.getReason());
+		return build.getId();
     }
 
 	@Api(order=200)

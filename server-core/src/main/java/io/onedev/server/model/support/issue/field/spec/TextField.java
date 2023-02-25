@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import io.onedev.server.model.support.inputspec.textinput.TextInput;
-import io.onedev.server.model.support.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
+import io.onedev.server.buildspecmodel.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=100, name=FieldSpec.TEXT)

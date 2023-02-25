@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;

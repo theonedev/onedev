@@ -6,11 +6,11 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.inputspec.groupchoiceinput.GroupChoiceInput;
-import io.onedev.server.model.support.inputspec.groupchoiceinput.choiceprovider.AllGroups;
-import io.onedev.server.model.support.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.inputspec.groupchoiceinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.model.support.inputspec.groupchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
+import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.GroupChoiceInput;
+import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider.AllGroups;
+import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 

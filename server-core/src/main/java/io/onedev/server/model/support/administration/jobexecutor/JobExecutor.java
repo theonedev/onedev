@@ -9,6 +9,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildRunning;
 import io.onedev.server.job.JobContext;
+import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.terminal.TerminalManager;
@@ -16,7 +17,6 @@ import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.JobAuthorization;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
 import javax.annotation.Nullable;
@@ -35,7 +35,7 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String name;
 	
-	private String jobAuthorization;
+	private String jobRequirement;
 	
 	private boolean shellAccessEnabled;
 	
@@ -64,7 +64,7 @@ public abstract class JobExecutor implements Serializable {
 
 	@Editable(order=20, description="Enable this to allow project managers to open web terminal to running builds. "
 			+ "<b class='text-danger'>WARNING</b>: Users with shell access can take control of the node used by "
-			+ "the executor. You should configure job authorization below to make sure the executor can only be "
+			+ "the executor. You should configure job requirement below to make sure the executor can only be "
 			+ "used by trusted jobs if this option is enabled")
 	@ShowCondition("isTerminalSupported")
 	public boolean isShellAccessEnabled() {
@@ -90,16 +90,15 @@ public abstract class JobExecutor implements Serializable {
 		return OneDev.getInstance(TerminalManager.class).isTerminalSupported();
 	}
 
-	@Editable(order=10000, placeholder="Can be used by any jobs", 
-			description="Optionally specify jobs authorized to use this executor")
-	@JobAuthorization
+	@Editable(order=10000, placeholder="Any job", description="Optionally specify job requirement of this executor")
+	@io.onedev.server.web.editable.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
 	@Nullable
-	public String getJobAuthorization() {
-		return jobAuthorization;
+	public String getJobRequirement() {
+		return jobRequirement;
 	}
 
-	public void setJobAuthorization(String jobAuthorization) {
-		this.jobAuthorization = jobAuthorization;
+	public void setJobRequirement(String jobRequirement) {
+		this.jobRequirement = jobRequirement;
 	}
 
 	@Editable(order=50000, group="More Settings", description="Specify job cache TTL (time to live) by days. "
@@ -122,37 +121,65 @@ public abstract class JobExecutor implements Serializable {
 	
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (jobAuthorization != null 
-				&& io.onedev.server.job.authorization.JobAuthorization.parse(jobAuthorization).isUsingProject(projectPath)) {
+		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingProject(projectPath)) {
 			usage.add("job requirement" );
 		}
 		return usage;
 	}
 	
 	public void onMoveProject(String oldPath, String newPath) {
-		if (jobAuthorization != null) {
-			io.onedev.server.job.authorization.JobAuthorization parsedJobAuthorization = 
-					io.onedev.server.job.authorization.JobAuthorization.parse(jobAuthorization);
-			parsedJobAuthorization.onMoveProject(oldPath, newPath);
-			jobAuthorization = parsedJobAuthorization.toString();
+		if (jobRequirement != null) {
+			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
+			jobMatch.onMoveProject(oldPath, newPath);
+			jobRequirement = jobMatch.toString();
 		}
 	}
 
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (jobAuthorization != null 
-				&& io.onedev.server.job.authorization.JobAuthorization.parse(jobAuthorization).isUsingUser(userName)) {
-			usage.add("job authorization" );
+		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingUser(userName)) {
+			usage.add("job requirement");
 		}
 		return usage;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		if (jobAuthorization != null) {
-			io.onedev.server.job.authorization.JobAuthorization parsedJobAuthorization = 
-					io.onedev.server.job.authorization.JobAuthorization.parse(jobAuthorization);
-			parsedJobAuthorization.onRenameUser(oldName, newName);
-			jobAuthorization = parsedJobAuthorization.toString();
+		if (jobRequirement != null) {
+			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
+			jobMatch.onRenameUser(oldName, newName);
+			jobRequirement = jobMatch.toString();
+		}
+	}
+
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
+		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingGroup(groupName)) {
+			usage.add("job requirement");
+		}
+		return usage;
+	}
+
+	public void onRenameGroup(String oldName, String newName) {
+		if (jobRequirement != null) {
+			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
+			jobMatch.onRenameGroup(oldName, newName);
+			jobRequirement = jobMatch.toString();
+		}
+	}
+
+	public Usage onDeleteRole(String roleName) {
+		Usage usage = new Usage();
+		if (jobRequirement != null && JobMatch.parse(jobRequirement, true, true).isUsingRole(roleName)) {
+			usage.add("job requirement");
+		}
+		return usage;
+	}
+
+	public void onRenameRole(String oldName, String newName) {
+		if (jobRequirement != null) {
+			JobMatch jobMatch = JobMatch.parse(jobRequirement, true, true);
+			jobMatch.onRenameRole(oldName, newName);
+			jobRequirement = jobMatch.toString();
 		}
 	}
 	

@@ -22,7 +22,6 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.*;
 import io.onedev.server.model.support.build.*;
-import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.FileProtection;
 import io.onedev.server.model.support.code.GitPackConfig;
@@ -78,6 +77,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.Project.PROP_NAME;
+import static io.onedev.server.util.match.WildcardUtils.matchPath;
 
 @Entity
 @Table(
@@ -349,6 +349,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private transient Optional<UUID> storageServerUUID;
 
 	private transient Map<ObjectId, Collection<Build>> buildsCache;
+	
+	private transient Map<ObjectId, Collection<String>> reachableBranchesCache;
 	
 	@Editable(order=100)
 	@ProjectName
@@ -958,13 +960,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return jobProperties;
 	}
 	
-	public List<ActionAuthorization> getHierarchyActionAuthorizations() {
-		List<ActionAuthorization> actionAuthorizations = new ArrayList<>(getBuildSetting().getActionAuthorizations());
-		if (getParent() != null)
-			actionAuthorizations.addAll(getParent().getHierarchyActionAuthorizations());
-		return actionAuthorizations;
-	}
-	
 	public List<DefaultFixedIssueFilter> getHierarchyDefaultFixedIssueFilters() {
 		List<DefaultFixedIssueFilter> defaultFixedIssueFilters = new ArrayList<>(getBuildSetting().getDefaultFixedIssueFilters());
 		if (getParent() != null)
@@ -1169,7 +1164,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		
 		Set<String> jobNames = new HashSet<>();
 		List<FileProtection> fileProtections = new ArrayList<>();
-		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null, true);
+		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null);
 		for (BranchProtection protection: getHierarchyBranchProtections()) {
 			if (protection.isEnabled() 
 					&& UserMatch.parse(protection.getUserMatch()).matches(this, user) 
@@ -1331,24 +1326,38 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return null;
 	}
 	
-	public boolean isCommitOnBranches(@Nullable ObjectId commitId, String branches) {
-		Matcher matcher = new PathMatcher();
-		if (commitId != null) {
+	private Collection<String> getReachableBranches(ObjectId commitId) {
+		if (reachableBranchesCache == null) 
+			reachableBranchesCache = new HashMap<>();
+		Collection<String> reachableBranches = reachableBranchesCache.get(commitId);
+		if (reachableBranches == null) {
+			reachableBranches = new HashSet<>();
+			
 			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
 			Collection<ObjectId> descendants = commitInfoManager.getDescendants(
 					getId(), Sets.newHashSet(commitId));
 			descendants.add(commitId);
-		
-			PatternSet branchPatterns = PatternSet.parse(branches);
-			for (RefFacade ref: getBranchRefs()) {
-				String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName()));
-				if (descendants.contains(ref.getPeeledObj()) && branchPatterns.matches(matcher, branchName))
-					return true;
+
+			for (RefFacade ref : getBranchRefs()) {
+				if (descendants.contains(ref.getPeeledObj()))
+					reachableBranches.add(Preconditions.checkNotNull(GitUtils.ref2branch(ref.getName())));
 			}
-			return false;
-		} else {
-			return PatternSet.parse(branches).matches(matcher, "main");
+			reachableBranchesCache.put(commitId, reachableBranches);
 		}
+		return reachableBranches;
+	}
+
+	public boolean isCommitOnBranches(@Nullable ObjectId commitId, PatternSet branches) {
+		Matcher matcher = new PathMatcher();
+		if (commitId != null) 
+			return getReachableBranches(commitId).stream().anyMatch(it->branches.matches(matcher, it));
+		else 
+			return branches.matches(matcher, "main");
+		
+	}
+	
+	public boolean isCommitOnBranch(ObjectId commitId, String branch) {
+		return getReachableBranches(commitId).stream().anyMatch(it->matchPath(branch, it));
 	}
 	
 	public boolean isReviewRequiredForModification(User user, String branch, @Nullable String file) {

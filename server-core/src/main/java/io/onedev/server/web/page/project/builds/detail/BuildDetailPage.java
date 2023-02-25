@@ -8,24 +8,21 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildUpdated;
+import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.terminal.TerminalManager;
-import io.onedev.server.util.JobSecretAuthorizationContext;
-import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.script.identity.JobIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -89,7 +86,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class BuildDetailPage extends ProjectPage 
-		implements InputContext, ScriptIdentityAware, BuildAware, JobSecretAuthorizationContextAware {
+		implements InputContext, BuildAware, JobAuthorizationContextAware {
 
 	public static final String PARAM_BUILD = "build";
 	
@@ -629,11 +626,6 @@ public abstract class BuildDetailPage extends ProjectPage
 	}
 
 	@Override
-	public ScriptIdentity getScriptIdentity() {
-		return new JobIdentity(getBuild().getProject(), getBuild().getCommitId());
-	}
-
-	@Override
 	protected Component newProjectTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("builds", ProjectBuildsPage.class, 
@@ -651,8 +643,9 @@ public abstract class BuildDetailPage extends ProjectPage
 	}
 
 	@Override
-	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {
-		return new JobSecretAuthorizationContext(getProject(), getBuild().getCommitId(), getBuild().getRequest());
+	public JobAuthorizationContext getJobAuthorizationContext() {
+		return new JobAuthorizationContext(getProject(), getBuild().getCommitId(), 
+				getBuild().getSubmitter(), getBuild().getRequest());
 	}
 	
 }

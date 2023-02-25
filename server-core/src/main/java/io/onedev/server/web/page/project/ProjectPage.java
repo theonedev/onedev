@@ -280,8 +280,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					JobSecretsPage.class, JobSecretsPage.paramsOf(getProject())));
 			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Job Properties",
 					JobPropertiesPage.class, JobPropertiesPage.paramsOf(getProject())));
-			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Action Authorizations", 
-					ActionAuthorizationsPage.class, ActionAuthorizationsPage.paramsOf(getProject())));
 			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Build Preserve Rules", 
 					BuildPreservationsPage.class, BuildPreservationsPage.paramsOf(getProject())));
 			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Fixed Issue Filters", 

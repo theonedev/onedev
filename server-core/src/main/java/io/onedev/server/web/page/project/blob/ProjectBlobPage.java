@@ -19,6 +19,8 @@ import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.git.service.GitService;
+import io.onedev.server.job.JobAuthorizationContext;
+import io.onedev.server.job.JobAuthorizationContextAware;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -30,11 +32,6 @@ import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.FilenameUtils;
-import io.onedev.server.util.JobSecretAuthorizationContext;
-import io.onedev.server.util.JobSecretAuthorizationContextAware;
-import io.onedev.server.util.script.identity.JobIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -117,7 +114,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
-		ScriptIdentityAware, EditParamsAware, JobSecretAuthorizationContextAware {
+		EditParamsAware, JobAuthorizationContextAware {
 
 	private static final String PARAM_INITIAL_NEW_PATH = "initial-new-path";
 	
@@ -204,7 +201,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			String path = state.blobIdent.path;
 			if (path != null && state.blobIdent.isTree())
 				path += "/";
-			if (!SecurityUtils.canModify(getProject(), state.blobIdent.revision, path))
+			
+			var revision = state.blobIdent.revision;
+			if (revision == null)
+				revision = "main";
+			if (!SecurityUtils.canModify(getProject(), revision, path))
 				unauthorized();
 		}
 		
@@ -370,25 +371,26 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		blobOperations.setOutputMarkupId(true);
 		
 		String revision = state.blobIdent.revision;
+		if (revision == null)
+			revision = "main";
 		
 		AtomicBoolean reviewRequired = new AtomicBoolean(true);
 		try {
-			reviewRequired.set(revision!=null && getProject().isReviewRequiredForModification(getLoginUser(), revision, null)); 
+			reviewRequired.set(getProject().isReviewRequiredForModification(getLoginUser(), revision, null)); 
 		} catch (Exception e) {
 			logger.error("Error checking review requirement", e);
 		}
 		
 		AtomicBoolean buildRequired = new AtomicBoolean(true);
 		try {
-			buildRequired.set(revision!=null && getProject().isBuildRequiredForModification(getLoginUser(), revision, null));
+			buildRequired.set(getProject().isBuildRequiredForModification(getLoginUser(), revision, null));
 		} catch (Exception e) {
 			logger.error("Error checking build requirement", e);
 		}
 
 		AtomicBoolean signatureRequiredButNoSigningKey = new AtomicBoolean(true);
 		try {
-			signatureRequiredButNoSigningKey.set(revision!=null 
-					&& getProject().isCommitSignatureRequiredButNoSigningKey(getLoginUser(), revision)); 
+			signatureRequiredButNoSigningKey.set(getProject().isCommitSignatureRequiredButNoSigningKey(getLoginUser(), revision)); 
 		} catch (Exception e) {
 			logger.error("Error checking signature requirement", e);
 		}
@@ -1611,14 +1613,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		else
 			return state.blobIdent.path + " at " + state.blobIdent.revision + " - " + getProject().getPath();
 	}
-	
-	@Override
-	public ScriptIdentity getScriptIdentity() {
-		if (getBlobIdent().revision != null)
-			return new JobIdentity(getProject(), getCommit().copy());
-		else // when we add file to an empty project
-			return new JobIdentity(getProject(), null);
-	}
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
@@ -1634,16 +1628,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 
 	@Override
-	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {
-		return new JobSecretAuthorizationContext(getProject(), getCommit(), null);
+	public JobAuthorizationContext getJobAuthorizationContext() {
+		return new JobAuthorizationContext(getProject(), getCommit(), SecurityUtils.getUser(), null);
 	}
 
 	@Override
 	protected BookmarkablePageLink<Void> navToProject(String componentId, Project project) {
-		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) 
+		if (project.isCodeManagement() && SecurityUtils.canReadCode(project)) {
 			return new ViewStateAwarePageLink<Void>(componentId, ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));
-		else
-			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project.getId()));
+		} else {
+			return new ViewStateAwarePageLink<Void>(componentId, ProjectDashboardPage.class, 
+					ProjectDashboardPage.paramsOf(project.getId()));
+		}
 	}
 	
 }

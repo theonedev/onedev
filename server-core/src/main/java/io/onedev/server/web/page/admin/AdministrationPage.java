@@ -1,17 +1,13 @@
 package io.onedev.server.web.page.admin;
 
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.page.layout.LayoutPage;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
-import io.onedev.server.util.script.identity.SiteAdministrator;
-import io.onedev.server.web.page.layout.LayoutPage;
-
 @SuppressWarnings("serial")
-public abstract class AdministrationPage extends LayoutPage implements ScriptIdentityAware {
+public abstract class AdministrationPage extends LayoutPage {
 
 	public AdministrationPage(PageParameters params) {
 		super(params);
@@ -37,11 +33,5 @@ public abstract class AdministrationPage extends LayoutPage implements ScriptIde
 	protected String getPageTitle() {
 		return "Administration - OneDev";
 	}
-
-	@Override
-	public ScriptIdentity getScriptIdentity() {
-		return new SiteAdministrator();
-	}
-	
 	
 }

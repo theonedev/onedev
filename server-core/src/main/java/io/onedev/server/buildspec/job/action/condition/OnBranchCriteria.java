@@ -25,7 +25,7 @@ public class OnBranchCriteria extends Criteria<Build> {
 	
 	@Override
 	public boolean matches(Build build) {
-		return build.getProject().isCommitOnBranches(build.getCommitId(), branch);
+		return build.getProject().isCommitOnBranch(build.getCommitId(), branch);
 	}
 
 	@Override

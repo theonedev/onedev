@@ -46,7 +46,7 @@ public class NoCommitsPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (SecurityUtils.canWriteCode(context.getProject())) {
+		if (SecurityUtils.canModify(context.getProject(), "main", null)) {
 			add(new MenuLink("addFiles") {
 
 				@Override
@@ -118,15 +118,27 @@ public class NoCommitsPanel extends Panel {
 				}
 				
 			});		
-			
-			add(new AjaxLink<Void>("setupBuildSpec") {
 
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					context.onModeChange(target, Mode.ADD, BuildSpec.BLOB_PATH);
-				}
-				
-			});
+			if (SecurityUtils.canModify(context.getProject(), "main", BuildSpec.BLOB_PATH)) {
+				add(new AjaxLink<Void>("setupBuildSpec") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						context.onModeChange(target, Mode.ADD, BuildSpec.BLOB_PATH);
+					}
+
+				});
+			} else {
+				add(new WebMarkupContainer("setupBuildSpec") {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("span");
+					}
+
+				});
+			}
 			
 			add(new DropdownLink("pushInstructions") {
 

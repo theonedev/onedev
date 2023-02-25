@@ -26,7 +26,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
 import io.onedev.server.util.Day;

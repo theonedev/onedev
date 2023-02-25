@@ -1,17 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
 import com.hazelcast.core.HazelcastInstance;
-
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -34,6 +23,14 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.facade.GroupCache;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.usage.Usage;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.List;
 
 @Singleton
 public class DefaultGroupManager extends BaseEntityManager<Group> implements GroupManager {
@@ -91,21 +88,18 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
     @Transactional
     @Listen
     public void on(EntityPersisted event) {
-    	if (event.getEntity() instanceof Group) 
-    		cacheAfterCommit((Group) event.getEntity());
-    }
-    
-    private void cacheAfterCommit(Group group) {
-    	GroupFacade facade = group.getFacade();
-		transactionManager.runAfterCommit(new Runnable() {
+    	if (event.getEntity() instanceof Group) {
+			GroupFacade facade = ((Group)event.getEntity()).getFacade();
+			transactionManager.runAfterCommit(new Runnable() {
 
-			@Override
-			public void run() {
-				if (cache != null)
-					cache.put(facade.getId(), facade);
-			}
-			
-		});
+				@Override
+				public void run() {
+					if (cache != null)
+						cache.put(facade.getId(), facade);
+				}
+
+			});
+		}
     }
     
 	@Transactional
@@ -113,10 +107,15 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 	public void save(Group group, String oldName) {
 		if (oldName != null && !oldName.equals(group.getName())) {
 			for (Project project: projectManager.query()) {
-				for (BranchProtection protection: project.getBranchProtections()) 
-					protection.onRenameGroup(oldName, group.getName());
-				for (TagProtection protection: project.getTagProtections())
-					protection.onRenameGroup(oldName, group.getName());
+				try {
+					for (BranchProtection protection : project.getBranchProtections())
+						protection.onRenameGroup(oldName, group.getName());
+					for (TagProtection protection : project.getTagProtections())
+						protection.onRenameGroup(oldName, group.getName());
+					project.getBuildSetting().onRenameGroup(oldName, group.getName());
+				} catch (Exception e) {
+					throw new RuntimeException("Error checking group reference in project '" + project.getPath() + "'", e);
+				}
 			}
 			
 			settingManager.onRenameGroup(oldName, group.getName());
@@ -130,13 +129,18 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 	public void delete(Group group) {
     	Usage usage = new Usage();
 		for (Project project: projectManager.query()) {
-			Usage usedInProject = new Usage();
-			for (BranchProtection protection: project.getBranchProtections()) 
-				usedInProject.add(protection.onDeleteGroup(group.getName()));
-			for (TagProtection protection: project.getTagProtections()) 
-				usedInProject.add(protection.onDeleteGroup(group.getName()));
-			usedInProject.prefix("project '" + project.getPath() + "': settings");
-			usage.add(usedInProject);
+			try {
+				Usage usageInProject = new Usage();
+				for (BranchProtection protection : project.getBranchProtections())
+					usageInProject.add(protection.onDeleteGroup(group.getName()));
+				for (TagProtection protection : project.getTagProtections())
+					usageInProject.add(protection.onDeleteGroup(group.getName()));
+				project.getBuildSetting().onDeleteGroup(group.getName());
+				usageInProject.prefix("project '" + project.getPath() + "': settings");
+				usage.add(usageInProject);
+			} catch (Exception e) {
+				throw new RuntimeException("Error checking group reference in project '" + project.getPath() + "'", e);
+			}
 		}
 
 		usage.add(settingManager.onDeleteGroup(group.getName()));
@@ -148,8 +152,8 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 
 	@Sessional
     @Override
-    public Group find(String groupName) {
-		GroupFacade facade = cache.find(groupName);
+    public Group find(String name) {
+		GroupFacade facade = cache.find(name);
 		if (facade != null)
 			return load(facade.getId());
 		else

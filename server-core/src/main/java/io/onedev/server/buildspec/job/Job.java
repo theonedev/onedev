@@ -16,11 +16,12 @@ import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.job.authorization.JobAuthorization;
-import io.onedev.server.job.authorization.JobAuthorization.Context;
+import io.onedev.server.job.match.JobMatch;
+import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.criteria.Criteria;
@@ -138,13 +139,16 @@ public class Job implements NamedElement, Serializable, Validatable {
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
 		String jobName = (String) EditContext.get().getInputValue(PROP_NAME);
 		if (jobName != null) {
-			Context context = new Context(page.getProject(), page.getBlobIdent().revision, jobName);
+			String branch = page.getBlobIdent().revision;
+			if (branch == null)
+				branch = "main";
+			JobMatchContext context = new JobMatchContext(page.getProject(), branch, null, SecurityUtils.getUser(), jobName);
 			for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
 				if (executor.isEnabled()) {
-					if (executor.getJobAuthorization() == null) {
+					if (executor.getJobRequirement() == null) {
 						applicableJobExecutors.add(executor.getName());
 					} else {
-						if (JobAuthorization.parse(executor.getJobAuthorization()).matches(context))
+						if (JobMatch.parse(executor.getJobRequirement(), true, true).matches(context))
 							applicableJobExecutors.add(executor.getName());
 					}
 				}
@@ -302,11 +306,11 @@ public class Job implements NamedElement, Serializable, Validatable {
 	}
 	
 	@Nullable
-	public JobTriggerMatch getTriggerMatch(ProjectEvent event) {
+	public TriggerMatch getTriggerMatch(ProjectEvent event) {
 		for (JobTrigger trigger: getTriggers()) {
-			SubmitReason reason = trigger.matches(event, this);
-			if (reason != null)
-				return new JobTriggerMatch(trigger, reason);
+			TriggerMatch match = trigger.matches(event, this);
+			if (match != null)
+				return match;
 		}
 		return null;
 	}

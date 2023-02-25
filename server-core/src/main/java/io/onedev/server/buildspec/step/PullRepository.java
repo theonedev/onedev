@@ -113,7 +113,7 @@ public class PullRepository extends SyncRepository {
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		Project buildProject = build.getProject();
-		if (!buildProject.isCommitOnBranches(build.getCommitId(), buildProject.getDefaultBranch()))
+		if (!buildProject.isCommitOnBranch(build.getCommitId(), buildProject.getDefaultBranch()))
 			throw new ExplicitException("For security reason, this step is only allowed to run from default branch");
 		
 		String remoteUrl = getRemoteUrlWithCredential(build);

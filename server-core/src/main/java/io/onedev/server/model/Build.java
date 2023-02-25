@@ -1,63 +1,11 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
-import static io.onedev.server.model.Build.PROP_COMMIT;
-import static io.onedev.server.model.Build.PROP_FINISH_DATE;
-import static io.onedev.server.model.Build.PROP_FINISH_DAY;
-import static io.onedev.server.model.Build.PROP_JOB;
-import static io.onedev.server.model.Build.PROP_PENDING_DATE;
-import static io.onedev.server.model.Build.PROP_PIPELINE;
-import static io.onedev.server.model.Build.PROP_REF_NAME;
-import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
-import static io.onedev.server.model.Build.PROP_STATUS;
-import static io.onedev.server.model.Build.PROP_SUBMIT_DATE;
-import static io.onedev.server.model.Build.PROP_VERSION;
-
-import java.io.File;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Stack;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import io.onedev.server.util.artifact.ArtifactInfo;
-import io.onedev.server.util.artifact.DirectoryInfo;
-import io.onedev.server.util.validation.annotation.Directory;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentStorageSupport;
@@ -69,38 +17,47 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.spec.SecretParam;
 import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
-import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
-import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
-import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.Day;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.JobSecretAuthorizationContext;
-import io.onedev.server.util.MatrixRunner;
-import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.*;
+import io.onedev.server.util.artifact.ArtifactInfo;
+import io.onedev.server.util.artifact.DirectoryInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
-import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.script.identity.JobIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
+
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import java.io.File;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
+import static io.onedev.server.model.Build.*;
 
 @Entity
 @Table(
@@ -369,7 +326,7 @@ public class Build extends ProjectBelonging
 	
 	private transient Map<Integer, Collection<Long>> streamPreviousNumbersCache = new HashMap<>();
 	
-	private transient JobSecretAuthorizationContext jobSecretAuthorizationContext;
+	private transient JobAuthorizationContext jobAuthorizationContext;
 	
 	private transient List<ArtifactInfo> rootArtifacts;
 	
@@ -739,18 +696,16 @@ public class Build extends ProjectBelonging
 		return new BuildFacade(getId(), getProject().getId(), getNumber(), getCommitHash());
 	}
 	
-	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {
-		if (jobSecretAuthorizationContext == null)
-			jobSecretAuthorizationContext = new JobSecretAuthorizationContext(project, getCommitId(), request);
-		return jobSecretAuthorizationContext;
+	public JobAuthorizationContext getJobAuthorizationContext() {
+		if (jobAuthorizationContext == null) 
+			jobAuthorizationContext = new JobAuthorizationContext(project, getCommitId(), getSubmitter(), request);
+		return jobAuthorizationContext;
 	}
 	
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
-		for (JobSecret secret: getProject().getHierarchyJobSecrets()) {
-			if (getJobSecretAuthorizationContext().isOnBranches(secret.getAuthorizedBranches()))
-				secretValuesToMask.add(secret.getValue());
-		}
+		for (JobSecret secret: getProject().getHierarchyJobSecrets()) 
+			secretValuesToMask.add(secret.getValue());
 		
 		for (BuildParam param: getParams()) {
 			if (param.getType().equals(ParamSpec.SECRET) && param.getValue() != null) {		
@@ -775,11 +730,11 @@ public class Build extends ProjectBelonging
 	
 	@Nullable
 	public Job getJob() {
-		JobSecretAuthorizationContext.push(getJobSecretAuthorizationContext());
+		JobAuthorizationContext.push(getJobAuthorizationContext());
 		try {
 			return getSpec()!=null? getSpec().getJobMap().get(getJobName()): null;
 		} finally {
-			JobSecretAuthorizationContext.pop();
+			JobAuthorizationContext.pop();
 		}
 	}
 
@@ -885,42 +840,26 @@ public class Build extends ProjectBelonging
 	
 	public static void push(@Nullable Build build) {
 		stack.get().push(build);
-		if (build != null)
-			ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
 	}
 
 	public static void pop() {
-		Build build = stack.get().pop();
-		if (build != null)
-			ScriptIdentity.pop();
+		stack.get().pop();
 	}
 	
-	public boolean canCreateTag(String tagName) {
-		for (ActionAuthorization authorization: getProject().getHierarchyActionAuthorizations()) {
-			if (getJobSecretAuthorizationContext().isOnBranches(authorization.getAuthorizedBranches())) {
-				if (authorization instanceof CreateTagAuthorization) {
-					CreateTagAuthorization createTagAuthorization = (CreateTagAuthorization) authorization;
-					String tagNames = createTagAuthorization.getTagNames();
-					if (tagNames == null || WildcardUtils.matchPath(tagNames, tagName))
-						return true;
-				}
-			}
-		}
-		return false;
+	public boolean canCreateTag(String accessTokenSecret, String tagName) {
+		return SecurityUtils.canCreateTag(getUser(accessTokenSecret), getProject(), tagName);
 	}
 	
-	public boolean canCloseMilestone(String milestoneName) {
-		for (ActionAuthorization authorization: getProject().getHierarchyActionAuthorizations()) {
-			if (getJobSecretAuthorizationContext().isOnBranches(authorization.getAuthorizedBranches())) {
-				if (authorization instanceof CloseMilestoneAuthorization) {
-					CloseMilestoneAuthorization closeMilestoneAuthorization = (CloseMilestoneAuthorization) authorization;
-					String milestoneNames = closeMilestoneAuthorization.getMilestoneNames();
-					if (milestoneNames == null || WildcardUtils.matchPath(milestoneNames, milestoneName))
-						return true;
-				}
-			}
-		}
-		return false;
+	private User getUser(String accessTokenSecret) {
+		String accessToken = getJobAuthorizationContext().getSecretValue(accessTokenSecret);
+		User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
+		if (user == null)
+			throw new ExplicitException("No user found with specified access token");
+		return user;
+	}
+	
+	public boolean canCloseMilestone(String accessTokenSecret, String milestoneName) {
+		return SecurityUtils.canManageIssues(getUser(accessTokenSecret), getProject());
 	}
 	
 	public boolean isValid() {

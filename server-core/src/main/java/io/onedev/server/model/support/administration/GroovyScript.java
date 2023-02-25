@@ -1,27 +1,18 @@
 package io.onedev.server.model.support.administration;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.validation.constraints.Size;
-
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.model.Project;
+import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.script.identity.JobIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.SiteAdministrator;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.Code;
 import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.editable.annotation.JobMatch;
 import io.onedev.server.web.editable.annotation.ShowCondition;
-import io.onedev.server.web.util.SuggestionUtils;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.List;
 
 @Editable
 public class GroovyScript implements Serializable {
@@ -36,9 +27,7 @@ public class GroovyScript implements Serializable {
 	
 	private boolean canBeUsedByBuildJobs = true;
 	
-	private String allowedProjects;
-	
-	private String allowedBranches;
+	private String authorization;
 
 	@Editable(order=100)
 	@RegEx(pattern="^(?!" + BUILTIN_PREFIX + ").*$", message="Name is not allowed to start with '" + BUILTIN_PREFIX + "'")
@@ -75,59 +64,84 @@ public class GroovyScript implements Serializable {
 	private static boolean isCanBeUsedByBuildJobsEnabled() {
 		return (boolean) EditContext.get().getInputValue("canBeUsedByBuildJobs");
 	}
-
-	@Editable(order=400, placeholder="All", description="Optionally specify space-separated projects allowed to "
-			+ "execute this script. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. "
-			+ "Leave empty to allow all")
-	@Patterns(suggester="suggestProjects", path=true)
+	
+	@Editable(order=500, placeholder="Any job", description="Optionally specify jobs allowed to use this script")
 	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
-	public String getAllowedProjects() {
-		return allowedProjects;
+	@JobMatch(withProjectCriteria = true)
+	public String getAuthorization() {
+		return authorization;
 	}
 	
-	public void setAllowedProjects(String allowedProjects) {
-		this.allowedProjects = allowedProjects;
+	public void setAuthorization(String authorization) {
+		this.authorization = authorization;
 	}
 	
-	@Editable(order=500, placeholder="All", description="Optionally specify space-separated branches allowed to "
-		+ "execute this script. Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
-		+ "Prefix with '-' to exclude. Leave empty to allow all")
-	@Patterns(path=true)
-	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
-	public String getAllowedBranches() {
-		return allowedBranches;
-	}
-	
-	public void setAllowedBranches(String allowedBranches) {
-		this.allowedBranches = allowedBranches;
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjectPaths(matchWith);
-	}
-		
-	public final boolean isAuthorized(ScriptIdentity identity) {
-		if (identity instanceof SiteAdministrator) { 
+	public final boolean isAuthorized() {
+		JobAuthorizationContext jobAuthorizationContext = JobAuthorizationContext.get();
+		if (jobAuthorizationContext != null) 
+			return canBeUsedByBuildJobs && jobAuthorizationContext.isScriptAuthorized(this);
+		else 
 			return true;
-		} else if (isCanBeUsedByBuildJobs() && identity instanceof JobIdentity) {
-			JobIdentity jobIdentity = (JobIdentity) identity;
-			return (getAllowedProjects() == null || PatternSet.parse(getAllowedProjects()).matches(new PathMatcher(), jobIdentity.getProject().getPath()))
-					&& (getAllowedBranches() == null || jobIdentity.getProject().isCommitOnBranches(jobIdentity.getCommitId(), getAllowedBranches()));
-		} else {
-			return false;
-		}
 	}
 	
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (Project.containsPath(getAllowedProjects(), projectPath))
-			usage.add("allowed projects");
+		if (authorization != null && io.onedev.server.job.match.JobMatch.parse(authorization, true, false).isUsingProject(projectPath))
+			usage.add("authorization");
 		return usage;
 	}
 	
 	public void onMoveProject(String oldPath, String newPath) {
-		setAllowedProjects(Project.substitutePath(getAllowedProjects(), oldPath, newPath));
+		if (authorization != null) {
+			var jobMatch = io.onedev.server.job.match.JobMatch.parse(authorization, true, false);
+			jobMatch.onMoveProject(oldPath, newPath);
+			authorization = jobMatch.toString();
+		}
 	}
 
+	public Usage onDeleteUser(String userName) {
+		Usage usage = new Usage();
+		if (authorization != null && io.onedev.server.job.match.JobMatch.parse(authorization, true, false).isUsingUser(userName))
+			usage.add("authorization");
+		return usage;
+	}
+
+	public void onRenameUser(String oldName, String newName) {
+		if (authorization != null) {
+			var jobMatch = io.onedev.server.job.match.JobMatch.parse(authorization, true, false);
+			jobMatch.onRenameUser(oldName, newName);
+			authorization = jobMatch.toString();
+		}
+	}
+
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
+		if (authorization != null && io.onedev.server.job.match.JobMatch.parse(authorization, true, false).isUsingGroup(groupName))
+			usage.add("authorization");
+		return usage;
+	}
+
+	public void onRenameGroup(String oldName, String newName) {
+		if (authorization != null) {
+			var jobMatch = io.onedev.server.job.match.JobMatch.parse(authorization, true, false);
+			jobMatch.onRenameGroup(oldName, newName);
+			authorization = jobMatch.toString();
+		}
+	}
+
+	public Usage onDeleteRole(String roleName) {
+		Usage usage = new Usage();
+		if (authorization != null && io.onedev.server.job.match.JobMatch.parse(authorization, true, false).isUsingRole(roleName))
+			usage.add("authorization");
+		return usage;
+	}
+
+	public void onRenameRole(String oldName, String newName) {
+		if (authorization != null) {
+			var jobMatch = io.onedev.server.job.match.JobMatch.parse(authorization, true, false);
+			jobMatch.onRenameRole(oldName, newName);
+			authorization = jobMatch.toString();
+		}
+	}
+	
 }

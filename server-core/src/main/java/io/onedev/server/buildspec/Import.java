@@ -1,31 +1,14 @@
 package io.onedev.server.buildspec;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Stack;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
-
-import org.apache.shiro.subject.Subject;
-import org.eclipse.jgit.revwalk.RevCommit;
-import javax.validation.constraints.NotEmpty;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -33,7 +16,6 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -41,10 +23,23 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.shiro.subject.Subject;
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 @Editable
 @ClassValidating
@@ -160,23 +155,8 @@ public class Import implements Serializable, Validatable {
 
 			Subject subject;
 			if (getAccessTokenSecret() != null) {
-				JobSecretAuthorizationContext context = Preconditions.checkNotNull(JobSecretAuthorizationContext.get());
-				String accessToken;
-				
-				if (WicketUtils.getPage() instanceof ProjectBlobPage) {
-					ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
-					if (context.getProject().equals(page.getProject()) 
-							&& (page.getMode() == Mode.ADD || page.getMode() == Mode.EDIT)) {
-						String branchName = page.getBlobIdent().revision;
-						if (branchName == null)
-							branchName = "main";
-						accessToken = context.getSecretValue(branchName, accessTokenSecret);
-					} else {
-						accessToken = context.getSecretValue(accessTokenSecret);
-					}
-				} else {
-					accessToken = context.getSecretValue(accessTokenSecret);
-				}
+				JobAuthorizationContext context = Preconditions.checkNotNull(JobAuthorizationContext.get());
+				String accessToken = context.getSecretValue(accessTokenSecret);
 				User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
 				if (user == null) {
 					throw new ExplicitException(String.format(
@@ -227,7 +207,8 @@ public class Import implements Serializable, Validatable {
 			try {
 				Validator validator = OneDev.getInstance(Validator.class);
 				BuildSpec buildSpec = getBuildSpec();
-				JobSecretAuthorizationContext.push(new JobSecretAuthorizationContext(getProject(), getCommit(), null));
+				JobAuthorizationContext.push(new JobAuthorizationContext(
+						getProject(), getCommit(), SecurityUtils.getUser(), null));
 				try {
 					for (int i=0; i<buildSpec.getImports().size(); i++) {
 						Import aImport = buildSpec.getImports().get(i);
@@ -242,7 +223,7 @@ public class Import implements Serializable, Validatable {
 					}
 					return true;
 				} finally {
-					JobSecretAuthorizationContext.pop();
+					JobAuthorizationContext.pop();
 				}
 			} catch (Exception e) {
 				context.disableDefaultConstraintViolation();

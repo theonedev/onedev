@@ -12,6 +12,7 @@ import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.*;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.Pair;
+import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.dom4j.Element;
@@ -4976,4 +4977,119 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate114_reviewRequirement(@Nullable Element reviewRequirementElement) {
+		if (reviewRequirementElement != null) {
+			String reviewRequirement = reviewRequirementElement.getText();
+			reviewRequirement = reviewRequirement.replaceAll("\\)\\s+(user|group)", ") and $1");
+			reviewRequirement = reviewRequirement.replace("):all", "):2");
+			reviewRequirementElement.setText(reviewRequirement);
+		}
+	}
+
+	private void migrate114(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			try {
+				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				content = StringUtils.replace(content,
+						"io.onedev.server.model.support.inputspec.",
+						"io.onedev.server.buildspecmodel.inputspec.");
+				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) {
+					var buildSettingElement = element.element("buildSetting");
+					buildSettingElement.element("actionAuthorizations").detach();
+					for (var branchProtectionElement : element.element("branchProtections").elements()) {
+						migrate114_reviewRequirement(branchProtectionElement.element("reviewRequirement"));
+						for (Element fileProtectionElement : branchProtectionElement.element("fileProtections").elements()) {
+							migrate114_reviewRequirement(fileProtectionElement.element("reviewRequirement"));
+						}
+					}
+					for (var secretElement: buildSettingElement.element("jobSecrets").elements()) {
+						var authorizedBranchesElement = secretElement.element("authorizedBranches");
+						if (authorizedBranchesElement != null) {
+							PatternSet patterns = PatternSet.parse(authorizedBranchesElement.getText());
+							var criterias = new ArrayList<>();
+							var positiveCriterias = new ArrayList<>();
+							for (String include : patterns.getIncludes()) {
+								positiveCriterias.add("on branch \"" + include + "\"");
+							}
+							if (!positiveCriterias.isEmpty()) {
+								criterias.add("(" + StringUtils.join(positiveCriterias, " or ") + ")");
+							}
+							for (String exclude : patterns.getExcludes()) {
+								criterias.add("not(on branch \"" + exclude + "\")");
+							}
+							secretElement.addElement("authorization").setText(StringUtils.join(criterias, " and "));
+							authorizedBranchesElement.detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (var jobExecutorElement: valueElement.elements()) {
+								var jobAuthorizationElement = jobExecutorElement.element("jobAuthorization");
+								if (jobAuthorizationElement != null)
+									jobAuthorizationElement.setName("jobRequirement");
+							}				
+						}
+					} else if (key.equals("GROOVY_SCRIPTS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (var groovyScriptElement: valueElement.elements()) {
+								var criterias = new ArrayList<>();
+								Element allowedProjectsElement = groovyScriptElement.element("allowedProjects");
+								if (allowedProjectsElement != null) {
+									PatternSet patterns = PatternSet.parse(allowedProjectsElement.getText());
+									var positiveCriterias = new ArrayList<>();
+									for (String include : patterns.getIncludes()) {
+										positiveCriterias.add("\"Project\" is \"" + include + "\"");
+									}
+									if (!positiveCriterias.isEmpty()) {
+										criterias.add("(" + StringUtils.join(positiveCriterias, " or ") + ")");
+									}
+									for (String exclude : patterns.getExcludes()) {
+										criterias.add("not(\"Project\" is \"" + exclude + "\")");
+									}
+									allowedProjectsElement.detach();
+								}
+
+								Element allowedBranchesElement = groovyScriptElement.element("allowedBranches");
+								if (allowedBranchesElement != null) {
+									PatternSet patterns = PatternSet.parse(allowedBranchesElement.getText());
+									var positiveCriterias = new ArrayList<>();
+									for (String include : patterns.getIncludes()) {
+										positiveCriterias.add("on branch \"" + include + "\"");
+									}
+									if (!positiveCriterias.isEmpty()) {
+										criterias.add("(" + StringUtils.join(positiveCriterias, " or ") + ")");
+									}
+									for (String exclude : patterns.getExcludes()) {
+										criterias.add("not(on branch \"" + exclude + "\")");
+									}
+									allowedBranchesElement.detach();
+								}
+								if (!criterias.isEmpty())
+									groovyScriptElement.addElement("authorization").setText(StringUtils.join(criterias, " and "));
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
 }

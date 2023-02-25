@@ -1,18 +1,12 @@
 package io.onedev.server.model.support.build;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.model.Project;
 import io.onedev.server.util.validation.annotation.SecretName;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.JobMatch;
 import io.onedev.server.web.editable.annotation.Multiline;
-import io.onedev.server.web.editable.annotation.Patterns;
-import io.onedev.server.web.util.SuggestionUtils;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
 @Editable
 public class JobSecret implements Serializable {
@@ -23,7 +17,7 @@ public class JobSecret implements Serializable {
 
 	private String value;
 	
-	private String authorizedBranches;
+	private String authorization;
 	
 	@Editable(order=100)
 	@NotEmpty
@@ -47,27 +41,15 @@ public class JobSecret implements Serializable {
 		this.value = value;
 	}
 
-	@Editable(order=300, placeholder="All", description=""
-			+ "Optionally specify space-separated branches to authorize.\n"
-			+ "Only builds from authorized branches can access this secret.\n"
-			+ "Use '**', '*' or '?' for <a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
-			+ "Prefix with '-' to exclude. Leave empty to authorize all branches")
-	@Patterns(suggester = "suggestBranches", path=true)
-	public String getAuthorizedBranches() {
-		return authorizedBranches;
+	@Editable(order=300, placeholder="All Branches", description=
+			"Optionally specify branches/roles allowed to access this secret")
+	@JobMatch(withProjectCriteria = true)
+    public String getAuthorization() {
+		return authorization;
 	}
 
-	public void setAuthorizedBranches(String authorizedBranches) {
-		this.authorizedBranches = authorizedBranches;
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestBranches(String matchWith) {
-		Project project = Project.get();
-		if (project != null)
-			return SuggestionUtils.suggestBranches(project, matchWith);
-		else
-			return new ArrayList<>();
+	public void setAuthorization(String authorization) {
+		this.authorization = authorization;
 	}
 	
 }

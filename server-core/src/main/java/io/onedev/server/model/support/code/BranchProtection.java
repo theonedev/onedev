@@ -1,15 +1,5 @@
 package io.onedev.server.model.support.code;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-
-import org.eclipse.jgit.lib.ObjectId;
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -29,6 +19,14 @@ import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.JobChoice;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Editable
 @Horizontal
@@ -145,7 +143,7 @@ public class BranchProtection implements Serializable {
 
 	public ReviewRequirement getParsedReviewRequirement() {
 		if (parsedReviewRequirement == null)
-			parsedReviewRequirement = ReviewRequirement.parse(reviewRequirement, true);
+			parsedReviewRequirement = ReviewRequirement.parse(reviewRequirement);
 		return parsedReviewRequirement;
 	}
 	
@@ -188,7 +186,7 @@ public class BranchProtection implements Serializable {
 
 	public FileProtection getFileProtection(String file) {
 		Set<String> jobNames = new HashSet<>();
-		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null, true);
+		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null);
 		for (FileProtection protection: fileProtections) {
 			if (PatternSet.parse(protection.getPaths()).matches(new PathMatcher(), file)) {
 				jobNames.addAll(protection.getJobNames());
@@ -224,7 +222,7 @@ public class BranchProtection implements Serializable {
 				break;
 			}
 		}
-		return usage.prefix("branch protection '" + getBranches() + "'");
+		return usage.prefix("code: branch protection '" + getBranches() + "'");
 	}
 	
 	public void onRenameUser(String oldName, String newName) {

@@ -52,7 +52,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.web.websocket.WebSocketManager;

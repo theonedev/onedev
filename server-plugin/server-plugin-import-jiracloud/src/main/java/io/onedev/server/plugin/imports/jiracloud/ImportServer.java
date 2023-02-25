@@ -35,7 +35,6 @@ import javax.ws.rs.core.Response;
 
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssuesImported;
-import io.onedev.server.security.SecurityUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -66,7 +65,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.DateUtils;

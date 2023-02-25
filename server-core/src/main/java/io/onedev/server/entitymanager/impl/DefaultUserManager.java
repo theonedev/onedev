@@ -1,46 +1,15 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
-import io.onedev.server.util.CryptoUtils;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.shiro.authz.Permission;
-import org.hibernate.ReplicationMode;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
-
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.IssueFieldManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.exception.SystemNotReadyException;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.GroupAuthorization;
-import io.onedev.server.model.IssueAuthorization;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.persistence.IdManager;
@@ -51,11 +20,23 @@ import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.permission.ConfidentialIssuePermission;
+import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.usage.Usage;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.authz.Permission;
+import org.hibernate.ReplicationMode;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.criteria.*;
+import java.util.Collection;
+import java.util.List;
 
 import static io.onedev.server.model.User.*;
 
@@ -120,11 +101,16 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
     	if (oldName != null && !oldName.equals(user.getName())) {
     		for (Project project: projectManager.query()) {
-    			for (BranchProtection protection: project.getBranchProtections())
-    				protection.onRenameUser(oldName, user.getName());
-    			for (TagProtection protection: project.getTagProtections())
-    				protection.onRenameUser(oldName, user.getName());
-    			project.getIssueSetting().onRenameUser(oldName, user.getName());
+				try {
+					for (BranchProtection protection : project.getBranchProtections())
+						protection.onRenameUser(oldName, user.getName());
+					for (TagProtection protection : project.getTagProtections())
+						protection.onRenameUser(oldName, user.getName());
+					project.getIssueSetting().onRenameUser(oldName, user.getName());
+					project.getBuildSetting().onRenameUser(oldName, user.getName());
+				} catch (Exception e) {
+					throw new RuntimeException("Error checking user reference in project '" + project.getPath() + "'", e);
+				}
     		}
     		
     		settingManager.onRenameUser(oldName, user.getName());
@@ -162,16 +148,17 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	Usage usage = new Usage();
 		for (Project project: projectManager.query()) {
 			try {
-				Usage usedInProject = new Usage();
+				Usage usageInProject = new Usage();
 				for (BranchProtection protection : project.getBranchProtections())
-					usedInProject.add(protection.onDeleteUser(user.getName()));
+					usageInProject.add(protection.onDeleteUser(user.getName()));
 				for (TagProtection protection : project.getTagProtections())
-					usedInProject.add(protection.onDeleteUser(user.getName()));
-				usedInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
-				usedInProject.prefix("project '" + project.getPath() + "': settings");
-				usage.add(usedInProject);
+					usageInProject.add(protection.onDeleteUser(user.getName()));
+				usageInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
+				usageInProject.add(project.getBuildSetting().onDeleteUser(user.getName()));
+				usageInProject.prefix("project '" + project.getPath() + "': settings");
+				usage.add(usageInProject);
 			} catch (Exception e) {
-				logger.error("Failed to check user reference in project: {}", project.getPath());
+				throw new RuntimeException("Error checking user reference in project '" + project.getPath() + "'", e);
 			}
 		}
 

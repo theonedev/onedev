@@ -96,7 +96,7 @@ public class ProjectIssueSetting implements Serializable {
 					it.remove();
 			}
 		}
-		return usage.prefix("issue settings");
+		return usage.prefix("issue boards");
 	}
 	
 	private Collection<IssueQueryUpdater> getNamedQueryUpdaters() {

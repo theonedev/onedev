@@ -3,6 +3,6 @@ package io.onedev.server.buildspec.param.spec.choiceparam.defaultmultivalueprovi
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public interface DefaultMultiValueProvider extends io.onedev.server.model.support.inputspec.choiceinput.DefaultMultiValueProvider {
+public interface DefaultMultiValueProvider extends io.onedev.server.buildspecmodel.inputspec.choiceinput.DefaultMultiValueProvider {
 	
 }

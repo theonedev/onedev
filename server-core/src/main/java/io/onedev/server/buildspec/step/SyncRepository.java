@@ -117,7 +117,7 @@ public abstract class SyncRepository extends ServerSideStep implements Validatab
 		String encodedPassword = null;
 		if (getPasswordSecret() != null) {
 			try {
-				String password = build.getJobSecretAuthorizationContext().getSecretValue(getPasswordSecret());
+				String password = build.getJobAuthorizationContext().getSecretValue(getPasswordSecret());
 				encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8.name());
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);

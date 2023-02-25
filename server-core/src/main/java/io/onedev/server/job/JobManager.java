@@ -1,25 +1,23 @@
 package io.onedev.server.job;
 
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.k8shelper.CacheAllocationRequest;
+import io.onedev.k8shelper.CacheInstance;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.terminal.Shell;
+import io.onedev.server.terminal.Terminal;
+import io.onedev.server.terminal.WebShell;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import org.eclipse.jgit.lib.ObjectId;
-
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.k8shelper.CacheAllocationRequest;
-import io.onedev.k8shelper.CacheInstance;
-import io.onedev.server.buildspec.job.SubmitReason;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.terminal.Shell;
-import io.onedev.server.terminal.Terminal;
-import io.onedev.server.terminal.WebShell;
 
 public interface JobManager {
 	
@@ -27,10 +25,10 @@ public interface JobManager {
 	
 	void unschedule(Long projectId);
 	
-	@Nullable
-	Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, String pipeline, 
-			SubmitReason reason);
+	Build submit(Project project, ObjectId commitId, String jobName,
+				 Map<String, List<String>> paramMap, String pipeline,
+				 String refName, User submitter, @Nullable PullRequest request,
+				 String reason);
 	
 	void resubmit(Build build, String reason);
 	

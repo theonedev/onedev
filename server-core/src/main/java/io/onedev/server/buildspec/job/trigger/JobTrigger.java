@@ -8,13 +8,13 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 
+import io.onedev.server.buildspec.job.TriggerMatch;
 import org.apache.wicket.Component;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.event.project.ProjectEvent;
@@ -95,7 +95,7 @@ public abstract class JobTrigger implements Serializable {
 	}
 	
 	@Nullable
-	public SubmitReason matches(ProjectEvent event, Job job) {
+	public TriggerMatch matches(ProjectEvent event, Job job) {
 		String projectPath = event.getProject().getPath();
 		Matcher matcher = new PathMatcher();
 		if (projects == null || PatternSet.parse(projects).matches(matcher, projectPath)) 
@@ -112,7 +112,7 @@ public abstract class JobTrigger implements Serializable {
 	}
 
 	@Nullable
-	public abstract SubmitReason triggerMatches(ProjectEvent event, Job job);
+	protected abstract TriggerMatch triggerMatches(ProjectEvent event, Job job);
 	
 	public abstract String getTriggerDescription();
 	

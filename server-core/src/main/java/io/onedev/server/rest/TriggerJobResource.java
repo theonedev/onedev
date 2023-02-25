@@ -1,39 +1,31 @@
 package io.onedev.server.rest;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.util.ThreadContext;
-import org.eclipse.jgit.revwalk.RevCommit;
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.job.JobManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.util.ThreadContext;
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Api(order=3510, description="This resource provides an alternative way to run job by passing all parameters via url")
 @Path("/trigger-job")
@@ -136,27 +128,11 @@ public class TriggerJobResource {
 				}
 			}
 			
-			SubmitReason reason = new SubmitReason() {
-
-				@Override
-				public String getRefName() {
-					return refName;
-				}
-
-				@Override
-				public PullRequest getPullRequest() {
-					return null;
-				}
-
-				@Override
-				public String getDescription() {
-					return "Triggered via restful api";
-				}
-				
-			};
-			
-			return jobManager.submit(project, commit.copy(), job, 
-					jobParams, UUID.randomUUID().toString(), reason).getId();
+			Build build = jobManager.submit(project, commit.copy(), job, 
+					jobParams, UUID.randomUUID().toString(), refName, 
+					SecurityUtils.getUser(), null,
+					"Triggered via restful api");
+			return build.getId();
 		} finally {
 			ThreadContext.unbindSubject();
 		}

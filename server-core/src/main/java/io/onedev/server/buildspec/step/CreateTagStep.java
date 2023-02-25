@@ -3,9 +3,11 @@ package io.onedev.server.buildspec.step;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotEmpty;
 
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -31,6 +33,8 @@ public class CreateTagStep extends ServerSideStep {
 	private String tagName;
 	
 	private String tagMessage;
+	
+	private String accessTokenSecret;
 	
 	@Editable(order=1000, description="Specify name of the tag")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -59,13 +63,35 @@ public class CreateTagStep extends ServerSideStep {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 
+	@Editable(order=1060, description="Specify a secret to be used as access token. This access token " +
+			"should have permission to create above tag in the project")
+	@ChoiceProvider("getAccessTokenSecretChoices")
+	@NotEmpty
+	public String getAccessTokenSecret() {
+		return accessTokenSecret;
+	}
+
+	public void setAccessTokenSecret(String accessTokenSecret) {
+		this.accessTokenSecret = accessTokenSecret;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getAccessTokenSecretChoices() {
+		return Project.get().getHierarchyJobSecrets()
+				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		PersonIdent taggerIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
 		Project project = build.getProject();
 		String tagName = getTagName();
 
-		if (build.canCreateTag(tagName)) {
+		// Access token is left empty if we migrate from old version
+		if (getAccessTokenSecret() == null)
+			throw new ExplicitException("Access token secret not specified");
+		
+		if (build.canCreateTag(getAccessTokenSecret(), tagName)) {
 			RefFacade tagRef = project.getTagRef(tagName);
 			if (tagRef != null) 
 				OneDev.getInstance(ProjectManager.class).deleteTag(project, tagName);

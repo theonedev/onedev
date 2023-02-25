@@ -1,15 +1,6 @@
 package io.onedev.server.util;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.MapMaker;
-
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
@@ -19,8 +10,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.exception.ScriptException;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.util.script.ScriptContribution;
-import io.onedev.server.util.script.identity.ScriptIdentity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GroovyUtils {
 	
@@ -87,7 +83,7 @@ public class GroovyUtils {
         	}
     	}
     	if (script != null) {
-    		if (script.isAuthorized(ScriptIdentity.get())) {
+    		if (script.isAuthorized()) {
     			try {
     				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
     			} catch (Exception e) {

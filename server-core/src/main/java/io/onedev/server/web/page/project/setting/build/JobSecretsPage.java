@@ -1,9 +1,14 @@
 package io.onedev.server.web.page.project.setting.build;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -21,15 +26,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.model.support.inputspec.SecretInput;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.svg.SpriteImage;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class JobSecretsPage extends ProjectBuildSettingPage {
@@ -99,19 +98,19 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<JobSecret, Void>(Model.of("Authorized Branches")) {
+		columns.add(new AbstractColumn<JobSecret, Void>(Model.of("Authorization")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobSecret>> cellItem, String componentId, 
 					IModel<JobSecret> rowModel) {
-				if (rowModel.getObject().getAuthorizedBranches() != null)
-					cellItem.add(new Label(componentId, rowModel.getObject().getAuthorizedBranches()));
+				if (rowModel.getObject().getAuthorization() != null)
+					cellItem.add(new Label(componentId, rowModel.getObject().getAuthorization()));
 				else
-					cellItem.add(new Label(componentId, "<i>All</i>").setEscapeModelStrings(false));
+					cellItem.add(new Label(componentId, "<i>All Branches</i>").setEscapeModelStrings(false));
 			}
 			
 		});
-		
+
 		columns.add(new AbstractColumn<JobSecret, Void>(Model.of("")) {
 
 			@Override

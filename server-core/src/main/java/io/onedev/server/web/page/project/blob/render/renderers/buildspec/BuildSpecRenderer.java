@@ -1,20 +1,18 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
-import java.util.List;
-import java.util.stream.IntStream;
-
-import javax.annotation.Nullable;
-
-import org.apache.wicket.Component;
-
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.NamedElement;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import io.onedev.server.web.page.project.blob.render.source.SourceEditPanel;
 import io.onedev.server.web.page.project.blob.render.source.SourceViewPanel;
-import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import org.apache.wicket.Component;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public class BuildSpecRenderer implements BlobRenderer {
 
@@ -63,9 +61,9 @@ public class BuildSpecRenderer implements BlobRenderer {
 	public Component render(String componentId, BlobRenderContext context) {
 		if (context.getMode() == Mode.ADD && isBuildSpec(context.getNewPath()) 
 				|| context.getMode() == Mode.EDIT && isBuildSpec(context.getBlobIdent().path)) {
-			if (BlobRenderer.getSourceRange(context.getPosition()) != null)
+			if (BlobRenderer.getSourceRange(context.getPosition()) != null) 
 				return new SourceEditPanel(componentId, context);
-			else
+			else 
 				return new BuildSpecBlobEditPanel(componentId, context);
 		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.BLAME) 
 				&& context.getBlobIdent().isFile() 

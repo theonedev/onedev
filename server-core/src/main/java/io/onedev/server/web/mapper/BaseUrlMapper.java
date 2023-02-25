@@ -371,7 +371,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~settings/pull-request", PullRequestSettingPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/job-secrets", JobSecretsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/job-properties", JobPropertiesPage.class));
-		add(new ProjectPageMapper("${project}/~settings/build/action-authorizations", ActionAuthorizationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/build-preserve-rules", BuildPreservationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));
 		add(new ProjectPageMapper("${project}/~settings/service-desk", ProjectServiceDeskSettingPage.class));

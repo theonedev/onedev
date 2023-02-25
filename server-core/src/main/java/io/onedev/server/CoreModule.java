@@ -209,7 +209,7 @@ import io.onedev.server.util.jackson.git.GitObjectMapperConfigurator;
 import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
 import io.onedev.server.util.schedule.DefaultTaskScheduler;
 import io.onedev.server.util.schedule.TaskScheduler;
-import io.onedev.server.util.script.ScriptContribution;
+import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.validation.ValidatorProvider;
 import io.onedev.server.util.xstream.CollectionConverter;
 import io.onedev.server.util.xstream.HibernateProxyConverter;

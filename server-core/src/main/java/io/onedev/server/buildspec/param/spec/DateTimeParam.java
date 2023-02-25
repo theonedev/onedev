@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import io.onedev.server.model.support.inputspec.datetimeinput.DateTimeInput;
-import io.onedev.server.model.support.inputspec.datetimeinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.buildspecmodel.inputspec.datetimeinput.DateTimeInput;
+import io.onedev.server.buildspecmodel.inputspec.datetimeinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.Constants;
 import io.onedev.server.web.editable.annotation.Editable;
 

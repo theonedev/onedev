@@ -14,7 +14,7 @@ import io.onedev.server.event.project.issue.IssuesImported;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.field.spec.*;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;

@@ -15,7 +15,7 @@ import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.DateUtils;

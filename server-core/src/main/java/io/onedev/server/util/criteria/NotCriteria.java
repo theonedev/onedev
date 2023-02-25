@@ -39,6 +39,11 @@ public class NotCriteria<T> extends Criteria<T> {
 	}
 
 	@Override
+	public void onRenameRole(String oldName, String newName) {
+		criteria.onRenameRole(oldName, newName);
+	}
+	
+	@Override
 	public void onMoveProject(String oldPath, String newPath) {
 		criteria.onMoveProject(oldPath, newPath);
 	}
@@ -58,6 +63,11 @@ public class NotCriteria<T> extends Criteria<T> {
 		return criteria.isUsingUser(userName);
 	}
 
+	@Override
+	public boolean isUsingRole(String roleName) {
+		return criteria.isUsingRole(roleName);
+	}
+	
 	@Override
 	public boolean isUsingProject(String projectPath) {
 		return criteria.isUsingProject(projectPath);

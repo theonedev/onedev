@@ -1,22 +1,6 @@
 package io.onedev.server.web.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Preconditions;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.LinearRange;
@@ -25,39 +9,28 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.entitymanager.AgentAttributeManager;
-import io.onedev.server.entitymanager.AgentManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildMetricManager;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.LabelManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.facade.UserCache;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.match.PatternApplied;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.script.ScriptContribution;
+import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SuggestionUtils {
 	
@@ -403,6 +376,15 @@ public class SuggestionUtils {
 				.sorted()
 				.collect(Collectors.toList());
 		return suggest(groupNames, matchWith);
+	}
+
+	public static List<InputSuggestion> suggestRoles(String matchWith) {
+		List<String> roleNames = OneDev.getInstance(RoleManager.class).query()
+				.stream()
+				.map(it->it.getName())
+				.sorted()
+				.collect(Collectors.toList());
+		return suggest(roleNames, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestBlobs(Project project, String matchWith) {

@@ -1,19 +1,15 @@
 package io.onedev.server.web.page.project.issues;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
-import io.onedev.server.util.script.identity.SiteAdministrator;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.project.ProjectPage;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @SuppressWarnings("serial")
-public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIdentityAware {
+public abstract class ProjectIssuesPage extends ProjectPage {
 
 	public ProjectIssuesPage(PageParameters params) {
 		super(params);
@@ -35,11 +31,6 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 			}
 			
 		});
-	}
-
-	@Override
-	public ScriptIdentity getScriptIdentity() {
-		return new SiteAdministrator();
 	}
 
 	@Override

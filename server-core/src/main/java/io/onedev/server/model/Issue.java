@@ -18,7 +18,7 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.search.entity.SortField;

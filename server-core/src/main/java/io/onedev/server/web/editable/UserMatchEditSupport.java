@@ -1,13 +1,12 @@
 package io.onedev.server.web.editable;
 
-import java.lang.reflect.Method;
-
-import org.apache.wicket.model.IModel;
-
 import io.onedev.server.web.behavior.UserMatchBehavior;
 import io.onedev.server.web.editable.annotation.UserMatch;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
+import org.apache.wicket.model.IModel;
+
+import java.lang.reflect.Method;
 
 @SuppressWarnings("serial")
 public class UserMatchEditSupport implements EditSupport {

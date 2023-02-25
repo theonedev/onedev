@@ -1,7 +1,5 @@
 package io.onedev.server.web.behavior;
 
-import java.util.List;
-
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
@@ -10,9 +8,14 @@ import io.onedev.server.util.usermatch.UserMatchParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
+import java.util.List;
+
+import static io.onedev.server.util.usermatch.UserMatchLexer.GROUP;
+import static io.onedev.server.util.usermatch.UserMatchLexer.USER;
+
 @SuppressWarnings("serial")
 public class UserMatchBehavior extends ANTLRAssistBehavior {
-
+	
 	public UserMatchBehavior() {
 		super(UserMatchParser.class, "userMatch", false);
 	}
@@ -28,12 +31,12 @@ public class UserMatchBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						int tokenType = terminalExpect.getState().getLastMatchedToken().getType();
 						switch (tokenType) {
-						case UserMatchParser.USER:
-							return SuggestionUtils.suggestUsers(matchWith);
-						case UserMatchParser.GROUP:
-							return SuggestionUtils.suggestGroups(matchWith);
-						default: 
-							return null;
+							case USER:
+								return SuggestionUtils.suggestUsers(matchWith);
+							case GROUP:
+								return SuggestionUtils.suggestGroups(matchWith); 
+							default: 
+								return null;
 						} 
 					}
 
@@ -47,5 +50,5 @@ public class UserMatchBehavior extends ANTLRAssistBehavior {
 		} 
 		return null;
 	}
-	
+
 }

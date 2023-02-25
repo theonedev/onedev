@@ -20,7 +20,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
@@ -31,11 +31,15 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Editable(order=100, name="Button is pressed")
 public class PressButtonTrigger extends TransitionTrigger {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(PressButtonTrigger.class);
 	
 	public static final String ROLE_SUBMITTER = "<Issue Submitter>";
 	
@@ -185,8 +189,14 @@ public class PressButtonTrigger extends TransitionTrigger {
 						} else if (roleName.equals(ROLE_SUBMITTER)) {
 							if (user.equals(issue.getSubmitter()))
 								return true;
-						} else if (SecurityUtils.isAuthorizedWithRole(project, roleName)) {
-							return true;
+						} else {
+							Role role = OneDev.getInstance(RoleManager.class).find(roleName);
+							if (role != null) {
+								if (SecurityUtils.isAssignedRole(project, role)) 
+									return true;
+							} else {
+								logger.error("Undefined role: " + roleName);
+							}
 						}
 					}
 					return false;

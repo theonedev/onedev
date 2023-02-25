@@ -1,8 +1,22 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.milestone.MilestoneDateLabel;
+import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
+import io.onedev.server.web.component.milestone.actions.MilestoneActionsPanel;
+import io.onedev.server.web.component.tabbable.PageTab;
+import io.onedev.server.web.component.tabbable.PageTabHead;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -21,29 +35,11 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.MilestoneManager;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
-import io.onedev.server.util.script.identity.SiteAdministrator;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.component.MultilineLabel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.milestone.MilestoneDateLabel;
-import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
-import io.onedev.server.web.component.milestone.actions.MilestoneActionsPanel;
-import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabHead;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
-public abstract class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAware {
+public abstract class MilestoneDetailPage extends ProjectPage {
 
 	public static final String PARAM_MILESTONE = "milestone";
 	
@@ -134,11 +130,6 @@ public abstract class MilestoneDetailPage extends ProjectPage implements ScriptI
 	protected void onDetach() {
 		milestoneModel.detach();
 		super.onDetach();
-	}
-
-	@Override
-	public ScriptIdentity getScriptIdentity() {
-		return new SiteAdministrator();
 	}
 	
 	public static PageParameters paramsOf(Project project, Milestone milestone) {

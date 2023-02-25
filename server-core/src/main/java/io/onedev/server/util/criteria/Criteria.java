@@ -122,6 +122,9 @@ public abstract class Criteria<T> implements Serializable {
 	public void onRenameUser(String oldName, String newName) {
 	}
 
+	public void onRenameRole(String oldName, String newName) {
+	}
+	
 	public void onMoveProject(String oldPath, String newPath) {
 	}
 
@@ -135,6 +138,10 @@ public abstract class Criteria<T> implements Serializable {
 		return false;
 	}
 
+	public boolean isUsingRole(String roleName) {
+		return false;
+	}
+	
 	public boolean isUsingProject(String projectPath) {
 		return false;
 	}

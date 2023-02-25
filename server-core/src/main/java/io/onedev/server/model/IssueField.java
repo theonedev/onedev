@@ -15,7 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import io.onedev.server.model.support.inputspec.textinput.TextInput;
+import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
 
 @Entity
 @Table(

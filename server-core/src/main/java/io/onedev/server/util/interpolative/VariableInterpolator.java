@@ -74,7 +74,7 @@ public class VariableInterpolator {
 								List<String> paramValues = new ArrayList<>();
 								for (String value: entry.getValue().getValues()) {
 									if (paramType.equals(ParamSpec.SECRET)) 
-										value = build.getJobSecretAuthorizationContext().getSecretValue(value);
+										value = build.getJobAuthorizationContext().getSecretValue(value);
 									paramValues.add(value);
 								}
 								return StringUtils.join(paramValues, ",");
@@ -102,7 +102,7 @@ public class VariableInterpolator {
 						secretName = t.substring(PREFIX_SECRET.length());
 					else
 						secretName = t.substring("secrets:".length());
-					return build.getJobSecretAuthorizationContext().getSecretValue(secretName);
+					return build.getJobAuthorizationContext().getSecretValue(secretName);
 				} else if (t.startsWith(PREFIX_SCRIPT) || t.startsWith("scripts:")) {
 					String scriptName;
 					if (t.startsWith(PREFIX_SCRIPT))

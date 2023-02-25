@@ -48,6 +48,11 @@ public class AndCriteria<T> extends Criteria<T> {
 	}
 
 	@Override
+	public void onRenameRole(String oldName, String newName) {
+		criterias.stream().forEach(it->it.onRenameRole(oldName, newName));
+	}
+	
+	@Override
 	public void onMoveProject(String oldPath, String newPath) {
 		criterias.stream().forEach(it->it.onMoveProject(oldPath, newPath));
 	}
@@ -67,6 +72,11 @@ public class AndCriteria<T> extends Criteria<T> {
 		return criterias.stream().anyMatch(it->it.isUsingUser(userName));
 	}
 
+	@Override
+	public boolean isUsingRole(String roleName) {
+		return criterias.stream().anyMatch(it->it.isUsingRole(roleName));
+	}
+	
 	@Override
 	public boolean isUsingProject(String projectPath) {
 		return criterias.stream().anyMatch(it->it.isUsingProject(projectPath));

@@ -344,7 +344,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 					ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 					if ((trigger.getJobNames() == null || PatternSet.parse(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
 							&& build.getStatus() == Build.Status.SUCCESSFUL
-							&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
+							&& (branches == null || project.isCommitOnBranches(commitId, PatternSet.parse(branches)))) {
 						IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), option, true);
 						List<Criteria<Issue>> criterias = new ArrayList<>();
 						

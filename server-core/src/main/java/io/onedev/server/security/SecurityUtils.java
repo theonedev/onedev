@@ -6,7 +6,6 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.*;
@@ -88,9 +87,13 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canCreateTag(Project project, String tagName) {
-		if (canWriteCode(project)) 
-			return !project.getHierarchyTagProtection(tagName, getUser()).isPreventCreation();
-		else 
+		return canCreateTag(getUser(), project, tagName);
+	}
+
+	public static boolean canCreateTag(@Nullable User user, Project project, String tagName) {
+		if (canWriteCode(user, project))
+			return !project.getHierarchyTagProtection(tagName, user).isPreventCreation();
+		else
 			return false;
 	}
 	
@@ -127,37 +130,34 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canScheduleIssues(Project project) {
 		return getSubject().isPermitted(new ProjectPermission(project, new ScheduleIssues()));
 	}
+
+	public static boolean isAssignedRole(Project project, Role role) {
+		return isAssignedRole(getUser(), project, role);
+	}
 	
-	public static boolean isAuthorizedWithRole(Project project, String roleName) {
-		Role role = OneDev.getInstance(RoleManager.class).find(roleName);
-		if (role != null) {
-			User user = getUser();
-			if (user != null) {
-				for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+	public static boolean isAssignedRole(@Nullable User user, Project project, Role role) {
+		if (user != null) {
+			for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+				Project authorizedProject = authorization.getProject();
+				if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project)) 
+					return true;
+			}
+			
+			Set<Group> groups = new HashSet<>(user.getGroups());
+			Group defaultLoginGroup = OneDev.getInstance(SettingManager.class)
+					.getSecuritySetting().getDefaultLoginGroup();
+			if (defaultLoginGroup != null)
+				groups.add(defaultLoginGroup);
+			
+			for (Group group: groups) {
+				for (GroupAuthorization authorization: group.getAuthorizations()) {
 					Project authorizedProject = authorization.getProject();
 					if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project)) 
 						return true;
 				}
-				
-				Set<Group> groups = new HashSet<>(user.getGroups());
-				Group defaultLoginGroup = OneDev.getInstance(SettingManager.class)
-						.getSecuritySetting().getDefaultLoginGroup();
-				if (defaultLoginGroup != null)
-					groups.add(defaultLoginGroup);
-				
-				for (Group group: groups) {
-					for (GroupAuthorization authorization: group.getAuthorizations()) {
-						Project authorizedProject = authorization.getProject();
-						if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project)) 
-							return true;
-					}
-				}
-			} 
-			return role.getDefaultProjects().stream().anyMatch(it->it.isSelfOrAncestorOf(project));
-		} else {
-			logger.error("Undefined role: " + roleName);
-			return false;
-		}
+			}
+		} 
+		return role.getDefaultProjects().stream().anyMatch(it->it.isSelfOrAncestorOf(project));
 	}
 	
 	public static boolean canAccess(Project project) {
@@ -191,7 +191,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canWriteCode(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, new WriteCode()));
+		return canWriteCode(getUser(), project);
+	}
+
+	public static boolean canWriteCode(@Nullable User user, Project project) {
+		return asSubject(user).isPermitted(new ProjectPermission(project, new WriteCode()));
 	}
 	
 	public static boolean canManage(Project project) {
@@ -199,7 +203,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canManageIssues(Project project) {
-		return getSubject().isPermitted(new ProjectPermission(project, new ManageIssues()));
+		return canManageIssues(getUser(), project);
+	}
+
+	public static boolean canManageIssues(@Nullable User user, Project project) {
+		return asSubject(user).isPermitted(new ProjectPermission(project, new ManageIssues()));
 	}
 	
 	public static boolean canManageBuilds(Project project) {
@@ -301,6 +309,13 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
     public static Subject asAnonymous() {
     	return asSubject(0L);
     }
+	
+	public static Subject asSubject(@Nullable User user) {
+		if (user != null)
+			return asSubject(user.getId());
+		else 
+			return asAnonymous();
+	}
     
 	public static void bindAsSystem() {
 		ThreadContext.bind(asSubject(User.SYSTEM_ID));

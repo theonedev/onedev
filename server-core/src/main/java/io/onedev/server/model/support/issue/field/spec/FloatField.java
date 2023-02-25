@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import io.onedev.server.model.support.inputspec.floatinput.FloatInput;
-import io.onedev.server.model.support.inputspec.floatinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.buildspecmodel.inputspec.floatinput.FloatInput;
+import io.onedev.server.buildspecmodel.inputspec.floatinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=450, name=FieldSpec.FLOAT)

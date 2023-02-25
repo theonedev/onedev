@@ -1,27 +1,25 @@
 package io.onedev.server.buildspec.job.trigger;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.SubmitReason;
+import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+
+import java.util.Collection;
+import java.util.List;
 
 @Editable(order=100, name="Branch update", description=""
 		+ "Job will run when code is committed. <b class='text-info'>NOTE:</b> This trigger will ignore commits "
@@ -96,7 +94,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public SubmitReason triggerMatches(ProjectEvent event, Job job) {
+	protected TriggerMatch triggerMatches(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String updatedBranch = GitUtils.ref2branch(refUpdated.getRefName());
@@ -105,24 +103,8 @@ public class BranchUpdateTrigger extends JobTrigger {
 					&& !SKIP_COMMIT.apply(event.getProject().getRevCommit(refUpdated.getNewCommitId(), true))
 					&& (branches == null || PatternSet.parse(branches).matches(matcher, updatedBranch)) 
 					&& touchedFile(refUpdated)) {
-				return new SubmitReason() {
-
-					@Override
-					public String getRefName() {
-						return refUpdated.getRefName();
-					}
-
-					@Override
-					public PullRequest getPullRequest() {
-						return null;
-					}
-
-					@Override
-					public String getDescription() {
-						return "Branch '" + updatedBranch + "' is updated";
-					}
-					
-				};
+				return new TriggerMatch(refUpdated.getRefName(), null, 
+						getParams(), "Branch '" + updatedBranch + "' is updated");
 			}
 		}
 		return null;

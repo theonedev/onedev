@@ -2,9 +2,8 @@ package io.onedev.server.buildspec.job.trigger;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.SubmitReason;
+import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -83,31 +82,14 @@ public abstract class PullRequestTrigger extends JobTrigger {
 	}
 	
 	@Nullable
-	protected SubmitReason triggerMatches(PullRequest request) {
+	protected TriggerMatch triggerMatches(PullRequest request) {
 		String targetBranch = request.getTargetBranch();
 		Matcher matcher = new PathMatcher();
 		if ((branches == null || PatternSet.parse(branches).matches(matcher, targetBranch)) 
 				&& touchedFile(request)) {
 			
-			Long requestId = request.getId();
-			return new SubmitReason() {
-
-				@Override
-				public String getRefName() {
-					return request.getMergeRef();
-				}
-
-				@Override
-				public PullRequest getPullRequest() {
-					return OneDev.getInstance(PullRequestManager.class).load(requestId);
-				}
-
-				@Override
-				public String getDescription() {
-					return "Pull request #" + request.getNumber() + " is opened/updated";
-				}
-				
-			};
+			return new TriggerMatch(request.getMergeRef(), request, getParams(), 
+					"Pull request #" + request.getNumber() + " is opened/updated");
 		}
 		return null;
 	}

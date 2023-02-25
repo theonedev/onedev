@@ -5,9 +5,7 @@ requirement: WS* criteria (WS+ 'and' WS+ criteria)* WS* EOF;
 criteria: userCriteria | groupCriteria;
 
 userCriteria: USER Value;
-groupCriteria: GROUP Value (':' count)?;
-
-count: 'all' | DIGIT;
+groupCriteria: GROUP Value (':' DIGIT)?;
 
 DIGIT: [1-9][0-9]*;
 

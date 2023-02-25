@@ -25,7 +25,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
-import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;

@@ -2,7 +2,7 @@ package io.onedev.server.model.support.issue.field.spec.choicefield.defaultmulti
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;

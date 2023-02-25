@@ -66,7 +66,7 @@ public class SshCredential implements GitCredential, Validatable {
 		
 		knownHosts.append("\n");
 		
-		String privateKey = build.getJobSecretAuthorizationContext().getSecretValue(keySecret);
+		String privateKey = build.getJobAuthorizationContext().getSecretValue(keySecret);
 		if (!privateKey.endsWith("\n"))
 			privateKey = privateKey + "\n";
 		

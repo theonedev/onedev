@@ -26,7 +26,7 @@ import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
 import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
-import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;

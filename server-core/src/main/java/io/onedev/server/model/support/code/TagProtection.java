@@ -1,11 +1,5 @@
 package io.onedev.server.model.support.code;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
@@ -16,6 +10,11 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Editable
 @Horizontal
@@ -126,7 +125,7 @@ public class TagProtection implements Serializable {
 		Usage usage = new Usage();
 		if (UserMatch.isUsingGroup(userMatch, groupName))
 			usage.add("applicable users");
-		return usage.prefix("tag protection '" + getTags() + "'");
+		return usage.prefix("code: tag protection '" + getTags() + "'");
 	}
 	
 	public void onRenameUser(String oldName, String newName) {

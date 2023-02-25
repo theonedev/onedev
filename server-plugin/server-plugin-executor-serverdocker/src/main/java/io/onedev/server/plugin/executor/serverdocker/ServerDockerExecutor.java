@@ -106,8 +106,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	@Editable(order=500, group="More Settings", description="Whether or not to mount docker sock into job container to "
 			+ "support docker operations in job commands, for instance to build docker image.<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
-			+ "by operating the mounted docker sock. You should configure job authorization "
-			+ "to make sure the executor can only be used by trusted jobs if this option is enabled")
+			+ "by operating the mounted docker sock. You should configure job requirement above to make sure the " +
+			"executor can only be used by trusted jobs if this option is enabled")
 	public boolean isMountDockerSock() {
 		return mountDockerSock;
 	}
@@ -486,7 +486,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												} catch (Exception e) {
 													if (ExceptionUtils.find(e, InterruptedException.class) == null) {
 														long duration = System.currentTimeMillis() - time;														
-														jobLogger.error("Step \"" + stepNames + "\" is failed: (" + DateUtils.formatDuration(duration) + ")" + getErrorMessage(e));
+														jobLogger.error("Step \"" + stepNames + "\" is failed: (" + DateUtils.formatDuration(duration) + ") " + getErrorMessage(e));
 													}
 													return false;
 												}

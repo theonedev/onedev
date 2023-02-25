@@ -1,19 +1,16 @@
 package io.onedev.server.web.component.job;
 
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.web.component.modal.ModalPanel;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-
-import io.onedev.server.model.support.inputspec.InputContext;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
-import io.onedev.server.web.component.modal.ModalPanel;
-
 @SuppressWarnings("serial")
-public abstract class BuildOptionModalPanel extends ModalPanel 
-		implements InputContext, ScriptIdentityAware {
+public abstract class BuildOptionModalPanel extends ModalPanel implements InputContext {
 
 	private final List<String> refNames;
 	

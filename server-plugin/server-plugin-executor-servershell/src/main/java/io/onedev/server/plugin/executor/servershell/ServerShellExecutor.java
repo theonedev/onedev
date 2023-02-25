@@ -46,11 +46,11 @@ import java.util.Map;
 import static io.onedev.agent.ShellExecutorUtils.testCommands;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 
-@Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description=""
-		+ "This executor runs build jobs with OneDev server's shell facility.<br>"
-		+ "<b class='text-danger'>WARNING</b>: Jobs running with this executor has same permission "
-		+ "as OneDev server process. Make sure it can only be used by trusted jobs via job "
-		+ "authorization setting")
+@Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="" +
+		"This executor runs build jobs with OneDev server's shell facility.<br>" +
+		"<b class='text-danger'>WARNING</b>: Jobs running with this executor has same " +
+		"permission as OneDev server process. Make sure it can only be used by trusted " +
+		"jobs via job requirement setting")
 @Horizontal
 public class ServerShellExecutor extends JobExecutor implements Testable<TestData> {
 
@@ -265,7 +265,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 										} catch (Exception e) {
 											if (ExceptionUtils.find(e, InterruptedException.class) == null) {
 												long duration = System.currentTimeMillis() - time;
-												jobLogger.error("Step \"" + stepNames + "\" is failed: (" + DateUtils.formatDuration(duration) + ")" + getErrorMessage(e));
+												jobLogger.error("Step \"" + stepNames + "\" is failed: (" + DateUtils.formatDuration(duration) + ") " + getErrorMessage(e));
 											}
 											return false;
 										}

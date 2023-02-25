@@ -1,38 +1,11 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.Validator;
-
-import org.hibernate.criterion.Restrictions;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.support.administration.AgentSetting;
-import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.BrandingSetting;
-import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.administration.GlobalProjectSetting;
-import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
-import io.onedev.server.model.support.administration.GpgSetting;
-import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.model.support.administration.PerformanceSetting;
-import io.onedev.server.model.support.administration.SecuritySetting;
-import io.onedev.server.model.support.administration.ServiceDeskSetting;
-import io.onedev.server.model.support.administration.SshSetting;
-import io.onedev.server.model.support.administration.SystemSetting;
+import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
@@ -49,6 +22,18 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
+import org.hibernate.criterion.Restrictions;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.Validator;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 public class DefaultSettingManager extends BaseEntityManager<Setting> implements SettingManager {
@@ -422,17 +407,11 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	@Override
 	public Usage onDeleteProject(String projectPath) {
     	Usage usage = new Usage();
-    	int index = 1;
-    	for (JobExecutor jobExecutor: getJobExecutors()) {
-    		usage.add(jobExecutor.onDeleteProject(projectPath).prefix("job executor #" + index));
-    		index++;
-    	}
-    	
-    	index = 1;
-    	for (GroovyScript groovyScript: getGroovyScripts()) {
-    		usage.add(groovyScript.onDeleteProject(projectPath).prefix("groovy script #" + index));
-    		index++;
-    	}
+		
+    	for (JobExecutor jobExecutor: getJobExecutors()) 
+    		usage.add(jobExecutor.onDeleteProject(projectPath).prefix("job executor '" + jobExecutor.getName() + "'"));
+    	for (GroovyScript groovyScript: getGroovyScripts()) 
+    		usage.add(groovyScript.onDeleteProject(projectPath).prefix("groovy script '" + groovyScript.getName() + "'"));
     	if (getServiceDeskSetting() != null)
     		usage.add(getServiceDeskSetting().onDeleteProject(projectPath));
     	usage.add(getIssueSetting().onDeleteProject(projectPath));
@@ -445,6 +424,12 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		Authenticator authenticator = getAuthenticator();
 		if (authenticator != null) 
 			authenticator.onRenameGroup(oldName, newName);
+
+		for (var jobExecutor: getJobExecutors())
+			jobExecutor.onRenameGroup(oldName, newName);
+		for (var groovyScript: getGroovyScripts())
+			groovyScript.onRenameGroup(oldName, newName);
+		
 		getIssueSetting().onRenameGroup(oldName, newName);
 		getSecuritySetting().onRenameGroup(oldName, newName);
 		
@@ -456,6 +441,11 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	@Override
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
+
+		for (var jobExecutor: getJobExecutors())
+			usage.add(jobExecutor.onDeleteGroup(groupName).prefix("job executor '" + jobExecutor.getName() + "'"));
+		for (var groovyScript: getGroovyScripts())
+			usage.add(groovyScript.onDeleteGroup(groupName).prefix("groovy script '" + groovyScript.getName() + "'"));
 		
 		usage.add(getIssueSetting().onDeleteGroup(groupName));
 		usage.add(getSecuritySetting().onDeleteGroup(groupName));
@@ -469,8 +459,10 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 
 	@Override
 	public void onRenameUser(String oldName, String newName) {
-    	for (JobExecutor jobExecutor: getJobExecutors())
+    	for (var jobExecutor: getJobExecutors())
     		jobExecutor.onRenameUser(oldName, newName);
+		for (var groovyScript: getGroovyScripts())
+			groovyScript.onRenameUser(oldName, newName);
 		getIssueSetting().onRenameUser(oldName, newName);
 		
 		saveSetting(Key.JOB_EXECUTORS, (Serializable) getJobExecutors());
@@ -481,11 +473,10 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
 		
-    	int index = 1;
-    	for (JobExecutor jobExecutor: getJobExecutors()) {
-    		usage.add(jobExecutor.onDeleteUser(userName).prefix("job executor #" + index));
-    		index++;
-    	}
+    	for (var jobExecutor: getJobExecutors()) 
+    		usage.add(jobExecutor.onDeleteUser(userName).prefix("job executor '" + jobExecutor.getName() + "'"));
+		for (var groovyScript: getGroovyScripts()) 
+			usage.add(groovyScript.onDeleteUser(userName).prefix("groovy script '" + groovyScript.getName() + "'"));
 
 		usage.add(getIssueSetting().onDeleteUser(userName));
 		

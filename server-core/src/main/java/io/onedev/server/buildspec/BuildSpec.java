@@ -20,12 +20,13 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.buildspec.step.StepTemplate;
 import io.onedev.server.buildspec.step.UseTemplateStep;
+import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.migration.VersionedYamlDoc;
 import io.onedev.server.migration.XmlBuildSpecMigrator;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.JobProperty;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -164,11 +165,12 @@ public class BuildSpec implements Serializable, Validatable {
 					try {
 						BuildSpec importedBuildSpec = aImport.getBuildSpec();
 						RevCommit commit = aImport.getProject().getRevCommit(aImport.getRevision(), true);
-						JobSecretAuthorizationContext.push(new JobSecretAuthorizationContext(aImport.getProject(), commit, null));
+						JobAuthorizationContext.push(new JobAuthorizationContext(
+								aImport.getProject(), commit, SecurityUtils.getUser(), null));
 						try {
 							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newProjectChain));
 						} finally {
-							JobSecretAuthorizationContext.pop();
+							JobAuthorizationContext.pop();
 						}
 						importedBuildSpecs.add(importedBuildSpec);
 					} catch (Exception e) {
@@ -1456,5 +1458,6 @@ public class BuildSpec implements Serializable, Validatable {
 				}
 			}
 		}
-	}	
+	}
+
 }

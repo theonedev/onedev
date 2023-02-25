@@ -14,7 +14,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.util.script.ScriptContribution;
+import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;

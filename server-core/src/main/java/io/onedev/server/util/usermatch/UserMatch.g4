@@ -40,7 +40,11 @@ USER
 	
 GROUP
 	: 'group'
-	;	   
+	;
+
+ROLE
+    : 'role'
+    ;
 
 EXCEPT
     : 'except'

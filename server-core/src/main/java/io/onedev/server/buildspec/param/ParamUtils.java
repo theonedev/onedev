@@ -28,7 +28,7 @@ import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.buildspec.param.supply.SpecifiedValues;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
@@ -217,7 +217,7 @@ public class ParamUtils {
 				for (List<String> value: param.getValuesProvider().getValues(build, paramCombination)) {
 					List<String> resolvedValue = new ArrayList<>();
 					for (String each: value) 
-						resolvedValue.add(SecretInput.LITERAL_VALUE_PREFIX + build.getJobSecretAuthorizationContext().getSecretValue(each));
+						resolvedValue.add(SecretInput.LITERAL_VALUE_PREFIX + build.getJobAuthorizationContext().getSecretValue(each));
 					resolvedValues.add(resolvedValue);
 				}
 				paramMatrix.put(param.getName(), resolvedValues);

@@ -678,7 +678,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		checkReviews(branchProtection.getParsedReviewRequirement(), 
 				request, changedFiles, sourceUpdated);
 		
-		ReviewRequirement checkedRequirement = ReviewRequirement.parse(null, true);
+		ReviewRequirement checkedRequirement = ReviewRequirement.parse(null);
 		
 		for (String file: changedFiles) {
 			FileProtection fileProtection = branchProtection.getFileProtection(file);
@@ -718,8 +718,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	
 	private void checkReviews(Collection<User> users, int requiredCount, 
 			PullRequest request, Collection<String> changedFiles, boolean sourceUpdated) {
-		if (requiredCount == 0)
-			requiredCount = users.size();
 		for (User user: users) {
 			PullRequestReview review = request.getReview(user);
 			if (review != null && review.getStatus() != PullRequestReview.Status.EXCLUDED) {

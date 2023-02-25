@@ -1,29 +1,25 @@
 package io.onedev.server.util.usermatch;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.usermatch.UserMatchParser.CriteriaContext;
 import io.onedev.server.util.usermatch.UserMatchParser.ExceptCriteriaContext;
 import io.onedev.server.util.usermatch.UserMatchParser.UserMatchContext;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserMatch implements Serializable {
 
@@ -63,14 +59,18 @@ public class UserMatch implements Serializable {
 			return new Anyone();
 		} else if (criteriaContext.userCriteria() != null) {
 			String userName = getValue(criteriaContext.userCriteria().Value());
-			SpecifiedUser specifiedUser = new SpecifiedUser();
-			specifiedUser.setUserName(userName);
-			return specifiedUser;
+			User user = OneDev.getInstance(UserManager.class).findByName(userName);
+			if (user != null)
+				return new UserCriteria(user);
+			else
+				throw new ExplicitException("Unable to find user with login: " + userName);
 		} else if (criteriaContext.groupCriteria() != null) {
 			String groupName = getValue(criteriaContext.groupCriteria().Value());
-			SpecifiedGroup specifiedGroup = new SpecifiedGroup();
-			specifiedGroup.setGroupName(groupName);
-			return specifiedGroup;
+			Group group = OneDev.getInstance(GroupManager.class).find(groupName);
+			if (group != null)
+				return new GroupCriteria(group);
+			else
+				throw new ExplicitException("Unable to find group: " + groupName);
 		} else {
 			throw new ExplicitException("Unrecognized user match criteria");
 		}
@@ -118,11 +118,11 @@ public class UserMatch implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		List<String> criteriaStrings = criterias.stream().map(it->it.toString()).collect(Collectors.toList()); 
+		List<String> criteriaStrings = criterias.stream().map(Object::toString).collect(Collectors.toList()); 
 		builder.append(StringUtils.join(criteriaStrings, " or "));
 
 		if (!exceptCriterias.isEmpty()) {
-			List<String> exceptCriteriaStrings = exceptCriterias.stream().map(it->it.toString()).collect(Collectors.toList()); 
+			List<String> exceptCriteriaStrings = exceptCriterias.stream().map(Object::toString).collect(Collectors.toList()); 
 			if (builder.length() != 0)
 				builder.append(" ");
 			builder.append("except ").append(StringUtils.join(exceptCriteriaStrings, " and "));
@@ -136,10 +136,10 @@ public class UserMatch implements Serializable {
 
 	private static void onRenameGroup(List<UserMatchCriteria> criterias, String oldName, String newName) {
 		for (UserMatchCriteria criteria: criterias) {
-			if (criteria instanceof SpecifiedGroup) {  
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
-				if (specifiedGroup.getGroupName().equals(oldName))
-					specifiedGroup.setGroupName(newName);
+			if (criteria instanceof GroupCriteria) {  
+				GroupCriteria groupCriteria = (GroupCriteria) criteria;
+				if (groupCriteria.getGroup().getName().equals(oldName))
+					groupCriteria.getGroup().setName(newName);
 			}
 		}
 	}
@@ -150,13 +150,13 @@ public class UserMatch implements Serializable {
 		onRenameGroup(userMatch.getExceptCriterias(), oldName, newName);
 		return userMatch.toString();
 	}
-
+	
 	private static void onRenameUser(List<UserMatchCriteria> criterias, String oldName, String newName) {
 		for (UserMatchCriteria criteria: criterias) {
-			if (criteria instanceof SpecifiedUser) {  
-				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
-				if (specifiedUser.getUserName().equals(oldName))
-					specifiedUser.setUserName(newName);
+			if (criteria instanceof UserCriteria) {  
+				UserCriteria userCriteria = (UserCriteria) criteria;
+				if (userCriteria.getUser().getName().equals(oldName))
+					userCriteria.getUser().setName(newName);
 			}
 		}
 	}
@@ -170,9 +170,9 @@ public class UserMatch implements Serializable {
 
 	private static boolean isUsingUser(List<UserMatchCriteria> criterias, String userName) {
 		for (UserMatchCriteria criteria: criterias) {
-			if (criteria instanceof SpecifiedUser) {  
-				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
-				if (specifiedUser.getUserName().equals(userName))
+			if (criteria instanceof UserCriteria) {  
+				UserCriteria userCriteria = (UserCriteria) criteria;
+				if (userCriteria.getUser().getName().equals(userName))
 					return true;
 			}
 		}
@@ -187,9 +187,9 @@ public class UserMatch implements Serializable {
 	
 	private static boolean isUsingGroup(List<UserMatchCriteria> criterias, String groupName) {
 		for (UserMatchCriteria criteria: criterias) {
-			if (criteria instanceof SpecifiedGroup) {  
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
-				if (specifiedGroup.getGroupName().equals(groupName))
+			if (criteria instanceof GroupCriteria) {  
+				GroupCriteria groupCriteria = (GroupCriteria) criteria;
+				if (groupCriteria.getGroup().getName().equals(groupName))
 					return true;
 			}
 		}
@@ -201,5 +201,4 @@ public class UserMatch implements Serializable {
 		return isUsingGroup(userMatch.getCriterias(), groupName) 
 				|| isUsingGroup(userMatch.getExceptCriterias(), groupName);
 	}
-	
 }

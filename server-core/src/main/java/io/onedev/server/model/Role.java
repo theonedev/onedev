@@ -1,29 +1,6 @@
 package io.onedev.server.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.NotNull;
-
-import org.apache.shiro.authz.Permission;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import javax.validation.constraints.NotEmpty;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -32,32 +9,24 @@ import io.onedev.server.model.support.role.CodePrivilege;
 import io.onedev.server.model.support.role.IssueFieldSet;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.AccessBuild;
-import io.onedev.server.security.permission.AccessBuildLog;
-import io.onedev.server.security.permission.AccessBuildReports;
-import io.onedev.server.security.permission.AccessConfidentialIssues;
-import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.security.permission.CreateChildren;
-import io.onedev.server.security.permission.EditIssueField;
-import io.onedev.server.security.permission.EditIssueLink;
-import io.onedev.server.security.permission.JobPermission;
-import io.onedev.server.security.permission.ManageBuilds;
-import io.onedev.server.security.permission.ManageCodeComments;
-import io.onedev.server.security.permission.ManageIssues;
-import io.onedev.server.security.permission.ManageJob;
-import io.onedev.server.security.permission.ManageProject;
-import io.onedev.server.security.permission.ManagePullRequests;
-import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.security.permission.RunJob;
-import io.onedev.server.security.permission.ScheduleIssues;
-import io.onedev.server.security.permission.WriteCode;
+import io.onedev.server.security.permission.*;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.facade.RoleFacade;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.util.validation.annotation.RoleName;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ShowCondition;
+import org.apache.shiro.authz.Permission;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.persistence.*;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.*;
 
 /**
  * @author robin
@@ -333,6 +302,11 @@ public class Role extends AbstractEntity implements Permission, Validatable {
 		this.linkAuthorizations = linkAuthorizations;
 	}
 
+	@Override
+	public RoleFacade getFacade() {
+		return new RoleFacade(getId(), getName());
+	}
+	
 	@Override
 	public boolean implies(Permission p) {
 		for (Permission each: getPermissions()) {

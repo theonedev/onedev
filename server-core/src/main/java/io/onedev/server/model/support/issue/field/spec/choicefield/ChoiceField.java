@@ -7,9 +7,9 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValueProvider;

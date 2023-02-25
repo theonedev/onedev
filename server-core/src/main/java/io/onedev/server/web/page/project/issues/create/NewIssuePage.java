@@ -1,8 +1,26 @@
 package io.onedev.server.web.page.project.issues.create;
 
-import java.util.List;
-
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.component.issue.create.NewIssueEditor;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -13,32 +31,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.inputspec.InputContext;
-import io.onedev.server.model.support.inputspec.InputSpec;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
-import io.onedev.server.util.script.identity.SiteAdministrator;
-import io.onedev.server.web.component.issue.create.NewIssueEditor;
-import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import java.util.List;
 
 @SuppressWarnings("serial")
-public class NewIssuePage extends ProjectPage implements InputContext, ScriptIdentityAware {
+public class NewIssuePage extends ProjectPage implements InputContext {
 
 	private static final String PARAM_TEMPLATE = "query";
 	
@@ -130,11 +126,6 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 	@Override
 	public InputSpec getInputSpec(String inputName) {
 		return getIssueSetting().getFieldSpec(inputName);
-	}
-
-	@Override
-	public ScriptIdentity getScriptIdentity() {
-		return new SiteAdministrator();
 	}
 
 	public static PageParameters paramsOf(Project project, String template) {

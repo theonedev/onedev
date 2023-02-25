@@ -6,12 +6,12 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.inputspec.userchoiceinput.UserChoiceInput;
-import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.AllUsers;
-import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
-import io.onedev.server.model.support.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.model.support.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
+import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.AllUsers;
+import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
+import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
