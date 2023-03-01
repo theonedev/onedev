@@ -231,8 +231,7 @@ public abstract class InputSpec implements Serializable {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("import org.apache.commons.lang3.SerializationUtils;\n");
 		buffer.append("import com.google.common.base.Optional;\n");
-		buffer.append("import io.onedev.server.web.editable.annotation.*;\n");
-		buffer.append("import io.onedev.server.util.validation.annotation.*;\n");
+		buffer.append("import io.onedev.server.annotation.*;\n");
 		buffer.append("import io.onedev.util.*;\n");
 		buffer.append("import io.onedev.server.util.*;\n");
 		buffer.append("import io.onedev.server.util.facade.*;\n");

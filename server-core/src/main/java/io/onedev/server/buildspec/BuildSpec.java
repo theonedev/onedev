@@ -102,7 +102,6 @@ public class BuildSpec implements Serializable, Validatable {
 	private transient Map<String, JobProperty> propertyMap;
 	
 	@Editable
-	@Valid
 	public List<Job> getJobs() {
 		return jobs;
 	}
@@ -113,7 +112,6 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 	
 	@Editable
-	@Valid
 	public List<StepTemplate> getStepTemplates() {
 		return stepTemplates;
 	}
@@ -124,7 +122,6 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
-	@Valid
 	public List<Service> getServices() {
 		return services;
 	}
@@ -145,7 +142,6 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 
 	@Editable
-	@Valid
 	public List<Import> getImports() {
 		return imports;
 	}
@@ -276,19 +272,27 @@ public class BuildSpec implements Serializable, Validatable {
 		return isValid;
 	}
 	
+	private Validator getValidator() {
+		return OneDev.getInstance(Validator.class);
+	}
+	
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
 
-		if (!validateImportedElements(context, jobs, it->it.getJobMap(), "job"))
-			isValid = false;
-		if (!validateImportedElements(context, services, it->it.getServiceMap(), "service"))
-			isValid = false;
-		if (!validateImportedElements(context, stepTemplates, it->it.getStepTemplateMap(), "step template"))
-			isValid = false;
-		if (!validateImportedElements(context, properties, it->it.getPropertyMap(), "property"))
-			isValid = false;
-
+		int index = 0;
+		for (Job job: jobs) {
+			for (ConstraintViolation<Job> violation: getValidator().validate(job)) {
+				context.buildConstraintViolationWithTemplate(violation.getMessage())
+						.addPropertyNode(PROP_JOBS)
+						.addBeanNode()
+						.inIterable().atIndex(index)
+						.addConstraintViolation();
+				isValid = false;
+			}
+			index++;
+		}
+		
 		Set<String> jobNames = new HashSet<>();
 		for (Job job: jobs) {
 			if (!jobNames.add(job.getName())) {
@@ -297,6 +301,20 @@ public class BuildSpec implements Serializable, Validatable {
 				isValid = false;
 			}
 		}
+
+		index = 0;
+		for (Service service: services) {
+			for (ConstraintViolation<Service> violation: getValidator().validate(service)) {
+				context.buildConstraintViolationWithTemplate(violation.getMessage())
+						.addPropertyNode(PROP_SERVICES)
+						.addBeanNode()
+						.inIterable().atIndex(index)
+						.addConstraintViolation();
+				isValid = false;
+			}
+			index++;
+		}
+		
 		Set<String> serviceNames = new HashSet<>();
 		for (Service service: services) {
 			if (!serviceNames.add(service.getName())) {
@@ -305,6 +323,20 @@ public class BuildSpec implements Serializable, Validatable {
 				isValid = false;
 			}
 		}
+
+		index = 0;
+		for (StepTemplate stepTemplate: stepTemplates) {
+			for (ConstraintViolation<StepTemplate> violation: getValidator().validate(stepTemplate)) {
+				context.buildConstraintViolationWithTemplate(violation.getMessage())
+						.addPropertyNode(PROP_STEP_TEMPLATES)
+						.addBeanNode()
+						.inIterable().atIndex(index)
+						.addConstraintViolation();
+				isValid = false;
+			}
+			index++;
+		}
+		
 		Set<String> stepTemplateNames = new HashSet<>();
 		for (StepTemplate template: stepTemplates) {
 			if (!stepTemplateNames.add(template.getName())) {
@@ -313,14 +345,43 @@ public class BuildSpec implements Serializable, Validatable {
 				isValid = false;
 			}
 		}
+
+		index = 0;
+		for (JobProperty property: properties) {
+			for (ConstraintViolation<JobProperty> violation: getValidator().validate(property)) {
+				context.buildConstraintViolationWithTemplate(violation.getMessage())
+						.addPropertyNode(PROP_PROPERTIES)
+						.addBeanNode()
+						.inIterable().atIndex(index)
+						.addConstraintViolation();
+				isValid = false;
+			}
+			index++;
+		}
+		
 		Set<String> propertyNames = new HashSet<>();
 		for (JobProperty property : properties) {
 			if (!propertyNames.add(property.getName())) {
 				context.buildConstraintViolationWithTemplate("Duplicate property name (" + property.getName() + ")")
-							.addPropertyNode(PROP_PROPERTIES).addConstraintViolation();
+						.addPropertyNode(PROP_PROPERTIES).addConstraintViolation();
 				isValid = false;
 			}
 		}
+
+		index = 0;
+		for (Import aImport: getImports()) {
+			Validator validator = OneDev.getInstance(Validator.class);
+			for (ConstraintViolation<Import> violation: validator.validate(aImport)) {
+				context.buildConstraintViolationWithTemplate(violation.getMessage())
+						.addPropertyNode(PROP_IMPORTS)
+						.addBeanNode()
+						.inIterable().atIndex(index)
+						.addConstraintViolation();
+				isValid = false;
+			}
+			index++;
+		}
+		
 		Set<String> importProjectNames = new HashSet<>();
 		for (Import aImport: imports) {
 			if (!importProjectNames.add(aImport.getProjectPath())) {
@@ -328,6 +389,17 @@ public class BuildSpec implements Serializable, Validatable {
 						.addPropertyNode(PROP_IMPORTS).addConstraintViolation();
 				isValid = false;
 			}
+		}
+		
+		if (isValid) {
+			if (!validateImportedElements(context, jobs, it -> it.getJobMap(), "job"))
+				isValid = false;
+			if (!validateImportedElements(context, services, it -> it.getServiceMap(), "service"))
+				isValid = false;
+			if (!validateImportedElements(context, stepTemplates, it -> it.getStepTemplateMap(), "step template"))
+				isValid = false;
+			if (!validateImportedElements(context, properties, it -> it.getPropertyMap(), "property"))
+				isValid = false;
 		}
 		
 		if (isValid) {
