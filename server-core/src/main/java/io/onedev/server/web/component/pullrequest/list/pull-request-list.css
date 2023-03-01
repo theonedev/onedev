@@ -8,5 +8,15 @@
 .pull-request-list>div>.body tr.request.new td.new-indicator {
 	background: var(--primary);
 }
-
-
+.pull-request-list .pull-request-jobs {
+	flex-direction: row;
+}
+.pull-request-list .pull-request-jobs>.job {
+	margin-right: 1rem;
+}
+.pull-request-list .pull-request-jobs>.job:last-child {
+	margin-right: 0;
+}
+.pull-request-list .request-status {
+	width: 75px;
+}

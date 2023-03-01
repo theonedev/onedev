@@ -184,7 +184,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), null);
 				String transformed = Emojis.getInstance().apply(transformer.apply(request.getTitle()));
-				return "#" + request.getNumber() + " - " + transformed;
+				return "#" + request.getNumber() + "&nbsp;&nbsp;" + transformed;
 			}
 			
 		}) {

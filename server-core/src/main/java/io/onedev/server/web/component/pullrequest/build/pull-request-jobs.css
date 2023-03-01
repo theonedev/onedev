@@ -1,6 +1,3 @@
-.pull-request-jobs>.job {
-	margin-bottom: 1rem;
-}
-.pull-request-jobs>.job:last-child {
-	margin-bottom: 0.5rem;
+.pull-request-jobs {
+	flex-direction: column;
 }
