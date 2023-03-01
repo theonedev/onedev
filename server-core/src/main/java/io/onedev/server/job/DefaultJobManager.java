@@ -703,7 +703,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												@Override
 												public void run(Map<String, List<String>> paramMap) {
 													submit(project, commitId, job.getName(), paramMap,
-															pipeline, match.getRefName(), SecurityUtils.getUser(), match.getRequest(), match.getReason());
+															pipeline, match.getRefName(), SecurityUtils.getUser(), 
+															match.getRequest(), match.getReason());
 												}
 
 											}.run();
@@ -1084,7 +1085,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 							@Override
 							public void run(Map<String, List<String>> paramMap) {
-								submit(project, commitId, job.getName(), paramMap, pipeline, refName, SecurityUtils.getUser(), null, reason);
+								submit(project, commitId, job.getName(), paramMap, pipeline, 
+										refName, SecurityUtils.getUser(), null, reason);
 							}
 
 						}.run();
