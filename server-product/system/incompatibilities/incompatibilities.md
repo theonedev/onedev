@@ -1,3 +1,7 @@
+# 8.0.5
+
+Create tag step and close milestone step in build spec now uses access token to authenticate to server for flexibility and consistence reason. Please edit relevant build specs to specify appropriate access tokens for these two steps, otherwise they will fail 
+
 # 8.0.0
 
 Project site published via public site step in build spec now can be publicly accessible. Previously it is only accessible to users able to access the project 
