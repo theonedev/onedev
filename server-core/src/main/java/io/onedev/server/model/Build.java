@@ -702,6 +702,11 @@ public class Build extends ProjectBelonging
 		return jobAuthorizationContext;
 	}
 	
+	// For backward compatibility
+	public JobAuthorizationContext getJobSecretAuthorizationContext() {
+		return getJobAuthorizationContext();
+	}
+	
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
 		for (JobSecret secret: getProject().getHierarchyJobSecrets()) 
