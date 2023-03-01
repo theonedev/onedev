@@ -19,7 +19,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class InputSpec implements Serializable {

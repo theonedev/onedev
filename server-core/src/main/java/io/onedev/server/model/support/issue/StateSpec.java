@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Color;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Color;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class StateSpec implements Serializable {

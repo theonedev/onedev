@@ -2,8 +2,8 @@ package io.onedev.server.plugin.authenticator.ldap;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 
 @Editable(name="Active Directory", order=100)
 public class ActiveDirectoryAuthenticator extends LdapAuthenticator {

@@ -18,7 +18,7 @@ import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.MilestoneChoice;
+import io.onedev.server.annotation.MilestoneChoice;
 
 @SuppressWarnings("serial")
 public class MilestoneSingleChoiceEditor extends PropertyEditor<String> {

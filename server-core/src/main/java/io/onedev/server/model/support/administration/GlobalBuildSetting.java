@@ -7,7 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.support.build.NamedBuildQuery;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class GlobalBuildSetting implements Serializable {

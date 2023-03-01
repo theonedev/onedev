@@ -15,9 +15,9 @@ import io.onedev.server.mail.MailCredential;
 import io.onedev.server.mail.MailSendSetting;
 import io.onedev.server.mail.OAuthAccessToken;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Password;
-import io.onedev.server.web.editable.annotation.RefreshToken;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.RefreshToken;
 
 @Editable(order=100, name="Office 365", description=""
 		+ "Office 365 mail provider with OAuth authentication. "

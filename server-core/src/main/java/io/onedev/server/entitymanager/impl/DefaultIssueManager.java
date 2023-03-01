@@ -42,7 +42,7 @@ import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.validation.ProjectPathValidator;
+import io.onedev.server.validation.validator.ProjectPathValidator;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;

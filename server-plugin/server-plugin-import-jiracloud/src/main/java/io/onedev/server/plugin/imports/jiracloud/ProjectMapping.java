@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.util.validation.annotation.ProjectPath;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ProjectPath;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class ProjectMapping implements Serializable {

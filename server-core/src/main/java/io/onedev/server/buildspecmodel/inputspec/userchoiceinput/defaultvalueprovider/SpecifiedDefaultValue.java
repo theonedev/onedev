@@ -11,9 +11,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.UserChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.UserChoice;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {

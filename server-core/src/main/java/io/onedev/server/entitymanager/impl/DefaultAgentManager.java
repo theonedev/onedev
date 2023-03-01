@@ -37,7 +37,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.validation.AttributeNameValidator;
+import io.onedev.server.validation.validator.AttributeNameValidator;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.websocket.api.Session;

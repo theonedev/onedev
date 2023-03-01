@@ -11,9 +11,9 @@ import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.interpolative.VariableInterpolator;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.WorkingPeriod;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.WorkingPeriod;
 
 public class EditableUtils {
 	

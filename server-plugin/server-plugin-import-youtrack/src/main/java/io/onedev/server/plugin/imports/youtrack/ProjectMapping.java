@@ -1,7 +1,7 @@
 package io.onedev.server.plugin.imports.youtrack;
 
-import io.onedev.server.util.validation.annotation.ProjectPath;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ProjectPath;
+import io.onedev.server.annotation.Editable;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;

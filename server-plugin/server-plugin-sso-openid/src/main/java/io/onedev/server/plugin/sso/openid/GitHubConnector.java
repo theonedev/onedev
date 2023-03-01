@@ -20,7 +20,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 import net.minidev.json.JSONObject;
 
 @Editable(name="OpenID (GitHub)", order=100, description="Refer to this <a href='https://docs.onedev.io/tutorials/security/sso-with-github/' target='_blank'>tutorial</a> for an example setup")

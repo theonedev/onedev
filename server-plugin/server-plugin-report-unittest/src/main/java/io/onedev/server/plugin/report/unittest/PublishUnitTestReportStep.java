@@ -14,7 +14,7 @@ import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.UnitTestMetric;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class PublishUnitTestReportStep extends PublishReportStep {

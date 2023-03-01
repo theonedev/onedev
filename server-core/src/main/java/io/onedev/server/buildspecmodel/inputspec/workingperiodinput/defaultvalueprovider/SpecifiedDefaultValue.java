@@ -2,9 +2,9 @@ package io.onedev.server.buildspecmodel.inputspec.workingperiodinput.defaultvalu
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.WorkingPeriod;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.WorkingPeriod;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {

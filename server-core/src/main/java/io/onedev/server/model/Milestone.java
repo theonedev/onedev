@@ -23,8 +23,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
 
 @Entity
 @Table(

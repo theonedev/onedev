@@ -14,8 +14,8 @@ import io.onedev.server.buildspecmodel.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 
 @Editable(order=145, name= ParamSpec.ENUMERATION)
 public class ChoiceParam extends ParamSpec {

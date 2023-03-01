@@ -1,7 +1,7 @@
 package io.onedev.server.web.editable;
 
 import io.onedev.server.web.behavior.JobMatchBehavior;
-import io.onedev.server.web.editable.annotation.JobMatch;
+import io.onedev.server.annotation.JobMatch;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;

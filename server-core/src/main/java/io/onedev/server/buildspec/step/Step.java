@@ -11,7 +11,7 @@ import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class Step implements Serializable {

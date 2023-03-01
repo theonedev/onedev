@@ -6,8 +6,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.notification.BuildNotificationManager;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NotificationReceiver;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.NotificationReceiver;
 
 @Editable(name="Send notification", order=200)
 public class SendNotificationAction extends PostBuildAction {

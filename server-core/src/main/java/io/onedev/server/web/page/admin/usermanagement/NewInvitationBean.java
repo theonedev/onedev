@@ -13,10 +13,10 @@ import com.google.common.base.Splitter;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.UserInvitationManager;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.validation.Validatable;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
 
 @Editable
 @ClassValidating

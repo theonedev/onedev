@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public interface NamedQuery extends Serializable {

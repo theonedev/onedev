@@ -6,9 +6,9 @@ import javax.validation.constraints.Size;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.RoleChoice;
-import io.onedev.server.web.editable.annotation.UserChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.RoleChoice;
+import io.onedev.server.annotation.UserChoice;
 
 @Editable
 public class AuthorizationBean implements Serializable {

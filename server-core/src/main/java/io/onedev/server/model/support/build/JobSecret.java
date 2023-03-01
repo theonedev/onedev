@@ -1,9 +1,9 @@
 package io.onedev.server.model.support.build;
 
-import io.onedev.server.util.validation.annotation.SecretName;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.JobMatch;
-import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.annotation.SecretName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.JobMatch;
+import io.onedev.server.annotation.Multiline;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;

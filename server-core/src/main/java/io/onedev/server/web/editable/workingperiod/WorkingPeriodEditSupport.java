@@ -14,7 +14,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.WorkingPeriod;
+import io.onedev.server.annotation.WorkingPeriod;
 
 @SuppressWarnings("serial")
 public class WorkingPeriodEditSupport implements EditSupport {

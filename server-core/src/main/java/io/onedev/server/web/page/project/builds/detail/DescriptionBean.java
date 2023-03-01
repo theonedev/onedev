@@ -2,9 +2,9 @@ package io.onedev.server.web.page.project.builds.detail;
 
 import java.io.Serializable;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Markdown;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Markdown;
+import io.onedev.server.annotation.OmitName;
 
 @Editable(name="Build Description")
 public class DescriptionBean implements Serializable {

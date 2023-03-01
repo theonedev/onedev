@@ -10,11 +10,11 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.util.validation.annotation.RegEx;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.validation.Validatable;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.RegEx;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 
 @Editable
 @ClassValidating

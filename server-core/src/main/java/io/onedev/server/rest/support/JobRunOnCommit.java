@@ -7,7 +7,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.server.model.Build;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.annotation.EntityCreate;
-import io.onedev.server.util.validation.annotation.CommitHash;
+import io.onedev.server.annotation.CommitHash;
 
 @EntityCreate(Build.class)
 public class JobRunOnCommit extends JobRun {

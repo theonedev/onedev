@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.issue.transitiontrigger;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=300, name="Pull request is discarded")
 public class DiscardPullRequestTrigger extends PullRequestTrigger {

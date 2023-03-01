@@ -22,11 +22,11 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.ParamSpecProvider;
-import io.onedev.server.web.editable.annotation.Patterns;
-import io.onedev.server.web.editable.annotation.VariableOption;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.VariableOption;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 

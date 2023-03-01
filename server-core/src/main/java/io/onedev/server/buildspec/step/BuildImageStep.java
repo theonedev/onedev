@@ -10,9 +10,9 @@ import io.onedev.k8shelper.StepFacade;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.validation.annotation.SafePath;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.annotation.SafePath;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 
 @Editable(order=160, name="Build Docker Image", description="Build and optionally publish docker image. "
 		+ "<span class='text-danger'>Registry logins should be specified</span> in the job executor executing this step if registry authentication "

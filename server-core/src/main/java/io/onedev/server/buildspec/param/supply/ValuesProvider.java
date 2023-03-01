@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public interface ValuesProvider extends Serializable {

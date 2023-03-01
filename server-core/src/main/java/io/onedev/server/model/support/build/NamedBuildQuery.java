@@ -3,8 +3,8 @@ package io.onedev.server.model.support.build;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.web.editable.annotation.BuildQuery;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.BuildQuery;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class NamedBuildQuery implements NamedQuery {

@@ -16,7 +16,7 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.annotation.Multiline;
 
 @SuppressWarnings("serial")
 public class StringPropertyEditor extends PropertyEditor<String> {

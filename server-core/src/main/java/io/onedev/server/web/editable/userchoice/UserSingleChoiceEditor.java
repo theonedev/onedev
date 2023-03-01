@@ -25,7 +25,7 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.choice.UserSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.UserChoice;
+import io.onedev.server.annotation.UserChoice;
 
 @SuppressWarnings("serial")
 public class UserSingleChoiceEditor extends PropertyEditor<String> {

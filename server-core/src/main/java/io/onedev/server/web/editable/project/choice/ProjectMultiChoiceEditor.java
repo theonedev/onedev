@@ -19,7 +19,7 @@ import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.component.project.choice.ProjectMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.ProjectChoice;
+import io.onedev.server.annotation.ProjectChoice;
 
 @SuppressWarnings("serial")
 public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {

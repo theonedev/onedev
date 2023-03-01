@@ -19,7 +19,7 @@ import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.annotation.ChoiceProvider;
 
 @SuppressWarnings("serial")
 public class SingleChoiceEditor extends PropertyEditor<String> {

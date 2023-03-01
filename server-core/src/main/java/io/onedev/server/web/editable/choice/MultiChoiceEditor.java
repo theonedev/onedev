@@ -21,7 +21,7 @@ import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.annotation.ChoiceProvider;
 
 @SuppressWarnings("serial")
 public class MultiChoiceEditor extends PropertyEditor<List<String>> {

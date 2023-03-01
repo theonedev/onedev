@@ -7,9 +7,9 @@ import javax.validation.constraints.Size;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
 
 @Editable(order=300, name="Specified fields")
 public class IncludeIssueFields implements IssueFieldSet {

@@ -1,6 +1,6 @@
 package io.onedev.server.git.location;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(name="Use curl in System Path", order=100)
 public class SystemCurl extends CurlLocation {

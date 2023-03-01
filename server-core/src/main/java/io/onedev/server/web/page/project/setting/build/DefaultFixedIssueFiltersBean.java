@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.server.model.support.build.DefaultFixedIssueFilter;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class DefaultFixedIssueFiltersBean implements Serializable {

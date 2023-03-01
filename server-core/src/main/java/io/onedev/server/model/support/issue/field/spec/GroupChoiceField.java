@@ -12,7 +12,7 @@ import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=160, name=FieldSpec.GROUP)
 public class GroupChoiceField extends FieldSpec {

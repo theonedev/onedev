@@ -22,11 +22,11 @@ import io.onedev.server.model.Build;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.interpolative.VariableInterpolator;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.ParamSpecProvider;
-import io.onedev.server.web.editable.annotation.VariableOption;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.annotation.VariableOption;
 
 @Editable(order=10000, name="Use Step Template", description="Run specified step template")
 public class UseTemplateStep extends Step {

@@ -15,9 +15,9 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.util.validation.annotation.DnsName;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.DnsName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
@@ -91,7 +91,7 @@ public abstract class JobExecutor implements Serializable {
 	}
 
 	@Editable(order=10000, placeholder="Any job", description="Optionally specify job requirement of this executor")
-	@io.onedev.server.web.editable.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
+	@io.onedev.server.annotation.JobMatch(withProjectCriteria = true, withJobCriteria = true)
 	@Nullable
 	public String getJobRequirement() {
 		return jobRequirement;

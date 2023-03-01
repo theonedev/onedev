@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=500, name=ParamSpec.SECRET)
 public class SecretParam extends ParamSpec {

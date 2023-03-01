@@ -44,8 +44,8 @@ import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.FieldNamesProvider;
-import io.onedev.server.web.editable.annotation.Password;
+import io.onedev.server.annotation.FieldNamesProvider;
+import io.onedev.server.annotation.Password;
 
 @SuppressWarnings("serial")
 class FieldListEditPanel extends PropertyEditor<List<Serializable>> {

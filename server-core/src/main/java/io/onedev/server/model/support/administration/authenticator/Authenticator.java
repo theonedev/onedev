@@ -9,8 +9,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.GroupChoice;
 
 @Editable
 @JsonTypeInfo(use=Id.CLASS)

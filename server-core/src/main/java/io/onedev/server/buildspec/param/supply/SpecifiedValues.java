@@ -8,8 +8,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 
 @Editable(name="Use specified values or job secrets")
 public class SpecifiedValues implements ValuesProvider {

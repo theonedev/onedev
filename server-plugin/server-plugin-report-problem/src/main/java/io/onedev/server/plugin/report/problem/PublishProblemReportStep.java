@@ -22,7 +22,7 @@ import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.ProblemMetric;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class PublishProblemReportStep extends PublishReportStep {

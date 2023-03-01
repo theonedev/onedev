@@ -16,7 +16,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.component.job.JobMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.JobChoice;
+import io.onedev.server.annotation.JobChoice;
 
 @SuppressWarnings("serial")
 public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {

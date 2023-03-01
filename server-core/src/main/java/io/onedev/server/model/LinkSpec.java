@@ -20,7 +20,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.facade.LinkSpecFacade;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 @Entity
@@ -75,7 +75,7 @@ public class LinkSpec extends AbstractEntity {
 
 	@Editable(order=160, name="Linkable Issues", placeholder="All issues", 
 			description="Optionally specify criteria of issues which can be linked")
-	@io.onedev.server.web.editable.annotation.IssueQuery
+	@io.onedev.server.annotation.IssueQuery
 	public String getIssueQuery() {
 		return issueQuery;
 	}

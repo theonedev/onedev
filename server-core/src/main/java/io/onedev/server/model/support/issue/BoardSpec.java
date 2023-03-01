@@ -14,6 +14,8 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.Size;
 
 import javax.validation.constraints.NotEmpty;
+
+import io.onedev.server.annotation.IssueQuery;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
@@ -38,8 +40,8 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class BoardSpec implements Serializable {
@@ -76,7 +78,7 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=200, placeholder="Not specified", description="Optionally specify a base query to "
 			+ "filter/order issues of the board")
-	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true)
+	@IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true)
 	@Nullable
 	public String getBaseQuery() {
 		return baseQuery;
@@ -88,7 +90,7 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=250, placeholder="Not specified", description="Optionally specify a base query to filter/order issues in backlog. "
 			+ "Backlog issues are those not associating with current milestone")
-	@io.onedev.server.web.editable.annotation.IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true)
+	@IssueQuery(withCurrentUserCriteria = true, withCurrentProjectCriteria = true)
 	@Nullable
 	public String getBacklogBaseQuery() {
 		return backlogBaseQuery;

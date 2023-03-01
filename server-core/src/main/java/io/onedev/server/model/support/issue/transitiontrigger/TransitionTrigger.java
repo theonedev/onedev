@@ -5,10 +5,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 
+import io.onedev.server.annotation.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class TransitionTrigger implements Serializable {
@@ -19,7 +20,7 @@ public abstract class TransitionTrigger implements Serializable {
 	
 	@Editable(order=1000, name="Applicable Issues", placeholder="All", description=""
 			+ "Optionally specify issues applicable for this transition. Leave empty for all issues. ")
-	@io.onedev.server.web.editable.annotation.IssueQuery(withOrder = false)
+	@IssueQuery(withOrder = false)
 	public String getIssueQuery() {
 		return issueQuery;
 	}

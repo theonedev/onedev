@@ -15,9 +15,9 @@ import io.onedev.server.mail.MailCredential;
 import io.onedev.server.mail.MailSendSetting;
 import io.onedev.server.mail.OAuthAccessToken;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Password;
-import io.onedev.server.web.editable.annotation.RefreshToken;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.RefreshToken;
 
 @Editable(order=200, name="Gmail", description="Gmail service with OAuth authentication")
 public class GmailSetting extends MailSetting {

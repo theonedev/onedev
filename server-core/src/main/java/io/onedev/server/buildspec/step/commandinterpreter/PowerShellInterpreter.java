@@ -6,9 +6,9 @@ import javax.validation.constraints.Size;
 
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.k8shelper.PowerShellFacade;
-import io.onedev.server.util.validation.annotation.Code;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 
 @Editable(order=300, name="PowerShell")
 public class PowerShellInterpreter extends Interpreter {

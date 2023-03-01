@@ -2,7 +2,7 @@ package io.onedev.server.plugin.authenticator.ldap;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=200)
 public class GetGroupsUsingAttribute implements GroupRetrieval {

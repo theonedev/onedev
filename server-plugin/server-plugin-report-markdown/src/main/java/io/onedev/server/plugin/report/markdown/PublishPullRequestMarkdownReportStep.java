@@ -16,8 +16,8 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.model.Build;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 
 @Editable(order=1200, group=StepGroup.PUBLISH_REPORTS, name="Pull Request Markdown", 
 		description="This report will be displayed in pull request overview page if build is triggered by pull request")

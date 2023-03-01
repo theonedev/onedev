@@ -12,9 +12,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.model.Group;
 import io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.GroupChoice;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.GroupChoice;
+import io.onedev.server.annotation.OmitName;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultValue implements DefaultValueProvider {

@@ -31,9 +31,9 @@ import io.onedev.server.plugin.report.coverage.PackageCoverageInfo;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
 import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.util.XmlUtils;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Patterns;
 
 @Editable(order=9920, group=StepGroup.PUBLISH_REPORTS, name="JaCoCo Coverage")
 public class PublishJacocoReportStep extends PublishCoverageReportStep {

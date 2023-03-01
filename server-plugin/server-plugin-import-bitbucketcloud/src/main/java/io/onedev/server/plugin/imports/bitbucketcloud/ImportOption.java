@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.RoleChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.RoleChoice;
 
 @Editable
 public class ImportOption implements Serializable {

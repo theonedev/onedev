@@ -14,6 +14,7 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
@@ -30,9 +31,7 @@ import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.*;
+import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang3.SystemUtils;
 

@@ -3,7 +3,7 @@ package io.onedev.server.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.EmailAddressFacade;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 

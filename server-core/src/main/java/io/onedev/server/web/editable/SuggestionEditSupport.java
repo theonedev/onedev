@@ -11,7 +11,7 @@ import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
-import io.onedev.server.web.editable.annotation.SuggestionProvider;
+import io.onedev.server.annotation.SuggestionProvider;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
 

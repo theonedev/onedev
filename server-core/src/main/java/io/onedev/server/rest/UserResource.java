@@ -57,7 +57,7 @@ import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.validation.annotation.UserName;
+import io.onedev.server.annotation.UserName;
 
 @Api(order=5000)
 @Path("/users")

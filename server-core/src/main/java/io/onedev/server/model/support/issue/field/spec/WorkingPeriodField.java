@@ -8,7 +8,7 @@ import javax.validation.Valid;
 import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.WorkingPeriodInput;
 import io.onedev.server.buildspecmodel.inputspec.workingperiodinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=700, name=FieldSpec.WORKING_PERIOD)
 public class WorkingPeriodField extends FieldSpec {

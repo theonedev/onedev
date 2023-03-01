@@ -11,7 +11,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
 

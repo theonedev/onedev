@@ -13,10 +13,10 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.BuildChoice;
-import io.onedev.server.web.editable.annotation.IssueChoice;
-import io.onedev.server.web.editable.annotation.PullRequestChoice;
-import io.onedev.server.web.editable.annotation.WorkingPeriod;
+import io.onedev.server.annotation.BuildChoice;
+import io.onedev.server.annotation.IssueChoice;
+import io.onedev.server.annotation.PullRequestChoice;
+import io.onedev.server.annotation.WorkingPeriod;
 
 @SuppressWarnings("serial")
 public class NumericEditSupport implements EditSupport {

@@ -12,13 +12,13 @@ import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.BuildQuery;
-import io.onedev.server.web.editable.annotation.CodeCommentQuery;
-import io.onedev.server.web.editable.annotation.CommitQuery;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.editable.annotation.PullRequestQuery;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.BuildQuery;
+import io.onedev.server.annotation.CodeCommentQuery;
+import io.onedev.server.annotation.CommitQuery;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.IssueQuery;
+import io.onedev.server.annotation.PullRequestQuery;
+import io.onedev.server.annotation.ShowCondition;
 
 @Editable
 public class ChannelNotification implements Serializable {

@@ -4,9 +4,9 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 import javax.validation.Validator;
@@ -25,7 +25,7 @@ public class DefaultMultiValue implements Serializable {
 	private String applicableProjects;
 
 	@Editable(name="Literal value", order=100)
-	@io.onedev.server.web.editable.annotation.ChoiceProvider("getValueChoices")
+	@io.onedev.server.annotation.ChoiceProvider("getValueChoices")
 	@NotEmpty
 	@OmitName
 	public List<String> getValue() {

@@ -1,9 +1,9 @@
 package io.onedev.server.buildspec.param.spec.choiceparam.defaultvalueprovider;
 
 import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.ScriptChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ScriptChoice;
 
 import javax.validation.constraints.NotEmpty;
 

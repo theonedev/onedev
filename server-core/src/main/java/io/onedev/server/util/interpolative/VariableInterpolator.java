@@ -173,7 +173,7 @@ public class VariableInterpolator {
 	public <T> T interpolateProperties(T object) {
 		return beanPropertyTransformer.transformProperties(
 				object, 
-				io.onedev.server.web.editable.annotation.Interpolative.class);
+				io.onedev.server.annotation.Interpolative.class);
 	}	
 		
 }

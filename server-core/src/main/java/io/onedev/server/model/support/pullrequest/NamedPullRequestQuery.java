@@ -3,8 +3,8 @@ package io.onedev.server.model.support.pullrequest;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.PullRequestQuery;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.PullRequestQuery;
 
 @Editable
 public class NamedPullRequestQuery implements NamedQuery {

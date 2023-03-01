@@ -7,7 +7,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.pullrequest.review.ReviewRequirementBehavior;
-import io.onedev.server.web.editable.annotation.ReviewRequirement;
+import io.onedev.server.annotation.ReviewRequirement;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
 

@@ -12,7 +12,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.Color;
+import io.onedev.server.annotation.Color;
 
 @SuppressWarnings("serial")
 public class ColorEditSupport implements EditSupport {

@@ -30,7 +30,7 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.web.util.IssueAware;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;

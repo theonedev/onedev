@@ -23,11 +23,11 @@ import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.FieldNamesProvider;
-import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.Multiline;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.FieldNamesProvider;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.OmitName;
 
 @Editable(name="Create issue", order=300)
 public class CreateIssueAction extends PostBuildAction {

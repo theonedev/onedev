@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.buildspecmodel.inputspec.BuildChoiceInput;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=1200, name=ParamSpec.BUILD)
 public class BuildChoiceParam extends ParamSpec {

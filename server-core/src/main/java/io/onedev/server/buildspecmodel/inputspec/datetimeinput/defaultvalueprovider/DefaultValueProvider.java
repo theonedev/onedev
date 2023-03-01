@@ -3,7 +3,7 @@ package io.onedev.server.buildspecmodel.inputspec.datetimeinput.defaultvalueprov
 import java.io.Serializable;
 import java.util.Date;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public interface DefaultValueProvider extends Serializable {

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.server.model.Build;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public interface GitCredential extends Serializable {

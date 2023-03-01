@@ -2,8 +2,8 @@ package io.onedev.server.web.component.issue.side;
 
 import java.io.Serializable;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.IssueChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.IssueChoice;
 
 @Editable
 public class SingleLinkBean implements Serializable {

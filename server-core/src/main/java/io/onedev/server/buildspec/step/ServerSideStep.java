@@ -16,7 +16,7 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringVisitor;
-import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.annotation.Interpolative;
 
 public abstract class ServerSideStep extends Step {
 

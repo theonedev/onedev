@@ -15,7 +15,7 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.component.blob.BlobPicker;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.BlobChoice;
+import io.onedev.server.annotation.BlobChoice;
 
 @SuppressWarnings("serial")
 public class BlobChoiceEditor extends PropertyEditor<String> {

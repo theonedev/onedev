@@ -7,8 +7,8 @@ import java.util.List;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.WicketUtils;
 

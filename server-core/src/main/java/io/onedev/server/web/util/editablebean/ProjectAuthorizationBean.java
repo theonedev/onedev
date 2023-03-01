@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ProjectChoice;
-import io.onedev.server.web.editable.annotation.RoleChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ProjectChoice;
+import io.onedev.server.annotation.RoleChoice;
 
 @Editable
 public class ProjectAuthorizationBean implements Serializable {

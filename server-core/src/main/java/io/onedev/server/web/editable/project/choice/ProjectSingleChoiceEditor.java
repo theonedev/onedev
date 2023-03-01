@@ -18,7 +18,7 @@ import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.web.component.project.choice.ProjectSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.ProjectChoice;
+import io.onedev.server.annotation.ProjectChoice;
 
 @SuppressWarnings("serial")
 public class ProjectSingleChoiceEditor extends PropertyEditor<String> {

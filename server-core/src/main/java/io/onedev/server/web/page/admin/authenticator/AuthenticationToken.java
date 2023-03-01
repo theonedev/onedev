@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Password;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
 
 @Editable
 public class AuthenticationToken implements Serializable {

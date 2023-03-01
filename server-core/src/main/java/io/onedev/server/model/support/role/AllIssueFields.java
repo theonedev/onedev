@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=100, name="All")
 public class AllIssueFields implements IssueFieldSet {

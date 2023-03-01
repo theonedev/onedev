@@ -16,7 +16,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.util.BeanUtils;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @SuppressWarnings("serial")
 public class BeanDescriptor implements Serializable {

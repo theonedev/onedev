@@ -11,7 +11,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.Password;
+import io.onedev.server.annotation.Password;
 
 @SuppressWarnings("serial")
 public class PasswordPropertyEditor extends PropertyEditor<String> {

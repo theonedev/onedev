@@ -4,8 +4,8 @@ import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.NamedElement;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.SuggestionProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.SuggestionProvider;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;

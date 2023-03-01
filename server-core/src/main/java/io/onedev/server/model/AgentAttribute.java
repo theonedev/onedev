@@ -16,8 +16,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.util.validation.annotation.AttributeName;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.AttributeName;
+import io.onedev.server.annotation.Editable;
 
 /**
  * @author robin

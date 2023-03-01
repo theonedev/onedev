@@ -25,11 +25,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.validation.Validatable;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.OmitName;
 
 @Editable
 @Entity

@@ -13,8 +13,8 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ScriptChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ScriptChoice;
 
 @Editable(name="Evaluate script to get values or secrets")
 public class ScriptingValues implements ValuesProvider {

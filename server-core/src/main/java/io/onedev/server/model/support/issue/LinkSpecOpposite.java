@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class LinkSpecOpposite implements Serializable {
@@ -46,7 +46,7 @@ public class LinkSpecOpposite implements Serializable {
 
 	@Editable(order=300, name="Linkable Issues On the Other Side", placeholder="All issues", 
 			description="Optionally specify criteria of issues which can be linked on the other side")
-	@io.onedev.server.web.editable.annotation.IssueQuery
+	@io.onedev.server.annotation.IssueQuery
 	public String getIssueQuery() {
 		return issueQuery;
 	}

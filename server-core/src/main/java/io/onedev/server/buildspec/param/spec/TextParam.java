@@ -7,7 +7,7 @@ import javax.validation.Valid;
 
 import io.onedev.server.buildspecmodel.inputspec.textinput.TextInput;
 import io.onedev.server.buildspecmodel.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=100, name=ParamSpec.TEXT)
 public class TextParam extends ParamSpec {

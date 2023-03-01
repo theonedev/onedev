@@ -3,9 +3,9 @@ package io.onedev.server.web.page.project.tags;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.web.component.createtag.TagBean;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.RevisionChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.RevisionChoice;
 
 @Editable
 public class TagBeanWithRevision extends TagBean {

@@ -7,8 +7,8 @@ import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class ImportWorkspace implements Serializable {

@@ -25,7 +25,7 @@ import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.web.component.user.choice.UserMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.UserChoice;
+import io.onedev.server.annotation.UserChoice;
 
 @SuppressWarnings("serial")
 public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {

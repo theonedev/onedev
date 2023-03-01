@@ -37,7 +37,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.ValueEditor;
-import io.onedev.server.web.editable.annotation.ExcludedProperties;
+import io.onedev.server.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {

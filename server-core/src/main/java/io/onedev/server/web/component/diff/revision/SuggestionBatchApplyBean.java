@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.OmitName;
 
 @Editable(name="Commit Batched Suggestions")
 public class SuggestionBatchApplyBean implements Serializable {

@@ -11,9 +11,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.User;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.UserChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.UserChoice;
 
 @Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultMultiValue implements DefaultMultiValueProvider {

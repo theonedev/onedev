@@ -42,7 +42,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.RefreshToken;
+import io.onedev.server.annotation.RefreshToken;
 import io.onedev.server.web.page.simple.security.OAuthCallbackPage;
 
 @SuppressWarnings("serial")

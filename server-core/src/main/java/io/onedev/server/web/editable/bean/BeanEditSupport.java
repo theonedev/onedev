@@ -16,8 +16,8 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ExcludedProperties;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class BeanEditSupport implements EditSupport {

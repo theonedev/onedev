@@ -22,7 +22,7 @@ import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.milestone.choice.MilestoneMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.MilestoneChoice;
+import io.onedev.server.annotation.MilestoneChoice;
 
 @SuppressWarnings("serial")
 public class MilestoneMultiChoiceEditor extends PropertyEditor<List<String>> {

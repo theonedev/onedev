@@ -5,8 +5,8 @@ import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.ScheduledTimeReaches;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.util.validation.annotation.CronExpression;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.CronExpression;
+import io.onedev.server.annotation.Editable;
 
 import javax.validation.constraints.NotEmpty;
 

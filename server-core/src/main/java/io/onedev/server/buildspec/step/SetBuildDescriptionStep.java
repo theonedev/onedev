@@ -15,9 +15,9 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.build.BuildUpdated;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.Markdown;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Markdown;
 
 @Editable(order=265, name="Set Build Description")
 public class SetBuildDescriptionStep extends ServerSideStep {

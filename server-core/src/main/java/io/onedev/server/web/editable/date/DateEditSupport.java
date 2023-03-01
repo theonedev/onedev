@@ -14,7 +14,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.WithTime;
+import io.onedev.server.annotation.WithTime;
 
 @SuppressWarnings("serial")
 public class DateEditSupport implements EditSupport {

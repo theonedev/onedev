@@ -74,7 +74,7 @@ import org.hibernate.validator.internal.util.TypeHelper;
 import org.hibernate.validator.internal.util.logging.Log;
 import org.hibernate.validator.internal.util.logging.LoggerFactory;
 
-import io.onedev.server.util.validation.annotation.ClassValidating;
+import io.onedev.server.annotation.ClassValidating;
 
 /**
  * The main Bean Validation class. This is the core processing class of Hibernate Validator.

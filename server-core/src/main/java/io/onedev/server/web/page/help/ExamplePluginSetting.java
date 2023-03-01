@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.help;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 

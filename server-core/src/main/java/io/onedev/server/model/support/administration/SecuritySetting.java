@@ -11,8 +11,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.GroupChoice;
 
 @Editable
 public class SecuritySetting implements Serializable {

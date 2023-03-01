@@ -16,7 +16,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.RoleChoice;
+import io.onedev.server.annotation.RoleChoice;
 
 @SuppressWarnings("serial")
 public class RoleChoiceEditSupport implements EditSupport {

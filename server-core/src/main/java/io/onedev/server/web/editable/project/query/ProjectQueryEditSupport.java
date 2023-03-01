@@ -13,7 +13,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.ProjectQuery;
+import io.onedev.server.annotation.ProjectQuery;
 
 @SuppressWarnings("serial")
 public class ProjectQueryEditSupport implements EditSupport {

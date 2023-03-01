@@ -4,8 +4,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
 
 import javax.validation.constraints.Size;
 import java.util.ArrayList;

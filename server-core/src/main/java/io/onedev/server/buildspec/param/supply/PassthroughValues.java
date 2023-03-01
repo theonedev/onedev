@@ -13,8 +13,8 @@ import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.Input;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
 
 @Editable(name="Use value of specified parameter/secret")
 public class PassthroughValues implements ValuesProvider {

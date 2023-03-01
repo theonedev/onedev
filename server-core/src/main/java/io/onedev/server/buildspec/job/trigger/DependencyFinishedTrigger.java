@@ -8,7 +8,7 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 import java.util.List;
 

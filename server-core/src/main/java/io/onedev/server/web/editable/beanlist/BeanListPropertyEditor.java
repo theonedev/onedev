@@ -41,7 +41,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
-import io.onedev.server.web.editable.annotation.ExcludedProperties;
+import io.onedev.server.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {

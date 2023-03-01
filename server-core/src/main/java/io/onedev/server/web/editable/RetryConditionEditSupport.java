@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.web.behavior.RetryConditionBehavior;
-import io.onedev.server.web.editable.annotation.RetryCondition;
+import io.onedev.server.annotation.RetryCondition;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
 @SuppressWarnings("serial")

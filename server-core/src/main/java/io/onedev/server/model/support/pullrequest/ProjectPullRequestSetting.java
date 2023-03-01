@@ -1,7 +1,7 @@
 package io.onedev.server.model.support.pullrequest;
 
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 import java.io.Serializable;
 import java.util.List;

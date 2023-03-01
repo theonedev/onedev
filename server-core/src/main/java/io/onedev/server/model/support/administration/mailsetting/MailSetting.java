@@ -7,7 +7,7 @@ import javax.validation.constraints.Min;
 
 import io.onedev.server.mail.MailCheckSetting;
 import io.onedev.server.mail.MailSendSetting;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class MailSetting implements Serializable {

@@ -2,7 +2,7 @@ package io.onedev.server.buildspecmodel.inputspec.workingperiodinput.defaultvalu
 
 import java.io.Serializable;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public interface DefaultValueProvider extends Serializable {

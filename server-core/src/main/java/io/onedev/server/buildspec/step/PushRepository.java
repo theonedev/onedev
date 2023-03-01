@@ -17,7 +17,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=70, name="Push to Remote", group=StepGroup.REPOSITORY_SYNC, 
 		description="This step pushes current commit to same ref on remote")

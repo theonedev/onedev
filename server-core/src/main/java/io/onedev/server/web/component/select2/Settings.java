@@ -22,7 +22,7 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.component.select2.json.Json;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.OmitName;
 
 /**
  * Select2 settings. Refer to the Select2 documentation for what these options

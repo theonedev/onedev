@@ -15,8 +15,8 @@ import io.onedev.server.model.support.issue.field.spec.choicefield.defaultmultiv
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 
 @Editable(order=145, name= FieldSpec.ENUMERATION)
 public class ChoiceField extends FieldSpec {

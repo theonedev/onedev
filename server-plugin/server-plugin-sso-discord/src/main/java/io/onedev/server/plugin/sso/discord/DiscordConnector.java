@@ -26,8 +26,8 @@ import io.onedev.server.plugin.sso.discord.oauth2.AccessTokenResponse;
 import io.onedev.server.plugin.sso.discord.oauth2.Request;
 import io.onedev.server.plugin.sso.discord.oauth2.UserGuildsResponse;
 import io.onedev.server.plugin.sso.discord.oauth2.UserInfoResponse;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Password;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 
 @Editable(name="Discord", order=10100, description="Single sign on via discord.com")

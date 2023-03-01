@@ -17,7 +17,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.BranchChoice;
+import io.onedev.server.annotation.BranchChoice;
 
 @SuppressWarnings("serial")
 public class BranchSingleChoiceEditor extends PropertyEditor<String> {

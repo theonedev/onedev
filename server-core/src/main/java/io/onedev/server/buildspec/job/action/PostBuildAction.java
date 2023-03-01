@@ -7,8 +7,8 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.model.Build;
-import io.onedev.server.web.editable.annotation.ActionCondition;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ActionCondition;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class PostBuildAction implements Serializable {

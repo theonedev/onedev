@@ -8,7 +8,7 @@ import javax.validation.Valid;
 import io.onedev.server.buildspecmodel.inputspec.dateinput.DateInput;
 import io.onedev.server.buildspecmodel.inputspec.dateinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.Constants;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=505, name=FieldSpec.DATE)
 public class DateField extends FieldSpec {

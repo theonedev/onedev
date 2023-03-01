@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.ScriptChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ScriptChoice;
 
 @Editable(order=300, name="Evaluate script to get choices")
 public class ScriptingChoices extends ChoiceProvider {

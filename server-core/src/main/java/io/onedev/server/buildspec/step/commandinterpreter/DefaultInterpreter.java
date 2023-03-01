@@ -5,9 +5,9 @@ import java.util.List;
 import javax.validation.constraints.Size;
 
 import io.onedev.k8shelper.CommandFacade;
-import io.onedev.server.util.validation.annotation.Code;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
 
 @Editable(order=100, name="Default (Shell on Linux, Batch on Windows)")
 public class DefaultInterpreter extends Interpreter {

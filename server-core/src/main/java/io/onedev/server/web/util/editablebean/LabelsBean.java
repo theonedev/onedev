@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.LabelManager;
 import io.onedev.server.model.support.LabelSupport;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class LabelsBean implements Serializable {

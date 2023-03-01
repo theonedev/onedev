@@ -7,8 +7,8 @@ import io.onedev.server.mail.BasicAuthPassword;
 import io.onedev.server.mail.MailCheckSetting;
 import io.onedev.server.mail.MailCredential;
 import io.onedev.server.mail.MailSendSetting;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Password;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
 
 @Editable(order=10000, name="Other")
 public class OtherMailSetting extends MailSetting {

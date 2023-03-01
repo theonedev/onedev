@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import io.onedev.server.buildspecmodel.inputspec.booleaninput.BooleanInput;
 import io.onedev.server.buildspecmodel.inputspec.booleaninput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.buildspecmodel.inputspec.booleaninput.defaultvalueprovider.FalseDefaultValue;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=300, name=FieldSpec.BOOLEAN)
 public class BooleanField extends FieldSpec {

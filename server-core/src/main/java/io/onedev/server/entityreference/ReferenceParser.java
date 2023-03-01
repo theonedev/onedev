@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
@@ -23,7 +22,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.TextNodeVisitor;
-import io.onedev.server.util.validation.ProjectPathValidator;
+import io.onedev.server.validation.validator.ProjectPathValidator;
 
 public class ReferenceParser {
 	

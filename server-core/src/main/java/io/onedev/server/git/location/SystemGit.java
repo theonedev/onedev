@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.apache.commons.lang3.SystemUtils;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(name="Use Git in System Path", order=100)
 public class SystemGit extends GitLocation {

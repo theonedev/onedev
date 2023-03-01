@@ -8,9 +8,9 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 import org.quartz.CronExpression;
 
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.validation.Validatable;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 @ClassValidating

@@ -42,7 +42,7 @@ import io.onedev.commons.utils.ClassUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.BeanUtils;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 public class VersionedYamlDoc extends MappingNode {
 

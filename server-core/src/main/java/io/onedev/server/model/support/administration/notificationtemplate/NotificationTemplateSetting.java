@@ -11,9 +11,9 @@ import javax.validation.constraints.Size;
 
 import com.google.common.io.Resources;
 
-import io.onedev.server.util.validation.annotation.Code;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
 
 @Editable
 public class NotificationTemplateSetting implements Serializable {

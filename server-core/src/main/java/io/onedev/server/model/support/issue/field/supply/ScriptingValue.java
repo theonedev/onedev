@@ -13,8 +13,8 @@ import javax.validation.constraints.NotEmpty;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ScriptChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ScriptChoice;
 
 @Editable
 public class ScriptingValue implements ValueProvider {

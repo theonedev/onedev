@@ -6,8 +6,8 @@ import java.net.URI;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.GroupChoice;
 
 @Editable
 public abstract class SsoConnector implements Serializable {

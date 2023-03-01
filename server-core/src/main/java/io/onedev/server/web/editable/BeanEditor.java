@@ -37,7 +37,7 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Named;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.OmitName;
 
 @SuppressWarnings("serial")
 public class BeanEditor extends ValueEditor<Serializable> {

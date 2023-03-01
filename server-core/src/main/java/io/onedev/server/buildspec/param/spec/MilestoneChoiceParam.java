@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.buildspecmodel.inputspec.MilestoneChoiceInput;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=1110, name=ParamSpec.MILESTONE)
 public class MilestoneChoiceParam extends ParamSpec {

@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
-import io.onedev.server.web.editable.annotation.ReferenceAware;
+import io.onedev.server.annotation.ReferenceAware;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
 @SuppressWarnings("serial")

@@ -12,8 +12,8 @@ import io.onedev.server.buildspec.ParamSpecAware;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.validation.annotation.ParamName;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ParamName;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable

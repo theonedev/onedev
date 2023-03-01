@@ -8,10 +8,10 @@ import javax.validation.constraints.Size;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.IssueQuery;
+import io.onedev.server.annotation.OmitName;
 
 @Editable(order=550, name="State of other issue is transited to")
 public class StateTransitionTrigger extends TransitionTrigger {

@@ -3,7 +3,7 @@ package io.onedev.server.web.editable;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.util.validation.annotation.ProjectPath;
+import io.onedev.server.annotation.ProjectPath;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;

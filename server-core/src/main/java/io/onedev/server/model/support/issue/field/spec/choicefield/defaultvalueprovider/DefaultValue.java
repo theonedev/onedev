@@ -4,8 +4,8 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 import javax.validation.Validator;
@@ -24,7 +24,7 @@ public class DefaultValue implements Serializable {
 	private String applicableProjects;
 
 	@Editable(order=100, name="Literal value")
-	@io.onedev.server.web.editable.annotation.ChoiceProvider("getValueChoices")
+	@io.onedev.server.annotation.ChoiceProvider("getValueChoices")
 	@NotEmpty
 	public String getValue() {
 		return value;

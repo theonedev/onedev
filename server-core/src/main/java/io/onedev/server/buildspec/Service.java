@@ -12,10 +12,10 @@ import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.EnvVar;
-import io.onedev.server.util.validation.annotation.DnsName;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.SuggestionProvider;
+import io.onedev.server.annotation.DnsName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.SuggestionProvider;
 
 @Editable
 public class Service implements NamedElement, Serializable {

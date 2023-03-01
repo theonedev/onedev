@@ -14,12 +14,12 @@ import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.util.validation.annotation.FieldName;
+import io.onedev.server.annotation.FieldName;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.wicket.MarkupContainer;
 
@@ -102,7 +102,7 @@ public abstract class FieldSpec extends InputSpec {
 	}
 	
 	@Editable(order=60)
-	@io.onedev.server.web.editable.annotation.ShowCondition("isNameOfEmptyValueVisible")
+	@io.onedev.server.annotation.ShowCondition("isNameOfEmptyValueVisible")
 	@NotEmpty
 	public String getNameOfEmptyValue() {
 		return nameOfEmptyValue;
@@ -135,7 +135,7 @@ public abstract class FieldSpec extends InputSpec {
 			+ "Multiple projects should be separated by space. Use '**', '*' or '?' for "
 			+ "<a href='https://docs.onedev.io/appendix/path-wildcard' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty for all projects")
-	@io.onedev.server.web.editable.annotation.ShowCondition("isPromptUponIssueOpenEnabled")
+	@io.onedev.server.annotation.ShowCondition("isPromptUponIssueOpenEnabled")
 	@Patterns(suggester="suggestProjects", path=true)
 	public String getApplicableProjects() {
 		return applicableProjects;

@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.validation.annotation.Code;
+import io.onedev.server.annotation.Code;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;

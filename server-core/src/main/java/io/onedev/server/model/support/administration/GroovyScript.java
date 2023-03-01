@@ -3,11 +3,11 @@ package io.onedev.server.model.support.administration;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.util.validation.annotation.Code;
-import io.onedev.server.util.validation.annotation.RegEx;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.JobMatch;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.annotation.RegEx;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.JobMatch;
+import io.onedev.server.annotation.ShowCondition;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;

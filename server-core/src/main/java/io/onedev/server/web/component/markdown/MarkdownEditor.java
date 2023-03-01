@@ -63,7 +63,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.FilenameUtils;
-import io.onedev.server.util.validation.ProjectPathValidator;
+import io.onedev.server.validation.validator.ProjectPathValidator;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;

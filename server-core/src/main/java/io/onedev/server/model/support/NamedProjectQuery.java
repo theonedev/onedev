@@ -2,8 +2,8 @@ package io.onedev.server.model.support;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ProjectQuery;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ProjectQuery;
 
 @Editable
 public class NamedProjectQuery implements NamedQuery {

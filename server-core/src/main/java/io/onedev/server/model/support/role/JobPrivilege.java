@@ -13,9 +13,9 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Patterns;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable

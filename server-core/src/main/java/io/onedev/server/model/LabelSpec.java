@@ -16,8 +16,8 @@ import javax.validation.constraints.NotEmpty;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import io.onedev.server.web.editable.annotation.Color;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Color;
+import io.onedev.server.annotation.Editable;
 
 @Entity
 @Table(indexes={@Index(columnList=PROP_NAME)})

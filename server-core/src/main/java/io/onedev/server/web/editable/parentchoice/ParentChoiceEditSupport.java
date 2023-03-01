@@ -13,7 +13,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.ParentChoice;
+import io.onedev.server.annotation.ParentChoice;
 
 @SuppressWarnings("serial")
 public class ParentChoiceEditSupport implements EditSupport {

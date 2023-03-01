@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import io.onedev.server.util.BeanUtils;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 public class EditableStringTransformer {
 	

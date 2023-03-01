@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandFacade;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class Interpreter implements Serializable {

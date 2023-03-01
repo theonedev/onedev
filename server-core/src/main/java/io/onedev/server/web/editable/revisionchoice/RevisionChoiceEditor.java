@@ -11,7 +11,7 @@ import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.revision.RevisionPicker;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.RevisionChoice;
+import io.onedev.server.annotation.RevisionChoice;
 
 @SuppressWarnings("serial")
 public class RevisionChoiceEditor extends PropertyEditor<String> {

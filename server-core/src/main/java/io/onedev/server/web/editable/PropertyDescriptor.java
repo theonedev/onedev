@@ -20,7 +20,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.ShowCondition;
 
 public class PropertyDescriptor implements Serializable {
 

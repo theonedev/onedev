@@ -14,10 +14,10 @@ import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.JobChoice;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Horizontal;
+import io.onedev.server.annotation.JobChoice;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -84,7 +84,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the branch matches criteria specified here")
-	@io.onedev.server.web.editable.annotation.UserMatch
+	@io.onedev.server.annotation.UserMatch
 	@NotEmpty(message="may not be empty")
 	public String getUserMatch() {
 		return userMatch;
@@ -132,7 +132,7 @@ public class BranchProtection implements Serializable {
 
 	@Editable(order=400, name="Required Reviewers", placeholder="No one", description="Optionally specify "
 			+ "required reviewers for changes of specified branch")
-	@io.onedev.server.web.editable.annotation.ReviewRequirement
+	@io.onedev.server.annotation.ReviewRequirement
 	public String getReviewRequirement() {
 		return reviewRequirement;
 	}

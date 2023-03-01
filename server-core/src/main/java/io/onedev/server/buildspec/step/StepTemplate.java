@@ -14,8 +14,8 @@ import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.NamedElement;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.SuggestionProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.SuggestionProvider;
 
 @Editable
 public class StepTemplate implements NamedElement, Serializable {

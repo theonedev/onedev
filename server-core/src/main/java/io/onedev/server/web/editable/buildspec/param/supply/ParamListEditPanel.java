@@ -54,9 +54,9 @@ import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.ParamSpecProvider;
-import io.onedev.server.web.editable.annotation.Password;
-import io.onedev.server.web.editable.annotation.VariableOption;
+import io.onedev.server.annotation.ParamSpecProvider;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.VariableOption;
 import io.onedev.server.web.editable.buildspec.job.trigger.JobTriggerEditPanel;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 

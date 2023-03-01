@@ -2,7 +2,7 @@ package io.onedev.server.model.support.issue.transitiontrigger;
 
 import javax.validation.constraints.Min;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=600, name="No activity for some time")
 public class NoActivityTrigger extends TransitionTrigger {

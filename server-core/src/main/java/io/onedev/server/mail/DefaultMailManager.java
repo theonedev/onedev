@@ -37,7 +37,7 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ParsedEmailAddress;
-import io.onedev.server.util.validation.UserNameValidator;
+import io.onedev.server.validation.validator.UserNameValidator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shiro.authz.Permission;

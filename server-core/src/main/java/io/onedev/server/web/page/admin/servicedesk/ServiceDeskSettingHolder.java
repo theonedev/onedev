@@ -3,7 +3,7 @@ package io.onedev.server.web.page.admin.servicedesk;
 import java.io.Serializable;
 
 import io.onedev.server.model.support.administration.ServiceDeskSetting;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class ServiceDeskSettingHolder implements Serializable {

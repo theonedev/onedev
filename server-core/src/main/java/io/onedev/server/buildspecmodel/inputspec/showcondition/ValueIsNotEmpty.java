@@ -2,7 +2,7 @@ package io.onedev.server.buildspecmodel.inputspec.showcondition;
 
 import java.util.List;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=300, name="is not empty")
 public class ValueIsNotEmpty implements ValueMatcher {

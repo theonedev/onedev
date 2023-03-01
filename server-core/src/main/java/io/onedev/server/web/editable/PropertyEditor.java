@@ -21,7 +21,7 @@ import org.apache.wicket.validation.IValidatable;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.OmitName;
 
 @SuppressWarnings("serial")
 public abstract class PropertyEditor<T> extends ValueEditor<T> {

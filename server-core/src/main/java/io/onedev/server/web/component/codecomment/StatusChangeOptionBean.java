@@ -2,9 +2,9 @@ package io.onedev.server.web.component.codecomment;
 
 import java.io.Serializable;
 
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.OmitName;
 
 @Editable(name="Confirm your action")
 public class StatusChangeOptionBean implements Serializable {

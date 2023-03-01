@@ -7,7 +7,7 @@ import javax.validation.Valid;
 
 import io.onedev.server.buildspecmodel.inputspec.floatinput.FloatInput;
 import io.onedev.server.buildspecmodel.inputspec.floatinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable(order=450, name=FieldSpec.FLOAT)
 public class FloatField extends FieldSpec {

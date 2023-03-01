@@ -11,7 +11,7 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.CommitQueryBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
-import io.onedev.server.web.editable.annotation.CommitQuery;
+import io.onedev.server.annotation.CommitQuery;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.WicketUtils;

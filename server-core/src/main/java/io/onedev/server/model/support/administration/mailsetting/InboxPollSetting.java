@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.Min;
 
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class InboxPollSetting implements Serializable {

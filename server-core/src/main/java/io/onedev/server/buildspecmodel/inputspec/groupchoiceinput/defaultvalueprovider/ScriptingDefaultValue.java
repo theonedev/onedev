@@ -3,9 +3,9 @@ package io.onedev.server.buildspecmodel.inputspec.groupchoiceinput.defaultvaluep
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.ScriptChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.annotation.ScriptChoice;
 
 @Editable(order=400, name="Evaluate script to get default value")
 public class ScriptingDefaultValue implements DefaultValueProvider {

@@ -17,7 +17,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.IssueChoice;
+import io.onedev.server.annotation.IssueChoice;
 
 @SuppressWarnings("serial")
 public class IssueChoiceEditSupport implements EditSupport {

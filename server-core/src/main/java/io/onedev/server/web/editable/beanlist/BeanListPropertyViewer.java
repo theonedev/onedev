@@ -22,7 +22,7 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.annotation.ExcludedProperties;
+import io.onedev.server.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class BeanListPropertyViewer extends Panel {

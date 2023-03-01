@@ -18,8 +18,8 @@ import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.GroupFacade;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)

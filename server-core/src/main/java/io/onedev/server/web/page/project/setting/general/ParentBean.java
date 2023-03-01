@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.util.validation.annotation.ProjectPath;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ParentChoice;
+import io.onedev.server.annotation.ProjectPath;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ParentChoice;
 
 @Editable
 public class ParentBean implements Serializable {

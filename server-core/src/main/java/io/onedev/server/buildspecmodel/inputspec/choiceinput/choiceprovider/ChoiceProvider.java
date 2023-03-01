@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public abstract class ChoiceProvider implements Serializable {

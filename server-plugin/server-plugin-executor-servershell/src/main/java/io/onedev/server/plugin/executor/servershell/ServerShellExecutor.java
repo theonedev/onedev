@@ -26,11 +26,11 @@ import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.validation.annotation.Code;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.Numeric;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.annotation.Code;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Horizontal;
+import io.onedev.server.annotation.Numeric;
+import io.onedev.server.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang.SystemUtils;
 

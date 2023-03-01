@@ -20,7 +20,7 @@ import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.groupchoice.GroupMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.annotation.GroupChoice;
 
 @SuppressWarnings("serial")
 public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {

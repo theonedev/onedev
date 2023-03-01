@@ -13,7 +13,7 @@ import org.hibernate.proxy.HibernateProxyHelper;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @SuppressWarnings("serial")
 public class BeanContext implements Serializable {

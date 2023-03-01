@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.web.behavior.ActionConditionBehavior;
-import io.onedev.server.web.editable.annotation.ActionCondition;
+import io.onedev.server.annotation.ActionCondition;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
 @SuppressWarnings("serial")

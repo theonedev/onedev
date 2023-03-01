@@ -14,9 +14,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Patterns;
-import io.onedev.server.web.editable.annotation.RoleChoice;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.RoleChoice;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable

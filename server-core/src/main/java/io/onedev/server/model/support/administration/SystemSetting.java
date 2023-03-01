@@ -21,9 +21,9 @@ import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.git.location.SystemCurl;
 import io.onedev.server.git.location.SystemGit;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.validation.Validatable;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 @ClassValidating

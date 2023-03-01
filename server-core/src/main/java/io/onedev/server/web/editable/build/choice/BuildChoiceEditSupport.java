@@ -22,7 +22,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.BuildChoice;
+import io.onedev.server.annotation.BuildChoice;
 
 @SuppressWarnings("serial")
 public class BuildChoiceEditSupport implements EditSupport {

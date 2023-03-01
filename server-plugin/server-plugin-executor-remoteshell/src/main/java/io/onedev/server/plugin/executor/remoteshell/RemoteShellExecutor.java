@@ -20,9 +20,9 @@ import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.terminal.AgentShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.Numeric;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Horizontal;
+import io.onedev.server.annotation.Numeric;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.File;
@@ -44,7 +44,7 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 	
 	@Editable(order=390, name="Agent Selector", placeholder="Any agent", 
 			description="Specify agents applicable for this executor")
-	@io.onedev.server.web.editable.annotation.AgentQuery(forExecutor=true)
+	@io.onedev.server.annotation.AgentQuery(forExecutor=true)
 	public String getAgentQuery() {
 		return agentQuery;
 	}

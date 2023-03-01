@@ -3,7 +3,7 @@ package io.onedev.server.web.page.admin.databasebackup;
 import java.io.Serializable;
 
 import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class BackupSettingHolder implements Serializable {

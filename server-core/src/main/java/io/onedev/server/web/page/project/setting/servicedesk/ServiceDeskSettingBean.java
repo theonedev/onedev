@@ -2,8 +2,8 @@ package io.onedev.server.web.page.project.setting.servicedesk;
 
 import java.io.Serializable;
 
-import io.onedev.server.util.validation.annotation.ProjectName;
-import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.annotation.ProjectName;
+import io.onedev.server.annotation.Editable;
 
 @Editable
 public class ServiceDeskSettingBean implements Serializable {

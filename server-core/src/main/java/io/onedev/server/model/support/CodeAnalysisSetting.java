@@ -1,8 +1,8 @@
 package io.onedev.server.model.support;
 
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Patterns;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;

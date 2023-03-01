@@ -3,9 +3,9 @@ package io.onedev.server.plugin.report.checkstyle;
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.step.StepGroup;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Patterns;
 
 @Editable(order=3000, group=StepGroup.PUBLISH_REPORTS, name="ESLint")
 public class PublishESLintReportStep extends PublishCheckstyleReportStep {

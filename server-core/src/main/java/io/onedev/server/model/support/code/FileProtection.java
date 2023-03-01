@@ -11,11 +11,11 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.JobChoice;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.validation.Validatable;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.JobChoice;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
@@ -54,7 +54,7 @@ public class FileProtection implements Serializable, Validatable {
 
 	@Editable(order=200, name="Reviewers", description="Specify required reviewers if specified path is "
 			+ "changed. Note that the user submitting the change is considered to reviewed the change automatically")
-	@io.onedev.server.web.editable.annotation.ReviewRequirement
+	@io.onedev.server.annotation.ReviewRequirement
 	public String getReviewRequirement() {
 		return reviewRequirement;
 	}

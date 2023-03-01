@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.job.action;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
@@ -12,7 +13,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.MatrixRunner;
-import io.onedev.server.web.editable.annotation.*;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.Component;
 

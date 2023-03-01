@@ -12,8 +12,8 @@ import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.ShowCondition;
 
 @Editable(order=150, name=ParamSpec.USER)
 public class UserChoiceParam extends ParamSpec {
