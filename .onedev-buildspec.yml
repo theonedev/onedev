@@ -1,4 +1,4 @@
-version: 19
+version: 20
 properties:
 - name: buildEnvironment
   value: 1dev/build-environment:1.5
@@ -169,6 +169,7 @@ jobs:
   - !CloseMilestoneStep
     name: close milestone
     milestoneName: '@build_version@'
+    accessTokenSecret: onedev-token
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   jobDependencies:
   - jobName: CI
