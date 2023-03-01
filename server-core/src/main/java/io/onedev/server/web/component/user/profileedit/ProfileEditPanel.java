@@ -74,7 +74,7 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				} 
 				
 				if (editor.isValid()) {
-					userManager.save(user, oldName);
+					userManager.update(user, oldName);
 					Session.get().success("Profile updated");
 					setResponsePage(getPage().getClass(), getPage().getPageParameters());
 				}

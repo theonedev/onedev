@@ -113,7 +113,7 @@ public class RoleDetailPage extends AdministrationPage {
 						Collection<LinkSpec> authorizedLinks = new ArrayList<>();
 						for (String linkName: role.getEditableIssueLinks()) 
 							authorizedLinks.add(OneDev.getInstance(LinkSpecManager.class).find(linkName));
-						roleManager.save(role, authorizedLinks, oldName);
+						roleManager.update(role, authorizedLinks, oldName);
 						setResponsePage(RoleDetailPage.class, RoleDetailPage.paramsOf(role));
 						Session.get().success("Role updated");
 					}

@@ -84,7 +84,7 @@ public class PasswordResetPage extends SimplePage {
 							String password = CryptoUtils.generateSecret();								
 							user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
 							user.setSsoConnector(null);
-							userManager.save(user);
+							userManager.update(user, null);
 							
 							MailManager mailManager = OneDev.getInstance(MailManager.class);
 							

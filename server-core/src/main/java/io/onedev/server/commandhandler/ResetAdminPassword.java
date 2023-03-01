@@ -79,7 +79,7 @@ public class ResetAdminPassword extends AbstractPlugin {
 		root.setSsoConnector(null);
 		root.setTwoFactorAuthentication(null);
 		root.setPassword(passwordService.encryptPassword(password));
-		userManager.save(root);
+		userManager.update(root, null);
 		
 		// wait for a short period to have embedded db flushing data
 		try {

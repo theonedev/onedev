@@ -1,6 +1,7 @@
 package io.onedev.server.rest;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -17,6 +18,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.entitymanager.LinkSpecManager;
+import io.onedev.server.model.LinkSpec;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -39,9 +42,12 @@ public class RoleResource {
 
 	private final RoleManager roleManager;
 	
+	private final LinkSpecManager linkSpecManager;
+	
 	@Inject
-	public RoleResource(RoleManager roleManager) {
+	public RoleResource(RoleManager roleManager, LinkSpecManager linkSpecManager) {
 		this.roleManager = roleManager;
+		this.linkSpecManager = linkSpecManager;
 	}
 
 	@Api(order=100)
@@ -76,10 +82,17 @@ public class RoleResource {
     public Long createOrUpdate(@NotNull Role role) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
+		
+		Collection<LinkSpec> authorizedLinks = new ArrayList<>();
+		for (String linkName: role.getEditableIssueLinks())
+			authorizedLinks.add(linkSpecManager.find(linkName));
+		
     	if (role.getOldVersion() != null)
-    		roleManager.save(role, new ArrayList<>(), ((RoleFacade) role.getOldVersion()).getName());
+    		roleManager.update(role, authorizedLinks, ((RoleFacade) role.getOldVersion()).getName());
+		else if (role.isNew())
+			roleManager.create(role, authorizedLinks);
     	else
-    		roleManager.save(role, new ArrayList<>(), null);
+    		roleManager.update(role, authorizedLinks, null);
     		
     	return role.getId();
     }

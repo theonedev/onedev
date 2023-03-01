@@ -58,7 +58,7 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
 		user.setPassword(User.EXTERNAL_MANAGED);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
-		userManager.save(user);
+		userManager.create(user);
 
 		EmailAddress emailAddress = new EmailAddress();
 		emailAddress.setOwner(user);
@@ -88,7 +88,7 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
 		user.setPassword(User.EXTERNAL_MANAGED);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
-		userManager.save(user);
+		userManager.update(user, null);
 		
 		emailAddress.setVerificationCode(null);
 		emailAddressManager.setAsPrimary(emailAddress);

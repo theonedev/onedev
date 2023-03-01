@@ -68,7 +68,7 @@ public class MyTwoFactorAuthenticationPage extends MyPage {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					getLoginUser().setTwoFactorAuthentication(null);
-					getUserManager().save(getLoginUser());
+					getUserManager().update(getLoginUser(), null);
 					Session.get().success("Two-factor authentication disabled");
 					setResponsePage(MyTwoFactorAuthenticationPage.class);
 				}

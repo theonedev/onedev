@@ -8,6 +8,9 @@ import io.onedev.server.model.Group;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface GroupManager extends EntityManager<Group> {
+	
+	void create(Group group);
+	
 	/**
 	 * Save specified group
 	 * 
@@ -19,7 +22,7 @@ public interface GroupManager extends EntityManager<Group> {
 	 * 			integrity. Use <tt>null</tt> if original name does not exist, 
 	 * 			or the name is not changed
 	 */
-	void save(Group group, @Nullable String oldName);
+	void update(Group group, @Nullable String oldName);
 	
 	@Nullable
 	Group find(String name);

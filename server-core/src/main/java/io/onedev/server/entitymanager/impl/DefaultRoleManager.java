@@ -120,7 +120,14 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 
 	@Transactional
 	@Override
-	public void save(Role role, Collection<LinkSpec> authorizedLinks, String oldName) {
+	public void create(Role role, Collection<LinkSpec> authorizedLinks) {
+		dao.persist(role);
+		linkAuthorizationManager.syncAuthorizations(role, authorizedLinks);
+	}
+
+	@Transactional
+	@Override
+	public void update(Role role, Collection<LinkSpec> authorizedLinks, String oldName) {
 		if (oldName != null && !oldName.equals(role.getName())) 
 			settingManager.onRenameRole(oldName, role.getName());
 		dao.persist(role);
@@ -181,7 +188,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setRunJob(true);
 		codeWriter.getJobPrivileges().add(jobPrivilege);
 		
-		save(codeWriter, new ArrayList<>(), null);
+		update(codeWriter, new ArrayList<>(), null);
 
 		Role codeReader = new Role();
 		codeReader.setName("Code Reader");
@@ -197,7 +204,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setJobNames("*");
 		codeReader.getJobPrivileges().add(jobPrivilege);
 		
-		save(codeReader, new ArrayList<>(), null);
+		update(codeReader, new ArrayList<>(), null);
 		
 		Role issueReporter = new Role();
 		issueReporter.setName("Issue Reporter");
@@ -213,7 +220,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setJobNames("*");
 		issueReporter.getJobPrivileges().add(jobPrivilege);
 
-		save(issueReporter, new ArrayList<>(), null);					
+		update(issueReporter, new ArrayList<>(), null);					
 	}
 
     @Sessional

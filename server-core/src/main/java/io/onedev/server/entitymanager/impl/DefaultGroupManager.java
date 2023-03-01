@@ -101,10 +101,16 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 			});
 		}
     }
-    
+
 	@Transactional
 	@Override
-	public void save(Group group, String oldName) {
+	public void create(Group group) {
+		dao.persist(group);
+	}
+
+	@Transactional
+	@Override
+	public void update(Group group, String oldName) {
 		if (oldName != null && !oldName.equals(group.getName())) {
 			for (Project project: projectManager.query()) {
 				try {

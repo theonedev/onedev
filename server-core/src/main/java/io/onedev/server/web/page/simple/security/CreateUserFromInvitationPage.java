@@ -86,7 +86,7 @@ public class CreateUserFromInvitationPage extends SimplePage {
 
 						@Override
 						public void run() {
-							getUserManager().save(user);
+							getUserManager().create(user);
 							getEmailAddressManager().save(emailAddress);
 							getInvitationManager().delete(invitationModel.getObject());
 						}

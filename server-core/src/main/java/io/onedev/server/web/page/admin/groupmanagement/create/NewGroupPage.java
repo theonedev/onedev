@@ -50,7 +50,7 @@ public class NewGroupPage extends AdministrationPage {
 							"This name has already been used by another group");
 				} 
 				if (editor.isValid()) {
-					groupManager.save(group, null);
+					groupManager.create(group);
 					Session.get().success("Group created");
 					setResponsePage(GroupMembershipsPage.class, GroupMembershipsPage.paramsOf(group));
 				}

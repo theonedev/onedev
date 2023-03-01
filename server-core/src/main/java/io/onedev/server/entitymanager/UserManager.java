@@ -15,8 +15,10 @@ import io.onedev.server.util.facade.UserFacade;
 
 public interface UserManager extends EntityManager<User> {
 	
+	void create(User user);
+	
 	/**
-	 * Save specified user
+	 * Update specified user
 	 * 
 	 * @param user
 	 * 			user to save
@@ -26,7 +28,7 @@ public interface UserManager extends EntityManager<User> {
 	 * 			integrity. Use <tt>null</tt> if original name does not exist, 
 	 * 			or the name is not changed
 	 */
-	void save(User user, @Nullable String oldName);
+	void update(User user, @Nullable String oldName);
 	
 	void replicate(User user);
 	

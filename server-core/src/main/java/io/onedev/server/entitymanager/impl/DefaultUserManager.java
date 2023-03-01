@@ -94,7 +94,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	
     @Transactional
     @Override
-	public void save(User user, String oldName) {
+	public void update(User user, String oldName) {
     	user.setName(user.getName().toLowerCase());
     	
     	dao.persist(user);
@@ -119,9 +119,11 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	}
     }
     
+	@Transactional
     @Override
-    public void save(User user) {
-    	save(user, null);
+    public void create(User user) {
+		user.setName(user.getName().toLowerCase());
+		dao.persist(user);
     }
     
     @Sessional

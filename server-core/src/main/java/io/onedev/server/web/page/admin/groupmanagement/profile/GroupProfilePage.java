@@ -71,7 +71,7 @@ public class GroupProfilePage extends GroupPage {
 							"This name has already been used by another group.");
 				} 
 				if (editor.isValid()) {
-					groupManager.save(group, oldName);
+					groupManager.update(group, oldName);
 					setResponsePage(GroupProfilePage.class, GroupProfilePage.paramsOf(group));
 					Session.get().success("Profile updated");
 				}

@@ -298,7 +298,7 @@ public class UserResource {
 			user.setName(data.getName());
 			user.setFullName(data.getFullName());
 			user.setPassword(passwordService.encryptPassword(data.getPassword()));
-			userManager.save(user);
+			userManager.create(user);
 			
 			EmailAddress emailAddress = new EmailAddress();
 			emailAddress.setGit(true);
@@ -327,7 +327,7 @@ public class UserResource {
 			String oldName = user.getName();
 			user.setName(data.getName());
 			user.setFullName(data.getFullName());
-			userManager.save(user, oldName);
+			userManager.update(user, oldName);
 			return user.getId();
 		} else { 
 			throw new UnauthenticatedException();
@@ -351,7 +351,7 @@ public class UserResource {
 			}
 		} else {
 	    	user.setPassword(passwordService.encryptPassword(password));
-	    	userManager.save(user);
+	    	userManager.update(user, null);
 	    	return Response.ok().build();
 		}
     }
@@ -371,7 +371,7 @@ public class UserResource {
 		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
 		user.setProjectQueries(queriesAndWatches.projectQueries);
 		user.setPullRequestQueries(queriesAndWatches.pullRequestQueries);
-		userManager.save(user);
+		userManager.update(user, null);
 		return Response.ok().build();
     }
 	

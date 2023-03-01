@@ -295,7 +295,7 @@ public class LoginPage extends SimplePage {
 				super.onSubmit();
 				User user = getUserManager().load(userId);
 				if (user.getTwoFactorAuthentication().getScratchCodes().remove(recoveryCode)) {
-					getUserManager().save(user);
+					getUserManager().update(user, null);
 					afterLogin(user);
 				} else {
 					error("Recovery code verification failed");

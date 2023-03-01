@@ -782,7 +782,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		user.setName(UserNameValidator.suggestUserName(ParsedEmailAddress.parse(address.getAddress()).getName()));
 		user.setFullName(address.getPersonal());
 		user.setPassword("impossible password");
-		userManager.save(user);
+		userManager.create(user);
 		
 		EmailAddress emailAddress = new EmailAddress();
 		emailAddress.setValue(address.getAddress());

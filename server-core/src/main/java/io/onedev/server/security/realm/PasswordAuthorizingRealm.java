@@ -76,7 +76,7 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		user.setPassword(User.EXTERNAL_MANAGED);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
-		userManager.save(user);
+		userManager.create(user);
 		
 		EmailAddress emailAddress = new EmailAddress();
 		emailAddress.setValue(authenticated.getEmail());
@@ -115,7 +115,7 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		user.setSsoConnector(null);
 		if (authenticated.getFullName() != null)
 			user.setFullName(authenticated.getFullName());
-		userManager.save(user);
+		userManager.update(user, null);
 		
 		if (authenticated.getGroupNames() != null)
 			membershipManager.syncMemberships(user, authenticated.getGroupNames());

@@ -45,7 +45,7 @@ public class PasswordEditPanel extends GenericPanel<User> {
 			protected void onSubmit() {
 				super.onSubmit();
 				getUser().setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(bean.getNewPassword()));
-				OneDev.getInstance(UserManager.class).save(getUser(), null);
+				OneDev.getInstance(UserManager.class).update(getUser(), null);
 				Session.get().success("Password has been changed");
 
 				bean.setOldPassword(null);

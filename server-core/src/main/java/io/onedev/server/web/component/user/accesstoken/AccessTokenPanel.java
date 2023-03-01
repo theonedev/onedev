@@ -50,7 +50,7 @@ public abstract class AccessTokenPanel extends Panel {
 			@Override
 			public void onClick() {
 				getUser().setAccessToken(CryptoUtils.generateSecret());
-				OneDev.getInstance(UserManager.class).save(getUser());
+				OneDev.getInstance(UserManager.class).update(getUser(), null);
 				Session.get().success("Access token regenerated");
 				setResponsePage(getPage());
 			}

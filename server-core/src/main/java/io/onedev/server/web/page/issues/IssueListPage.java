@@ -164,7 +164,7 @@ public class IssueListPage extends LayoutPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(UserManager.class).save(getLoginUser());
+										OneDev.getInstance(UserManager.class).update(getLoginUser(), null);
 										target.add(savedQueries);
 										close();
 									}

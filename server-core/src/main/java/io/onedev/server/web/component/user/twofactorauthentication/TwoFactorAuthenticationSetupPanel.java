@@ -114,7 +114,7 @@ public abstract class TwoFactorAuthenticationSetupPanel extends GenericPanel<Use
 					target.add(form);
 				} else {
 					getUser().setTwoFactorAuthentication(authentication);
-					OneDev.getInstance(UserManager.class).save(getUser());
+					OneDev.getInstance(UserManager.class).update(getUser(), null);
 					
 					Fragment fragment = new Fragment("content", "verifiedFrag", TwoFactorAuthenticationSetupPanel.this);
 					RepeatingView recoveryCodesView = new RepeatingView("recoveryCodes");

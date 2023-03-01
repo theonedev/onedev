@@ -263,7 +263,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).save(User.this);
+				OneDev.getInstance(UserManager.class).update(User.this, null);
 			}
 			
 		};
@@ -311,7 +311,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).save(User.this);
+				OneDev.getInstance(UserManager.class).update(User.this, null);
 			}
 			
 		};
@@ -359,7 +359,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).save(User.this);
+				OneDev.getInstance(UserManager.class).update(User.this, null);
 			}
 			
 		};
@@ -407,7 +407,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 			@Override
 			public void onUpdated() {
-				OneDev.getInstance(UserManager.class).save(User.this);
+				OneDev.getInstance(UserManager.class).update(User.this, null);
 			}
 			
 		};
