@@ -14,6 +14,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
@@ -227,6 +228,10 @@ public class SuggestionUtils {
 		}
 		for (String propertyName: buildSpec.getPropertyMap().keySet())
 			variables.put(VariableInterpolator.PREFIX_PROPERTY + propertyName, null);
+		for (JobProperty property: project.getHierarchyJobProperties()) {
+			if (!buildSpec.getPropertyMap().containsKey(property.getName()))
+				variables.put(VariableInterpolator.PREFIX_PROPERTY + property.getName(), null);
+		}
 		for (JobSecret secret: project.getHierarchyJobSecrets())
 			variables.put(VariableInterpolator.PREFIX_SECRET + secret.getName(), null);
 

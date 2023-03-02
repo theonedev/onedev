@@ -292,9 +292,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 						ProjectServiceDeskSettingPage.class, ProjectServiceDeskSettingPage.paramsOf(getProject())));
 			}
 			
-			settingMenuItems.add(new SidebarMenuItem.Page(null, "Web Hooks", 
-					WebHooksPage.class, WebHooksPage.paramsOf(getProject())));
-			
 			List<Class<? extends ContributedProjectSetting>> contributedSettingClasses = new ArrayList<>();
 			for (ProjectSettingContribution contribution:OneDev.getExtensions(ProjectSettingContribution.class)) {
 				for (Class<? extends ContributedProjectSetting> settingClass: contribution.getSettingClasses()) 
@@ -303,6 +300,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			contributedSettingClasses.sort(Comparator.comparingInt(EditableUtils::getOrder));
 			
 			Map<String, List<SidebarMenuItem>> contributedSettingMenuItems = new HashMap<>();
+			
 			for (var contributedSettingClass: contributedSettingClasses) {
 				var group = EditableUtils.getGroup(contributedSettingClass);
 				if (group == null)
@@ -318,6 +316,15 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 						ContributedProjectSettingPage.class,
 						ContributedProjectSettingPage.paramsOf(getProject(), contributedSettingClass)));
 			}
+
+			SidebarMenuItem webHooksItem = new SidebarMenuItem.Page(null, "Web Hooks", 
+					WebHooksPage.class, WebHooksPage.paramsOf(getProject()));			
+			var notificationItems = contributedSettingMenuItems.get("Notification");
+			if (notificationItems == null) 
+				settingMenuItems.add(webHooksItem);
+			else 
+				notificationItems.add(0, webHooksItem);
+			
 			for (var entry: contributedSettingMenuItems.entrySet()) {
 				if (entry.getKey().length() == 0) {
 					settingMenuItems.addAll(entry.getValue());

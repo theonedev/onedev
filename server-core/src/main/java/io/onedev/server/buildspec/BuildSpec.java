@@ -13,6 +13,8 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.param.ParamUtils;
@@ -23,13 +25,10 @@ import io.onedev.server.buildspec.step.UseTemplateStep;
 import io.onedev.server.job.JobAuthorizationContext;
 import io.onedev.server.migration.VersionedYamlDoc;
 import io.onedev.server.migration.XmlBuildSpecMigrator;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
@@ -40,7 +39,10 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.*;
 
 import javax.annotation.Nullable;
-import javax.validation.*;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -195,10 +197,6 @@ public class BuildSpec implements Serializable, Validatable {
 	public Map<String, JobProperty> getPropertyMap() {
 		if (propertyMap == null) { 
 			propertyMap = new LinkedHashMap<>();
-			if (Project.get() != null) {
-				for (JobProperty property : Project.get().getHierarchyJobProperties())
-					propertyMap.put(property.getName(), property);
-			}
 			for (BuildSpec buildSpec: getImportedBuildSpecs(new HashSet<>())) { 
 				for (JobProperty property : buildSpec.getProperties())
 					propertyMap.put(property.getName(), property);
