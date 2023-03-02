@@ -1,29 +1,24 @@
 package io.onedev.server.search.entity.issue;
 
-import java.nio.channels.IllegalSelectorException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueField;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
 import io.onedev.server.model.support.issue.field.spec.CommitField;
 import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.criteria.Criteria;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import java.nio.channels.IllegalSelectorException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class FieldOperatorCriteria extends FieldCriteria {
 
@@ -108,7 +103,10 @@ public class FieldOperatorCriteria extends FieldCriteria {
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.IsEmpty) {
-			return fieldValue == null;
+			if (fieldValue instanceof Collection)
+				return ((Collection)fieldValue).isEmpty();
+			else
+				return fieldValue == null;
 		} else if (operator == IssueQueryLexer.IsMe) {
 			if (User.get() != null)
 				return Objects.equals(fieldValue, User.get().getName());
