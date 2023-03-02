@@ -208,7 +208,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	@Transactional
 	@Override
-	public void save(Project project) {
+	public void update(Project project) {
 		String oldPath = project.getPath();
 		String newPath = project.calcPath();
 		if (!newPath.equals(oldPath)) {
@@ -278,9 +278,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			create(parent);
 		project.setPath(project.calcPath());
 
-		ProjectDynamics update = new ProjectDynamics();
-		project.setDynamics(update);
-		dynamicsManager.save(update);
+		ProjectDynamics dynamics = new ProjectDynamics();
+		project.setDynamics(dynamics);
+		dynamicsManager.create(dynamics);
 		dao.persist(project);
 
 		var projectDir = storageManager.getProjectDir(project.getId());
@@ -295,7 +295,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		authorization.setProject(project);
 		authorization.setUser(SecurityUtils.getUser());
 		authorization.setRole(roleManager.getOwner());
-		userAuthorizationManager.save(authorization);
+		userAuthorizationManager.createOrUpdate(authorization);
 
 		updateStorageServer(project);
 		listenerRegistry.post(new ProjectCreated(project));
@@ -1009,7 +1009,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public void move(Collection<Project> projects, Project parent) {
 		for (Project project : projects) {
 			project.setParent(parent);
-			save(project);
+			update(project);
 		}
 	}
 

@@ -75,7 +75,7 @@ public class SignUpPage extends SimplePage {
 						@Override
 						public void run() {
 							getUserManager().create(user);
-							getEmailAddressManager().save(emailAddress);
+							getEmailAddressManager().createOrUpdate(emailAddress);
 						}
 						
 					});

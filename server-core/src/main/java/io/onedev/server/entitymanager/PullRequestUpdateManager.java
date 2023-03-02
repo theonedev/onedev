@@ -11,5 +11,7 @@ public interface PullRequestUpdateManager extends EntityManager<PullRequestUpdat
 	void checkUpdate(PullRequest request);
 	
 	List<PullRequestUpdate> queryAfter(Long projectId, Long afterUpdateId, int count);
+
+    void create(PullRequestUpdate update);
 	
 }

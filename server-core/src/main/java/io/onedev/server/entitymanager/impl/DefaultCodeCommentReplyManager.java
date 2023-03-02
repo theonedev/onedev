@@ -28,7 +28,7 @@ public class DefaultCodeCommentReplyManager extends BaseEntityManager<CodeCommen
 
 	@Transactional
 	@Override
-	public void save(CodeCommentReply reply) {
+	public void createOrUpdate(CodeCommentReply reply) {
 		if (reply.isNew()) {
 			dao.persist(reply);
 			

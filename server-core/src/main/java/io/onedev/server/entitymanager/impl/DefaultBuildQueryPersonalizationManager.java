@@ -40,7 +40,7 @@ public class DefaultBuildQueryPersonalizationManager extends BaseEntityManager<B
 
 	@Transactional
 	@Override
-	public void save(BuildQueryPersonalization personalization) {
+	public void createOrUpdate(BuildQueryPersonalization personalization) {
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
@@ -52,7 +52,7 @@ public class DefaultBuildQueryPersonalizationManager extends BaseEntityManager<B
 			if (!personalization.isNew())
 				delete(personalization);
 		} else {
-			super.save(personalization);
+			dao.persist(personalization);
 		}
 	}
 

@@ -13,5 +13,6 @@ public interface IssueWatchManager extends EntityManager<IssueWatch> {
 	IssueWatch find(Issue issue, User user);
 
 	void watch(Issue issue, User user, boolean watching);
-	
+
+    void createOrUpdate(IssueWatch watch);
 }

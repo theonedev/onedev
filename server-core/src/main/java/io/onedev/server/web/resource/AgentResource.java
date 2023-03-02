@@ -70,7 +70,7 @@ public class AgentResource extends AbstractResource {
 					
 					AgentToken token = new AgentToken();
 					token.setValue(UUID.randomUUID().toString());
-					OneDev.getInstance(AgentTokenManager.class).save(token);
+					OneDev.getInstance(AgentTokenManager.class).create(token);
 					props.setProperty("agentToken", token.getValue());
 					
 					try (OutputStream os = new FileOutputStream(new File(agentDir, "agent/conf/agent.properties"))) {

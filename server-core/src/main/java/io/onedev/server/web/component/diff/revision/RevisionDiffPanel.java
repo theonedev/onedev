@@ -1720,7 +1720,7 @@ public abstract class RevisionDiffPanel extends Panel {
 											pendingApply.setRequest(getPullRequest());
 											pendingApply.setUser(SecurityUtils.getUser());
 											pendingApply.setSuggestion(new ArrayList<String>(suggestion));
-											OneDev.getInstance(PendingSuggestionApplyManager.class).save(pendingApply);
+											OneDev.getInstance(PendingSuggestionApplyManager.class).create(pendingApply);
 											onBatchChange(target);
 										}
 

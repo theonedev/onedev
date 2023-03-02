@@ -34,7 +34,7 @@ public class DefaultUserAuthorizationManager extends BaseEntityManager<UserAutho
 				if (newAuthorization.getProject().equals(authorization.getProject())) {
 					found = true;
 					authorization.setRole(newAuthorization.getRole());
-					save(authorization);
+					dao.persist(authorization);
 				}
 			}
 			if (!found) {
@@ -53,7 +53,7 @@ public class DefaultUserAuthorizationManager extends BaseEntityManager<UserAutho
 			}
 			if (!found) {
 				user.getProjectAuthorizations().add(newAuthorization);
-				save(newAuthorization);
+				dao.persist(newAuthorization);
 			}
 		}
 	}
@@ -78,7 +78,7 @@ public class DefaultUserAuthorizationManager extends BaseEntityManager<UserAutho
 				if (newAuthorization.getUser().equals(authorization.getUser())) {
 					found = true;
 					authorization.setRole(newAuthorization.getRole());
-					save(authorization);
+					dao.persist(authorization);
 				}
 			}
 			if (!found) {
@@ -97,9 +97,15 @@ public class DefaultUserAuthorizationManager extends BaseEntityManager<UserAutho
 			}
 			if (!found) {
 				project.getUserAuthorizations().add(newAuthorization);
-				save(newAuthorization);
+				dao.persist(newAuthorization);
 			}
 		}
+	}
+
+	@Transactional
+	@Override
+	public void createOrUpdate(UserAuthorization authorization) {
+		dao.persist(authorization);
 	}
 	
 }

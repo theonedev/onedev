@@ -33,5 +33,6 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
     @Nullable
     CodeComment findByUUID(String uuid);
-	
+
+    void createOrUpdate(CodeComment comment);
 }

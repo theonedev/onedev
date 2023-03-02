@@ -8,5 +8,6 @@ import io.onedev.server.persistence.dao.EntityManager;
 public interface CommitQueryPersonalizationManager extends EntityManager<CommitQueryPersonalization> {
 	
 	CommitQueryPersonalization find(Project project, User user);
-	
+
+    void createOrUpdate(CommitQueryPersonalization commitQueryPersonalization);
 }

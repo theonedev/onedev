@@ -66,11 +66,17 @@ public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements S
 		
 		diff.entriesOnlyOnRight().values().forEach(sshKey -> {
 			if (findByDigest(sshKey.getDigest()) == null) 
-				save(sshKey);	
+				create(sshKey);	
 			else 
 				logger.warn("SSH key is already in use (digest: {})", sshKey.getDigest());
 		});
 		
     }
+
+	@Transactional
+	@Override
+	public void create(SshKey sshKey) {
+		dao.persist(sshKey);
+	}
 
 }

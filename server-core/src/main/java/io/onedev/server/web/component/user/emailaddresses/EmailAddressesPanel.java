@@ -217,7 +217,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 					address.setOwner(getUser());
 					if (SecurityUtils.isAdministrator())
 						address.setVerificationCode(null);
-					getEmailAddressManager().save(address);
+					getEmailAddressManager().createOrUpdate(address);
 					emailAddressValue = null;
 				}
 			}

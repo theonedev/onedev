@@ -35,12 +35,12 @@ public class DefaultCodeCommentQueryPersonalizationManager extends BaseEntityMan
 
 	@Transactional
 	@Override
-	public void save(CodeCommentQueryPersonalization setting) {
+	public void createOrUpdate(CodeCommentQueryPersonalization setting) {
 		if (setting.getQueries().isEmpty()) {
 			if (!setting.isNew())
 				delete(setting);
 		} else {
-			super.save(setting);
+			dao.persist(setting);
 		}
 	}
 

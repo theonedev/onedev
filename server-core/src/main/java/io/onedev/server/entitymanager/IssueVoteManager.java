@@ -5,4 +5,6 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueVoteManager extends EntityManager<IssueVote> {
 
+    void create(IssueVote vote);
+	
 }

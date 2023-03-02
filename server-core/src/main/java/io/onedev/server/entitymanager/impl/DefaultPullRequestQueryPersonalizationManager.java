@@ -1,14 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.hibernate.criterion.Restrictions;
-
 import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestQueryPersonalization;
@@ -19,6 +10,13 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import org.hibernate.criterion.Restrictions;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultPullRequestQueryPersonalizationManager extends BaseEntityManager<PullRequestQueryPersonalization> 
@@ -40,7 +38,7 @@ public class DefaultPullRequestQueryPersonalizationManager extends BaseEntityMan
 
 	@Transactional
 	@Override
-	public void save(PullRequestQueryPersonalization personalization) {
+	public void createOrUpdate(PullRequestQueryPersonalization personalization) {
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
@@ -52,7 +50,7 @@ public class DefaultPullRequestQueryPersonalizationManager extends BaseEntityMan
 			if (!personalization.isNew())
 				delete(personalization);
 		} else {
-			super.save(personalization);
+			dao.persist(personalization);
 		}
 	}
 

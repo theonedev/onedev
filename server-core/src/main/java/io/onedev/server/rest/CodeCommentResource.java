@@ -125,7 +125,7 @@ public class CodeCommentResource {
 			throw new UnauthorizedException();
     	}
     	
-		commentManager.save(comment);
+		commentManager.createOrUpdate(comment);
 		return comment.getId();
 	}
 	

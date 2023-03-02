@@ -84,7 +84,7 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		emailAddress.setOwner(user);
 		emailAddress.setPrimary(true);
 		emailAddress.setGit(true);
-		emailAddressManager.save(emailAddress);
+		emailAddressManager.createOrUpdate(emailAddress);
 		
 		user.getEmailAddresses().add(emailAddress);
 
@@ -110,7 +110,7 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 			emailAddress.setOwner(user);
 			emailAddress.setPrimary(true);
 			emailAddress.setGit(true);
-			emailAddressManager.save(emailAddress);
+			emailAddressManager.createOrUpdate(emailAddress);
 		}
 		user.setSsoConnector(null);
 		if (authenticated.getFullName() != null)

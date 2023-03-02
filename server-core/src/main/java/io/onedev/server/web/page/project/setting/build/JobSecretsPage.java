@@ -165,7 +165,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						getProject().getBuildSetting().getJobSecrets().remove(index);
-						OneDev.getInstance(ProjectManager.class).save(getProject());
+						OneDev.getInstance(ProjectManager.class).update(getProject());
 						Session.get().success("Secret '" + rowModel.getObject().getName() + "' deleted");
 						target.add(secretsTable);
 					}

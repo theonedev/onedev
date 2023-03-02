@@ -45,16 +45,16 @@ public class PullRequestAssignmentResource {
 		return assignment;
 	}
 	
-	@Api(order=200, description="Update pull request assignment of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new pull request assignment. Id property should not be specified")
 	@POST
-	public Long createOrUpdate(PullRequestAssignment assignment) {
+	public Long create(PullRequestAssignment assignment) {
 		PullRequest pullRequest = assignment.getRequest();
 		if (!SecurityUtils.canReadCode(pullRequest.getProject()) || !SecurityUtils.canModify(pullRequest)) 
 			throw new UnauthorizedException();
 		
 		if (pullRequest.isMerged())
 			throw new ExplicitException("Pull request is merged");
-		assignmentManager.save(assignment);
+		assignmentManager.create(assignment);
 		return assignment.getId();
 	}
 	

@@ -52,7 +52,7 @@ public class CodeCommentReplyResource {
 			throw new UnauthorizedException();
     	}
     	
-    	replyManager.save(reply);
+    	replyManager.createOrUpdate(reply);
 		return reply.getId();
 	}
 	

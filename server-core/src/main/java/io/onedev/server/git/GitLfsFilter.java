@@ -340,7 +340,7 @@ public class GitLfsFilter implements Filter {
 										lock = new GitLfsLock();
 										lock.setPath(path);
 										lock.setOwner(SecurityUtils.getUser());
-										lockManager.save(lock);
+										lockManager.create(lock);
 										httpResponse.setStatus(SC_CREATED);
 									} else {
 										httpResponse.setStatus(SC_CONFLICT);

@@ -20,5 +20,6 @@ public interface UserInvitationManager extends EntityManager<UserInvitation> {
 	int count(@Nullable String term);
 	
 	List<UserInvitation> query(@Nullable String term, int firstResult, int maxResults);
-	
+
+    void create(UserInvitation invitation);
 }

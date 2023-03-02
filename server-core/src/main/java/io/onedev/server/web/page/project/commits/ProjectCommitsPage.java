@@ -95,7 +95,7 @@ public class ProjectCommitsPage extends ProjectPage {
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedCommitQuery> projectQueries) {
 				getProject().setNamedCommitQueries(projectQueries);
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
 			}
 
 		});
@@ -144,7 +144,7 @@ public class ProjectCommitsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getCommitQueryPersonalizationManager().save(setting);
+										getCommitQueryPersonalizationManager().createOrUpdate(setting);
 										target.add(savedQueries);
 										close();
 									}
@@ -160,7 +160,7 @@ public class ProjectCommitsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(ProjectManager.class).save(getProject());
+										OneDev.getInstance(ProjectManager.class).update(getProject());
 										target.add(savedQueries);
 										close();
 									}

@@ -755,7 +755,7 @@ public abstract class BuildListPanel extends Panel {
 						super.onSubmit(target, form);
 						if (getProject() != null) {
 							getProject().getBuildSetting().setListParams(listParams);
-							OneDev.getInstance(ProjectManager.class).save(getProject());
+							OneDev.getInstance(ProjectManager.class).update(getProject());
 						} else {
 							getGlobalBuildSetting().setListParams(listParams);
 							OneDev.getInstance(SettingManager.class).saveBuildSetting(getGlobalBuildSetting());
@@ -771,7 +771,7 @@ public abstract class BuildListPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						modal.close();
 						getProject().getBuildSetting().setListParams(null);
-						OneDev.getInstance(ProjectManager.class).save(getProject());
+						OneDev.getInstance(ProjectManager.class).update(getProject());
 						target.add(body);
 					}
 					

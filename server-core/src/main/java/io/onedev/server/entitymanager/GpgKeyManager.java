@@ -10,5 +10,6 @@ public interface GpgKeyManager extends EntityManager<GpgKey> {
 
     @Nullable
     SignatureVerificationKey findSignatureVerificationKey(long keyId);
-    
+
+    void create(GpgKey gpgKey);
 }

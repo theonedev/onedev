@@ -41,9 +41,15 @@ public class DefaultLinkAuthorizationManager extends BaseEntityManager<LinkAutho
 				LinkAuthorization authorization = new LinkAuthorization();
 				authorization.setLink(link);
 				authorization.setRole(role);
-				save(authorization);
+				create(authorization);
 			}
 		}
+	}
+
+	@Transactional
+	@Override
+	public void create(LinkAuthorization authorization) {
+		dao.persist(authorization);
 	}
 
 }

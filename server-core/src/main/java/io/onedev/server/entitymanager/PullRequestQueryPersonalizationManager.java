@@ -8,5 +8,7 @@ import io.onedev.server.persistence.dao.EntityManager;
 public interface PullRequestQueryPersonalizationManager extends EntityManager<PullRequestQueryPersonalization> {
 	
 	PullRequestQueryPersonalization find(Project project, User user);
+
+    void createOrUpdate(PullRequestQueryPersonalization personalization);
 	
 }

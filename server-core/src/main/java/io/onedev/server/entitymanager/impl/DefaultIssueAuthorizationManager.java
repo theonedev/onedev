@@ -47,8 +47,14 @@ public class DefaultIssueAuthorizationManager extends BaseEntityManager<IssueAut
 			authorization.setIssue(issue);
 			authorization.setUser(user);
 			issue.getAuthorizations().add(authorization);
-			save(authorization);
+			createOrUpdate(authorization);
 		}
+	}
+
+	@Transactional
+	@Override
+	public void createOrUpdate(IssueAuthorization authorization) {
+		dao.persist(authorization);
 	}
 
 }

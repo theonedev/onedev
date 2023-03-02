@@ -1,19 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.event.Listen;
@@ -27,6 +13,14 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
 
 @Singleton
 public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> implements BuildParamManager {
@@ -78,8 +72,8 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 
 	@Transactional
 	@Override
-	public void save(BuildParam param) {
-		super.save(param);
+	public void create(BuildParam param) {
+		dao.persist(param);
 		
 		Long projectId = param.getBuild().getProject().getId();
 		String paramName = param.getName();
@@ -111,7 +105,7 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 		}
 		return paramNames;
 	}
-	
+
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {

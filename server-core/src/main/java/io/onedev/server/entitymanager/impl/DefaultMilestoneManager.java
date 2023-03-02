@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.server.persistence.annotation.Transactional;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -75,5 +76,11 @@ public class DefaultMilestoneManager extends BaseEntityManager<Milestone> implem
 		criteria.addOrder(Order.asc(Milestone.PROP_DUE_DATE));
 		return find(criteria);
 	}
-	
+
+	@Transactional
+	@Override
+	public void createOrUpdate(Milestone milestone) {
+		dao.persist(milestone);
+	}
+
 }

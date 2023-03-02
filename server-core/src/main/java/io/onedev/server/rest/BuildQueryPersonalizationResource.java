@@ -49,7 +49,7 @@ public class BuildQueryPersonalizationResource {
 	public Long createOrUpdate(@NotNull BuildQueryPersonalization queryPersonalization) {
     	if (!SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser()))  
 			throw new UnauthorizedException();
-		queryPersonalizationManager.save(queryPersonalization);
+		queryPersonalizationManager.createOrUpdate(queryPersonalization);
 		return queryPersonalization.getId();
 	}
 	

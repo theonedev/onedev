@@ -13,5 +13,6 @@ public interface PullRequestReviewManager extends EntityManager<PullRequestRevie
     void review(PullRequest request, boolean approved, @Nullable String note);
 	
 	void populateReviews(Collection<PullRequest> requests);
-	
+
+    void createOrUpdate(PullRequestReview review);
 }

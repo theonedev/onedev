@@ -1,8 +1,9 @@
 package io.onedev.server.entitymanager.impl;
 
-import io.onedev.server.entitymanager.IssueMentionManager;
 import io.onedev.server.entitymanager.PullRequestMentionManager;
-import io.onedev.server.model.*;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestMention;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
@@ -24,8 +25,8 @@ public class DefaultPullRequestMentionManager extends BaseEntityManager<PullRequ
 			PullRequestMention mention = new PullRequestMention();
 			mention.setRequest(request);
 			mention.setUser(user);
-			save(mention);
+			dao.persist(mention);
 		}
 	}
-	
+
 }

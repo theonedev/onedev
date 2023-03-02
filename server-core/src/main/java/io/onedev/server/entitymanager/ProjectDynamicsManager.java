@@ -5,4 +5,6 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface ProjectDynamicsManager extends EntityManager<ProjectDynamics> {
 
+	void create(ProjectDynamics dynamics);
+	
 }

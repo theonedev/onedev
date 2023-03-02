@@ -89,7 +89,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 
 	@Transactional
 	@Override
-	public void save(CodeComment comment) {
+	public void createOrUpdate(CodeComment comment) {
 		if (comment.isNew()) {
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setUser(comment.getUser());

@@ -59,8 +59,8 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 
 	@Transactional
 	@Override
-	public void save(AgentAttribute attribute) {
-		super.save(attribute);
+	public void create(AgentAttribute attribute) {
+		dao.persist(attribute);
 		
 		transactionManager.runAfterCommit(new Runnable() {
 
@@ -101,7 +101,7 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 				attribute.setAgent(agent);
 				attribute.setName(entry.getKey());
 				attribute.setValue(entry.getValue());
-				save(attribute);
+				create(attribute);
 				agent.getAttributes().add(attribute);
 			}
 		}

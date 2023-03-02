@@ -49,7 +49,7 @@ abstract class NewMilestonePanel extends Panel {
 				} 
 				if (editor.isValid()){
 					milestone.setProject(getProject());
-					milestoneManager.save(milestone);
+					milestoneManager.createOrUpdate(milestone);
 					Session.get().success("New milestone created");
 					onMilestoneCreated(target, milestone);
 				} else {

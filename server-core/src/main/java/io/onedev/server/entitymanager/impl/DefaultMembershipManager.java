@@ -83,7 +83,13 @@ public class DefaultMembershipManager extends BaseEntityManager<Membership> impl
 		MapDifference<String, Membership> diff = Maps.difference(currentMap, syncMap);
 		
 		diff.entriesOnlyOnLeft().values().forEach(membership -> delete(membership));
-		diff.entriesOnlyOnRight().values().forEach(membership -> save(membership));		
+		diff.entriesOnlyOnRight().values().forEach(membership -> dao.persist(membership));		
+	}
+
+	@Transactional
+	@Override
+	public void create(Membership membership) {
+		dao.persist(membership);
 	}
 
 	@Sessional

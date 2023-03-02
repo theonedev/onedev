@@ -306,7 +306,7 @@ public class UserResource {
 			emailAddress.setOwner(user);
 			emailAddress.setValue(data.getEmailAddress());
 			emailAddress.setVerificationCode(null);
-			emailAddressManager.save(emailAddress);
+			emailAddressManager.createOrUpdate(emailAddress);
 			
 			return user.getId();
 		} else {
@@ -387,7 +387,7 @@ public class UserResource {
 		sshKey.setOwner(user);
 		sshKey.digest();
         
-		sshKeyManager.save(sshKey);
+		sshKeyManager.create(sshKey);
 		return sshKey.getId();
 	}
 	

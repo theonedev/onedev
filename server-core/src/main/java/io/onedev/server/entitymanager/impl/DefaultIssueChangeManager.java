@@ -174,7 +174,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void addSchedule(Issue issue, Milestone milestone) {
-		issueScheduleManager.save(issue.addSchedule(milestone));
+		issueScheduleManager.create(issue.addSchedule(milestone));
 		
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);

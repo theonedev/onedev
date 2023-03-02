@@ -43,5 +43,11 @@ public class DefaultIssueScheduleManager extends BaseEntityManager<IssueSchedule
     		}
     	}
  	}
- 	
+
+	 @Transactional
+	@Override
+	public void create(IssueSchedule schedule) {
+		dao.persist(schedule);
+	}
+
 }

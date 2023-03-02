@@ -45,17 +45,16 @@ public class SshKeyResource {
     	return sshKey;
 	}
 	
-	@Api(order=150, description="Update ssh key of specified id in request body, or create new if id property not provided")
+	@Api(order=150, description="Create new ssh key. Id property should not be specified")
 	@POST
-	public Long createOrUpdate(SshKey sshKey) {
+	public Long create(SshKey sshKey) {
     	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
-    	if (sshKey.isNew())
-    		sshKey.setCreatedAt(new Date());
-    	
+		
+		sshKey.setCreatedAt(new Date());
     	sshKey.digest();
     	
-    	sshKeyManager.save(sshKey);
+    	sshKeyManager.create(sshKey);
     	return sshKey.getId();
 	}
 	

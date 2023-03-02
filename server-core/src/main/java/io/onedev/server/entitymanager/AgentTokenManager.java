@@ -9,6 +9,8 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface AgentTokenManager extends EntityManager<AgentToken> {
 	
+	void create(AgentToken token);
+	
 	@Nullable
 	AgentToken find(String value);
 	

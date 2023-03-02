@@ -143,7 +143,7 @@ public class UserMembershipsPage extends UserPage {
 				Membership membership = new Membership();
 				membership.setUser(getUser());
 				membership.setGroup(OneDev.getInstance(GroupManager.class).load(selection.getId()));
-				OneDev.getInstance(MembershipManager.class).save(membership);
+				OneDev.getInstance(MembershipManager.class).create(membership);
 				target.add(membershipsTable);
 				if (selectionColumn != null)
 					selectionColumn.getSelections().clear();

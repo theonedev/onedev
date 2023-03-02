@@ -82,7 +82,7 @@ public abstract class JobSecretEditPanel extends Panel {
 						secrets.add(editingSecret);
 					else
 						secrets.set(index, editingSecret);
-					OneDev.getInstance(ProjectManager.class).save(getProject());
+					OneDev.getInstance(ProjectManager.class).update(getProject());
 					onSaved(target);
 				} else {
 					target.add(form);

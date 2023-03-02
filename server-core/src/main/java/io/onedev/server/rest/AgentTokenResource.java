@@ -81,16 +81,14 @@ public class AgentTokenResource {
     	return tokenManager.query(criteria, offset, count);
     }
 	
-	@Api(order=500, description="Update token of specified id in request body, or create new if id property not provided")
+	@Api(order=500, description="Create new token if id property not provided")
     @POST
-    public Long createOrUpdate(AgentToken token) {
+    public Long createOrUpdate() {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	if (token == null)
-    		token = new AgentToken();
-    	if (token.isNew())
-    		token.setValue(UUID.randomUUID().toString());
-	    tokenManager.save(token);
+		AgentToken token = new AgentToken();
+		token.setValue(UUID.randomUUID().toString());
+	    tokenManager.create(token);
 	    return token.getId();
     }
 	

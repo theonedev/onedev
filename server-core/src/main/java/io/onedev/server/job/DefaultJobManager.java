@@ -589,7 +589,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									build.setRetryDate(new Date());
 									build.setStatus(Status.WAITING);
 									listenerRegistry.post(new BuildRetrying(build));
-									buildManager.save(build);
+									buildManager.update(build);
 								}
 
 							});
@@ -609,7 +609,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									build.setPendingDate(new Date());
 									build.setStatus(Status.PENDING);
 									listenerRegistry.post(new BuildPending(build));
-									buildManager.save(build);
+									buildManager.update(build);
 								}
 
 							});
@@ -653,7 +653,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		build.setStatus(Build.Status.FAILED);
 		logManager.newLogger(build).error(errorMessage);
 		build.setFinishDate(new Date());
-		buildManager.save(build);
+		buildManager.update(build);
 		listenerRegistry.post(new BuildFinished(build));
 	}
 
@@ -777,7 +777,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							param.setType(type);
 							param.setValue(value);
 							build.getParams().add(param);
-							buildParamManager.save(param);
+							buildParamManager.create(param);
 						}
 					} else {
 						BuildParam param = new BuildParam();
@@ -785,10 +785,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						param.setName(paramSpec.getName());
 						param.setType(type);
 						build.getParams().add(param);
-						buildParamManager.save(param);
+						buildParamManager.create(param);
 					}
 				}
-				buildManager.save(build);
+				buildManager.update(build);
 				buildSubmitted(build);
 			} finally {
 				JobAuthorizationContext.pop();
@@ -969,7 +969,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								build.setStatus(Status.CANCELLED);
 								build.setFinishDate(new Date());
 								build.setCanceller(userManager.load(userId));
-								buildManager.save(build);
+								buildManager.update(build);
 								listenerRegistry.post(new BuildFinished(build));
 							}
 						}
@@ -1243,7 +1243,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								} catch (InterruptedException ignored) {
 								} finally {
 									build.setFinishDate(new Date());
-									buildManager.save(build);
+									buildManager.update(build);
 									listenerRegistry.post(new BuildFinished(build));
 								}
 							}
@@ -1457,7 +1457,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			public void run() {
 				Build build = buildManager.load(jobContext.getBuildId());
 				build.setJobWorkspace(jobWorkspace);
-				buildManager.save(build);
+				buildManager.update(build);
 			}
 
 		});

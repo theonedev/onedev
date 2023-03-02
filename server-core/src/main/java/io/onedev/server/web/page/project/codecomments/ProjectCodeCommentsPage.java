@@ -94,7 +94,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedCodeCommentQuery> projectQueries) {
 				getProject().setNamedCodeCommentQueries(projectQueries);
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
 			}
 
 		});
@@ -166,7 +166,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getCodeCommentQueryPersonalizationManager().save(setting);
+										getCodeCommentQueryPersonalizationManager().createOrUpdate(setting);
 										target.add(savedQueries);
 										close();
 									}
@@ -182,7 +182,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(ProjectManager.class).save(getProject());
+										OneDev.getInstance(ProjectManager.class).update(getProject());
 										target.add(savedQueries);
 										close();
 									}

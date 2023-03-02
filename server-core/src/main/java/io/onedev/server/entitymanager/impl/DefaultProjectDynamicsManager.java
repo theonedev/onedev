@@ -37,4 +37,10 @@ public class DefaultProjectDynamicsManager extends BaseEntityManager<ProjectDyna
 		}
 	}
 	
+	@Transactional
+	@Override
+	public void create(ProjectDynamics dynamics) {
+		dao.persist(dynamics);
+	}
+	
 }

@@ -113,13 +113,13 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 						} else {
 							if (getSpec().isNew()) 
 								getSpec().setOrder(manager.query().stream().mapToInt(it->it.getOrder()).max().orElse(0)+1);
-							manager.save(getSpec(), oldName, oldOppositeName);
+							manager.update(getSpec(), oldName, oldOppositeName);
 							onSave(target);
 						}
 					} else {
 						if (getSpec().isNew()) 
 							getSpec().setOrder(manager.query().stream().mapToInt(it->it.getOrder()).max().orElse(0)+1);
-						manager.save(getSpec(), oldName, oldOppositeName);
+						manager.update(getSpec(), oldName, oldOppositeName);
 						onSave(target);
 					}
 				}

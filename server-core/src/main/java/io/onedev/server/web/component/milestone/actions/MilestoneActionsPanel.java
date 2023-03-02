@@ -33,7 +33,7 @@ public abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				getMilestone().setClosed(false);
-				getMilestoneManager().save(getMilestone());
+				getMilestoneManager().createOrUpdate(getMilestone());
 				target.add(MilestoneActionsPanel.this);
 				onUpdated(target);
 				getSession().success("Milestone '" + getMilestone().getName() + "' reopened");
@@ -58,7 +58,7 @@ public abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				getMilestone().setClosed(true);
-				getMilestoneManager().save(getMilestone());
+				getMilestoneManager().createOrUpdate(getMilestone());
 				target.add(MilestoneActionsPanel.this);
 				onUpdated(target);
 				getSession().success("Milestone '" + getMilestone().getName() + "' closed");

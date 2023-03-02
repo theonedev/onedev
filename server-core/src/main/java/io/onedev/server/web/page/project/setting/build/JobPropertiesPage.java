@@ -35,7 +35,7 @@ public class JobPropertiesPage extends ProjectBuildSettingPage {
 				super.onSubmit();
 				getSession().success("Job properties saved");
 				getProject().getBuildSetting().setJobProperties(bean.getProperties());
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(JobPropertiesPage.class, 
 						JobPropertiesPage.paramsOf(getProject()));
 			}

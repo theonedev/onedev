@@ -191,7 +191,7 @@ public abstract class JobExecutor implements Serializable {
 			build.setRunningDate(new Date());
 			if (agentId != null)
 				build.setAgent(OneDev.getInstance(AgentManager.class).load(agentId));
-			buildManager.save(build);
+			buildManager.update(build);
 			OneDev.getInstance(ListenerRegistry.class).post(new BuildRunning(build));
 		});
 	}

@@ -8,5 +8,6 @@ import io.onedev.server.persistence.dao.EntityManager;
 public interface BuildQueryPersonalizationManager extends EntityManager<BuildQueryPersonalization> {
 	
 	BuildQueryPersonalization find(Project project, User user);
-	
+
+    void createOrUpdate(BuildQueryPersonalization buildQueryPersonalization);
 }

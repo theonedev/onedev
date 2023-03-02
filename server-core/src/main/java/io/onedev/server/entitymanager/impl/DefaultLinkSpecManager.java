@@ -85,13 +85,13 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 		for (int i=0; i<links.size(); i++) {
 			LinkSpec link = links.get(i);
 			link.setOrder(i+1);
-			save(link);
+			dao.persist(link);
 		}
 	}
 
 	@Transactional
 	@Override
-	public void save(LinkSpec spec, String oldName, String oldOppositeName) {
+	public void update(LinkSpec spec, String oldName, String oldOppositeName) {
 		if (oldName != null) {
 			if (oldOppositeName != null) {
 				if (spec.getOpposite() == null) {
@@ -118,7 +118,7 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 		    	}
 			}
 		}
-		super.save(spec);
+		dao.persist(spec);
 		
 		LinkSpecFacade facade = new LinkSpecFacade(spec);
 		
@@ -133,6 +133,12 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 			}
 			
 		});
+	}
+
+	@Transactional
+	@Override
+	public void create(LinkSpec link) {
+		dao.persist(link);
 	}
 
 	@Transactional

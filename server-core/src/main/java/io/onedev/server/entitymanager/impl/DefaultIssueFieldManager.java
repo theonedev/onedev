@@ -47,10 +47,16 @@ public class DefaultIssueFieldManager extends BaseEntityManager<IssueField> impl
 			query.executeUpdate();
 		}
 		
-		for (IssueField entity: issue.getFields()) {
-			if (entity.isNew())
-				save(entity);
+		for (IssueField field: issue.getFields()) {
+			if (field.isNew())
+				create(field);
 		}
+	}
+
+	@Transactional
+	@Override
+	public void create(IssueField field) {
+		dao.persist(field);
 	}
 
 	@Transactional

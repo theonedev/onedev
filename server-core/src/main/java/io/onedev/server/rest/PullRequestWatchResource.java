@@ -51,7 +51,7 @@ public class PullRequestWatchResource {
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();
 		}
-		watchManager.save(watch);
+		watchManager.createOrUpdate(watch);
 		return watch.getId();
 	}
 	

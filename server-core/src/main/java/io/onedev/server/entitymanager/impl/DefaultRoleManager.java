@@ -146,7 +146,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		
 		for (Project project: role.getDefaultProjects()) {
 			project.setDefaultRole(null);
-			projectManager.save(project);
+			projectManager.update(project);
 		}
     	
 		dao.remove(role);

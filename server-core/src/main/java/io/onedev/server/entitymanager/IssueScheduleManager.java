@@ -10,5 +10,6 @@ import io.onedev.server.persistence.dao.EntityManager;
 public interface IssueScheduleManager extends EntityManager<IssueSchedule> {
 	
  	void syncMilestones(Issue issue, Collection<Milestone> milestones);
-	
+
+    void create(IssueSchedule schedule);
 }

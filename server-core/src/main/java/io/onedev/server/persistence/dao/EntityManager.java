@@ -31,22 +31,7 @@ public interface EntityManager<T extends AbstractEntity> {
 	 *             HibernateException if no matching entity is found
 	 */
 	T load(Long entityId);
-
-	/**
-	 * If the id of the entity is null or zero, add it to the datastore and
-	 * assign it an id; otherwise, update the corresponding entity in the
-	 * data store with the properties of this entity. In either case the entity
-	 * passed to this method will be attached to the session.
-	 * <p>
-	 * If an entity to update is already attached to the session, this method
-	 * will have no effect. If an entity to update has the same id as another
-	 * instance already attached to the session, an error will be thrown.
-	 * 
-	 * @param entity
-	 * 			the entity to be saved
-	 */
-	void save(T entity);
-
+	
 	/**
 	 * Remove the specified entity from the datastore.
 	 * 

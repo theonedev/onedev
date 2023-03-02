@@ -1,8 +1,9 @@
 package io.onedev.server.entitymanager.impl;
 
 import io.onedev.server.entitymanager.CodeCommentMentionManager;
-import io.onedev.server.entitymanager.IssueMentionManager;
-import io.onedev.server.model.*;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentMention;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
@@ -24,8 +25,8 @@ public class DefaultCodeCommentMentionManager extends BaseEntityManager<CodeComm
 			CodeCommentMention mention = new CodeCommentMention();
 			mention.setComment(comment);
 			mention.setUser(user);
-			save(mention);
+			dao.persist(mention);
 		}
 	}
-	
+
 }

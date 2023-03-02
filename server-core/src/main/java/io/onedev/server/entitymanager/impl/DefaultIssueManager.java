@@ -214,7 +214,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		authorization.setIssue(issue);
 		authorization.setUser(issue.getSubmitter());
 		issue.getAuthorizations().add(authorization);
-		authorizationManager.save(authorization);
+		authorizationManager.createOrUpdate(authorization);
 		
 		updateCacheAfterCommit(Lists.newArrayList(issue));
 		listenerRegistry.post(new IssueOpened(issue));

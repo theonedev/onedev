@@ -137,7 +137,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 
 	@Transactional
 	@Override
-	public void save(EmailAddress emailAddress) {
+	public void createOrUpdate(EmailAddress emailAddress) {
 		boolean isNew = emailAddress.isNew();
 		emailAddress.setValue(emailAddress.getValue().toLowerCase());
 		

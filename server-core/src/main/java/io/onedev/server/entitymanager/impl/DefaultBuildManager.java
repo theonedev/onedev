@@ -184,9 +184,12 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	@Transactional
 	@Override
-	public void save(Build build) {
-		super.save(build);
-		
+	public void update(Build build) {
+		dao.persist(build);
+		updateCacheAfterCommit(build);
+	}
+	
+	private void updateCacheAfterCommit(Build build) {
 		BuildFacade facade = build.getFacade();
 		String jobName = build.getJobName();
 		transactionManager.runAfterCommit(new Runnable() {
@@ -196,7 +199,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				cache.put(facade.getId(), facade);
 				populateJobNames(facade.getProjectId(), jobName);
 			}
-			
+
 		});
 	}
 	
@@ -429,11 +432,14 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		Preconditions.checkArgument(build.isNew());
 		build.setNumberScope(build.getProject().getForkRoot());
 		build.setNumber(numberGenerator.getNextSequence(build.getNumberScope()));
-		save(build);
+		
+		dao.persist(build);
+		updateCacheAfterCommit(build);
+		
 		for (BuildParam param: build.getParams())
-			buildParamManager.save(param);
+			buildParamManager.create(param);
 		for (BuildDependence dependence: build.getDependencies())
-			buildDependenceManager.save(dependence);
+			buildDependenceManager.create(dependence);
 	}
 
 	private Collection<Predicate> getPredicates(@Nullable Project project, From<Build, Build> root, CriteriaBuilder builder) {

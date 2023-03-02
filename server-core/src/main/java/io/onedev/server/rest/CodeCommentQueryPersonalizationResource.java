@@ -51,7 +51,7 @@ public class CodeCommentQueryPersonalizationResource {
     			|| !SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
     	}
-		queryPersonalizationManager.save(queryPersonalization);
+		queryPersonalizationManager.createOrUpdate(queryPersonalization);
 		return queryPersonalization.getId();
 	}
 	

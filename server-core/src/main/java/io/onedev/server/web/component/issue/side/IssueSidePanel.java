@@ -117,7 +117,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected void onSaveWatch(EntityWatch watch) {
-				OneDev.getInstance(IssueWatchManager.class).save((IssueWatch) watch);
+				OneDev.getInstance(IssueWatchManager.class).createOrUpdate((IssueWatch) watch);
 			}
 
 			@Override
@@ -734,7 +734,7 @@ public abstract class IssueSidePanel extends Panel {
 						vote.setIssue(getIssue());
 						vote.setUser(SecurityUtils.getUser());
 						vote.setDate(new Date());
-						OneDev.getInstance(IssueVoteManager.class).save(vote);
+						OneDev.getInstance(IssueVoteManager.class).create(vote);
 						getIssue().getVotes().add(vote);
 					} else {
 						getIssue().getVotes().remove(vote);

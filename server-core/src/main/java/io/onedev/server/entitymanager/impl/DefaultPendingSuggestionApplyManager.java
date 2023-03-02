@@ -123,4 +123,10 @@ public class DefaultPendingSuggestionApplyManager extends BaseEntityManager<Pend
 		return getSession().createQuery(criteriaQuery).list();
 	}
 
+	@Transactional
+	@Override
+	public void create(PendingSuggestionApply pendingSuggestionApply) {
+		dao.persist(pendingSuggestionApply);
+	}
+
 }

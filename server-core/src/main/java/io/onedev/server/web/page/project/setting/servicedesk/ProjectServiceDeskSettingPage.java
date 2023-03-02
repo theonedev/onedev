@@ -52,7 +52,7 @@ public class ProjectServiceDeskSettingPage extends ProjectSettingPage {
 				} 
 				if (editor.isValid()) {
 					getProject().setServiceDeskName(bean.getServiceDeskName());
-					projectManager.save(getProject());
+					projectManager.update(getProject());
 					setResponsePage(ProjectServiceDeskSettingPage.class, ProjectServiceDeskSettingPage.paramsOf(getProject()));
 					Session.get().success("Service desk settings updated");
 				}

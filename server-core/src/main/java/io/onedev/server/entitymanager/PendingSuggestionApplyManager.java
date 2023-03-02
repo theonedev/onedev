@@ -18,5 +18,6 @@ public interface PendingSuggestionApplyManager extends EntityManager<PendingSugg
 	void discard(@Nullable User user, PullRequest request);
 
 	List<PendingSuggestionApply> query(User user, PullRequest request);
-	
+
+    void create(PendingSuggestionApply pendingApply);
 }

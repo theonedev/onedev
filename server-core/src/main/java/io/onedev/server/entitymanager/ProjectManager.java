@@ -47,6 +47,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	void create(Project project);
 	
+	void update(Project project);
+	
 	void onDeleteBranch(Project project, String branchName);
 	
 	void clone(Project project, String repositoryUrl);

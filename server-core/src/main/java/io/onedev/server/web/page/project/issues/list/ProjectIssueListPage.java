@@ -89,7 +89,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			@Override
 			protected void onSaveCommonQueries(ArrayList<NamedIssueQuery> namedQueries) {
 				getProject().getIssueSetting().setNamedQueries(namedQueries);
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
 			}
 
 			@Override
@@ -164,7 +164,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getIssueQueryPersonalizationManager().save(setting);
+										getIssueQueryPersonalizationManager().createOrUpdate(setting);
 										target.add(savedQueries);
 										close();
 									}
@@ -183,7 +183,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(ProjectManager.class).save(getProject());
+										OneDev.getInstance(ProjectManager.class).update(getProject());
 										target.add(savedQueries);
 										close();
 									}

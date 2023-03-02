@@ -48,7 +48,7 @@ public class GroupAuthorizationResource {
 	public Long createOrUpdate(@NotNull GroupAuthorization authorization) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		authorizationManager.save(authorization);
+		authorizationManager.createOrUpdate(authorization);
 		return authorization.getId();
 	}
 	

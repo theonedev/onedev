@@ -5,4 +5,6 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface BuildDependenceManager extends EntityManager<BuildDependence> {
 	
+	void create(BuildDependence dependence);
+	
 }

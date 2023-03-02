@@ -59,9 +59,8 @@ public class DefaultLabelManager extends BaseEntityManager<LabelSpec> implements
 	@Transactional
 	@Override
 	public void sync(List<LabelSpec> labels) {
-		for (var label: labels) {
-			save(label);
-		}
+		for (var label: labels) 
+			dao.persist(label);
 		for (var existingLabel: query()) {
 			if (!labels.contains(existingLabel))
 				delete(existingLabel);

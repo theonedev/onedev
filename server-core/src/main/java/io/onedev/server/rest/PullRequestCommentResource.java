@@ -52,7 +52,7 @@ public class PullRequestCommentResource {
 			throw new UnauthorizedException();
     	}
     	
-		commentManager.save(comment);
+		commentManager.createOrUpdate(comment);
 		return comment.getId();
 	}
 	

@@ -284,7 +284,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						@Override
 						public void onClick() {
 							getProject().getIssueSetting().setBoardSpecs(null);
-							OneDev.getInstance(ProjectManager.class).save(getProject());
+							OneDev.getInstance(ProjectManager.class).update(getProject());
 							setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject()));
 						}
 
@@ -346,7 +346,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									BoardSpec currentBoard = getBoard();
 									boards.remove(boardToRemove);
 									getProject().getIssueSetting().setBoardSpecs(boards);
-									OneDev.getInstance(ProjectManager.class).save(getProject());
+									OneDev.getInstance(ProjectManager.class).update(getProject());
 									
 									BoardSpec nextBoard;
 									if (boardToRemove.getName().equals(currentBoard.getName())) 
@@ -372,7 +372,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								BoardSpec board = boards.get(from.getItemIndex());
 								boards.set(from.getItemIndex(), boards.set(to.getItemIndex(), board));
 								getProject().getIssueSetting().setBoardSpecs(boards);
-								OneDev.getInstance(ProjectManager.class).save(getProject());
+								OneDev.getInstance(ProjectManager.class).update(getProject());
 								target.add(menuFragment);
 							}
 							
@@ -479,11 +479,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						private void toggleClose(Milestone milestone) {
 							milestone.setClosed(!milestone.isClosed());
 							if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
-								getMilestoneManager().save(milestone);
+								getMilestoneManager().createOrUpdate(milestone);
 								setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), 
 										milestone, backlog, queryString, backlogQueryString));
 							} else {
-								getMilestoneManager().save(milestone);
+								getMilestoneManager().createOrUpdate(milestone);
 							}
 							dropdown.close();
 							if (milestone.isClosed())
@@ -844,7 +844,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				public void onClick() {
 					getProject().getIssueSetting().setBoardSpecs(null);
-					OneDev.getInstance(ProjectManager.class).save(getProject());
+					OneDev.getInstance(ProjectManager.class).update(getProject());
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject()));
 				}
 				
@@ -1018,7 +1018,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onSave(AjaxRequestTarget target, BoardSpec board) {
 					getProject().getIssueSetting().setBoardSpecs(boards);
-					OneDev.getInstance(ProjectManager.class).save(getProject());
+					OneDev.getInstance(ProjectManager.class).update(getProject());
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 							getProject(), board, getMilestone(), backlog, queryString, 
 							backlogQueryString));

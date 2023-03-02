@@ -320,7 +320,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 				ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()), null);
 		
 		for (PullRequestUpdate update: request.getUpdates())
-			updateManager.save(update);
+			updateManager.create(update);
 
 		for (PullRequestReview review: request.getReviews())
 			dao.persist(review);
@@ -425,7 +425,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 						
 						for (PullRequestReview review: request.getReviews()) {
 							if (review.isNew() || review.isDirty())
-								reviewManager.save(review);
+								reviewManager.createOrUpdate(review);
 						}
 
 						Project targetProject = request.getTargetProject();
@@ -957,7 +957,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 				throw new ExplicitException("Description too long"); 
 			request.setDescription(description);
 			referenceManager.addReferenceChange(request, description);
-			save(request);
+			dao.persist(request);
 		}
 	}
 

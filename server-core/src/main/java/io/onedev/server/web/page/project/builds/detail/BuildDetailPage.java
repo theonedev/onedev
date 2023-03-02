@@ -294,7 +294,7 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected void onSave(AjaxRequestTarget target, Serializable bean) {
 						getBuild().setDescription(((DescriptionBean)bean).getValue());
-						OneDev.getInstance(BuildManager.class).save(getBuild());
+						OneDev.getInstance(BuildManager.class).update(getBuild());
 						OneDev.getInstance(ListenerRegistry.class).post(new BuildUpdated(getBuild()));
 						close();
 					}

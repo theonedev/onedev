@@ -11,8 +11,10 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface BuildParamManager extends EntityManager<BuildParam> {
 	
+	void create(BuildParam param);
+	
 	void deleteParams(Build build);
 	
 	Collection<String> getParamNames(@Nullable Project project);
-	
+
 }

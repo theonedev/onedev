@@ -88,7 +88,7 @@ public class EmailAddressResource {
 		if (SecurityUtils.isAdministrator()) 
 			emailAddress.setVerificationCode(null);
 		
-		emailAddressManager.save(emailAddress);
+		emailAddressManager.createOrUpdate(emailAddress);
 		return emailAddress.getId();
 	}
 	

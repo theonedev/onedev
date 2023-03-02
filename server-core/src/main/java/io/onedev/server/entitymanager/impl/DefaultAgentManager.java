@@ -192,14 +192,14 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setCpus(data.getCpus());
 				agent.setTemporal(data.isTemporal());
 				agent.setIpAddress(data.getIpAddress());
-				save(agent);
+				createOrUpdate(agent);
 				
 				for (Map.Entry<String, String> entry: data.getAttributes().entrySet()) {
 					AgentAttribute attribute = new AgentAttribute();
 					attribute.setAgent(agent);
 					attribute.setName(entry.getKey());
 					attribute.setValue(entry.getValue());
-					attributeManager.save(attribute);
+					attributeManager.create(attribute);
 					agent.getAttributes().add(attribute);
 				}
 			} else if (agentSessions.containsKey(agent.getId())) {
@@ -211,7 +211,7 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setIpAddress(data.getIpAddress());
 				agent.setCpus(data.getCpus());
 				agent.setTemporal(data.isTemporal());
-				save(agent);
+				createOrUpdate(agent);
 				attributeManager.syncAttributes(agent, data.getAttributes());
 			}
 
@@ -243,21 +243,6 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 			}
 			listenerRegistry.post(new AgentDisconnected(agent));
 		}
-	}
-
-	@Override
-	public void save(Agent agent) {
-		super.save(agent);
-		
-    	transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				osNames.put(agent.getOsName(), agent.getOsName());
-				osArchs.put(agent.getOsArch(), agent.getOsArch());
-			}
-    		
-    	});
 	}
 
 	private void removeReferences(Agent agent) {
@@ -403,16 +388,31 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 
 	@Transactional
 	@Override
+	public void createOrUpdate(Agent agent) {
+		dao.persist(agent);
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				osNames.put(agent.getOsName(), agent.getOsName());
+				osArchs.put(agent.getOsArch(), agent.getOsArch());
+			}
+
+		});
+	}
+	
+	@Transactional
+	@Override
 	public void pause(Agent agent) {
 		agent.setPaused(true);
-		save(agent);
+		createOrUpdate(agent);
 	}
 
 	@Transactional
 	@Override
 	public void resume(Agent agent) {
 		agent.setPaused(false);
-		save(agent);
+		createOrUpdate(agent);
 	}
 
 	@Override

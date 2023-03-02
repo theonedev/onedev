@@ -25,8 +25,8 @@ public class DefaultIssueMentionManager extends BaseEntityManager<IssueMention>
 			IssueMention mention = new IssueMention();
 			mention.setIssue(issue);
 			mention.setUser(user);
-			save(mention);
+			dao.persist(mention);
 		}
 	}
-	
+
 }

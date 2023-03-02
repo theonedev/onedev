@@ -33,7 +33,7 @@ public class DefaultGroupAuthorizationManager extends BaseEntityManager<GroupAut
 				if (newAuthorization.getProject().equals(authorization.getProject())) {
 					found = true;
 					authorization.setRole(newAuthorization.getRole());
-					save(authorization);
+					dao.persist(authorization);
 				}
 			}
 			if (!found) {
@@ -52,11 +52,17 @@ public class DefaultGroupAuthorizationManager extends BaseEntityManager<GroupAut
 			}
 			if (!found) {
 				group.getAuthorizations().add(newAuthorization);
-				save(newAuthorization);
+				dao.persist(newAuthorization);
 			}
 		}
 	}
-	
+
+	@Transactional
+	@Override
+	public void createOrUpdate(GroupAuthorization authorization) {
+		dao.persist(authorization);
+	}
+
 	@Override
 	public List<GroupAuthorization> query() {
 		return query(true);

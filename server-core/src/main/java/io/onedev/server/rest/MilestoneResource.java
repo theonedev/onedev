@@ -49,7 +49,7 @@ public class MilestoneResource {
 	public Long createOrUpdate(@NotNull Milestone milestone) {
 		if (!SecurityUtils.canManageIssues(milestone.getProject()))
 			throw new UnauthorizedException();
-		milestoneManager.save(milestone);
+		milestoneManager.createOrUpdate(milestone);
 		return milestone.getId();
 	}
 	

@@ -60,9 +60,9 @@ public class DefaultDashboardGroupShareManager extends BaseEntityManager<Dashboa
 		MapDifference<String, DashboardGroupShare> diff = Maps.difference(currentMap, syncMap);
 		
 		diff.entriesOnlyOnLeft().values().forEach(share -> delete(share));
-		diff.entriesOnlyOnRight().values().forEach(share -> save(share));		
+		diff.entriesOnlyOnRight().values().forEach(share -> dao.persist(share));		
 	}
-	
+
 	@Override
 	public List<DashboardGroupShare> query() {
 		return query(true);

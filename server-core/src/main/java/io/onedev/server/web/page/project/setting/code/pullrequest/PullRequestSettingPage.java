@@ -35,7 +35,7 @@ public class PullRequestSettingPage extends ProjectSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				getProject().setPullRequestSetting(bean);
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(PullRequestSettingPage.class, PullRequestSettingPage.paramsOf(getProject()));
 				Session.get().success("Pull request settings updated");
 			}

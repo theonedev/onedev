@@ -47,7 +47,7 @@ public class NewInvitationPage extends AdministrationPage {
 						UserInvitation invitation = new UserInvitation();
 						invitation.setEmailAddress(emailAddress);
 						UserInvitationManager userInvitationManager = OneDev.getInstance(UserInvitationManager.class);
-						userInvitationManager.save(invitation);
+						userInvitationManager.create(invitation);
 						userInvitationManager.sendInvitationEmail(invitation);
 						if (Thread.interrupted())
 							throw new InterruptedException();

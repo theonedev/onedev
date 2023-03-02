@@ -41,8 +41,8 @@ public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullReque
 
 	@Transactional
 	@Override
-	public void save(PullRequestUpdate update) {
-		super.save(update);
+	public void create(PullRequestUpdate update) {
+		dao.persist(update);
 		PullRequest request = update.getRequest();
 		if (!request.getTargetProject().equals(request.getSourceProject())) {
 			if (request.getTargetProject().findPullRequestWithLFS()) {
@@ -72,7 +72,7 @@ public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullReque
 				update.setHeadCommitHash(request.getSource().getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 				request.getUpdates().add(update);
-				save(update);
+				create(update);
 
 				gitService.updateRef(request.getTargetProject(), request.getHeadRef(), 
 						ObjectId.fromString(request.getLatestUpdate().getHeadCommitHash()), null);

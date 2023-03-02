@@ -8,6 +8,8 @@ import io.onedev.server.model.AgentAttribute;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface AgentAttributeManager extends EntityManager<AgentAttribute> {
+
+	void create(AgentAttribute attribute);
 	
 	List<String> getAttributeNames();
 

@@ -314,7 +314,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						comment.setRequest(getPullRequest());
 						comment.setUser(getLoginUser());
 						comment.setContent(input.getModelObject());
-						OneDev.getInstance(PullRequestCommentManager.class).save(comment);
+						OneDev.getInstance(PullRequestCommentManager.class).createOrUpdate(comment);
 						input.clearMarkdown();
 
 						target.add(fragment);

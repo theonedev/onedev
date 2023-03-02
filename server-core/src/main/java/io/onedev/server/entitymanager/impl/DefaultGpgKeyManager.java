@@ -154,5 +154,11 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
     		return null;
     	}
 	}
-    
+
+	@Transactional
+	@Override
+	public void create(GpgKey gpgKey) {
+		dao.persist(gpgKey);
+	}
+
 }

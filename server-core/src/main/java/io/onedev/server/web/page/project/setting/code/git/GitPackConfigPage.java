@@ -43,7 +43,7 @@ public class GitPackConfigPage extends ProjectSettingPage {
 				getProject().setGitPackConfig(bean);
 				var projectManager = OneDev.getInstance(ProjectManager.class);
 				var clusterManager = OneDev.getInstance(ClusterManager.class);
-				projectManager.save(getProject());
+				projectManager.update(getProject());
 
 				Long projectId = getProject().getId();
 				GitPackConfig gitPackConfig = getProject().getGitPackConfig();

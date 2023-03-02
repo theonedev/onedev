@@ -48,9 +48,9 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 
  	@Transactional
 	@Override
-	public void save(PullRequestReview review) {
+	public void createOrUpdate(PullRequestReview review) {
  		review.setDirty(false);
-		super.save(review);
+		dao.persist(review);
 		
 		if (review.getStatus() == Status.PENDING) {
 			listenerRegistry.post(new PullRequestReviewRequested(
@@ -92,7 +92,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		else
 			review.setStatus(PullRequestReview.Status.REQUESTED_FOR_CHANGES);
 			
-		save(review);
+		createOrUpdate(review);
 		
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(review.getStatusDate());

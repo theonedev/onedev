@@ -441,7 +441,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 				@Override
 				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-					OneDev.getInstance(CodeCommentManager.class).save(comment);
+					OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
 					target.add(commentContainer.get("head"));
 				}
 
@@ -584,7 +584,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								comment.setProject(context.getProject());
 								comment.setCompareContext(getCompareContext());
 								
-								OneDev.getInstance(CodeCommentManager.class).save(comment);
+								OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
 								
 								CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
@@ -595,7 +595,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 									@Override
 									protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-										OneDev.getInstance(CodeCommentManager.class).save(comment);
+										OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
 										target.add(commentContainer.get("head"));
 									}
 
@@ -653,7 +653,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 						@Override
 						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-							OneDev.getInstance(CodeCommentManager.class).save(comment);
+							OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
 							target.add(commentContainer.get("head"));
 						}
 
@@ -1247,7 +1247,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private void onSaveCommentReply(CodeCommentReply reply) {
 		reply.setCompareContext(getCompareContext());
-		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
+		OneDev.getInstance(CodeCommentReplyManager.class).createOrUpdate(reply);
 	}
 	
 	private void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {

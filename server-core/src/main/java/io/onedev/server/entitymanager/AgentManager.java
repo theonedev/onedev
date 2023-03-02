@@ -1,21 +1,21 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import org.eclipse.jetty.websocket.api.Session;
-
 import io.onedev.agent.AgentData;
 import io.onedev.server.model.Agent;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
+import org.eclipse.jetty.websocket.api.Session;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public interface AgentManager extends EntityManager<Agent> {
+	
+	void createOrUpdate(Agent agent);
 	
 	String getAgentVersion();
 	

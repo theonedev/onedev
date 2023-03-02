@@ -36,11 +36,6 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 	}
 
 	@Override
-	public void save(T entity) {
-		dao.persist(entity);
-	}
-
-	@Override
 	public void delete(T entity) {
 		dao.remove(entity);
 	}

@@ -62,7 +62,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 			public void onClick(AjaxRequestTarget target) {
 				AgentToken token = new AgentToken();
 				token.setValue(UUID.randomUUID().toString());
-				getTokenManager().save(token);
+				getTokenManager().create(token);
 				target.add(TokenListPanel.this);
 			}
 			

@@ -284,7 +284,7 @@ public class ProjectResource {
     	} else if (!SecurityUtils.canManage(project)) {
 			throw new UnauthorizedException();
     	} else {
-    		projectManager.save(project);
+    		projectManager.update(project);
     	}
     	
     	return project.getId();
@@ -306,7 +306,7 @@ public class ProjectResource {
 		project.setNamedCommitQueries(setting.namedCommitQueries);
 		project.setPullRequestSetting(setting.pullRequestSetting);
 		project.setWebHooks(setting.webHooks);
-		projectManager.save(project);
+		projectManager.update(project);
 		return Response.ok().build();
     }
 	

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.onedev.server.persistence.annotation.Transactional;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -93,6 +94,12 @@ public class DefaultUserInvitationManager extends BaseEntityManager<UserInvitati
 		EntityCriteria<UserInvitation> criteria = getCriteria(term);
 		criteria.addOrder(Order.asc(UserInvitation.PROP_EMAIL_ADDRESS));
 		return query(criteria, firstResult, maxResults);
+	}
+
+	@Transactional
+	@Override
+	public void create(UserInvitation invitation) {
+		dao.persist(invitation);
 	}
 
 	@Sessional

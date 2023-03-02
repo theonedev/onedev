@@ -82,7 +82,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 				else 
 					getProject().setContributedSetting(settingClass, null);
 				
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
 				
 				getSession().success("Setting has been saved");
 				

@@ -49,7 +49,7 @@ public class UserAuthorizationResource {
 	public Long createOrUpdate(@NotNull UserAuthorization authorization) {
 		if (!SecurityUtils.canManage(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.save(authorization);
+		authorizationManager.createOrUpdate(authorization);
 		return authorization.getId();
 	}
 	

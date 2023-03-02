@@ -24,6 +24,11 @@ public class DefaultAgentTokenManager extends BaseEntityManager<AgentToken> impl
 	}
 
 	@Override
+	public void create(AgentToken token) {
+		dao.persist(token);
+	}
+	
+	@Override
 	public AgentToken find(String value) {
 		EntityCriteria<AgentToken> criteria = newCriteria();
 		criteria.add(Restrictions.eq(AgentToken.PROP_VALUE, value));

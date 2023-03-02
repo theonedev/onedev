@@ -106,7 +106,7 @@ public abstract class ReviewListPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequestReview review = item.getModelObject();
 						review.setStatus(Status.PENDING);
-						OneDev.getInstance(PullRequestReviewManager.class).save(review);
+						OneDev.getInstance(PullRequestReviewManager.class).createOrUpdate(review);
 					}
 					
 					@Override
@@ -148,10 +148,10 @@ public abstract class ReviewListPanel extends Panel {
 						} else if (request.getReview(reviewer).getStatus() == Status.EXCLUDED) {
 							PullRequestReviewManager reviewManager = 
 									OneDev.getInstance(PullRequestReviewManager.class);
-							reviewManager.save(review);
+							reviewManager.createOrUpdate(review);
 							for (PullRequestReview eachReview: request.getReviews()) {
 								if (eachReview.isNew())
-									reviewManager.save(eachReview);
+									reviewManager.createOrUpdate(eachReview);
 							}
 						} else {
 							reviewerRequired = true;

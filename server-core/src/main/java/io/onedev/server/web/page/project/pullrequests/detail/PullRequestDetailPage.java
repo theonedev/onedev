@@ -104,7 +104,6 @@ import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
 
@@ -990,7 +989,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected void onSaveWatch(EntityWatch watch) {
-						OneDev.getInstance(PullRequestWatchManager.class).save((PullRequestWatch) watch);
+						OneDev.getInstance(PullRequestWatchManager.class).createOrUpdate((PullRequestWatch) watch);
 					}
 
 					@Override

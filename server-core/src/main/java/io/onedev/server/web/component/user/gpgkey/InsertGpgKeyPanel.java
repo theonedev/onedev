@@ -77,7 +77,7 @@ public abstract class InsertGpgKeyPanel extends Panel {
                 	}
                 	if (!hasErrors) {
                         gpgKey.setCreatedAt(new Date());
-                        gpgKeyManager.save(gpgKey);
+                        gpgKeyManager.create(gpgKey);
                         onSave(target);
                 	}
                 }

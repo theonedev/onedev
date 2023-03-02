@@ -79,7 +79,7 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 				if (comment.length() > PullRequestComment.MAX_CONTENT_LEN)
 					throw new ExplicitException("Comment too long");
 				PullRequestCommentedPanel.this.getComment().setContent(comment);
-				OneDev.getInstance(PullRequestCommentManager.class).save(PullRequestCommentedPanel.this.getComment());
+				OneDev.getInstance(PullRequestCommentManager.class).createOrUpdate(PullRequestCommentedPanel.this.getComment());
 			}
 
 			@Override

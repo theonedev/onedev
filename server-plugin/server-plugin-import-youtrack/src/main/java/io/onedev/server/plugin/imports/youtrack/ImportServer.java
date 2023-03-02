@@ -1005,7 +1005,7 @@ public class ImportServer implements Serializable, Validatable {
 									link.setSource(source);
 									link.setTarget(target);
 									link.setSpec(entry.getValue().getFirst());
-									OneDev.getInstance(IssueLinkManager.class).save(link);
+									OneDev.getInstance(IssueLinkManager.class).create(link);
 								}
 							}
 						}

@@ -63,7 +63,7 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 						link.setSource(issue);
 						link.setTarget(linkedIssue);
 					}
-					save(link);
+					create(link);
 				}
 			}
 		} else {			
@@ -84,10 +84,16 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 					link.setSpec(spec);
 					link.setSource(issue);
 					link.setTarget(linkedIssue);
-					save(link);
+					create(link);
 				}
 			}
 		}
+	}
+
+	@Transactional
+	@Override
+	public void create(IssueLink link) {
+		dao.persist(link);
 	}
 
 	@Sessional

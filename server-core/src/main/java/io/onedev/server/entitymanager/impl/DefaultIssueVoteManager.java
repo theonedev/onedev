@@ -19,10 +19,10 @@ public class DefaultIssueVoteManager extends BaseEntityManager<IssueVote>
 	}
 
 	@Transactional
-	public void save(IssueVote vote) {
-		if (vote.isNew())
-			vote.getIssue().setVoteCount(vote.getIssue().getVoteCount()+1);
-		super.save(vote);
+	@Override
+	public void create(IssueVote vote) {
+		vote.getIssue().setVoteCount(vote.getIssue().getVoteCount()+1);
+		dao.persist(vote);
 	}
 
 	@Transactional

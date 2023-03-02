@@ -22,7 +22,7 @@ import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.criteria.Criteria;
 
 public interface BuildManager extends EntityManager<Build> {
-
+	
 	@Nullable
 	Build find(Project project, long number);
 
@@ -55,6 +55,8 @@ public interface BuildManager extends EntityManager<Build> {
 	Map<ObjectId, Map<String, Collection<StatusInfo>>> queryStatus(Project project, Collection<ObjectId> commitIds);
 
 	void create(Build build);
+	
+	void update(Build build);
 
 	Map<Long, Long> queryUnfinished();
 	

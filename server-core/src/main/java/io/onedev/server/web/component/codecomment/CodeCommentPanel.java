@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.web.component.markdown.ContentQuoted;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
-import io.onedev.server.web.util.WicketUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -69,7 +68,6 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
-import org.unbescape.javascript.JavaScriptEscape;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentPanel extends Panel {
@@ -149,7 +147,7 @@ public abstract class CodeCommentPanel extends Panel {
 			public void setObject(String object) {
 				CodeComment comment = getComment();
 				comment.setContent(object);
-				OneDev.getInstance(CodeCommentManager.class).save(comment);				
+				OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);				
 			}
 			
 		}, null) {

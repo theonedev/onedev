@@ -54,7 +54,7 @@ abstract class NewBoardPanel extends Panel {
 					
 					boards.add(board);
 					getProject().getIssueSetting().setBoardSpecs(boards);
-					OneDev.getInstance(ProjectManager.class).save(getProject());
+					OneDev.getInstance(ProjectManager.class).update(getProject());
 					Session.get().success("New issue board created");
 					onBoardCreated(target, board);
 				} else {

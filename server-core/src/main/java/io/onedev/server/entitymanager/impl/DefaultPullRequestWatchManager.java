@@ -35,8 +35,13 @@ public class DefaultPullRequestWatchManager extends BaseEntityManager<PullReques
 		PullRequestWatch watch = (PullRequestWatch) request.getWatch(user, true);
 		if (watch.isNew()) {
 			watch.setWatching(watching);
-			save(watch);
+			dao.persist(watch);
 		}
 	}
-	
+
+	@Override
+	public void createOrUpdate(PullRequestWatch watch) {
+		dao.persist(watch);
+	}
+
 }

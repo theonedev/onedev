@@ -30,8 +30,8 @@ public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequ
 
 	@Transactional
 	@Override
-	public void save(PullRequestComment comment) {
-		save(comment, Lists.newArrayList());
+	public void createOrUpdate(PullRequestComment comment) {
+		createOrUpdate(comment, Lists.newArrayList());
 	}
 
 	@Transactional
@@ -42,8 +42,9 @@ public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequ
 		request.setCommentCount(request.getCommentCount()-1);
 	}
 
+	@Transactional
 	@Override
-	public void save(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
+	public void createOrUpdate(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
 		boolean isNew = comment.isNew();
 		dao.persist(comment);
 		if (isNew) {

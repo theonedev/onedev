@@ -36,7 +36,7 @@ public class DefaultFixedIssueFiltersPage extends ProjectBuildSettingPage {
 				super.onSubmit();
 				getSession().success("Default fixed issue filters saved");
 				getProject().getBuildSetting().setDefaultFixedIssueFilters(bean.getDefaultFixedIssueFilters());
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(DefaultFixedIssueFiltersPage.class, 
 						DefaultFixedIssueFiltersPage.paramsOf(getProject()));
 			}

@@ -846,12 +846,12 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 
 	@Override
 	public void onSaveComment(CodeComment comment) {
-		OneDev.getInstance(CodeCommentManager.class).save(comment);
+		OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
 	}
 	
 	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
-		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
+		OneDev.getInstance(CodeCommentReplyManager.class).createOrUpdate(reply);
 	}
 
 	@Override

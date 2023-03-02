@@ -498,7 +498,7 @@ public abstract class IssueListPanel extends Panel {
 						if (getProject() != null) {
 							getProject().getIssueSetting().setListFields(bean.getFields());
 							getProject().getIssueSetting().setListLinks(bean.getLinks());
-							OneDev.getInstance(ProjectManager.class).save(getProject());
+							OneDev.getInstance(ProjectManager.class).update(getProject());
 						} else {
 							getGlobalIssueSetting().setListFields(bean.getFields());
 							getGlobalIssueSetting().setListLinks(bean.getLinks());
@@ -516,7 +516,7 @@ public abstract class IssueListPanel extends Panel {
 						modal.close();
 						getProject().getIssueSetting().setListFields(null);
 						getProject().getIssueSetting().setListLinks(null);
-						OneDev.getInstance(ProjectManager.class).save(getProject());
+						OneDev.getInstance(ProjectManager.class).update(getProject());
 						target.add(body);
 					}
 

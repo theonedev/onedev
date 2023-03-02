@@ -134,7 +134,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 
 							@Override
 							public void run() {
-								getProjectManager().save(project);
+								getProjectManager().update(project);
 								OneDev.getInstance(ProjectLabelManager.class).sync(getProject(), labelsBean.getLabels());
 							}
 							

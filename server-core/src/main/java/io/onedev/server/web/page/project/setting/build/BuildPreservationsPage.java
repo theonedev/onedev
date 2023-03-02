@@ -36,7 +36,7 @@ public class BuildPreservationsPage extends ProjectBuildSettingPage {
 				super.onSubmit();
 				getSession().success("Build preserve rules saved");
 				getProject().getBuildSetting().setBuildPreservations(bean.getBuildPreservations());
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				OneDev.getInstance(ProjectManager.class).update(getProject());
 				setResponsePage(BuildPreservationsPage.class, 
 						BuildPreservationsPage.paramsOf(getProject()));
 			}

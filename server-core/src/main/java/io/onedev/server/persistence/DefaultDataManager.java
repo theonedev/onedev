@@ -720,7 +720,7 @@ public class DefaultDataManager implements DataManager, Serializable {
     		primaryEmailAddress.setOwner(user);
 		}
 		primaryEmailAddress.setValue(bean.getEmailAddress());
-		emailAddressManager.save(primaryEmailAddress);
+		emailAddressManager.createOrUpdate(primaryEmailAddress);
 	}	
 
 	@SuppressWarnings({"serial"})
@@ -841,7 +841,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			link.setOpposite(new LinkSpecOpposite());
 			link.getOpposite().setName("Parent Issue");
 			link.setOrder(1);
-			linkSpecManager.save(link);
+			linkSpecManager.create(link);
 			
 			link = new LinkSpec();
 			link.setName("Blocked By");
@@ -850,7 +850,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			link.getOpposite().setName("Blocking");
 			link.getOpposite().setMultiple(true);
 			link.setOrder(2);
-			linkSpecManager.save(link);
+			linkSpecManager.create(link);
 			
 			settingManager.saveIssueSetting(new GlobalIssueSetting());
 		} 

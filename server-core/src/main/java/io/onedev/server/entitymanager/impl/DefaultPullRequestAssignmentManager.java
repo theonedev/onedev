@@ -29,8 +29,8 @@ public class DefaultPullRequestAssignmentManager extends BaseEntityManager<PullR
 
 	@Transactional
 	@Override
-	public void save(PullRequestAssignment assignment) {
-		super.save(assignment);
+	public void create(PullRequestAssignment assignment) {
+		dao.persist(assignment);
 
 		listenerRegistry.post(new PullRequestAssigned(
 				SecurityUtils.getUser(), new Date(), 
