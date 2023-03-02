@@ -3,13 +3,11 @@ package io.onedev.server.infomanager;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.event.system.SystemStarted;
@@ -19,7 +17,6 @@ import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Day;
@@ -180,74 +177,6 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 			Day day = new Day(issue.getSubmitDate());
 			stateHistory.put(day.getValue(), issue.getState());
 			stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
-		}
-	}
-	
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.isNew()) {
-			Long projectId;
-			if (event.getEntity() instanceof Issue)
-				projectId = ((Issue)event.getEntity()).getProject().getId();
-			else if (event.getEntity() instanceof IssueChange)
-				projectId = ((IssueChange)event.getEntity()).getIssue().getProject().getId();
-			else
-				projectId = null;
-				
-			if(projectId != null) {
-				if (event.getEntity() instanceof Issue) {
-					Issue issue = (Issue) event.getEntity();
-					Long oldProjectId;
-					if (issue.getOldVersion() != null) 
-						oldProjectId = issue.getOldVersion().getProjectId();
-					else 
-						oldProjectId = null;
-					if (oldProjectId != null && !projectId.equals(oldProjectId)) {
-						Long issueId = issue.getId();
-						transactionManager.runAfterCommit(new ClusterRunnable() {
-							
-							private static final long serialVersionUID = 1L;
-
-							@Override
-							public void run() {
-								projectManager.submitToProjectServer(oldProjectId, new ClusterTask<Void>() {
-
-									private static final long serialVersionUID = 1L;
-
-									@Override
-									public Void call() throws Exception {
-										remove(oldProjectId, issueId);
-										return null;
-									}
-									
-								});
-							}
-							
-						});
-					}
-				}
-				transactionManager.runAfterCommit(new ClusterRunnable() {
-	
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void run() {
-						projectManager.submitToProjectServer(projectId, new ClusterTask<Void>() {
-
-							private static final long serialVersionUID = 1L;
-
-							@Override
-							public Void call() throws Exception {
-								batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
-								return null;
-							}
-							
-						});
-					}
-					
-				});
-			}
 		}
 	}
 	

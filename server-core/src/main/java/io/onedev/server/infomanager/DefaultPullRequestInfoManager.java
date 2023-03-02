@@ -1,37 +1,21 @@
 package io.onedev.server.infomanager;
 
-import java.io.File;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.project.pullrequest.PullRequestOpened;
+import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
@@ -40,9 +24,18 @@ import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.Transaction;
-import jetbrains.exodus.env.TransactionalComputable;
-import jetbrains.exodus.env.TransactionalExecutable;
+import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.List;
 
 @Singleton
 public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManager 
@@ -107,26 +100,9 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		};
 	}
 	
-	@Transactional
 	@Listen
-	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Project) {
-			Long projectId = event.getEntity().getId();
-			UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, false);
-			if (storageServerUUID != null) {
-				clusterManager.runOnServer(storageServerUUID, new ClusterTask<Void>() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Void call() throws Exception {
-						removeEnv(projectId.toString());
-						return null;
-					}
-					
-				});
-			}
-		}
+	public void on(ProjectDeleted event) {
+		removeEnv(event.getProjectId().toString());
 	}
 	
 	@Sessional
@@ -181,33 +157,17 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 			
 		});
 	}
-	
-	@Transactional
+
+	@Sessional
 	@Listen
-	public void on(EntityPersisted event) {
-		if (event.isNew() && event.getEntity() instanceof PullRequestUpdate) {
-			Long projectId = ((PullRequestUpdate) event.getEntity()).getRequest().getTargetProject().getId();
-			transactionManager.runAfterCommit(new ClusterRunnable() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void run() {
-					projectManager.submitToProjectServer(projectId, new ClusterTask<Void>() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public Void call() throws Exception {
-							batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
-							return null;
-						}
-						
-					});
-				}
-				
-			});
-		} 
+	public void on(PullRequestOpened event) {
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
+	}
+	
+	@Sessional
+	@Listen
+	public void on(PullRequestUpdated event) {
+		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
 	}
 
 	@Sessional
