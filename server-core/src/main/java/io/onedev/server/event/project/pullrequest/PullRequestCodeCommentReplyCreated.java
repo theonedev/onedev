@@ -8,13 +8,13 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class PullRequestCodeCommentReplied extends PullRequestCodeCommentEvent {
+public class PullRequestCodeCommentReplyCreated extends PullRequestCodeCommentEvent {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final Long replyId;
 	
-	public PullRequestCodeCommentReplied(PullRequest request, CodeCommentReply reply) {
+	public PullRequestCodeCommentReplyCreated(PullRequest request, CodeCommentReply reply) {
 		super(reply.getUser(), reply.getDate(), request, reply.getComment());
 		replyId = reply.getId();
 	}

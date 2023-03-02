@@ -7,13 +7,13 @@ import io.onedev.server.security.SecurityUtils;
 
 import java.util.Date;
 
-public class PullRequestCommentUpdated extends PullRequestEvent {
+public class PullRequestCommentEdited extends PullRequestEvent {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final Long commentId;
 	
-	public PullRequestCommentUpdated(PullRequestComment comment) {
+	public PullRequestCommentEdited(PullRequestComment comment) {
 		super(SecurityUtils.getUser(), new Date(), comment.getRequest());
 		this.commentId = comment.getId();
 	}
@@ -29,7 +29,7 @@ public class PullRequestCommentUpdated extends PullRequestEvent {
 
 	@Override
 	public String getActivity() {
-		return "comment updated";
+		return "comment edited";
 	}
 
 }

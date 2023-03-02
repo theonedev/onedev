@@ -147,7 +147,7 @@ public abstract class CodeCommentPanel extends Panel {
 			public void setObject(String object) {
 				CodeComment comment = getComment();
 				comment.setContent(object);
-				OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);				
+				OneDev.getInstance(CodeCommentManager.class).update(comment);				
 			}
 			
 		}, null) {

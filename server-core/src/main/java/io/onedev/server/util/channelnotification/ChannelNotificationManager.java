@@ -7,7 +7,7 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.project.build.BuildEvent;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
-import io.onedev.server.event.project.codecomment.CodeCommentUpdated;
+import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.event.project.issue.IssueEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.git.GitUtils;
@@ -124,7 +124,7 @@ public abstract class ChannelNotificationManager<T extends ChannelNotificationSe
 	@Sessional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (!(event instanceof CodeCommentUpdated)) {
+		if (!(event instanceof CodeCommentEdited)) {
 			CodeComment comment = event.getComment();
 
 			String commentInfo = String.format("[Code Comment] (%s:%s)", event.getProject().getPath(), comment.getMark().getPath());

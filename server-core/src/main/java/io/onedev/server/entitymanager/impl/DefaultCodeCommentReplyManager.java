@@ -5,8 +5,10 @@ import javax.inject.Singleton;
 
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.codecomment.CodeCommentReplied;
-import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentReplied;
+import io.onedev.server.event.project.codecomment.CodeCommentReplyCreated;
+import io.onedev.server.event.project.codecomment.CodeCommentReplyDeleted;
+import io.onedev.server.event.project.codecomment.CodeCommentReplyEdited;
+import io.onedev.server.event.project.pullrequest.PullRequestCodeCommentReplyCreated;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
@@ -28,34 +30,33 @@ public class DefaultCodeCommentReplyManager extends BaseEntityManager<CodeCommen
 
 	@Transactional
 	@Override
-	public void createOrUpdate(CodeCommentReply reply) {
-		if (reply.isNew()) {
-			dao.persist(reply);
-			
-			CodeComment comment = reply.getComment();
-			comment.setReplyCount(comment.getReplyCount()+1);
-			
-			listenerRegistry.post(new CodeCommentReplied(reply));
+	public void create(CodeCommentReply reply) {
+		dao.persist(reply);
+		
+		CodeComment comment = reply.getComment();
+		comment.setReplyCount(comment.getReplyCount()+1);
+		
+		listenerRegistry.post(new CodeCommentReplyCreated(reply));
 
-			PullRequest request = comment.getCompareContext().getPullRequest();
-			if (request != null) {
-				request.setCommentCount(request.getCommentCount()+1);
-				listenerRegistry.post(new PullRequestCodeCommentReplied(request, reply));
-			}
-		} else {
-			dao.persist(reply);
-		}
+		PullRequest request = comment.getCompareContext().getPullRequest();
+		if (request != null) 
+			listenerRegistry.post(new PullRequestCodeCommentReplyCreated(request, reply));
 	}
 
+	@Transactional
+	@Override
+	public void update(CodeCommentReply reply) {
+		dao.persist(reply);
+		listenerRegistry.post(new CodeCommentReplyEdited(reply));
+	}
+	
 	@Transactional
 	@Override
 	public void delete(CodeCommentReply reply) {
 		super.delete(reply);
 		CodeComment comment = reply.getComment();
 		comment.setReplyCount(comment.getReplyCount()-1);
-		PullRequest request = comment.getCompareContext().getPullRequest();
-		if (request != null)
-			request.setCommentCount(request.getCommentCount()-1);
+		listenerRegistry.post(new CodeCommentReplyDeleted(reply));
 	}
 	
 }

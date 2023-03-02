@@ -1,12 +1,18 @@
 package io.onedev.server.search.entitytext;
 
+import com.google.common.collect.Lists;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.codecomment.CodeCommentDeleted;
+import io.onedev.server.event.project.codecomment.CodeCommentEvent;
+import io.onedev.server.event.project.codecomment.CodeCommentsDeleted;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.BatchWorkManager;
@@ -71,6 +77,23 @@ public class DefaultCodeCommentTextManager extends ProjectTextManager<CodeCommen
 			builder.append(reply.getContent()).append("\n");
 		if (builder.length() != 0)
 			document.add(new TextField(FIELD_REPLIES, builder.toString(), Store.NO));
+	}
+
+	@Sessional
+	@Listen
+	public void on(CodeCommentEvent event) {
+		requestIndexLocal(event.getComment());
+	}
+	@Sessional
+	@Listen
+	public void on(CodeCommentsDeleted event) {
+		deleteEntitiesLocal(event.getCommentIds());
+	}
+
+	@Sessional
+	@Listen
+	public void on(CodeCommentDeleted event) {
+		deleteEntitiesLocal(Lists.newArrayList(event.getCommentId()));
 	}
 
 	private Query buildQuery(Project project, String queryString) {

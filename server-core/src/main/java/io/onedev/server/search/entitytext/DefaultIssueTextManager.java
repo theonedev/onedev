@@ -125,7 +125,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 
 	@Sessional
 	@Listen
-	public void on(IssueCommentUpdated event) {
+	public void on(IssueCommentEdited event) {
 		requestIndexLocal(event.getIssue());
 	}
 

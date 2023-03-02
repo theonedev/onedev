@@ -5,6 +5,8 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface CodeCommentReplyManager extends EntityManager<CodeCommentReply> {
 
-	void createOrUpdate(CodeCommentReply reply);
+	void create(CodeCommentReply reply);
+
+	void update(CodeCommentReply reply);
 	
 }	

@@ -725,12 +725,18 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 
 	@Override
 	public void onSaveComment(CodeComment comment) {
-		OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
+		if (comment.isNew())
+			OneDev.getInstance(CodeCommentManager.class).create(comment);
+		else
+			OneDev.getInstance(CodeCommentManager.class).update(comment);			
 	}
 	
 	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
-		OneDev.getInstance(CodeCommentReplyManager.class).createOrUpdate(reply);
+		if (reply.isNew())
+			OneDev.getInstance(CodeCommentReplyManager.class).create(reply);
+		else
+			OneDev.getInstance(CodeCommentReplyManager.class).update(reply);
 	}
 
 	@Override

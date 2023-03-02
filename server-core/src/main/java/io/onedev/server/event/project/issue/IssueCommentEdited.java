@@ -7,13 +7,13 @@ import io.onedev.server.security.SecurityUtils;
 
 import java.util.Date;
 
-public class IssueCommentUpdated extends IssueEvent {
+public class IssueCommentEdited extends IssueEvent {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final Long commentId;
 	
-	public IssueCommentUpdated(IssueComment comment) {
+	public IssueCommentEdited(IssueComment comment) {
 		super(SecurityUtils.getUser(), new Date(), comment.getIssue());
 		this.commentId = comment.getId();
 	}
@@ -34,7 +34,7 @@ public class IssueCommentUpdated extends IssueEvent {
 
 	@Override
 	public String getActivity() {
-		return "comment updated";
+		return "comment edited";
 	}
 
 }

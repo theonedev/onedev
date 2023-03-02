@@ -121,7 +121,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 
 	@Sessional
 	@Listen
-	public void on(PullRequestCommentUpdated event) {
+	public void on(PullRequestCommentEdited event) {
 		requestIndexLocal(event.getRequest());
 	}
 

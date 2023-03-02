@@ -29,10 +29,15 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
 	int count(Project project, @Nullable PullRequest request, Criteria<CodeComment> commentCriteria);
 
-	void delete(Collection<CodeComment> comments);
+	void delete(Collection<CodeComment> comments, Project project);
+
+	void delete(CodeComment comment);
 	
     @Nullable
     CodeComment findByUUID(String uuid);
 
-    void createOrUpdate(CodeComment comment);
+    void create(CodeComment comment);
+
+	void update(CodeComment comment);
+	
 }

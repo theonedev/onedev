@@ -4,7 +4,7 @@ import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentDeleted;
-import io.onedev.server.event.project.pullrequest.PullRequestCommentUpdated;
+import io.onedev.server.event.project.pullrequest.PullRequestCommentEdited;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -46,7 +46,7 @@ public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequ
 	@Override
 	public void update(PullRequestComment comment) {
 		dao.persist(comment);
-		listenerRegistry.post(new PullRequestCommentUpdated(comment));
+		listenerRegistry.post(new PullRequestCommentEdited(comment));
 	}
 	
 }

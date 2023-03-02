@@ -4,7 +4,7 @@ import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueCommentDeleted;
-import io.onedev.server.event.project.issue.IssueCommentUpdated;
+import io.onedev.server.event.project.issue.IssueCommentEdited;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -33,7 +33,7 @@ public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment> 
 	@Override
 	public void update(IssueComment comment) {
 		dao.persist(comment);
-		listenerRegistry.post(new IssueCommentUpdated(comment));
+		listenerRegistry.post(new IssueCommentEdited(comment));
 	}
 
 	@Transactional

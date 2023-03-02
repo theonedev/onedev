@@ -6,15 +6,14 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.codecomment.CodeCommentCreated;
-import io.onedev.server.event.project.codecomment.CodeCommentReplied;
-import io.onedev.server.event.project.codecomment.CodeCommentStatusChanged;
-import io.onedev.server.event.project.codecomment.CodeCommentUpdated;
+import io.onedev.server.event.project.codecomment.*;
 import io.onedev.server.event.project.issue.IssueChanged;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
+import io.onedev.server.event.project.issue.IssueCommentEdited;
 import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
+import io.onedev.server.event.project.pullrequest.PullRequestCommentEdited;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.*;
@@ -286,6 +285,12 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 
 	@Transactional
 	@Listen
+	public void on(IssueCommentEdited event) {
+		addReferenceChange(event.getIssue(), event.getComment().getContent());
+	}
+	
+	@Transactional
+	@Listen
 	public void on(IssueChanged event) {
 		addReferenceChange(event.getIssue(), event.getComment());
 	}
@@ -293,6 +298,12 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	@Transactional
 	@Listen
 	public void on(PullRequestCommentCreated event) {
+		addReferenceChange(event.getRequest(), event.getComment().getContent());
+	}
+
+	@Transactional
+	@Listen
+	public void on(PullRequestCommentEdited event) {
 		addReferenceChange(event.getRequest(), event.getComment().getContent());
 	}
 	
@@ -304,7 +315,13 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	
 	@Transactional
 	@Listen
-	public void on(CodeCommentReplied event) {
+	public void on(CodeCommentReplyCreated event) {
+		addReferenceChange(event.getComment(), event.getReply().getContent());
+	}
+
+	@Transactional
+	@Listen
+	public void on(CodeCommentReplyEdited event) {
 		addReferenceChange(event.getComment(), event.getReply().getContent());
 	}
 	
@@ -336,7 +353,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	
 	@Transactional
 	@Listen
-	public void on(CodeCommentUpdated event) {
+	public void on(CodeCommentEdited event) {
 		addReferenceChange(event.getComment(), event.getComment().getContent());
 	}
 	

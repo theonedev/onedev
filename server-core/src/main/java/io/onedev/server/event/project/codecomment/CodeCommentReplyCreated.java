@@ -7,13 +7,13 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class CodeCommentReplied extends CodeCommentEvent {
+public class CodeCommentReplyCreated extends CodeCommentEvent {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private final Long replyId;
 	
-	public CodeCommentReplied(CodeCommentReply reply) {
+	public CodeCommentReplyCreated(CodeCommentReply reply) {
 		super(reply.getUser(), reply.getDate(), reply.getComment());
 		replyId = reply.getId();
 	}
@@ -36,5 +36,5 @@ public class CodeCommentReplied extends CodeCommentEvent {
 	public String getUrl() {
 		return OneDev.getInstance(UrlManager.class).urlFor(getReply());
 	}
-	
+
 }

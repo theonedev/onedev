@@ -441,7 +441,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 				@Override
 				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-					OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
+					OneDev.getInstance(CodeCommentManager.class).update(comment);
 					target.add(commentContainer.get("head"));
 				}
 
@@ -584,7 +584,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								comment.setProject(context.getProject());
 								comment.setCompareContext(getCompareContext());
 								
-								OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
+								OneDev.getInstance(CodeCommentManager.class).create(comment);
 								
 								CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
@@ -595,7 +595,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 									@Override
 									protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-										OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
+										OneDev.getInstance(CodeCommentManager.class).update(comment);
 										target.add(commentContainer.get("head"));
 									}
 
@@ -653,7 +653,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 						@Override
 						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-							OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
+							OneDev.getInstance(CodeCommentManager.class).update(comment);
 							target.add(commentContainer.get("head"));
 						}
 
@@ -1247,7 +1247,10 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private void onSaveCommentReply(CodeCommentReply reply) {
 		reply.setCompareContext(getCompareContext());
-		OneDev.getInstance(CodeCommentReplyManager.class).createOrUpdate(reply);
+		if (reply.isNew())
+			OneDev.getInstance(CodeCommentReplyManager.class).create(reply);
+		else
+			OneDev.getInstance(CodeCommentReplyManager.class).update(reply);			
 	}
 	
 	private void onSaveCommentStatusChange(CodeCommentStatusChange change, String note) {

@@ -373,7 +373,7 @@ public abstract class CodeCommentListPanel extends Panel {
 											Collection<CodeComment> comments = new ArrayList<>();
 											for (IModel<CodeComment> each: selectionColumn.getSelections())
 												comments.add(each.getObject());
-											OneDev.getInstance(CodeCommentManager.class).delete(comments);
+											OneDev.getInstance(CodeCommentManager.class).delete(comments, getProject());
 											selectionColumn.getSelections().clear();
 											target.add(body);
 										}
@@ -526,7 +526,7 @@ public abstract class CodeCommentListPanel extends Panel {
 											Collection<CodeComment> comments = new ArrayList<>();
 											for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
 												comments.add(it.next());
-											OneDev.getInstance(CodeCommentManager.class).delete(comments);
+											OneDev.getInstance(CodeCommentManager.class).delete(comments, getProject());
 											dataProvider.detach();
 											selectionColumn.getSelections().clear();
 											target.add(body);

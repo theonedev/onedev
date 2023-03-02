@@ -7,12 +7,17 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class CodeCommentUpdated extends CodeCommentEvent {
+public class CodeCommentEdited extends CodeCommentEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public CodeCommentUpdated(User user, CodeComment comment) {
+	public CodeCommentEdited(User user, CodeComment comment) {
 		super(user, new Date(), comment);
+	}
+
+	@Override
+	public boolean isMinor() {
+		return true;
 	}
 
 	@Override
@@ -22,7 +27,7 @@ public class CodeCommentUpdated extends CodeCommentEvent {
 
 	@Override
 	public String getActivity() {
-		return "updated";
+		return "edited";
 	}
 
 }

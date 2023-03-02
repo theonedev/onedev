@@ -15,13 +15,12 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.codecomment.CodeCommentEvent;
-import io.onedev.server.event.project.codecomment.CodeCommentUpdated;
+import io.onedev.server.event.project.codecomment.CodeCommentEdited;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.commenttext.MarkdownText;
 
@@ -75,7 +74,7 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 					.map(it -> it.getPrimaryEmailAddress().getValue())
 					.collect(Collectors.toSet());
 
-			if (!emailAddresses.isEmpty() && !(event instanceof CodeCommentUpdated)) {
+			if (!emailAddresses.isEmpty() && !(event instanceof CodeCommentEdited)) {
 				String url = event.getUrl();
 				String subject = String.format("[Code Comment] %s:%s",
 						event.getProject().getPath(), comment.getMark().getPath());

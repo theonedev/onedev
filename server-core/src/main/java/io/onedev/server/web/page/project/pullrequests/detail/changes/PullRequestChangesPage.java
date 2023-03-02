@@ -856,8 +856,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			CompareContext compareContext = comment.getCompareContext();
 			compareContext.setOldCommitHash(state.oldCommitHash);
 			compareContext.setNewCommitHash(state.newCommitHash);
-		} 
-		OneDev.getInstance(CodeCommentManager.class).createOrUpdate(comment);
+			OneDev.getInstance(CodeCommentManager.class).create(comment);
+		} else {
+			OneDev.getInstance(CodeCommentManager.class).update(comment);
+		}
 	}
 	
 	@Override
@@ -866,8 +868,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			CompareContext compareContext = reply.getCompareContext();
 			compareContext.setOldCommitHash(state.oldCommitHash);
 			compareContext.setNewCommitHash(state.newCommitHash);
-		} 
-		OneDev.getInstance(CodeCommentReplyManager.class).createOrUpdate(reply);
+			OneDev.getInstance(CodeCommentReplyManager.class).create(reply);
+		} else {
+			OneDev.getInstance(CodeCommentReplyManager.class).update(reply);
+		}
 	}
 	
 	@Override
