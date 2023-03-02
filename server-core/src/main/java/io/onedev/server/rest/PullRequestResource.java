@@ -1,45 +1,12 @@
 package io.onedev.server.rest;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.joda.time.DateTime;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestAssignment;
-import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequestReview.Status;
-import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.PullRequestWatch;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.rest.annotation.Api;
@@ -49,6 +16,22 @@ import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.joda.time.DateTime;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(order=3000, description="In most cases, pull request resource is operated with pull request id, which is different from pull request number. "
 		+ "To get pull request id of a particular pull request number, use the <a href='/~help/api/io.onedev.server.rest.PullRequestResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -297,7 +280,7 @@ public class PullRequestResource {
 		PullRequest request = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canModify(request))
 			throw new UnauthorizedException();
-		pullRequestManager.saveDescription(request, description);
+		pullRequestChangeManager.changeDescription(request, description);
 		return Response.ok().build();
     }
 	

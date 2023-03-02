@@ -3,7 +3,6 @@ package io.onedev.server.infomanager;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.IssueChangeManager;
@@ -29,7 +28,9 @@ import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.*;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.Transaction;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,15 +79,13 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	
 	private final ProjectManager projectManager;
 	
-	private final ClusterManager clusterManager;
-	
 	private final Dao dao;
 	
 	@Inject
 	public DefaultIssueInfoManager(Dao dao, TransactionManager transactionManager,
 								   StorageManager storageManager, IssueManager issueManager,
 								   IssueChangeManager issueChangeManager, BatchWorkManager batchWorkManager,
-								   ProjectManager projectManager, ClusterManager clusterManager) {
+								   ProjectManager projectManager) {
 		this.dao = dao;
 		this.storageManager = storageManager;
 		this.issueManager = issueManager;
@@ -94,7 +93,6 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		this.batchWorkManager = batchWorkManager;
 		this.transactionManager = transactionManager;
 		this.projectManager = projectManager;
-		this.clusterManager = clusterManager;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -121,77 +119,52 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store stateHistoryStore = getStore(env, STATE_HISTORY_STORE);
 
-		Long lastIssueId = env.computeInTransaction(new TransactionalComputable<Long>() {
-			
-			@Override
-			public Long compute(Transaction txn) {
-				return readLong(defaultStore, txn, LAST_ISSUE_KEY, 0);
-			}
-			
-		});
+		Long lastIssueId = env.computeInTransaction(txn -> readLong(defaultStore, txn, LAST_ISSUE_KEY, 0));
 		
 		List<Issue> unprocessedIssues = issueManager.queryAfter(projectId, lastIssueId, BATCH_SIZE); 
-		env.executeInTransaction(new TransactionalExecutable() {
-
-			@Override
-			public void execute(Transaction txn) {
-				Issue lastIssue = null;
-				for (Issue issue: unprocessedIssues) {
-					initStateHistory(stateHistoryStore, txn, issue);
-					lastIssue = issue;
-				}
-				if (lastIssue != null)
-					defaultStore.put(txn, LAST_ISSUE_KEY, new LongByteIterable(lastIssue.getId()));
+		env.executeInTransaction(txn -> {
+			Issue lastIssue = null;
+			for (Issue issue: unprocessedIssues) {
+				initStateHistory(stateHistoryStore, txn, issue);
+				lastIssue = issue;
 			}
-			
+			if (lastIssue != null)
+				defaultStore.put(txn, LAST_ISSUE_KEY, new LongByteIterable(lastIssue.getId()));
 		});
 		
-		Long lastChangeId = env.computeInTransaction(new TransactionalComputable<Long>() {
-			
-			@Override
-			public Long compute(Transaction txn) {
-				return readLong(defaultStore, txn, LAST_ISSUE_CHANGE_KEY, 0);
-			}
-			
-		});
+		Long lastChangeId = env.computeInTransaction(txn -> readLong(defaultStore, txn, LAST_ISSUE_CHANGE_KEY, 0));
 		
 		List<IssueChange> unprocessedChanges = issueChangeManager.queryAfter(projectId, lastChangeId, BATCH_SIZE); 
-		env.executeInTransaction(new TransactionalExecutable() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public void execute(Transaction txn) {
-				IssueChange lastChange = null;
-				
-				for (IssueChange change: unprocessedChanges) {
-					Issue issue = change.getIssue();
-					initStateHistory(stateHistoryStore, txn, issue);
-					
-					String state = null;
-					if (change.getData() instanceof IssueStateChangeData) {
-						IssueStateChangeData changeData = (IssueStateChangeData) change.getData();
-						if (!changeData.getOldState().equals(changeData.getNewState()))
-							state = changeData.getNewState();
-					} else if (change.getData() instanceof IssueBatchUpdateData) {
-						IssueBatchUpdateData changeData = (IssueBatchUpdateData) change.getData();
-						if (!changeData.getOldState().equals(changeData.getNewState()))
-							state = changeData.getNewState();
-					}
-
-					if (state != null) {
-						ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
-						byte[] bytes = Preconditions.checkNotNull(readBytes(stateHistoryStore, txn, issueKey));
-						Map<Integer, String> stateHistory = (Map<Integer, String>) SerializationUtils.deserialize(bytes);
-						stateHistory.put(new Day(change.getDate()).getValue(), state);
-						stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
-					}
-					
-					lastChange = change;
-				}
-				if (lastChange != null)
-					defaultStore.put(txn, LAST_ISSUE_CHANGE_KEY, new LongByteIterable(lastChange.getId()));
-			}
+		env.executeInTransaction(txn -> {
+			IssueChange lastChange = null;
 			
+			for (IssueChange change: unprocessedChanges) {
+				Issue issue = change.getIssue();
+				initStateHistory(stateHistoryStore, txn, issue);
+				
+				String state = null;
+				if (change.getData() instanceof IssueStateChangeData) {
+					IssueStateChangeData changeData = (IssueStateChangeData) change.getData();
+					if (!changeData.getOldState().equals(changeData.getNewState()))
+						state = changeData.getNewState();
+				} else if (change.getData() instanceof IssueBatchUpdateData) {
+					IssueBatchUpdateData changeData = (IssueBatchUpdateData) change.getData();
+					if (!changeData.getOldState().equals(changeData.getNewState()))
+						state = changeData.getNewState();
+				}
+
+				if (state != null) {
+					ArrayByteIterable issueKey = new LongByteIterable(issue.getId());
+					byte[] bytes = Preconditions.checkNotNull(readBytes(stateHistoryStore, txn, issueKey));
+					Map<Integer, String> stateHistory = (Map<Integer, String>) SerializationUtils.deserialize(bytes);
+					stateHistory.put(new Day(change.getDate()).getValue(), state);
+					stateHistoryStore.put(txn, issueKey, new ArrayByteIterable(SerializationUtils.serialize((Serializable) stateHistory)));
+				}
+				
+				lastChange = change;
+			}
+			if (lastChange != null)
+				defaultStore.put(txn, LAST_ISSUE_CHANGE_KEY, new LongByteIterable(lastChange.getId()));
 		});
 		
 		logger.debug("Collected issue info");
@@ -281,14 +254,7 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	private void remove(Long projectId, Long issueId) {
 		Environment env = getEnv(projectId.toString());
 		Store stateHistoryStore = getStore(env, STATE_HISTORY_STORE);
-		env.executeInTransaction(new TransactionalExecutable() {
-
-			@Override
-			public void execute(Transaction txn) {
-				stateHistoryStore.delete(txn, new LongByteIterable(issueId));
-			}
-			
-		});
+		env.executeInTransaction(txn -> stateHistoryStore.delete(txn, new LongByteIterable(issueId)));
 	}
 	
 	@Sessional
@@ -326,6 +292,12 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	public void on(IssuesDeleted event) {
 		for (var issueId: event.getIssueIds()) 
 			remove(event.getProject().getId(), issueId);
+	}
+
+	@Sessional
+	@Listen
+	public void on(IssueDeleted event) {
+		remove(event.getProject().getId(), event.getIssueId());
 	}
 	
 	@Sessional
@@ -387,36 +359,30 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 				Environment env = getEnv(projectId.toString());
 				Store stateHistoryStore = getStore(env, STATE_HISTORY_STORE);
 				
-				return env.computeInTransaction(new TransactionalComputable<Map<Integer, String>>() {
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public Map<Integer, String> compute(Transaction txn) {
-						Map<Integer, String> dailyStates = new LinkedHashMap<>();
-						byte[] bytes = readBytes(stateHistoryStore, txn, new LongByteIterable(issueId));
-						if (bytes != null) {
-							Map<Integer, String> stateHistory = (Map<Integer, String>) SerializationUtils.deserialize(bytes);
-							String currentState = null;
-							for (Map.Entry<Integer, String> entry: stateHistory.entrySet()) {
-								if (entry.getKey()<=fromDay) 
-									currentState = entry.getValue();
-								else
-									break;
-							}
-							
-							int currentDay = fromDay;
-							while (currentDay <= toDay) {
-								String stateOnDay = stateHistory.get(currentDay);
-								if (stateOnDay != null) 
-									currentState = stateOnDay;
-								dailyStates.put(currentDay, currentState);
-								currentDay = new Day(new Day(currentDay).getDate().plusDays(1)).getValue();
-							}
-						} 
+				return env.computeInTransaction(txn -> {
+					Map<Integer, String> dailyStates = new LinkedHashMap<>();
+					byte[] bytes = readBytes(stateHistoryStore, txn, new LongByteIterable(issueId));
+					if (bytes != null) {
+						Map<Integer, String> stateHistory = (Map<Integer, String>) SerializationUtils.deserialize(bytes);
+						String currentState = null;
+						for (Map.Entry<Integer, String> entry: stateHistory.entrySet()) {
+							if (entry.getKey()<=fromDay) 
+								currentState = entry.getValue();
+							else
+								break;
+						}
 						
-						return dailyStates;
-					}
+						int currentDay = fromDay;
+						while (currentDay <= toDay) {
+							String stateOnDay = stateHistory.get(currentDay);
+							if (stateOnDay != null) 
+								currentState = stateOnDay;
+							dailyStates.put(currentDay, currentState);
+							currentDay = new Day(new Day(currentDay).getDate().plusDays(1)).getValue();
+						}
+					} 
 					
+					return dailyStates;
 				});
 			}
 			

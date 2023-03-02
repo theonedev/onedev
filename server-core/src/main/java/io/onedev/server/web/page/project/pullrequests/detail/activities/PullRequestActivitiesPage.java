@@ -10,6 +10,8 @@ import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.*;
+import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCommitData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
@@ -147,7 +149,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 					ProjectScopedCommit commit = ((PullRequestReferencedFromCommitData) change.getData()).getCommit();
 					if (commit.canDisplay() && getPullRequest().getUpdates().stream().noneMatch(it->it.getCommits().contains(commit.getCommitId()))) 
 						otherActivities.add(new PullRequestChangeActivity(change));
-				} else {
+				} else if (!(change.getData() instanceof PullRequestDescriptionChangeData)) {
 					otherActivities.add(new PullRequestChangeActivity(change));
 				}
 			}
@@ -314,7 +316,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 						comment.setRequest(getPullRequest());
 						comment.setUser(getLoginUser());
 						comment.setContent(input.getModelObject());
-						OneDev.getInstance(PullRequestCommentManager.class).createOrUpdate(comment);
+						OneDev.getInstance(PullRequestCommentManager.class).create(comment, new ArrayList<>());
 						input.clearMarkdown();
 
 						target.add(fragment);

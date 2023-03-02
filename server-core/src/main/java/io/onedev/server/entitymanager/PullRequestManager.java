@@ -1,13 +1,5 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import org.eclipse.jgit.lib.ObjectId;
-
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
@@ -16,6 +8,12 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectPullRequestStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
@@ -72,9 +70,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	List<PullRequest> query(Project targetProject, String term, int count);
 
-	void delete(Collection<PullRequest> requests);
-	
-	void saveDescription(PullRequest request, @Nullable String description);
+	void delete(Collection<PullRequest> requests, Project project);
 	
 	List<ProjectPullRequestStats> queryStats(Collection<Project> projects);
 	

@@ -1,18 +1,15 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Date;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTargetBranchChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
@@ -21,16 +18,26 @@ import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Date;
+import java.util.Objects;
+
 @Singleton
 public class DefaultPullRequestChangeManager extends BaseEntityManager<PullRequestChange> 
 		implements PullRequestChangeManager {
 
 	private final ListenerRegistry listenerRegistry;
 	
+	private final EntityReferenceManager entityReferenceManager;
+	
 	@Inject
-	public DefaultPullRequestChangeManager(Dao dao, ListenerRegistry listenerRegistry) {
+	public DefaultPullRequestChangeManager(Dao dao, ListenerRegistry listenerRegistry, 
+										   EntityReferenceManager entityReferenceManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
+		this.entityReferenceManager = entityReferenceManager;
 	}
 
 	@Transactional
@@ -81,6 +88,25 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 		}
 	}
 
+	@Transactional
+	@Override
+	public void changeDescription(PullRequest request, @Nullable String description) {
+		String prevDescription = request.getDescription();
+		if (!Objects.equals(description, prevDescription)) {
+			if (description != null && description.length() > PullRequest.MAX_DESCRIPTION_LEN)
+				throw new ExplicitException("Description too long");
+			request.setDescription(description);
+			entityReferenceManager.addReferenceChange(request, description);
+
+			PullRequestChange change = new PullRequestChange();
+			change.setRequest(request);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new PullRequestDescriptionChangeData(prevDescription, request.getDescription()));
+			create(change, null);
+			dao.persist(request);
+		}
+	}
+	
 	@Transactional
 	@Override
 	public void changeTargetBranch(PullRequest request, String targetBranch) {

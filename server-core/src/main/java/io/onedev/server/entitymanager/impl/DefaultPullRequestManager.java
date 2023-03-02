@@ -11,7 +11,6 @@ import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.*;
-import io.onedev.server.entityreference.EntityReferenceManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -22,7 +21,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.PullRequestInfoManager;
-import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.*;
 import io.onedev.server.model.PullRequest.Status;
 import io.onedev.server.model.support.CompareContext;
@@ -103,8 +101,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	
 	private final TransactionManager transactionManager;
 	
-	private final EntityReferenceManager referenceManager;
-	
 	private final PendingSuggestionApplyManager pendingSuggestionApplyManager;
 	
 	private final GitService gitService;
@@ -114,15 +110,14 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	private final SequenceGenerator numberGenerator;
 	
 	@Inject
-	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager updateManager,  
-			PullRequestReviewManager reviewManager, MarkdownManager markdownManager, 
-			ListenerRegistry listenerRegistry, PullRequestChangeManager changeManager, 
-			BuildManager buildManager, TransactionManager transactionManager, 
-			ProjectManager projectManager, CommitInfoManager commitInfoManager, 
-			EntityReferenceManager referenceManager, ClusterManager clusterManager, 
-			UserManager userManager, GitService gitService,
-			PendingSuggestionApplyManager pendingSuggestionApplyManager, 
-			PullRequestInfoManager pullRequestInfoManager) {
+	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager updateManager, 
+									 PullRequestReviewManager reviewManager, ListenerRegistry listenerRegistry, 
+									 PullRequestChangeManager changeManager, BuildManager buildManager, 
+									 TransactionManager transactionManager, ProjectManager projectManager, 
+									 CommitInfoManager commitInfoManager, ClusterManager clusterManager, 
+									 UserManager userManager, GitService gitService, 
+									 PendingSuggestionApplyManager pendingSuggestionApplyManager, 
+									 PullRequestInfoManager pullRequestInfoManager) {
 		super(dao);
 		
 		this.updateManager = updateManager;
@@ -133,7 +128,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		this.buildManager = buildManager;
 		this.projectManager = projectManager;
 		this.commitInfoManager = commitInfoManager;
-		this.referenceManager = referenceManager;
 		this.pendingSuggestionApplyManager = pendingSuggestionApplyManager;
 		this.userManager = userManager;
 		this.gitService = gitService;
@@ -145,12 +139,17 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(PullRequestManager.class);
 	}
-	
+
 	@Transactional
 	@Override
 	public void delete(PullRequest request) {
+		doDelete(request);
+		listenerRegistry.post(new PullRequestDeleted(request));
+	}
+	
+	private void doDelete(PullRequest request) {
 		Collection<String> refs = Lists.newArrayList(
-				request.getHeadRef(), request.getMergeRef(), request.getBaseRef());
+				request.getHeadRef(), request.getMergeRef(), request.getBaseRef(), request.getBuildRef());
 		for (PullRequestUpdate update: request.getUpdates())
 			refs.add(update.getHeadRef());
 		
@@ -943,22 +942,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 	@Transactional
 	@Override
-	public void delete(Collection<PullRequest> requests) {
+	public void delete(Collection<PullRequest> requests, Project project) {
 		for (PullRequest request: requests)
-			delete(request);
-	}
-
-	@Transactional
-	@Override
-	public void saveDescription(PullRequest request, @Nullable String description) {
-		String prevDescription = request.getDescription();
-		if (!Objects.equals(description, prevDescription)) {
-			if (description != null && description.length() > PullRequest.MAX_DESCRIPTION_LEN)
-				throw new ExplicitException("Description too long"); 
-			request.setDescription(description);
-			referenceManager.addReferenceChange(request, description);
-			dao.persist(request);
-		}
+			doDelete(request);
+		listenerRegistry.post(new PullRequestsDeleted(project, requests));
 	}
 
 	@Sessional

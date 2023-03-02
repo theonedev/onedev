@@ -14,7 +14,7 @@ import io.onedev.server.event.project.issue.IssueChanged;
 import io.onedev.server.event.project.issue.IssueCommentCreated;
 import io.onedev.server.event.project.issue.IssueOpened;
 import io.onedev.server.event.project.pullrequest.PullRequestChanged;
-import io.onedev.server.event.project.pullrequest.PullRequestCommented;
+import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.*;
@@ -292,7 +292,7 @@ public class DefaultEntityReferenceManager implements EntityReferenceManager {
 	
 	@Transactional
 	@Listen
-	public void on(PullRequestCommented event) {
+	public void on(PullRequestCommentCreated event) {
 		addReferenceChange(event.getRequest(), event.getComment().getContent());
 	}
 	

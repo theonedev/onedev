@@ -14,6 +14,8 @@ public interface PullRequestChangeManager extends EntityManager<PullRequestChang
 	void changeMergeStrategy(PullRequest request, MergeStrategy mergeStrategy);
 	
 	void changeTitle(PullRequest request, String title);
+
+	void changeDescription(PullRequest request, @Nullable String description);
 	
 	void changeTargetBranch(PullRequest request, String targetBranch);
 	

@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.hazelcast.core.HazelcastInstance;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
@@ -17,7 +18,6 @@ import io.onedev.server.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.changedata.IssueProjectChangeData;
@@ -850,7 +850,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		dao.remove(issue);
 	
 		removeFromCacheAfterCommit(Lists.newArrayList(issue));
-		listenerRegistry.post(new IssuesDeleted(issue.getProject(), Lists.newArrayList(issue)));
+		listenerRegistry.post(new IssueDeleted(issue));
 	}
 	
 	private String getCacheKey(Issue issue) {

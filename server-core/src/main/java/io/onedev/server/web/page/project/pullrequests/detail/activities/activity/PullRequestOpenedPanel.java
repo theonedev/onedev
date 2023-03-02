@@ -1,18 +1,9 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.IModel;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentSupport;
 import io.onedev.server.attachment.ProjectAttachmentSupport;
-import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -20,9 +11,17 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserCache;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.comment.CommentPanel;
+import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.util.DeleteCallback;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.IModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
@@ -49,7 +48,7 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				OneDev.getInstance(PullRequestManager.class).saveDescription(getPullRequest(), comment);
+				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment);
 			}
 
 			@Override

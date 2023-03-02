@@ -1,19 +1,30 @@
 package io.onedev.server.search.entitytext;
 
-import java.io.ObjectStreamException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import com.google.common.collect.Lists;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.project.pullrequest.*;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
+import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.lucene.BooleanQueryBuilder;
+import io.onedev.server.util.lucene.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -27,22 +38,12 @@ import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.concurrent.BatchWorkManager;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.lucene.BooleanQueryBuilder;
-import io.onedev.server.util.lucene.LuceneUtils;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.ObjectStreamException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultPullRequestTextManager extends ProjectTextManager<PullRequest> 
@@ -98,6 +99,50 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 			document.add(new TextField(FIELD_COMMENTS, builder.toString(), Store.NO));
 	}
 
+	@Sessional
+	@Listen
+	public void on(PullRequestOpened event) {
+		requestIndexLocal(event.getRequest());
+	}
+
+	@Sessional
+	@Listen
+	public void on(PullRequestChanged event) {
+		PullRequestChangeData data = event.getChange().getData();
+		if (data instanceof PullRequestTitleChangeData || data instanceof PullRequestDescriptionChangeData)
+			requestIndexLocal(event.getRequest());
+	}
+
+	@Sessional
+	@Listen
+	public void on(PullRequestCommentCreated event) {
+		requestIndexLocal(event.getRequest());
+	}
+
+	@Sessional
+	@Listen
+	public void on(PullRequestCommentUpdated event) {
+		requestIndexLocal(event.getRequest());
+	}
+
+	@Sessional
+	@Listen
+	public void on(PullRequestCommentDeleted event) {
+		requestIndexLocal(event.getRequest());
+	}
+
+	@Sessional
+	@Listen
+	public void on(PullRequestsDeleted event) {
+		deleteEntitiesLocal(event.getRequestIds());
+	}
+
+	@Sessional
+	@Listen
+	public void on(PullRequestDeleted event) {
+		deleteEntitiesLocal(Lists.newArrayList(event.getRequestId()));
+	}
+	
 	@Nullable
 	private Query buildQuery(@Nullable Project project, String queryString) {
 		BooleanQueryBuilder queryBuilder = new BooleanQueryBuilder();
@@ -123,7 +168,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 		try {
 			Long number = Long.valueOf(numberString);
 			contentQueryBuilder.add(new BoostQuery(LongPoint.newExactQuery(FIELD_NUMBER, number), 1f), Occur.SHOULD);
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException ignored) {
 		}
 		
 		try (Analyzer analyzer = newAnalyzer()) {

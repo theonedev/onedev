@@ -137,38 +137,26 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store commitToIdsStore = getStore(env, COMMIT_TO_IDS_STORE);
 
-		Long lastPullRequestUpdateId = env.computeInTransaction(new TransactionalComputable<Long>() {
-			
-			@Override
-			public Long compute(Transaction txn) {
-				return readLong(defaultStore, txn, LAST_PULL_REQUEST_UPDATE_KEY, 0);
-			}
-			
-		});
+		Long lastPullRequestUpdateId = env.computeInTransaction(txn -> readLong(defaultStore, txn, LAST_PULL_REQUEST_UPDATE_KEY, 0));
 		
 		List<PullRequestUpdate> unprocessedPullRequestUpdates = pullRequestUpdateManager.queryAfter(
 				projectId, lastPullRequestUpdateId, BATCH_SIZE); 
-		env.executeInTransaction(new TransactionalExecutable() {
-
-			@Override
-			public void execute(Transaction txn) {
-				PullRequestUpdate lastUpdate = null;
-				for (PullRequestUpdate update: unprocessedPullRequestUpdates) {
-					PullRequest request = update.getRequest();
-					if (request.isValid()) {
-						for (ObjectId commit: update.getCommits()) {
-							ByteIterable commitKey = new CommitByteIterable(commit);
-							Collection<Long> pullRequestIds = readLongs(commitToIdsStore, txn, commitKey);
-							pullRequestIds.add(update.getRequest().getId());
-							writeLongs(commitToIdsStore, txn, commitKey, pullRequestIds);
-						}
+		env.executeInTransaction(txn -> {
+			PullRequestUpdate lastUpdate = null;
+			for (PullRequestUpdate update: unprocessedPullRequestUpdates) {
+				PullRequest request = update.getRequest();
+				if (request.isValid()) {
+					for (ObjectId commit: update.getCommits()) {
+						ByteIterable commitKey = new CommitByteIterable(commit);
+						Collection<Long> pullRequestIds = readLongs(commitToIdsStore, txn, commitKey);
+						pullRequestIds.add(update.getRequest().getId());
+						writeLongs(commitToIdsStore, txn, commitKey, pullRequestIds);
 					}
-					lastUpdate = update;
 				}
-				if (lastUpdate != null)
-					defaultStore.put(txn, LAST_PULL_REQUEST_UPDATE_KEY, new LongByteIterable(lastUpdate.getId()));
+				lastUpdate = update;
 			}
-			
+			if (lastUpdate != null)
+				defaultStore.put(txn, LAST_PULL_REQUEST_UPDATE_KEY, new LongByteIterable(lastUpdate.getId()));
 		});
 		logger.debug("Collected pull request info (project id: {})", projectId);
 		
@@ -188,14 +176,7 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 				Environment env = getEnv(projectId.toString());
 				Store store = getStore(env, COMMIT_TO_IDS_STORE);
 				
-				return env.computeInTransaction(new TransactionalComputable<Collection<Long>>() {
-					
-					@Override
-					public Collection<Long> compute(Transaction txn) {
-						return readLongs(store, txn, new CommitByteIterable(commitId));
-					}
-					
-				});
+				return env.computeInTransaction(txn -> readLongs(store, txn, new CommitByteIterable(commitId)));
 			}
 			
 		});
@@ -269,17 +250,12 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 				Environment env = getEnv(targetProjectId.toString());
 				Store store = getStore(env, COMPARISON_BASES_STORE);
 				
-				return env.computeInTransaction(new TransactionalComputable<ObjectId>() {
-					
-					@Override
-					public ObjectId compute(Transaction txn) {
-						byte[] valueBytes = readBytes(store, txn, getComparisonBaseKey(requestId, commitId1, commitId2));
-						if (valueBytes != null)
-							return ObjectId.fromRaw(valueBytes);
-						else
-							return null;
-					}
-					
+				return env.computeInTransaction(txn -> {
+					byte[] valueBytes = readBytes(store, txn, getComparisonBaseKey(requestId, commitId1, commitId2));
+					if (valueBytes != null)
+						return ObjectId.fromRaw(valueBytes);
+					else
+						return null;
 				});
 			}
 			
@@ -310,14 +286,7 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 				Environment env = getEnv(targetProjectId.toString());
 				Store store = getStore(env, COMPARISON_BASES_STORE);
 				
-				env.executeInTransaction(new TransactionalExecutable() {
-					
-					@Override
-					public void execute(Transaction txn) {
-						store.put(txn, getComparisonBaseKey(requestId, commitId1, commitId2), new CommitByteIterable(comparisonBase));
-					}
-					
-				});
+				env.executeInTransaction(txn -> store.put(txn, getComparisonBaseKey(requestId, commitId1, commitId2), new CommitByteIterable(comparisonBase)));
 				return null;
 			}
 			

@@ -244,8 +244,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		}
 
 		Collection<String> notifiedEmailAddresses;
-		if (event instanceof PullRequestCommented)
-			notifiedEmailAddresses = ((PullRequestCommented) event).getNotifiedEmailAddresses();
+		if (event instanceof PullRequestCommentCreated)
+			notifiedEmailAddresses = ((PullRequestCommentCreated) event).getNotifiedEmailAddresses();
 		else
 			notifiedEmailAddresses = new ArrayList<>();
 

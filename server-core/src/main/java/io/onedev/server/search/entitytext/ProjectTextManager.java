@@ -514,7 +514,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	protected static interface WriterRunnable {
 
-		abstract void run(IndexWriter writer) throws IOException;
+		void run(IndexWriter writer) throws IOException;
 
 	}
 	

@@ -137,6 +137,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		}
 	}
 
+	@Transactional
 	@Override
 	public void changeDescription(Issue issue, @Nullable String description) {
 		String prevDescription = issue.getDescription();

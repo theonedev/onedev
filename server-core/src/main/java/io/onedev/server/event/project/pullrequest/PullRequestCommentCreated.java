@@ -9,7 +9,7 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.util.commenttext.CommentText;
 import io.onedev.server.util.commenttext.MarkdownText;
 
-public class PullRequestCommented extends PullRequestEvent {
+public class PullRequestCommentCreated extends PullRequestEvent {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,7 @@ public class PullRequestCommented extends PullRequestEvent {
 	
 	private final Collection<String> notifiedEmailAddresses;
 	
-	public PullRequestCommented(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
+	public PullRequestCommentCreated(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
 		super(comment.getUser(), comment.getDate(), comment.getRequest());
 		commentId = comment.getId();
 		this.notifiedEmailAddresses = notifiedEmailAddresses;

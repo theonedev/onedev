@@ -705,7 +705,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		String content = stripQuotationAndSignature(sendSetting, getText(pullRequest.getProject(), pullRequest.getUUID(), message, null));
 		if (content != null) {
 			comment.setContent(decorateContent(content));
-			pullRequestCommentManager.createOrUpdate(comment, receiverEmailAddresses);
+			pullRequestCommentManager.create(comment, receiverEmailAddresses);
 		}
 	}
 	

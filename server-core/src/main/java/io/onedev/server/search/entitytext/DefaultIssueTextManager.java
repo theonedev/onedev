@@ -1,5 +1,6 @@
 package io.onedev.server.search.entitytext;
 
+import com.google.common.collect.Lists;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
@@ -15,7 +16,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
@@ -67,19 +67,15 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	
 	private final IssueLinkManager linkManager;
 	
-	private final SessionManager sessionManager;
-	
 	@Inject
 	public DefaultIssueTextManager(Dao dao, StorageManager storageManager, BatchWorkManager batchWorkManager, 
 								   TransactionManager transactionManager, ProjectManager projectManager, 
 								   IssueFieldManager fieldManager, IssueLinkManager linkManager, 
-								   ClusterManager clusterManager, UserManager userManager, 
-								   SessionManager sessionManager) {
+								   ClusterManager clusterManager, UserManager userManager) {
 		super(dao, storageManager, batchWorkManager, transactionManager, projectManager, clusterManager);
 		this.fieldManager = fieldManager;
 		this.linkManager = linkManager;
 		this.userManager = userManager;
-		this.sessionManager = sessionManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -143,6 +139,12 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	@Listen
 	public void on(IssuesDeleted event) {
 		deleteEntitiesLocal(event.getIssueIds());
+	}
+
+	@Sessional
+	@Listen
+	public void on(IssueDeleted event) {
+		deleteEntitiesLocal(Lists.newArrayList(event.getIssueId()));
 	}
 	
 	@Sessional

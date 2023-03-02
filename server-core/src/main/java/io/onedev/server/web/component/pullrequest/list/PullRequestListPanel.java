@@ -347,7 +347,7 @@ public abstract class PullRequestListPanel extends Panel {
 										Collection<PullRequest> requests = new ArrayList<>();
 										for (IModel<PullRequest> each: selectionColumn.getSelections())
 											requests.add(each.getObject());
-										OneDev.getInstance(PullRequestManager.class).delete(requests);
+										OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
 										target.add(body);
 										selectionColumn.getSelections().clear();
 									}
@@ -485,7 +485,7 @@ public abstract class PullRequestListPanel extends Panel {
 										Collection<PullRequest> requests = new ArrayList<>();
 										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();)
 											requests.add(it.next());
-										OneDev.getInstance(PullRequestManager.class).delete(requests);
+										OneDev.getInstance(PullRequestManager.class).delete(requests, getProject());
 										dataProvider.detach();
 										target.add(body);
 										selectionColumn.getSelections().clear();
