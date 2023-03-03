@@ -35,6 +35,7 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import javax.annotation.Nullable;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.ws.rs.GET;
@@ -126,14 +127,9 @@ public class ExampleValuePanel extends Panel {
 			builder.append(toJson(((AbstractEntity)getValue()).getId()));
 		} else if (getValue() instanceof Collection) {
 			List<String> elements = new ArrayList<>();
-			visitChildren(ExampleValuePanel.class, new IVisitor<ExampleValuePanel, Void>() {
-
-				@Override
-				public void component(ExampleValuePanel object, IVisit<Void> visit) {
-					elements.add(object.getValueAsJson());
-					visit.dontGoDeeper();
-				}
-				
+			visitChildren(ExampleValuePanel.class, (IVisitor<ExampleValuePanel, Void>) (object, visit) -> {
+				elements.add(object.getValueAsJson());
+				visit.dontGoDeeper();
 			});
 			if (elements.isEmpty()) 
 				builder.append("[ ]");
@@ -315,29 +311,29 @@ public class ExampleValuePanel extends Panel {
 	
 	private Fragment newArrayFragment() {
 		Fragment fragment = new Fragment("content", "arrayFrag", this);
-		fragment.add(new ListView<Serializable>("elements", new AbstractReadOnlyModel<List<Serializable>>() {
+		fragment.add(new ListView<>("elements", new AbstractReadOnlyModel<List<Serializable>>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
 			public List<Serializable> getObject() {
-				return new ArrayList<Serializable>((Collection<? extends Serializable>) getValue());
+				return new ArrayList<>((Collection<? extends Serializable>) getValue());
 			}
-			
+
 		}) {
 
 			@Override
 			protected void populateItem(ListItem<Serializable> item) {
-				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
 						Type declaredType = ReflectionUtils.getCollectionElementType(getDeclaredType());
-						return new ValueInfo(getValueOrigin(), declaredType, null);
+						return new ValueInfo(getValueOrigin(), declaredType);
 					}
-					
+
 				};
 
-				item.add(new ExampleValuePanel("element", new IModel<Serializable>() {
+				item.add(new ExampleValuePanel("element", new IModel<>() {
 
 					@Override
 					public void detach() {
@@ -348,20 +344,20 @@ public class ExampleValuePanel extends Panel {
 						return item.getModelObject();
 					}
 
-					@SuppressWarnings({ "unchecked", "rawtypes" })
+					@SuppressWarnings({"unchecked", "rawtypes"})
 					@Override
 					public void setObject(Serializable object) {
-						Collection collection = (Collection)getValue();
+						Collection collection = (Collection) getValue();
 						collection.remove(item.getModelObject());
 						collection.add(object);
 					}
-					
+
 				}, valueInfoModel, requestBodyClass));
-				
+
 				item.add(new WebMarkupContainer("comma")
-						.setVisible(item.getIndex() < getModelObject().size()-1));
+						.setVisible(item.getIndex() < getModelObject().size() - 1));
 			}
-			
+
 		});
 		return fragment;
 	}
@@ -371,42 +367,42 @@ public class ExampleValuePanel extends Panel {
 		
 		fragment.add(new WebMarkupContainer("typeInfo").setVisible(false));
 		
-		IModel<List<Map.Entry<Serializable, Serializable>>> entriesModel = 
-				new AbstractReadOnlyModel<List<Map.Entry<Serializable, Serializable>>>() {
+		IModel<List<Map.Entry<Serializable, Serializable>>> entriesModel =
+				new AbstractReadOnlyModel<>() {
 
-			@SuppressWarnings("unchecked")
-			@Override
-			public List<Map.Entry<Serializable, Serializable>> getObject() {
-				return new ArrayList<Map.Entry<Serializable, Serializable>>(((Map<Serializable, Serializable>)getValue()).entrySet());
-			}
-			
-		};
+					@SuppressWarnings("unchecked")
+					@Override
+					public List<Map.Entry<Serializable, Serializable>> getObject() {
+						return new ArrayList<>(((Map<Serializable, Serializable>) getValue()).entrySet());
+					}
+
+				};
 		
-		fragment.add(new ListView<Map.Entry<Serializable, Serializable>>("properties", entriesModel) {
+		fragment.add(new ListView<>("properties", entriesModel) {
 
 			@Override
 			protected void populateItem(ListItem<Map.Entry<Serializable, Serializable>> item) {
-				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
 						Type declaredType = ReflectionUtils.getMapKeyType(getDeclaredType());
-						return new ValueInfo(getValueOrigin(), declaredType, null);
+						return new ValueInfo(getValueOrigin(), declaredType);
 					}
-					
+
 				};
 				item.add(new ExampleValuePanel("name", Model.of(item.getModelObject().getKey()), valueInfoModel, requestBodyClass));
-				
-				valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+
+				valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
 						Type declaredType = ReflectionUtils.getMapValueType(getDeclaredType());
-						return new ValueInfo(getValueOrigin(), declaredType, null);
+						return new ValueInfo(getValueOrigin(), declaredType);
 					}
-						
+
 				};
-				item.add(new ExampleValuePanel("value", new IModel<Serializable>() {
+				item.add(new ExampleValuePanel("value", new IModel<>() {
 
 					@Override
 					public void detach() {
@@ -420,16 +416,16 @@ public class ExampleValuePanel extends Panel {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void setObject(Serializable object) {
-						Map<Serializable, Serializable> map = (Map<Serializable, Serializable>)getValue();
+						Map<Serializable, Serializable> map = (Map<Serializable, Serializable>) getValue();
 						map.put(item.getModelObject().getKey(), object);
 					}
-					
+
 				}, valueInfoModel, requestBodyClass));
-				
+
 				item.add(new WebMarkupContainer("comma")
-						.setVisible(item.getIndex() < getModelObject().size()-1));
+						.setVisible(item.getIndex() < getModelObject().size() - 1));
 			}
-			
+
 		});
 		return fragment;
 	}
@@ -437,13 +433,18 @@ public class ExampleValuePanel extends Panel {
 	private Fragment newObjectFragment() {
 		Fragment fragment = new Fragment("content", "objectFrag", this);
 		
-		IModel<List<Field>> fieldsModel = new LoadableDetachableModel<List<Field>>() {
+		IModel<List<Field>> fieldsModel = new LoadableDetachableModel<>() {
 
 			@Override
 			protected List<Field> load() {
-				return ApiHelpUtils.getJsonFields(getValue().getClass(), getValueOrigin());
+				List<Field> fields = ApiHelpUtils.getJsonFields(getValue().getClass(), getValueOrigin());
+				for (Iterator<Field> it = fields.iterator(); it.hasNext();) {
+					if (getValueInfo().isCreateOnly() && it.next().getAnnotation(Id.class) != null) 
+						it.remove();
+				}
+				return fields;
 			}
-			
+
 		};
 		
 		if (getDeclaredClass() != null 
@@ -452,23 +453,23 @@ public class ExampleValuePanel extends Panel {
 				&& !Map.class.isAssignableFrom(getDeclaredClass())) {
 			Fragment typeInfoFragment = new Fragment("typeInfo", "typeInfoFrag", this);
 			
-			IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+			IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<>() {
 
 				@Override
 				protected ValueInfo load() {
-					return new ValueInfo(getValueOrigin(), String.class, null);
+					return new ValueInfo(getValueOrigin(), String.class);
 				}
-				
+
 			};
 			typeInfoFragment.add(new ExampleValuePanel("name", Model.of(JsonTypeInfo.Id.NAME.getDefaultPropertyName()), 
 					valueInfoModel, requestBodyClass));
-			typeInfoFragment.add(new ExampleValuePanel("value", new AbstractReadOnlyModel<Serializable>() {
+			typeInfoFragment.add(new ExampleValuePanel("value", new AbstractReadOnlyModel<>() {
 
 				@Override
 				public Serializable getObject() {
 					return getValue().getClass().getSimpleName();
 				}
-				
+
 			}, valueInfoModel, requestBodyClass));
 
 			typeInfoFragment.add(new MenuLink("implementations") {
@@ -526,7 +527,7 @@ public class ExampleValuePanel extends Panel {
 
 					@Override
 					protected ValueInfo load() {
-						return new ValueInfo(getValueOrigin(), String.class, null);
+						return new ValueInfo(getValueOrigin(), String.class);
 					}
 					
 				};
@@ -536,17 +537,17 @@ public class ExampleValuePanel extends Panel {
 					item.add(new ExampleValuePanel("name", Model.of(field.getName()), valueInfoModel, requestBodyClass));
 				
 				field.setAccessible(true);
-				valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+				valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
 						Field field = item.getModelObject();
-						return new ValueInfo(getValueOrigin(), field.getGenericType(), field);
+						return new ValueInfo(getValueOrigin(), field.getGenericType(), field, false);
 					}
-					
+
 				};
 				
-				item.add(new ExampleValuePanel("value", new IModel<Serializable>() {
+				item.add(new ExampleValuePanel("value", new IModel<>() {
 
 					@Override
 					public void detach() {
@@ -560,7 +561,7 @@ public class ExampleValuePanel extends Panel {
 							return (Serializable) field.get(getValue());
 						} catch (IllegalArgumentException | IllegalAccessException e) {
 							throw new RuntimeException(e);
-						} 
+						}
 					}
 
 					@Override
@@ -573,7 +574,7 @@ public class ExampleValuePanel extends Panel {
 							throw new RuntimeException(e);
 						}
 					}
-					
+
 				}, valueInfoModel, requestBodyClass));
 				
 				item.add(new WebMarkupContainer("comma")

@@ -1,25 +1,5 @@
 package io.onedev.server.rest;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.hibernate.criterion.Restrictions;
-
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentToken;
@@ -28,6 +8,16 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.exception.InvalidParamException;
 import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.hibernate.criterion.Restrictions;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Collection;
+import java.util.List;
 
 @Api(order=10100)
 @Path("/agent-tokens")
@@ -81,13 +71,11 @@ public class AgentTokenResource {
     	return tokenManager.query(criteria, offset, count);
     }
 	
-	@Api(order=500, description="Create new token if id property not provided")
+	@Api(order=500, createOnly = true, description="Create new token")
     @POST
-    public Long createOrUpdate() {
+    public Long create(AgentToken token) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-		AgentToken token = new AgentToken();
-		token.setValue(UUID.randomUUID().toString());
 	    tokenManager.create(token);
 	    return token.getId();
     }

@@ -132,12 +132,14 @@ public class MethodDetailPage extends ApiHelpPage {
 				if (exampleValue == null)
 					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType(), ValueInfo.Origin.REQUEST_BODY);
 				requestBodyClass = exampleValue.getClass();
-				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
+						Api api = getResourceMethod().getAnnotation(Api.class);
 						return new ValueInfo(ValueInfo.Origin.REQUEST_BODY,
-								getRequestBodyParam().getParameterizedType(), null);
+								getRequestBodyParam().getParameterizedType(), null, 
+								api != null && api.createOnly());
 					}
 
 				};
@@ -224,7 +226,7 @@ public class MethodDetailPage extends ApiHelpPage {
 					@Override
 					protected ValueInfo load() {
 						return new ValueInfo(ValueInfo.Origin.PATH_PLACEHOLDER, 
-								item.getModelObject().getParameterizedType(), null);
+								item.getModelObject().getParameterizedType());
 					}
 					
 				};
@@ -275,7 +277,7 @@ public class MethodDetailPage extends ApiHelpPage {
 					@Override
 					protected ValueInfo load() {
 						return new ValueInfo(ValueInfo.Origin.QUERY_PARAM, 
-								item.getModelObject().getParameterizedType(), null);
+								item.getModelObject().getParameterizedType());
 					}
 					
 				};
@@ -307,12 +309,12 @@ public class MethodDetailPage extends ApiHelpPage {
 				if (exampleValue == null) 
 					exampleValue = ApiHelpUtils.getExampleValue(method.getGenericReturnType(), ValueInfo.Origin.RESPONSE_BODY);
 			
-				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<>() {
 
 					@Override
 					protected ValueInfo load() {
 						return new ValueInfo(ValueInfo.Origin.RESPONSE_BODY,
-								getResourceMethod().getGenericReturnType(), null);
+								getResourceMethod().getGenericReturnType());
 					}
 
 				};
@@ -417,7 +419,7 @@ public class MethodDetailPage extends ApiHelpPage {
 		
 		add(new Label("curlExample", curlExample));
 		
-		add(new CopyToClipboardLink("copyCurlExample", Model.of(curlExample.toString().substring(1))));
+		add(new CopyToClipboardLink("copyCurlExample", Model.of(curlExample.substring(1))));
 	}
 
 	@Override

@@ -15,12 +15,19 @@ class ValueInfo {
 	
 	private final Field field;
 	
-	public ValueInfo(Origin origin, Type declaredType, @Nullable Field field) {
+	private final boolean createOnly;
+	
+	public ValueInfo(Origin origin, Type declaredType, @Nullable Field field, boolean createOnly) {
 		this.origin = origin;
 		this.declaredType = declaredType;
 		this.field = field;
+		this.createOnly = createOnly;
 	}
 
+	public ValueInfo(Origin origin, Type declaredType) {
+		this(origin, declaredType, null, false);
+	}
+	
 	public Type getDeclaredType() {
 		return declaredType;
 	}
@@ -34,4 +41,7 @@ class ValueInfo {
 		return field;
 	}
 
+	public boolean isCreateOnly() {
+		return createOnly;
+	}
 }
