@@ -224,7 +224,7 @@ public class SuggestionUtils {
 		}
 		if (paramSpecs != null) {
 			for (ParamSpec paramSpec: paramSpecs) 
-				variables.put(VariableInterpolator.PREFIX_PARAM + paramSpec.getName(), paramSpec.getDescription());
+				variables.put(VariableInterpolator.PREFIX_PARAM + paramSpec.getName(), null);
 		}
 		for (String propertyName: buildSpec.getPropertyMap().keySet())
 			variables.put(VariableInterpolator.PREFIX_PROPERTY + propertyName, null);

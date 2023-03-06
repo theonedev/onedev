@@ -106,4 +106,8 @@ public class HtmlUtils {
 		return Jsoup.parseBodyFragment(html, "http://localhost/sanitize");
 	}
 	
+	public static String sanitize(String html) {
+		return sanitize(parse(html)).body().html();
+	}
+	
 }

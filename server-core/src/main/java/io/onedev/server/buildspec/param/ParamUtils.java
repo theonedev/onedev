@@ -1,36 +1,27 @@
 package io.onedev.server.buildspec.param;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.validation.ValidationException;
-
+import com.google.common.base.Preconditions;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.SecretParam;
+import io.onedev.server.buildspec.param.supply.ParamSupply;
+import io.onedev.server.buildspec.param.supply.SpecifiedValues;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.HtmlUtils;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.PropertyDescriptor;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.param.spec.ParamSpec;
-import io.onedev.server.buildspec.param.spec.SecretParam;
-import io.onedev.server.buildspec.param.supply.ParamSupply;
-import io.onedev.server.buildspec.param.supply.SpecifiedValues;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.PropertyDescriptor;
+import javax.annotation.Nullable;
+import javax.validation.ValidationException;
+import java.io.Serializable;
+import java.util.*;
 
 public class ParamUtils {
 	
@@ -147,19 +138,20 @@ public class ParamUtils {
 		byte[] bytes = SerializationUtils.serialize((Serializable) paramSpecs);
 		String className = PARAM_BEAN_PREFIX + "_" + Hex.encodeHexString(bytes);
 		
-		List<ParamSpec> paramSpecsCopy = new ArrayList<>(paramSpecs);
-		for (int i=0; i<paramSpecsCopy.size(); i++) {
-			ParamSpec paramSpec = paramSpecsCopy.get(i);
+		List<ParamSpec> paramSpecsCopy = new ArrayList<>();
+		for (var paramSpec: paramSpecs) {
+			ParamSpec paramSpecClone = (ParamSpec) SerializationUtils.clone(paramSpec);
+			var description = paramSpecClone.getDescription();
+			if (description != null) 
+				description = HtmlUtils.sanitize(description);
 			if (paramSpec instanceof SecretParam) {
-				ParamSpec paramSpecClone = (ParamSpec) SerializationUtils.clone(paramSpec);
-				String description = paramSpecClone.getDescription();
 				if (description == null)
 					description = "";
 				description += String.format("<div style='margin-top: 12px;'><b>Note:</b> Secret less than %d characters "
 						+ "will not be masked in build log</div>", SecretInput.MASK.length());
-				paramSpecClone.setDescription(description);
-				paramSpecsCopy.set(i, paramSpecClone);
 			}
+			paramSpecClone.setDescription(description);
+			paramSpecsCopy.add(paramSpecClone);
 		}
 		return (Class<? extends Serializable>) ParamSpec.defineClass(className, "Parameters", paramSpecsCopy);
 	}

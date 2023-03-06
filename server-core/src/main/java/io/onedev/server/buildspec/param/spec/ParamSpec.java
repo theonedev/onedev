@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 
+import io.onedev.server.annotation.Multiline;
 import org.apache.wicket.Component;
 import javax.validation.constraints.NotEmpty;
 
@@ -34,7 +35,8 @@ public abstract class ParamSpec extends InputSpec {
 		super.setName(name);
 	}
 
-	@Editable(order=30, placeholder="No description", description="Optionally describes the param")
+	@Editable(order=30, placeholder="No description", description="Optionally describes the param. Html tags are accepted.")
+	@Multiline
 	@Override
 	public String getDescription() {
 		return super.getDescription();
