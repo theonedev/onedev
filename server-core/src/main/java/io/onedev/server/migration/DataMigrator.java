@@ -5091,5 +5091,92 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
+	}
+
+	private void migrate115(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
+								if (fieldSpecElement.getName().equals("io.onedev.server.model.support.issue.field.spec.UserChoiceField")) {
+									Element defaultValueProviderElement = fieldSpecElement.element("defaultValueProvider");
+									if (defaultValueProviderElement != null
+											&& defaultValueProviderElement.attributeValue("class").contains("SpecifiedDefaultValue")) {
+										Element defaultValueElement = defaultValueProviderElement.element("value");
+										Element defaultValuesElement = defaultValueProviderElement.addElement("defaultValues");
+										defaultValueElement.detach();
+										defaultValuesElement.addElement("io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.DefaultValue").add(defaultValueElement);
+									}
+									Element defaultMultiValueProviderElement = fieldSpecElement.element("defaultMultiValueProvider");
+									if (defaultMultiValueProviderElement != null
+											&& defaultMultiValueProviderElement.attributeValue("class").contains("SpecifiedDefaultMultiValue")) {
+										Element defaultValueElement = defaultMultiValueProviderElement.element("value");
+										Element defaultValuesElement = defaultMultiValueProviderElement.addElement("defaultValues");
+										defaultValueElement.detach();
+										defaultValuesElement.addElement("io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValue").add(defaultValueElement);
+									}
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
+	private void migrate116(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Node node : dom.selectNodes("//io.onedev.server.model.support.issue.field.spec.UserChoiceField")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						element.setName("io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField");
+					}
+				}
+				for (Node node : dom.selectNodes("//defaultValueProvider")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						String clazz = element.attributeValue("class");
+						if (clazz != null) {
+							clazz = clazz.replace(
+									"io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.",
+									"io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultvalueprovider.");
+							element.addAttribute("class", clazz);
+						}
+					}
+				}
+				for (Node node : dom.selectNodes("//defaultMultiValueProvider")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						String clazz = element.attributeValue("class");
+						if (clazz != null) {
+							clazz = clazz.replace(
+									"io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.",
+									"io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.");
+							element.addAttribute("class", clazz);
+						}
+					}
+				}
+				for (Node node: dom.selectNodes("//io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.DefaultValue")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						element.setName("io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultvalueprovider.DefaultValue");
+					}
+				}
+				for (Node node: dom.selectNodes("//io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValue")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						element.setName("io.onedev.server.model.support.issue.field.spec.userchoicefield.defaultmultivalueprovider.DefaultMultiValue");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
 	}	
 }

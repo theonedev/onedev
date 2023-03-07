@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.issue.field.spec;
+package io.onedev.server.buildspec.param.spec.userchoiceparam;
 
 import java.util.List;
 import java.util.Map;
@@ -6,19 +6,18 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.userchoiceparam.defaultmultivalueprovider.DefaultMultiValueProvider;
+import io.onedev.server.buildspec.param.spec.userchoiceparam.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.AllUsers;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
-import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.usage.Usage;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.ShowCondition;
 
-@Editable(order=150, name=FieldSpec.USER)
-public class UserChoiceField extends FieldSpec {
+@Editable(order=150, name= ParamSpec.USER)
+public class UserChoiceParam extends ParamSpec {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -70,7 +69,7 @@ public class UserChoiceField extends FieldSpec {
 	private static boolean isDefaultMultiValueProviderVisible() {
 		return EditContext.get().getInputValue("allowMultiple").equals(true);
 	}
-	
+
 	@Override
 	public List<String> getPossibleValues() {
 		return UserChoiceInput.getPossibleValues();
@@ -81,23 +80,6 @@ public class UserChoiceField extends FieldSpec {
 		return UserChoiceInput.getPropertyDef(this, indexes, choiceProvider, defaultValueProvider, defaultMultiValueProvider);
 	}
 
-	public void onRenameUser(DefaultValueProvider defaultValueProvider, String oldName, String newName) {
-		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
-			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
-			if (specifiedDefaultValue.getValue().equals(oldName))
-				specifiedDefaultValue.setValue(newName);
-		}
-	}
-
-	public Usage onDeleteUser(DefaultValueProvider defaultValueProvider, String userName) {
-		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
-			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
-			if (specifiedDefaultValue.getValue().equals(userName))
-				defaultValueProvider = null;
-		}
-		return new Usage();
-	}
-
 	@Override
 	public Object convertToObject(List<String> strings) {
 		return UserChoiceInput.convertToObject(this, strings);
@@ -106,15 +88,6 @@ public class UserChoiceField extends FieldSpec {
 	@Override
 	public List<String> convertToStrings(Object value) {
 		return UserChoiceInput.convertToStrings(this, value);
-	}
-
-	@Override
-	protected void runScripts() {
-		if (isAllowMultiple() && getDefaultMultiValueProvider() != null)
-			getDefaultMultiValueProvider().getDefaultValue();
-		if (!isAllowMultiple() && getDefaultValueProvider() != null)
-			getDefaultValueProvider().getDefaultValue();
-		getChoiceProvider().getChoices(true);
 	}
 
 }

@@ -1,4 +1,4 @@
-package io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider;
+package io.onedev.server.buildspecmodel.inputspec.userchoiceinput;
 
 import java.io.Serializable;
 import java.util.List;

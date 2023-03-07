@@ -30,7 +30,7 @@ import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Spec
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
-import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.usage.Usage;

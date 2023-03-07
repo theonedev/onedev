@@ -9,10 +9,8 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
 
 public class UserChoiceInput {
 	

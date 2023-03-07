@@ -23,7 +23,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
-import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;

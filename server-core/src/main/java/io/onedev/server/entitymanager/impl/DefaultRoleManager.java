@@ -192,7 +192,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setRunJob(true);
 		codeWriter.getJobPrivileges().add(jobPrivilege);
 		
-		update(codeWriter, new ArrayList<>(), null);
+		create(codeWriter, new ArrayList<>());
 
 		Role codeReader = new Role();
 		codeReader.setName("Code Reader");
@@ -208,7 +208,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setJobNames("*");
 		codeReader.getJobPrivileges().add(jobPrivilege);
 		
-		update(codeReader, new ArrayList<>(), null);
+		create(codeReader, new ArrayList<>());
 		
 		Role issueReporter = new Role();
 		issueReporter.setName("Issue Reporter");
@@ -224,7 +224,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		jobPrivilege.setJobNames("*");
 		issueReporter.getJobPrivileges().add(jobPrivilege);
 
-		update(issueReporter, new ArrayList<>(), null);					
+		create(issueReporter, new ArrayList<>());					
 	}
 
     @Sessional

@@ -21,6 +21,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.*;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;

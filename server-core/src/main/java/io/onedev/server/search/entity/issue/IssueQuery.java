@@ -40,7 +40,7 @@ import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
 import io.onedev.server.model.support.issue.field.spec.MilestoneChoiceField;
 import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
 import io.onedev.server.model.support.issue.field.spec.TextField;
-import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;

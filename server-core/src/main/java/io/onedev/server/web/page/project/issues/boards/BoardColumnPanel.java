@@ -52,7 +52,7 @@ import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.field.FieldUtils;
 import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
 import io.onedev.server.search.entity.issue.FieldOperatorCriteria;

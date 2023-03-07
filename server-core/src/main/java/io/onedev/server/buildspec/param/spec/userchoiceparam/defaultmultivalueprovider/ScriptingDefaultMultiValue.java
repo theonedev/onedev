@@ -1,13 +1,12 @@
-package io.onedev.server.buildspecmodel.inputspec.userchoiceinput.defaultmultivalueprovider;
+package io.onedev.server.buildspec.param.spec.userchoiceparam.defaultmultivalueprovider;
 
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.OmitName;
 import io.onedev.server.annotation.ScriptChoice;
+import io.onedev.server.util.GroovyUtils;
+
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Editable(order=400, name="Evaluate script to get default value")
 public class ScriptingDefaultMultiValue implements DefaultMultiValueProvider {
@@ -16,7 +15,7 @@ public class ScriptingDefaultMultiValue implements DefaultMultiValueProvider {
 
 	private String scriptName;
 
-	@Editable(description="Groovy script to be evaluated. It should return list of user login name. "
+	@Editable(description="Groovy script to be evaluated. It should return list of string. "
 			+ "Check <a href='https://docs.onedev.io/appendix/scripting' target='_blank'>scripting help</a> for details")
 	@ScriptChoice
 	@OmitName
