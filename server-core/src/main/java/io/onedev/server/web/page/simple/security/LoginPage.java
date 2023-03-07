@@ -334,7 +334,7 @@ public class LoginPage extends SimplePage {
 
 	@Override
 	protected String getTitle() {
-		return "Sign In To OneDev";
+		return "Sign In To " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 
 	@Override

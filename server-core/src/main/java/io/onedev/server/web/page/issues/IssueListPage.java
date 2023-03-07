@@ -248,7 +248,7 @@ public class IssueListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Issues - OneDev";
+		return "Issues - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 	
 }

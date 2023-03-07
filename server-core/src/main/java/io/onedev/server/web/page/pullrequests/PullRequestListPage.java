@@ -224,7 +224,7 @@ public class PullRequestListPage extends LayoutPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Pull Requests - OneDev";
+		return "Pull Requests - " + OneDev.getInstance(SettingManager.class).getBrandingSetting().getName();
 	}
 	
 	public static PageParameters paramsOf(int page) {
