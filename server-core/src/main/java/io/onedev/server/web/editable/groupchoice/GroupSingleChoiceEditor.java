@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import io.onedev.server.util.ComponentContext;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
@@ -36,17 +37,22 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 		super.onInitialize();
 
 		List<Group> choices = new ArrayList<>();
-		
-		GroupChoice groupChoice = descriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
-		Preconditions.checkNotNull(groupChoice);
-		if (groupChoice.value().length() != 0) {
-			choices.addAll((List<Group>)ReflectionUtils
-					.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
-		} else {
-			choices.addAll(OneDev.getInstance(GroupManager.class).query());
-			choices.sort(Comparator.comparing(Group::getName));
+
+		ComponentContext componentContext = new ComponentContext(this);
+		ComponentContext.push(componentContext);
+		try {
+			GroupChoice groupChoice = descriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
+			Preconditions.checkNotNull(groupChoice);
+			if (groupChoice.value().length() != 0) {
+				choices.addAll((List<Group>) ReflectionUtils
+						.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
+			} else {
+				choices.addAll(OneDev.getInstance(GroupManager.class).query());
+				choices.sort(Comparator.comparing(Group::getName));
+			}
+		} finally {
+			ComponentContext.pop();
 		}
-		
 		Group group;
 		if (getModelObject() != null)
 			group = OneDev.getInstance(GroupManager.class).find(getModelObject());

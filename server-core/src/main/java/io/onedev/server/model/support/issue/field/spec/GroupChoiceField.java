@@ -70,7 +70,8 @@ public class GroupChoiceField extends FieldSpec {
 		return GroupChoiceInput.convertToStrings(value);
 	}
 
-	public void onRenameGroup(DefaultValueProvider defaultValueProvider, String oldName, String newName) {
+	@Override
+	public void onRenameGroup(String oldName, String newName) {
 		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
 			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
 			if (specifiedDefaultValue.getValue().equals(oldName))
@@ -78,13 +79,15 @@ public class GroupChoiceField extends FieldSpec {
 		}
 	}
 
-	public Usage onDeleteGroup(DefaultValueProvider defaultValueProvider, String groupName) {
+	@Override
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
 		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
 			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
 			if (specifiedDefaultValue.getValue().equals(groupName))
-				defaultValueProvider = null;
+				usage.add("default value");
 		}
-		return new Usage();
+		return usage.prefix("custom fields: " + getName());
 	}
 
 	@Override
