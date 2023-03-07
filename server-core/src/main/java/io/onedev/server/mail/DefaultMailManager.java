@@ -458,7 +458,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 										IssueWatch watch = issueWatchManager.find(issue, user);
 										if (watch != null) {
 											watch.setWatching(false);
-											issueWatchManager.createOrUpdate(watch);
+											issueWatchManager.update(watch);
 											String subject = "Unsubscribed successfully from issue " + issue.getFQN(); 
 											String body = "You will no longer receive notifications of issue " + issue.getFQN() + " unless mentioned. "
 													+ "However if you subscribed to certain issue queries, you may still get notifications of newly "
@@ -484,7 +484,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 										PullRequestWatch watch = pullRequestWatchManager.find(pullRequest, user);
 										if (watch != null) {
 											watch.setWatching(false);
-											pullRequestWatchManager.createOrUpdate(watch);
+											pullRequestWatchManager.update(watch);
 											String subject = "Unsubscribed successfully from pull request " + pullRequest.getFQN(); 
 											String body = "You will no longer receive notifications of pull request " + pullRequest.getFQN() 
 													+ " unless mentioned. However if you subscribed to certain pull request queries, you may still "
@@ -790,7 +790,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 		emailAddress.setPrimary(true);
 		emailAddress.setGit(true);
 		emailAddress.setOwner(user);
-		emailAddressManager.createOrUpdate(emailAddress);
+		emailAddressManager.create(emailAddress);
 		
 		boolean found = false;
 		for (UserAuthorization authorization: user.getProjectAuthorizations()) {
@@ -804,7 +804,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 			authorization.setUser(user);
 			authorization.setProject(project);
 			authorization.setRole(role);
-			authorizationManager.createOrUpdate(authorization);
+			authorizationManager.create(authorization);
 		}
 		
 		return user;

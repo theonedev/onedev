@@ -1,3 +1,7 @@
+# 8.0.7
+
+Various resource update operations now require resource id to be specified in url path instead of request body. Refer to RESTful api help for details   
+
 # 8.0.5
 
 Create tag step and close milestone step in build spec now uses access token to authenticate to server for flexibility and consistence reason. Please edit relevant build specs to specify appropriate access tokens for these two steps, otherwise they will fail 

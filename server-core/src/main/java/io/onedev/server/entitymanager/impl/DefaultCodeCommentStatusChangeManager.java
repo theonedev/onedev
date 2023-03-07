@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.codecomment.CodeCommentStatusChanged;
@@ -32,6 +33,8 @@ public class DefaultCodeCommentStatusChangeManager extends BaseEntityManager<Cod
 	@Transactional
 	@Override
 	public void create(CodeCommentStatusChange change, String note) {
+		Preconditions.checkState(change.isNew());
+		
 		CodeComment comment = change.getComment();
 		comment.setResolved(change.isResolved());
 		

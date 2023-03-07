@@ -1,9 +1,8 @@
 package io.onedev.server.web.page.help;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-
-import javax.annotation.Nullable;
 
 class ValueInfo {
 	
@@ -15,17 +14,14 @@ class ValueInfo {
 	
 	private final Field field;
 	
-	private final boolean createOnly;
-	
-	public ValueInfo(Origin origin, Type declaredType, @Nullable Field field, boolean createOnly) {
+	public ValueInfo(Origin origin, Type declaredType, @Nullable Field field) {
 		this.origin = origin;
 		this.declaredType = declaredType;
 		this.field = field;
-		this.createOnly = createOnly;
 	}
 
 	public ValueInfo(Origin origin, Type declaredType) {
-		this(origin, declaredType, null, false);
+		this(origin, declaredType, null);
 	}
 	
 	public Type getDeclaredType() {
@@ -41,7 +37,4 @@ class ValueInfo {
 		return field;
 	}
 
-	public boolean isCreateOnly() {
-		return createOnly;
-	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.persistence.annotation.Transactional;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -79,8 +80,16 @@ public class DefaultMilestoneManager extends BaseEntityManager<Milestone> implem
 
 	@Transactional
 	@Override
-	public void createOrUpdate(Milestone milestone) {
+	public void create(Milestone milestone) {
+		Preconditions.checkState(milestone.isNew());
 		dao.persist(milestone);
 	}
 
+	@Transactional
+	@Override
+	public void update(Milestone milestone) {
+		Preconditions.checkState(!milestone.isNew());
+		dao.persist(milestone);
+	}
+	
 }

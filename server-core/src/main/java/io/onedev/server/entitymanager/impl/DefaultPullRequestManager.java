@@ -423,8 +423,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 						checkReviews(request, sourceUpdated);
 						
 						for (PullRequestReview review: request.getReviews()) {
-							if (review.isNew() || review.isDirty())
-								reviewManager.createOrUpdate(review);
+							if (review.isNew())
+								reviewManager.create(review);
+							else if (review.isDirty())
+								reviewManager.update(review);
 						}
 
 						Project targetProject = request.getTargetProject();

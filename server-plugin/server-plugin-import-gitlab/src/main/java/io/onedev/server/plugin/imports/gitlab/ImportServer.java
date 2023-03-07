@@ -304,7 +304,7 @@ public class ImportServer implements Serializable, Validatable {
 							milestone.setProject(project);
 							project.getMilestones().add(milestone);
 							if (!dryRun)
-								OneDev.getInstance(MilestoneManager.class).createOrUpdate(milestone);
+								OneDev.getInstance(MilestoneManager.class).create(milestone);
 						}
 					}
 					

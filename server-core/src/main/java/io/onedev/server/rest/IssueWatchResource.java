@@ -44,15 +44,27 @@ public class IssueWatchResource {
 		return watch;
 	}
 	
-	@Api(order=200, description="Update issue watch of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new issue watch")
 	@POST
-	public Long createOrUpdate(@NotNull IssueWatch watch) {
+	public Long create(@NotNull IssueWatch watch) {
 		if (!SecurityUtils.canAccess(watch.getIssue().getProject()) 
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();
 		}
-		watchManager.createOrUpdate(watch);
+		watchManager.create(watch);
 		return watch.getId();
+	}
+
+	@Api(order=250, description="Update issue watch of specified id")
+	@Path("/{watchId}")
+	@POST
+	public Response update(@PathParam("watchId") Long watchId, @NotNull IssueWatch watch) {
+		if (!SecurityUtils.canAccess(watch.getIssue().getProject())
+				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
+			throw new UnauthorizedException();
+		}
+		watchManager.update(watch);
+		return Response.ok().build();
 	}
 	
 	@Api(order=300)

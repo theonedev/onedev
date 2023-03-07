@@ -46,9 +46,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		this.listenerRegistry = listenerRegistry;
 	}
 
- 	@Transactional
-	@Override
-	public void createOrUpdate(PullRequestReview review) {
+	private void createOrUpdate(PullRequestReview review) {
  		review.setDirty(false);
 		dao.persist(review);
 		
@@ -63,7 +61,21 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		}
 	}
 
- 	@Sessional
+	@Transactional
+	@Override
+	public void create(PullRequestReview review) {
+		Preconditions.checkState(review.isNew());
+		createOrUpdate(review);	
+	}
+	
+	@Transactional
+	@Override
+	public void update(PullRequestReview review) {
+		Preconditions.checkState(!review.isNew());
+		createOrUpdate(review);
+	}
+
+	@Sessional
 	@Override
 	public void populateReviews(Collection<PullRequest> requests) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();

@@ -44,12 +44,22 @@ public class MilestoneResource {
 		return milestone;
 	}
 	
-	@Api(order=200, description="Update milestone of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new milestone")
 	@POST
-	public Long createOrUpdate(@NotNull Milestone milestone) {
+	public Long create(@NotNull Milestone milestone) {
 		if (!SecurityUtils.canManageIssues(milestone.getProject()))
 			throw new UnauthorizedException();
-		milestoneManager.createOrUpdate(milestone);
+		milestoneManager.create(milestone);
+		return milestone.getId();
+	}
+
+	@Api(order=250, description="Update milestone of specified id")
+	@Path("/{milestoneId}")
+	@POST
+	public Long update(@PathParam("milestoneId") Long milestoneId, @NotNull Milestone milestone) {
+		if (!SecurityUtils.canManageIssues(milestone.getProject()))
+			throw new UnauthorizedException();
+		milestoneManager.update(milestone);
 		return milestone.getId();
 	}
 	

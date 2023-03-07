@@ -245,7 +245,7 @@ public class ExampleValuePanel extends Panel {
 			if (AbstractEntity.class.isAssignableFrom(requestBodyClass)) {
 				Class<?> resourceClass = resourceMap.get(requestBodyClass);
 				if (resourceClass != null) {
-					Fragment typeHintFrag = new Fragment("typeHint", "idAsResultOfEntityCreateOrUpdateHintFrag", this);
+					Fragment typeHintFrag = new Fragment("typeHint", "idAsResultOfEntityCreateHintFrag", this);
 					
 					Link<Void> link = new ViewStateAwarePageLink<Void>("entity", ResourceDetailPage.class, 
 							ResourceDetailPage.paramsOf(resourceClass));
@@ -438,8 +438,9 @@ public class ExampleValuePanel extends Panel {
 			@Override
 			protected List<Field> load() {
 				List<Field> fields = ApiHelpUtils.getJsonFields(getValue().getClass(), getValueOrigin());
-				for (Iterator<Field> it = fields.iterator(); it.hasNext();) {
-					if (getValueInfo().isCreateOnly() && it.next().getAnnotation(Id.class) != null) 
+				for (var it = fields.iterator(); it.hasNext();) {
+					var field = it.next();
+					if (getValueInfo().getOrigin() == ValueInfo.Origin.REQUEST_BODY && field.getAnnotation(Id.class) != null) 
 						it.remove();
 				}
 				return fields;
@@ -542,7 +543,7 @@ public class ExampleValuePanel extends Panel {
 					@Override
 					protected ValueInfo load() {
 						Field field = item.getModelObject();
-						return new ValueInfo(getValueOrigin(), field.getGenericType(), field, false);
+						return new ValueInfo(getValueOrigin(), field.getGenericType(), field);
 					}
 
 				};

@@ -44,7 +44,7 @@ public class IssueVoteResource {
 		return vote;
 	}
 	
-	@Api(order=200, createOnly = true, description="Create new issue vote")
+	@Api(order=200, description="Create new issue vote")
 	@POST
 	public Long create(@NotNull IssueVote vote) {
 		if (!SecurityUtils.canAccess(vote.getIssue().getProject()) 

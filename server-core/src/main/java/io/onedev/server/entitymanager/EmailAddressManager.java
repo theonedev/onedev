@@ -38,5 +38,8 @@ public interface EmailAddressManager extends EntityManager<EmailAddress> {
 
 	EmailAddressCache cloneCache();
 
-    void createOrUpdate(EmailAddress address);
+    void create(EmailAddress address);
+
+	void update(EmailAddress address);
+	
 }

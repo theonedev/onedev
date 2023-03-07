@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotEmpty;
@@ -249,46 +250,70 @@ public class ProjectResource {
 		return DateUtils.formatISO8601Date(new Date());
 	}
 	
-	@Api(order=800, description="Update project of specified id in request body, or create new if id property not provided")
+	@Api(order=800, description="Create new project")
     @POST
-    public Long createOrUpdate(@NotNull Project project) {
+    public Long create(@NotNull Project project) {
+		Project parent = project.getParent();
+		
+		checkProjectCreationPermission(parent);
+	
+		if (parent != null && project.isSelfOrAncestorOf(parent)) 
+			throw new ExplicitException("Can not use current or descendant project as parent");
+		
+		checkProjectNameDuplication(project);
+		
+		projectManager.create(project);
+    	
+    	return project.getId();
+    }
+
+	@Api(order=850, description="Update projecty basic info of specified id")
+	@Path("/{projectId}")
+	@POST
+	public Response updateBasicInfo(@PathParam("projectId") Long projectId, @NotNull Project project) {
 		Project parent = project.getParent();
 		Long oldParentId;
 		if (project.getOldVersion() != null)
 			oldParentId = ((ProjectFacade) project.getOldVersion()).getParentId();
 		else
 			oldParentId = null;
-		
-		if (project.isNew() || !Objects.equals(oldParentId, Project.idOf(parent))) {
-			if (parent != null && !SecurityUtils.canCreateChildren(parent))
-				throw new UnauthorizedException("Not authorized to create project under '" + parent.getPath() + "'");
-			if (parent == null && !SecurityUtils.canCreateRootProjects()) 
-				throw new UnauthorizedException("Not authorized to create root project");
-		}
-	
-		if (parent != null && project.isSelfOrAncestorOf(parent)) 
+
+		if (!Objects.equals(oldParentId, Project.idOf(parent))) 
+			checkProjectCreationPermission(parent);
+
+		if (parent != null && project.isSelfOrAncestorOf(parent))
 			throw new ExplicitException("Can not use current or descendant project as parent");
-		
+
+		checkProjectNameDuplication(project);
+
+		if (!SecurityUtils.canManage(project)) {
+			throw new UnauthorizedException();
+		} else {
+			projectManager.update(project);
+		}
+
+		return Response.ok().build();
+	}
+	
+	private void checkProjectCreationPermission(@Nullable Project parent) {
+		if (parent != null && !SecurityUtils.canCreateChildren(parent))
+			throw new UnauthorizedException("Not authorized to create project under '" + parent.getPath() + "'");
+		if (parent == null && !SecurityUtils.canCreateRootProjects())
+			throw new UnauthorizedException("Not authorized to create root project");
+	}
+	
+	private void checkProjectNameDuplication(Project project) {
+		Project parent = project.getParent();
 		Project projectWithSameName = projectManager.find(parent, project.getName());
 		if (projectWithSameName != null && !projectWithSameName.equals(project)) {
 			if (parent != null) {
-				throw new ExplicitException("Name '" + project.getName() + "' is already used by another project under '" 
+				throw new ExplicitException("Name '" + project.getName() + "' is already used by another project under '"
 						+ parent.getPath() + "'");
 			} else {
 				throw new ExplicitException("Name '" + project.getName() + "' is already used by another root project");
 			}
 		}
-		
-    	if (project.isNew()) { 
-    		projectManager.create(project);
-    	} else if (!SecurityUtils.canManage(project)) {
-			throw new UnauthorizedException();
-    	} else {
-    		projectManager.update(project);
-    	}
-    	
-    	return project.getId();
-    }
+	}
 	
 	@Api(order=900, description="Update project setting")
 	@Path("/{projectId}/setting")

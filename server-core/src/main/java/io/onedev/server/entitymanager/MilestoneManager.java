@@ -18,5 +18,8 @@ public interface MilestoneManager extends EntityManager<Milestone> {
 	@Nullable
 	Milestone findNextOpen(Project project);
 
-    void createOrUpdate(Milestone milestone);
+    void create(Milestone milestone);
+
+	void update(Milestone milestone);
+	
 }

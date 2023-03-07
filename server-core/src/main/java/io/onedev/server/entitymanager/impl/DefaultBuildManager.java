@@ -185,6 +185,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Transactional
 	@Override
 	public void update(Build build) {
+		Preconditions.checkState(!build.isNew());
 		dao.persist(build);
 		updateCacheAfterCommit(build);
 	}

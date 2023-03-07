@@ -10,6 +10,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
@@ -43,9 +44,9 @@ public class PullRequestReviewResource {
 		return review;
 	}
 	
-	@Api(order=200, description="Update pull request review of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Creater new pull request review")
 	@POST
-	public Long createOrUpdate(@NotNull PullRequestReview review) {
+	public Long create(@NotNull PullRequestReview review) {
 		if (!SecurityUtils.canReadCode(review.getRequest().getProject()) 
 				|| !SecurityUtils.isAdministrator() && !review.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();
@@ -57,8 +58,27 @@ public class PullRequestReviewResource {
 		if (review.getRequest().isMerged())
 			throw new ExplicitException("Pull request is merged");
 		
-		reviewManager.createOrUpdate(review);
+		reviewManager.create(review);
 		return review.getId();
+	}
+
+	@Api(order=250, description="Update pull request review of specified id")
+	@Path("/{reviewId}")
+	@POST
+	public Response update(@PathParam("reviewId") Long reviewId, @NotNull PullRequestReview review) {
+		if (!SecurityUtils.canReadCode(review.getRequest().getProject())
+				|| !SecurityUtils.isAdministrator() && !review.getUser().equals(SecurityUtils.getUser())) {
+			throw new UnauthorizedException();
+		}
+
+		if (review.getUser().equals(review.getRequest().getSubmitter()))
+			throw new ExplicitException("Pull request submitter can not be reviewer");
+
+		if (review.getRequest().isMerged())
+			throw new ExplicitException("Pull request is merged");
+
+		reviewManager.update(review);
+		return Response.ok().build();
 	}
 	
 }

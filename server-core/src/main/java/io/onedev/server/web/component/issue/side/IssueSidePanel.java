@@ -117,7 +117,10 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected void onSaveWatch(EntityWatch watch) {
-				OneDev.getInstance(IssueWatchManager.class).createOrUpdate((IssueWatch) watch);
+				if (watch.isNew())
+					OneDev.getInstance(IssueWatchManager.class).create((IssueWatch) watch);
+				else
+					OneDev.getInstance(IssueWatchManager.class).update((IssueWatch) watch);
 			}
 
 			@Override

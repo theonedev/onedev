@@ -43,13 +43,23 @@ public class GroupAuthorizationResource {
 		return authorizationManager.load(authorizationId);
 	}
 	
-	@Api(order=200, description="Update group authorization of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new group authorization")
 	@POST
-	public Long createOrUpdate(@NotNull GroupAuthorization authorization) {
+	public Long create(@NotNull GroupAuthorization authorization) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
-		authorizationManager.createOrUpdate(authorization);
+		authorizationManager.create(authorization);
 		return authorization.getId();
+	}
+
+	@Api(order=250, description="Update group authorization of specified id")
+	@Path("/{authorizationId}")
+	@POST
+	public Response update(@PathParam("authorizationId") Long authorizationId, @NotNull GroupAuthorization authorization) {
+		if (!SecurityUtils.isAdministrator())
+			throw new UnauthorizedException();
+		authorizationManager.update(authorization);
+		return Response.ok().build();
 	}
 	
 	@Api(order=300)

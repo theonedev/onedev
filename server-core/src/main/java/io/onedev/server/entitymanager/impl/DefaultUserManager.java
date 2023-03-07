@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
 import io.onedev.server.cluster.ClusterManager;
@@ -95,6 +96,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Transactional
     @Override
 	public void update(User user, String oldName) {
+		Preconditions.checkState(!user.isNew());
+		
     	user.setName(user.getName().toLowerCase());
     	
     	dao.persist(user);
@@ -122,6 +125,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Transactional
     @Override
     public void create(User user) {
+		Preconditions.checkState(user.isNew());
 		user.setName(user.getName().toLowerCase());
 		dao.persist(user);
     }

@@ -71,7 +71,7 @@ public class AgentTokenResource {
     	return tokenManager.query(criteria, offset, count);
     }
 	
-	@Api(order=500, createOnly = true, description="Create new token")
+	@Api(order=500, description="Create new token")
     @POST
     public Long create(AgentToken token) {
     	if (!SecurityUtils.isAdministrator()) 

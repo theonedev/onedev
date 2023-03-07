@@ -44,15 +44,27 @@ public class CodeCommentQueryPersonalizationResource {
     	return queryPersonalization;
 	}
 	
-	@Api(order=200, description="Update code comment query personalization of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new code comment query personalization")
 	@POST
-	public Long createOrUpdate(@NotNull CodeCommentQueryPersonalization queryPersonalization) {
+	public Long create(@NotNull CodeCommentQueryPersonalization queryPersonalization) {
     	if (!SecurityUtils.canAccess(queryPersonalization.getProject()) 
     			|| !SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
     	}
-		queryPersonalizationManager.createOrUpdate(queryPersonalization);
+		queryPersonalizationManager.create(queryPersonalization);
 		return queryPersonalization.getId();
+	}
+
+	@Api(order=250, description="Update code comment query personalization of specified id")
+	@Path("/{queryPersonalizationId}")
+	@POST
+	public Response update(@PathParam("queryPersonalizationId") Long queryPersonalizationId, @NotNull CodeCommentQueryPersonalization queryPersonalization) {
+		if (!SecurityUtils.canAccess(queryPersonalization.getProject())
+				|| !SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser())) {
+			throw new UnauthorizedException();
+		}
+		queryPersonalizationManager.update(queryPersonalization);
+		return Response.ok().build();
 	}
 	
 	@Api(order=300)

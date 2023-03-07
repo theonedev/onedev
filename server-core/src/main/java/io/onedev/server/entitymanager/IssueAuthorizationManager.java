@@ -9,5 +9,8 @@ public interface IssueAuthorizationManager extends EntityManager<IssueAuthorizat
 
 	void authorize(Issue issue, User user);
 
-    void createOrUpdate(IssueAuthorization authorization);
+    void create(IssueAuthorization authorization);
+
+	void update(IssueAuthorization authorization);
+	
 }

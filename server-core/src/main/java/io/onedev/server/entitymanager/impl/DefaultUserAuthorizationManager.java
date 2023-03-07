@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -104,7 +105,15 @@ public class DefaultUserAuthorizationManager extends BaseEntityManager<UserAutho
 
 	@Transactional
 	@Override
-	public void createOrUpdate(UserAuthorization authorization) {
+	public void create(UserAuthorization authorization) {
+		Preconditions.checkState(authorization.isNew());
+		dao.persist(authorization);
+	}
+
+	@Transactional
+	@Override
+	public void update(UserAuthorization authorization) {
+		Preconditions.checkState(!authorization.isNew());
 		dao.persist(authorization);
 	}
 	

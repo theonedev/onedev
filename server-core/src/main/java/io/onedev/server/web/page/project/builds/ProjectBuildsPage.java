@@ -169,7 +169,11 @@ public class ProjectBuildsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getBuildQueryPersonalizationManager().createOrUpdate(setting);
+										if (setting.isNew())
+											getBuildQueryPersonalizationManager().create(setting);
+										else
+											getBuildQueryPersonalizationManager().update(setting);
+											
 										target.add(savedQueries);
 										close();
 									}

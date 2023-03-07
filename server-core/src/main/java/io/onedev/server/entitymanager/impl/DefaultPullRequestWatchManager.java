@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.entitymanager.PullRequestWatchManager;
@@ -40,8 +41,15 @@ public class DefaultPullRequestWatchManager extends BaseEntityManager<PullReques
 	}
 
 	@Override
-	public void createOrUpdate(PullRequestWatch watch) {
+	public void create(PullRequestWatch watch) {
+		Preconditions.checkState(watch.isNew());
 		dao.persist(watch);
 	}
 
+	@Override
+	public void update(PullRequestWatch watch) {
+		Preconditions.checkState(!watch.isNew());
+		dao.persist(watch);
+	}
+	
 }

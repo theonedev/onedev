@@ -45,7 +45,7 @@ public class SshKeyResource {
     	return sshKey;
 	}
 	
-	@Api(order=150, createOnly = true, description="Create new ssh key")
+	@Api(order=150, description="Create new ssh key")
 	@POST
 	public Long create(SshKey sshKey) {
     	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getUser())) 

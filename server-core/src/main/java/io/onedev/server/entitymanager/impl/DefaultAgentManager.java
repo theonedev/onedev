@@ -95,10 +95,9 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		this.transactionManager = transactionManager;
 		this.clusterManager = clusterManager;
 	
-		Properties props = new Properties();
 		agentLibs = new HashSet<>();
 		try (InputStream is = Agent.class.getClassLoader().getResourceAsStream("META-INF/onedev-agent.properties")) {
-			props = new Properties();
+			Properties props = new Properties();
 			props.load(is);
 			for (String dependency: Splitter.on(';').omitEmptyStrings().split(props.getProperty("dependencies")))  
 				agentLibs.add(StringUtils.replace(dependency, ":", "-") + ".jar");
@@ -192,7 +191,8 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setCpus(data.getCpus());
 				agent.setTemporal(data.isTemporal());
 				agent.setIpAddress(data.getIpAddress());
-				createOrUpdate(agent);
+				dao.persist(agent);
+				cacheAfterCommit(agent);
 				
 				for (Map.Entry<String, String> entry: data.getAttributes().entrySet()) {
 					AgentAttribute attribute = new AgentAttribute();
@@ -211,7 +211,8 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 				agent.setIpAddress(data.getIpAddress());
 				agent.setCpus(data.getCpus());
 				agent.setTemporal(data.isTemporal());
-				createOrUpdate(agent);
+				dao.persist(agent);
+				cacheAfterCommit(agent);
 				attributeManager.syncAttributes(agent, data.getAttributes());
 			}
 
@@ -385,17 +386,16 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 		}
 		dao.remove(agent.getToken());
 	}
-
-	@Transactional
-	@Override
-	public void createOrUpdate(Agent agent) {
-		dao.persist(agent);
+	
+	private void cacheAfterCommit(Agent agent) {
+		String osName = agent.getOsName();
+		String osArch = agent.getOsArch();
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				osNames.put(agent.getOsName(), agent.getOsName());
-				osArchs.put(agent.getOsArch(), agent.getOsArch());
+				osNames.put(osName, osName);
+				osArchs.put(osArch, osArch);
 			}
 
 		});
@@ -405,14 +405,14 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Override
 	public void pause(Agent agent) {
 		agent.setPaused(true);
-		createOrUpdate(agent);
+		dao.persist(agent);
 	}
 
 	@Transactional
 	@Override
 	public void resume(Agent agent) {
 		agent.setPaused(false);
-		createOrUpdate(agent);
+		dao.persist(agent);
 	}
 
 	@Override

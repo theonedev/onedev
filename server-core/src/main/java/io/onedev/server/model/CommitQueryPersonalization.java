@@ -96,7 +96,10 @@ public class CommitQueryPersonalization extends AbstractEntity implements QueryP
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(CommitQueryPersonalizationManager.class).createOrUpdate(this);
+		if (isNew())
+			OneDev.getInstance(CommitQueryPersonalizationManager.class).create(this);
+		else
+			OneDev.getInstance(CommitQueryPersonalizationManager.class).update(this);			
 	}
 	
 }

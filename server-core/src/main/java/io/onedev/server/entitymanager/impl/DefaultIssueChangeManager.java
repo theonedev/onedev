@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -107,6 +108,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 	@Transactional
 	@Override
 	public void create(IssueChange change, @Nullable String note) {
+		Preconditions.checkState(change.isNew());
 		dao.persist(change);
 		if (note != null && change.getUser() != null) {
 			IssueComment comment = new IssueComment();

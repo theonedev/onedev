@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -92,6 +93,7 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 	@Transactional
 	@Override
 	public void update(LinkSpec spec, String oldName, String oldOppositeName) {
+		Preconditions.checkState(!spec.isNew());
 		if (oldName != null) {
 			if (oldOppositeName != null) {
 				if (spec.getOpposite() == null) {
@@ -138,6 +140,7 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 	@Transactional
 	@Override
 	public void create(LinkSpec link) {
+		Preconditions.checkState(link.isNew());
 		dao.persist(link);
 	}
 

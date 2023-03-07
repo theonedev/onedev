@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.model.CommitQueryPersonalization;
 import io.onedev.server.model.Project;
@@ -36,9 +37,7 @@ public class DefaultCommitQueryPersonalizationManager extends BaseEntityManager<
 		return find(criteria);
 	}
 
-	@Transactional
-	@Override
-	public void createOrUpdate(CommitQueryPersonalization personalization) {
+	private void createOrUpdate(CommitQueryPersonalization personalization) {
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
@@ -54,4 +53,18 @@ public class DefaultCommitQueryPersonalizationManager extends BaseEntityManager<
 		}
 	}
 
+	@Transactional
+	@Override
+	public void create(CommitQueryPersonalization personalization) {
+		Preconditions.checkState(personalization.isNew());
+		createOrUpdate(personalization);
+	}
+
+	@Transactional
+	@Override
+	public void update(CommitQueryPersonalization personalization) {
+		Preconditions.checkState(!personalization.isNew());
+		createOrUpdate(personalization);
+	}
+	
 }

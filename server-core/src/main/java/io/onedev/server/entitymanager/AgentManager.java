@@ -15,8 +15,6 @@ import java.util.UUID;
 
 public interface AgentManager extends EntityManager<Agent> {
 	
-	void createOrUpdate(Agent agent);
-	
 	String getAgentVersion();
 	
 	Collection<String> getAgentLibs();

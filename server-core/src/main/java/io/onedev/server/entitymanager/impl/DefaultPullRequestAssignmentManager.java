@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestAssigned;
@@ -30,6 +31,7 @@ public class DefaultPullRequestAssignmentManager extends BaseEntityManager<PullR
 	@Transactional
 	@Override
 	public void create(PullRequestAssignment assignment) {
+		Preconditions.checkState(assignment.isNew());
 		dao.persist(assignment);
 
 		listenerRegistry.post(new PullRequestAssigned(

@@ -44,13 +44,23 @@ public class BuildQueryPersonalizationResource {
     	return queryPersonalization;
 	}
 	
-	@Api(order=200, description="Update build query personalization of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new build query personalization ")
 	@POST
-	public Long createOrUpdate(@NotNull BuildQueryPersonalization queryPersonalization) {
+	public Long create(@NotNull BuildQueryPersonalization queryPersonalization) {
     	if (!SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser()))  
 			throw new UnauthorizedException();
-		queryPersonalizationManager.createOrUpdate(queryPersonalization);
+		queryPersonalizationManager.create(queryPersonalization);
 		return queryPersonalization.getId();
+	}
+
+	@Api(order=250, description="Update build query personalization of specified id")
+	@Path("/{queryPersonalizationId}")
+	@POST
+	public Response update(@PathParam("queryPersonalizationId") Long queryPersonalizationId, @NotNull BuildQueryPersonalization queryPersonalization) {
+		if (!SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser()))
+			throw new UnauthorizedException();
+		queryPersonalizationManager.update(queryPersonalization);
+		return Response.ok().build();
 	}
 	
 	@Api(order=300)

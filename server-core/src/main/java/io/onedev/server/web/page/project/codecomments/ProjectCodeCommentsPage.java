@@ -166,7 +166,11 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getCodeCommentQueryPersonalizationManager().createOrUpdate(setting);
+										if (setting.isNew())
+											getCodeCommentQueryPersonalizationManager().create(setting);
+										else
+											getCodeCommentQueryPersonalizationManager().update(setting);
+											
 										target.add(savedQueries);
 										close();
 									}

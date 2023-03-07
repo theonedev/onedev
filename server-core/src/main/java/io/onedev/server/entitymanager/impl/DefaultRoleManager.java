@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.LinkAuthorizationManager;
@@ -121,6 +122,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	@Transactional
 	@Override
 	public void create(Role role, Collection<LinkSpec> authorizedLinks) {
+		Preconditions.checkState(role.isNew());
 		dao.persist(role);
 		linkAuthorizationManager.syncAuthorizations(role, authorizedLinks);
 	}
@@ -128,6 +130,8 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	@Transactional
 	@Override
 	public void update(Role role, Collection<LinkSpec> authorizedLinks, String oldName) {
+		Preconditions.checkState(!role.isNew());
+		
 		if (oldName != null && !oldName.equals(role.getName())) 
 			settingManager.onRenameRole(oldName, role.getName());
 		dao.persist(role);

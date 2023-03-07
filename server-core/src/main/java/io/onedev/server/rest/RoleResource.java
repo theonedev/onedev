@@ -77,9 +77,9 @@ public class RoleResource {
     	return roleManager.query(criteria, offset, count);
     }
 	
-	@Api(order=300, description="Update role of specified id in request body, or create new if id property not provided")
+	@Api(order=300, description="Create new role")
     @POST
-    public Long createOrUpdate(@NotNull Role role) {
+    public Long create(@NotNull Role role) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 		
@@ -87,15 +87,29 @@ public class RoleResource {
 		for (String linkName: role.getEditableIssueLinks())
 			authorizedLinks.add(linkSpecManager.find(linkName));
 		
-    	if (role.getOldVersion() != null)
-    		roleManager.update(role, authorizedLinks, ((RoleFacade) role.getOldVersion()).getName());
-		else if (role.isNew())
-			roleManager.create(role, authorizedLinks);
-    	else
-    		roleManager.update(role, authorizedLinks, null);
+		roleManager.create(role, authorizedLinks);
     		
     	return role.getId();
     }
+
+	@Api(order=350, description="Update role of specified id")
+	@Path("/{roleId}")
+	@POST
+	public Response update(@PathParam("roleId") Long roleId, @NotNull Role role) {
+		if (!SecurityUtils.isAdministrator())
+			throw new UnauthorizedException();
+
+		Collection<LinkSpec> authorizedLinks = new ArrayList<>();
+		for (String linkName: role.getEditableIssueLinks())
+			authorizedLinks.add(linkSpecManager.find(linkName));
+
+		if (role.getOldVersion() != null)
+			roleManager.update(role, authorizedLinks, ((RoleFacade) role.getOldVersion()).getName());
+		else
+			roleManager.update(role, authorizedLinks, null);
+
+		return Response.ok().build();
+	}
 	
 	@Api(order=400)
 	@Path("/{roleId}")

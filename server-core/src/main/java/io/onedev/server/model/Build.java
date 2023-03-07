@@ -176,14 +176,7 @@ public class Build extends ProjectBelonging
 			NAME_PROJECT, PROP_PROJECT,
 			NAME_COMMIT, PROP_COMMIT);	
 	
-	private static ThreadLocal<Stack<Build>> stack =  new ThreadLocal<Stack<Build>>() {
-
-		@Override
-		protected Stack<Build> initialValue() {
-			return new Stack<Build>();
-		}
-	
-	};
+	private static ThreadLocal<Stack<Build>> stack = ThreadLocal.withInitial(() -> new Stack<Build>());
 	
 	public static final String ARTIFACTS_DIR = "artifacts";
 	

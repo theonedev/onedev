@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.persistence.annotation.Transactional;
 import org.hibernate.criterion.Restrictions;
 
@@ -36,14 +37,22 @@ public class DefaultIssueWatchManager extends BaseEntityManager<IssueWatch>
 		IssueWatch watch = (IssueWatch) issue.getWatch(user, true);
 		if (watch.isNew()) {
 			watch.setWatching(watching);
-			createOrUpdate(watch);
+			create(watch);
 		}
 	}
 
 	@Transactional
 	@Override
-	public void createOrUpdate(IssueWatch watch) {
+	public void create(IssueWatch watch) {
+		Preconditions.checkState(watch.isNew());
 		dao.persist(watch);
 	}
 
+	@Transactional
+	@Override
+	public void update(IssueWatch watch) {
+		Preconditions.checkState(!watch.isNew());
+		dao.persist(watch);
+	}
+	
 }

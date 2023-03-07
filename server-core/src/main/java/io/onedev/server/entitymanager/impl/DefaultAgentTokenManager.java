@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.entitymanager.AgentTokenManager;
@@ -25,6 +26,7 @@ public class DefaultAgentTokenManager extends BaseEntityManager<AgentToken> impl
 
 	@Override
 	public void create(AgentToken token) {
+		Preconditions.checkState(token.isNew());
 		dao.persist(token);
 	}
 	

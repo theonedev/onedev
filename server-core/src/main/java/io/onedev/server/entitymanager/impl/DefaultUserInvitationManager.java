@@ -99,6 +99,7 @@ public class DefaultUserInvitationManager extends BaseEntityManager<UserInvitati
 	@Transactional
 	@Override
 	public void create(UserInvitation invitation) {
+		Preconditions.checkState(invitation.isNew());
 		dao.persist(invitation);
 	}
 

@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entityreference.EntityReferenceManager;
@@ -43,6 +44,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 	@Transactional
 	@Override
 	public void create(PullRequestChange change, @Nullable String note) {
+		Preconditions.checkState(change.isNew());
 		dao.persist(change);
 		
 		if (note != null && change.getUser() != null) {

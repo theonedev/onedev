@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -21,6 +22,7 @@ public class DefaultIssueVoteManager extends BaseEntityManager<IssueVote>
 	@Transactional
 	@Override
 	public void create(IssueVote vote) {
+		Preconditions.checkState(vote.isNew());
 		vote.getIssue().setVoteCount(vote.getIssue().getVoteCount()+1);
 		dao.persist(vote);
 	}

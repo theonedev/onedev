@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import org.bouncycastle.openpgp.PGPPublicKey;
 
 import io.onedev.server.cluster.ClusterManager;
@@ -158,6 +159,7 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 	@Transactional
 	@Override
 	public void create(GpgKey gpgKey) {
+		Preconditions.checkState(gpgKey.isNew());
 		dao.persist(gpgKey);
 	}
 

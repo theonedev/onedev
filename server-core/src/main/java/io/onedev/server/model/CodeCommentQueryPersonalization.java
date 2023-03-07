@@ -80,7 +80,10 @@ public class CodeCommentQueryPersonalization extends AbstractEntity implements Q
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).createOrUpdate(this);
+		if (isNew())
+			OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).create(this);
+		else
+			OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).update(this);			
 	}
 	
 }

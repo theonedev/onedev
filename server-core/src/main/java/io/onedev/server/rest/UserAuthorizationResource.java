@@ -44,13 +44,23 @@ public class UserAuthorizationResource {
 		return authorization;
 	}
 	
-	@Api(order=200, description="Update user authorization of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create user authorization")
 	@POST
-	public Long createOrUpdate(@NotNull UserAuthorization authorization) {
+	public Long create(@NotNull UserAuthorization authorization) {
 		if (!SecurityUtils.canManage(authorization.getProject()))
 			throw new UnauthorizedException();
-		authorizationManager.createOrUpdate(authorization);
+		authorizationManager.create(authorization);
 		return authorization.getId();
+	}
+
+	@Api(order=250, description="Update user authorization of specified id")
+	@Path("/{authorizationId}")
+	@POST
+	public Response update(@PathParam("authorizationId") Long authorizationId, @NotNull UserAuthorization authorization) {
+		if (!SecurityUtils.canManage(authorization.getProject()))
+			throw new UnauthorizedException();
+		authorizationManager.update(authorization);
+		return Response.ok().build();
 	}
 	
 	@Api(order=300)

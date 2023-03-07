@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.codecomment.CodeCommentReplyCreated;
@@ -31,6 +32,7 @@ public class DefaultCodeCommentReplyManager extends BaseEntityManager<CodeCommen
 	@Transactional
 	@Override
 	public void create(CodeCommentReply reply) {
+		Preconditions.checkState(reply.isNew());
 		dao.persist(reply);
 		
 		CodeComment comment = reply.getComment();
@@ -46,6 +48,7 @@ public class DefaultCodeCommentReplyManager extends BaseEntityManager<CodeCommen
 	@Transactional
 	@Override
 	public void update(CodeCommentReply reply) {
+ 		Preconditions.checkState(!reply.isNew());
 		dao.persist(reply);
 		listenerRegistry.post(new CodeCommentReplyEdited(reply));
 	}

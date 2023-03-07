@@ -164,7 +164,10 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getIssueQueryPersonalizationManager().createOrUpdate(setting);
+										if (setting.isNew())
+											getIssueQueryPersonalizationManager().create(setting);
+										else
+											getIssueQueryPersonalizationManager().update(setting);
 										target.add(savedQueries);
 										close();
 									}

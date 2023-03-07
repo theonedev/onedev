@@ -38,19 +38,31 @@ public class IssueCommentResource {
     	return comment;
 	}
 	
-	@Api(order=200, description="Update issue comment of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new issue comment")
 	@POST
-	public Long createOrUpdate(@NotNull IssueComment comment) {
+	public Long create(@NotNull IssueComment comment) {
     	if (!SecurityUtils.canAccess(comment.getIssue().getProject()) || 
     			!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
     	}
     	
-		if (comment.isNew())
-			commentManager.create(comment, new ArrayList<>());
-		else 
-			commentManager.update(comment);
+		commentManager.create(comment, new ArrayList<>());
+		
 		return comment.getId();
+	}
+
+	@Api(order=250, description="Update issue comment of specified id")
+	@Path("/{commentId}")
+	@POST
+	public Response update(@PathParam("commentId") Long commentId, @NotNull IssueComment comment) {
+		if (!SecurityUtils.canAccess(comment.getIssue().getProject()) ||
+				!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) {
+			throw new UnauthorizedException();
+		}
+
+		commentManager.update(comment);
+
+		return Response.ok().build();
 	}
 	
 	@Api(order=300)

@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.SimpleExpression;
 import org.slf4j.Logger;
@@ -76,6 +77,7 @@ public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements S
 	@Transactional
 	@Override
 	public void create(SshKey sshKey) {
+		Preconditions.checkState(sshKey.isNew());
 		dao.persist(sshKey);
 	}
 

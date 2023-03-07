@@ -479,11 +479,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						private void toggleClose(Milestone milestone) {
 							milestone.setClosed(!milestone.isClosed());
 							if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
-								getMilestoneManager().createOrUpdate(milestone);
+								getMilestoneManager().update(milestone);
 								setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject(), getBoard(), 
 										milestone, backlog, queryString, backlogQueryString));
 							} else {
-								getMilestoneManager().createOrUpdate(milestone);
+								getMilestoneManager().update(milestone);
 							}
 							dropdown.close();
 							if (milestone.isClosed())

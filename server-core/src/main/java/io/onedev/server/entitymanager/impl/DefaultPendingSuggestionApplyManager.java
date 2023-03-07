@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import com.google.common.base.Preconditions;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
@@ -126,6 +127,7 @@ public class DefaultPendingSuggestionApplyManager extends BaseEntityManager<Pend
 	@Transactional
 	@Override
 	public void create(PendingSuggestionApply pendingSuggestionApply) {
+		Preconditions.checkState(pendingSuggestionApply.isNew());
 		dao.persist(pendingSuggestionApply);
 	}
 

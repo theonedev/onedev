@@ -14,5 +14,8 @@ public interface PullRequestWatchManager extends EntityManager<PullRequestWatch>
 	
 	void watch(PullRequest request, User user, boolean watching);
 
-    void createOrUpdate(PullRequestWatch watch);
+    void create(PullRequestWatch watch);
+
+	void update(PullRequestWatch watch);
+	
 }

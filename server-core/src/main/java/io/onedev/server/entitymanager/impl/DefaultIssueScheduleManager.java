@@ -6,6 +6,7 @@ import java.util.Iterator;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.IssueScheduleManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueSchedule;
@@ -47,6 +48,7 @@ public class DefaultIssueScheduleManager extends BaseEntityManager<IssueSchedule
 	 @Transactional
 	@Override
 	public void create(IssueSchedule schedule) {
+		Preconditions.checkState(schedule.isNew());
 		dao.persist(schedule);
 	}
 

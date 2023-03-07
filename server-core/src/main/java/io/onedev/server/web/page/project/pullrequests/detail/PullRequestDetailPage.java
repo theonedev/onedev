@@ -989,7 +989,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected void onSaveWatch(EntityWatch watch) {
-						OneDev.getInstance(PullRequestWatchManager.class).createOrUpdate((PullRequestWatch) watch);
+						if (watch.isNew())
+							OneDev.getInstance(PullRequestWatchManager.class).create((PullRequestWatch) watch);
+						else
+							OneDev.getInstance(PullRequestWatchManager.class).update((PullRequestWatch) watch);
 					}
 
 					@Override

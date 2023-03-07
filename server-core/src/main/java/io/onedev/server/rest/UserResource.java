@@ -306,7 +306,7 @@ public class UserResource {
 			emailAddress.setOwner(user);
 			emailAddress.setValue(data.getEmailAddress());
 			emailAddress.setVerificationCode(null);
-			emailAddressManager.createOrUpdate(emailAddress);
+			emailAddressManager.create(emailAddress);
 			
 			return user.getId();
 		} else {
@@ -317,7 +317,7 @@ public class UserResource {
 	@Api(order=1950, description="Update user profile")
 	@Path("/{userId}")
     @POST
-    public Long updateProfile(@PathParam("userId") Long userId, @NotNull @Valid ProfileUpdateData data) {
+    public Response updateProfile(@PathParam("userId") Long userId, @NotNull @Valid ProfileUpdateData data) {
 		User user = userManager.load(userId);
 		if (SecurityUtils.isAdministrator() || user.equals(SecurityUtils.getUser())) { 
 			User existingUser = userManager.findByName(data.getName());
@@ -328,7 +328,7 @@ public class UserResource {
 			user.setName(data.getName());
 			user.setFullName(data.getFullName());
 			userManager.update(user, oldName);
-			return user.getId();
+			return Response.ok().build();
 		} else { 
 			throw new UnauthenticatedException();
 		}

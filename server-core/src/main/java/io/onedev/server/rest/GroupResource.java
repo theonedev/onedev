@@ -91,20 +91,29 @@ public class GroupResource {
     	return groupManager.query(criteria, offset, count);
     }
 	
-	@Api(order=500, description="Update group of specified id in request body, or create new if id property not provided")
+	@Api(order=500, description="Create new group")
     @POST
-    public Long createOrUpdate(@NotNull Group group) {
+    public Long create(@NotNull Group group) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	if (group.getOldVersion() != null)
-    		groupManager.update(group, ((GroupFacade) group.getOldVersion()).getName());
-    	else if (group.isNew())
-    		groupManager.create(group);
-		else 
-			groupManager.update(group, null);
+		
+		groupManager.create(group);
     		
     	return group.getId();
     }
+
+	@Api(order=550, description="Update group of specified id")
+	@Path("/{groupId}")
+	@POST
+	public Response update(@PathParam("groupId") Long groupId, @NotNull Group group) {
+		if (!SecurityUtils.isAdministrator())
+			throw new UnauthorizedException();
+		if (group.getOldVersion() != null)
+			groupManager.update(group, ((GroupFacade) group.getOldVersion()).getName());
+		else
+			groupManager.update(group, null);
+		return Response.ok().build();
+	}
 	
 	@Api(order=600)
 	@Path("/{groupId}")

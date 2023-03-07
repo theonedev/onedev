@@ -2,6 +2,7 @@ package io.onedev.server.model.support.issue.field.spec;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Multiline;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -55,7 +56,9 @@ public abstract class FieldSpec extends InputSpec {
 		super.setName(name);
 	}
 
-	@Editable(order=30, placeholder="No description", description="Optionally describes the custom field")
+	@Editable(order=30, placeholder="No description", description="Optionally describes the custom field. " +
+			"Html tags are accepted")
+	@Multiline
 	@Override
 	public String getDescription() {
 		return super.getDescription();

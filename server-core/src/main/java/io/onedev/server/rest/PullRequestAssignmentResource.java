@@ -45,7 +45,7 @@ public class PullRequestAssignmentResource {
 		return assignment;
 	}
 	
-	@Api(order=200, createOnly = true, description="Create new pull request assignment")
+	@Api(order=200, description="Create new pull request assignment")
 	@POST
 	public Long create(PullRequestAssignment assignment) {
 		PullRequest pullRequest = assignment.getRequest();

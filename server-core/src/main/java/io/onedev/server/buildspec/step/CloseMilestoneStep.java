@@ -81,7 +81,7 @@ public class CloseMilestoneStep extends ServerSideStep {
 					
 					if (build.canCloseMilestone(getAccessTokenSecret(), milestoneName)) {
 						milestone.setClosed(true);
-						milestoneManager.createOrUpdate(milestone);
+						milestoneManager.update(milestone);
 					} else {
 						throw new ExplicitException("This build is not authorized to close milestone '" + milestoneName + "'");
 					}

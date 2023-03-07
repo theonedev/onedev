@@ -9,5 +9,8 @@ public interface CodeCommentQueryPersonalizationManager extends EntityManager<Co
 	
 	CodeCommentQueryPersonalization find(Project project, User user);
 
-    void createOrUpdate(CodeCommentQueryPersonalization codeCommentQueryPersonalization);
+    void create(CodeCommentQueryPersonalization personalization);
+
+	void update(CodeCommentQueryPersonalization personalization);
+	
 }

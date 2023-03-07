@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.pullrequest.PullRequestCommentCreated;
@@ -37,6 +38,7 @@ public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequ
 	@Transactional
 	@Override
 	public void create(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
+		Preconditions.checkState(comment.isNew());
 		dao.persist(comment);
 		comment.getRequest().setCommentCount(comment.getRequest().getCommentCount()+1);
 		listenerRegistry.post(new PullRequestCommentCreated(comment, notifiedEmailAddresses));
@@ -45,6 +47,7 @@ public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequ
 	@Transactional
 	@Override
 	public void update(PullRequestComment comment) {
+		Preconditions.checkState(!comment.isNew());
 		dao.persist(comment);
 		listenerRegistry.post(new PullRequestCommentEdited(comment));
 	}

@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.ProjectDynamicsManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ProjectCreated;
@@ -40,6 +41,7 @@ public class DefaultProjectDynamicsManager extends BaseEntityManager<ProjectDyna
 	@Transactional
 	@Override
 	public void create(ProjectDynamics dynamics) {
+		Preconditions.checkState(dynamics.isNew());
 		dao.persist(dynamics);
 	}
 	

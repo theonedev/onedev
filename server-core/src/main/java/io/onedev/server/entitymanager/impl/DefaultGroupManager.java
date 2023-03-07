@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.GroupManager;
@@ -105,12 +106,14 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 	@Transactional
 	@Override
 	public void create(Group group) {
+		Preconditions.checkState(group.isNew());
 		dao.persist(group);
 	}
 
 	@Transactional
 	@Override
 	public void update(Group group, String oldName) {
+		Preconditions.checkState(!group.isNew());
 		if (oldName != null && !oldName.equals(group.getName())) {
 			for (Project project: projectManager.query()) {
 				try {

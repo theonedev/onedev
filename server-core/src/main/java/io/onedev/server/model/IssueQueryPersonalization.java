@@ -97,7 +97,10 @@ public class IssueQueryPersonalization extends AbstractEntity implements QueryPe
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(IssueQueryPersonalizationManager.class).createOrUpdate(this);
+		if (isNew())
+			OneDev.getInstance(IssueQueryPersonalizationManager.class).create(this);
+		else
+			OneDev.getInstance(IssueQueryPersonalizationManager.class).update(this);
 	}
 	
 }

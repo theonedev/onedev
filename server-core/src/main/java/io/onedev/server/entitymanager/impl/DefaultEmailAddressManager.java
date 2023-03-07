@@ -1,17 +1,8 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.eclipse.jgit.lib.PersonIdent;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.hazelcast.core.HazelcastInstance;
-
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -30,6 +21,12 @@ import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.facade.EmailAddressCache;
 import io.onedev.server.util.facade.EmailAddressFacade;
+import org.eclipse.jgit.lib.PersonIdent;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> implements EmailAddressManager {
@@ -137,8 +134,8 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 
 	@Transactional
 	@Override
-	public void createOrUpdate(EmailAddress emailAddress) {
-		boolean isNew = emailAddress.isNew();
+	public void create(EmailAddress emailAddress) {
+		Preconditions.checkState(emailAddress.isNew());
 		emailAddress.setValue(emailAddress.getValue().toLowerCase());
 		
 		User user = emailAddress.getOwner();
@@ -150,7 +147,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 		
 		user.getEmailAddresses().add(emailAddress);
 		
-		if (isNew && !emailAddress.isVerified() && settingManager.getMailSetting() != null) {
+		if (!emailAddress.isVerified() && settingManager.getMailSetting() != null) {
 			Long addressId = emailAddress.getId();
 			sessionManager.runAsyncAfterCommit(new Runnable() {
 
@@ -163,6 +160,14 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 		}
 	}
 
+	@Transactional
+	@Override
+	public void update(EmailAddress emailAddress) {
+		Preconditions.checkState(!emailAddress.isNew());
+		emailAddress.setValue(emailAddress.getValue().toLowerCase());
+		dao.persist(emailAddress);
+	}
+	
     @Transactional
     @Listen
     public void on(EntityRemoved event) {

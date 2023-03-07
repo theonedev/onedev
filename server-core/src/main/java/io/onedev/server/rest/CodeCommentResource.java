@@ -117,20 +117,31 @@ public class CodeCommentResource {
 		return commentManager.query(project, pullRequest, parsedQuery, offset, count);
     }
 	
-	@Api(order=400, description="Update code comment of specified id in request body, or create new if id property not provided")
+	@Api(order=400, description="Create new code comment")
 	@POST
-	public Long createOrUpdate(@NotNull CodeComment comment) {
+	public Long create(@NotNull CodeComment comment) {
     	if (!SecurityUtils.canReadCode(comment.getProject()) || 
     			!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
     	}
     	
-		if (comment.isNew())
-			commentManager.create(comment);
-		else
-			commentManager.update(comment);
+		commentManager.create(comment);
 		
 		return comment.getId();
+	}
+
+	@Api(order=450, description="Update code comment of specified id")
+	@Path("/{commentId}")
+	@POST
+	public Response update(@PathParam("commentId") Long commentId, @NotNull CodeComment comment) {
+		if (!SecurityUtils.canReadCode(comment.getProject()) ||
+				!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) {
+			throw new UnauthorizedException();
+		}
+
+		commentManager.update(comment);
+
+		return Response.ok().build();
 	}
 	
 	@Api(order=500)

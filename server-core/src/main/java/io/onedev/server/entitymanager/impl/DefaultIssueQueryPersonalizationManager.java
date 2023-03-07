@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.Project;
@@ -38,14 +39,26 @@ public class DefaultIssueQueryPersonalizationManager extends BaseEntityManager<I
 
 	@Transactional
 	@Override
-	public void createOrUpdate(IssueQueryPersonalization personalization) {
+	public void create(IssueQueryPersonalization personalization) {
+		Preconditions.checkState(personalization.isNew());
+		createrOrUpdate(personalization);
+	}
+
+	@Transactional
+	@Override
+	public void update(IssueQueryPersonalization personalization) {
+		Preconditions.checkState(!personalization.isNew());
+		createrOrUpdate(personalization);
+	}
+
+	private void createrOrUpdate(IssueQueryPersonalization personalization) {
 		Collection<String> retainNames = new HashSet<>();
 		retainNames.addAll(personalization.getQueries().stream()
 				.map(it->NamedQuery.PERSONAL_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
 		retainNames.addAll(personalization.getProject().getNamedIssueQueries().stream()
 				.map(it->NamedQuery.COMMON_NAME_PREFIX+it.getName()).collect(Collectors.toSet()));
 		personalization.getQueryWatchSupport().getQueryWatches().keySet().retainAll(retainNames);
-		
+
 		if (personalization.getQueryWatchSupport().getQueryWatches().isEmpty() && personalization.getQueries().isEmpty()) {
 			if (!personalization.isNew())
 				delete(personalization);
@@ -53,5 +66,5 @@ public class DefaultIssueQueryPersonalizationManager extends BaseEntityManager<I
 			dao.persist(personalization);
 		}
 	}
-
+	
 }

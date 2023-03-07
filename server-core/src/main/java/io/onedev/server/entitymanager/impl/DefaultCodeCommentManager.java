@@ -73,6 +73,8 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	@Transactional
 	@Override
 	public void create(CodeComment comment) {
+		Preconditions.checkState(comment.isNew());
+		
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setUser(comment.getUser());
 		lastActivity.setDescription("added");
@@ -90,6 +92,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	@Transactional
 	@Override
 	public void update(CodeComment comment) {
+ 		Preconditions.checkState(!comment.isNew());
 		dao.persist(comment);
 		listenerRegistry.post(new CodeCommentEdited(SecurityUtils.getUser(), comment));
 	}

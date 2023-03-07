@@ -1,10 +1,5 @@
 package io.onedev.server.util.jackson.hibernate;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-
-import org.hibernate.proxy.HibernateProxy;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
@@ -14,13 +9,19 @@ import com.fasterxml.jackson.databind.deser.SettableAnyProperty;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
 import com.fasterxml.jackson.databind.deser.impl.PropertyValue;
 import com.google.common.base.Preconditions;
-
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
+import org.hibernate.proxy.HibernateProxy;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Stack;
 
 @SuppressWarnings("serial")
 public class EntityDeserializer extends BeanDeserializer {
 
+	private static ThreadLocal<Stack<Object[]>> paramsStack = ThreadLocal.withInitial(() -> new Stack<Object[]>());
+	
 	private final Class<? extends AbstractEntity> entityClass;
 	
 	private final BeanDeserializer defaultDeserializer;
@@ -37,13 +38,37 @@ public class EntityDeserializer extends BeanDeserializer {
 		this.defaultDeserializer = defaultDeserializer;
 		this.dao = dao;
 	}
+	
+	public static void pushParams(Object[] params) {
+		paramsStack.get().push(params);
+	}
+
+	public static void popParams() {
+		paramsStack.get().pop();
+	}
 
 	@Override
 	public AbstractEntity deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
 		Preconditions.checkState(jp.getCurrentToken() == JsonToken.START_OBJECT);
 		jp.nextToken();
+		
+		if (!paramsStack.get().isEmpty() 
+				&& paramsStack.get().peek().length != 0 
+				&& paramsStack.get().peek()[0] instanceof Long) {
+			Long entityId = (Long) paramsStack.get().peek()[0];
+			AbstractEntity entity = dao.load(entityClass, entityId);
+			entity.setOldVersion(entity.getFacade());
 
+			Object bean;
+			if (entity instanceof HibernateProxy)
+				bean = ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
+			else
+				bean = entity;
+			defaultDeserializer.deserialize(jp, ctxt, bean);
+			return entity;
+		}
+		
 		PropertyValue buffer = null;
         for (JsonToken t = jp.getCurrentToken(); t == JsonToken.FIELD_NAME; t = jp.nextToken()) {
         	String propName = jp.getCurrentName();
@@ -51,7 +76,7 @@ public class EntityDeserializer extends BeanDeserializer {
         	SettableBeanProperty property = _beanProperties.find(propName);
         	if (property != null) {
         		Object value = property.deserialize(jp, ctxt);
-            	if (property.getName().equals("id") && value != null) {
+            	if (property.getName().equals(AbstractEntity.PROP_ID) && value != null) {
         			jp.nextToken();
         			AbstractEntity entity = dao.load(entityClass, (Long)value);
         			entity.setOldVersion(entity.getFacade());

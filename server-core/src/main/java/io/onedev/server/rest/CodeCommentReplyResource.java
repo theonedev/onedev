@@ -44,20 +44,31 @@ public class CodeCommentReplyResource {
     	return reply;
 	}
 	
-	@Api(order=200, description="Update code comment reply of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new code comment reply")
 	@POST
-	public Long createOrUpdate(@NotNull CodeCommentReply reply) {
+	public Long create(@NotNull CodeCommentReply reply) {
     	if (!SecurityUtils.canReadCode(reply.getComment().getProject()) || 
     			!SecurityUtils.isAdministrator() && !reply.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
     	}
     	
-		if (reply.isNew())
-    		replyManager.create(reply);
-		else 
-			replyManager.update(reply);
+		replyManager.create(reply);
 		
 		return reply.getId();
+	}
+
+	@Api(order=250, description="Update code comment reply of specified id")
+	@Path("/{replyId}")
+	@POST
+	public Response update(@PathParam("replyId") Long replyId, @NotNull CodeCommentReply reply) {
+		if (!SecurityUtils.canReadCode(reply.getComment().getProject()) ||
+				!SecurityUtils.isAdministrator() && !reply.getUser().equals(SecurityUtils.getUser())) {
+			throw new UnauthorizedException();
+		}
+
+		replyManager.update(reply);
+
+		return Response.ok().build();
 	}
 	
 	@Api(order=300)

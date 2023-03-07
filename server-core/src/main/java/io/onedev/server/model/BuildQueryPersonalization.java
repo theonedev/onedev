@@ -92,7 +92,10 @@ public class BuildQueryPersonalization extends AbstractEntity implements QueryPe
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(BuildQueryPersonalizationManager.class).createOrUpdate(this);
+		if (isNew())
+			OneDev.getInstance(BuildQueryPersonalizationManager.class).create(this);
+		else
+			OneDev.getInstance(BuildQueryPersonalizationManager.class).update(this);			
 	}
 
 }

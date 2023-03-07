@@ -69,7 +69,7 @@ public class MilestoneEditPage extends ProjectPage {
 				} 
 				if (editor.isValid()){
 					editor.getDescriptor().copyProperties(milestone, getMilestone());
-					milestoneManager.createOrUpdate(getMilestone());
+					milestoneManager.update(getMilestone());
 					Session.get().success("Milestone saved");
 					setResponsePage(MilestoneIssuesPage.class, 
 							MilestoneIssuesPage.paramsOf(getMilestone().getProject(), getMilestone(), null));

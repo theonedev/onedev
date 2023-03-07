@@ -14,6 +14,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import com.google.common.base.Preconditions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +90,7 @@ public class DefaultMembershipManager extends BaseEntityManager<Membership> impl
 	@Transactional
 	@Override
 	public void create(Membership membership) {
+		Preconditions.checkState(membership.isNew());
 		dao.persist(membership);
 	}
 

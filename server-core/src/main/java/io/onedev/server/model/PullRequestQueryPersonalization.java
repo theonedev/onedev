@@ -96,7 +96,10 @@ public class PullRequestQueryPersonalization extends AbstractEntity implements Q
 
 	@Override
 	public void onUpdated() {
-		OneDev.getInstance(PullRequestQueryPersonalizationManager.class).createOrUpdate(this);
+		if (isNew())
+			OneDev.getInstance(PullRequestQueryPersonalizationManager.class).create(this);
+		else
+			OneDev.getInstance(PullRequestQueryPersonalizationManager.class).update(this);			
 	}
 	
 }

@@ -11,6 +11,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
@@ -56,6 +57,7 @@ public class DefaultIssueFieldManager extends BaseEntityManager<IssueField> impl
 	@Transactional
 	@Override
 	public void create(IssueField field) {
+		Preconditions.checkState(field.isNew());
 		dao.persist(field);
 	}
 

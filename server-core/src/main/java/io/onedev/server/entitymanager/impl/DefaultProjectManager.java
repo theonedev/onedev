@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import com.hazelcast.cluster.MembershipEvent;
@@ -209,6 +210,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Transactional
 	@Override
 	public void update(Project project) {
+		Preconditions.checkState(!project.isNew());
 		String oldPath = project.getPath();
 		String newPath = project.calcPath();
 		if (!newPath.equals(oldPath)) {
@@ -273,6 +275,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Transactional
 	@Override
 	public void create(Project project) {
+		Preconditions.checkState(project.isNew());
 		Project parent = project.getParent();
 		if (parent != null && parent.isNew())
 			create(parent);
@@ -295,7 +298,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		authorization.setProject(project);
 		authorization.setUser(SecurityUtils.getUser());
 		authorization.setRole(roleManager.getOwner());
-		userAuthorizationManager.createOrUpdate(authorization);
+		userAuthorizationManager.create(authorization);
 
 		updateStorageServer(project);
 		listenerRegistry.post(new ProjectCreated(project));

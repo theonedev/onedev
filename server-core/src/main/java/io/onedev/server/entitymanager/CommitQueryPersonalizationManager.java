@@ -9,5 +9,8 @@ public interface CommitQueryPersonalizationManager extends EntityManager<CommitQ
 	
 	CommitQueryPersonalization find(Project project, User user);
 
-    void createOrUpdate(CommitQueryPersonalization commitQueryPersonalization);
+    void create(CommitQueryPersonalization commitQueryPersonalization);
+
+	void update(CommitQueryPersonalization commitQueryPersonalization);
+	
 }

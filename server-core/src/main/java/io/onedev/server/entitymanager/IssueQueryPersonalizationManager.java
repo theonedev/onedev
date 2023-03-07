@@ -9,5 +9,8 @@ public interface IssueQueryPersonalizationManager extends EntityManager<IssueQue
 	
 	IssueQueryPersonalization find(Project project, User user);
 
-    void createOrUpdate(IssueQueryPersonalization personalization);
+    void create(IssueQueryPersonalization personalization);
+
+	void update(IssueQueryPersonalization personalization);
+	
 }

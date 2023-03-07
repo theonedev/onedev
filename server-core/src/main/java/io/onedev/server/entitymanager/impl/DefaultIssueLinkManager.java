@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import com.google.common.base.Preconditions;
 import org.hibernate.Hibernate;
 import org.hibernate.query.Query;
 
@@ -93,6 +94,7 @@ public class DefaultIssueLinkManager extends BaseEntityManager<IssueLink> implem
 	@Transactional
 	@Override
 	public void create(IssueLink link) {
+		Preconditions.checkState(link.isNew());
 		dao.persist(link);
 	}
 

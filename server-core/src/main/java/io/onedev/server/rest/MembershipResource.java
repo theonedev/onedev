@@ -47,7 +47,7 @@ public class MembershipResource {
 		return membershipManager.load(membershipId);
 	}
 	
-	@Api(order=200, createOnly = true, description="Create new membership")
+	@Api(order=200, description="Create new membership")
 	@POST
 	public Long create(@NotNull Membership membership) {
 		if (!SecurityUtils.isAdministrator())

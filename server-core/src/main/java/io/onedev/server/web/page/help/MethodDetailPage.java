@@ -138,8 +138,7 @@ public class MethodDetailPage extends ApiHelpPage {
 					protected ValueInfo load() {
 						Api api = getResourceMethod().getAnnotation(Api.class);
 						return new ValueInfo(ValueInfo.Origin.REQUEST_BODY,
-								getRequestBodyParam().getParameterizedType(), null, 
-								api != null && api.createOnly());
+								getRequestBodyParam().getParameterizedType(), null);
 					}
 
 				};

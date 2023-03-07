@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.event.Listen;
@@ -73,6 +74,7 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 	@Transactional
 	@Override
 	public void create(BuildParam param) {
+		Preconditions.checkState(param.isNew());
 		dao.persist(param);
 		
 		Long projectId = param.getBuild().getProject().getId();

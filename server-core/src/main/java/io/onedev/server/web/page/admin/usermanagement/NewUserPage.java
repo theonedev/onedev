@@ -75,7 +75,7 @@ public class NewUserPage extends AdministrationPage {
 						@Override
 						public void run() {
 							getUserManager().create(user);
-							getEmailAddressManager().createOrUpdate(emailAddress);
+							getEmailAddressManager().create(emailAddress);
 						}
 						
 					});

@@ -19,8 +19,6 @@ public @interface Api {
 	
 	boolean readOnly() default false;
 	
-	boolean createOnly() default false;
-	
 	int order() default 100;
 	
 }

@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.persistence.annotation.Transactional;
 import org.hibernate.criterion.Restrictions;
 
@@ -31,6 +32,7 @@ public class DefaultGitLfsLockManager extends BaseEntityManager<GitLfsLock> impl
 	@Transactional
 	@Override
 	public void create(GitLfsLock lock) {
+		Preconditions.checkState(lock.isNew());
 		dao.persist(lock);
 	}
 

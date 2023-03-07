@@ -142,7 +142,7 @@ public abstract class IssueAuthorizationsPanel extends Panel {
 				IssueAuthorization authorization = new IssueAuthorization();
 				authorization.setIssue(getIssue());
 				authorization.setUser(OneDev.getInstance(UserManager.class).load(selection.getId()));
-				OneDev.getInstance(IssueAuthorizationManager.class).createOrUpdate(authorization);
+				OneDev.getInstance(IssueAuthorizationManager.class).create(authorization);
 				target.add(authorizationsTable);
 				Session.get().success("User authorized");
 			}

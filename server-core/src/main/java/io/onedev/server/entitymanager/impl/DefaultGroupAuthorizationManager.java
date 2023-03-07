@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
@@ -59,10 +60,18 @@ public class DefaultGroupAuthorizationManager extends BaseEntityManager<GroupAut
 
 	@Transactional
 	@Override
-	public void createOrUpdate(GroupAuthorization authorization) {
+	public void create(GroupAuthorization authorization) {
+		Preconditions.checkState(authorization.isNew());
 		dao.persist(authorization);
 	}
 
+	@Transactional
+	@Override
+	public void update(GroupAuthorization authorization) {
+		Preconditions.checkState(!authorization.isNew());
+		dao.persist(authorization);
+	}
+	
 	@Override
 	public List<GroupAuthorization> query() {
 		return query(true);

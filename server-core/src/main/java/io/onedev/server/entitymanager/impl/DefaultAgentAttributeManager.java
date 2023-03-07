@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,7 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 	@Transactional
 	@Override
 	public void create(AgentAttribute attribute) {
+		Preconditions.checkState(attribute.isNew());
 		dao.persist(attribute);
 		
 		transactionManager.runAfterCommit(new Runnable() {

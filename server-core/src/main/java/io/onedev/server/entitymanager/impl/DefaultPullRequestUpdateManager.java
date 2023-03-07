@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -42,6 +43,7 @@ public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullReque
 	@Transactional
 	@Override
 	public void create(PullRequestUpdate update) {
+		Preconditions.checkState(update.isNew());
 		dao.persist(update);
 		PullRequest request = update.getRequest();
 		if (!request.getTargetProject().equals(request.getSourceProject())) {

@@ -720,7 +720,10 @@ public class DefaultDataManager implements DataManager, Serializable {
     		primaryEmailAddress.setOwner(user);
 		}
 		primaryEmailAddress.setValue(bean.getEmailAddress());
-		emailAddressManager.createOrUpdate(primaryEmailAddress);
+		if (primaryEmailAddress.isNew())
+			emailAddressManager.create(primaryEmailAddress);
+		else
+			emailAddressManager.update(primaryEmailAddress);
 	}	
 
 	@SuppressWarnings({"serial"})

@@ -44,15 +44,27 @@ public class CommitQueryPersonalizationResource {
     	return queryPersonalization;
 	}
 	
-	@Api(order=200, description="Update commit query personalization of specified id in request body, or create new if id property not provided")
+	@Api(order=200, description="Create new commit query personalization")
 	@POST
-	public Long createOrUpdate(@NotNull CommitQueryPersonalization queryPersonalization) {
+	public Long create(@NotNull CommitQueryPersonalization queryPersonalization) {
     	if (!SecurityUtils.canAccess(queryPersonalization.getProject()) 
     			|| !SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
     	}
-		queryPersonalizationManager.createOrUpdate(queryPersonalization);
+		queryPersonalizationManager.create(queryPersonalization);
 		return queryPersonalization.getId();
+	}
+
+	@Api(order=250, description="Update commit query personalization of specified id")
+	@Path("/{queryPersonalizationId}")
+	@POST
+	public Response update(@PathParam("queryPersonalizationId") Long queryPersonalizationId, @NotNull CommitQueryPersonalization queryPersonalization) {
+		if (!SecurityUtils.canAccess(queryPersonalization.getProject())
+				|| !SecurityUtils.isAdministrator() && !queryPersonalization.getUser().equals(SecurityUtils.getUser())) {
+			throw new UnauthorizedException();
+		}
+		queryPersonalizationManager.update(queryPersonalization);
+		return Response.ok().build();
 	}
 	
 	@Api(order=300)

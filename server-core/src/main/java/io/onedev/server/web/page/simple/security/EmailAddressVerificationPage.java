@@ -38,7 +38,7 @@ public class EmailAddressVerificationPage extends SimplePage {
 
 		if (verificationCode.equals(emailAddress.getVerificationCode())) {
 			emailAddress.setVerificationCode(null);
-			getEmailAddressManager().createOrUpdate(emailAddress);
+			getEmailAddressManager().update(emailAddress);
 		} 
 	}
 	
