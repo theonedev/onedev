@@ -36,6 +36,10 @@ onedev.server.codeSupport = {
 		cm.on("change", function() {
 			cm.save();
 			onedev.server.form.markDirty($input.closest("form"));
+			setTimeout(function() {
+				onedev.server.codeSupport.adjustHeight($input);
+				cm.refresh();
+			}, 0);
 		});
 		
 		onedev.server.codeSupport.adjustHeight($input);
