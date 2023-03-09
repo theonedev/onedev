@@ -1,6 +1,5 @@
 package io.onedev.server.search.entitytext;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.WordUtils;
@@ -451,16 +450,10 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		}
 		
 		List<Long> entityIds = new ArrayList<>(entityScores.keySet());
-		Collections.sort(entityIds, new Comparator<>() {
-
-			@Override
-			public int compare(Object o1, Object o2) {
-				if (entityScores.get(o1) < entityScores.get(o2))
-					return 1;
-				else
-					return -1;
-			}
-			
+		Collections.sort(entityIds, (o1, o2) -> {
+			Float score1 = entityScores.get(o1);
+			Float score2 = entityScores.get(o2);
+			return Float.compare(score1, score2) * -1;
 		});
 		
 		if (firstResult < entityIds.size()) {
