@@ -47,13 +47,13 @@ public abstract class ProjectSelector extends Panel {
 		protected List<Project> load() {
 			ProjectCache cache = getProjectManager().cloneCache();
 			
-			return new Similarities<Project>(projectsModel.getObject()) {
+			return new Similarities<>(projectsModel.getObject()) {
 
 				@Override
 				protected double getSimilarScore(Project item) {
 					return cache.getSimilarScore(item, searchInput);
 				}
-				
+
 			};
 		}
 		

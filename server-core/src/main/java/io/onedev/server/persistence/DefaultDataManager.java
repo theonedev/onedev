@@ -1,37 +1,42 @@
 package io.onedev.server.persistence;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterRunnable;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.commandhandler.Upgrade;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.mail.MailManager;
+import io.onedev.server.migration.DataMigrator;
+import io.onedev.server.migration.MigrationHelper;
+import io.onedev.server.migration.VersionedXmlDoc;
+import io.onedev.server.model.*;
+import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.support.administration.*;
+import io.onedev.server.model.support.administration.mailsetting.MailSetting;
+import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
+import io.onedev.server.model.support.issue.LinkSpecOpposite;
+import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.ssh.SshKeyUtils;
+import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.init.ManualConfig;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.web.util.editablebean.NewUserBean;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -52,66 +57,21 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.commandhandler.Upgrade;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.entity.EntityPersisted;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.mail.MailManager;
-import io.onedev.server.migration.DataMigrator;
-import io.onedev.server.migration.MigrationHelper;
-import io.onedev.server.migration.VersionedXmlDoc;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.ModelVersion;
-import io.onedev.server.model.Role;
-import io.onedev.server.model.Setting;
-import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.AgentSetting;
-import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.BrandingSetting;
-import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.administration.GlobalProjectSetting;
-import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
-import io.onedev.server.model.support.administration.GpgSetting;
-import io.onedev.server.model.support.administration.PerformanceSetting;
-import io.onedev.server.model.support.administration.SecuritySetting;
-import io.onedev.server.model.support.administration.ServiceDeskSetting;
-import io.onedev.server.model.support.administration.SshSetting;
-import io.onedev.server.model.support.administration.SystemSetting;
-import io.onedev.server.model.support.administration.mailsetting.MailSetting;
-import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
-import io.onedev.server.model.support.issue.LinkSpecOpposite;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.ssh.SshKeyUtils;
-import io.onedev.server.util.BeanUtils;
-import io.onedev.server.util.init.ManualConfig;
-import io.onedev.server.util.schedule.SchedulableTask;
-import io.onedev.server.util.schedule.TaskScheduler;
-import io.onedev.server.web.util.editablebean.NewUserBean;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -164,7 +124,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 	@Inject
 	public DefaultDataManager(PhysicalNamingStrategy physicalNamingStrategy, HibernateConfig hibernateConfig, 
-			Validator validator, SessionManager sessionManager, Dao dao, SessionFactoryManager sessionFactoryManager,
+			Validator validator, Dao dao, SessionFactoryManager sessionFactoryManager,
 			SettingManager settingManager, MailManager mailManager, TaskScheduler taskScheduler, 
 			PasswordService passwordService, RoleManager roleManager, LinkSpecManager linkSpecManager, 
 			EmailAddressManager emailAddressManager, UserManager userManager, ClusterManager clusterManager, 
@@ -770,7 +730,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			}
 		}
 		
-		Setting setting = settingManager.findSetting(Key.SYSTEM);
+		Setting setting = settingManager.getSetting(Key.SYSTEM);
 		SystemSetting systemSetting = null;
 
 		String ingressUrl = OneDev.getInstance().getIngressUrl();
@@ -818,7 +778,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 
-		setting = settingManager.findSetting(Key.SSH);
+		setting = settingManager.getSetting(Key.SSH);
 		if (setting == null || setting.getValue() == null) {
 			SshSetting sshSetting = new SshSetting();
             sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
@@ -826,17 +786,17 @@ public class DefaultDataManager implements DataManager, Serializable {
             settingManager.saveSshSetting(sshSetting);
         }
 		
-		setting = settingManager.findSetting(Key.GPG);
+		setting = settingManager.getSetting(Key.GPG);
 		if (setting == null || setting.getValue() == null) {
 			GpgSetting gpgSetting = new GpgSetting();
             settingManager.saveGpgSetting(gpgSetting);
         }
 		
-		setting = settingManager.findSetting(Key.SECURITY);
+		setting = settingManager.getSetting(Key.SECURITY);
 		if (setting == null) {
 			settingManager.saveSecuritySetting(new SecuritySetting());
 		} 
-		setting = settingManager.findSetting(Key.ISSUE);
+		setting = settingManager.getSetting(Key.ISSUE);
 		if (setting == null) {
 			LinkSpec link = new LinkSpec();
 			link.setName("Child Issue");
@@ -857,42 +817,42 @@ public class DefaultDataManager implements DataManager, Serializable {
 			
 			settingManager.saveIssueSetting(new GlobalIssueSetting());
 		} 
-		setting = settingManager.findSetting(Key.PERFORMANCE);
+		setting = settingManager.getSetting(Key.PERFORMANCE);
 		if (setting == null) {
 			settingManager.savePerformanceSetting(new PerformanceSetting());
 		} 
-		setting = settingManager.findSetting(Key.AUTHENTICATOR);
+		setting = settingManager.getSetting(Key.AUTHENTICATOR);
 		if (setting == null) {
 			settingManager.saveAuthenticator(null);
 		}
-		setting = settingManager.findSetting(Key.JOB_EXECUTORS);
+		setting = settingManager.getSetting(Key.JOB_EXECUTORS);
 		if (setting == null) 
 			settingManager.saveJobExecutors(new ArrayList<>());
-		setting = settingManager.findSetting(Key.SSO_CONNECTORS);
+		setting = settingManager.getSetting(Key.SSO_CONNECTORS);
 		if (setting == null) {
 			settingManager.saveSsoConnectors(Lists.newArrayList());
 		}
-		setting = settingManager.findSetting(Key.GROOVY_SCRIPTS);
+		setting = settingManager.getSetting(Key.GROOVY_SCRIPTS);
 		if (setting == null) {
 			settingManager.saveGroovyScripts(Lists.newArrayList());
 		}
-		setting = settingManager.findSetting(Key.PULL_REQUEST);
+		setting = settingManager.getSetting(Key.PULL_REQUEST);
 		if (setting == null) {
 			settingManager.savePullRequestSetting(new GlobalPullRequestSetting());
 		}
-		setting = settingManager.findSetting(Key.BUILD);
+		setting = settingManager.getSetting(Key.BUILD);
 		if (setting == null) {
 			settingManager.saveBuildSetting(new GlobalBuildSetting());
 		}
-		setting = settingManager.findSetting(Key.PROJECT);
+		setting = settingManager.getSetting(Key.PROJECT);
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
-		setting = settingManager.findSetting(Key.AGENT);
+		setting = settingManager.getSetting(Key.AGENT);
 		if (setting == null) {
 			settingManager.saveAgentSetting(new AgentSetting());
 		}
-		setting = settingManager.findSetting(Key.SERVICE_DESK_SETTING);
+		setting = settingManager.getSetting(Key.SERVICE_DESK_SETTING);
 		if (setting == null) { 
 			settingManager.saveServiceDeskSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
@@ -906,16 +866,16 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
-		setting = settingManager.findSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
+		setting = settingManager.getSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
 		if (setting == null) {
 			settingManager.saveNotificationTemplateSetting(new NotificationTemplateSetting());
 		}
 		
-		setting = settingManager.findSetting(Key.CONTRIBUTED_SETTINGS);
+		setting = settingManager.getSetting(Key.CONTRIBUTED_SETTINGS);
 		if (setting == null) 
 			settingManager.saveContributedSettings(new LinkedHashMap<>());
 		
-		setting = settingManager.findSetting(Key.MAIL);
+		setting = settingManager.getSetting(Key.MAIL);
 		if (setting == null) {
 			settingManager.saveMailSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
@@ -929,7 +889,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		setting = settingManager.findSetting(Key.BACKUP);
+		setting = settingManager.getSetting(Key.BACKUP);
 		if (setting == null) {
 			settingManager.saveBackupSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
@@ -944,9 +904,16 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		setting = settingManager.findSetting(Key.BRANDING);
+		setting = settingManager.getSetting(Key.BRANDING);
 		if (setting == null) 
 			settingManager.saveBrandingSetting(new BrandingSetting());
+
+		setting = settingManager.getSetting(Key.CLUSTER_SETTING);
+		if (setting == null) {
+			ClusterSetting clusterSetting = new ClusterSetting();
+			clusterSetting.setReplicaCount(1);
+			settingManager.saveClusterSetting(clusterSetting);
+		}
 		
 		if (roleManager.get(Role.OWNER_ID) == null) {
 			Role owner = new Role();

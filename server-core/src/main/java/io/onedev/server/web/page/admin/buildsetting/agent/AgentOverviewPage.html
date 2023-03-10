@@ -1,4 +1,4 @@
-<wicket:extend>
+<wicket:extend xmlns:wicket="http://www.w3.org/1999/html">
 	<div class="mb-5">
 		<a wicket:id="pauseOrResume" class="btn btn-light-primary mr-2"><span wicket:id="label"></span></a>
 		<a wicket:id="restart" class="btn btn-light-primary mr-2">Restart</a>
@@ -39,6 +39,12 @@
 			</tr>
 		</tbody>
 	</table>
+	<div class="mb-4">
+		<span class="font-weight-bold">Access Token: </span>
+		<span wicket:id="accessToken" class="text-monospace font-size-sm mr-2"></span> 
+		<a wicket:id="copyAccessToken" title="copy"><wicket:svg href="copy" class="icon mr-1"/></a>
+		<a wicket:id="regenerateAccessToken" title="Regenerate"><wicket:svg href="refresh2" class="icon"/></a>
+	</div>
 	<div wicket:id="attributes"></div>
 	<wicket:fragment wicket:id="onlineAttributesFrag">
 		<form wicket:id="form" class="leave-confirm">

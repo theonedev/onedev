@@ -1,37 +1,6 @@
 package io.onedev.server.web.resource;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-import javax.persistence.EntityNotFoundException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.AbstractResource;
-import org.apache.wicket.request.resource.ContentDisposition;
-import org.eclipse.jetty.io.EofException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Splitter;
-
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
@@ -44,10 +13,38 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.IOUtils;
+import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.web.mapper.ProjectMapperUtils;
 import io.onedev.server.web.util.MimeUtils;
 import io.onedev.server.web.util.WicketUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+import org.apache.wicket.request.resource.ContentDisposition;
+import org.eclipse.jetty.io.EofException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.persistence.EntityNotFoundException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RawBlobResource extends AbstractResource {
 
@@ -136,8 +133,8 @@ public class RawBlobResource extends AbstractResource {
 				if (blob.getLfsPointer() == null && !blob.isPartial()) {
 					return new ByteArrayInputStream(blob.getBytes());
 				} else {
-					UUID storageServerUUID = getProjectManager().getStorageServerUUID(project.getId(), true);
-					if (storageServerUUID.equals(getClusterManager().getLocalServerUUID())) {
+					String activeServer = getProjectManager().getActiveServer(project.getId(), true);
+					if (activeServer.equals(getClusterManager().getLocalServerAddress())) {
 						if (blob.getLfsPointer() != null) {
 							return new LfsObject(project.getId(), blob.getLfsPointer().getObjectId()).getInputStream();
 						} else {
@@ -148,7 +145,7 @@ public class RawBlobResource extends AbstractResource {
 					} else {
 						Client client = ClientBuilder.newClient();
 						try {
-							String serverUrl = getClusterManager().getServerUrl(storageServerUUID);
+							String serverUrl = getClusterManager().getServerUrl(activeServer);
 							WebTarget target = client.target(serverUrl);
 							if (blob.getLfsPointer() != null) {
 								target = target.path("~api/cluster/lfs")
@@ -163,10 +160,20 @@ public class RawBlobResource extends AbstractResource {
 							}
 							Invocation.Builder builder =  target.request();
 							builder.header(HttpHeaders.AUTHORIZATION, 
-									KubernetesHelper.BEARER + " " + getClusterManager().getCredentialValue());
-							try (Response response = builder.get()){
+									KubernetesHelper.BEARER + " " + getClusterManager().getCredential());
+							Response response = builder.get();
+							try {
 								KubernetesHelper.checkStatus(response);
-								return response.readEntity(InputStream.class);
+								return new InputStreamWrapper(response.readEntity(InputStream.class)) {
+									@Override
+									public void close() throws IOException {
+										super.close();
+										response.close();
+									}
+								};
+							} catch (Exception e) {
+								response.close();
+								throw e;
 							}
 						} finally {
 							client.close();

@@ -61,7 +61,7 @@ public class MarkdownReportPage extends BuildDetailPage {
 
 		Long projectId = getBuild().getProject().getId();
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		String markdown = projectManager.runOnProjectServer(projectId, new GetMarkdownContent(projectId, getBuild().getNumber(), reportName, filePath));
+		String markdown = projectManager.runOnActiveServer(projectId, new GetMarkdownContent(projectId, getBuild().getNumber(), reportName, filePath));
 		add(new MarkdownViewer("markdownReport", Model.of(markdown), null));
 	}
 
@@ -112,8 +112,8 @@ public class MarkdownReportPage extends BuildDetailPage {
 		
 		@Override
 		public String call() throws Exception {
-			File file = new File(Build.getDir(projectId, buildNumber), 
-					PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + filePath);
+			File file = new File(Build.getStorageDir(projectId, buildNumber), 
+					PublishMarkdownReportStep.DIR_CATEGORY + "/" + reportName + "/" + filePath);
 			return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 		}
 		

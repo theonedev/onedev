@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.hibernate.cfg.AvailableSettings.DIALECT;
 
 @Singleton
@@ -253,10 +255,10 @@ public class Upgrade extends AbstractPlugin {
 					}
 
 					File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
-					String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, StandardCharsets.UTF_8);
+					String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, UTF_8);
 					if (hibernateProps.contains("sampledb")) {
 						hibernateProps = StringUtils.replace(hibernateProps, "sampledb", "internaldb");
-						FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, StandardCharsets.UTF_8);
+						writeStringToFile(hibernatePropsFile, hibernateProps, UTF_8);
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -569,7 +571,7 @@ public class Upgrade extends AbstractPlugin {
 						}
 					}
 					if (serverScript != null)
-						FileUtils.writeStringToFile(siteServerScriptFile, serverScript, Charset.defaultCharset());
+						writeStringToFile(siteServerScriptFile, serverScript, Charset.defaultCharset());
 					else 
 						FileUtils.copyFile(file, new File(upgradeDir, "bin/" + file.getName()));
 				} catch (IOException e) {
@@ -701,10 +703,96 @@ public class Upgrade extends AbstractPlugin {
 			}
 			FileUtils.deleteDir(new File(upgradeDir, "site/info"));
 		}
+		
+		if (oldDataVersion <= 116) {
+			var directoryVersion = ".onedev-directory-version";
+			for (var projectDir: new File(upgradeDir, "site/projects").listFiles()) {
+				if (projectDir.getName().equals(directoryVersion)) 
+					continue;	
+				var buildsDir = new File(projectDir, "builds");
+				if (buildsDir.exists()) {
+					for (var buildDir: buildsDir.listFiles()) {
+						if (buildDir.getName().equals(directoryVersion))
+							continue;
+						if (new File(buildDir, "build.log").exists() 
+								|| new File(buildDir, "artifacts").exists()) {
+							var buildNumber = Integer.parseInt(buildDir.getName());
+							File suffixDir = new File(buildsDir, String.format("%03d", buildNumber%1000));
+							FileUtils.createDir(suffixDir);
+							try {
+								FileUtils.moveDirectory(buildDir, new File(suffixDir, String.valueOf(buildNumber)));
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					}
+				}
+				try {
+					writeStringToFile(new File(projectDir, directoryVersion), "1", UTF_8);
+					var attachmentDir = new File(projectDir, "attachment");					
+					if (attachmentDir.exists()) {
+						writeStringToFile(new File(attachmentDir, directoryVersion), "1", UTF_8);
+						var permanentDir = new File(attachmentDir, "permanent");
+						if (permanentDir.exists()) {
+							writeStringToFile(new File(permanentDir, directoryVersion), "1", UTF_8);
+							for (var prefixDir: permanentDir.listFiles()) {
+								if (prefixDir.getName().equals(directoryVersion))
+									continue;
+								writeStringToFile(new File(prefixDir, directoryVersion), "1", UTF_8);
+								for (var groupDir : prefixDir.listFiles()) {
+									if (groupDir.getName().equals(directoryVersion))
+										continue;
+									writeStringToFile(new File(groupDir, directoryVersion), "1", UTF_8);
+								}
+							}								
+						}
+					}
+					var gitDir = new File(projectDir, "git");
+					if (gitDir.exists()) 
+						writeStringToFile(new File(gitDir, directoryVersion), "1", UTF_8);
+					var siteDir = new File(projectDir, "site");
+					if (siteDir.exists())
+						writeStringToFile(new File(siteDir, directoryVersion), "1", UTF_8);
+					if (buildsDir.exists()) {
+						writeStringToFile(new File(buildsDir, directoryVersion), "1", UTF_8);
+						for (var suffixDir: buildsDir.listFiles()) {
+							if (suffixDir.getName().equals(directoryVersion)) 
+								continue;
+							writeStringToFile(new File(suffixDir, directoryVersion), "1", UTF_8);
+							for (var buildDir: suffixDir.listFiles()) {
+								if (buildDir.getName().equals(directoryVersion)) 
+									continue;
+								writeStringToFile(new File(buildDir, directoryVersion), "1", UTF_8);
+								var artifactsDir = new File(buildDir, "artifacts");
+								if (artifactsDir.exists())
+									writeStringToFile(new File(artifactsDir, directoryVersion), "1", UTF_8);
+								var markdownDir = new File(buildDir, "markdown");
+								if (markdownDir.exists())
+									writeStringToFile(new File(markdownDir, directoryVersion), "1", UTF_8);
+								var pullRequestMarkdownDir = new File(buildDir, "pull-request-markdown");
+								if (pullRequestMarkdownDir.exists())
+									writeStringToFile(new File(pullRequestMarkdownDir, directoryVersion), "1", UTF_8);
+								var unitTestDir = new File(buildDir, "unit-test");
+								if (unitTestDir.exists())
+									writeStringToFile(new File(unitTestDir, directoryVersion), "1", UTF_8);
+								var problemDir = new File(buildDir, "problem");
+								if (problemDir.exists())
+									writeStringToFile(new File(problemDir, directoryVersion), "1", UTF_8);
+								var coverageDir = new File(buildDir, "coverage");
+								if (coverageDir.exists())
+									writeStringToFile(new File(coverageDir, directoryVersion), "1", UTF_8);
+							}
+						}
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
 
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
-			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, StandardCharsets.UTF_8);
+			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, UTF_8);
 			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.launcher.bootstrap.Bootstrap", 
@@ -734,10 +822,10 @@ public class Upgrade extends AbstractPlugin {
 
 			wrapperConf = wrapperConf.replaceAll("\r\n(\r\n)+\r\n", "\r\n\r\n");
 			
-			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, StandardCharsets.UTF_8);
+			writeStringToFile(wrapperConfFile, wrapperConf, UTF_8);
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
-			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, StandardCharsets.UTF_8);
+			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, UTF_8);
 			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
 					"hibernate.hikari.autoCommit=true");
 			hibernateProps = StringUtils.replace(hibernateProps, "GitPlex", "OneDev");
@@ -786,20 +874,20 @@ public class Upgrade extends AbstractPlugin {
 			
 			hibernateProps = hibernateProps.replaceAll("\r\n(\r\n)+\r\n", "\r\n\r\n");
 			
-			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, StandardCharsets.UTF_8);
+			writeStringToFile(hibernatePropsFile, hibernateProps, UTF_8);
 			
 			File serverPropsFile = new File(upgradeDir, "conf/server.properties");
-			String serverProps = FileUtils.readFileToString(serverPropsFile, StandardCharsets.UTF_8);
+			String serverProps = FileUtils.readFileToString(serverPropsFile, UTF_8);
 			if (serverProps.contains("sessionTimeout")) 
 				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "server.properties"), serverPropsFile);
-			serverProps = FileUtils.readFileToString(serverPropsFile, StandardCharsets.UTF_8);
+			serverProps = FileUtils.readFileToString(serverPropsFile, UTF_8);
 			if (!serverProps.contains("ssh_port")) {
 				serverProps += String.format("%n%nssh_port: 6611%n");
-				FileUtils.writeStringToFile(serverPropsFile, serverProps, StandardCharsets.UTF_8);
+				writeStringToFile(serverPropsFile, serverProps, UTF_8);
 			}
 
 			File logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
-			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, StandardCharsets.UTF_8);
+			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, UTF_8);
 			if (!logbackConfig.contains("AggregatedServiceLoader") 
 					|| !logbackConfig.contains("com.hazelcast.cp.CPSubsystem")) { 
 				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "logback.xml"), logbackConfigFile);
@@ -810,7 +898,7 @@ public class Upgrade extends AbstractPlugin {
 				FileUtils.deleteFile(sampleKeystoreFile);
 			
 			logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
-			logbackConfig = FileUtils.readFileToString(logbackConfigFile, StandardCharsets.UTF_8);
+			logbackConfig = FileUtils.readFileToString(logbackConfigFile, UTF_8);
 			logbackConfig = StringUtils.replace(logbackConfig, 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"><maxFileSize>1MB</maxFileSize></triggeringPolicy>");
@@ -830,7 +918,7 @@ public class Upgrade extends AbstractPlugin {
 						"</pattern>\n			</layout>");
 			}
 			
-			FileUtils.writeStringToFile(logbackConfigFile, logbackConfig, StandardCharsets.UTF_8);
+			writeStringToFile(logbackConfigFile, logbackConfig, UTF_8);
 			
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
 					new File(upgradeDir, "conf/wrapper-license.conf"));
@@ -844,10 +932,10 @@ public class Upgrade extends AbstractPlugin {
 			if (new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION).exists())
 				FileUtils.deleteFile(new File(upgradeDir, CHECKED_INCOMPATIBILITIES_SINCE_UPGRADED_VERSION));
 			List<String> incompatibilities = FileUtils.readLines(
-					new File(Bootstrap.installDir, INCOMPATIBILITIES), StandardCharsets.UTF_8);
+					new File(Bootstrap.installDir, INCOMPATIBILITIES), UTF_8);
 			if (new File(upgradeDir, INCOMPATIBILITIES).exists()) {
 				String lastIncompatibilityVersion = null;
-				for (var line: FileUtils.readLines(new File(upgradeDir, INCOMPATIBILITIES), StandardCharsets.UTF_8)) {
+				for (var line: FileUtils.readLines(new File(upgradeDir, INCOMPATIBILITIES), UTF_8)) {
 					if (line.trim().startsWith("# ")) {
 						lastIncompatibilityVersion = line.trim().substring(1).trim();
 						break;

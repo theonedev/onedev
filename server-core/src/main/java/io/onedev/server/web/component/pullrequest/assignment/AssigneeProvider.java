@@ -31,7 +31,7 @@ public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 		UserCache cache = userManager.cloneCache();
 		users.sort(cache.comparingDisplayName(request.getParticipants()));
 
-		new ResponseFiller<User>(response).fill(new Similarities<User>(users) {
+		new ResponseFiller<>(response).fill(new Similarities<>(users) {
 
 			private static final long serialVersionUID = 1L;
 
@@ -39,7 +39,7 @@ public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 			public double getSimilarScore(User object) {
 				return cache.getSimilarScore(object, term);
 			}
-			
+
 		}, page, WebConstants.PAGE_SIZE);
 	}
 

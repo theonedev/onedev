@@ -23,6 +23,7 @@ import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
+import io.onedev.server.web.page.admin.clustermanagement.ClusterManagementPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
@@ -223,6 +224,9 @@ public abstract class LayoutPage extends BasePage {
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts", 
 							GroovyScriptListPage.class, new PageParameters()));
+
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Clustering & Replication",
+							ClusterManagementPage.class, new PageParameters()));
 
 					List<Class<? extends ContributedAdministrationSetting>> contributedSettingClasses = new ArrayList<>();
 					for (AdministrationSettingContribution contribution:OneDev.getExtensions(AdministrationSettingContribution.class)) {

@@ -1,26 +1,8 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.model.Setting;
-import io.onedev.server.model.support.administration.AgentSetting;
-import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.BrandingSetting;
-import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.administration.GlobalProjectSetting;
-import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
-import io.onedev.server.model.support.administration.GpgSetting;
-import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.model.support.administration.PerformanceSetting;
-import io.onedev.server.model.support.administration.SecuritySetting;
-import io.onedev.server.model.support.administration.ServiceDeskSetting;
-import io.onedev.server.model.support.administration.SshSetting;
-import io.onedev.server.model.support.administration.SystemSetting;
+import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.support.administration.*;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
@@ -33,21 +15,15 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 public interface SettingManager extends EntityManager<Setting> {
 	
-	void init();
-	
-	/**
-	 * Retrieve setting by key.
-	 * <p>
-	 * @param key
-	 *			key of the setting
-	 * @return
-	 * 			setting associated with specified key, or <tt>null</tt> if 
-	 * 			no setting record found for the key
-	 */
 	@Nullable
-	Setting findSetting(Setting.Key key);
+	Setting getSetting(Key key);
 	
 	/**
 	 * Get system setting.
@@ -110,11 +86,14 @@ public interface SettingManager extends EntityManager<Setting> {
 	 */
 	void saveBackupSetting(@Nullable BackupSetting backupSetting);
 	
-	@Nullable
 	BrandingSetting getBrandingSetting();
 	
-	void saveBrandingSetting(@Nullable BrandingSetting brandingSetting);
+	void saveBrandingSetting(BrandingSetting brandingSetting);
+	
+	ClusterSetting getClusterSetting();
 
+	void saveClusterSetting(ClusterSetting clusterSetting);
+	
 	SecuritySetting getSecuritySetting();
 	
 	void saveSecuritySetting(SecuritySetting securitySetting);

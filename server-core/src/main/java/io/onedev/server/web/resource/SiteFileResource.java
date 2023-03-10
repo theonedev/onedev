@@ -2,16 +2,13 @@ package io.onedev.server.web.resource;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ExceptionUtils;
-import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.LongRange;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
@@ -39,8 +36,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
+
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.util.IOUtils.copyRange;
 
 public class SiteFileResource extends AbstractResource {
 
@@ -123,37 +121,32 @@ public class SiteFileResource extends AbstractResource {
 			public void writeData(Attributes attributes) throws IOException {
 				LongRange range = WicketUtils.getRequestContentRange(fileInfo.getLength());
 				
-				UUID storageServerUUID = getProjectManager().getStorageServerUUID(projectId, true);
-				if (storageServerUUID.equals(getClusterManager().getLocalServerUUID())) {
-					LockUtils.read(Project.getSiteLockName(projectId), new Callable<Void>() {
-
-						@Override
-						public Void call() {
-							File file = new File(getStorageManager().getProjectSiteDir(projectId), finalFilePath);
-							try (InputStream is = new FileInputStream(file)) {
-								IOUtils.copyRange(is, attributes.getResponse().getOutputStream(), range);
-							} catch (IOException e) {
-								handle(e);
-							}
-							return null;
+				String activeServer = getProjectManager().getActiveServer(projectId, true);
+				if (activeServer.equals(getClusterManager().getLocalServerAddress())) {
+					read(Project.getSiteLockName(projectId), () -> {
+						File file = new File(getProjectManager().getSiteDir(projectId), finalFilePath);
+						try (InputStream is = new FileInputStream(file)) {
+							copyRange(is, attributes.getResponse().getOutputStream(), range);
+						} catch (IOException e) {
+							handle(e);
 						}
-						
+						return null;
 					});
 				} else {
 					Client client = ClientBuilder.newClient();
 					try {
-						String serverUrl = getClusterManager().getServerUrl(storageServerUUID);
+						String serverUrl = getClusterManager().getServerUrl(activeServer);
 						WebTarget target = client.target(serverUrl);
 						target = target.path("~api/cluster/site")
 								.queryParam("projectId", project.getId())
 								.queryParam("filePath", finalFilePath);
 						Invocation.Builder builder =  target.request();
 						builder.header(HttpHeaders.AUTHORIZATION, 
-								KubernetesHelper.BEARER + " " + getClusterManager().getCredentialValue());
+								KubernetesHelper.BEARER + " " + getClusterManager().getCredential());
 						try (Response response = builder.get()){
 							KubernetesHelper.checkStatus(response);
 							try (InputStream is = response.readEntity(InputStream.class)) {
-								IOUtils.copyRange(is, attributes.getResponse().getOutputStream(), range);
+								copyRange(is, attributes.getResponse().getOutputStream(), range);
 							} catch (Exception e) {
 								handle(e);
 							}
@@ -189,10 +182,6 @@ public class SiteFileResource extends AbstractResource {
 	
 	private ClusterManager getClusterManager() {
 		return OneDev.getInstance(ClusterManager.class);
-	}
-	
-	private StorageManager getStorageManager() {
-		return OneDev.getInstance(StorageManager.class);
 	}
 	
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {

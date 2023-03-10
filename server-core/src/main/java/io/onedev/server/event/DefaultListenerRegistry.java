@@ -4,14 +4,15 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterRunnable;
-import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.ProjectEvent;
+import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,12 +20,13 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultListenerRegistry.class);
+	
 	private final ProjectManager projectManager;
 	
 	private final TransactionManager transactionManager;
@@ -35,7 +37,7 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 	
 	private volatile Map<Object, Collection<Method>> listenerMethods;
 	
-	private final Map<Class<?>, List<Listener>> listeners = new ConcurrentHashMap<>();
+	private final Map<Class<?>, Collection<Listener>> listeners = new ConcurrentHashMap<>();
 	
 	@Inject
 	public DefaultListenerRegistry(ProjectManager projectManager, ClusterManager clusterManager,
@@ -80,7 +82,7 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 	}
 	
 	protected Collection<Listener> getListeners(Class<?> eventType) {
-		List<Listener> listeners = this.listeners.get(eventType);
+		Collection<Listener> listeners = this.listeners.get(eventType);
 		if (listeners == null) {
 			listeners = new ArrayList<>();
 			for (Map.Entry<Object, Collection<Method>> entry: getListenerMethods().entrySet()) {
@@ -90,7 +92,6 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 						listeners.add(new Listener(entry.getKey(), method));
 				}
 			}
-			Collections.sort(listeners);
 			this.listeners.put(eventType, listeners);
 		}
 		return listeners;
@@ -108,87 +109,47 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 		if (event instanceof ProjectEvent) {
 			ProjectEvent projectEvent = (ProjectEvent) event;
 			Long projectId = projectEvent.getProject().getId();
-
-			transactionManager.runAfterCommit(new ClusterRunnable() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void run() {
-					projectManager.submitToProjectServer(projectId, new ClusterTask<Void>() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public Void call() throws Exception {
-							String lockName = projectEvent.getLockName();
-							if (lockName != null) {
-								LockUtils.call(lockName, true, new Callable<Void>() {
-
-									@Override
-									public Void call() throws Exception {
-										sessionManager.run(new Runnable() {
-
-											@Override
-											public void run() {
-												invokeListeners(event);
-											}
-
-										});
-										return null;
-									}
-
-								});
-							} else {
-								sessionManager.run(new Runnable() {
-
-									@Override
-									public void run() {
-										invokeListeners(event);
-									}
-
-								});
-							}
+			transactionManager.runAfterCommit(() -> projectManager.submitToActiveServer(projectId, () -> {
+				try {
+					String lockName = projectEvent.getLockName();
+					if (lockName != null) {
+						LockUtils.call(lockName, true, () -> {
+							sessionManager.run(() -> invokeListeners(event));
 							return null;
-						}
-
-					});
+						});
+					} else {
+						sessionManager.run(() -> invokeListeners(event));
+					}
+				} catch (Exception e) {
+					logger.error("Error invoking listeners", e);
 				}
-
-			});
+				return null;
+			}));
 		} else if (event instanceof ProjectDeleted) {
 			ProjectDeleted projectDeleted = (ProjectDeleted) event;
 			Long projectId = projectDeleted.getProjectId();
-			UUID projectStorageServerUUID = projectManager.getStorageServerUUID(projectId, false);
-			if (projectStorageServerUUID != null) {
-				transactionManager.runAfterCommit(new ClusterRunnable() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void run() {
-						clusterManager.submitToServer(projectStorageServerUUID, new ClusterTask<Void>() {
-
-							private static final long serialVersionUID = 1L;
-
-							@Override
-							public Void call() throws Exception {
-								sessionManager.run(new Runnable() {
-
-									@Override
-									public void run() {
-										invokeListeners(event);
-									}
-
-								});
-								return null;
-							}
-
-						});
+			String activeServer = projectManager.getActiveServer(projectId, false);
+			if (activeServer != null) {
+				transactionManager.runAfterCommit(() -> clusterManager.submitToServer(activeServer, () -> {
+					try {
+						sessionManager.run(() -> invokeListeners(event));
+					} catch (Exception e) {
+						logger.error("Error invoking listeners", e);
 					}
-
-				});
+					return null;
+				}));
 			}
+		} else if (event instanceof ActiveServerChanged) {
+			ActiveServerChanged serverActivated = (ActiveServerChanged) event;
+			Long projectId = serverActivated.getProjectId();
+			transactionManager.runAfterCommit(() -> projectManager.submitToActiveServer(projectId, () -> {
+				try {
+					sessionManager.run(() -> invokeListeners(event));
+				} catch (Exception e) {
+					logger.error("Error invoking listeners", e);
+				}
+				return null;
+			}));
 		} else {
 			invokeListeners(event);
 		}

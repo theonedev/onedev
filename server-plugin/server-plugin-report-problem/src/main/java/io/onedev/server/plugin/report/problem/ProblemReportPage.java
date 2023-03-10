@@ -92,7 +92,7 @@ public class ProblemReportPage extends BuildReportPage {
 			Long projectId = getProject().getId();
 			Long buildNumber = getBuild().getNumber();
 			
-			return OneDev.getInstance(ProjectManager.class).runOnProjectServer(projectId, new GetProblemReport(projectId, buildNumber, getReportName()));
+			return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetProblemReport(projectId, buildNumber, getReportName()));
 		}
 		
 	};
@@ -394,7 +394,7 @@ public class ProblemReportPage extends BuildReportPage {
 
 				@Override
 				public ProblemReport call() throws Exception {
-					File reportDir = new File(Build.getDir(projectId, buildNumber), ProblemReport.CATEGORY + "/" + reportName);				
+					File reportDir = new File(Build.getStorageDir(projectId, buildNumber), ProblemReport.DIR_CATEGORY + "/" + reportName);				
 					return ProblemReport.readFrom(reportDir);
 				}
 				

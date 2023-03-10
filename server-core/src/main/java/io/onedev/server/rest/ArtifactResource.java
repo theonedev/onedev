@@ -2,7 +2,6 @@ package io.onedev.server.rest;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -10,7 +9,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.artifact.ArtifactInfo;
-import org.apache.commons.compress.utils.IOUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 
@@ -18,17 +16,23 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.UUID;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.k8shelper.KubernetesHelper.checkStatus;
+import static javax.ws.rs.client.Entity.entity;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
+import static javax.ws.rs.core.Response.ok;
+import static org.apache.commons.compress.utils.IOUtils.copy;
 
 @Api(order=4100, description="In most cases, artifact resource is operated with build id, which is different from build number. "
 		+ "To get build id of a particular build number, use the <a href='/~help/api/io.onedev.server.rest.BuildResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
@@ -80,7 +84,7 @@ public class ArtifactResource {
 	@Api(order=200, description = "Download artifact of specified path")
 	@Path("/{buildId}/contents/{artifactPath:(.*)}")
 	@GET
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@Produces(APPLICATION_OCTET_STREAM)
 	public StreamingOutput downloadArtifact(@PathParam("buildId") Long buildId,
 									 @PathParam("artifactPath") @Api(example = "path/to/file") String artifactPath) {
 		Build build = buildManager.load(buildId);
@@ -88,9 +92,9 @@ public class ArtifactResource {
 			throw new UnauthorizedException();
 
 		return output -> {
-			UUID storageServerUUID = projectManager.getStorageServerUUID(
+			String activeServer = projectManager.getActiveServer(
 					build.getProject().getId(), true);
-			String serverUrl = clusterManager.getServerUrl(storageServerUUID);
+			String serverUrl = clusterManager.getServerUrl(activeServer);
 			Client client = ClientBuilder.newClient();
 			try {
 				WebTarget target = client.target(serverUrl).path("~api/cluster/artifact")
@@ -98,13 +102,13 @@ public class ArtifactResource {
 						.queryParam("buildNumber", build.getNumber())
 						.queryParam("artifactPath", normalizeArtifactPath(artifactPath));
 				Invocation.Builder builder = target.request();
-				builder.header(HttpHeaders.AUTHORIZATION, KubernetesHelper.BEARER + " "
-						+ clusterManager.getCredentialValue());
+				builder.header(AUTHORIZATION, BEARER + " "
+						+ clusterManager.getCredential());
 
 				try (Response response = builder.get()) {
-					KubernetesHelper.checkStatus(response);
+					checkStatus(response);
 					try (InputStream is = response.readEntity(InputStream.class)) {
-						IOUtils.copy(is, output, BUFFER_SIZE);
+						copy(is, output, BUFFER_SIZE);
 					} finally {
 						output.close();
 					}
@@ -118,7 +122,7 @@ public class ArtifactResource {
 	@Api(order=300, description = "Upload artifact to specified path")
 	@Path("/{buildId}/{artifactPath:(.*)}")
 	@POST
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@Consumes(APPLICATION_OCTET_STREAM)
 	public Response uploadArtifact(
 			@PathParam("buildId") Long buildId, 
 			@PathParam("artifactPath") @Api(example = "path/to/file") String artifactPath, 
@@ -127,9 +131,9 @@ public class ArtifactResource {
 		if (!SecurityUtils.canManage(build))
 			throw new UnauthorizedException();
 
-		UUID storageServerUUID = projectManager.getStorageServerUUID(
+		String activeServer = projectManager.getActiveServer(
 				build.getProject().getId(), true);
-		String serverUrl = clusterManager.getServerUrl(storageServerUUID);
+		String serverUrl = clusterManager.getServerUrl(activeServer);
 
 		Client client = ClientBuilder.newClient();
 		client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
@@ -140,30 +144,24 @@ public class ArtifactResource {
 					.queryParam("buildNumber", build.getNumber())
 					.queryParam("artifactPath", normalizeArtifactPath(artifactPath));
 			Invocation.Builder builder = target.request();
-			builder.header(HttpHeaders.AUTHORIZATION,
-					KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+			builder.header(AUTHORIZATION, BEARER + " " + clusterManager.getCredential());
 
-			StreamingOutput os = new StreamingOutput() {
-
-				@Override
-				public void write(OutputStream output) throws IOException {
-					try {
-						IOUtils.copy(input, output, BUFFER_SIZE);
-					} finally {
-						input.close();
-						output.close();
-					}
+			StreamingOutput os = output -> {
+				try {
+					copy(input, output, BUFFER_SIZE);
+				} finally {
+					input.close();
+					output.close();
 				}
-
 			};
 
-			try (Response response = builder.post(Entity.entity(os, MediaType.APPLICATION_OCTET_STREAM))) {
-				KubernetesHelper.checkStatus(response);
+			try (Response response = builder.post(entity(os, APPLICATION_OCTET_STREAM))) {
+				checkStatus(response);
 			}
 		} finally {
 			client.close();
 		}
-		return Response.ok().build();
+		return ok().build();
 	}
 	
 	@Api(order=400, description = "Delete artifact of specified path, or delete all artifacts " +
@@ -178,7 +176,7 @@ public class ArtifactResource {
 			throw new UnauthorizedException();
 		
 		buildManager.deleteArtifact(build, normalizeArtifactPath(artifactPath));
-		return Response.ok().build();
+		return ok().build();
 	}
 	
 }

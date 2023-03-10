@@ -108,15 +108,10 @@ public abstract class ForkOptionPanel extends Panel {
 						newProject.setCodeAnalysisSetting(getProject().getCodeAnalysisSetting());
 						newProject.setGitPackConfig(getProject().getGitPackConfig());
 						
-						OneDev.getInstance(TransactionManager.class).run(new Runnable() {
-
-							@Override
-							public void run() {
-								getProjectManager().create(newProject);
-								getProjectManager().fork(getProject(), newProject);
-								OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
-							}
-							
+						OneDev.getInstance(TransactionManager.class).run(() -> {
+							getProjectManager().create(newProject);
+							getProjectManager().fork(getProject(), newProject);
+							OneDev.getInstance(ProjectLabelManager.class).sync(newProject, labelsBean.getLabels());
 						});
 						Session.get().success("Project forked");
 						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));

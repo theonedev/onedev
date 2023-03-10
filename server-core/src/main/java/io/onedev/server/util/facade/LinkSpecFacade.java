@@ -17,10 +17,6 @@ public class LinkSpecFacade extends EntityFacade {
 		this.name = name;
 		this.oppositeName = oppositeName;
 	}
-	
-	public LinkSpecFacade(LinkSpec link) {
-		this(link.getId(), link.getName(), link.getOpposite()!=null?link.getOpposite().getName():null);
-	}
 
 	public String getName() {
 		return name;

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -47,19 +48,12 @@ public class CommandUtils {
 		File homeDir = FileUtils.createTempDir("githome"); 
 		
 		ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-		SensitiveMasker.push(new SensitiveMasker() {
-
-			@Override
-			public String mask(String text) {
-				return StringUtils.replace(text, clusterManager.getCredentialValue(), "******");
-			}
-			
-		});
+		SensitiveMasker.push(text -> StringUtils.replace(text, clusterManager.getCredential(), "******"));
 		try {
 			Commandline git = newGit();
 			git.environments().put("HOME", homeDir.getAbsolutePath());
 			String extraHeader = KubernetesHelper.AUTHORIZATION + ": " 
-					+ KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue();
+					+ KubernetesHelper.BEARER + " " + clusterManager.getCredential();
 			git.addArgs("config", "--global", "http.extraHeader", extraHeader);
 			git.execute(new LineConsumer() {
 
@@ -80,6 +74,8 @@ public class CommandUtils {
 			git.clearArgs();
 			
 			return task.call(git);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		} finally {
 			SensitiveMasker.pop();
 			FileUtils.deleteDir(homeDir);

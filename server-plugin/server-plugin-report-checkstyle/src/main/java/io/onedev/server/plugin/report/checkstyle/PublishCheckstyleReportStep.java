@@ -1,23 +1,12 @@
 package io.onedev.server.plugin.report.checkstyle;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import javax.validation.constraints.NotEmpty;
-import org.unbescape.html.HtmlEscape;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.Patterns;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.StepGroup;
 import io.onedev.server.codequality.CodeProblem;
@@ -27,9 +16,19 @@ import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.problem.ProblemReport;
 import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.Patterns;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.unbescape.html.HtmlEscape;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Editable(order=8000, group=StepGroup.PUBLISH_REPORTS, name="Checkstyle")
 public class PublishCheckstyleReportStep extends PublishProblemReportStep {
@@ -37,8 +36,6 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 	private static final long serialVersionUID = 1L;
 	
 	private static final int TAB_WIDTH = 8;
-	
-	public static final String HH = "hh";
 	
 	@Editable(order=100, description="Specify checkstyle result xml file under <a href='https://docs.onedev.io/concepts#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/checkstyle-result.xml</tt>. "

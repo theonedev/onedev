@@ -29,6 +29,8 @@ public class Group extends AbstractEntity implements Permission {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PROP_ADMINISTRATOR = "administrator";
+	
+	public static final String PROP_NAME = "name";
 
 	@Column(unique=true, nullable=false)
 	private String name;

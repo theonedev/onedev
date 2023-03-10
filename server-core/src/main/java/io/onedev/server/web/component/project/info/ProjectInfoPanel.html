@@ -26,5 +26,18 @@
 		</div>
 		</wicket:enclosure>
 		<div wicket:id="description" class="mt-4"></div>
+		<wicket:enclosure child="replicas">
+			<div class="font-weight-bolder font-size-lg mt-4 mb-2">Replicas</div>
+			<table class="table mb-0">
+				<tbody>
+				<tr wicket:id="replicas">
+					<td wicket:id="server"></td>
+					<td class="text-right">
+						<a wicket:id="sync" title="Request to sync"><wicket:svg href="refresh" class="icon"/></a>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</wicket:enclosure>
 	</div>
 </wicket:panel>

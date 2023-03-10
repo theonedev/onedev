@@ -1,18 +1,5 @@
 package io.onedev.server.persistence.dao;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -21,6 +8,17 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.List;
 
 @Singleton
 @SuppressWarnings("unchecked")

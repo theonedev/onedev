@@ -395,8 +395,10 @@ public class MethodDetailPage extends ApiHelpPage {
 		case "PUT":
 		case "POST":
 			if (resourceClass == TriggerJobResource.class) {
-				curlExample.append(String.format("-X %s -H \"Content-Type: %s\" ", 
+				curlExample.append(String.format("-X %s -H \"Content-Type: %s\" ",
 						httpMethod, MediaType.APPLICATION_JSON));
+			} else if (requestBodyClass == null) {
+				curlExample.append(String.format("-X %s ", httpMethod));
 			} else if (InputStream.class.isAssignableFrom(requestBodyClass)) {
 				curlExample.append(String.format("-X %s --data-binary \"@upload-file\" -H \"Content-Type: %s\" ",
 						httpMethod, MediaType.APPLICATION_OCTET_STREAM));

@@ -52,8 +52,6 @@ import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.RefUpdate;
-import org.eclipse.jgit.lib.Repository;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
@@ -73,6 +71,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.onedev.server.model.PullRequest.getSerialLockName;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
 
 @Singleton
@@ -228,7 +227,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		
 		MergePreview mergePreview = request.checkMergePreview();
 		if (mergePreview != null)
-			listenerRegistry.post(new PullRequestMergePreviewUpdated(request));
+			updateMergePreviewRef(request);
 		
 		checkAsync(request, false, true);
 	}
@@ -330,10 +329,10 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		MergePreview mergePreview = request.checkMergePreview();
 		
 		if (mergePreview != null) 
-			listenerRegistry.post(new PullRequestMergePreviewUpdated(request));
+			updateMergePreviewRef(request);
 		
 		if (request.getBuildCommitHash() != null) 
-			listenerRegistry.post(new PullRequestBuildCommitUpdated(request));
+			updateBuildCommitRef(request);
 		
 		checkAsync(request, false, request.getBuildCommitHash() == null);
 		
@@ -364,45 +363,72 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		pendingSuggestionApplyManager.discard(null, request);
 	}
 	
-	@Sessional
-	@Listen
-	public void on(PullRequestMergePreviewUpdated event) {
-		PullRequest request = event.getRequest();
+	private void updateMergePreviewRef(PullRequest request) {
 		Project project = request.getTargetProject();
 		MergePreview preview = request.getMergePreview();
-		Repository repository = projectManager.getRepository(project.getId());
 		if (preview != null) {
 			ObjectId mergedId = preview.getMergeCommitHash() != null ?
 					ObjectId.fromString(preview.getMergeCommitHash()) : null;
 			if (mergedId != null && !mergedId.equals((project.getObjectId(request.getMergeRef(), false)))) {
-				RefUpdate refUpdate = GitUtils.getRefUpdate(repository, request.getMergeRef());
-				refUpdate.setNewObjectId(mergedId);
-				GitUtils.updateRef(refUpdate);
+				gitService.updateRef(project, request.getMergeRef(), mergedId, null);
 			} else if (mergedId == null && project.getObjectId(request.getMergeRef(), false) != null) {
-				GitUtils.deleteRef(GitUtils.getRefUpdate(repository, request.getMergeRef()));
+				gitService.deleteRefs(project, Sets.newHashSet(request.getMergeRef()));
 			}
 		} else if (project.getObjectId(request.getMergeRef(), false) != null) {
-			GitUtils.deleteRef(GitUtils.getRefUpdate(repository, request.getMergeRef()));
+			gitService.deleteRefs(project, Sets.newHashSet(request.getMergeRef()));
 		}
+	}
+	
+	@Sessional
+	@Listen
+	public void updateBuildCommitRef(PullRequest request) {
+		Project project = request.getTargetProject();
+		ObjectId buildCommitId = null;
+		if (request.getBuildCommitHash() != null)
+			buildCommitId = ObjectId.fromString(request.getBuildCommitHash());
+		if (buildCommitId != null && !buildCommitId.equals((project.getObjectId(request.getBuildRef(), false)))) {
+			gitService.updateRef(project, request.getBuildRef(), buildCommitId, null);
+		} else if (buildCommitId == null
+				&& project.getObjectId(request.getBuildRef(), false) != null) {
+			gitService.deleteRefs(project, Sets.newHashSet(request.getBuildRef()));
+		}
+	}
+
+	private void gitDirModified(Long projectId) {
+		var gitDir = projectManager.getRepository(projectId).getDirectory();
+		projectManager.directoryModified(projectId, gitDir);	
+	}
+	
+	@Listen
+	public void on(PullRequestOpened event) {
+		gitDirModified(event.getProject().getId());
+	}
+
+	@Listen
+	public void on(PullRequestUpdated event) {
+		gitDirModified(event.getProject().getId());
+	}
+
+	@Listen
+	public void on(PullRequestDeleted event) {
+		gitDirModified(event.getProject().getId());
+	}
+
+	@Listen
+	public void on(PullRequestsDeleted event) {
+		gitDirModified(event.getProject().getId());
+	}
+
+	@Sessional
+	@Listen
+	public void on(PullRequestMergePreviewUpdated event) {
+		gitDirModified(event.getProject().getId());
 	}
 
 	@Sessional
 	@Listen
 	public void on(PullRequestBuildCommitUpdated event) {
-		PullRequest request = event.getRequest();
-		Project project = request.getTargetProject();
-		ObjectId buildCommitId = null;
-		if (request.getBuildCommitHash() != null)
-			buildCommitId = ObjectId.fromString(request.getBuildCommitHash());
-		Repository repository = projectManager.getRepository(project.getId());
-		if (buildCommitId != null && !buildCommitId.equals((project.getObjectId(request.getBuildRef(), false)))) {
-			RefUpdate refUpdate = GitUtils.getRefUpdate(repository, request.getBuildRef());
-			refUpdate.setNewObjectId(buildCommitId);
-			GitUtils.updateRef(refUpdate);
-		} else if (buildCommitId == null
-				&& project.getObjectId(request.getBuildRef(), false) != null) {
-			GitUtils.deleteRef(GitUtils.getRefUpdate(repository, request.getBuildRef()));
-		}
+		gitDirModified(event.getProject().getId());
 	}
 
 	private void check(PullRequest request, boolean sourceUpdated, boolean updateBuildCommit) {
@@ -448,14 +474,17 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 								if (updateBuildCommit) {
 									request.setBuildCommitHash(mergePreview.getMergeCommitHash());
+									updateBuildCommitRef(request);
 									listenerRegistry.post(new PullRequestBuildCommitUpdated((request)));
 								}
 								dao.persist(request);
+								updateMergePreviewRef(request);
 								listenerRegistry.post(new PullRequestMergePreviewUpdated(request));
 							} else if (updateBuildCommit && 
 									!Objects.equals(mergePreview.getMergeCommitHash(), request.getBuildCommitHash())) {
 								request.setBuildCommitHash(mergePreview.getMergeCommitHash());
 								dao.persist(request);
+								updateBuildCommitRef(request);
 								listenerRegistry.post(new PullRequestBuildCommitUpdated(request));
 							}
 						} 
@@ -627,33 +656,38 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 
 			@Override
 			public void run() {
-				projectManager.submitToProjectServer(projectId, new ClusterTask<Void>() {
+				projectManager.submitToActiveServer(projectId, new ClusterTask<Void>() {
 
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					public Void call() throws Exception {
-			        	return LockUtils.call(PullRequest.getSerialLockName(requestId), true, new ClusterTask<Void>() {
+					public Void call() {
+						try {
+							LockUtils.call(getSerialLockName(requestId), true, new ClusterTask<Void>() {
 
-							private static final long serialVersionUID = 1L;
+								private static final long serialVersionUID = 1L;
 
-							@Override
-							public Void call() throws Exception {
-								transactionManager.run(new ClusterRunnable() {
+								@Override
+								public Void call() {
+									transactionManager.run(new ClusterRunnable() {
 
-									private static final long serialVersionUID = 1L;
+										private static final long serialVersionUID = 1L;
 
-									@Override
-									public void run() {
-										PullRequest request = load(requestId);
-							        	check(request, sourceUpdated, updateBuildCommit);
-									}
-									
-								});
-								return null;
-							}
-			        		
-			        	});
+										@Override
+										public void run() {
+											PullRequest request = load(requestId);
+											check(request, sourceUpdated, updateBuildCommit);
+										}
+
+									});
+									return null;
+								}
+
+							});
+						} catch (Exception e) {
+							logger.error("Error checking pull request", e);
+						}
+						return null;
 					}
 					
 				});

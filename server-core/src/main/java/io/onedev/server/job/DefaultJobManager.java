@@ -9,6 +9,7 @@ import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.*;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecParseException;
 import io.onedev.server.buildspec.Service;
@@ -35,11 +36,12 @@ import io.onedev.server.event.project.*;
 import io.onedev.server.event.project.build.*;
 import io.onedev.server.event.project.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.job.log.LogManager;
-import io.onedev.server.job.log.LogTask;
+import io.onedev.server.job.log.ServerJobLogger;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.job.match.JobMatchContext;
 import io.onedev.server.model.*;
@@ -56,7 +58,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.terminal.WebShell;
@@ -68,7 +69,6 @@ import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.editable.EditableStringTransformer;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.annotation.Interpolative;
 import nl.altindag.ssl.SSLFactory;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
@@ -97,7 +97,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
@@ -153,8 +152,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private final CodeIndexManager codeIndexManager;
 
-	private final StorageManager storageManager;
-
 	private final GitService gitService;
 	
 	private final SSLFactory sslFactory;
@@ -163,7 +160,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private volatile Map<String, JobContext> jobContexts;
 
-	private volatile Map<String, UUID> jobServers;
+	private volatile Map<String, String> jobServers;
 
 	private volatile Map<String, Collection<String>> allocatedCaches;
 
@@ -172,8 +169,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							 SettingManager settingManager, TransactionManager transactionManager, LogManager logManager,
 							 ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager,
 							 ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler,
-							 ClusterManager clusterManager, CodeIndexManager codeIndexManager, StorageManager storageManager,
-							 PullRequestManager pullRequestManager, GitService gitService, SSLFactory sslFactory, Dao dao) {
+							 ClusterManager clusterManager, CodeIndexManager codeIndexManager, PullRequestManager pullRequestManager, 
+							 GitService gitService, SSLFactory sslFactory, Dao dao) {
 		this.dao = dao;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -189,7 +186,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.taskScheduler = taskScheduler;
 		this.codeIndexManager = codeIndexManager;
 		this.clusterManager = clusterManager;
-		this.storageManager = storageManager;
 		this.pullRequestManager = pullRequestManager;
 		this.gitService = gitService;
 		this.sslFactory = sslFactory;
@@ -219,14 +215,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						String refName, User submitter, @Nullable PullRequest request,
 						String reason) {
 		Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
-		transactionManager.mustRunAfterTransaction(new Runnable() {
-
-			@Override
-			public void run() {
-				lock.unlock();
-			}
-
-		});
+		transactionManager.mustRunAfterTransaction(() -> lock.unlock());
 
 		JobAuthorizationContext.push(new JobAuthorizationContext(
 				project, commitId, SecurityUtils.getUser(), request));
@@ -407,16 +396,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private void buildSubmitted(Build build) {
 		Long projectId = build.getProject().getId();
 		Long buildNumber = build.getNumber();
-		projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				FileUtils.cleanDir(storageManager.getBuildDir(projectId, buildNumber));
-				return null;
-			}
-
+		projectManager.runOnActiveServer(projectId, () -> {
+			FileUtils.cleanDir(buildManager.getStorageDir(projectId, buildNumber));
+			return null;
 		});
 		listenerRegistry.post(new BuildSubmitted(build));
 	}
@@ -491,14 +473,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		String jobToken = UUID.randomUUID().toString();
 		VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 
-		Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken, clusterManager.getCredentialValue());
+		Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken, clusterManager.getCredential());
 		TaskLogger jobLogger = logManager.newLogger(build, jobSecretsToMask);
 		String jobExecutorName = interpolator.interpolate(build.getJob().getJobExecutor());
 
 		JobExecutor jobExecutor = getJobExecutor(build, jobExecutorName, jobLogger);
 		Long projectId = build.getProject().getId();
 		String projectPath = build.getProject().getPath();
-		String projectGitDir = storageManager.getProjectGitDir(build.getProject().getId()).getAbsolutePath();
+		String projectGitDir = projectManager.getGitDir(build.getProject().getId()).getAbsolutePath();
 		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
 		String refName = build.getRefName();
@@ -510,6 +492,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		List<CacheSpec> caches = new ArrayList<>();
 		List<Service> services = new ArrayList<>();
 		List<Action> actions = new ArrayList<>();
+		long timeout;
 
 		Job job;
 
@@ -533,102 +516,89 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 			maxRetries.set(job.getMaxRetries());
 			retryDelay.set(job.getRetryDelay());
+			
+			timeout = job.getTimeout();
 		} finally {
 			Build.pop();
 			JobAuthorizationContext.pop();
 		}
 
 		AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
-		executionRef.set(new JobExecution(executorService.submit(new Runnable() {
+		executionRef.set(new JobExecution(executorService.submit(() -> {
+			AtomicInteger retried = new AtomicInteger(0);
+			while (true) {
+				JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
+						projectGitDir, buildId, buildNumber, actions, refName, commitId, caches, 
+						services, timeout, retried.get());
+				// Store original job actions as the copy in job context will be fetched from cluster and 
+				// some transient fields (such as step object in ServerSideFacade) will not be preserved 
+				jobActions.put(jobToken, actions);
+				jobContexts.put(jobToken, jobContext);
+				logManager.addJobLogger(jobToken, jobLogger);
+				serverStepThreads.put(jobToken, new ArrayList<>());
+				try {
+					jobExecutor.execute(jobContext, jobLogger);
+					break;
+				} catch (Throwable e) {
+					if (retried.getAndIncrement() < maxRetries.get() && sessionManager.call(new Callable<Boolean>() {
 
-			@Override
-			public void run() {
-				AtomicInteger retried = new AtomicInteger(0);
-				while (true) {
-					JobContext jobContext = new JobContext(jobToken, jobExecutor, projectId, projectPath,
-							projectGitDir, buildId, buildNumber, actions, refName, commitId, caches, services,
-							retried.get());
-					// Store original job actions as the copy in job context will be fetched from cluster and 
-					// some transient fields (such as step object in ServerSideFacade) will not be preserved 
-					jobActions.put(jobToken, actions);
-					jobContexts.put(jobToken, jobContext);
-					logManager.addJobLogger(jobToken, jobLogger);
-					serverStepThreads.put(jobToken, new ArrayList<>());
-					try {
-						jobExecutor.execute(jobContext, jobLogger);
-						break;
-					} catch (Throwable e) {
-						if (retried.getAndIncrement() < maxRetries.get() && sessionManager.call(new Callable<Boolean>() {
+						@Override
+						public Boolean call() {
+							RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
 
-							@Override
-							public Boolean call() {
-								RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
-
-								AtomicReference<String> errorMessage = new AtomicReference<>(null);
-								log(e, new TaskLogger() {
-
-									@Override
-									public void log(String message, String sessionId) {
-										errorMessage.set(message);
-									}
-
-								});
-								return retryCondition.matches(new RetryContext(buildManager.load(buildId), errorMessage.get()));
-							}
-
-						})) {
-							log(e, jobLogger);
-							jobLogger.warning("Job will be retried after a while...");
-							transactionManager.run(new Runnable() {
+							AtomicReference<String> errorMessage = new AtomicReference<>(null);
+							log(e, new TaskLogger() {
 
 								@Override
-								public void run() {
-									Build build = buildManager.load(buildId);
-									build.setRunningDate(null);
-									build.setPendingDate(null);
-									build.setRetryDate(new Date());
-									build.setStatus(Status.WAITING);
-									listenerRegistry.post(new BuildRetrying(build));
-									buildManager.update(build);
+								public void log(String message, String sessionId) {
+									errorMessage.set(message);
 								}
 
 							});
-							try {
-								Thread.sleep(retryDelay.get() * (long) (Math.pow(2, retried.get())) * 1000L);
-							} catch (InterruptedException e2) {
-								throw new RuntimeException(e2);
-							}
-							transactionManager.run(new Runnable() {
-
-								@Override
-								public void run() {
-									JobExecution execution = executionRef.get();
-									if (execution != null)
-										execution.updateBeginTime();
-									Build build = buildManager.load(buildId);
-									build.setPendingDate(new Date());
-									build.setStatus(Status.PENDING);
-									listenerRegistry.post(new BuildPending(build));
-									buildManager.update(build);
-								}
-
-							});
-						} else {
-							throw ExceptionUtils.unchecked(e);
+							return retryCondition.matches(new RetryContext(buildManager.load(buildId), errorMessage.get()));
 						}
-					} finally {
-						Collection<Thread> threads = serverStepThreads.remove(jobToken);
-						synchronized (threads) {
-							for (Thread thread : threads)
-								thread.interrupt();
+
+					})) {
+						log(e, jobLogger);
+						jobLogger.warning("Job will be retried after a while...");
+						transactionManager.run(() -> {
+							Build build1 = buildManager.load(buildId);
+							build1.setRunningDate(null);
+							build1.setPendingDate(null);
+							build1.setRetryDate(new Date());
+							build1.setStatus(Status.WAITING);
+							listenerRegistry.post(new BuildRetrying(build1));
+							buildManager.update(build1);
+						});
+						try {
+							Thread.sleep(retryDelay.get() * (long) (Math.pow(2, retried.get())) * 1000L);
+						} catch (InterruptedException e2) {
+							throw new RuntimeException(e2);
 						}
-						logManager.removeJobLogger(jobToken);
-						jobContexts.remove(jobToken);
-						jobActions.remove(jobToken);
+						transactionManager.run(() -> {
+							JobExecution execution = executionRef.get();
+							if (execution != null)
+								execution.updateBeginTime();
+							Build build1 = buildManager.load(buildId);
+							build1.setPendingDate(new Date());
+							build1.setStatus(Status.PENDING);
+							listenerRegistry.post(new BuildPending(build1));
+							buildManager.update(build1);
+						});
+					} else {
+						throw ExceptionUtils.unchecked(e);
 					}
+				} finally {
+					Collection<Thread> threads = serverStepThreads.remove(jobToken);
+					synchronized (threads) {
+						for (Thread thread : threads)
+							thread.interrupt();
+					}
+					logManager.removeJobLogger(jobToken);
+					jobContexts.remove(jobToken);
+					jobActions.remove(jobToken);
 				}
 			}
-
 		}), job.getTimeout() * 1000L));
 
 		return executionRef.get();
@@ -662,6 +632,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		schedule(event.getProject());
 	}
 
+	@Listen
+	public void on(ProjectDeleted event) {
+		unschedule(event.getProjectId());
+	}
+	
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
@@ -698,12 +673,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										SecurityUtils.bindAsSystem();
 										Project project = projectManager.load(projectId);
 										try {
-											new MatrixRunner<List<String>>(paramMatrix) {
+											new MatrixRunner<>(paramMatrix) {
 
 												@Override
 												public void run(Map<String, List<String>> paramMap) {
 													submit(project, commitId, job.getName(), paramMap,
-															pipeline, match.getRefName(), SecurityUtils.getUser(), 
+															pipeline, match.getRefName(), SecurityUtils.getUser(),
 															match.getRequest(), match.getReason());
 												}
 
@@ -810,14 +785,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Long buildId = build.getId();
 		JobContext jobContext = getJobContext(buildId);
 		if (jobContext != null) {
-			UUID jobServerUUID = jobServers.get(jobContext.getJobToken());
+			String jobServerUUID = jobServers.get(jobContext.getJobToken());
 			if (jobServerUUID != null) {
 				clusterManager.runOnServer(jobServerUUID, new ClusterTask<Void>() {
 
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					public Void call() throws Exception {
+					public Void call() {
 						JobContext jobContext = getJobContext(buildId);
 						if (jobContext != null) {
 							JobRunnable jobRunnable = jobRunnables.get(jobContext.getJobToken());
@@ -839,26 +814,19 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		JobContext jobContext = getJobContext(buildId);
 		if (jobContext != null) {
 			String jobToken = jobContext.getJobToken();
-			UUID shellServerUUID = jobServers.get(jobToken);
-			if (shellServerUUID != null) {
+			String shellServer = jobServers.get(jobToken);
+			if (shellServer != null) {
 				if (SecurityUtils.isAdministrator() || jobContext.getJobExecutor().isShellAccessEnabled()) {
-					clusterManager.runOnServer(shellServerUUID, new ClusterTask<Void>() {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						public Void call() throws Exception {
-							JobContext jobContext = getJobContext(jobToken, true);
-							JobRunnable jobRunnable = jobRunnables.get(jobContext.getJobToken());
-							if (jobRunnable != null) {
-								Shell shell = jobRunnable.openShell(jobContext, terminal);
-								jobShells.put(terminal.getSessionId(), shell);
-							} else {
-								throw new ExplicitException("Job shell not ready");
-							}
-							return null;
+					clusterManager.runOnServer(shellServer, () -> {
+						JobContext jobContext1 = getJobContext(jobToken, true);
+						JobRunnable jobRunnable = jobRunnables.get(jobContext1.getJobToken());
+						if (jobRunnable != null) {
+							Shell shell = jobRunnable.openShell(jobContext1, terminal);
+							jobShells.put(terminal.getSessionId(), shell);
+						} else {
+							throw new ExplicitException("Job shell not ready");
 						}
-
+						return null;
 					});
 
 					return new WebShell(buildId, terminal.getSessionId()) {
@@ -867,52 +835,43 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 						@Override
 						public void sendInput(String input) {
-							clusterManager.submitToServer(shellServerUUID, new ClusterTask<Void>() {
-
-								private static final long serialVersionUID = 1L;
-
-								@Override
-								public Void call() throws Exception {
+							clusterManager.submitToServer(shellServer, () -> {
+								try {
 									Shell shell = jobShells.get(terminal.getSessionId());
 									if (shell != null)
 										shell.sendInput(input);
-									return null;
+								} catch (Exception e) {
+									logger.error("Error sending shell input", e);
 								}
-
+								return null;
 							});
 						}
 
 						@Override
 						public void resize(int rows, int cols) {
-							clusterManager.submitToServer(shellServerUUID, new ClusterTask<Void>() {
-
-								private static final long serialVersionUID = 1L;
-
-								@Override
-								public Void call() throws Exception {
+							clusterManager.submitToServer(shellServer, () -> {
+								try {
 									Shell shell = jobShells.get(terminal.getSessionId());
 									if (shell != null)
 										shell.resize(rows, cols);
-									return null;
+								} catch (Exception e) {
+									logger.error("Error resizing shell", e);
 								}
-
+								return null;
 							});
 						}
 
 						@Override
 						public void exit() {
-							clusterManager.submitToServer(shellServerUUID, new ClusterTask<Void>() {
-
-								private static final long serialVersionUID = 1L;
-
-								@Override
-								public Void call() throws Exception {
+							clusterManager.submitToServer(shellServer, () -> {
+								try {
 									Shell shell = jobShells.remove(terminal.getSessionId());
 									if (shell != null)
 										shell.exit();
-									return null;
+								} catch (Exception e) {
+									logger.error("Error exiting shell", e);
 								}
-
+								return null;
 							});
 						}
 
@@ -930,7 +889,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public Shell getShellLocal(String sessionId) {
+	public Shell getShell(String sessionId) {
 		return jobShells.get(sessionId);
 	}
 
@@ -950,55 +909,53 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Long projectId = build.getProject().getId();
 		Long buildId = build.getId();
 		Long userId = User.idOf(SecurityUtils.getUser());
-		projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				JobExecution execution = jobExecutions.get(buildId);
-				if (execution != null) {
-					execution.cancel(userId);
-				} else {
-					transactionManager.run(new Runnable() {
-
-						@Override
-						public void run() {
-							Build build = buildManager.load(buildId);
-							if (!build.isFinished()) {
-								build.setStatus(Status.CANCELLED);
-								build.setFinishDate(new Date());
-								build.setCanceller(userManager.load(userId));
-								buildManager.update(build);
-								listenerRegistry.post(new BuildFinished(build));
-							}
-						}
-
-					});
-				}
-				return null;
+		projectManager.runOnActiveServer(projectId, () -> {
+			JobExecution execution = jobExecutions.get(buildId);
+			if (execution != null) {
+				execution.cancel(userId);
+			} else {
+				transactionManager.run(() -> {
+					Build build1 = buildManager.load(buildId);
+					if (!build1.isFinished()) {
+						build1.setStatus(Status.CANCELLED);
+						build1.setFinishDate(new Date());
+						build1.setCanceller(userManager.load(userId));
+						buildManager.update(build1);
+						listenerRegistry.post(new BuildFinished(build1));
+					}
+				});
 			}
-
+			return null;
 		});
 	}
 
+	@Listen
+	public void on(SystemStarting event) {
+		var hazelcastInstance = clusterManager.getHazelcastInstance();
+		jobContexts = hazelcastInstance.getMap("jobContexts");
+		allocatedCaches = hazelcastInstance.getMap("allocatedCaches");
+		jobServers = hazelcastInstance.getMap("jobRunServers");
+	}
+	
 	@Sessional
-	@Listen(100000)
+	@Listen
 	public void on(SystemStarted event) {
-		jobContexts = clusterManager.getHazelcastInstance().getMap("jobContexts");
-		allocatedCaches = clusterManager.getHazelcastInstance().getMap("allocatedCaches");
-		jobServers = clusterManager.getHazelcastInstance().getMap("jobRunServers");
-
-		for (var entry : projectManager.getStorageServers().entrySet()) {
-			if (entry.getValue().getPrimary().equals(clusterManager.getLocalServerUUID())) {
-				schedule(projectManager.load(entry.getKey()));
-			}
+		var localServer = clusterManager.getLocalServerAddress();
+		for (var projectId: projectManager.getIds()) {
+			if (localServer.equals(projectManager.getActiveServer(projectId, false))) 
+				schedule(projectManager.load(projectId));
 		}
-
 		thread = new Thread(this);
 		thread.start();
 	}
+	
+	@Sessional
+	@Listen
+	public void on(ActiveServerChanged event) {
+		schedule(projectManager.load(event.getProjectId()));
+	}
 
+	@Sessional
 	@Listen
 	public void on(DefaultBranchChanged event) {
 		schedule(event.getProject());
@@ -1070,29 +1027,27 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											   ScheduleTrigger trigger, String refName, 
 											   String reason) {
 		Long projectId = project.getId();
+		var localServer = clusterManager.getLocalServerAddress();
 		return new SchedulableTask() {
-
+			
 			@Override
 			public void execute() {
-				sessionManager.run(new Runnable() {
-
-					@Override
-					public void run() {
+				if (thread != null && localServer.equals(projectManager.getActiveServer(projectId, false))) {
+					sessionManager.run(() -> {
 						SecurityUtils.bindAsSystem();
-						Project project = projectManager.load(projectId);
+						Project aProject = projectManager.load(projectId);
 						String pipeline = UUID.randomUUID().toString();
-						new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(null, null, trigger.getParams())) {
+						new MatrixRunner<>(ParamUtils.getParamMatrix(null, null, trigger.getParams())) {
 
 							@Override
 							public void run(Map<String, List<String>> paramMap) {
-								submit(project, commitId, job.getName(), paramMap, pipeline, 
+								submit(aProject, commitId, job.getName(), paramMap, pipeline,
 										refName, SecurityUtils.getUser(), null, reason);
 							}
 
 						}.run();
-					}
-
-				});
+					});
+				}
 			}
 
 			@Override
@@ -1113,7 +1068,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			} catch (InterruptedException ignored) {
 			}
 		}
-		scheduledTasks.values().forEach(it1 -> it1.forEach(taskScheduler::unschedule));
+		scheduledTasks.values().forEach(it -> it.forEach(taskScheduler::unschedule));
 		scheduledTasks.clear();
 	}
 
@@ -1124,77 +1079,64 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				logger.info("Waiting for unfinished jobs...");
 			try {
 				if (clusterManager.isLeaderServer()) {
-					Map<UUID, Collection<Long>> buildIds = new HashMap<>();
+					Map<String, Collection<Long>> buildIds = new HashMap<>();
 					for (var entry : buildManager.queryUnfinished().entrySet()) {
-						UUID storageServerUUID = projectManager.getStorageServerUUID(entry.getValue(), false);
-						if (storageServerUUID != null) {
-							Collection<Long> buildIdsOfServer = buildIds.get(storageServerUUID);
-							if (buildIdsOfServer == null) {
-								buildIdsOfServer = new ArrayList<>();
-								buildIds.put(storageServerUUID, buildIdsOfServer);
-							}
-							buildIdsOfServer.add(entry.getKey());
+						var buildId = entry.getKey();
+						var projectId = entry.getValue();
+						String activeServer = projectManager.getActiveServer(projectId, false);
+						if (activeServer != null && clusterManager.getRunningServers().contains(activeServer)) {
+							var buildIdsOfServer = buildIds.computeIfAbsent(activeServer, k -> new ArrayList<>());
+							buildIdsOfServer.add(buildId);
 						}
 					}
 
 					Collection<Future<?>> futures = new ArrayList<>();
 					for (var entry : buildIds.entrySet()) {
+						var server = entry.getKey();
 						var buildIdsOfServer = entry.getValue();
-						futures.add(clusterManager.submitToServer(entry.getKey(), new ClusterTask<Void>() {
-
-							private static final long serialVersionUID = 1L;
-
-							@Override
-							public Void call() throws Exception {
-								transactionManager.run(new Runnable() {
-
-									@Override
-									public void run() {
-										for (Long buildId : buildIdsOfServer) {
-											Build build = buildManager.load(buildId);
-											if (build.getStatus() == Build.Status.RUNNING
-													|| build.getStatus() == Build.Status.PENDING) {
-												JobExecution execution = jobExecutions.get(build.getId());
-												if (execution != null) {
-													if (execution.isTimedout())
-														execution.cancel(null);
-												} else if (thread != null) {
-													build.setStatus(Build.Status.PENDING);
-													try {
-														jobExecutions.put(build.getId(), execute(build));
-													} catch (Throwable t) {
-														ExplicitException explicitException = ExceptionUtils.find(t, ExplicitException.class);
-														if (explicitException != null)
-															markBuildError(build, explicitException.getMessage());
-														else
-															markBuildError(build, Throwables.getStackTraceAsString(t));
-													}
-												}
-											} else if (build.getStatus() == Build.Status.WAITING) {
-												if (build.getRetryDate() != null) {
-													JobExecution execution = jobExecutions.get(build.getId());
-													if (execution == null && thread != null) {
-														build.setStatus(Build.Status.PENDING);
-														build.setPendingDate(new Date());
-														listenerRegistry.post(new BuildPending(build));
-													}
-												} else if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful()
-														&& it.getDependency().isFinished()
-														&& it.getDependency().getStatus() != Build.Status.SUCCESSFUL)) {
-													markBuildError(build, "Some dependencies are required to be successful but failed");
-												} else if (build.getDependencies().stream().allMatch(it -> it.getDependency().isFinished())) {
-													build.setStatus(Build.Status.PENDING);
-													build.setPendingDate(new Date());
-													listenerRegistry.post(new BuildPending(build));
-												}
+						futures.add(clusterManager.submitToServer(server, () -> {
+							transactionManager.run(() -> {
+								for (Long buildId : buildIdsOfServer) {
+									Build build = buildManager.load(buildId);
+									if (build.getStatus() == Status.RUNNING
+											|| build.getStatus() == Status.PENDING) {
+										JobExecution execution = jobExecutions.get(build.getId());
+										if (execution != null) {
+											if (execution.isTimedout())
+												execution.cancel(null);
+										} else if (thread != null) {
+											build.setStatus(Status.PENDING);
+											try {
+												jobExecutions.put(build.getId(), execute(build));
+											} catch (Throwable t) {
+												ExplicitException explicitException = ExceptionUtils.find(t, ExplicitException.class);
+												if (explicitException != null)
+													markBuildError(build, explicitException.getMessage());
+												else
+													markBuildError(build, Throwables.getStackTraceAsString(t));
 											}
 										}
+									} else if (build.getStatus() == Status.WAITING) {
+										if (build.getRetryDate() != null) {
+											JobExecution execution = jobExecutions.get(build.getId());
+											if (execution == null && thread != null) {
+												build.setStatus(Status.PENDING);
+												build.setPendingDate(new Date());
+												listenerRegistry.post(new BuildPending(build));
+											}
+										} else if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful()
+												&& it.getDependency().isFinished()
+												&& it.getDependency().getStatus() != Status.SUCCESSFUL)) {
+											markBuildError(build, "Some dependencies are required to be successful but failed");
+										} else if (build.getDependencies().stream().allMatch(it -> it.getDependency().isFinished())) {
+											build.setStatus(Status.PENDING);
+											build.setPendingDate(new Date());
+											listenerRegistry.post(new BuildPending(build));
+										}
 									}
-
-								});
-								return null;
-							}
-
+								}
+							});
+							return null;
 						}));
 					}
 					for (var future : futures) {
@@ -1206,50 +1148,45 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					}
 				}
 
-				sessionManager.run(new Runnable() {
-
-					@Override
-					public void run() {
-						for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
-							Map.Entry<Long, JobExecution> entry = it.next();
-							Build build = buildManager.get(entry.getKey());
-							JobExecution execution = entry.getValue();
-							if (build == null || build.isFinished()) {
-								it.remove();
-								execution.cancel(null);
-							} else if (execution.isDone()) {
-								it.remove();
-								TaskLogger jobLogger = logManager.newLogger(build);
-								try {
-									execution.check();
-									build.setStatus(Build.Status.SUCCESSFUL);
-									jobLogger.log("Job finished");
-								} catch (TimeoutException e) {
-									build.setStatus(Build.Status.TIMED_OUT);
-								} catch (java.util.concurrent.CancellationException e) {
-									if (e instanceof CancellationException) {
-										Long cancellerId = ((CancellationException) e).getCancellerId();
-										if (cancellerId != null)
-											build.setCanceller(userManager.load(cancellerId));
-									}
-									build.setStatus(Build.Status.CANCELLED);
-								} catch (ExecutionException e) {
-									build.setStatus(Build.Status.FAILED);
-									ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
-									if (explicitException != null)
-										jobLogger.error(explicitException.getMessage());
-									else if (ExceptionUtils.find(e, FailedException.class) == null)
-										jobLogger.error("Error running job", e);
-								} catch (InterruptedException ignored) {
-								} finally {
-									build.setFinishDate(new Date());
-									buildManager.update(build);
-									listenerRegistry.post(new BuildFinished(build));
+				sessionManager.run(() -> {
+					for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext(); ) {
+						Map.Entry<Long, JobExecution> entry = it.next();
+						Build build = buildManager.get(entry.getKey());
+						JobExecution execution = entry.getValue();
+						if (build == null || build.isFinished()) {
+							it.remove();
+							execution.cancel(null);
+						} else if (execution.isDone()) {
+							it.remove();
+							TaskLogger jobLogger = logManager.newLogger(build);
+							try {
+								execution.check();
+								build.setStatus(Status.SUCCESSFUL);
+								jobLogger.log("Job finished");
+							} catch (TimeoutException e) {
+								build.setStatus(Status.TIMED_OUT);
+							} catch (java.util.concurrent.CancellationException e) {
+								if (e instanceof CancellationException) {
+									Long cancellerId = ((CancellationException) e).getCancellerId();
+									if (cancellerId != null)
+										build.setCanceller(userManager.load(cancellerId));
 								}
+								build.setStatus(Status.CANCELLED);
+							} catch (ExecutionException e) {
+								build.setStatus(Status.FAILED);
+								ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
+								if (explicitException != null)
+									jobLogger.error(explicitException.getMessage());
+								else if (ExceptionUtils.find(e, FailedException.class) == null)
+									jobLogger.error("Error running job", e);
+							} catch (InterruptedException ignored) {
+							} finally {
+								build.setFinishDate(new Date());
+								buildManager.update(build);
+								listenerRegistry.post(new BuildFinished(build));
 							}
 						}
 					}
-
 				});
 				Thread.sleep(CHECK_INTERVAL);
 			} catch (Throwable e) {
@@ -1300,98 +1237,71 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public Map<CacheInstance, String> allocateCaches(JobContext jobContext, CacheAllocationRequest request) {
-		UUID leaderServerUUID = clusterManager.getHazelcastInstance()
-				.getCluster().getMembers().iterator().next().getUuid();
+		String leaderServer = clusterManager.getServerAddresses().iterator().next();
 		String jobToken = jobContext.getJobToken();
-		return clusterManager.runOnServer(leaderServerUUID, new ClusterTask<Map<CacheInstance, String>>() {
+		return clusterManager.runOnServer(leaderServer, () -> {
+			synchronized (allocatedCaches) {
+				JobContext jobContext1 = getJobContext(jobToken, true);
 
-			private static final long serialVersionUID = 1L;
+				List<CacheInstance> sortedInstances = new ArrayList<>(request.getInstances().keySet());
+				sortedInstances.sort((o1, o2) -> request.getInstances().get(o2).compareTo(request.getInstances().get(o1)));
 
-			@Override
-			public Map<CacheInstance, String> call() throws Exception {
-				synchronized (allocatedCaches) {
-					JobContext jobContext = getJobContext(jobToken, true);
-
-					List<CacheInstance> sortedInstances = new ArrayList<>(request.getInstances().keySet());
-					sortedInstances.sort(new Comparator<CacheInstance>() {
-
-						@Override
-						public int compare(CacheInstance o1, CacheInstance o2) {
-							return request.getInstances().get(o2).compareTo(request.getInstances().get(o1));
-						}
-
-					});
-
-					Collection<String> allAllocated = new HashSet<>();
-					Collection<String> activeJobTokens = jobContexts.keySet();
-					Collection<String> removeKeys = new HashSet<>();
-					for (var entry : allocatedCaches.entrySet()) {
-						if (activeJobTokens.contains(entry.getKey()))
-							allAllocated.addAll(entry.getValue());
-						else
-							removeKeys.add(entry.getKey());
-					}
-					for (var key : removeKeys)
-						allocatedCaches.remove(key);
-
-					Map<CacheInstance, String> allocations = new HashMap<>();
-
-					Collection<String> allocatedCachesOfJob = new ArrayList<>();
-					for (CacheSpec cacheSpec : jobContext.getCacheSpecs()) {
-						Optional<CacheInstance> result = sortedInstances
-								.stream()
-								.filter(it -> it.getCacheKey().equals(cacheSpec.getNormalizedKey()))
-								.filter(it -> !allAllocated.contains(it.getName()))
-								.findFirst();
-						CacheInstance allocation;
-						allocation = result.orElseGet(() -> new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getNormalizedKey()));
-						allocations.put(allocation, cacheSpec.getPath());
-						allocatedCachesOfJob.add(allocation.getName());
-						allAllocated.add(allocation.getName());
-					}
-
-					Consumer<CacheInstance> deletionMarker = new Consumer<CacheInstance>() {
-
-						@Override
-						public void accept(CacheInstance instance) {
-							long ellapsed = request.getCurrentTime().getTime() - request.getInstances().get(instance).getTime();
-							if (ellapsed > jobContext.getJobExecutor().getCacheTTL() * 24L * 3600L * 1000L) {
-								allocations.put(instance, null);
-								allocatedCachesOfJob.add(instance.getName());
-								allAllocated.add(instance.getName());
-							}
-						}
-
-					};
-
-					allocatedCaches.put(jobToken, allocatedCachesOfJob);
-
-					request.getInstances().keySet()
-							.stream()
-							.filter(it -> !allAllocated.contains(it.getName()))
-							.forEach(deletionMarker);
-
-					return allocations;
+				Collection<String> allAllocated = new HashSet<>();
+				Collection<String> activeJobTokens = jobContexts.keySet();
+				Collection<String> removeKeys = new HashSet<>();
+				for (var entry : allocatedCaches.entrySet()) {
+					if (activeJobTokens.contains(entry.getKey()))
+						allAllocated.addAll(entry.getValue());
+					else
+						removeKeys.add(entry.getKey());
 				}
-			}
+				for (var key : removeKeys)
+					allocatedCaches.remove(key);
 
+				Map<CacheInstance, String> allocations = new HashMap<>();
+
+				Collection<String> allocatedCachesOfJob = new ArrayList<>();
+				for (CacheSpec cacheSpec : jobContext1.getCacheSpecs()) {
+					Optional<CacheInstance> result = sortedInstances
+							.stream()
+							.filter(it -> it.getCacheKey().equals(cacheSpec.getNormalizedKey()))
+							.filter(it -> !allAllocated.contains(it.getName()))
+							.findFirst();
+					CacheInstance allocation;
+					allocation = result.orElseGet(() -> new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getNormalizedKey()));
+					allocations.put(allocation, cacheSpec.getPath());
+					allocatedCachesOfJob.add(allocation.getName());
+					allAllocated.add(allocation.getName());
+				}
+
+				Consumer<CacheInstance> deletionMarker = instance -> {
+					long ellapsed = request.getCurrentTime().getTime() - request.getInstances().get(instance).getTime();
+					if (ellapsed > jobContext1.getJobExecutor().getCacheTTL() * 24L * 3600L * 1000L) {
+						allocations.put(instance, null);
+						allocatedCachesOfJob.add(instance.getName());
+						allAllocated.add(instance.getName());
+					}
+				};
+
+				allocatedCaches.put(jobToken, allocatedCachesOfJob);
+
+				request.getInstances().keySet()
+						.stream()
+						.filter(it -> !allAllocated.contains(it.getName()))
+						.forEach(deletionMarker);
+
+				return allocations;
+			}
 		});
 	}
 
 	@Override
-	public void runJob(UUID serverUUID, ClusterRunnable runnable) {
+	public void runJob(String server, ClusterRunnable runnable) {
 		Future<?> future = null;
 		try {
-			future = clusterManager.submitToServer(serverUUID, new ClusterTask<Void>() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public Void call() throws Exception {
-					runnable.run();
-					return null;
-				}
-
+			future = clusterManager.submitToServer(server, () -> {
+				runnable.run();
+				return null;
 			});
 
 			// future.get() here does not respond to thread interruption
@@ -1408,7 +1318,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public void runJobLocal(JobContext jobContext, JobRunnable runnable) {
+	public void runJob(JobContext jobContext, JobRunnable runnable) {
 		while (thread == null) {
 			try {
 				Thread.sleep(100);
@@ -1417,23 +1327,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 		}
 
-		Long buildId = jobContext.getBuildId();
-
 		String jobToken = jobContext.getJobToken();
-		jobServers.put(jobToken, clusterManager.getLocalServerUUID());
+		jobServers.put(jobToken, clusterManager.getLocalServerAddress());
 
 		jobRunnables.put(jobToken, runnable);
 		try {
 			TaskLogger jobLogger = logManager.getJobLogger(jobToken);
 			if (jobLogger == null) {
-				jobLogger = new TaskLogger() {
-
-					@Override
-					public void log(String message, String sessionId) {
-						projectManager.runOnProjectServer(jobContext.getProjectId(), new LogTask(jobToken, message, sessionId));
-					}
-
-				};
+				var activeServer = projectManager.getActiveServer(jobContext.getProjectId(), true);
+				jobLogger = new ServerJobLogger(activeServer, jobContext.getJobToken());
 				logManager.addJobLogger(jobToken, jobLogger);
 				try {
 					runnable.run(jobLogger);
@@ -1451,15 +1353,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public void reportJobWorkspace(JobContext jobContext, String jobWorkspace) {
-		transactionManager.run(new Runnable() {
-
-			@Override
-			public void run() {
-				Build build = buildManager.load(jobContext.getBuildId());
-				build.setJobWorkspace(jobWorkspace);
-				buildManager.update(build);
-			}
-
+		transactionManager.run(() -> {
+			Build build = buildManager.load(jobContext.getBuildId());
+			build.setJobWorkspace(jobWorkspace);
+			buildManager.update(build);
 		});
 	}
 
@@ -1479,28 +1376,23 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					targetDir = tempDir;
 				}
 
-				UUID dependencyStorageServerUUID = projectManager.getStorageServerUUID(
+				String dependencyActiveServer = projectManager.getActiveServer(
 						dependency.getProject().getId(), true);
-				if (dependencyStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
-					LockUtils.read(dependency.getArtifactsLockName(), new Callable<Void>() {
-
-						@Override
-						public Void call() throws Exception {
-							File artifactsDir = dependency.getArtifactsDir();
-							if (artifactsDir.exists()) {
-								PatternSet patternSet = PatternSet.parse(dependence.getArtifacts());
-								int baseLen = artifactsDir.getAbsolutePath().length() + 1;
-								for (File file : FileUtils.listFiles(artifactsDir, patternSet.getIncludes(), patternSet.getExcludes())) {
-									FileUtils.copyFile(file,
-											new File(targetDir, file.getAbsolutePath().substring(baseLen)));
-								}
+				if (dependencyActiveServer.equals(clusterManager.getLocalServerAddress())) {
+					LockUtils.read(dependency.getArtifactsLockName(), () -> {
+						File artifactsDir = dependency.getArtifactsDir();
+						if (artifactsDir.exists()) {
+							PatternSet patternSet = PatternSet.parse(dependence.getArtifacts());
+							int baseLen = artifactsDir.getAbsolutePath().length() + 1;
+							for (File file : FileUtils.listFiles(artifactsDir, patternSet.getIncludes(), patternSet.getExcludes())) {
+								FileUtils.copyFile(file,
+										new File(targetDir, file.getAbsolutePath().substring(baseLen)));
 							}
-							return null;
 						}
-
+						return null;
 					});
 				} else {
-					String serverUrl = clusterManager.getServerUrl(dependencyStorageServerUUID);
+					String serverUrl = clusterManager.getServerUrl(dependencyActiveServer);
 					Client client = ClientBuilder.newClient();
 					try {
 						WebTarget target = client.target(serverUrl).path("~api/cluster/artifacts")
@@ -1509,7 +1401,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								.queryParam("artifacts", dependence.getArtifacts());
 						Invocation.Builder builder = target.request();
 						builder.header(HttpHeaders.AUTHORIZATION, KubernetesHelper.BEARER + " "
-								+ clusterManager.getCredentialValue());
+								+ clusterManager.getCredential());
 
 						try (Response response = builder.get()) {
 							KubernetesHelper.checkStatus(response);
@@ -1531,8 +1423,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public Map<String, byte[]> runServerStep(JobContext jobContext, List<Integer> stepPosition,
 											 File inputDir, Map<String, String> placeholderValues,
 											 boolean callByAgent, TaskLogger logger) {
-		UUID storageServerUUID = projectManager.getStorageServerUUID(jobContext.getProjectId(), true);
-		if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+		String activeServer = projectManager.getActiveServer(jobContext.getProjectId(), true);
+		if (activeServer.equals(clusterManager.getLocalServerAddress())) {
 			// Some steps need the commit to be indexed, for instance various 
 			// report publishing steps need to query the full blob path based 
 			// on a partial path (java package/class etc)
@@ -1545,46 +1437,34 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 			}
 
-			return sessionManager.call(new Callable<Map<String, byte[]>>() {
+			return sessionManager.call(() -> {
+				Thread thread = Thread.currentThread();
+				Collection<Thread> threads = serverStepThreads.get(jobContext.getJobToken());
+				if (callByAgent && threads != null) synchronized (threads) {
+					threads.add(thread);
+				}
+				try {
+					List<Action> actions = jobActions.get(jobContext.getJobToken());
+					if (actions != null) {
+						ServerSideFacade serverSideFacade = (ServerSideFacade) LeafFacade.of(actions, stepPosition);
+						ServerSideStep serverSideStep = (ServerSideStep) serverSideFacade.getStep();
 
-				@Override
-				public Map<String, byte[]> call() {
-					Thread thread = Thread.currentThread();
-					Collection<Thread> threads = serverStepThreads.get(jobContext.getJobToken());
+						serverSideStep = new EditableStringTransformer(t -> replacePlaceholders(t, placeholderValues)).transformProperties(serverSideStep, Interpolative.class);
+
+						Build build = buildManager.load(jobContext.getBuildId());
+						return serverSideStep.run(build, inputDir, logger);
+					} else {
+						throw new IllegalStateException("Job actions not found");
+					}
+				} finally {
 					if (callByAgent && threads != null) synchronized (threads) {
-						threads.add(thread);
+						threads.remove(thread);
 					}
-					try {
-						List<Action> actions = jobActions.get(jobContext.getJobToken());
-						if (actions != null) {
-							ServerSideFacade serverSideFacade = (ServerSideFacade) LeafFacade.of(actions, stepPosition);
-							ServerSideStep serverSideStep = (ServerSideStep) serverSideFacade.getStep();
-
-							serverSideStep = new EditableStringTransformer(new Function<String, String>() {
-
-								@Override
-								public String apply(String t) {
-									return replacePlaceholders(t, placeholderValues);
-								}
-
-							}).transformProperties(serverSideStep, Interpolative.class);
-
-							Build build = buildManager.load(jobContext.getBuildId());
-							return serverSideStep.run(build, inputDir, logger);
-						} else {
-							throw new IllegalStateException("Job actions not found");
-						}
-					} finally {
-						if (callByAgent && threads != null) synchronized (threads) {
-							threads.remove(thread);
-						}
-					}
-
 				}
 
 			});
 		} else {
-			String serverUrl = clusterManager.getServerUrl(storageServerUUID);
+			String serverUrl = clusterManager.getServerUrl(activeServer);
 			return KubernetesHelper.runServerStep(sslFactory, serverUrl, jobContext.getJobToken(), 
 					stepPosition, inputDir, Lists.newArrayList("**"), Lists.newArrayList(), 
 					placeholderValues, logger);

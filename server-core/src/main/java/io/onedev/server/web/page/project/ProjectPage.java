@@ -16,7 +16,6 @@ import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.project.childrentree.ProjectChildrenTree;
 import io.onedev.server.web.component.project.info.ProjectInfoPanel;
@@ -154,7 +153,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		if (!(this instanceof ProjectSettingPage) 
 				&& !(this instanceof ProjectChildrenPage)
 				&& !(this instanceof NoProjectStoragePage) 
-				&& getProject().getStorageServerUUID(false) == null) {
+				&& getProject().getActiveServer(false) == null) {
 			throw new RestartResponseException(NoProjectStoragePage.class, 
 					NoProjectStoragePage.paramsOf(getProject()));
 		}

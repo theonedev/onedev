@@ -1,5 +1,6 @@
 package io.onedev.server.rest;
 
+import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentToken;
@@ -16,8 +17,8 @@ import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Api(order=10100)
 @Path("/agent-tokens")
@@ -28,9 +29,12 @@ public class AgentTokenResource {
 
 	private final AgentTokenManager tokenManager;
 	
+	private final AgentManager agentManager;
+	
 	@Inject
-	public AgentTokenResource(AgentTokenManager tokenManager) {
+	public AgentTokenResource(AgentTokenManager tokenManager, AgentManager agentManager) {
 		this.tokenManager = tokenManager;
+		this.agentManager = agentManager;
 	}
 
 	@Api(order=100)
@@ -43,12 +47,13 @@ public class AgentTokenResource {
     }
 
 	@Api(order=100)
-	@Path("/{tokenId}/agents")
+	@Path("/{tokenId}/agent")
     @GET
-    public Collection<Agent> getAgent(@PathParam("tokenId") Long agentTokenId) {
+    public Agent getAgent(@PathParam("tokenId") Long tokenId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
-    	return tokenManager.load(agentTokenId).getAgents();
+		AgentToken token = tokenManager.load(tokenId);
+    	return agentManager.findByToken(token);
     }
 	
 	@Api(order=200)
@@ -73,9 +78,10 @@ public class AgentTokenResource {
 	
 	@Api(order=500, description="Create new token")
     @POST
-    public Long create(AgentToken token) {
+    public Long create() {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
+		AgentToken token = new AgentToken();
 	    tokenManager.create(token);
 	    return token.getId();
     }

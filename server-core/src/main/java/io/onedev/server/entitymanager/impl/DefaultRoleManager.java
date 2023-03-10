@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager.impl;
 
 import com.google.common.base.Preconditions;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.cp.IAtomicLong;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.LinkAuthorizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -10,7 +11,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
@@ -74,49 +75,23 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	public void replicate(Role role) {
 		getSession().replicate(role, ReplicationMode.OVERWRITE);
 		idManager.useId(Role.class, role.getId());
+
+		var facade = role.getFacade();
+		transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 	}
 
 	@Sessional
 	@Listen
-	public void on(SystemStarted event) {
+	public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-		cache = new RoleCache(hazelcastInstance.getReplicatedMap("roleCache"));
+		cache = new RoleCache(hazelcastInstance.getMap("roleCache"));
 
-		for (var role: query())
-			cache.put(role.getId(), role.getFacade());
-	}
-
-	@Transactional
-	@Listen
-	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Role) {
-			Long id = event.getEntity().getId();
-			transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					cache.remove(id);
-				}
-
-			});
-		}
-	}
-
-	@Transactional
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof Role) {
-			RoleFacade facade = ((Role)event.getEntity()).getFacade();
-			transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					if (cache != null)
-						cache.put(facade.getId(), facade);
-				}
-
-			});
-		}
+		IAtomicLong cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("roleCacheInited"); 
+		clusterManager.init(cacheInited, () -> {
+			for (var role: query())
+				cache.put(role.getId(), role.getFacade());
+			return 1L;			
+		});
 	}
 
 	@Transactional
@@ -152,7 +127,6 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 			project.setDefaultRole(null);
 			projectManager.update(project);
 		}
-    	
 		dao.remove(role);
 	}
 
@@ -308,6 +282,24 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	@Override
 	public int count(@Nullable String term) {
 		return count(getCriteria(term));
+	}
+
+	@Transactional
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof Role) {
+			var facade = (RoleFacade) event.getEntity().getFacade();
+			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
+		}
+	}
+
+	@Transactional
+	@Listen
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Role) {
+			var id = event.getEntity().getId();
+			transactionManager.runAfterCommit(() -> cache.remove(id));
+		}
 	}
 	
 }

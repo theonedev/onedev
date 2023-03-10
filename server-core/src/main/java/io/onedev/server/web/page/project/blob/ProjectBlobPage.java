@@ -1543,7 +1543,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		}
 
 		BlobEdits blobEdits = new BlobEdits(Sets.newHashSet(), newBlobs);
-		String refName = blobIdent.revision!=null?GitUtils.branch2ref(blobIdent.revision):"refs/heads/main";
+		String refName = blobIdent.revision!=null? GitUtils.branch2ref(blobIdent.revision):"refs/heads/main";
 
 		ObjectId prevCommitId;
 		if (blobIdent.revision != null)

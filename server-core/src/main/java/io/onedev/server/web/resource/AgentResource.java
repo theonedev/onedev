@@ -1,32 +1,26 @@
 package io.onedev.server.web.resource;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Properties;
-import java.util.UUID;
-
 import com.google.common.collect.Sets;
-import io.onedev.commons.utils.StringUtils;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.tika.mime.MimeTypes;
-import org.apache.wicket.request.resource.AbstractResource;
-
 import io.onedev.agent.Agent;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.AgentToken;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.tika.mime.MimeTypes;
+import org.apache.wicket.request.resource.AbstractResource;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Properties;
 
 public class AgentResource extends AbstractResource {
 
@@ -69,7 +63,6 @@ public class AgentResource extends AbstractResource {
 					props.setProperty("serverUrl", OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());
 					
 					AgentToken token = new AgentToken();
-					token.setValue(UUID.randomUUID().toString());
 					OneDev.getInstance(AgentTokenManager.class).create(token);
 					props.setProperty("agentToken", token.getValue());
 					

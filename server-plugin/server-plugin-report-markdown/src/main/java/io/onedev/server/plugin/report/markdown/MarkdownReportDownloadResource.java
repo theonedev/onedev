@@ -1,26 +1,6 @@
 package io.onedev.server.plugin.report.markdown;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import javax.persistence.EntityNotFoundException;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.tika.io.IOUtils;
-import org.apache.tika.mime.MimeTypes;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.AbstractResource;
-
 import com.google.common.base.Joiner;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
@@ -29,7 +9,19 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.storage.StorageManager;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.tika.io.IOUtils;
+import org.apache.tika.mime.MimeTypes;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.AbstractResource;
+
+import javax.persistence.EntityNotFoundException;
+import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class MarkdownReportDownloadResource extends AbstractResource {
 
@@ -45,8 +37,8 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		Long projectId = params.get(PARAM_PROJECT).toLong();
-		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+		String projectPath = params.get(PARAM_PROJECT).toString();
+		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 		
 		Long buildNumber = params.get(PARAM_BUILD).toOptionalLong();
 		
@@ -78,8 +70,8 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		
 		String markdownPath = Joiner.on("/").join(pathSegments);
 		
-		File buildDir = OneDev.getInstance(StorageManager.class).getBuildDir(project.getId(), build.getNumber());
-		File reportDir = new File(buildDir, PublishMarkdownReportStep.CATEGORY + "/" + reportName);
+		File buildDir = build.getStorageDir();
+		File reportDir = new File(buildDir, PublishMarkdownReportStep.DIR_CATEGORY + "/" + reportName);
 		
 		File markdownFile = new File(reportDir, markdownPath);
 		if (!markdownFile.exists() || markdownFile.isDirectory()) {

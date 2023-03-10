@@ -9,7 +9,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.model.ProjectDynamics;
+import io.onedev.server.model.ProjectLastEventDate;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -31,7 +31,7 @@ public class LastActivityDateCriteria extends Criteria<Project> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
-		Path<Date> attribute = ProjectQuery.getPath(from, Project.PROP_DYNAMICS + "." + ProjectDynamics.PROP_LAST_ACTIVITY_DATE);
+		Path<Date> attribute = ProjectQuery.getPath(from, Project.PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY);
 		if (operator == ProjectQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
@@ -41,9 +41,9 @@ public class LastActivityDateCriteria extends Criteria<Project> {
 	@Override
 	public boolean matches(Project project) {
 		if (operator == ProjectQueryLexer.IsUntil)
-			return project.getDynamics().getLastActivityDate().before(date);
+			return project.getLastEventDate().getActivity().before(date);
 		else
-			return project.getDynamics().getLastActivityDate().after(date);
+			return project.getLastEventDate().getActivity().after(date);
 	}
 
 	@Override

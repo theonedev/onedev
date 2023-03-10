@@ -1,3 +1,9 @@
+# 8.1.0
+
+1. **[Agent]** A particular agent token can only be used by one agent now. If you have multiple agents using same token, only the first one can connect to server, and others will be rejected. To fix this, open detail page of each rejected agent and copy the newly generated token to agent side
+2. **[RESTful api]** The endpoint path to list agents in agent token resource has been changed from `/agents` to `/agent`
+3. **[RESTful api]** The endpoint to create agent token now do not require any request body. It will generate new token value at OneDev side
+
 # 8.0.7
 
 Various resource update operations now require resource id to be specified in url path instead of request body. Refer to RESTful api help for details   

@@ -1,13 +1,12 @@
 package io.onedev.server.persistence.dao;
 
-import java.util.List;
-
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.persistence.SessionManager;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.persistence.SessionManager;
+import java.util.List;
 
 public interface Dao {
 	
@@ -50,7 +49,7 @@ public interface Dao {
 	 * 			the entity to be saved
 	 */
 	void persist(AbstractEntity entity);
-
+	
 	/**
 	 * Remove the specified entity from the datastore.
 	 * 

@@ -1,25 +1,21 @@
 package io.onedev.server.product;
 
-import static org.hibernate.cfg.AvailableSettings.DIALECT;
-import static org.hibernate.cfg.AvailableSettings.DRIVER;
-import static org.hibernate.cfg.AvailableSettings.PASS;
-import static org.hibernate.cfg.AvailableSettings.URL;
-import static org.hibernate.cfg.AvailableSettings.USER;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.ServerConfig;
 import io.onedev.server.jetty.ServerConfigurator;
 import io.onedev.server.jetty.ServletConfigurator;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.util.ProjectNameReservation;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.hibernate.cfg.AvailableSettings.*;
 
 public class ProductModule extends AbstractPluginModule {
 
@@ -57,16 +53,11 @@ public class ProductModule extends AbstractPluginModule {
 		contribute(ServerConfigurator.class, ProductConfigurator.class);
 		contribute(ServletConfigurator.class, ProductServletConfigurator.class);
 		
-		contribute(ProjectNameReservation.class, new ProjectNameReservation() {
-			
-			@Override
-			public Collection<String> getReserved() {
-				Set<String> reserved = new HashSet<>();
-				for (var file: new File(Bootstrap.getSiteDir(), "assets").listFiles())
-					reserved.add(file.getName());
-				return reserved;
-			}
-			
+		contribute(ProjectNameReservation.class, () -> {
+			Set<String> reserved = new HashSet<>();
+			for (var file1 : OneDev.getAssetsDir().listFiles())
+				reserved.add(file1.getName());
+			return reserved;
 		});
 	}
 

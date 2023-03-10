@@ -17,7 +17,7 @@ public class NoProjectStoragePage extends ProjectPage {
 	public NoProjectStoragePage(PageParameters params) {
 		super(params);
 		
-		if (getProject().getStorageServerUUID(false) != null) {
+		if (getProject().getActiveServer(false) != null) {
 			throw new RestartResponseException(ProjectDashboardPage.class, 
 					ProjectDashboardPage.paramsOf(getProject()));
 		}

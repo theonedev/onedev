@@ -4,20 +4,22 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import javax.validation.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.buildspec.step.StepGroup;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+
+import static io.onedev.commons.utils.LockUtils.write;
 
 @Editable(order=1200, group=StepGroup.PUBLISH_REPORTS, name="Pull Request Markdown", 
 		description="This report will be displayed in pull request overview page if build is triggered by pull request")
@@ -25,9 +27,9 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String CATEGORY = "pull-request-markdown";
+	public static final String DIR_CATEGORY = "pull-request-markdown";
 	
-	public static final String FILE = "content.md";
+	public static final String FILE_CONTENT = "content.md";
 
 	private String file;
 	
@@ -55,22 +57,19 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 	@Override
 	public Map<String, byte[]> run(Build build, File workspace, TaskLogger logger) {
 		if (build.getRequest() != null) {
-			LockUtils.write(getReportLockName(build.getProject().getId(), build.getNumber()), new Callable<Void>() {
-
-				@Override
-				public Void call() throws Exception {
-					File file = new File(workspace, getFile()); 
-					if (file.exists()) {
-						File reportDir = new File(build.getDir(), CATEGORY + "/" + getReportName());
-						String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-						FileUtils.createDir(reportDir);
-						FileUtils.writeFile(new File(reportDir, FILE), markdown, StandardCharsets.UTF_8.name());
-					} else {
-						logger.log("WARNING: Markdown report file not found: " + file.getAbsolutePath());
-					}
-					return null;
+			write(getReportLockName(build.getProject().getId(), build.getNumber()), () -> {
+				File file = new File(workspace, getFile()); 
+				if (file.exists()) {
+					File reportDir = new File(build.getStorageDir(), DIR_CATEGORY + "/" + getReportName());
+					String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+					FileUtils.createDir(reportDir);
+					FileUtils.writeFile(new File(reportDir, FILE_CONTENT), markdown, StandardCharsets.UTF_8.name());
+					OneDev.getInstance(ProjectManager.class).directoryModified(
+							build.getProject().getId(), reportDir.getParentFile());
+				} else {
+					logger.log("WARNING: Markdown report file not found: " + file.getAbsolutePath());
 				}
-				
+				return null;
 			});
 		}
 		return null;

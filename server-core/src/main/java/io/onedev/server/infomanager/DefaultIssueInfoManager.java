@@ -3,22 +3,21 @@ package io.onedev.server.infomanager;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
@@ -37,10 +36,11 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.Long.valueOf;
 
 @Singleton
 public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager 
@@ -52,8 +52,6 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueInfoManager.class);
 	
-	private static final String INFO_DIR = "issue";
-	
 	private static final String DEFAULT_STORE = "default";
 	
 	private static final String STATE_HISTORY_STORE = "stateHistory";
@@ -64,32 +62,25 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	
 	private static final int PRIORITY = 100;
 	
-	private final StorageManager storageManager;
-	
 	private final BatchWorkManager batchWorkManager;
 	
 	private final IssueManager issueManager;
 	
 	private final IssueChangeManager issueChangeManager;
 	
-	private final TransactionManager transactionManager;
+	private final ClusterManager clusterManager;
 	
 	private final ProjectManager projectManager;
 	
-	private final Dao dao;
-	
 	@Inject
-	public DefaultIssueInfoManager(Dao dao, TransactionManager transactionManager,
-								   StorageManager storageManager, IssueManager issueManager,
-								   IssueChangeManager issueChangeManager, BatchWorkManager batchWorkManager,
-								   ProjectManager projectManager) {
-		this.dao = dao;
-		this.storageManager = storageManager;
+	public DefaultIssueInfoManager(IssueManager issueManager, IssueChangeManager issueChangeManager, 
+								   BatchWorkManager batchWorkManager, ProjectManager projectManager, 
+								   ClusterManager clusterManager) {
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
 		this.batchWorkManager = batchWorkManager;
-		this.transactionManager = transactionManager;
 		this.projectManager = projectManager;
+		this.clusterManager = clusterManager;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -100,7 +91,7 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		return new BatchWorker("project-" + projectId + "-collectIssueInfo") {
 
 			@Override
-			public void doWorks(Collection<Prioritized> works) {
+			public void doWorks(List<Prioritized> works) {
 				// do the work batch by batch to avoid consuming too much memory
 				while (collect(projectId));
 			}
@@ -233,13 +224,17 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	@Listen
 	public void on(IssuesMoved event) {
 		Long sourceProjectId = event.getSourceProject().getId();
-		projectManager.submitToProjectServer(sourceProjectId, new ClusterTask<Void>() {
+		projectManager.submitToActiveServer(sourceProjectId, new ClusterTask<Void>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public Void call() throws Exception {
-				event.getIssueIds().forEach(it->remove(sourceProjectId, it));
+				try {
+					event.getIssueIds().forEach(it -> remove(sourceProjectId, it));
+				} catch (Exception e) {
+					logger.error("Error removing issue info", e);
+				}
 				return null;
 			}
 
@@ -247,23 +242,32 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		
 		batchWorkManager.submit(getBatchWorker(event.getProject().getId()), new Prioritized(PRIORITY));
 	}
-	
+
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		Collection<Long> projectIds = projectManager.getIds();
-		for (File file: storageManager.getProjectsDir().listFiles()) {
-			Long projectId = Long.valueOf(file.getName());
-			if (projectIds.contains(projectId)) {
+		var localServer = clusterManager.getLocalServerAddress();
+		for (var entry: projectManager.getActiveServers().entrySet()) {
+			var projectId = entry.getKey();
+			var activeServer = entry.getValue();
+			if (localServer.equals(activeServer)) {
 				checkVersion(getEnvDir(projectId.toString()));
 				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
 			}
 		}
 	}
+
+	@Sessional
+	@Listen
+	public void on(ActiveServerChanged event) {
+		var projectId = event.getProjectId();
+		checkVersion(getEnvDir(projectId.toString()));
+		batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+	}
 	
 	@Override
 	protected File getEnvDir(String envKey) {
-		File infoDir = new File(storageManager.getProjectInfoDir(Long.valueOf(envKey)), INFO_DIR);
+		File infoDir = new File(projectManager.getInfoDir(valueOf(envKey)), "issue");
 		FileUtils.createDir(infoDir);
 		return infoDir;
 	}
@@ -279,7 +283,7 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 		Long projectId = issue.getProject().getId();
 		Long issueId = issue.getId();
 		
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Map<Integer, String>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Map<Integer, String>>() {
 
 			private static final long serialVersionUID = 1L;
 

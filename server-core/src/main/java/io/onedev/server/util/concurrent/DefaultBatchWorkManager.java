@@ -1,10 +1,6 @@
 package io.onedev.server.util.concurrent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Collectors;
@@ -105,7 +101,7 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 		getWorks(new BatchWorker(worker.getId(), worker.getMaxBatchSize()) {
 
 			@Override
-			public void doWorks(Collection<Prioritized> works) {
+			public void doWorks(List<Prioritized> works) {
 				ThreadContext.bind(subject);
 				worker.doWorks(works);
 			}
@@ -118,7 +114,7 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 	private static class Works {
 		BlockingQueue<Prioritized> queued = new PriorityBlockingQueue<>();
 		
-		Collection<Prioritized> working = new ArrayList<>();
+		List<Prioritized> working = new ArrayList<>();
 	}
 
 }

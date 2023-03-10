@@ -183,13 +183,9 @@ public class AgentQuery extends EntityQuery<Agent> {
 			return new AgentQuery();
 		}
 	}
-	
-	private static ExplicitException newOperatorException(String fieldName, int operator) {
-		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
-	}
-	
+
 	public static void checkField(String fieldName, int operator) {
-		Collection<String> attributeNames = OneDev.getInstance(AgentAttributeManager.class).getAttributeNames();
+		var attributeNames = OneDev.getInstance(AgentAttributeManager.class).getAttributeNames();
 		if (!QUERY_FIELDS.contains(fieldName) && !attributeNames.contains(fieldName))
 			throw new ExplicitException("Attribute not found: " + fieldName);
 	}

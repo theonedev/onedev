@@ -24,6 +24,8 @@ import jetbrains.exodus.env.StoreConfig;
 import jetbrains.exodus.env.Transaction;
 import jetbrains.exodus.env.TransactionalComputable;
 
+import static java.nio.charset.Charset.defaultCharset;
+
 public abstract class AbstractEnvironmentManager {
 	
 	private static final String VERSION_FILE = "version.txt";
@@ -33,11 +35,11 @@ public abstract class AbstractEnvironmentManager {
 	private static final int MEMORY_USAGE_PERCENT = 25;
 	
 	protected void checkVersion(File envDir) {
-		File versionFile = new File(envDir, VERSION_FILE);
+		File versionFile = getVersionFile(envDir);
 		int versionFromFile;
 		if (versionFile.exists()) {
 			try {
-				versionFromFile = Integer.parseInt(FileUtils.readFileToString(versionFile, Charset.defaultCharset()).trim());
+				versionFromFile = Integer.parseInt(FileUtils.readFileToString(versionFile, defaultCharset()).trim());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -51,8 +53,11 @@ public abstract class AbstractEnvironmentManager {
 	}
 	
 	protected void writeVersion(File envDir) {
-		File versionFile = new File(envDir, VERSION_FILE);
-		FileUtils.writeFile(versionFile, String.valueOf(getEnvVersion()));
+		FileUtils.writeFile(getVersionFile(envDir), String.valueOf(getEnvVersion()));
+	}
+	
+	protected File getVersionFile(File envDir) {
+		return new File(envDir, VERSION_FILE);
 	}
 
 	protected abstract int getEnvVersion();

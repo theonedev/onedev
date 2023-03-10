@@ -25,7 +25,7 @@ public class LogTask implements ClusterTask<Void> {
 	@Override
 	public Void call() {
 		TaskLogger logger = OneDev.getInstance(LogManager.class).getJobLogger(jobToken);
-		if (logger != null) 
+		if (logger != null && !(logger instanceof ServerJobLogger))  
 			logger.log(message, sessionId);
 		return null;
 	}

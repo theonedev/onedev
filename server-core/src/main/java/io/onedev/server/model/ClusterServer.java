@@ -3,11 +3,7 @@ package io.onedev.server.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
 @Entity
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class ClusterServer extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;

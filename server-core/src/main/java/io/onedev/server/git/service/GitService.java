@@ -43,7 +43,7 @@ public interface GitService {
 	@Nullable
 	String getClosestPath(Project project, ObjectId revId, String path);
 	
-	List<RefFacade> getRefs(Project project, String prefix);
+	List<RefFacade> getCommitRefs(Project project, String prefix);
 
 	RefFacade getRef(Project project, String revision);
 	

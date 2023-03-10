@@ -28,9 +28,9 @@ public class UnitTestReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String CATEGORY = "unit-test";
+	public static final String DIR_CATEGORY = "unit-test";
 	
-	private static final String FILE_NAME = "report.ser";
+	private static final String FILE_REPORT = "report.ser";
 	
 	public static enum Status {
 		
@@ -94,7 +94,7 @@ public class UnitTestReport implements Serializable {
 
 	@Nullable
 	public static UnitTestReport readFrom(File reportDir) {
-		File reportFile = new File(reportDir, FILE_NAME);
+		File reportFile = new File(reportDir, FILE_REPORT);
 		try (InputStream is = new BufferedInputStream(new FileInputStream(reportFile))) {
 			return (UnitTestReport) SerializationUtils.deserialize(is);
 		} catch (IOException e) {
@@ -103,7 +103,7 @@ public class UnitTestReport implements Serializable {
 	}
 	
 	public void writeTo(File reportDir) {
-		File reportFile = new File(reportDir, FILE_NAME);
+		File reportFile = new File(reportDir, FILE_REPORT);
 		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(reportFile))) {
 			SerializationUtils.serialize(this, os);
 		} catch (IOException e) {

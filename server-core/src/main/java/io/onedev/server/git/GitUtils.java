@@ -1,35 +1,22 @@
 package io.onedev.server.git;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Objects;
+import com.google.common.base.*;
+import com.google.common.collect.Iterables;
+import io.onedev.commons.utils.PathUtils;
+import io.onedev.server.git.command.IsAncestorCommand;
+import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.git.exception.RefUpdateException;
+import io.onedev.server.git.service.DiffEntryFacade;
+import io.onedev.server.git.service.RefFacade;
+import io.onedev.server.git.signature.*;
+import io.onedev.server.util.GpgUtils;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.PGPSignatureList;
-import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
-import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
@@ -42,29 +29,11 @@ import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.AnyObjectId;
-import org.eclipse.jgit.lib.CommitBuilder;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.GpgSignature;
-import org.eclipse.jgit.lib.ObjectBuilder;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectInserter;
-import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.RefUpdate;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.merge.Merger;
 import org.eclipse.jgit.merge.ResolveMerger;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevObject;
-import org.eclipse.jgit.revwalk.RevTag;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.RevWalkUtils;
+import org.eclipse.jgit.revwalk.*;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -75,25 +44,10 @@ import org.eclipse.jgit.util.io.NullOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-
-import io.onedev.commons.utils.PathUtils;
-import io.onedev.server.git.command.IsAncestorCommand;
-import io.onedev.server.git.exception.ObjectNotFoundException;
-import io.onedev.server.git.exception.ObsoleteCommitException;
-import io.onedev.server.git.exception.RefUpdateException;
-import io.onedev.server.git.service.DiffEntryFacade;
-import io.onedev.server.git.signature.SignatureUnverified;
-import io.onedev.server.git.signature.SignatureVerification;
-import io.onedev.server.git.signature.SignatureVerificationKey;
-import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
-import io.onedev.server.git.signature.SignatureVerified;
-import io.onedev.server.util.GpgUtils;
+import javax.annotation.Nullable;
+import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class GitUtils {
 
@@ -130,6 +84,11 @@ public class GitUtils {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public static void setDefaultBranch(Repository repository, String defaultBranch) {
+		RefUpdate refUpdate = getRefUpdate(repository, "HEAD");
+		linkRef(refUpdate, branch2ref(defaultBranch));
+	}	
 	
 	public static List<DiffEntry> diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId) {
 		List<DiffEntry> diffs = new ArrayList<>();
@@ -314,6 +273,24 @@ public class GitUtils {
 		}
 		return blobIdent;
 	}
+	
+	public static Collection<ObjectId> getReachableCommits(Repository repository, 
+														   Collection<ObjectId> sinceCommits, 
+														   Collection<ObjectId> untilCommits) {
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			var reachableCommits = new HashSet<ObjectId>();
+			for (var commitId: untilCommits)
+				revWalk.markStart(revWalk.parseCommit(commitId));
+			for (var commitId: sinceCommits)
+				revWalk.markUninteresting(revWalk.parseCommit(commitId));
+			RevCommit commit;
+			while ((commit = revWalk.next()) != null)
+				reachableCommits.add(commit.copy());
+			return reachableCommits;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public static BlobIdent getNewBlobIdent(DiffEntryFacade diffEntry, String newRev) {
 		BlobIdent blobIdent;
@@ -382,6 +359,22 @@ public class GitUtils {
 				return null;
 		} catch (MissingObjectException e) {
 			return null;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static Collection<RefFacade> getCommitRefs(Repository repository, @Nullable String prefix) {
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			List<Ref> refs;
+			if (prefix != null)
+				refs = repository.getRefDatabase().getRefsByPrefix(prefix);
+			else 
+				refs = repository.getRefDatabase().getRefs();
+			return refs.stream()
+					.map(ref->new RefFacade(revWalk, ref))
+					.filter(refInfo->refInfo.getPeeledObj() instanceof RevCommit)
+					.collect(Collectors.toSet());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -471,7 +464,7 @@ public class GitUtils {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	public static Collection<String> getChangedFiles(Repository repository, ObjectId oldCommitId,
 			ObjectId newCommitId) {
 		Collection<String> changedFiles = new HashSet<>();

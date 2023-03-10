@@ -39,12 +39,14 @@ public class JobContext implements Serializable {
 	
 	private final List<Service> services;
 	
+	private final long timeout;
+	
 	private final int retried;
 	
 	public JobContext(String jobToken, JobExecutor jobExecutor, Long projectId, String projectPath, 
 			String projectGitDir, Long buildId, Long buildNumber, List<Action> actions, 
 			String refName, ObjectId commitId, Collection<CacheSpec> caches, 
-			List<Service> services, int retried) {
+			List<Service> services, long timeout, int retried) {
 		this.jobToken = jobToken;
 		this.jobExecutor = jobExecutor;
 		this.projectId = projectId;
@@ -57,6 +59,7 @@ public class JobContext implements Serializable {
 		this.commitId = commitId;
 		this.cacheSpecs = caches;
 		this.services = services;
+		this.timeout = timeout;
 		this.retried = retried;
 	}
 	
@@ -106,6 +109,10 @@ public class JobContext implements Serializable {
 
 	public Long getBuildNumber() {
 		return buildNumber;
+	}
+
+	public long getTimeout() {
+		return timeout;
 	}
 
 	public int getRetried() {

@@ -33,7 +33,7 @@ public class BuildDashboardPage extends BuildDetailPage {
 			Long projectId = getBuild().getProject().getId();
 			Long buildNumber = getBuild().getNumber();
 			
-			boolean hasArtifacts = OneDev.getInstance(ProjectManager.class).runOnProjectServer(projectId, new ClusterTask<Boolean>() {
+			boolean hasArtifacts = OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new ClusterTask<Boolean>() {
 
 				@Override
 				public Boolean call() throws Exception {

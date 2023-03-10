@@ -53,14 +53,7 @@ public class DefaultWorkExecutor implements WorkExecutor {
 				averagePriorities.put(entry.getKey(), totalPriorities/entry.getValue().size());
 			}
 			List<String> groupIds = new ArrayList<>(waitings.keySet());
-			Collections.sort(groupIds, new Comparator<String>() {
-
-				@Override
-				public int compare(String o1, String o2) {
-					return averagePriorities.get(o1) - averagePriorities.get(o2);
-				}
-				
-			});
+			Collections.sort(groupIds, Comparator.comparingInt(averagePriorities::get));
 			for (String groupId: groupIds) {
 				Collection<PrioritizedCallable<?>> runningsOfGroup = new ArrayList<>();
 				for (WorkFuture<?> future: waitings.remove(groupId)) {
@@ -76,24 +69,19 @@ public class DefaultWorkExecutor implements WorkExecutor {
 	}
 	
 	private synchronized <T> Future<T> call(String groupId, PrioritizedCallable<T> callable) {
-		return executorService.submit(new Callable<T>() {
-
-			@Override
-			public T call() throws Exception {
-				try {
-					return callable.call();
-				} finally {
-					synchronized (DefaultWorkExecutor.this) {
-						Collection<PrioritizedCallable<?>> runningsOfGroup = runnings.get(groupId);
-						runningsOfGroup.remove(callable);
-						if (runningsOfGroup.isEmpty()) {
-							runnings.remove(groupId);
-							check();
-						}
+		return executorService.submit(() -> {
+			try {
+				return callable.call();
+			} finally {
+				synchronized (DefaultWorkExecutor.this) {
+					Collection<PrioritizedCallable<?>> runningsOfGroup = runnings.get(groupId);
+					runningsOfGroup.remove(callable);
+					if (runningsOfGroup.isEmpty()) {
+						runnings.remove(groupId);
+						check();
 					}
 				}
 			}
-			
 		});
 	}
 	
@@ -211,7 +199,7 @@ public class DefaultWorkExecutor implements WorkExecutor {
 		return submit(groupId, new PrioritizedCallable<Void>(runnable.getPriority()) {
 
 			@Override
-			public Void call() throws Exception {
+			public Void call() {
 				runnable.run();
 				return null;
 			}

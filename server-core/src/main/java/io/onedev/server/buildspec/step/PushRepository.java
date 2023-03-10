@@ -1,23 +1,23 @@
 package io.onedev.server.buildspec.step;
 
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.git.CommandUtils;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.annotation.Editable;
 
 @Editable(order=70, name="Push to Remote", group=StepGroup.REPOSITORY_SYNC, 
 		description="This step pushes current commit to same ref on remote")
@@ -27,9 +27,10 @@ public class PushRepository extends SyncRepository {
 
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		if (isWithLfs()) {
+		if (OneDev.getInstance(ProjectManager.class).hasLfsObjects(build.getProject().getId())) {
 			Project project = build.getProject();
-			Commandline git = newGit(project);
+			Commandline git = CommandUtils.newGit();
+			git.workingDir(OneDev.getInstance(ProjectManager.class).getGitDir(project.getId()));
 			
 			String remoteUrl = getRemoteUrlWithCredential(build);
 			AtomicReference<String> remoteCommitId = new AtomicReference<>(null);
@@ -127,7 +128,8 @@ public class PushRepository extends SyncRepository {
 	}
 	
 	private void push(Build build, TaskLogger logger) {
-		Commandline git = newGit(build.getProject());
+		Commandline git = CommandUtils.newGit();
+		git.workingDir(OneDev.getInstance(ProjectManager.class).getGitDir(build.getProject().getId()));
 		git.addArgs("push");
 		if (isForce())
 			git.addArgs("--force");
@@ -150,5 +152,5 @@ public class PushRepository extends SyncRepository {
 			
 		}).checkReturnCode();
 	}
-
+	
 }

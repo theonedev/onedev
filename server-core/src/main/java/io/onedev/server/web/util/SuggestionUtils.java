@@ -18,13 +18,13 @@ import io.onedev.server.model.support.build.JobProperty;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.UserCache;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.match.PatternApplied;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.ScriptContribution;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.sort;
 
 public class SuggestionUtils {
 	
@@ -92,7 +94,7 @@ public class SuggestionUtils {
 				if (SecurityUtils.canReadCode(project)) {
 					List<String> branchNames = project.getBranchRefs()
 							.stream()
-							.map(it->GitUtils.ref2branch(it.getName()))
+							.map(it-> GitUtils.ref2branch(it.getName()))
 							.sorted()
 							.collect(Collectors.toList());
 					return SuggestionUtils.suggest(branchNames, matchWith);
@@ -113,7 +115,7 @@ public class SuggestionUtils {
 					List<String> tags = project.getTagRefs()
 							.stream()
 							.sorted()
-							.map(it->GitUtils.ref2tag(it.getName()))
+							.map(it-> GitUtils.ref2tag(it.getName()))
 							.collect(Collectors.toList());
 					Collections.reverse(tags);
 					return SuggestionUtils.suggest(tags, matchWith);
@@ -134,7 +136,7 @@ public class SuggestionUtils {
 					List<String> branches = project.getBranchRefs()
 							.stream()
 							.sorted()
-							.map(it->GitUtils.ref2branch(it.getName()))
+							.map(it-> GitUtils.ref2branch(it.getName()))
 							.collect(Collectors.toList());
 					Collections.reverse(branches);
 					if (project.getDefaultBranch() != null) {
@@ -145,7 +147,7 @@ public class SuggestionUtils {
 					List<String> tags = project.getTagRefs()
 							.stream()
 							.sorted()
-							.map(it->GitUtils.ref2tag(it.getName()))
+							.map(it-> GitUtils.ref2tag(it.getName()))
 							.collect(Collectors.toList());
 					Collections.reverse(tags);
 					
@@ -236,7 +238,9 @@ public class SuggestionUtils {
 			variables.put(VariableInterpolator.PREFIX_SECRET + secret.getName(), null);
 
 		if (withDynamicVariables) {
-			for (String attributeName: OneDev.getInstance(AgentAttributeManager.class).getAttributeNames()) 
+			var attributeNames = new ArrayList<>(OneDev.getInstance(AgentAttributeManager.class).getAttributeNames());
+			sort(attributeNames);
+			for (String attributeName: attributeNames) 
 				variables.put(VariableInterpolator.PREFIX_ATTRIBUTE + attributeName, "Use value of specified agent attribute");
 			
 			String filePath;

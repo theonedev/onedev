@@ -11,6 +11,8 @@ public interface AgentTokenManager extends EntityManager<AgentToken> {
 	
 	void create(AgentToken token);
 	
+	void update(AgentToken token);
+	
 	@Nullable
 	AgentToken find(String value);
 	

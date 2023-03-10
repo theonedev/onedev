@@ -1,19 +1,20 @@
 package io.onedev.server;
 
-import java.io.IOException;
+import io.onedev.agent.Agent;
+import io.onedev.server.entitymanager.AgentTokenManager;
+import io.onedev.server.exception.ServerNotReadyException;
+import io.onedev.server.security.SecurityUtils;
+import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-
-import io.onedev.agent.Agent;
-import io.onedev.server.entitymanager.AgentTokenManager;
-import io.onedev.server.security.SecurityUtils;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 @Singleton
 public class ServerSocketServlet extends WebSocketServlet {
@@ -38,11 +39,13 @@ public class ServerSocketServlet extends WebSocketServlet {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String bearerToken = SecurityUtils.getBearerToken(request);
-		if (bearerToken != null && tokenManager.find(bearerToken) != null)  
+		if (!OneDev.getInstance().isReady())
+			throw new ServerNotReadyException();
+		String tokenValue = SecurityUtils.getBearerToken(request);
+		if (tokenValue != null && tokenManager.find(tokenValue) != null)
 			super.service(request, response);
 		else
-			response.sendError(HttpServletResponse.SC_FORBIDDEN, "A valid agent token is expected");
+			response.sendError(SC_FORBIDDEN, "A valid agent token is expected");
 	}
 	
 }

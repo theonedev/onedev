@@ -2,6 +2,7 @@ package io.onedev.server.event.project;
 
 import java.util.Date;
 
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -31,6 +32,10 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 		this.refName = refName;
 		this.oldCommitId = oldCommitId;
 		this.newCommitId = newCommitId;
+	}
+	
+	public static boolean isValidRef(String refName) {
+		return refName.startsWith(Constants.R_HEADS) || refName.startsWith(Constants.R_TAGS);
 	}
 
 	public String getRefName() {

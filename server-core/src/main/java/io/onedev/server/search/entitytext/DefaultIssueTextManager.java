@@ -3,7 +3,6 @@ package io.onedev.server.search.entitytext;
 import com.google.common.collect.Lists;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueLinkManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -21,7 +20,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.criteria.Criteria;
@@ -40,6 +38,8 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -51,6 +51,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class DefaultIssueTextManager extends ProjectTextManager<Issue> implements IssueTextManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueTextManager.class);
+	
 	private static final String FIELD_NUMBER = "number";
 	
 	private static final String FIELD_TITLE = "title";
@@ -68,11 +70,11 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	private final IssueLinkManager linkManager;
 	
 	@Inject
-	public DefaultIssueTextManager(Dao dao, StorageManager storageManager, BatchWorkManager batchWorkManager, 
+	public DefaultIssueTextManager(Dao dao, BatchWorkManager batchWorkManager, 
 								   TransactionManager transactionManager, ProjectManager projectManager, 
 								   IssueFieldManager fieldManager, IssueLinkManager linkManager, 
 								   ClusterManager clusterManager, UserManager userManager) {
-		super(dao, storageManager, batchWorkManager, transactionManager, projectManager, clusterManager);
+		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager);
 		this.fieldManager = fieldManager;
 		this.linkManager = linkManager;
 		this.userManager = userManager;
@@ -106,7 +108,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	@Sessional
 	@Listen
 	public void on(IssueOpened event) {
-		requestIndexLocal(event.getIssue());
+		requestIndex(event.getIssue());
 	}
 	
 	@Sessional
@@ -114,76 +116,84 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	public void on(IssueChanged event) {
 		IssueChangeData data = event.getChange().getData();
 		if (data instanceof IssueTitleChangeData || data instanceof IssueDescriptionChangeData)
-			requestIndexLocal(event.getIssue());
+			requestIndex(event.getIssue());
 	}
 
 	@Sessional
 	@Listen
 	public void on(IssueCommentCreated event) {
-		requestIndexLocal(event.getIssue());
+		requestIndex(event.getIssue());
 	}
 
 	@Sessional
 	@Listen
 	public void on(IssueCommentEdited event) {
-		requestIndexLocal(event.getIssue());
+		requestIndex(event.getIssue());
 	}
 
 	@Sessional
 	@Listen
 	public void on(IssueCommentDeleted event) {
-		requestIndexLocal(event.getIssue());
+		requestIndex(event.getIssue());
 	}
 	
 	@Sessional
 	@Listen
 	public void on(IssuesDeleted event) {
-		deleteEntitiesLocal(event.getIssueIds());
+		clusterManager.submitToAllServers(() -> {
+			try {
+				deleteEntities(event.getIssueIds());
+			} catch (Exception e) {
+				logger.error("Error deleting entities", e);
+			}
+			return null;
+		});
 	}
 
 	@Sessional
 	@Listen
 	public void on(IssueDeleted event) {
-		deleteEntitiesLocal(Lists.newArrayList(event.getIssueId()));
+		clusterManager.submitToAllServers(() -> {
+			try {
+				deleteEntities(Lists.newArrayList(event.getIssueId()));
+			} catch (Exception e) {
+				logger.error("Error deleting entities", e);
+			}
+			return null;
+		});
 	}
 	
 	@Sessional
 	@Listen
 	public void on(IssuesMoved event) {
-		UUID sourceProjectServerUUID = projectManager.getStorageServerUUID(
-				event.getSourceProject().getId(), true);
-		UUID targetProjectServerUUID = projectManager.getStorageServerUUID(
-				event.getTargetProject().getId(), true);
-		if (!sourceProjectServerUUID.equals(targetProjectServerUUID)) {
-			clusterManager.submitToServer(sourceProjectServerUUID, new ClusterTask<Void>() {
-				
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public Void call() throws Exception {
-					deleteEntitiesLocal(event.getIssueIds());
-					return null;
+		var localServer = clusterManager.getLocalServerAddress();
+		clusterManager.submitToAllServers(() -> {
+			if (!clusterManager.getLocalServerAddress().equals(localServer)) {
+				try {
+					deleteEntities(event.getIssueIds());
+				} catch (Exception e) {
+					logger.error("Error deleting entities", e);
 				}
-				
-			});
-		}
+			}
+			return null;
+		});
 		
 		for (Long issueId: event.getIssueIds())
-			requestIndexLocal(dao.load(Issue.class, issueId));
+			requestIndex(dao.load(Issue.class, issueId));
 	}
 	
 	@Sessional
 	@Listen
 	public void on(IssuesCopied event) {
 		for (Long issueId: event.getIssueIdMapping().values())
-			requestIndexLocal(dao.load(Issue.class, issueId));
+			requestIndex(dao.load(Issue.class, issueId));
 	}
 	
 	@Sessional
 	@Listen
 	public void on(IssuesImported event) {
 		for (Long issueId: event.getIssueIds())
-			requestIndexLocal(dao.load(Issue.class, issueId));
+			requestIndex(dao.load(Issue.class, issueId));
 	}
 	
 	@Nullable

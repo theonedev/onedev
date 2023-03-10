@@ -3,7 +3,6 @@ package io.onedev.server.web.resource;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
@@ -35,10 +34,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.model.Build.getArtifactsLockName;
 
 public class ArtifactResource extends AbstractResource {
 
@@ -114,22 +113,17 @@ public class ArtifactResource extends AbstractResource {
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, true);
+				String activeServer = projectManager.getActiveServer(projectId, true);
 				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-				if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
-					LockUtils.read(Build.getArtifactsLockName(projectId, buildNumber), new Callable<Void>() {
-
-						@Override
-						public Void call() throws Exception {
-							File artifactFile = new File(Build.getArtifactsDir(projectId, buildNumber), artifactPath);
-							try (
-									InputStream is = new FileInputStream(artifactFile);
-									OutputStream os = attributes.getResponse().getOutputStream()) {
-								IOUtils.copy(is, os, BUFFER_SIZE);
-							}
-							return null;
+				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+					read(getArtifactsLockName(projectId, buildNumber), () -> {
+						File artifactFile = new File(Build.getArtifactsDir(projectId, buildNumber), artifactPath);
+						try (
+								InputStream is = new FileInputStream(artifactFile);
+								OutputStream os = attributes.getResponse().getOutputStream()) {
+							IOUtils.copy(is, os, BUFFER_SIZE);
 						}
-						
+						return null;
 					});
 				} else {
 	    			Client client = ClientBuilder.newClient();
@@ -137,12 +131,12 @@ public class ArtifactResource extends AbstractResource {
 	    				CharSequence path = RequestCycle.get().urlFor(
 	    						new ArtifactResourceReference(), 
 	    						ArtifactResource.paramsOf(projectId, buildNumber, artifactPath));
-	    				String storageServerUrl = clusterManager.getServerUrl(storageServerUUID);
+	    				String activeServerUrl = clusterManager.getServerUrl(activeServer);
 	    				
-	    				WebTarget target = client.target(storageServerUrl).path(path.toString());
+	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+	    						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);

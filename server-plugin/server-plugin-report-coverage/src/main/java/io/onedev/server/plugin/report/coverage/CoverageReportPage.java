@@ -86,7 +86,7 @@ public class CoverageReportPage extends BuildReportPage {
 		@Override
 		protected CoverageReport load() {
 			Long projectId = getProject().getId();
-			return OneDev.getInstance(ProjectManager.class).runOnProjectServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
+			return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetCoverageReport(projectId, getBuild().getNumber(), getReportName()));
 		}
 		
 	};
@@ -431,7 +431,7 @@ public class CoverageReportPage extends BuildReportPage {
 
 				@Override
 				public CoverageReport call() throws Exception {
-					return CoverageReport.readFrom(new File(Build.getDir(projectId, buildNumber), CoverageReport.CATEGORY + "/" + reportName));
+					return CoverageReport.readFrom(new File(Build.getStorageDir(projectId, buildNumber), CoverageReport.DIR_CATEGORY + "/" + reportName));
 				}
 				
 			});

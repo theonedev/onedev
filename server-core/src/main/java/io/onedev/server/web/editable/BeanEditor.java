@@ -1,18 +1,12 @@
 package io.onedev.server.web.editable;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.util.PathNode.Named;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
@@ -28,21 +22,14 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
-import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.IValidator;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.util.PathNode.Named;
-import io.onedev.server.annotation.OmitName;
+import javax.validation.Validator;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class BeanEditor extends ValueEditor<Serializable> {
-
-	public static final String SCRIPT_CONTEXT_BEAN = "beanEditor";
 	
 	private final BeanDescriptor descriptor;
 	
@@ -50,7 +37,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	
 	private RepeatingView groupsView;
 	
-	private Map<String, ComponentContext> componentContexts = new HashMap<>();
+	private final Map<String, ComponentContext> componentContexts = new HashMap<>();
 	
 	public BeanEditor(String id, BeanDescriptor descriptor, IModel<Serializable> model) {
 		super(id, model);
@@ -59,7 +46,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		
 		for (Map.Entry<String, List<PropertyDescriptor>> entry: descriptor.getProperties().entrySet()) {
 			propertyContexts.put(entry.getKey(), 
-					entry.getValue().stream().map(it->PropertyContext.of(it)).collect(Collectors.toList()));
+					entry.getValue().stream().map(PropertyContext::of).collect(Collectors.toList()));
 		}
 	}
 
@@ -116,9 +103,9 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			
 			convertInput();
 			clearErrors();
-			/**
-			 * Bump up event even if some properties are invalid as we may need to do something with 
-			 * partial properties of the bean. For instance to update issue description template
+			/*
+			  Bump up event even if some properties are invalid as we may need to do something with 
+			  partial properties of the bean. For instance to update issue description template
 			 */
 			send(this, Broadcast.BUBBLE, new BeanUpdating(propertyUpdating.getHandler(), propertyUpdating));
 		}		
@@ -181,7 +168,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				String propertyName = descriptor.getPropertyName(name);
 				property.getDescriptor().getDependencyPropertyNames().add(propertyName);
 				 
-				Optional<Object> result= BeanEditor.this.visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, Optional<Object>>() {
+				Optional<Object> result = BeanEditor.this.visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, Optional<Object>>() {
 
 					@Override
 					public void component(PropertyEditor<?> object, IVisit<Optional<Object>> visit) {
@@ -257,20 +244,15 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			groupsView.add(groupContainer);
 		}
 		
-		add(new IValidator<Serializable>() {
-
-			@Override
-			public void validate(IValidatable<Serializable> validatable) {
-				ComponentContext.push(newComponentContext());
-				try {
-					Validator validator = AppLoader.getInstance(Validator.class);
-					for (ConstraintViolation<Serializable> violation: validator.validate(validatable.getValue()))
-						error(new Path(violation.getPropertyPath()), violation.getMessage());
-				} finally {
-					ComponentContext.pop();
-				}
+		add(validatable -> {
+			ComponentContext.push(newComponentContext());
+			try {
+				Validator validator = AppLoader.getInstance(Validator.class);
+				for (var violation : validator.validate(validatable.getValue()))
+					error(new Path(violation.getPropertyPath()), violation.getMessage());
+			} finally {
+				ComponentContext.pop();
 			}
-			
 		});
 		
 		add(AttributeAppender.append("class", "bean-editor editable"));
@@ -285,17 +267,11 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	@Override
 	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
 		PathNode.Named named = (Named) propertyNode;
-		PropertyEditor<?> propertyEditor = visitChildren(PropertyEditor.class, 
-				new IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>() {
-
-			@Override
-			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
-				if (object.getDescriptor().getPropertyName().equals(named.getName()) && object.isVisibleInHierarchy())
-					visit.stop(object);
-				else
-					visit.dontGoDeeper();
-			}
-			
+		PropertyEditor<?> propertyEditor = visitChildren(PropertyEditor.class, (IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>) (object, visit) -> {
+			if (object.getDescriptor().getPropertyName().equals(named.getName()) && object.isVisibleInHierarchy())
+				visit.stop(object);
+			else
+				visit.dontGoDeeper();
 		});
 		if (propertyEditor != null)
 			propertyEditor.error(pathInProperty, errorMessage);
@@ -312,15 +288,10 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	protected Serializable convertInputToValue() throws ConversionException {
 		final Serializable bean = (Serializable) getDescriptor().newBeanInstance();
 		
-		visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>() {
-
-			@Override
-			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
-				if (!object.getDescriptor().isPropertyExcluded()) 
-					object.getDescriptor().setPropertyValue(bean, object.getConvertedInput());
-				visit.dontGoDeeper();
-			}
-			
+		visitChildren(PropertyEditor.class, (IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>) (object, visit) -> {
+			if (!object.getDescriptor().isPropertyExcluded()) 
+				object.getDescriptor().setPropertyValue(bean, object.getConvertedInput());
+			visit.dontGoDeeper();
 		});
 		
 		return bean;

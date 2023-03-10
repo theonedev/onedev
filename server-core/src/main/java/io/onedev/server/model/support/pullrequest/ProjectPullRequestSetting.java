@@ -3,10 +3,9 @@ package io.onedev.server.model.support.pullrequest;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.annotation.Editable;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 @Editable
 public class ProjectPullRequestSetting implements Serializable {
@@ -14,8 +13,6 @@ public class ProjectPullRequestSetting implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private List<NamedPullRequestQuery> namedQueries;
-	
-	private Boolean withLFS;
 	
 	private MergeStrategy defaultMergeStrategy;
 	
@@ -27,17 +24,7 @@ public class ProjectPullRequestSetting implements Serializable {
 	public void setNamedQueries(@Nullable List<NamedPullRequestQuery> namedQueries) {
 		this.namedQueries = namedQueries;
 	}
-
-	@Editable(order=100, name="Fetch LFS Objects", placeholder = "Inherit from parent", rootPlaceholder = "No",
-			descriptionProvider = "getLfsDescription")
-	public Boolean isWithLFS() {
-		return withLFS;
-	}
-
-	public void setWithLFS(Boolean withLFS) {
-		this.withLFS = withLFS;
-	}
-
+	
 	private static String getLfsDescription() {
 		if (!Bootstrap.isInDocker()) {
 			return "Whether or not to fetch LFS objects if pull request is opened from a different project. " +

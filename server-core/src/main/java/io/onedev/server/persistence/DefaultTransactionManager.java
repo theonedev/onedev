@@ -57,82 +57,60 @@ public class DefaultTransactionManager implements TransactionManager {
 	
 	@Override
 	public <T> T call(Callable<T> callable) {
-		return sessionManager.call(new Callable<T>() {
-
-			@Override
-			public T call() throws Exception {
-				if (getTransaction().isActive()) {
-					return callable.call();
-				} else {
-					Session session = sessionManager.getSession();
-					FlushModeType prevFlushModeType = session.getFlushMode();
-					Transaction tx = session.beginTransaction();
-					try {
-						session.setFlushMode(FlushModeType.AUTO);
-						T result = callable.call();
-						tx.commit();
-						return result;
-					} catch (Throwable t) {
-						tx.rollback();
-						throw ExceptionUtils.unchecked(t);
-					} finally {
-						Collection<Runnable> runnables = completionRunnables.remove(tx);
-						if (runnables != null) {
-							for (Runnable runnable: runnables) {
-								try {
-									runnable.run();
-								} catch (Exception e) {
-									logger.error("Error running completion callback", e);
-								}
+		return sessionManager.call(() -> {
+			if (getTransaction().isActive()) {
+				return callable.call();
+			} else {
+				Session session = sessionManager.getSession();
+				FlushModeType prevFlushModeType = session.getFlushMode();
+				Transaction tx = session.beginTransaction();
+				try {
+					session.setFlushMode(FlushModeType.AUTO);
+					T result = callable.call();
+					tx.commit();
+					return result;
+				} catch (Throwable t) {
+					tx.rollback();
+					throw ExceptionUtils.unchecked(t);
+				} finally {
+					Collection<Runnable> runnables = completionRunnables.remove(tx);
+					if (runnables != null) {
+						for (Runnable runnable: runnables) {
+							try {
+								runnable.run();
+							} catch (Exception e) {
+								logger.error("Error running completion callback", e);
 							}
 						}
-						session.setFlushMode(prevFlushModeType);
 					}
+					session.setFlushMode(prevFlushModeType);
 				}
 			}
-			
 		});
 	}
 
 	@Override
 	public void run(Runnable runnable) {
-		call(new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				runnable.run();
-				return null;
-			}
-			
+		call(() -> {
+			runnable.run();
+			return null;
 		});
 	}
 
 	@Override
 	public void runAsync(Runnable runnable) {
-		executorService.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					DefaultTransactionManager.this.run(runnable);
-				} catch (Exception e) {
-					logger.error("Error executing in transaction", e);
-				}
+		executorService.execute(() -> {
+			try {
+				DefaultTransactionManager.this.run(runnable);
+			} catch (Exception e) {
+				logger.error("Error executing in transaction", e);
 			}
-			
 		});
 	}
 	
 	@Override
 	public void runAsyncAfterCommit(Runnable runnable) {
-		runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				runAsync(runnable);
-			}
-			
-		});
+		runAfterCommit(() -> runAsync(runnable));
 	}
 	
 	@Override

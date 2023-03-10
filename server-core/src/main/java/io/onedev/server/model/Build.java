@@ -8,6 +8,8 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Markdown;
 import io.onedev.server.attachment.AttachmentStorageSupport;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
@@ -16,6 +18,7 @@ import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.spec.SecretParam;
 import io.onedev.server.buildspec.param.supply.ParamSupply;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.Referenceable;
@@ -28,9 +31,7 @@ import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.model.support.ProjectBelonging;
 import io.onedev.server.model.support.build.JobSecret;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.*;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.artifact.DirectoryInfo;
@@ -38,8 +39,6 @@ import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Markdown;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.Build.*;
+import static io.onedev.server.model.Project.BUILDS_DIR;
 
 @Entity
 @Table(
@@ -76,6 +76,10 @@ public class Build extends ProjectBelonging
 		implements Referenceable, AttachmentStorageSupport, LabelSupport<BuildLabel> {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PATH_ARTIFACTS = "artifacts";
+
+	public static final String PATH_LOG = "build.log";
 
 	public static final int MAX_DESCRIPTION_LEN = 12000;
 	
@@ -176,10 +180,33 @@ public class Build extends ProjectBelonging
 			NAME_PROJECT, PROP_PROJECT,
 			NAME_COMMIT, PROP_COMMIT);	
 	
-	private static ThreadLocal<Stack<Build>> stack = ThreadLocal.withInitial(() -> new Stack<Build>());
+	private static ThreadLocal<Stack<Build>> stack = ThreadLocal.withInitial(Stack::new);
+
+	public static File getLogFile(Long projectId, Long buildNumber) {
+		File buildDir = OneDev.getInstance(BuildManager.class).getStorageDir(projectId, buildNumber);
+		return new File(buildDir, PATH_LOG);
+	}
 	
-	public static final String ARTIFACTS_DIR = "artifacts";
+	public static String getProjectRelativePath(Long buildNumber) {
+		return BUILDS_DIR + "/" + String.format("%03d", buildNumber%1000) + "/" + buildNumber;		
+	}
 	
+	public String getProjectRelativePath() {
+		return getProjectRelativePath(getNumber());
+	}
+	
+	public File getLogFile() {
+		return getLogFile(getProject().getId(), getNumber());
+	}
+	
+	public static String getLogLockName(Long projectId, Long buildNumber) {
+		return "build-log: " + projectId + ":" + buildNumber;
+	}
+	
+	public String getLogLockName() {
+		return getLogLockName(getProject().getId(), getNumber());
+	}
+
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
 		WAITING, PENDING, RUNNING, FAILED, CANCELLED, TIMED_OUT, SUCCESSFUL;
@@ -757,20 +784,20 @@ public class Build extends ProjectBelonging
 		return paramBean;
 	}
 	
-	public File getDir() {
-		return getDir(getProject().getId(), getNumber());
+	public File getStorageDir() {
+		return getStorageDir(getProject().getId(), getNumber());
 	}
 	
 	public File getArtifactsDir() {
 		return getArtifactsDir(getProject().getId(), getNumber());
 	}
 	
-	public static File getDir(Long projectId, Long buildNumber) {
-		return OneDev.getInstance(StorageManager.class).getBuildDir(projectId, buildNumber);
+	public static File getStorageDir(Long projectId, Long buildNumber) {
+		return OneDev.getInstance(BuildManager.class).getStorageDir(projectId, buildNumber);
 	}
 	
 	public static File getArtifactsDir(Long projectId, Long buildNumber) {
-		return new File(getDir(projectId, buildNumber), ARTIFACTS_DIR);
+		return new File(getStorageDir(projectId, buildNumber), PATH_ARTIFACTS);
 	}
 	
 	@Nullable

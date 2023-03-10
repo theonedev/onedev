@@ -28,7 +28,7 @@ public class DefaultBranchChanged extends ProjectEvent implements CommitAware {
 
 	@Override
 	public ProjectScopedCommit getCommit() {
-		return null;
+		return new ProjectScopedCommit(getProject(), getProject().getObjectId(defaultBranch, true));
 	}
 
 }

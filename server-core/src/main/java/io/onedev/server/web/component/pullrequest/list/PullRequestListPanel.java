@@ -639,7 +639,7 @@ public abstract class PullRequestListPanel extends Panel {
 						@Override
 						protected List<Project> load() {
 							ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-							List<Project> projects = new ArrayList<Project>(projectManager.getPermittedProjects(new ReadCode()));
+							List<Project> projects = new ArrayList<>(projectManager.getPermittedProjects(new ReadCode()));
 							projects.sort(projectManager.cloneCache().comparingPath());
 							return projects;
 						}

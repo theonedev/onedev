@@ -85,7 +85,7 @@ public class RepositoryResource {
 			throw new UnauthorizedException();
 
 		return project.getBranchRefs().stream()
-				.map(it->GitUtils.ref2branch(it.getName()))
+				.map(it-> GitUtils.ref2branch(it.getName()))
 				.collect(Collectors.toList());
 	}
 	
@@ -176,7 +176,7 @@ public class RepositoryResource {
 		}
 
 		return project.getTagRefs().stream()
-				.map(it->GitUtils.ref2tag(it.getName()))
+				.map(it-> GitUtils.ref2tag(it.getName()))
 				.collect(Collectors.toList());
 	}
 	

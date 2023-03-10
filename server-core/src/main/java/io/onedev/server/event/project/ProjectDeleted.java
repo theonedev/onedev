@@ -14,22 +14,8 @@ public class ProjectDeleted implements Serializable {
 
 	private final Long projectId;
 	
-	private final Long userId;
-	
-	private final Date date;
-	
-	public ProjectDeleted(User user, Date date, Project project) {
-		userId = user.getId();
-		this.date = date;
+	public ProjectDeleted(Project project) {
 		projectId = project.getId();
-	}
-	
-	public User getUser() {
-		return OneDev.getInstance(UserManager.class).load(userId);
-	}
-
-	public Date getDate() {
-		return date;
 	}
 
 	public Long getProjectId() {

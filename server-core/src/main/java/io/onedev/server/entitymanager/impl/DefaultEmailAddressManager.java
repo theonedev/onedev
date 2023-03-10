@@ -9,7 +9,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.mail.MailManager;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
@@ -57,12 +57,15 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
 
     @Listen
     @Sessional
-    public void on(SystemStarted event) {
+    public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = new EmailAddressCache(hazelcastInstance.getReplicatedMap("emailAddressCache"));
-        
-    	for (EmailAddress address: query())
-    		cache.put(address.getId(), address.getFacade());
+        cache = new EmailAddressCache(hazelcastInstance.getMap("emailAddressCache"));
+		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("emailAddressCacheInited");        
+		clusterManager.init(cacheInited, () -> {
+			for (EmailAddress address: query())
+				cache.put(address.getId(), address.getFacade());
+			return 1L;			
+		});
     }
     
     @Sessional
@@ -173,29 +176,17 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
     public void on(EntityRemoved event) {
     	if (event.getEntity() instanceof EmailAddress) {
     		Long id = event.getEntity().getId();
-    		transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-			    	cache.remove(id);
-				}
-    			
-    		});
+    		transactionManager.runAfterCommit(() -> cache.remove(id));
     	} else if (event.getEntity() instanceof User) {
     		Long ownerId = event.getEntity().getId();
-    		transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					for (var id: cache.entrySet().stream()
-							.filter(it->it.getValue().getOwnerId().equals(ownerId))
-							.map(it->it.getKey())
-							.collect(Collectors.toSet())) {
-						cache.remove(id);
-					}
+    		transactionManager.runAfterCommit(() -> {
+				for (var id: cache.entrySet().stream()
+						.filter(it->it.getValue().getOwnerId().equals(ownerId))
+						.map(it->it.getKey())
+						.collect(Collectors.toSet())) {
+					cache.remove(id);
 				}
-    			
-    		});
+			});
     	}
     }
     
@@ -204,15 +195,7 @@ public class DefaultEmailAddressManager extends BaseEntityManager<EmailAddress> 
     public void on(EntityPersisted event) {
     	if (event.getEntity() instanceof EmailAddress) {
     		EmailAddressFacade facade = ((EmailAddress) event.getEntity()).getFacade();
-    		transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					if (cache != null)
-						cache.put(facade.getId(), facade);
-				}
-    			
-    		});
+    		transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
     	}
     }
     

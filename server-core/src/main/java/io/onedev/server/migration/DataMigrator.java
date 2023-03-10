@@ -37,6 +37,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Comparator.naturalOrder;
+
 @Singleton
 @SuppressWarnings("unused")
 public class DataMigrator {
@@ -5178,5 +5180,97 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
-	}	
+	}
+
+	private void migrate117(File dataDir, Stack<Integer> versions) {
+		var agentLastUsedDatesFile = new File(dataDir, "AgentLastUsedDates.xml");
+		var agentLastUsedDatesDom = new VersionedXmlDoc();
+		var agentLastUsedDatesElement = agentLastUsedDatesDom.addElement("list");
+
+		agentLastUsedDatesDom.writeToFile(agentLastUsedDatesFile, true);
+		var agentLastUsedDateId = 1L;
+
+		var agentTokenIds = new HashSet<Long>();
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("AgentTokens.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element : dom.getRootElement().elements()) 
+					agentTokenIds.add(Long.valueOf(element.elementTextTrim("id")));
+			}
+		}
+		var maxAgentTokenId = agentTokenIds.stream().max(naturalOrder()).orElse(0L);
+
+		VersionedXmlDoc partialAgentTokensDom;
+		Element partialAgentTokensElement;
+		var partialAgentTokensFile = new File(dataDir, "AgentTokens.xml");
+		if (partialAgentTokensFile.exists()) {
+			partialAgentTokensDom = VersionedXmlDoc.fromFile(partialAgentTokensFile);
+			partialAgentTokensElement = partialAgentTokensDom.getRootElement();
+		} else {
+			partialAgentTokensDom = new VersionedXmlDoc();
+			partialAgentTokensElement = partialAgentTokensDom.addElement("list");
+		}
+		
+		for (var file : dataDir.listFiles()) {
+			if (file.getName().startsWith("ClusterCredentials.xml")) {
+				FileUtils.deleteFile(file);				
+			} else if (file.getName().startsWith("Projects.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (var element : dom.getRootElement().elements()) {
+					var withLfsElement = element.element("pullRequestSetting").element("withLFS");
+					if (withLfsElement != null)
+						withLfsElement.detach();
+					element.element("dynamics").setName("lastEventDate");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("ProjectDynamicss.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (var element : dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.ProjectLastEventDate");
+					element.element("lastActivityDate").setName("activity");
+					var lastCommitDateElement = element.element("lastCommitDate");
+					if (lastCommitDateElement != null)
+						lastCommitDateElement.setName("commit");
+				}
+				FileUtils.deleteFile(file);
+				dom.writeToFile(new File(dataDir, file.getName().replace("ProjectDynamicss", "ProjectLastEventDates")), false);
+			} else if (file.getName().startsWith("Agents.xml")) {
+				var dom = VersionedXmlDoc.fromFile(file);
+				for (var element : dom.getRootElement().elements()) {
+					var lastUsedDateElement = element.element("lastUsedDate");
+					String lastUsedDate = null;
+					if (lastUsedDateElement != null) {
+						lastUsedDateElement.remove(lastUsedDateElement.attribute("class"));
+						lastUsedDate = lastUsedDateElement.getText().trim();
+					} else {
+						lastUsedDateElement = element.addElement("lastUsedDate");
+					}
+					lastUsedDateElement.setText(String.valueOf(agentLastUsedDateId));
+
+					lastUsedDateElement = agentLastUsedDatesElement.addElement("io.onedev.server.model.AgentLastUsedDate");
+					lastUsedDateElement.addAttribute("revision", "0.0");
+					lastUsedDateElement.addElement("id").setText(String.valueOf(agentLastUsedDateId));
+					if (lastUsedDate != null)
+						lastUsedDateElement.addElement("value").setText(lastUsedDate);
+					agentLastUsedDateId++;
+					
+					var tokenElement = element.element("token");
+					var tokenId = Long.valueOf(tokenElement.getTextTrim());
+					if (!agentTokenIds.remove(tokenId)) {
+						tokenId = ++maxAgentTokenId;
+						tokenElement.setText(String.valueOf(tokenId));
+						var agentTokenElement = partialAgentTokensElement.addElement("io.onedev.server.model.AgentToken");
+						agentTokenElement.addAttribute("revision", "0.0");
+						agentTokenElement.addElement("id").setText(String.valueOf(tokenId));
+						agentTokenElement.addElement("value").setText(UUID.randomUUID().toString());
+					} 
+				}
+				dom.writeToFile(file, false);
+			}
+			agentLastUsedDatesDom.writeToFile(agentLastUsedDatesFile, true);
+			partialAgentTokensDom.writeToFile(partialAgentTokensFile, true);
+		}
+		
+	}
+	
 }

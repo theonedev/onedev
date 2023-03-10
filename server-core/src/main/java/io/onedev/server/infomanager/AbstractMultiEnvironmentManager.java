@@ -4,8 +4,11 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.system.SystemStopping;
+import jetbrains.exodus.backup.BackupStrategy;
+import jetbrains.exodus.backup.VirtualFileDescriptor;
 import jetbrains.exodus.env.Environment;
 
 public abstract class AbstractMultiEnvironmentManager extends AbstractEnvironmentManager {
@@ -43,4 +46,21 @@ public abstract class AbstractMultiEnvironmentManager extends AbstractEnvironmen
 		}
 	}
 
+	public void export(String envKey, File targetDir) {
+		BackupStrategy backupStrategy = getEnv(envKey).getBackupStrategy();
+		try {
+			backupStrategy.beforeBackup();
+			try {
+				for (VirtualFileDescriptor descriptor : backupStrategy.getContents()) {
+					FileUtils.copyFileToDirectory(((BackupStrategy.FileDescriptor) descriptor).getFile(), targetDir);
+				}
+			} finally {
+				backupStrategy.afterBackup();
+			}
+			writeVersion(targetDir);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 }
