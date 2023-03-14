@@ -229,8 +229,6 @@ public class PullRequestResource {
 
 		PullRequestUpdate update = new PullRequestUpdate();
 		update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
-		request.getUpdates().add(update);
-		request.setUpdates(request.getUpdates());
 		update.setRequest(request);
 		update.setHeadCommitHash(source.getObjectName());
 		update.setTargetHeadCommitHash(request.getTarget().getObjectName());
