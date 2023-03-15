@@ -27,7 +27,6 @@ import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.validation.Validatable;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -736,7 +735,7 @@ public class ImportServer implements Serializable, Validatable {
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		Client client = ClientBuilder.newClient();
-		client.register(OAuth2ClientSupport.feature(accessToken));
+		client.register(new AccessTokenFilter(accessToken));
 		try {
 			String apiEndpoint = getApiEndpoint("/user");
 			WebTarget target = client.target(apiEndpoint);
