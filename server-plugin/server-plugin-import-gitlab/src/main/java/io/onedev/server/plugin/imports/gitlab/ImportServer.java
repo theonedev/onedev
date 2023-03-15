@@ -7,7 +7,11 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
@@ -16,15 +20,11 @@ import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.*;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
@@ -156,7 +156,10 @@ public class ImportServer implements Serializable, Validatable {
 	private Client newClient() {
 		Client client = ClientBuilder.newClient();
 		client.property(ClientProperties.FOLLOW_REDIRECTS, true);
-		client.register(OAuth2ClientSupport.feature(getAccessToken()));
+		
+		// Pass token with PRIVATE-TOKEN header to be compatible with old GitLab version
+		//client.register(OAuth2ClientSupport.feature(getAccessToken()));
+		client.register(new AccessTokenFilter(getAccessToken()));
 		return client;
 	}
 	

@@ -1,18 +1,16 @@
 package io.onedev.server.util;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TaskLogger;
+import java.util.List;
 
 public class JerseyUtils {
 
