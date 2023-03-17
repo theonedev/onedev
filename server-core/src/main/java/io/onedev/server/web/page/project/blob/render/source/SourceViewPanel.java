@@ -15,7 +15,9 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
+import io.onedev.server.util.diff.DiffUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -488,10 +490,22 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							convertToJson(range), context.getPositionUrl(position), SecurityUtils.getUser()!=null);
 					target.appendJavaScript(script);
 					break;
-				case "addComment": 
+				case "addComment":
 					Preconditions.checkNotNull(SecurityUtils.getUser());
-					
 					range = getRange(params, "param1", "param2", "param3", "param4");
+					var lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
+					var containTooLongLines = false;
+					for (var i=range.getFromRow(); i<=range.getToRow(); i++) {
+						if (lines.get(i).length() > DiffUtils.MAX_LINE_LEN) {
+							containTooLongLines = true;
+							break;
+						}
+					}
+					if (containTooLongLines) {
+						Session.get().error("Unable to comment as line is too long");
+						break;
+					}
+					
 					commentContainer.setDefaultModelObject(range);
 					
 					Fragment fragment = new Fragment("body", "newCommentFrag", SourceViewPanel.this);
