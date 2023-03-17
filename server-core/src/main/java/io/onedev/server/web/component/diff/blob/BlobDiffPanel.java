@@ -27,6 +27,8 @@ import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.util.DiffPlanarRange;
 
+import static io.onedev.server.util.diff.DiffUtils.MAX_LINE_LEN;
+
 @SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel {
 
@@ -136,6 +138,9 @@ public class BlobDiffPanel extends Panel {
 				} else if (change.getOldText() != null && change.getNewText() != null) {
 					if (change.getOldText().getLines().size() + change.getNewText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 						add(newFragment("Unable to diff as the file is too large.", true));
+					} else if (change.getOldText().getLines().stream().anyMatch(it->it.length()>MAX_LINE_LEN)
+							|| change.getOldText().getLines().stream().anyMatch(it->it.length()>MAX_LINE_LEN)) {
+						add(newFragment("Unable to diff as some line is too long.", true));
 					} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
 						add(newFragment("Diff is too large to be displayed.", true));
 					} else if (change.getAdditions() + change.getDeletions() == 0) {

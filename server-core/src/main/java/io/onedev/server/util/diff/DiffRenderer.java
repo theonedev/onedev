@@ -1,13 +1,11 @@
 package io.onedev.server.util.diff;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.util.diff.DiffMatchPatch.Operation;
+import javax.annotation.Nullable;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class DiffRenderer {
 

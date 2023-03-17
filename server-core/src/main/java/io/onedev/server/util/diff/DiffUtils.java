@@ -23,6 +23,8 @@ public class DiffUtils {
 
 	public static final int MAX_DIFF_SIZE = 65535;
 	
+	public static final int MAX_LINE_LEN = 10000;
+	
 	private static final Pattern WORD_PATTERN = Pattern.compile("\\w+");
 	
 	public static List<String> getLines(@Nullable String text) {
