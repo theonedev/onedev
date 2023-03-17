@@ -305,6 +305,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		request.setNumberScope(request.getTargetProject().getForkRoot());
 		request.setNumber(numberGenerator.getNextSequence(request.getNumberScope()));
 		request.setSubmitDate(new Date());
+		for (var update: request.getUpdates())
+			update.setDate(new DateTime().plusMillis(1).toDate());
 		
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setUser(request.getSubmitter());

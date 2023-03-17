@@ -232,7 +232,6 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 					request.setStatus(Status.MERGED);
 	
 				PullRequestUpdate update = new PullRequestUpdate();
-				update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
 				request.getUpdates().add(update);
 				request.setUpdates(request.getUpdates());
 				update.setRequest(request);
