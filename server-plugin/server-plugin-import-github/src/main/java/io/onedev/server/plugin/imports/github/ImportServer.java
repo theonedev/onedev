@@ -7,6 +7,10 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
@@ -15,17 +19,15 @@ import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.joda.time.format.ISODateTimeFormat;
@@ -524,11 +526,24 @@ public class ImportServer implements Serializable, Validatable {
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
 			ImportResult result = new ImportResult();
-			for (ProjectMapping projectMapping: repositories.getProjectMappings()) {
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.setup(projectMapping.getOneDevProject());
+			for (var gitHubRepository: repositories.getImportRepositories()) {
+				String oneDevProjectPath;
+				if (repositories.getParentOneDevProject() != null)
+					oneDevProjectPath = repositories.getParentOneDevProject() + "/" + gitHubRepository;
+				else
+					oneDevProjectPath = gitHubRepository;
+
+				logger.log("Importing from '" + gitHubRepository + "' to '" + oneDevProjectPath + "'...");
 				
-				String apiEndpoint = getApiEndpoint("/repos/" + projectMapping.getGitHubRepo());
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+				Project project = projectManager.setup(oneDevProjectPath);
+
+				if (!project.isNew() && !SecurityUtils.canManage(project)) {
+					throw new UnauthorizedException("Import target already exists. " +
+							"You need to have project management privilege over it");
+				}
+				
+				String apiEndpoint = getApiEndpoint("/repos/" + gitHubRepository);
 				JsonNode repoNode = get(client, apiEndpoint, logger);
 				
 				project.setDescription(repoNode.get("description").asText(null));
@@ -538,18 +553,11 @@ public class ImportServer implements Serializable, Validatable {
 					project.setDefaultRole(option.getPublicRole());
 
 				if (project.isNew() || project.getDefaultBranch() == null) {
-					logger.log("Cloning code from repository " + projectMapping.getGitHubRepo() + "...");
+					logger.log("Cloning code...");
 					URIBuilder builder = new URIBuilder(repoNode.get("clone_url").asText());
 					builder.setUserInfo("git", getAccessToken());
 					
-					SensitiveMasker.push(new SensitiveMasker() {
-
-						@Override
-						public String mask(String text) {
-							return StringUtils.replace(text, getAccessToken(), "******");
-						}
-						
-					});
+					SensitiveMasker.push(text -> StringUtils.replace(text, getAccessToken(), "******"));
 					try {
 						if (dryRun) { 
 							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();
@@ -566,8 +574,8 @@ public class ImportServer implements Serializable, Validatable {
 				}
 
 				if (option.getIssueImportOption() != null) {
-					logger.log("Importing milestones from repository " + projectMapping.getGitHubRepo() + "...");
-					apiEndpoint = getApiEndpoint("/repos/" + projectMapping.getGitHubRepo() + "/milestones?state=all");
+					logger.log("Importing milestones...");
+					apiEndpoint = getApiEndpoint("/repos/" + gitHubRepository + "/milestones?state=all");
 					for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) {
 						String milestoneName = milestoneNode.get("title").asText();
 						Milestone milestone = project.getMilestone(milestoneName);
@@ -589,9 +597,9 @@ public class ImportServer implements Serializable, Validatable {
 						}
 					}
 					
-					logger.log("Importing issues from repository " + projectMapping.getGitHubRepo() + "...");
-					ImportResult currentResult = importIssues(projectMapping.getGitHubRepo(), 
-							project, option.getIssueImportOption(), users, dryRun, logger);
+					logger.log("Importing issues...");
+					ImportResult currentResult = importIssues(gitHubRepository, project, option.getIssueImportOption(), 
+							users, dryRun, logger);
 					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 					result.nonExistentMilestones.addAll(currentResult.nonExistentMilestones);
 					result.unmappedIssueLabels.addAll(currentResult.unmappedIssueLabels);

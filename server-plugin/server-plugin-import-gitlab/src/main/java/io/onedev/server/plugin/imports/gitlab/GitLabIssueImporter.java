@@ -44,9 +44,9 @@ public class GitLabIssueImporter implements IssueImporter {
 
 		@Override
 		protected ImportProject newSetting() {
-			ImportProject repository = new ImportProject();
-			repository.server = serverStep.getSetting();
-			return repository;
+			ImportProject project = new ImportProject();
+			project.server = serverStep.getSetting();
+			return project;
 		}
 		
 	};

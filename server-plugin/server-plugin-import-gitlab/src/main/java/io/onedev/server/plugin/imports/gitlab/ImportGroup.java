@@ -1,12 +1,12 @@
 package io.onedev.server.plugin.imports.gitlab;
 
-import java.io.Serializable;
-import java.util.Map;
-
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.web.editable.BeanEditor;
+
+import java.io.Serializable;
+import java.util.Map;
 
 @Editable
 public class ImportGroup implements Serializable {
@@ -35,15 +35,6 @@ public class ImportGroup implements Serializable {
 		BeanEditor editor = ComponentContext.get().getComponent().findParent(BeanEditor.class);
 		ImportGroup setting = (ImportGroup) editor.getModelObject();
 		return setting.server.listGroups();
-	}
-	
-	@Editable(order=200, description="Whether or not to include forked repositories")
-	public boolean isIncludeForks() {
-		return includeForks;
-	}
-
-	public void setIncludeForks(boolean includeForks) {
-		this.includeForks = includeForks;
 	}
 	
 }

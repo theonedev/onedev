@@ -1,13 +1,12 @@
 package io.onedev.server.plugin.imports.bitbucketcloud;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.web.util.ImportStep;
+
+import java.io.Serializable;
+import java.util.List;
 
 public class BitbucketProjectImporter implements ProjectImporter {
 
@@ -29,24 +28,6 @@ public class BitbucketProjectImporter implements ProjectImporter {
 		
 	};
 	
-	private final ImportStep<ImportWorkspace> workspaceStep = new ImportStep<ImportWorkspace>() {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public String getTitle() {
-			return "Choose workspace";
-		}
-
-		@Override
-		protected ImportWorkspace newSetting() {
-			ImportWorkspace workspace = new ImportWorkspace();
-			workspace.server = serverStep.getSetting();
-			return workspace;
-		}
-		
-	};
-	
 	private final ImportStep<ImportRepositories> repositoriesStep = new ImportStep<ImportRepositories>() {
 
 		private static final long serialVersionUID = 1L;
@@ -59,15 +40,7 @@ public class BitbucketProjectImporter implements ProjectImporter {
 		@Override
 		protected ImportRepositories newSetting() {
 			ImportRepositories repositories = new ImportRepositories();
-			String workspace = workspaceStep.getSetting().getWorkspace();
-			for (String repository: serverStep.getSetting().listRepositories(
-					workspace, workspaceStep.getSetting().isIncludeForks())) {
-				ProjectMapping projectMapping = new ProjectMapping();
-				projectMapping.setBitbucketRepo(repository);
-				projectMapping.setOneDevProject(repository);
-				repositories.getProjectMappings().add(projectMapping);
-			}
-			
+			repositories.server = serverStep.getSetting();
 			return repositories;
 		}
 		
@@ -103,7 +76,7 @@ public class BitbucketProjectImporter implements ProjectImporter {
 
 	@Override
 	public List<ImportStep<? extends Serializable>> getSteps() {
-		return Lists.newArrayList(serverStep, workspaceStep, repositoriesStep, optionStep);
+		return Lists.newArrayList(serverStep, repositoriesStep, optionStep);
 	}
 
 }

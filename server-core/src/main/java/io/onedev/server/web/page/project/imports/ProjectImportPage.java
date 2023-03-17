@@ -1,16 +1,5 @@
 package io.onedev.server.web.page.project.imports;
 
-import java.util.concurrent.Callable;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.ProjectImporter;
@@ -22,6 +11,16 @@ import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.component.wizard.WizardPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.ProjectListPage;
+import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.util.concurrent.Callable;
 
 @SuppressWarnings("serial")
 public class ProjectImportPage extends LayoutPage {

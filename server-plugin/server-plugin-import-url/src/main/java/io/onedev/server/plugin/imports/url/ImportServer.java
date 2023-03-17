@@ -89,26 +89,28 @@ public class ImportServer implements Serializable, Validatable {
 				projectPath = deriveProjectPath(getUrl());
 			if (projectPath == null)
 				throw new ExplicitException("Invalid url: " + getUrl());
+
+			logger.log("Importing from '" + getUrl() + "' to '" + projectPath + "'...");
 			
 			Project project = getProjectManager().setup(projectPath);
 
+			if (!project.isNew() && !SecurityUtils.canManage(project)) {
+				throw new UnauthorizedException("Import target already exists. " +
+						"You need to have project management privilege over it");
+			}
+			
 			if (project.isNew() || project.getDefaultBranch() == null) {
-				logger.log("Cloning code from " + getUrl() + "...");
+				logger.log("Cloning code...");
 				
 				URIBuilder builder = new URIBuilder(getUrl());
 				if (authentication != null)
 					builder.setUserInfo(authentication.getUserName(), authentication.getPassword());
 				
-				SensitiveMasker.push(new SensitiveMasker() {
-
-					@Override
-					public String mask(String text) {
-						if (authentication != null)
-							return StringUtils.replace(text, authentication.getPassword(), "******");
-						else
-							return text;
-					}
-					
+				SensitiveMasker.push(text -> {
+					if (authentication != null)
+						return StringUtils.replace(text, authentication.getPassword(), "******");
+					else
+						return text;
 				});
 				try {
 					if (dryRun) {
@@ -139,29 +141,14 @@ public class ImportServer implements Serializable, Validatable {
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
 		
-		if (getUrl() != null) {
-			if (!getUrl().startsWith("http://") && !getUrl().startsWith("https://")) {
-				isValid = false;
-				context.buildConstraintViolationWithTemplate("Only http(s) protocol is supported")
-						.addPropertyNode("url").addConstraintViolation();
-			}
-		}
-		
-		if (getProject() != null) {
-			try {
-				Project project = getProjectManager().setup(getProject());
-				if (!project.isNew() && !SecurityUtils.canManage(project))
-					throw new UnauthorizedException("Project management permission is required");
-			} catch (UnauthorizedException e) {
-				context.buildConstraintViolationWithTemplate(e.getMessage())
-						.addPropertyNode("project").addConstraintViolation();
-				isValid = false;
-			}
+		if (getUrl() != null && !getUrl().startsWith("http://") && !getUrl().startsWith("https://")) {
+			isValid = false;
+			context.buildConstraintViolationWithTemplate("Only http(s) protocol is supported")
+					.addPropertyNode("url").addConstraintViolation();
 		}
 		
 		if (!isValid)
 			context.disableDefaultConstraintViolation();
-		
 		return isValid;
 	}
 

@@ -6,17 +6,19 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
@@ -173,11 +175,25 @@ public class ImportServer implements Serializable, Validatable {
 	String importProjects(ImportRepositories repositories, ImportOption option, boolean dryRun, TaskLogger logger) {
 		Client client = newClient();
 		try {
-			for (ProjectMapping projectMapping: repositories.getProjectMappings()) {
-				String apiEndpoint = getApiEndpoint("/repositories/" + projectMapping.getBitbucketRepo());
-				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
+			for (var bitbucketRepository: repositories.getImportRepositories()) {
+				String oneDevProjectPath;
+				if (repositories.getParentOneDevProject() != null)
+					oneDevProjectPath = repositories.getParentOneDevProject() + "/" + bitbucketRepository;
+				else
+					oneDevProjectPath = bitbucketRepository;
+
+				logger.log("Importing from '" + bitbucketRepository + "' to '" + oneDevProjectPath + "'...");
+						
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);                               
-				Project project = projectManager.setup(projectMapping.getOneDevProject());
+				Project project = projectManager.setup(oneDevProjectPath);
+
+				if (!project.isNew() && !SecurityUtils.canManage(project)) {
+					throw new UnauthorizedException("Import target already exists. " +
+							"You need to have project management privilege over it");
+				}
+
+				String apiEndpoint = getApiEndpoint("/repositories/" + bitbucketRepository);
+				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
 				
 				project.setDescription(repoNode.get("description").asText(null));
 				
@@ -187,7 +203,7 @@ public class ImportServer implements Serializable, Validatable {
 
 				boolean newlyCreated = project.isNew();
 				if (newlyCreated || project.getDefaultBranch() == null) {
-					logger.log("Cloning code from repository " + projectMapping.getBitbucketRepo() + "...");
+					logger.log("Cloning code...");
 					
 					String cloneUrl = null;
 					for (JsonNode cloneNode: repoNode.get("links").get("clone")) {
@@ -202,14 +218,7 @@ public class ImportServer implements Serializable, Validatable {
 					URIBuilder builder = new URIBuilder(cloneUrl);
 					builder.setUserInfo(getUserName(), getAppPassword());
 					
-					SensitiveMasker.push(new SensitiveMasker() {
-
-						@Override
-						public String mask(String text) {
-							return StringUtils.replace(text, getAppPassword(), "******");
-						}
-						
-					});
+					SensitiveMasker.push(text -> StringUtils.replace(text, getAppPassword(), "******"));
 					try {
 						if (dryRun) {
 							new LsRemoteCommand(builder.build().toString()).refs("HEAD").quiet(true).run();

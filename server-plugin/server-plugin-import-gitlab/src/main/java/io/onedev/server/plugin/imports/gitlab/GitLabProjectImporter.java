@@ -1,14 +1,12 @@
 package io.onedev.server.plugin.imports.gitlab;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.web.util.ImportStep;
+
+import java.io.Serializable;
+import java.util.List;
 
 public class GitLabProjectImporter implements ProjectImporter {
 
@@ -30,24 +28,6 @@ public class GitLabProjectImporter implements ProjectImporter {
 
 	};
 	
-	private final ImportStep<ImportGroup> groupStep = new ImportStep<ImportGroup>() {
-
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public String getTitle() {
-			return "Choose group";
-		}
-
-		@Override
-		protected ImportGroup newSetting() {
-			ImportGroup group = new ImportGroup();
-			group.server = serverStep.getSetting();
-			return group;
-		}
-		
-	};
-	
 	private final ImportStep<ImportProjects> projectsStep = new ImportStep<ImportProjects>() {
 
 		private static final long serialVersionUID = 1L;
@@ -60,14 +40,7 @@ public class GitLabProjectImporter implements ProjectImporter {
 		@Override
 		protected ImportProjects newSetting() {
 			ImportProjects projects = new ImportProjects();
-			String groupId = groupStep.getSetting().getGroupId();
-			for (String project: serverStep.getSetting().listProjects(
-					groupId, groupStep.getSetting().isIncludeForks())) {
-				ProjectMapping projectMapping = new ProjectMapping();
-				projectMapping.setGitLabProject(project);
-				projectMapping.setOneDevProject(project);
-				projects.getProjectMappings().add(projectMapping);
-			}
+			projects.server = serverStep.getSetting();
 			return projects;
 		}
 		
@@ -85,9 +58,7 @@ public class GitLabProjectImporter implements ProjectImporter {
 		@Override
 		protected ProjectImportOption newSetting() {
 			ProjectImportOption option = new ProjectImportOption();
-			List<String> gitLabProjects = projectsStep.getSetting().getProjectMappings().stream()
-					.map(it->it.getGitLabProject()).collect(Collectors.toList());
-			option.setIssueImportOption(serverStep.getSetting().buildIssueImportOption(gitLabProjects));
+			option.setIssueImportOption(serverStep.getSetting().buildIssueImportOption(projectsStep.getSetting().getImportProjects()));
 			return option;
 		}
 		
@@ -106,7 +77,7 @@ public class GitLabProjectImporter implements ProjectImporter {
 
 	@Override
 	public List<ImportStep<? extends Serializable>> getSteps() {
-		return Lists.newArrayList(serverStep, groupStep, projectsStep, optionStep);
+		return Lists.newArrayList(serverStep, projectsStep, optionStep);
 	}
 		
 }

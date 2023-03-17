@@ -22,10 +22,12 @@ import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.*;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.validation.Validatable;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -248,11 +250,26 @@ public class ImportServer implements Serializable, Validatable {
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
 			ImportResult result = new ImportResult();
-			for (ProjectMapping projectMapping: projects.getProjectMappings()) {
-				String apiEndpoint = getApiEndpoint("/projects/" + projectMapping.getGitLabProject().replace("/", "%2F"));
+			for (var gitLabProject: projects.getImportProjects()) {
+				String oneDevProjectPath;
+				if (projects.getParentOneDevProject() != null)
+					oneDevProjectPath = projects.getParentOneDevProject() + "/" + gitLabProject;
+				else 
+					oneDevProjectPath = gitLabProject;
+				
+				logger.log("Importing from '" + gitLabProject + "' to '" + oneDevProjectPath + "'...");
+
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+				Project project = projectManager.setup(oneDevProjectPath);
+				
+				if (!project.isNew() && !SecurityUtils.canManage(project)) {
+					throw new UnauthorizedException("Import target already exists. " +
+							"You need to have project management privilege over it");
+				}
+
+				String apiEndpoint = getApiEndpoint("/projects/" + gitLabProject.replace("/", "%2F"));
 				JsonNode projectNode = JerseyUtils.get(client, apiEndpoint, logger);
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.setup(projectMapping.getOneDevProject());
+
 				project.setDescription(projectNode.get("description").asText(null));
 				project.setIssueManagement(projectNode.get("issues_enabled").asBoolean());
 				
@@ -261,7 +278,7 @@ public class ImportServer implements Serializable, Validatable {
 					project.setDefaultRole(option.getPublicRole());
 				
 				if (project.isNew() || project.getDefaultBranch() == null) {
-					logger.log("Cloning code from project " + projectMapping.getGitLabProject() + "...");
+					logger.log("Cloning code...");
 					URIBuilder builder = new URIBuilder(projectNode.get("http_url_to_repo").asText());
 					builder.setUserInfo("git", getAccessToken());
 					
@@ -290,9 +307,9 @@ public class ImportServer implements Serializable, Validatable {
 
 				if (option.getIssueImportOption() != null) {
 					List<Milestone> milestones = new ArrayList<>();
-					logger.log("Importing milestones from project " + projectMapping.getGitLabProject() + "...");
+					logger.log("Importing milestones...");
 					apiEndpoint = getApiEndpoint("/projects/" 
-							+ projectMapping.getGitLabProject().replace("/", "%2F") + "/milestones");
+							+ gitLabProject.replace("/", "%2F") + "/milestones");
 					for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) 
 						milestones.add(getMilestone(milestoneNode));
 					JsonNode namespaceNode = projectNode.get("namespace");
@@ -310,9 +327,9 @@ public class ImportServer implements Serializable, Validatable {
 						}
 					}
 					
-					logger.log("Importing issues from project " + projectMapping.getGitLabProject() + "...");
-					ImportResult currentResult = importIssues(projectMapping.getGitLabProject(), 
-							project, option.getIssueImportOption(), users, dryRun, logger);
+					logger.log("Importing issues...");
+					ImportResult currentResult = importIssues(gitLabProject, project, option.getIssueImportOption(), 
+							users, dryRun, logger);
 					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 					result.nonExistentMilestones.addAll(currentResult.nonExistentMilestones);
 					result.unmappedIssueLabels.addAll(currentResult.unmappedIssueLabels);

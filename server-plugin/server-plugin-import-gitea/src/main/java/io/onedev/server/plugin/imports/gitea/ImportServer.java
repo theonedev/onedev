@@ -7,6 +7,10 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
@@ -15,18 +19,16 @@ import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.joda.time.format.ISODateTimeFormat;
@@ -474,11 +476,26 @@ public class ImportServer implements Serializable, Validatable {
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
 			ImportResult result = new ImportResult();
-			for (ProjectMapping projectMapping: repositories.getProjectMappings()) {
-				String apiEndpoint = getApiEndpoint("/repos/" + projectMapping.getGiteaRepo());
-				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
+			for (var giteaRepository: repositories.getImportRepositories()) {
+				String oneDevProjectPath;
+				if (repositories.getParentOneDevProject() != null)
+					oneDevProjectPath = repositories.getParentOneDevProject() + "/" + giteaRepository;
+				else
+					oneDevProjectPath = giteaRepository;
+
+				logger.log("Importing from '" + giteaRepository + "' to '" + oneDevProjectPath + "'...");
+
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.setup(projectMapping.getOneDevProject());
+				Project project = projectManager.setup(oneDevProjectPath);
+
+				if (!project.isNew() && !SecurityUtils.canManage(project)) {
+					throw new UnauthorizedException("Import target already exists. " +
+							"You need to have project management privilege over it");
+				}
+
+				String apiEndpoint = getApiEndpoint("/repos/" + giteaRepository);
+				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
+
 				project.setDescription(repoNode.get("description").asText(null));
 				project.setIssueManagement(repoNode.get("has_issues").asBoolean());
 				
@@ -487,7 +504,7 @@ public class ImportServer implements Serializable, Validatable {
 					project.setDefaultRole(option.getPublicRole());
 
 				if (project.isNew() || project.getDefaultBranch() == null) {
-					logger.log("Cloning code from repository " + projectMapping.getGiteaRepo() + "...");
+					logger.log("Cloning code...");
 					
 					URIBuilder builder = new URIBuilder(repoNode.get("clone_url").asText());
 					builder.setUserInfo("git", getAccessToken());
@@ -516,8 +533,8 @@ public class ImportServer implements Serializable, Validatable {
 				}
 
 				if (option.getIssueImportOption() != null) {
-					logger.log("Importing milestones from repository " + projectMapping.getGiteaRepo() + "...");
-					apiEndpoint = getApiEndpoint("/repos/" + projectMapping.getGiteaRepo() + "/milestones?state=all");
+					logger.log("Importing milestones...");
+					apiEndpoint = getApiEndpoint("/repos/" + giteaRepository + "/milestones?state=all");
 					for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) {
 						String milestoneName = milestoneNode.get("title").asText();
 						Milestone milestone = project.getMilestone(milestoneName);
@@ -539,8 +556,8 @@ public class ImportServer implements Serializable, Validatable {
 						}
 					}
 					
-					logger.log("Importing issues from repository " + projectMapping.getGiteaRepo() + "...");
-					ImportResult currentResult = importIssues(projectMapping.getGiteaRepo(), 
+					logger.log("Importing issues...");
+					ImportResult currentResult = importIssues(giteaRepository, 
 							project, option.getIssueImportOption(), users, dryRun, logger);
 					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 					result.nonExistentMilestones.addAll(currentResult.nonExistentMilestones);

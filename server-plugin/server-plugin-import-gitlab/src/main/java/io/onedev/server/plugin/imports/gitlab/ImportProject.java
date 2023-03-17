@@ -1,14 +1,13 @@
 package io.onedev.server.plugin.imports.gitlab;
 
-import java.util.List;
-
-import javax.validation.constraints.NotEmpty;
-
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
+
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Editable
 public class ImportProject extends ImportGroup {
@@ -26,11 +25,6 @@ public class ImportProject extends ImportGroup {
 
 	public void setProject(String project) {
 		this.project = project;
-	}
-	
-	@Override
-	public boolean isIncludeForks() {
-		return super.isIncludeForks();
 	}
 	
 	@SuppressWarnings("unused")

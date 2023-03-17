@@ -40,12 +40,7 @@ public class YouTrackProjectImporter implements ProjectImporter {
 		@Override
 		protected ImportProjects newSetting() {
 			ImportProjects projects = new ImportProjects();
-			for (String project: serverStep.getSetting().listProjects()) {
-				ProjectMapping mapping = new ProjectMapping();
-				mapping.setYouTrackProject(project);
-				mapping.setOneDevProject(project.replace(' ', '-'));
-				projects.getProjectMappings().add(mapping);
-			}
+			projects.server = serverStep.getSetting();
 			return projects;
 		}
 		

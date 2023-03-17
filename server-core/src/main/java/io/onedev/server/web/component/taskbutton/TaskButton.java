@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -169,16 +170,21 @@ public abstract class TaskButton extends AjaxButton {
 				};				
 				try {
 					String feedback = String.format(
-						"<div class='task-result alert-notice text-break alert alert-light-info'>%s</div>", 
-						runTask(logger));
+							"<div class='task-result alert-notice text-break alert alert-light-info'>%s</div>",
+							runTask(logger));
 					return new TaskResult(true, feedback);
 				} catch (Exception e) {	
 					if (ExceptionUtils.find(e, FailedException.class) == null) {
 						ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
-						if (explicitException != null)
+						if (explicitException != null) {
 							logger.error(explicitException.getMessage());
-						else
-							logger.error(null, e);
+						} else {
+							UnauthorizedException unauthorizedException = ExceptionUtils.find(e, UnauthorizedException.class);
+							if (unauthorizedException != null && unauthorizedException.getMessage() != null)
+								logger.error(unauthorizedException.getMessage());
+							else								
+								logger.error(null, e);
+						}
 					}
 					String suggestedSolution = ExceptionUtils.suggestSolution(e);
 					if (suggestedSolution != null)

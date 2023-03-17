@@ -1,26 +1,43 @@
 package io.onedev.server.plugin.imports.jiracloud;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
+import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.ReferenceMigrator;
+import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.project.issue.IssuesImported;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.LastActivity;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.JerseyUtils;
+import io.onedev.server.util.JerseyUtils.PageDataConsumer;
+import io.onedev.server.util.Pair;
+import io.onedev.server.validation.Validatable;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -32,50 +49,16 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import io.onedev.server.event.ListenerRegistry;
-import io.onedev.server.event.project.issue.IssuesImported;
-import org.apache.http.client.utils.URIBuilder;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.unbescape.html.HtmlEscape;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
-import io.onedev.server.attachment.AttachmentManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entityreference.ReferenceMigrator;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.IssueField;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.JerseyUtils;
-import io.onedev.server.util.JerseyUtils.PageDataConsumer;
-import io.onedev.server.util.Pair;
-import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Editable
 @ClassValidating
@@ -339,26 +322,38 @@ public class ImportServer implements Serializable, Validatable {
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
 			ImportResult result = new ImportResult();
-			for (ProjectMapping projectMapping: projects.getProjectMappings()) {
-				String jiraProject = projectMapping.getJiraProject();
+			for (var jiraProject: projects.getImportProjects()) {
+				String oneDevProjectPath;
+				if (projects.getParentOneDevProject() != null)
+					oneDevProjectPath = projects.getParentOneDevProject() + "/" + jiraProject;
+				else
+					oneDevProjectPath = jiraProject;
+
+				logger.log("Importing from '" + jiraProject + "' to '" + oneDevProjectPath + "'...");
+				
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
+				Project project = projectManager.setup(oneDevProjectPath);
+
+				if (!project.isNew() && !SecurityUtils.canManage(project)) {
+					throw new UnauthorizedException("Import target already exists. " +
+							"You need to have project management privilege over it");
+				}
+
 				JsonNode projectNode = projectNodes.get(jiraProject);
 				if (projectNode == null)
 					throw new ExplicitException("Unable to find project: " + jiraProject);
 
 				String apiEndpoint = getApiEndpoint("/project/" + projectNode.get("id").asText());
-				
+
 				// Get more detail project information
 				projectNode = JerseyUtils.get(client, apiEndpoint, logger);
-				
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
-				Project project = projectManager.setup(projectMapping.getOneDevProject());
-				
+
 				project.setDescription(projectNode.get("description").asText(null));
 				
 				if (!dryRun && project.isNew()) 
 					projectManager.create(project);
 				
-				logger.log("Importing issues from project " + jiraProject + "...");
+				logger.log("Importing issues...");
 				ImportResult currentResult = importIssues(projectNode, project, option, users, dryRun, logger);
 				result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 				result.errorAttachments.addAll(currentResult.errorAttachments);
