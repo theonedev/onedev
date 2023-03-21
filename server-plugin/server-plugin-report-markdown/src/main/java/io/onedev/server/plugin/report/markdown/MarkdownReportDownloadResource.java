@@ -45,8 +45,8 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		Long projectId = params.get(PARAM_PROJECT).toLong();
-		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+		String projectPath = params.get(PARAM_PROJECT).toString();
+		Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
 		
 		Long buildNumber = params.get(PARAM_BUILD).toOptionalLong();
 		
