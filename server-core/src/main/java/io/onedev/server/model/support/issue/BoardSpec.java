@@ -343,7 +343,7 @@ public class BoardSpec implements Serializable {
 		FieldSpec fieldSpec = issueSetting.getFieldSpec(getIdentifyField());
 		if (fieldSpec instanceof UserChoiceField) {
 			for (int i=0; i<getColumns().size(); i++) {
-				if (getColumns().get(i).equals(oldName))
+				if (oldName.equals(getColumns().get(i)))
 					getColumns().set(i, newName);
 			}
 		}
@@ -353,7 +353,7 @@ public class BoardSpec implements Serializable {
 		FieldSpec fieldSpec = issueSetting.getFieldSpec(getIdentifyField());
 		if (fieldSpec instanceof UserChoiceField) {
 			for (Iterator<String> it = getColumns().iterator(); it.hasNext();) {
-				if (it.next().equals(userName))
+				if (userName.equals(it.next()))
 					it.remove();
 			}
 		}
