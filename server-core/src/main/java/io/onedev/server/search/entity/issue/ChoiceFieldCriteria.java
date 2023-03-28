@@ -56,14 +56,18 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		if (allowMultiple) 
-			return ((List<String>)fieldValue).contains(value);
-		else if (operator == IssueQueryLexer.Is)
-			return Objects.equals(fieldValue, value);
-		else if (operator == IssueQueryLexer.IsGreaterThan)
-			return issue.getFieldOrdinal(getFieldName(), (String)fieldValue) > ordinal;
-		else
-			return issue.getFieldOrdinal(getFieldName(), (String)fieldValue) < ordinal;
+		if (fieldValue != null) {
+			if (allowMultiple)
+				return ((List<String>) fieldValue).contains(value);
+			else if (operator == IssueQueryLexer.Is)
+				return Objects.equals(fieldValue, value);
+			else if (operator == IssueQueryLexer.IsGreaterThan)
+				return issue.getFieldOrdinal(getFieldName(), (String) fieldValue) > ordinal;
+			else
+				return issue.getFieldOrdinal(getFieldName(), (String) fieldValue) < ordinal;
+		} else {
+			return false;
+		}
 	}
 
 	@Override

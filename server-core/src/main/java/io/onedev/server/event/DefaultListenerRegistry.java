@@ -12,6 +12,8 @@ import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -25,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultListenerRegistry.class);
+	
 	private final ProjectManager projectManager;
 	
 	private final TransactionManager transactionManager;
@@ -120,34 +124,19 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 						private static final long serialVersionUID = 1L;
 
 						@Override
-						public Void call() throws Exception {
-							String lockName = projectEvent.getLockName();
-							if (lockName != null) {
-								LockUtils.call(lockName, true, new Callable<Void>() {
-
-									@Override
-									public Void call() throws Exception {
-										sessionManager.run(new Runnable() {
-
-											@Override
-											public void run() {
-												invokeListeners(event);
-											}
-
-										});
+						public Void call() {
+							try {
+								String lockName = projectEvent.getLockName();
+								if (lockName != null) {
+									LockUtils.call(lockName, true, (Callable<Void>) () -> {
+										sessionManager.run(() -> invokeListeners(event));
 										return null;
-									}
-
-								});
-							} else {
-								sessionManager.run(new Runnable() {
-
-									@Override
-									public void run() {
-										invokeListeners(event);
-									}
-
-								});
+									});
+								} else {
+									sessionManager.run(() -> invokeListeners(event));
+								}
+							} catch (Exception e) {
+								logger.error("Error invoking listeners", e);
 							}
 							return null;
 						}
