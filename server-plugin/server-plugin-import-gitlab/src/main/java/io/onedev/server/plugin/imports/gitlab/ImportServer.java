@@ -83,7 +83,8 @@ public class ImportServer implements Serializable, Validatable {
 	}
 
 	@Editable(order=100, name="GitLab Personal Access Token", description="GitLab personal access token should be generated with "
-			+ "scope <b>read_api</b>, <b>read_user</b> and <b>read_repository</b>")
+			+ "scope <b>read_api</b>, <b>read_user</b> and <b>read_repository</b>. Note that only groups/projects owned by " +
+			"user of specified access token will be listed")
 	@Password
 	@NotEmpty
 	public String getAccessToken() {
