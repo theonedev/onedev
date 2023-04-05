@@ -120,7 +120,8 @@ public abstract class FieldSpec extends InputSpec {
 		return (boolean) EditContext.get().getInputValue("allowEmpty");
 	}
 
-	@Editable(order=10000, description="Whether or not to prompt this field upon issue open")
+	@Editable(order=10000, name="Include When Issue is Opened", description="Whether or not to include this field when issue is initially opened. " +
+			"If not, you may include this field later when issue is transited to other states via issue transition rule")
 	public boolean isPromptUponIssueOpen() {
 		return promptUponIssueOpen;
 	}
