@@ -386,8 +386,8 @@ onedev.server = {
 				for (var i in messagesToSent)
 					Wicket.WebSocket.send(messagesToSent[i]);
 				messagesToSent = [];
-			}
-			setTimeout(sendMessages, 0);
+			} 
+			setTimeout(sendMessages, 10);
 		}
 		sendMessages();
 		

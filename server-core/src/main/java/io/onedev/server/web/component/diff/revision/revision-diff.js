@@ -6,7 +6,6 @@ onedev.server.revisionDiff = {
 			var $textDiffCaption = $textDiffContent.parent().prev();
 			$textDiffContent.css("scroll-margin-top", $head.outerHeight() + $textDiffCaption.outerHeight());
 			$textDiffContent[0].scrollIntoView();
-			console.log("shit");
 		}
 	},
 	initComment: function() {
