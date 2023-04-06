@@ -328,7 +328,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		for (IssueTemplate template: getIssueSetting().getIssueTemplates()) {
 			IssueQuery criteria = IssueQuery.parse(getProject(), template.getIssueQuery(), option, true);
 			if (criteria.matches(issue)) 
-				return template.getIssueDescription();
+				return template.getIssueDescription().replace("\r\n", "\n");
 		}
 		return null;
 	}
