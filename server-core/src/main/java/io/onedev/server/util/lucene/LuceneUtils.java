@@ -15,9 +15,11 @@ public class LuceneUtils {
 		StringBuilder builder = new StringBuilder();
 		for (char ch: queryString.toCharArray()) {
 			if (Arrays.contains(SPECIAL_CHARS, ch))
-				builder.append('\\');
-			builder.append(ch);
+				builder.append(" ");
+			else
+				builder.append(ch);
 		}
+		
 		return builder.toString()
 				.replace("AND", "and")
 				.replace("OR", "or")
