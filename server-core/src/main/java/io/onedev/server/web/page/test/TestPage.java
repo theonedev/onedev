@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.test;
 
+import org.apache.wicket.NonResettingRestartException;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;

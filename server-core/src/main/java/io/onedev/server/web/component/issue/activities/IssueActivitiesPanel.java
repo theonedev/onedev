@@ -39,7 +39,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -281,10 +280,10 @@ public abstract class IssueActivitiesPanel extends Panel {
 			add(fragment);
 		} else {
 			Fragment fragment = new Fragment("addComment", "loginToCommentFrag", this);
-			fragment.add(new Link<Void>("login") {
+			fragment.add(new AjaxLink<Void>("login") {
 
 				@Override
-				public void onClick() {
+				public void onClick(AjaxRequestTarget target) {
 					throw new RestartResponseAtInterceptPageException(LoginPage.class);
 				}
 				

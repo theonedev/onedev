@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import io.onedev.commons.utils.StringUtils;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.IWritableRequestParameters;
@@ -30,6 +31,7 @@ import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.QueryParameter;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.flow.ResetResponseException;
 import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
@@ -201,7 +203,10 @@ public class RestartResponseAtInterceptPageException extends ResetResponseExcept
 		if (data != null)
 		{
 			String url = RequestCycle.get().getUrlRenderer().renderUrl(data.originalUrl);
-			throw new NonResettingRestartException(url);
+			Url parsedUrl = Url.parse(url);
+			// Fix issue ##1301
+			parsedUrl.getQueryParameters().removeIf(it -> it.getName().contains(".IBehaviorListener."));
+			throw new NonResettingRestartException(parsedUrl.toString());
 		}
 	}
 
