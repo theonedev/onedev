@@ -18,7 +18,10 @@ public class LuceneUtils {
 				builder.append('\\');
 			builder.append(ch);
 		}
-		return builder.toString();
+		return builder.toString()
+				.replace("AND", "and")
+				.replace("OR", "or")
+				.replace("NOT", "not");
 	}
 	
 	public static boolean isEmpty(Query query) {
