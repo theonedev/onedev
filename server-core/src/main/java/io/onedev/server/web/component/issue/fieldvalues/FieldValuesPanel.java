@@ -1,15 +1,41 @@
 package io.onedev.server.web.component.issue.fieldvalues;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.field.FieldUtils;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.TextField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ColorUtils;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.Input;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.InplacePropertyEditLink;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.util.ProjectAware;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -29,51 +55,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.MilestoneManager;
-import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
-import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ColorUtils;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.Input;
-import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
-import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.InplacePropertyEditLink;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.util.ProjectAware;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public abstract class FieldValuesPanel extends Panel implements EditContext, ProjectAware {
@@ -97,10 +84,12 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 			
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				if (delayPermissionCheck && !canEditField())
-					return new Label(id, "<div class='px-3 py-2'><i>No permission to edit field</i></div>").setEscapeModelStrings(false);
-				else
+				String reason;
+				if (delayPermissionCheck && (reason = getUneditableReason()) != null) {
+					return new Label(id, "<div class='px-3 py-2'><i>" + reason + "</i></div>").setEscapeModelStrings(false);
+				} else {
 					return super.newContent(id, dropdown);
+				}
 			}
 
 			@Override
@@ -195,20 +184,29 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 		};
 	}
 	
-	private boolean canEditField() {
-		if (getField() != null && getIssueSetting().getFieldSpec(getField().getName()) != null) {
-			User user = SecurityUtils.getUser();
-			String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
-			if (SecurityUtils.canManageIssues(getIssue().getProject())) {
-				return true;
+	@Nullable
+	private String getUneditableReason() {
+		if (getIssueSetting().isReconciled()) { 
+			if (getField() != null && getIssueSetting().getFieldSpec(getField().getName()) != null) {
+				User user = SecurityUtils.getUser();
+				String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
+				if (SecurityUtils.canManageIssues(getIssue().getProject())) {
+					return null;
+				} else {
+					if (SecurityUtils.canEditIssueField(getIssue().getProject(), getField().getName())
+							&& user != null
+							&& user.equals(getIssue().getSubmitter())
+							&& getIssue().getState().equals(initialState)) {
+						return null;
+					} else {
+						return "No permission to edit field";
+					}
+				}
 			} else {
-				return SecurityUtils.canEditIssueField(getIssue().getProject(), getField().getName()) 
-						&& user != null 
-						&& user.equals(getIssue().getSubmitter()) 
-						&& getIssue().getState().equals(initialState);
+				return "Field spec not found";
 			}
 		} else {
-			return false;
+			return "Issue needs to be reconciled";
 		}
 	}
 
@@ -222,7 +220,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext, Pro
 			link.add(AttributeAppender.append("style", "cursor:pointer;"));
 			link.add(AttributeAppender.append("class", "editable"));
 		} else {
-			if (canEditField()) {
+			if (getUneditableReason() == null) {
 				link = newInplaceEditLink("edit");
 				link.add(AttributeAppender.append("style", "cursor:pointer;"));
 				link.add(AttributeAppender.append("class", "editable"));
