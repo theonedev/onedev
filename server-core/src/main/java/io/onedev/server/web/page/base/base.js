@@ -386,15 +386,17 @@ onedev.server = {
 				for (var i in messagesToSent)
 					Wicket.WebSocket.send(messagesToSent[i]);
 				messagesToSent = [];
+			} else {
+				setTimeout(sendMessages, 100);
 			} 
-			setTimeout(sendMessages, 10);
 		}
-		sendMessages();
 		
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message.indexOf("ObservableChanged:") != -1) { 
-				if (messagesToSent.indexOf(message) == -1)
-					messagesToSent.push(message);				
+				if (messagesToSent.indexOf(message) == -1) {
+					messagesToSent.push(message);
+					sendMessages();
+				}
 			} else if (message == "ErrorMessage") {
 				var $websocketError = $(".websocket-error");
 		        $websocketError.css("left", ($(window).width()-$websocketError.outerWidth()) / 2);
