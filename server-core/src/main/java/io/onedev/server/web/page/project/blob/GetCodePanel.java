@@ -1,19 +1,22 @@
 package io.onedev.server.web.page.project.blob;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.ResourceLink;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
 import io.onedev.server.web.resource.ArchiveResource;
 import io.onedev.server.web.resource.ArchiveResourceReference;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.link.ResourceLink;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @SuppressWarnings("serial")
 public abstract class GetCodePanel extends Panel {
@@ -44,6 +47,19 @@ public abstract class GetCodePanel extends Panel {
 				};
 				fragment.add(new TextField<String>("value", urlModel));
 				fragment.add(new CopyToClipboardLink("copy", urlModel));
+				
+				fragment.add(new ExternalLink("vscode", new LoadableDetachableModel<>() {
+					@Override
+					protected String load() {
+						return "vscode://vscode.git/clone?url=" + encode(getProtocolUrl(), UTF_8);
+					}
+				}));
+				fragment.add(new ExternalLink("intellij", new LoadableDetachableModel<>() {
+					@Override
+					protected String load() {
+						return "jetbrains://idea/checkout/git?idea.required.plugins.id=Git4Idea&checkout.repo=" + encode(getProtocolUrl(), UTF_8);
+					}
+				}));
 				return fragment;
 			}
 			
