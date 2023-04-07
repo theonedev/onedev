@@ -455,7 +455,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			try {
 				SecurityUtils.bindAsSystem();
 				ProjectScope projectScope = new ProjectScope(project, true, true);
-				Set<Long> fixedIssueIds = new HashSet<>();
+				Map<Long, RevCommit> fixedIssueIds = new HashMap<>();
 				Repository repository = projectManager.getRepository(projectId);
 				try (RevWalk revWalk = new RevWalk(repository)) {
 					revWalk.markStart(revWalk.lookupCommit(newCommitId));
@@ -474,7 +474,8 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 					}
 					RevCommit commit;
 					while ((commit = revWalk.next()) != null) {
-						fixedIssueIds.addAll(project.parseFixedIssueIds(commit.getFullMessage()));
+						for (Long issueId: project.parseFixedIssueIds(commit.getFullMessage())) 
+							fixedIssueIds.put(issueId, commit);							
 						if (fixedIssueIds.size() > MAX_FIXED_ISSUES)
 							break;
 					}
@@ -500,22 +501,23 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 							query = new IssueQuery(Criteria.andCriterias(criterias), new ArrayList<>());
 							ProjectScopedCommit.push(new ProjectScopedCommit(project, newCommitId) {
 
-								private static final long serialVersionUID = 1L;
-
 								@Override
 								public Collection<Long> getFixedIssueIds() {
-									return fixedIssueIds;
+									return fixedIssueIds.keySet();
 								}
 								
 							});
 							try {
 								for (Issue issue: issueManager.query(projectScope, query, true, 0, Integer.MAX_VALUE)) {
-									String commitFQN = newCommitId.name();
-									if (!project.equals(issue.getProject()))
-										commitFQN = project.getPath() + ":" + commitFQN;
-									changeState(issue, transition.getToState(), new HashMap<>(), 
-											transition.getRemoveFields(), 
-											"State changed as code fixing the issue is committed (" + commitFQN + ")");
+									var commit = fixedIssueIds.get(issue.getId());
+									if (commit != null) {
+										String commitFQN = commit.name();
+										if (!project.equals(issue.getProject()))
+											commitFQN = project.getPath() + ":" + commitFQN;
+										changeState(issue, transition.getToState(), new HashMap<>(),
+												transition.getRemoveFields(),
+												"State changed as code fixing the issue is committed (" + commitFQN + ")");
+									}
 								}
 							} finally {
 								ProjectScopedCommit.pop();
