@@ -360,10 +360,9 @@ public class BlobTextDiffPanel extends Panel {
 					StringBuilder builder = new StringBuilder();
 					appendEquals(builder, index, lastContextSize, contextSize);
 					
-					String expanded = StringUtils.replace(builder.toString(), "\"", "\\\"");
-					expanded = StringUtils.replace(expanded, "\n", "");
+					String expanded = StringUtils.replace(builder.toString(), "\n", "");
 					String script = String.format("onedev.server.blobTextDiff.expand('%s', %d, \"%s\");",
-							getMarkupId(), index, expanded);
+							getMarkupId(), index, JavaScriptEscape.escapeJavaScript(expanded));
 					target.appendJavaScript(script);
 					break;
 				case "openSelectionPopover":
