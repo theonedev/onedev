@@ -53,14 +53,7 @@ public class DefaultGitServiceCommitTest extends AbstractGitTest {
 	protected void setup() {
 		super.setup();
 		var projectManager = mock(ProjectManager.class);
-		when(projectManager.runOnActiveServer(any(), any())).thenAnswer(new Answer<Object>() {
-
-			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
-				return invocation.getArgument(1, ClusterTask.class).call();
-			}
-			
-		});
+		when(projectManager.runOnActiveServer(any(), any())).thenAnswer(invocation -> invocation.getArgument(1, ClusterTask.class).call());
 		when(projectManager.getRepository(any())).thenReturn(git.getRepository());
 		
 		var settingManager = mock(SettingManager.class);

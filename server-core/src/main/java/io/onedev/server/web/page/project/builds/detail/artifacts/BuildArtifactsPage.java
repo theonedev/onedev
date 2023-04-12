@@ -94,8 +94,8 @@ public class BuildArtifactsPage extends BuildDetailPage {
 		
 		List<IColumn<ArtifactInfo, Void>> columns = new ArrayList<>();
 		
-		columns.add(new TreeColumn<ArtifactInfo, Void>(Model.of("Name")));
-		columns.add(new AbstractColumn<ArtifactInfo, Void>(Model.of("Size")) {
+		columns.add(new TreeColumn<>(Model.of("Name")));
+		columns.add(new AbstractColumn<>(Model.of("Size")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
@@ -104,35 +104,35 @@ public class BuildArtifactsPage extends BuildDetailPage {
 					cellItem.add(new Label(componentId, ""));
 				} else {
 					cellItem.add(new Label(
-							componentId, 
+							componentId,
 							FileUtils.byteCountToDisplaySize(((FileInfo) artifact).getLength())));
 				}
 			}
-			
+
 		});
-		columns.add(new AbstractColumn<ArtifactInfo, Void>(Model.of("Last Modified")) {
+		columns.add(new AbstractColumn<>(Model.of("Last Modified")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
 				ArtifactInfo artifact = rowModel.getObject();
 				cellItem.add(new Label(componentId, DateUtils.formatAge(new Date(artifact.getLastModified()))));
 			}
-			
+
 		});
 		if (SecurityUtils.canManage(getBuild())) {
-			columns.add(new AbstractColumn<ArtifactInfo, Void>(Model.of("")) {
+			columns.add(new AbstractColumn<>(Model.of("")) {
 
 				@Override
 				public void populateItem(Item<ICellPopulator<ArtifactInfo>> cellItem, String componentId, IModel<ArtifactInfo> rowModel) {
 					Fragment fragment = new Fragment(componentId, "deleteFrag", BuildArtifactsPage.this);
-					AjaxLink<?> link = new AjaxLink<Void>("link") { 
+					AjaxLink<?> link = new AjaxLink<Void>("link") {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							getBuildManager().deleteArtifact(getBuild(), rowModel.getObject().getPath());
 							updateArtifacts(target);
 						}
-						
+
 					};
 					if (rowModel.getObject() instanceof DirectoryInfo)
 						link.add(new ConfirmClickModifier("Do you really want to delete this directory?"));
@@ -141,7 +141,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 					fragment.add(link);
 					cellItem.add(fragment);
 				}
-				
+
 			});
 		}
 		

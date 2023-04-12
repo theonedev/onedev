@@ -12,6 +12,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import com.google.common.base.Preconditions;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
@@ -89,6 +90,17 @@ public class DefaultDashboardManager extends BaseEntityManager<Dashboard> implem
 		
 		Query<Dashboard> query = getSession().createQuery(criteriaQuery);
 		return query.getResultList();
+	}
+
+	@Override
+	public void create(Dashboard dashboard) {
+		Preconditions.checkState(dashboard.isNew());
+		dao.persist(dashboard);
+	}
+
+	@Override
+	public void update(Dashboard dashboard) {
+		Preconditions.checkState(!dashboard.isNew());
 	}
 
 	@Override

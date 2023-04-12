@@ -78,7 +78,7 @@ public class MarkdownReportTab extends BuildTab {
 				@Override
 				public String call() throws Exception {
 					File startPageFile = new File(Build.getStorageDir(projectId, buildNumber), 
-							PublishMarkdownReportStep.DIR_CATEGORY + "/" + reportName + "/" + PublishMarkdownReportStep.FILE_START_PAGE);
+							PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + PublishMarkdownReportStep.START_PAGE);
 					return FileUtils.readFileToString(startPageFile, StandardCharsets.UTF_8);
 				}
 				

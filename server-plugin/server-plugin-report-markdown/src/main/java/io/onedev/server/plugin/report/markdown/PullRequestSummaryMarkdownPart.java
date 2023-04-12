@@ -38,8 +38,8 @@ public class PullRequestSummaryMarkdownPart extends PullRequestSummaryPart {
 
 			@Override
 			public String call() throws Exception {
-				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.DIR_CATEGORY);
-				File file = new File(new File(categoryDir, getReportName()), PublishPullRequestMarkdownReportStep.FILE_CONTENT);
+				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
+				File file = new File(new File(categoryDir, getReportName()), PublishPullRequestMarkdownReportStep.CONTENT);
 				return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 			}
 			

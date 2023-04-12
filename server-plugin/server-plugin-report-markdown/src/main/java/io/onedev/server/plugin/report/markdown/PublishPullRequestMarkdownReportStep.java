@@ -27,9 +27,9 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String DIR_CATEGORY = "pull-request-markdown";
+	public static final String CATEGORY = "pull-request-markdown";
 	
-	public static final String FILE_CONTENT = "content.md";
+	public static final String CONTENT = "content.md";
 
 	private String file;
 	
@@ -60,10 +60,10 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 			write(getReportLockName(build.getProject().getId(), build.getNumber()), () -> {
 				File file = new File(workspace, getFile()); 
 				if (file.exists()) {
-					File reportDir = new File(build.getStorageDir(), DIR_CATEGORY + "/" + getReportName());
+					File reportDir = new File(build.getStorageDir(), CATEGORY + "/" + getReportName());
 					String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 					FileUtils.createDir(reportDir);
-					FileUtils.writeFile(new File(reportDir, FILE_CONTENT), markdown, StandardCharsets.UTF_8.name());
+					FileUtils.writeFile(new File(reportDir, CONTENT), markdown, StandardCharsets.UTF_8.name());
 					OneDev.getInstance(ProjectManager.class).directoryModified(
 							build.getProject().getId(), reportDir.getParentFile());
 				} else {

@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getProjectRelativePath;
-import static io.onedev.server.plugin.report.unittest.UnitTestReport.DIR_CATEGORY;
+import static io.onedev.server.model.Build.getProjectRelativeStoragePath;
+import static io.onedev.server.plugin.report.unittest.UnitTestReport.CATEGORY;
 import static io.onedev.server.plugin.report.unittest.UnitTestReport.getReportLockName;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 
@@ -87,7 +87,7 @@ public class UnitTestModule extends AbstractPluginModule {
 		
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
 			getProjectManager().syncDirectory(projectId, 
-					getProjectRelativePath(buildNumber) + "/" + DIR_CATEGORY,
+					getProjectRelativeStoragePath(buildNumber) + "/" + CATEGORY,
 					getReportLockName(projectId, buildNumber), activeServer);
 		}));
 	}
@@ -113,7 +113,7 @@ public class UnitTestModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), DIR_CATEGORY);
+				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!reportDir.isHidden() && !isVersionFile(reportDir)) {

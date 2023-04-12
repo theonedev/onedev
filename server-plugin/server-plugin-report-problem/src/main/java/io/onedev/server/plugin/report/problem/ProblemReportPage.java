@@ -394,7 +394,7 @@ public class ProblemReportPage extends BuildReportPage {
 
 				@Override
 				public ProblemReport call() throws Exception {
-					File reportDir = new File(Build.getStorageDir(projectId, buildNumber), ProblemReport.DIR_CATEGORY + "/" + reportName);				
+					File reportDir = new File(Build.getStorageDir(projectId, buildNumber), ProblemReport.CATEGORY + "/" + reportName);				
 					return ProblemReport.readFrom(reportDir);
 				}
 				

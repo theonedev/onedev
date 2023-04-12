@@ -34,7 +34,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		CoverageReport report = write(getReportLockName(build), () -> {
-			File reportDir = new File(build.getStorageDir(), CoverageReport.DIR_CATEGORY + "/" + getReportName());
+			File reportDir = new File(build.getStorageDir(), CoverageReport.CATEGORY + "/" + getReportName());
 
 			FileUtils.createDir(reportDir);
 			try {
@@ -79,8 +79,8 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	protected abstract CoverageReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger);
 
 	protected void writeLineCoverages(Build build, String blobPath, Map<Integer, CoverageStatus> lineCoverages) {
-		File reportDir = new File(build.getStorageDir(), CoverageReport.DIR_CATEGORY + "/" + getReportName());
-		File lineCoverageFile = new File(reportDir, CoverageReport.DIR_FILES + "/" + blobPath);
+		File reportDir = new File(build.getStorageDir(), CoverageReport.CATEGORY + "/" + getReportName());
+		File lineCoverageFile = new File(reportDir, CoverageReport.FILES + "/" + blobPath);
 		FileUtils.createDir(lineCoverageFile.getParentFile());
 		try (OutputStream os = new FileOutputStream(lineCoverageFile)) {
 			SerializationUtils.serialize((Serializable) lineCoverages, os);

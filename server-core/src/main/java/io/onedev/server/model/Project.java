@@ -101,6 +101,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public static String SITE_DIR = "site";
 	
+	public static String SHARE_TEST_DIR = ".onedev-share-test";
+	
 	public static final int MAX_DESCRIPTION_LEN = 15000;
 	
 	public static final String NAME_NAME = "Name";

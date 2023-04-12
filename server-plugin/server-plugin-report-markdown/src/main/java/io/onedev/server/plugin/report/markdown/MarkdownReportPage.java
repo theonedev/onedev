@@ -113,7 +113,7 @@ public class MarkdownReportPage extends BuildDetailPage {
 		@Override
 		public String call() throws Exception {
 			File file = new File(Build.getStorageDir(projectId, buildNumber), 
-					PublishMarkdownReportStep.DIR_CATEGORY + "/" + reportName + "/" + filePath);
+					PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + filePath);
 			return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 		}
 		

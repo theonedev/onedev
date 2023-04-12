@@ -163,8 +163,6 @@ public interface ProjectManager extends EntityManager<Project> {
 	 */
 	File getInfoDir(Long projectId);
 
-	void initLfsDir(Long projectId);
-
 	/**
 	 * Get directory to store attachments of specified project
 	 *

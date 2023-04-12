@@ -1,25 +1,24 @@
 package io.onedev.server.buildspec.step;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.annotation.SafePath;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 import io.onedev.server.annotation.Patterns;
+import io.onedev.server.annotation.SafePath;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.patternset.PatternSet;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 @Editable(order=1050, name="Publish Artifacts")
 public class PublishArtifactStep extends ServerSideStep {
@@ -71,7 +70,7 @@ public class PublishArtifactStep extends ServerSideStep {
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger jobLogger) {
 		LockUtils.write(build.getArtifactsLockName(), () -> {
 			var projectId = build.getProject().getId();
-			OneDev.getInstance(BuildManager.class).initArtifactsDir(projectId, build.getNumber());
+			OneDev.getInstance(StorageManager.class).initArtifactsDir(projectId, build.getNumber());
 			FileUtils.copyDirectory(inputDir, build.getArtifactsDir());
 			OneDev.getInstance(ProjectManager.class).directoryModified(projectId, build.getArtifactsDir());
 			return null;

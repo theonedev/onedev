@@ -431,7 +431,7 @@ public class CoverageReportPage extends BuildReportPage {
 
 				@Override
 				public CoverageReport call() throws Exception {
-					return CoverageReport.readFrom(new File(Build.getStorageDir(projectId, buildNumber), CoverageReport.DIR_CATEGORY + "/" + reportName));
+					return CoverageReport.readFrom(new File(Build.getStorageDir(projectId, buildNumber), CoverageReport.CATEGORY + "/" + reportName));
 				}
 				
 			});

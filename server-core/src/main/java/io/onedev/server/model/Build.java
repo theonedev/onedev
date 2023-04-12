@@ -77,9 +77,9 @@ public class Build extends ProjectBelonging
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String PATH_ARTIFACTS = "artifacts";
+	public static final String ARTIFACTS_DIR = "artifacts";
 
-	public static final String PATH_LOG = "build.log";
+	public static final String LOG_FILE = "build.log";
 
 	public static final int MAX_DESCRIPTION_LEN = 12000;
 	
@@ -184,15 +184,15 @@ public class Build extends ProjectBelonging
 
 	public static File getLogFile(Long projectId, Long buildNumber) {
 		File buildDir = OneDev.getInstance(BuildManager.class).getStorageDir(projectId, buildNumber);
-		return new File(buildDir, PATH_LOG);
+		return new File(buildDir, LOG_FILE);
 	}
 	
-	public static String getProjectRelativePath(Long buildNumber) {
-		return BUILDS_DIR + "/" + String.format("%03d", buildNumber%1000) + "/" + buildNumber;		
+	public static String getProjectRelativeStoragePath(Long buildNumber) {
+		return BUILDS_DIR + "/" + getStoragePath(buildNumber);		
 	}
 	
-	public String getProjectRelativePath() {
-		return getProjectRelativePath(getNumber());
+	public static String getStoragePath(Long buildNumber) {
+		return String.format("%03d", buildNumber%1000) + "/" + buildNumber;
 	}
 	
 	public File getLogFile() {
@@ -797,7 +797,7 @@ public class Build extends ProjectBelonging
 	}
 	
 	public static File getArtifactsDir(Long projectId, Long buildNumber) {
-		return new File(getStorageDir(projectId, buildNumber), PATH_ARTIFACTS);
+		return new File(getStorageDir(projectId, buildNumber), ARTIFACTS_DIR);
 	}
 	
 	@Nullable

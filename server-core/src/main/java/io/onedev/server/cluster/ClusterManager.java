@@ -3,11 +3,13 @@ package io.onedev.server.cluster;
 import com.hazelcast.cluster.Member;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
+import io.onedev.server.replica.ProjectReplica;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -66,4 +68,9 @@ public interface ClusterManager {
 
 	List<String> getServerAddresses();
 	
+	void redistributeProjects(Map<Long, Map<String, ProjectReplica>> replicas);
+
+	Map<String, ProjectReplica> addProject(Map<Long, Map<String, ProjectReplica>> replicas, Long projectId);
+	
+	boolean isClusteringSupported();
 }

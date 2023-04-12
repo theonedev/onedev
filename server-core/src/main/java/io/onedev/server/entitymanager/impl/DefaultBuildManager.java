@@ -35,6 +35,7 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ProjectBuildStats;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.StatusInfo;
@@ -71,9 +72,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static edu.emory.mathcs.backport.java.util.Collections.sort;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.model.Build.*;
 import static io.onedev.server.model.Project.BUILDS_DIR;
+import static io.onedev.server.model.Project.SHARE_TEST_DIR;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 import static java.lang.Long.valueOf;
 
@@ -102,6 +105,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final ClusterManager clusterManager;
 	
+	private final StorageManager storageManager;
+	
 	private final Set<BuildStorageSyncer> storageSyncers;
 	
 	private final SequenceGenerator numberGenerator;
@@ -114,10 +119,11 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
-			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
-			ProjectManager projectManager, SessionManager sessionManager, 
-			TransactionManager transactionManager, SettingManager settingManager, 
-			ClusterManager clusterManager, Set<BuildStorageSyncer> storageSyncers) {
+							   TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager, 
+							   ProjectManager projectManager, SessionManager sessionManager, 
+							   TransactionManager transactionManager, SettingManager settingManager, 
+							   ClusterManager clusterManager, StorageManager storageManager, 
+							   Set<BuildStorageSyncer> storageSyncers) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
@@ -127,6 +133,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		this.transactionManager = transactionManager;
 		this.settingManager = settingManager;
 		this.clusterManager = clusterManager;
+		this.storageManager = storageManager;
 		this.storageSyncers = storageSyncers;
 
 		numberGenerator = new SequenceGenerator(Build.class, clusterManager, dao);
@@ -978,7 +985,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 					List<ArtifactInfo> children = new ArrayList<>();
 					int baseLen = artifactsDir.getAbsolutePath().length() + 1;
 					for (File child : artifactFile.listFiles()) {
-						if (!isVersionFile(child)) {
+						if (!isVersionFile(child) && !child.getName().equals(SHARE_TEST_DIR)) {
 							var relativePath = child.getAbsolutePath().substring(baseLen);
 							if (child.isFile()) {
 								children.add(new FileInfo(relativePath, child.lastModified(),
@@ -988,7 +995,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 							}
 						}
 					}
-					Collections.sort(children, (Comparator<ArtifactInfo>) (o1, o2) -> {
+					sort(children, (Comparator<ArtifactInfo>) (o1, o2) -> {
 						if (o1 instanceof FileInfo && o2 instanceof FileInfo
 								|| (o1 instanceof DirectoryInfo) && (o2 instanceof DirectoryInfo)) {
 							return o1.getPath().compareTo(o2.getPath());
@@ -1038,11 +1045,26 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		projectManager.syncDirectory(projectId, BUILDS_DIR, (suffix) -> {
 			projectManager.syncDirectory(projectId, BUILDS_DIR + "/" + suffix, (buildNumberString) -> {
 				var buildNumber = valueOf(buildNumberString);
-				var buildPath = getProjectRelativePath(buildNumber);
-				projectManager.syncFile(projectId, buildPath + "/" + PATH_LOG, 
+				var buildPath = getProjectRelativeStoragePath(buildNumber);
+				projectManager.syncFile(projectId, buildPath + "/" + LOG_FILE, 
 						getLogLockName(projectId, buildNumber), activeServer);
-				projectManager.syncDirectory(projectId, buildPath + "/" + PATH_ARTIFACTS, 
-						getArtifactsLockName(projectId, buildNumber), activeServer);
+				storageManager.initArtifactsDir(projectId, buildNumber);
+				var artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+				boolean artifactsDirShared;
+				var testFile = new File(artifactsDir, SHARE_TEST_DIR + "/" + UUID.randomUUID());
+				FileUtils.touchFile(testFile);
+				try {
+					artifactsDirShared = clusterManager.runOnServer(activeServer, () -> {
+						var remoteArtifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+						return new File(remoteArtifactsDir, SHARE_TEST_DIR + "/" + testFile.getName()).exists();
+					});
+				} finally {
+					FileUtils.deleteFile(testFile);					
+				}
+				if (!artifactsDirShared) {
+					projectManager.syncDirectory(projectId, buildPath + "/" + ARTIFACTS_DIR,
+							getArtifactsLockName(projectId, buildNumber), activeServer);
+				}
 				storageSyncers.forEach(it->it.sync(projectId, buildNumber, activeServer));
 			}, activeServer);
 		}, activeServer);
@@ -1050,13 +1072,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 
 	@Override
 	public File getStorageDir(Long projectId, Long buildNumber) {
-		return projectManager.getSubDir(projectId, Build.getProjectRelativePath(buildNumber));
-	}
-	
-	@Override
-	public void initArtifactsDir(Long projectId, Long buildNumber) {
-		File buildDir = getStorageDir(projectId, buildNumber);
-		FileUtils.createDir(new File(buildDir, Build.PATH_ARTIFACTS));
+		return projectManager.getSubDir(projectId, Build.getProjectRelativeStoragePath(buildNumber));
 	}
 	
 }

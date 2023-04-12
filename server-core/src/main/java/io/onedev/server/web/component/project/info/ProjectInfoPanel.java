@@ -253,7 +253,7 @@ public abstract class ProjectInfoPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(latestVersion != -1);
+				setVisible(latestVersion != -1 && OneDev.getInstance(ClusterManager.class).isClusteringSupported());
 			}
 		});
 	}

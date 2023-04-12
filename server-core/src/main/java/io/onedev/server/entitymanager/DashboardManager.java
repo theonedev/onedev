@@ -13,6 +13,10 @@ public interface DashboardManager extends EntityManager<Dashboard> {
 	
 	List<Dashboard> queryAccessible(@Nullable User user);
 	
+	void create(Dashboard dashboard);
+	
+	void update(Dashboard dashboard);
+	
 	@Nullable
 	Dashboard find(User owner, String name);
 

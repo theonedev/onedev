@@ -31,7 +31,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		File reportDir = new File(build.getStorageDir(), ProblemReport.DIR_CATEGORY + "/" + getReportName());
+		File reportDir = new File(build.getStorageDir(), ProblemReport.CATEGORY + "/" + getReportName());
 		
 		ProblemReport report = LockUtils.write(ProblemReport.getReportLockName(build), () -> {
 			FileUtils.createDir(reportDir);
@@ -76,8 +76,8 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	}
 	
 	protected void writeFileProblems(Build build, String blobPath, List<CodeProblem> problemsOfFile) {
-		File reportDir = new File(build.getStorageDir(), ProblemReport.DIR_CATEGORY + "/" + getReportName());
-		File violationsFile = new File(reportDir, ProblemReport.DIR_FILES + "/" + blobPath);
+		File reportDir = new File(build.getStorageDir(), ProblemReport.CATEGORY + "/" + getReportName());
+		File violationsFile = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
 		FileUtils.createDir(violationsFile.getParentFile());
 		try (OutputStream os = new FileOutputStream(violationsFile)) {
 			SerializationUtils.serialize((Serializable) problemsOfFile, os);

@@ -24,11 +24,11 @@ public class ProblemReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String DIR_CATEGORY = "problem";
+	public static final String CATEGORY = "problem";
 	
-	private static final String FILE_REPORT = "report.ser";
+	private static final String REPORT = "report.ser";
 
-	public static final String DIR_FILES = "files";
+	public static final String FILES = "files";
 	
 	private final List<CodeProblem> problems;
 	
@@ -69,7 +69,7 @@ public class ProblemReport implements Serializable {
 	}
 	
 	public static ProblemReport readFrom(File reportDir) {
-		File dataFile = new File(reportDir, FILE_REPORT);
+		File dataFile = new File(reportDir, REPORT);
 		try (InputStream is = new BufferedInputStream(new FileInputStream(dataFile))) {
 			return (ProblemReport) SerializationUtils.deserialize(is);
 		} catch (IOException e) {
@@ -78,7 +78,7 @@ public class ProblemReport implements Serializable {
 	}
 	
 	public void writeTo(File reportDir) {
-		File dataFile = new File(reportDir, FILE_REPORT);
+		File dataFile = new File(reportDir, REPORT);
 		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(dataFile))) {
 			SerializationUtils.serialize(this, os);
 		} catch (IOException e) {

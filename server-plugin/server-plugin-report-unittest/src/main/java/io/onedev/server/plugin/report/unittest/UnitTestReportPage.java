@@ -128,7 +128,7 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 
 				@Override
 				public UnitTestReport call() throws Exception {
-					File reportDir = new File(Build.getStorageDir(projectId, buildNumber), UnitTestReport.DIR_CATEGORY + "/" + reportName);				
+					File reportDir = new File(Build.getStorageDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);				
 					return UnitTestReport.readFrom(reportDir);
 				}
 				

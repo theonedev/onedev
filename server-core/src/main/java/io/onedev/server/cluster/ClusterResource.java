@@ -19,6 +19,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.patternset.PatternSet;
@@ -42,6 +43,7 @@ import static io.onedev.commons.utils.FileUtils.tar;
 import static io.onedev.commons.utils.LockUtils.read;
 import static io.onedev.commons.utils.LockUtils.write;
 import static io.onedev.server.model.Build.getArtifactsLockName;
+import static io.onedev.server.model.Project.SHARE_TEST_DIR;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.ok;
 import static javax.ws.rs.core.Response.status;
@@ -54,26 +56,26 @@ public class ClusterResource {
 
 	private final ProjectManager projectManager;
 	
-	private final BuildManager buildManager;
-	
 	private final AttachmentManager attachmentManager;
 	
 	private final CommitInfoManager commitInfoManager;
 	
 	private final VisitInfoManager visitInfoManager;
 	
+	private final StorageManager storageManager;
+	
 	private final WorkExecutor workExecutor;
 	
 	@Inject
-	public ClusterResource(ProjectManager projectManager, BuildManager buildManager, 
-						   CommitInfoManager commitInfoManager, AttachmentManager attachmentManager, 
-						   VisitInfoManager visitInfoManager, WorkExecutor workExecutor) {
+	public ClusterResource(ProjectManager projectManager, CommitInfoManager commitInfoManager, 
+						   AttachmentManager attachmentManager, VisitInfoManager visitInfoManager, 
+						   WorkExecutor workExecutor, StorageManager storageManager) {
 		this.commitInfoManager = commitInfoManager;
 		this.projectManager = projectManager;
-		this.buildManager = buildManager;
 		this.workExecutor = workExecutor;
 		this.attachmentManager = attachmentManager;
 		this.visitInfoManager = visitInfoManager;
+		this.storageManager = storageManager;
 	}
 
 	@Path("/project-files")
@@ -89,6 +91,7 @@ public class ClusterResource {
 		StreamingOutput os = output -> read(readLock, () -> {
 			File directory = new File(projectManager.getStorageDir(projectId), path);
 			PatternSet patternSet = PatternSet.parse(patterns);
+			patternSet.getExcludes().add(SHARE_TEST_DIR + "/**");
 			tar(directory, patternSet.getIncludes(), patternSet.getExcludes(), output, false);
 			return null;
 		});
@@ -141,6 +144,7 @@ public class ClusterResource {
 		StreamingOutput os = output -> read(getArtifactsLockName(projectId, buildNumber), () -> {
 			File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
 			PatternSet patternSet = PatternSet.parse(artifacts);
+			patternSet.getExcludes().add(SHARE_TEST_DIR + "/**");
 			tar(artifactsDir, patternSet.getIncludes(), patternSet.getExcludes(), output, false);
 			return null;
 		});
@@ -367,7 +371,7 @@ public class ClusterResource {
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
 		write(getArtifactsLockName(projectId, buildNumber), () -> {
-			buildManager.initArtifactsDir(projectId, buildNumber);
+			storageManager.initArtifactsDir(projectId, buildNumber);
 			var artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
 			File artifactFile = new File(artifactsDir, artifactPath);
 			FileUtils.createDir(artifactFile.getParentFile());

@@ -31,8 +31,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getProjectRelativePath;
-import static io.onedev.server.plugin.report.problem.ProblemReport.DIR_CATEGORY;
+import static io.onedev.server.model.Build.getProjectRelativeStoragePath;
+import static io.onedev.server.plugin.report.problem.ProblemReport.CATEGORY;
 import static io.onedev.server.plugin.report.problem.ProblemReport.getReportLockName;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 
@@ -109,7 +109,7 @@ public class ProblemModule extends AbstractPluginModule {
 
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
 			OneDev.getInstance(ProjectManager.class).syncDirectory(projectId, 
-					getProjectRelativePath(buildNumber) + "/" + DIR_CATEGORY,
+					getProjectRelativeStoragePath(buildNumber) + "/" + CATEGORY,
 					getReportLockName(projectId, buildNumber), activeServer);
 		}));
 	}
@@ -141,11 +141,11 @@ public class ProblemModule extends AbstractPluginModule {
 		public Map<String, List<CodeProblem>> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				Map<String, List<CodeProblem>> problems = new HashMap<>();
-				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), DIR_CATEGORY);
+				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!isVersionFile(reportDir) && (reportName == null || reportName.equals(reportDir.getName()))) { 
-							File file = new File(reportDir, ProblemReport.DIR_FILES + "/" + blobPath);
+							File file = new File(reportDir, ProblemReport.FILES + "/" + blobPath);
 							if (file.exists()) {
 								try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
 									problems.put(reportDir.getName(), (List<CodeProblem>) SerializationUtils.deserialize(is));
@@ -177,7 +177,7 @@ public class ProblemModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), DIR_CATEGORY);
+				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!reportDir.isHidden() && !isVersionFile(reportDir)) {

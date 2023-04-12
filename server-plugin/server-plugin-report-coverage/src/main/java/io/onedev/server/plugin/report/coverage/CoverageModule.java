@@ -31,9 +31,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.commons.utils.LockUtils.read;
-import static io.onedev.server.model.Build.getProjectRelativePath;
+import static io.onedev.server.model.Build.getProjectRelativeStoragePath;
 import static io.onedev.server.model.Build.getStorageDir;
-import static io.onedev.server.plugin.report.coverage.CoverageReport.DIR_CATEGORY;
+import static io.onedev.server.plugin.report.coverage.CoverageReport.CATEGORY;
 import static io.onedev.server.plugin.report.coverage.CoverageReport.getReportLockName;
 import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 
@@ -108,7 +108,7 @@ public class CoverageModule extends AbstractPluginModule {
 
 		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
 			getProjectManager().syncDirectory(projectId, 
-					getProjectRelativePath(buildNumber) + "/" + DIR_CATEGORY, 
+					getProjectRelativeStoragePath(buildNumber) + "/" + CATEGORY, 
 					getReportLockName(projectId, buildNumber), activeServer);
 		}));
 		
@@ -135,7 +135,7 @@ public class CoverageModule extends AbstractPluginModule {
 		public List<BuildTab> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				List<BuildTab> tabs = new ArrayList<>();
-				File categoryDir = new File(getStorageDir(projectId, buildNumber), DIR_CATEGORY);
+				File categoryDir = new File(getStorageDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (!reportDir.isHidden() && !isVersionFile(reportDir)) {
@@ -174,11 +174,11 @@ public class CoverageModule extends AbstractPluginModule {
 		public Map<String, Map<Integer, CoverageStatus>> call() {
 			return read(getReportLockName(projectId, buildNumber), () -> {
 				Map<String, Map<Integer, CoverageStatus>> coverages = new HashMap<>();
-				File categoryDir = new File(getStorageDir(projectId, buildNumber), DIR_CATEGORY);
+				File categoryDir = new File(getStorageDir(projectId, buildNumber), CATEGORY);
 				if (categoryDir.exists()) {
 					for (File reportDir: categoryDir.listFiles()) {
 						if (reportName == null || reportName.equals(reportDir.getName())) { 
-							File lineCoveragesFile = new File(reportDir, CoverageReport.DIR_FILES + "/" + blobPath);
+							File lineCoveragesFile = new File(reportDir, CoverageReport.FILES + "/" + blobPath);
 							if (lineCoveragesFile.exists()) {
 								try (InputStream is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
 									coverages.put(reportDir.getName(), (Map<Integer, CoverageStatus>) SerializationUtils.deserialize(is));

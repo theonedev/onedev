@@ -98,6 +98,4 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	File getStorageDir(Long projectId, Long buildNumber);
 	
-	void initArtifactsDir(Long projectId, Long buildNumber);
-	
 }

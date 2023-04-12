@@ -26,9 +26,9 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String DIR_CATEGORY = "markdown";
+	public static final String CATEGORY = "markdown";
 	
-	public static final String FILE_START_PAGE = "$onedev-startpage$";
+	public static final String START_PAGE = "$onedev-startpage$";
 	
 	private String startPage;
 	
@@ -61,10 +61,10 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 		write(getReportLockName(build), () -> {
 			File startPage = new File(inputDir, getStartPage()); 
 			if (startPage.exists()) {
-				File reportDir = new File(build.getStorageDir(), DIR_CATEGORY + "/" + getReportName());
+				File reportDir = new File(build.getStorageDir(), CATEGORY + "/" + getReportName());
 
 				FileUtils.createDir(reportDir);
-				File startPageFile = new File(reportDir, FILE_START_PAGE);
+				File startPageFile = new File(reportDir, START_PAGE);
 				FileUtils.writeFile(startPageFile, getStartPage());
 				
 				int baseLen = inputDir.getAbsolutePath().length() + 1;

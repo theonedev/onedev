@@ -19,6 +19,7 @@ import io.onedev.server.event.cluster.ConnectionRestored;
 import io.onedev.server.model.ClusterServer;
 import io.onedev.server.persistence.DataManager;
 import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.replica.ProjectReplica;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,6 +37,7 @@ import java.util.concurrent.Future;
 
 import static io.onedev.server.model.AbstractEntity.PROP_ID;
 import static io.onedev.server.model.ClusterServer.PROP_ADDRESS;
+import static io.onedev.server.replica.ProjectReplica.Type.PRIMARY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.max;
 import static java.util.stream.Collectors.toList;
@@ -363,6 +365,26 @@ public class DefaultClusterManager implements ClusterManager {
 	public List<String> getServerAddresses() {
 		return getHazelcastInstance().getCluster().getMembers()
 				.stream().map(this::getServerAddress).collect(toList());
+	}
+
+	@Override
+	public void redistributeProjects(Map<Long, Map<String, ProjectReplica>> replicas) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Map<String, ProjectReplica> addProject(Map<Long, Map<String, ProjectReplica>> replicas, Long projectId) {
+		var replicasOfProject = new HashMap<String, ProjectReplica>();
+		var replica = new ProjectReplica();
+		replica.setType(PRIMARY);
+		replica.setVersion(0);
+		replicasOfProject.put(getLocalServerAddress(), replica);
+		return replicasOfProject;
+	}
+
+	@Override
+	public boolean isClusteringSupported() {
+		return false;
 	}
 	
 }

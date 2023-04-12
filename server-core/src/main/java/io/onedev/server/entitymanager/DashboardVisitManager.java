@@ -5,4 +5,7 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface DashboardVisitManager extends EntityManager<DashboardVisit> {
 
+	void create(DashboardVisit visit);
+
+	void update(DashboardVisit visit);
 }

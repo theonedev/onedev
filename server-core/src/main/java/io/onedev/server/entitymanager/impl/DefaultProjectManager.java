@@ -14,6 +14,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentManager;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
@@ -58,6 +59,7 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.IOUtils;
 import io.onedev.server.util.ProjectNameReservation;
 import io.onedev.server.util.artifact.ArtifactInfo;
@@ -115,8 +117,6 @@ import static io.onedev.server.git.CommandUtils.callWithClusterCredential;
 import static io.onedev.server.git.GitUtils.*;
 import static io.onedev.server.model.Project.*;
 import static io.onedev.server.replica.ProjectReplica.Type.*;
-import static io.onedev.server.replica.ReplicaUtils.addProject;
-import static io.onedev.server.replica.ReplicaUtils.redistributeProjects;
 import static io.onedev.server.search.entity.EntitySort.Direction.ASCENDING;
 import static io.onedev.server.util.DirectoryVersionUtils.*;
 import static io.onedev.server.util.criteria.Criteria.forManyValues;
@@ -133,7 +133,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	private static final String DELETE_MARK = "to-be-deleted-when-onedev-is-restarted";
 
-	private static final String LFS_SINCE_COMMITS = ".lfs-since-commits";
+	private static final String LFS_SINCE_COMMITS = "lfs/.lfs-since-commits";
 	
 	private static final int SYNC_PRIORITY = 40;
 	
@@ -179,6 +179,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
 	private final VisitInfoManager visitInfoManager;
 	
+	private final StorageManager storageManager;
+	
 	private final Collection<String> reservedNames = Sets.newHashSet("robots.txt", "sitemap.xml", "sitemap.txt",
 			"favicon.ico", "favicon.png", "logo.png", "wicket", "projects");
 
@@ -202,7 +204,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								 ClusterManager clusterManager, GitService gitService, TaskScheduler taskScheduler,
 								 ProjectLastEventDateManager lastEventDateManager, PullRequestManager pullRequestManager,
 								 AttachmentManager attachmentManager, BatchWorkManager batchWorkManager,
-								 VisitInfoManager visitInfoManager, Set<ProjectNameReservation> nameReservations) {
+								 VisitInfoManager visitInfoManager, StorageManager storageManager, 
+								 Set<ProjectNameReservation> nameReservations) {
 		super(dao);
 
 		this.commitInfoManager = commitInfoManager;
@@ -225,6 +228,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		this.attachmentManager = attachmentManager;
 		this.batchWorkManager = batchWorkManager;
 		this.visitInfoManager = visitInfoManager;
+		this.storageManager = storageManager;
 
 		for (ProjectNameReservation reservation : nameReservations)
 			reservedNames.addAll(reservation.getReserved());
@@ -322,11 +326,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		authorization.setRole(roleManager.getOwner());
 		userAuthorizationManager.create(authorization);
 		
-		var servers = new HashSet<>(clusterManager.getServerAddresses());
 		Long projectId = project.getId();
-		Map<String, ProjectReplica> replicasOfProject = addProject(
-				new HashMap<>(replicas), servers, 
-				settingManager.getClusterSetting().getReplicaCount(), projectId);
+		Map<String, ProjectReplica> replicasOfProject = clusterManager.addProject(
+				new HashMap<>(replicas), projectId);
 		var gitPackConfig = project.getGitPackConfig();
 		for (var entry: replicasOfProject.entrySet()) {
 			var replica = entry.getValue();
@@ -551,7 +553,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			if (fromActiveServer.equals(clusterManager.getLocalServerAddress())) {
 				File fromGitDir = getGitDir(fromId);
 				new CloneCommand(toGitDir, fromGitDir.getAbsolutePath()).noLfs(true).mirror(true).run();
-				initLfsDir(toId);
+				storageManager.initLfsDir(toId);
 				if (withLfs)
 					// Use origin instead of real url as otherwise the command will 
 					// report EOF error when fetch from a local path
@@ -570,7 +572,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					return null;
 				});
 
-				initLfsDir(toId);
+				storageManager.initLfsDir(toId);
 
 				if (withLfs) {
 					callWithClusterCredential(git -> {
@@ -605,7 +607,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			File gitDir = getGitDir(projectId);
 			cleanDir(gitDir);
 			new CloneCommand(gitDir, repositoryUrl).mirror(true).noLfs(true).run();
-			initLfsDir(projectId);
+			storageManager.initLfsDir(projectId);
 			new LfsFetchAllCommand(gitDir, repositoryUrl).run();
 			return null;
 		});
@@ -646,16 +648,16 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
-			initLfsDir(projectId);
+			storageManager.initLfsDir(projectId);
 		} else if (!isValid(gitDir)) {
 			logger.warn("Directory '" + gitDir + "' is not a valid git repository, reinitializing...");
 			cleanDir(gitDir);
-			initLfsDir(projectId);
+			storageManager.initLfsDir(projectId);
 			try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
-			initLfsDir(projectId);
+			storageManager.initLfsDir(projectId);
 		}
 	}
 
@@ -1248,16 +1250,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public void redistributeReplicas() {
 		var snapshot = new HashMap<>(replicas);
-		var servers = new HashSet<>(clusterManager.getServerAddresses());
-		int replicaCount = settingManager.getClusterSetting().getReplicaCount();
-		redistributeProjects(snapshot, servers, replicaCount);	
-		for (var projectToReplicas: snapshot.entrySet()) {
-			var projectId = projectToReplicas.getKey();
+		clusterManager.redistributeProjects(snapshot);	
+		for (var newProjectToReplicas: snapshot.entrySet()) {
+			var projectId = newProjectToReplicas.getKey();
 			var project = cache.get(projectId);
 			while (true) {
 				var replicasOfProject = replicas.get(projectId);
 				if (project != null && replicasOfProject != null) {
-					var newReplicasOfProject = projectToReplicas.getValue();
+					var newReplicasOfProject = newProjectToReplicas.getValue();
 					for (var newServerToReplica: newReplicasOfProject.entrySet()) {
 						var server = newServerToReplica.getKey();
 						var newReplica = newServerToReplica.getValue();
@@ -1277,13 +1277,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 						}
 					}
 					
-					// Add back temporarily disconnected server replicas
-					for (var serverToReplica: replicasOfProject.entrySet()) {
-						var server = serverToReplica.getKey();
-						var replica = serverToReplica.getValue();
-						if (!servers.contains(server)) 
-							newReplicasOfProject.put(server, replica);
-					}
 					if (replicasOfProject.equals(newReplicasOfProject)) {
 						break;
 					} else if (replicas.replace(projectId, replicasOfProject, newReplicasOfProject)) {
@@ -1348,7 +1341,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public Map<String, ProjectReplica> getReplicas(Long projectId) {
 		return replicas.get(projectId);
 	}
-
+	
 	private void updateReplicaVersion(Long projectId) {
 		var projectDir = getStorageDir(projectId);
 		while (true) {
@@ -1623,28 +1616,44 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								git.clearArgs();
 
 								if (withLfs) {
-									var sinceCommitIds = readLfsSinceCommits(projectId);
-									var untilCommitIds = new HashSet<ObjectId>();
-									for (Ref ref: repository.getRefDatabase().getRefs())
-										untilCommitIds.add(ref.getObjectId());
-
-									if (sinceCommitIds.isEmpty()) {
-										new LfsFetchAllCommand(git.workingDir(), fetchUrl) {
-											@Override
-											protected Commandline newGit() {
-												return git;
-											}
-										}.run();
-									} else {
-										var fetchCommitIds = new ArrayList<>(getReachableCommits(repository, sinceCommitIds, untilCommitIds));
-										new LfsFetchCommand(git.workingDir(), fetchUrl, fetchCommitIds) {
-											@Override
-											protected Commandline newGit() {
-												return git;
-											}
-										}.run();
+									storageManager.initLfsDir(projectId);
+									var lfsDir = new File(git.workingDir(), "lfs");
+									boolean lfsDirShared;
+									var testFile = new File(lfsDir, SHARE_TEST_DIR + "/" + UUID.randomUUID());
+									FileUtils.touchFile(testFile);
+									try {
+										lfsDirShared = clusterManager.runOnServer(activeServer, 
+												new SharedLfsDirTester(projectId, testFile.getName()));
+									} finally {
+										FileUtils.deleteFile(testFile);
 									}
-									writeLfsSinceCommits(projectId, untilCommitIds);
+									
+									if (lfsDirShared) {
+										fetch(git, fetchUrl);
+									} else {
+										var sinceCommitIds = readLfsSinceCommits(projectId);
+										var untilCommitIds = new HashSet<ObjectId>();
+										for (Ref ref: repository.getRefDatabase().getRefs())
+											untilCommitIds.add(ref.getObjectId());
+
+										if (sinceCommitIds.isEmpty()) {
+											new LfsFetchAllCommand(git.workingDir(), fetchUrl) {
+												@Override
+												protected Commandline newGit() {
+													return git;
+												}
+											}.run();
+										} else {
+											var fetchCommitIds = new ArrayList<>(getReachableCommits(repository, sinceCommitIds, untilCommitIds));
+											new LfsFetchCommand(git.workingDir(), fetchUrl, fetchCommitIds) {
+												@Override
+												protected Commandline newGit() {
+													return git;
+												}
+											}.run();
+										}
+										writeLfsSinceCommits(projectId, untilCommitIds);
+									}
 								} else {
 									fetch(git, fetchUrl);
 								}
@@ -1709,11 +1718,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public File getAttachmentDir(Long projectId) {
 		return getSubDir(projectId, ATTACHMENT_DIR);
-	}
-
-	@Override
-	public void initLfsDir(Long projectId) {
-		FileUtils.createDir(new File(getGitDir(projectId), "lfs"));
 	}
 	
 	@Override
@@ -1789,7 +1793,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return CronScheduleBuilder.dailyAtHourAndMinute(3, 0);
 	}
 
-	static class SyncWork extends Prioritized {
+	private static class SyncWork extends Prioritized {
 
 		final String syncWithServer;
 
@@ -1800,4 +1804,24 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	}
 
+	private static class SharedLfsDirTester implements ClusterTask<Boolean> {
+
+		Long projectId;
+
+		String fileName;
+
+		SharedLfsDirTester(Long projectId, String fileName) {
+			this.projectId = projectId;
+			this.fileName = fileName;
+		}
+		
+		@Override
+		public Boolean call() throws IOException {
+			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+			var remoteLfsDir = new File(projectManager.getGitDir(projectId), "lfs");
+			return new File(remoteLfsDir, SHARE_TEST_DIR + "/" + fileName).exists();
+		}
+		
+	};
+	
 }

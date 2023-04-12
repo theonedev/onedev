@@ -89,6 +89,8 @@ import io.onedev.server.search.entitytext.*;
 import io.onedev.server.security.*;
 import io.onedev.server.security.realm.AbstractAuthorizingRealm;
 import io.onedev.server.ssh.*;
+import io.onedev.server.storage.DefaultStorageManager;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.terminal.DefaultTerminalManager;
 import io.onedev.server.terminal.TerminalManager;
 import io.onedev.server.util.ScriptContribution;
@@ -289,6 +291,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildLabelManager.class).to(DefaultBuildLabelManager.class);
 		bind(PullRequestLabelManager.class).to(DefaultPullRequestLabelManager.class);
 		bind(ClusterManager.class).to(DefaultClusterManager.class);
+		bind(StorageManager.class).to(DefaultStorageManager.class);
 		
 		bind(WebHookManager.class);
 		

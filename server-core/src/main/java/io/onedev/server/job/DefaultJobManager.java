@@ -1383,6 +1383,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						File artifactsDir = dependency.getArtifactsDir();
 						if (artifactsDir.exists()) {
 							PatternSet patternSet = PatternSet.parse(dependence.getArtifacts());
+							patternSet.getExcludes().add(Project.SHARE_TEST_DIR + "/**");
 							int baseLen = artifactsDir.getAbsolutePath().length() + 1;
 							for (File file : FileUtils.listFiles(artifactsDir, patternSet.getIncludes(), patternSet.getExcludes())) {
 								FileUtils.copyFile(file,

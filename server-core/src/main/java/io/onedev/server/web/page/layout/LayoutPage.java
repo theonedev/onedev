@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.Plugin;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -225,8 +226,10 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts", 
 							GroovyScriptListPage.class, new PageParameters()));
 
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Clustering & Replication",
-							ClusterManagementPage.class, new PageParameters()));
+					if (OneDev.getInstance(ClusterManager.class).isClusteringSupported()) {
+						administrationMenuItems.add(new SidebarMenuItem.Page(null, "Clustering & Replication",
+								ClusterManagementPage.class, new PageParameters()));
+					}
 
 					List<Class<? extends ContributedAdministrationSetting>> contributedSettingClasses = new ArrayList<>();
 					for (AdministrationSettingContribution contribution:OneDev.getExtensions(AdministrationSettingContribution.class)) {

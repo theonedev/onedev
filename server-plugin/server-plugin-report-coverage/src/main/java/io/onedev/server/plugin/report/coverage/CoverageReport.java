@@ -19,11 +19,11 @@ public class CoverageReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String DIR_CATEGORY = "coverage";
+	public static final String CATEGORY = "coverage";
 	
-	public static final String DIR_FILES = "files";
+	public static final String FILES = "files";
 	
-	private static final String FILE_REPORT = "report.ser";
+	private static final String REPORT = "report.ser";
 	
 	private final CoverageInfo coverages;
 	
@@ -43,7 +43,7 @@ public class CoverageReport implements Serializable {
 	}
 	
 	public static CoverageReport readFrom(File reportDir) {
-		File reportFile = new File(reportDir, FILE_REPORT);
+		File reportFile = new File(reportDir, REPORT);
 		try (InputStream is = new BufferedInputStream(new FileInputStream(reportFile))) {
 			return (CoverageReport) SerializationUtils.deserialize(is);
 		} catch (IOException e) {
@@ -52,7 +52,7 @@ public class CoverageReport implements Serializable {
 	}
 	
 	public void writeTo(File reportDir) {
-		File reportFile = new File(reportDir, FILE_REPORT);
+		File reportFile = new File(reportDir, REPORT);
 		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(reportFile))) {
 			SerializationUtils.serialize(this, os);
 		} catch (IOException e) {
