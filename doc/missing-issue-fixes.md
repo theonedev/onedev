@@ -25,3 +25,4 @@ issue #953
 issue #997 
 issue #1001 
 issue #1134 
+issue #1326
