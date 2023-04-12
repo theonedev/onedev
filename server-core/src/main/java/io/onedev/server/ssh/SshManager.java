@@ -1,11 +1,11 @@
 package io.onedev.server.ssh;
 
-import java.util.UUID;
-
 import org.apache.sshd.client.session.ClientSession;
+
+import java.util.UUID;
 
 public interface SshManager {
 
-	ClientSession ssh(UUID serverUUID);
+	ClientSession ssh(String server);
 	
 }

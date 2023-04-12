@@ -30,7 +30,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
@@ -81,10 +80,10 @@ public class BuildLogResource extends AbstractResource {
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, true);
+				String activeServer = projectManager.getActiveServer(projectId, true);
 				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
 				LogManager logManager = OneDev.getInstance(LogManager.class);
-				if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
 					try (
 							InputStream is = logManager.openLogStream(projectId, buildNumber);
 							OutputStream os = attributes.getResponse().getOutputStream()) {
@@ -96,12 +95,12 @@ public class BuildLogResource extends AbstractResource {
 	    				CharSequence path = RequestCycle.get().urlFor(
 	    						new BuildLogResourceReference(), 
 	    						BuildLogResource.paramsOf(projectId, buildNumber));
-	    				String storageServerUrl = clusterManager.getServerUrl(storageServerUUID) + path;
+	    				String activeServerUrl = clusterManager.getServerUrl(activeServer) + path;
 	    				
-	    				WebTarget target = client.target(storageServerUrl).path(path.toString());
+	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+	    						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);

@@ -30,7 +30,7 @@ public class CacheSpec implements Serializable, Validatable {
 			+ "Embed project/job variable to prevent cross project/job reuse")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
-	@RegEx(pattern="[a-zA-Z0-9\\-_\\.]+", message="Can only contain alphanumeric, dash, dot and underscore")
+	@RegEx(pattern ="[a-zA-Z0-9\\-_\\.]+", message="Can only contain alphanumeric, dash, dot and underscore")
 	public String getKey() {
 		return key;
 	}

@@ -7,8 +7,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
+import io.onedev.server.entitymanager.ProjectManager;
 import org.apache.commons.lang3.SerializationUtils;
 
 import io.onedev.commons.utils.ExceptionUtils;
@@ -31,28 +31,25 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		File reportDir = new File(build.getDir(), ProblemReport.CATEGORY + "/" + getReportName());
+		File reportDir = new File(build.getStorageDir(), ProblemReport.DIR_CATEGORY + "/" + getReportName());
 		
-		ProblemReport report = LockUtils.write(ProblemReport.getReportLockName(build), new Callable<ProblemReport>() {
-
-			@Override
-			public ProblemReport call() throws Exception {
-				FileUtils.createDir(reportDir);
-				try {
-					ProblemReport report = createReport(build, inputDir, reportDir, logger);
-					if (report != null) {
-						report.writeTo(reportDir);
-						return report;
-					} else {
-						FileUtils.deleteDir(reportDir);
-						return null;
-					}
-				} catch (Exception e) {
+		ProblemReport report = LockUtils.write(ProblemReport.getReportLockName(build), () -> {
+			FileUtils.createDir(reportDir);
+			try {
+				ProblemReport aReport = createReport(build, inputDir, reportDir, logger);
+				if (aReport != null) {
+					aReport.writeTo(reportDir);
+					OneDev.getInstance(ProjectManager.class).directoryModified(
+							build.getProject().getId(), reportDir.getParentFile());
+					return aReport;
+				} else {
 					FileUtils.deleteDir(reportDir);
-					throw ExceptionUtils.unchecked(e);
+					return null;
 				}
+			} catch (Exception e) {
+				FileUtils.deleteDir(reportDir);
+				throw ExceptionUtils.unchecked(e);
 			}
-			
 		});
 		
 		if (report != null) {
@@ -79,8 +76,8 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	}
 	
 	protected void writeFileProblems(Build build, String blobPath, List<CodeProblem> problemsOfFile) {
-		File reportDir = new File(build.getDir(), ProblemReport.CATEGORY + "/" + getReportName());
-		File violationsFile = new File(reportDir, ProblemReport.FILES_DIR + "/" + blobPath);
+		File reportDir = new File(build.getStorageDir(), ProblemReport.DIR_CATEGORY + "/" + getReportName());
+		File violationsFile = new File(reportDir, ProblemReport.DIR_FILES + "/" + blobPath);
 		FileUtils.createDir(violationsFile.getParentFile());
 		try (OutputStream os = new FileOutputStream(violationsFile)) {
 			SerializationUtils.serialize((Serializable) problemsOfFile, os);

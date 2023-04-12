@@ -59,7 +59,7 @@ public class FixedIssueCriteria extends Criteria<Build> {
 			Collection<Long> inBuildNumbers = buildManager.filterNumbers(it.getId(), descendants);
 			predicates.add(builder.and(
 					builder.equal(from.get(Build.PROP_PROJECT), it),
-					forManyValues(builder, attribute, inBuildNumbers, buildManager.getNumbersByProject(it.getId()))));
+					forManyValues(builder, attribute, inBuildNumbers, buildManager.getNumbers(it.getId()))));
 		});
 		if (!predicates.isEmpty())
 			return builder.or(predicates.toArray(new Predicate[0]));

@@ -1,10 +1,17 @@
 package io.onedev.server.web.page.admin.brandingsetting;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import org.apache.commons.io.FileUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.cluster.ClusterTask;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.BrandingSetting;
+import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
+import io.onedev.server.web.component.fileupload.FileUploadField;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -14,18 +21,10 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.BrandingSetting;
-import io.onedev.server.web.component.brandlogo.BrandLogoPanel;
-import io.onedev.server.web.component.fileupload.FileUploadField;
-import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.ConfirmClickModifier;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
-@SuppressWarnings("serial")
 public class BrandingSettingPage extends AdministrationPage {
 
 	private List<FileUpload> uploads;
@@ -34,8 +33,8 @@ public class BrandingSettingPage extends AdministrationPage {
 		super(params);
 	}
 	
-	private File getLogoFile() {
-		return new File(Bootstrap.getSiteDir(), "assets/logo.png");
+	private static File getLogoFile() {
+		return new File(OneDev.getAssetsDir(), "logo.png");
 	}
 
 	@Override
@@ -53,12 +52,8 @@ public class BrandingSettingPage extends AdministrationPage {
 				super.onSubmit();
 
 				if (uploads != null && !uploads.isEmpty()) {
-					FileUpload upload = uploads.iterator().next();
-					try {
-						FileUtils.writeByteArrayToFile(getLogoFile(), upload.getBytes());
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
+					getClusterManager().runOnAllServers(new UpdateLogoTask(
+							uploads.iterator().next().getBytes()));
 				}
 				OneDev.getInstance(SettingManager.class).saveBrandingSetting(setting);
 				getSession().success("Branding settings saved");
@@ -108,7 +103,7 @@ public class BrandingSettingPage extends AdministrationPage {
 
 			@Override
 			public void onClick() {
-				getLogoFile().delete();
+				getClusterManager().runOnAllServers(new DeleteLogoTask());
 				getSession().success("Using default logo now");
 			}
 
@@ -128,4 +123,38 @@ public class BrandingSettingPage extends AdministrationPage {
 		return new Label(componentId, "Branding");
 	}
 
+	private ClusterManager getClusterManager() {
+		return OneDev.getInstance(ClusterManager.class);
+	}
+	
+	private static class UpdateLogoTask implements ClusterTask<Void> {
+
+		private final byte[] logoBytes;
+		
+		UpdateLogoTask(byte[] logoBytes) {
+			this.logoBytes = logoBytes;
+		}
+		
+		@Override
+		public Void call() throws Exception {
+			try {
+				FileUtils.writeByteArrayToFile(getLogoFile(), logoBytes);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return null;
+		}
+		
+	}
+
+	private static class DeleteLogoTask implements ClusterTask<Void> {
+
+		@Override
+		public Void call() throws Exception {
+			FileUtils.deleteFile(getLogoFile());
+			return null;
+		}
+
+	}
+	
 }

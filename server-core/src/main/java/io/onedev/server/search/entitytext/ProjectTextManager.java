@@ -1,5 +1,6 @@
 package io.onedev.server.search.entitytext;
 
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.WordUtils;
@@ -16,7 +17,6 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
@@ -62,6 +62,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import static java.lang.Long.valueOf;
+import static java.util.Comparator.comparingInt;
+import static org.apache.lucene.document.LongPoint.newExactQuery;
+
 public abstract class ProjectTextManager<T extends ProjectBelonging> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -113,8 +118,6 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	protected final Dao dao;
 
-	private final StorageManager storageManager;
-
 	private final BatchWorkManager batchWorkManager;
 
 	protected final TransactionManager transactionManager;
@@ -126,7 +129,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	private volatile SearcherManager searcherManager;
 	
 	@SuppressWarnings("unchecked")
-	public ProjectTextManager(Dao dao, StorageManager storageManager, BatchWorkManager batchWorkManager,
+	public ProjectTextManager(Dao dao, BatchWorkManager batchWorkManager,
 			TransactionManager transactionManager, ProjectManager projectManager, 
 			ClusterManager clusterManager) {
 		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ProjectTextManager.class, getClass());
@@ -137,10 +140,9 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 					+ "be EntityIndexManager and must realize the type argument <T>");
 		}
 		this.dao = dao;
-		this.storageManager = storageManager;
+		this.projectManager = projectManager;
 		this.batchWorkManager = batchWorkManager;
 		this.transactionManager = transactionManager;
-		this.projectManager = projectManager;
 		this.clusterManager = clusterManager;
 	}
 
@@ -157,7 +159,9 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	}
 
 	private File getIndexDir() {
-		return new File(storageManager.getIndexDir(), getIndexName());
+		File indexDir = new File(Bootstrap.getSiteDir(), "index");
+		FileUtils.createDir(indexDir);
+		return new File(indexDir, getIndexName());
 	}
 
 	@Sessional
@@ -177,16 +181,11 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			}
 			if (indexVersion != getIndexVersion()) {
 				FileUtils.cleanDir(indexDir);
-				doWithWriter(new WriterRunnable() {
-
-					@Override
-					public void run(IndexWriter writer) throws IOException {
-						Document document = new Document();
-						document.add(new StringField(FIELD_TYPE, FIELD_INDEX_VERSION, Store.NO));
-						document.add(new StoredField(FIELD_INDEX_VERSION, String.valueOf(getIndexVersion())));
-						writer.updateDocument(getTerm(FIELD_TYPE, FIELD_INDEX_VERSION), document);
-					}
-
+				doWithWriter(writer -> {
+					Document document = new Document();
+					document.add(new StringField(FIELD_TYPE, FIELD_INDEX_VERSION, Store.NO));
+					document.add(new StoredField(FIELD_INDEX_VERSION, String.valueOf(getIndexVersion())));
+					writer.updateDocument(getTerm(FIELD_TYPE, FIELD_INDEX_VERSION), document);
 				});
 			}
 			searcherManager = new SearcherManager(directory, null);
@@ -208,15 +207,10 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		}
 	}
 	
-	protected void deleteEntitiesLocal(Collection<Long> entityIds) {
-		doWithWriter(new WriterRunnable() {
-
-			@Override
-			public void run(IndexWriter writer) throws IOException {
-				for (Long entityId: entityIds)
-					writer.deleteDocuments(getTerm(FIELD_ENTITY_ID, String.valueOf(entityId)));
-			}
-
+	protected void deleteEntities(Collection<Long> entityIds) {
+		doWithWriter(writer -> {
+			for (Long entityId: entityIds)
+				writer.deleteDocuments(getTerm(FIELD_ENTITY_ID, String.valueOf(entityId)));
 		});
 	}
 
@@ -224,21 +218,17 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	@Listen
 	public void on(ProjectDeleted event) {
 		Long projectId = event.getProjectId();
-		doWithWriter(new WriterRunnable() {
-	
-			@Override
-			public void run(IndexWriter writer) throws IOException {
-				writer.deleteDocuments(LongPoint.newExactQuery(FIELD_PROJECT_ID, projectId));
-			}
-	
+		clusterManager.submitToAllServers(() -> {
+			doWithWriter(writer -> writer.deleteDocuments(newExactQuery(FIELD_PROJECT_ID, projectId)));
+			return null;			
 		});
 	}
 	
-	protected void requestIndexLocal(T entity) {
+	protected void requestIndex(T entity) {
 		batchWorkManager.submit(getBatchWorker(), new IndexWork(INDEXING_PRIORITY, entity.getId()));
 	}
 	
-	protected void doWithWriter(WriterRunnable runnable) {
+	protected synchronized void doWithWriter(WriterRunnable runnable) {
 		File indexDir = getIndexDir();
 		try (Directory directory = FSDirectory.open(indexDir.toPath()); Analyzer analyzer = newAnalyzer()) {
 			IndexWriterConfig writerConfig = new IndexWriterConfig(analyzer);
@@ -278,17 +268,17 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		TopDocs topDocs = searcher.search(getTermQuery(FIELD_TYPE, FIELD_LAST_ENTITY_ID), 1);
 		if (topDocs.scoreDocs.length != 0) {
 			Document doc = searcher.doc(topDocs.scoreDocs[0].doc);
-			return Long.valueOf(doc.get(FIELD_LAST_ENTITY_ID));
+			return valueOf(doc.get(FIELD_LAST_ENTITY_ID));
 		} else {
 			return 0L;
 		}
 	}
 	
 	private BatchWorker getBatchWorker() {
-		return new BatchWorker("index" + entityClass.getSimpleName()) {
+		return new BatchWorker("index:" + entityClass.getSimpleName()) {
 
 			@Override
-			public void doWorks(Collection<Prioritized> works) {
+			public void doWorks(List<Prioritized> works) {
 				String entityName = WordUtils.uncamel(entityClass.getSimpleName()).toLowerCase();
 
 				boolean checkNewEntities = false;
@@ -316,16 +306,11 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 
 	@Sessional
 	protected void index(Collection<Long> entityIds) {
-		doWithWriter(new WriterRunnable() {
-
-			@Override
-			public void run(IndexWriter writer) throws IOException {
-				for (Long entityId : entityIds) {
-					T entity = dao.load(entityClass, entityId);
-					index(writer, entity);
-				}
+		doWithWriter(writer -> {
+			for (Long entityId : entityIds) {
+				T entity = dao.load(entityClass, entityId);
+				index(writer, entity);
 			}
-
 		});
 	}
 
@@ -341,25 +326,21 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			}
 			List<T> unprocessedEntities = dao.queryAfter(entityClass, lastEntityId, BATCH_SIZE);
 
-			doWithWriter(new WriterRunnable() {
-
-				@Override
-				public void run(IndexWriter writer) throws IOException {
-					T lastEntity = null;
-					for (T entity: unprocessedEntities) {
-						if (clusterManager.getLocalServerUUID().equals(projectManager.getStorageServerUUID(entity.getProject().getId(), false))) 
-							index(writer, entity);
-						lastEntity = entity;
-					}
-
-					if (lastEntity != null) {
-						Document document = new Document();
-						document.add(new StringField(FIELD_TYPE, FIELD_LAST_ENTITY_ID, Store.NO));
-						document.add(new StoredField(FIELD_LAST_ENTITY_ID, String.valueOf(lastEntity.getId())));
-						writer.updateDocument(getTerm(FIELD_TYPE, FIELD_LAST_ENTITY_ID), document);
-					}
+			doWithWriter(writer -> {
+				var localServer = clusterManager.getLocalServerAddress();
+				T lastEntity = null;
+				for (T entity: unprocessedEntities) {
+					if (localServer.equals(projectManager.getActiveServer(entity.getProject().getId(), false))) 
+						index(writer, entity);
+					lastEntity = entity;
 				}
 
+				if (lastEntity != null) {
+					Document document = new Document();
+					document.add(new StringField(FIELD_TYPE, FIELD_LAST_ENTITY_ID, Store.NO));
+					document.add(new StoredField(FIELD_LAST_ENTITY_ID, String.valueOf(lastEntity.getId())));
+					writer.updateDocument(getTerm(FIELD_TYPE, FIELD_LAST_ENTITY_ID), document);
+				}
 			});
 
 			return unprocessedEntities.size() == BATCH_SIZE;
@@ -388,69 +369,56 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	
 	protected long count(Query query) {
 		String queryString = query.toString();
-		return clusterManager.runOnAllServers(new ClusterTask<Long>() {
-
-			private static final long serialVersionUID = 1L;
-			@Override
-			public Long call() throws Exception {
-				if (searcherManager != null) {
+		return clusterManager.runOnAllServers(() -> {
+			if (searcherManager != null) {
+				try {
+					IndexSearcher indexSearcher = searcherManager.acquire();
 					try {
-						IndexSearcher indexSearcher = searcherManager.acquire();
-						try {
-							TotalHitCountCollector collector = new TotalHitCountCollector();
-							indexSearcher.search(parse(queryString), collector);
-							return (long) collector.getTotalHits();
-						} finally {
-							searcherManager.release(indexSearcher);
-						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+						TotalHitCountCollector collector = new TotalHitCountCollector();
+						indexSearcher.search(parse(queryString), collector);
+						return (long) collector.getTotalHits();
+					} finally {
+						searcherManager.release(indexSearcher);
 					}
-				} else {
-					return 0L;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
+			} else {
+				return 0L;
 			}
-			
 		}).values().stream().reduce(0L, Long::sum);
 	}
 
 	protected List<T> search(Query query, int firstResult, int maxResults) {
 		String queryString = query.toString();
 		Map<Long, Float> entityScores = new HashMap<>();
-		for (var entry: clusterManager.runOnAllServers(new ClusterTask<Map<Long, Float>>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Map<Long, Float> call() throws Exception {
-				if (searcherManager != null) {
+		for (var entry: clusterManager.runOnAllServers((ClusterTask<Map<Long, Float>>) () -> {
+			if (searcherManager != null) {
+				try {
+					IndexSearcher indexSearcher = searcherManager.acquire();
 					try {
-						IndexSearcher indexSearcher = searcherManager.acquire();
-						try {
-							Map<Long, Float> entityScores = new HashMap<>();
-							TopDocs topDocs = indexSearcher.search(parse(queryString), firstResult + maxResults);
-							for (var scoreDoc: topDocs.scoreDocs) {
-								Document doc = indexSearcher.doc(scoreDoc.doc);
-								entityScores.put(Long.valueOf(doc.get(FIELD_ENTITY_ID)), scoreDoc.score);
-							}
-							return entityScores;
-						} finally {
-							searcherManager.release(indexSearcher);
+						Map<Long, Float> theEntityScores = new HashMap<>();
+						TopDocs topDocs = indexSearcher.search(parse(queryString), firstResult + maxResults);
+						for (var scoreDoc: topDocs.scoreDocs) {
+							Document doc = indexSearcher.doc(scoreDoc.doc);
+							theEntityScores.put(valueOf(doc.get(FIELD_ENTITY_ID)), scoreDoc.score);
 						}
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+						return theEntityScores;
+					} finally {
+						searcherManager.release(indexSearcher);
 					}
-				} else {
-					return new HashMap<>();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
+			} else {
+				return new HashMap<>();
 			}
-			
 		}).entrySet()) {
 			entityScores.putAll(entry.getValue());
 		}
 		
 		List<Long> entityIds = new ArrayList<>(entityScores.keySet());
-		Collections.sort(entityIds, (o1, o2) -> {
+		entityIds.sort((o1, o2) -> {
 			Float score1 = entityScores.get(o1);
 			Float score2 = entityScores.get(o2);
 			return Float.compare(score1, score2) * -1;
@@ -463,14 +431,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 					entityIds.subList(firstResult, Math.min(firstResult + maxResults, entityIds.size()))));
 			
 			List<T> entities = dao.query(criteria);
-			Collections.sort(entities, new Comparator<T>() {
-
-				@Override
-				public int compare(T o1, T o2) {
-					return entityIds.indexOf(o1.getId()) - entityIds.indexOf(o2.getId());
-				}
-
-			});
+			entities.sort(comparingInt(o -> entityIds.indexOf(o.getId())));
 			return entities;
 		} else {
 			return new ArrayList<>();
@@ -490,7 +451,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	protected abstract void addFields(Document document, T entity);
 
 	private static class IndexWork extends Prioritized {
-
+		
 		private final Long entityId;
 
 		public IndexWork(int priority, @Nullable Long entityId) {
@@ -504,7 +465,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		}
 
 	}
-
+	
 	protected static interface WriterRunnable {
 
 		void run(IndexWriter writer) throws IOException;

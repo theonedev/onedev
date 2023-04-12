@@ -8,8 +8,8 @@ import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.exception.SystemNotReadyException;
+import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.code.TagProtection;
@@ -30,8 +30,6 @@ import org.apache.shiro.authz.Permission;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -43,8 +41,6 @@ import static io.onedev.server.model.User.*;
 
 @Singleton
 public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
-
-	private static final Logger logger = LoggerFactory.getLogger(DefaultUserManager.class);
 	
     private final ProjectManager projectManager;
     
@@ -90,7 +86,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	public void replicate(User user) {
 		getSession().replicate(user, ReplicationMode.OVERWRITE);
 		idManager.useId(User.class, user.getId());
-		cacheAfterCommit(user);
+		var facade = user.getFacade();
+		transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 	}
 	
     @Transactional
@@ -241,7 +238,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("user", user);
     	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
-    	
+		
 		dao.remove(user);
     }
 	
@@ -305,7 +302,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			else
 				return null;
 		} else {
-			throw new SystemNotReadyException();
+			throw new ServerNotReadyException();
 		}
     }
 	
@@ -324,47 +321,14 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
     @Sessional
     @Listen
-    public void on(SystemStarted event) {
+    public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = new UserCache(hazelcastInstance.getReplicatedMap("userCache"));
-        
-    	for (User user: query()) 
-    		cache.put(user.getId(), user.getFacade());
-    }
-	
-    @Transactional
-    @Listen
-    public void on(EntityRemoved event) {
-    	if (event.getEntity() instanceof User) {
-    		Long id = event.getEntity().getId();
-    		transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-			    	cache.remove(id);
-				}
-				
-    		});
-    	}
-    }
-    
-    @Transactional
-    @Listen
-    public void on(EntityPersisted event) {
-    	if (event.getEntity() instanceof User) 
-    		cacheAfterCommit((User) event.getEntity());
-    }
-    
-    private void cacheAfterCommit(User user) {
-    	UserFacade facade = user.getFacade();
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				if (cache != null)
-					cache.put(facade.getId(), facade);
-			}
-			
+        cache = new UserCache(hazelcastInstance.getMap("userCache"));
+        var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("userCacheInited");
+		clusterManager.init(cacheInited, () -> {
+			for (User user: query())
+				cache.put(user.getId(), user.getFacade());
+			return 1L;			
 		});
     }
     
@@ -497,6 +461,24 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		}
 
         return authorizedUsers;	
+	}
+
+	@Transactional
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof User) {
+			var facade = (UserFacade) event.getEntity().getFacade();
+			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
+		}
+	}
+
+	@Transactional
+	@Listen
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof User) {
+			var id = event.getEntity().getId();
+			transactionManager.runAfterCommit(() -> cache.remove(id));
+		}
 	}
 	
 }

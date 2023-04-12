@@ -96,54 +96,49 @@ public class KubernetesResource {
 		// database connection when running step at project server side
 		sessionManager.closeSession(); 
 		try {
-			StreamingOutput os = new StreamingOutput() {
+			StreamingOutput os = output -> {
+				File filesDir = FileUtils.createTempDir();
+				try {
+					int length = readInt(is);
+					List<Integer> stepPosition = new ArrayList<>();
+					for (int i=0; i<length; i++) 
+						stepPosition.add(readInt(is));
+					
+					Map<String, String> placeholderValues = new HashMap<>();
+					length = readInt(is);
+					for (int i=0; i<length; i++) 
+						placeholderValues.put(readString(is), readString(is));
+					
+					FileUtils.untar(is, filesDir, false);
+					
+					JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
+					Map<String, byte[]> outputFiles = jobManager.runServerStep(jobContext, 
+							stepPosition, filesDir, placeholderValues, true, new TaskLogger() {
 
-				@Override
-			   public void write(OutputStream output) throws IOException {
-					File filesDir = FileUtils.createTempDir();
-					try {
-						int length = readInt(is);
-						List<Integer> stepPosition = new ArrayList<>();
-						for (int i=0; i<length; i++) 
-							stepPosition.add(readInt(is));
-						
-						Map<String, String> placeholderValues = new HashMap<>();
-						length = readInt(is);
-						for (int i=0; i<length; i++) 
-							placeholderValues.put(readString(is), readString(is));
-						
-						FileUtils.untar(is, filesDir, false);
-						
-						JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
-						Map<String, byte[]> outputFiles = jobManager.runServerStep(jobContext, 
-								stepPosition, filesDir, placeholderValues, true, new TaskLogger() {
-
-							@Override
-							public void log(String message, String sessionId) {
-								// While testing, ngrok.io buffers response and build can not get log entries 
-								// timely. This won't happen on pagekite however
-								KubernetesHelper.writeInt(output, 1);
-								KubernetesHelper.writeString(output, message);
-								try {
-									output.flush();
-								} catch (IOException e) {
-									throw new RuntimeException(e);
-								}
+						@Override
+						public void log(String message, String sessionId) {
+							// While testing, ngrok.io buffers response and build can not get log entries 
+							// timely. This won't happen on pagekite however
+							KubernetesHelper.writeInt(output, 1);
+							KubernetesHelper.writeString(output, message);
+							try {
+								output.flush();
+							} catch (IOException e) {
+								throw new RuntimeException(e);
 							}
-							
-						});
-						if (outputFiles == null)
-							outputFiles = new HashMap<>();
-						byte[] bytes = SerializationUtils.serialize((Serializable) outputFiles); 
-						KubernetesHelper.writeInt(output, 2);
-						KubernetesHelper.writeInt(output, bytes.length);
-						output.write(bytes);
-					} finally {
-						FileUtils.deleteDir(filesDir);
-					}						
-			   }				   
-			   
-			};
+						}
+						
+					});
+					if (outputFiles == null)
+						outputFiles = new HashMap<>();
+					byte[] bytes = SerializationUtils.serialize((Serializable) outputFiles); 
+					KubernetesHelper.writeInt(output, 2);
+					KubernetesHelper.writeInt(output, bytes.length);
+					output.write(bytes);
+				} finally {
+					FileUtils.deleteDir(filesDir);
+				}						
+		   };
 			return Response.ok(os).build();
 		} finally {
 			sessionManager.openSession();
@@ -154,22 +149,17 @@ public class KubernetesResource {
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	@GET
 	public Response downloadDependencies() {
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
-				File tempDir = FileUtils.createTempDir();
-				try {
-					jobManager.copyDependencies(jobContext, tempDir);
-					FileUtils.tar(tempDir, output, false);
-					output.flush();
-				} finally {
-					FileUtils.deleteDir(tempDir);
-				}
-		   }				   
-		   
-		};
+		StreamingOutput os = output -> {
+			JobContext jobContext = jobManager.getJobContext(getJobToken(), true);
+			File tempDir = FileUtils.createTempDir();
+			try {
+				jobManager.copyDependencies(jobContext, tempDir);
+				FileUtils.tar(tempDir, output, false);
+				output.flush();
+			} finally {
+				FileUtils.deleteDir(tempDir);
+			}
+	   };
 		return Response.ok(os).build();
 	}
 	 

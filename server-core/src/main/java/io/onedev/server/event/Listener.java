@@ -3,7 +3,7 @@ package io.onedev.server.event;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class Listener implements Comparable<Listener> {
+public class Listener {
 
 	private final Object singleton;
 	
@@ -20,11 +20,6 @@ public class Listener implements Comparable<Listener> {
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public int compareTo(Listener o) {
-		return method.getAnnotation(Listen.class).value() - o.method.getAnnotation(Listen.class).value();
 	}
 	
 }

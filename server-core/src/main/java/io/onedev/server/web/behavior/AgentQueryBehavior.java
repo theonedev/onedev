@@ -23,8 +23,9 @@ import io.onedev.server.web.util.SuggestionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.sort;
 
 @SuppressWarnings("serial")
 public class AgentQueryBehavior extends ANTLRAssistBehavior {
@@ -48,8 +49,9 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 						AgentManager agentManager = OneDev.getInstance(AgentManager.class);
 						AgentAttributeManager attributeManager = OneDev.getInstance(AgentAttributeManager.class);
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> fields = new ArrayList<>(Agent.QUERY_FIELDS);
-							List<String> attributeNames = attributeManager.getAttributeNames();
+							var fields = new ArrayList<>(Agent.QUERY_FIELDS);
+							var attributeNames = new ArrayList<>(attributeManager.getAttributeNames());
+							sort(attributeNames);
 							fields.addAll(attributeNames);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
@@ -65,7 +67,9 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 								if (operator == AgentQueryLexer.EverUsedSince || operator == AgentQueryLexer.NotUsedSince) {
 									return SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 								} else if (operator == AgentQueryLexer.HasAttribute) {
-									return SuggestionUtils.suggest(attributeManager.getAttributeNames(), matchWith);
+									var attributeNames = new ArrayList<>(attributeManager.getAttributeNames());									
+									sort(attributeNames);
+									return SuggestionUtils.suggest(attributeNames, matchWith);
 								} else if (operator == AgentQueryLexer.RanBuild) { 
 									return SuggestionUtils.suggestBuilds(null, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								}
@@ -75,13 +79,13 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 									AgentQuery.checkField(fieldName, operator);
 									if (fieldName.equals(Agent.NAME_OS_NAME)) {
 										var osNames = new ArrayList<>(agentManager.getOsNames());
-										Collections.sort(osNames);
+										sort(osNames);
 										return SuggestionUtils.suggest(osNames, matchWith);
 									} else if (fieldName.equals(Agent.NAME_NAME)) {
 										return SuggestionUtils.suggestAgents(matchWith);
 									} else if (fieldName.equals(Agent.NAME_OS_ARCH)) {
 										var osArchs = new ArrayList<>(agentManager.getOsArchs());
-										Collections.sort(osArchs);
+										sort(osArchs);
 										return SuggestionUtils.suggest(osArchs, matchWith);
 									} else {
 										return null;

@@ -8,6 +8,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
+import io.onedev.server.OneDev;
 import org.apache.shiro.web.env.EnvironmentLoader;
 import org.apache.shiro.web.env.EnvironmentLoaderListener;
 import org.apache.shiro.web.servlet.ShiroFilter;
@@ -118,7 +119,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		 * Configure a servlet to serve contents under site folder. Site folder can be used 
 		 * to hold site specific web assets.   
 		 */
-		File assetsDir = new File(Bootstrap.getSiteDir(), "assets");
+		File assetsDir = OneDev.getAssetsDir();
 		
 		boolean hasCustomLogo = false;
 		boolean hasSiteMapTxt = false;

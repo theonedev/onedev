@@ -41,7 +41,7 @@ public class AvatarEditPage extends ProjectSettingPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAvatarManager().getProjectUploaded(getProject().getId()).exists());
+				setVisible(getAvatarManager().getProjectUploadedFile(getProject().getId()).exists());
 			}
 
 			@Override

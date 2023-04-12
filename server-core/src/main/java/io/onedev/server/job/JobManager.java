@@ -17,7 +17,6 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public interface JobManager {
 	
@@ -36,16 +35,16 @@ public interface JobManager {
 	
 	void resume(Build build);
 
-	void runJob(UUID serverUUID, ClusterRunnable runnable);
+	void runJob(String server, ClusterRunnable runnable);
 
-	void runJobLocal(JobContext jobContext, JobRunnable runnable);
+	void runJob(JobContext jobContext, JobRunnable runnable);
 	
 	WebShell openShell(Long buildId, Terminal terminal);
 	
 	JobContext getJobContext(String jobToken, boolean mustExist);
 	
 	@Nullable
-	Shell getShellLocal(String sessionId);
+	Shell getShell(String sessionId);
 	
 	void reportJobWorkspace(JobContext jobContext, String jobWorkspace);
 	

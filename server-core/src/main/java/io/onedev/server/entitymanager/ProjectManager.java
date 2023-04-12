@@ -1,16 +1,17 @@
 package io.onedev.server.entitymanager;
 
 import io.onedev.server.cluster.ClusterTask;
-import io.onedev.server.cluster.ProjectServer;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.replica.ProjectReplica;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
 import org.apache.shiro.authz.Permission;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 
 import javax.annotation.Nullable;
@@ -21,11 +22,11 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public interface ProjectManager extends EntityManager<Project> {
-	
+
 	@Nullable 
 	Project findByPath(String path);
 	
@@ -75,8 +76,6 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Collection<Long> getIds();
 	
-	Map<Long, ProjectServer> getStorageServers();
-	
 	Collection<Long> getSubtreeIds(Long projectId);
 	
 	Collection<Project> getPermittedProjects(Permission permission);
@@ -87,11 +86,17 @@ public interface ProjectManager extends EntityManager<Project> {
 	String getFavoriteQuery();
 	
 	@Nullable
-	UUID getStorageServerUUID(Long projectId, boolean mustExist);
+	String getActiveServer(Long projectId, boolean mustExist);
 	
-	<T> T runOnProjectServer(Long projectId, ClusterTask<T> task);
+	Map<Long, String> getActiveServers();
 	
-	<T> Future<T> submitToProjectServer(Long projectId, ClusterTask<T> task);
+	<T> T runOnActiveServer(Long projectId, ClusterTask<T> task);
+
+	<T> Map<String, T> runOnReplicaServers(Long projectId, ClusterTask<T> task);
+	
+	<T> Future<T> submitToActiveServer(Long projectId, ClusterTask<T> task);
+	
+	<T> Map<String, Future<T>> submitToReplicaServers(Long projectId, ClusterTask<T> task);
 	
 	File getLfsObjectsDir(Long projectId);
 	
@@ -101,5 +106,73 @@ public interface ProjectManager extends EntityManager<Project> {
 	ArtifactInfo getSiteArtifactInfo(Long projectId, String siteArtifactPath);
 
 	void checkGitConfig(Long projectId, GitPackConfig gitPackConfig);
+
+	void redistributeReplicas();
+	
+	void directoryModified(Long projectId, File directory);
+
+	boolean hasLfsObjects(Long projectId);
+	
+	Map<String, ProjectReplica> getReplicas(Long projectId);
+	
+	void requestToSyncReplica(Long projectId, String syncWithServer);
+
+	Collection<ObjectId> readLfsSinceCommits(Long projectId);
+	
+	void writeLfsSinceCommits(Long projectId, Collection<ObjectId> commitIds);
+	
+	void syncDirectory(Long projectId, String path, Consumer<String> childSyncer, String activeServer);
+		
+	void syncDirectory(Long projectId, String path, String readLock, String activeServer);
+
+	void syncFile(Long projectId, String path, String readLock, String activeServer);
+
+	File getStorageDir();
+
+	File getStorageDir(Long projectId);
+
+	/**
+	 * Get directory to store git repository of specified project
+	 *
+	 * @return
+	 * 			directory to store git repository. The directory will be exist after calling this method
+	 */
+	File getGitDir(Long projectId);
+
+	/**
+	 * Get directory to store Lucene index of specified project
+	 *
+	 * @return
+	 * 			directory to store lucene index. The directory will be exist after calling this method
+	 */
+	File getIndexDir(Long projectId);
+
+	/**
+	 * Get directory to store static content of specified project
+	 *
+	 * @return
+	 * 			directory to store static content. The directory will be exist after calling this method
+	 */
+	File getSiteDir(Long projectId);
+
+	/**
+	 * Get directory to store additional info of specified project
+	 *
+	 * @return
+	 * 			directory to store additional info. The directory will be exist after calling this method
+	 */
+	File getInfoDir(Long projectId);
+
+	void initLfsDir(Long projectId);
+
+	/**
+	 * Get directory to store attachments of specified project
+	 *
+	 * @return
+	 * 			directory store attachments. The directory will be exist after calling this method
+	 */
+	File getAttachmentDir(Long projectId);
+
+	File getSubDir(Long projectId, String subdirPath);
 	
 }

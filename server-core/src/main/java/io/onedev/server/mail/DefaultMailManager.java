@@ -38,6 +38,7 @@ import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ParsedEmailAddress;
 import io.onedev.server.validation.validator.UserNameValidator;
+import jnr.ffi.Struct;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shiro.authz.Permission;
@@ -76,6 +77,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+
+import static io.onedev.server.model.Setting.Key.MAIL;
+import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class DefaultMailManager implements MailManager, Serializable {
@@ -332,29 +336,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 	public void on(EntityPersisted event) {
 		if (event.getEntity() instanceof Setting) {
 			Setting setting = (Setting) event.getEntity();
-			if (setting.getKey() == Setting.Key.MAIL) {
-				transactionManager.runAfterCommit(new ClusterRunnable() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void run() {
-						clusterManager.submitToServer(clusterManager.getLeaderServerUUID(), new ClusterTask<Void>() {
-
-							private static final long serialVersionUID = 1L;
-
-							@Override
-							public Void call() throws Exception {
-								Thread copy = thread;
-								if (copy != null)
-									copy.interrupt();
-								return null;
-							}
-							
-						});
-					}
-					
-				});
+			if (setting.getKey() == MAIL) {
+				transactionManager.runAfterCommit(() -> clusterManager.submitToServer(clusterManager.getLeaderServerAddress(), () -> {
+					Thread copy = thread;
+					if (copy != null)
+						copy.interrupt();
+					return null;
+				}));
 			}
 		}
 	}
@@ -407,7 +395,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 					receivers.addAll(Arrays.asList(InternetAddress.parse(ccHeader[0], true)));
 				
 				List<String> receiverEmailAddresses = 
-						receivers.stream().map(it->it.getAddress()).collect(Collectors.toList());
+						receivers.stream().map(InternetAddress::getAddress).collect(toList());
 				
 				for (InternetAddress receiver: receivers) {
 					logger.trace("Processing on behalf of receiver '" + receiver.getAddress() + "'");
@@ -828,45 +816,35 @@ public class DefaultMailManager implements MailManager, Serializable {
 			}
 			
 		});
-		thread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while (thread != null) {
-					try {
-						MailSetting mailSetting = settingManager.getMailSetting();
-						MailCheckSetting checkSetting = mailSetting!=null?mailSetting.getCheckSetting():null;
-						if (checkSetting != null && clusterManager.isLeaderServer()) {
-							MailSendSetting sendSetting = mailSetting.getSendSetting();
-							MailPosition mailPosition = new MailPosition();
-							while (thread != null) {
-								Future<?> future = monitorInbox(checkSetting, new MessageListener() {
-									
-									@Override
-									public void onReceived(Message message) throws IOException, MessagingException {
-										onMessage(sendSetting, checkSetting, message);
-									}
-									
-								}, mailPosition);
-								
-								try {
-									future.get();
-								} catch (InterruptedException e) {
-									future.cancel(true);
-									throw e;
-								} catch (ExecutionException e) {
-									if (ExceptionUtils.find(e, FolderClosedException.class) == null)
-										logger.error("Error monitoring inbox", e);
-									else
-										logger.warn("Lost connection to mail server, will reconnect later... ");
-									Thread.sleep(5000);
-								}
+		thread = new Thread(() -> {
+			while (thread != null) {
+				try {
+					MailSetting mailSetting = settingManager.getMailSetting();
+					MailCheckSetting checkSetting = mailSetting!=null?mailSetting.getCheckSetting():null;
+					if (checkSetting != null && clusterManager.isLeaderServer()) {
+						MailSendSetting sendSetting = mailSetting.getSendSetting();
+						MailPosition mailPosition = new MailPosition();
+						while (thread != null) {
+							Future<?> future = monitorInbox(checkSetting, message -> 
+									onMessage(sendSetting, checkSetting, message), mailPosition);
+							
+							try {
+								future.get();
+							} catch (InterruptedException e) {
+								future.cancel(true);
+								throw e;
+							} catch (ExecutionException e) {
+								if (ExceptionUtils.find(e, FolderClosedException.class) == null)
+									logger.error("Error monitoring inbox", e);
+								else
+									logger.warn("Lost connection to mail server, will reconnect later... ");
+								Thread.sleep(5000);
 							}
-						} else {
-							Thread.sleep(60000);
 						}
-					} catch (InterruptedException e) {
+					} else {
+						Thread.sleep(60000);
 					}
+				} catch (InterruptedException ignored) {
 				}
 			}
 		});
@@ -881,7 +859,7 @@ public class DefaultMailManager implements MailManager, Serializable {
 			copy.interrupt();
 			try {
 				copy.join();
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 		}
 	}
@@ -1004,13 +982,13 @@ public class DefaultMailManager implements MailManager, Serializable {
 					if (inbox != null && inbox.isOpen()) {
 						try {
 							inbox.close(false);
-						} catch (Exception e) {
+						} catch (Exception ignored) {
 						}
 					}
 					if (store != null) {
 						try {
 							store.close();
-						} catch (Exception e) {
+						} catch (Exception ignored) {
 						}
 					}
 				}
@@ -1111,10 +1089,10 @@ public class DefaultMailManager implements MailManager, Serializable {
 				        // alternatives appear in an order of increasing 
 				        // faithfulness to the original content. Customize as req'd.
 				        return getText(project, attachmentGroup, multipart.getBodyPart(count - 1), attachments);
-				    String result = "";
+				    StringBuilder builder = new StringBuilder();
 				    for (int i=0; i<count; i++)  
-				        result += getText(project, attachmentGroup, multipart.getBodyPart(i), attachments);
-				    return result;
+				        builder.append(getText(project, attachmentGroup, multipart.getBodyPart(i), attachments));
+				    return builder.toString();
 			    } else {
 			    	return "";
 			    }
@@ -1131,7 +1109,8 @@ public class DefaultMailManager implements MailManager, Serializable {
 	    if (part.getDisposition() != null) {
 	    	String[] contentId = part.getHeader("Content-ID");
 	    	String fileName = MimeUtility.decodeText(part.getFileName());
-	        String attachmentName = attachmentManager.saveAttachment(project.getId(), attachmentGroup, fileName, part.getInputStream());
+	        String attachmentName = attachmentManager.saveAttachment(project.getId(), attachmentGroup, 
+					fileName, part.getInputStream());
 			String attachmentUrl = project.getAttachmentUrlPath(attachmentGroup, attachmentName);
 			Attachment attachment;
 	        if (part.isMimeType("image/*"))

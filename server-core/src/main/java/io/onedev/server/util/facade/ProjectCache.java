@@ -22,6 +22,9 @@ import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
 import io.onedev.server.util.match.WildcardUtils;
 
+import static io.onedev.server.util.match.WildcardUtils.matchPath;
+import static java.util.Comparator.comparing;
+
 public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Serializable {
 
 	public ProjectCache(Map<Long, ProjectFacade> delegate) {
@@ -45,17 +48,21 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Seria
 	public Collection<Long> getMatchingIds(String pathPattern) {
 		Collection<Long> ids = new HashSet<>();
 		for (ProjectFacade project: values()) {
-			if (WildcardUtils.matchPath(pathPattern.toLowerCase(), project.getPath().toLowerCase()))
+			if (matchPath(pathPattern.toLowerCase(), project.getPath().toLowerCase()))
 				ids.add(project.getId());
 		}
 		return ids;
 	}
 
 	public Collection<Long> getSubtreeIds(Long id) {
+		return getSubtreeIds(values(), id);
+	}
+
+	private Collection<Long> getSubtreeIds(Collection<ProjectFacade> projects, Long id) {
 		Collection<Long> treeIds = Sets.newHashSet(id);
-		for (ProjectFacade facade: values()) {
+		for (ProjectFacade facade: projects) {
 			if (id.equals(facade.getParentId()))
-				treeIds.addAll(getSubtreeIds(facade.getId()));
+				treeIds.addAll(getSubtreeIds(projects, facade.getId()));
 		}
 		return treeIds;
 	}
@@ -76,22 +83,19 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Seria
     }
     
 	public List<ProjectFacade> getChildren(Long id) {
+		return getChildren(values(), id);
+	}
+
+	private List<ProjectFacade> getChildren(Collection<ProjectFacade> projects, Long id) {
 		List<ProjectFacade> children = new ArrayList<>();
-		for (ProjectFacade facade: values()) {
+		for (ProjectFacade facade: projects) {
 			if (id.equals(facade.getParentId()))
 				children.add(facade);
 		}
-		Collections.sort(children, new Comparator<ProjectFacade>() {
-
-			@Override
-			public int compare(ProjectFacade o1, ProjectFacade o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-			
-		});
+		Collections.sort(children, comparing(ProjectFacade::getName));
 		return children;
 	}
-
+	
 	@Override
 	public ProjectCache clone() {
 		return new ProjectCache(new HashMap<>(delegate));
@@ -108,14 +112,7 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Seria
 	}
 	
 	public Comparator<Project> comparingPath() {
-		return new Comparator<Project>() {
-
-			@Override
-			public int compare(Project o1, Project o2) {
-				return get(o1.getId()).getPath().compareTo(get(o2.getId()).getPath());
-			}
-			
-		};		
+		return (o1, o2) -> get(o1.getId()).getPath().compareTo(get(o2.getId()).getPath());		
 	}
 
 }

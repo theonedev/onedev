@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.IMap;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -11,9 +12,10 @@ import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
+import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.issue.*;
-import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.migration.VersionedXmlDoc;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;
@@ -113,7 +115,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final SequenceGenerator numberGenerator;
 	
-	private volatile Map<String, Long> issueIds;
+	private volatile IMap<String, Long> ids;
 	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldManager fieldManager, TransactionManager transactionManager, 
@@ -146,19 +148,23 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@SuppressWarnings("unchecked")
 	@Sessional
 	@Listen
-	public void on(SystemStarted event) {
+	public void on(SystemStarting event) {
 		logger.info("Caching issue info...");
 
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        issueIds = hazelcastInstance.getReplicatedMap("issueIds");
+        ids = hazelcastInstance.getMap("issueIds");
         
-		Query<?> query = dao.getSession().createQuery("select id, project.id, number from Issue");
-		for (Object[] fields: (List<Object[]>)query.list()) {
-			Long issueId = (Long) fields[0];
-			Long projectId = (Long)fields[1];
-			Long issueNumber = (Long) fields[2];
-			issueIds.put(getCacheKey(projectId, issueNumber), issueId);
-		}
+		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("issueCacheInited");
+		clusterManager.init(cacheInited, () -> {
+			Query<?> query = dao.getSession().createQuery("select id, project.id, number from Issue");
+			for (Object[] fields: (List<Object[]>)query.list()) {
+				Long issueId = (Long) fields[0];
+				Long projectId = (Long)fields[1];
+				Long issueNumber = (Long) fields[2];
+				ids.put(getCacheKey(projectId, issueNumber), issueId);
+			}
+			return 1L;
+		});
 	}
 	
 	@Sessional
@@ -217,7 +223,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issue.getAuthorizations().add(authorization);
 		authorizationManager.create(authorization);
 		
-		updateCacheAfterCommit(Lists.newArrayList(issue));
 		listenerRegistry.post(new IssueOpened(issue));
 	}
 
@@ -849,8 +854,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Override
 	public void delete(Issue issue) {
 		dao.remove(issue);
-	
-		removeFromCacheAfterCommit(Lists.newArrayList(issue));
 		listenerRegistry.post(new IssueDeleted(issue));
 	}
 	
@@ -861,71 +864,37 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	private String getCacheKey(Long projectId, Long issueNumber) {
 		return projectId + ":" + issueNumber;
 	}
-	
-	private void removeFromCacheAfterCommit(Collection<Issue> issues) {
-		Collection<String> cacheKeysToDelete = new ArrayList<>();
-		for (Issue issue: issues)
-			cacheKeysToDelete.add(getCacheKey(issue));
-		transactionManager.runAfterCommit(new Runnable() {
 
-			@Override
-			public void run() {
-				for (var issueKey: cacheKeysToDelete)
-					issueIds.remove(issueKey);
-			}
-			
-		});
-	}
-	
-	private void updateCacheAfterCommit(Collection<Issue> issues) {
-		Map<String, Long> cacheEntriesToUpdate = new HashMap<>();
-		for (Issue issue: issues)
-			cacheEntriesToUpdate.put(getCacheKey(issue), issue.getId());
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				for (var entry: cacheEntriesToUpdate.entrySet())
-					issueIds.put(entry.getKey(), entry.getValue());
-			}
-
-		});
-		
+	@Transactional
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof Issue) {
+			Issue issue = (Issue) event.getEntity();
+			var issueKey = getCacheKey(issue);
+			var issueId = issue.getId();
+			transactionManager.runAfterCommit(() -> ids.put(issueKey, issueId));
+		}
 	}
 	
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof Project) {
+		if (event.getEntity() instanceof Issue) {
+			var cacheKey = getCacheKey((Issue) event.getEntity());
+			transactionManager.runAfterCommit(() -> ids.remove(cacheKey));
+			
+		} else if (event.getEntity() instanceof Project) {
 			Project project = (Project) event.getEntity();
 	    	if (project.getForkRoot().equals(project))
 	    		numberGenerator.removeNextSequence(project);
 			
 			Long projectId = project.getId();
-			transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					for (var key: issueIds.entrySet().stream()
-							.filter(it->it.getKey().startsWith(projectId + ":"))
-							.map(Map.Entry::getKey)
-							.collect(Collectors.toSet())) {
-						issueIds.remove(key);
-					}
-				}
-			});
+			transactionManager.runAfterCommit(() -> ids.removeAll(entry -> entry.getKey().startsWith(projectId + ":")));
 		}
 	}
 	
-	@Listen
-	@Sessional
-	public void on(IssuesImported event) {
-		for (var issueId: event.getIssueIds())
-			issueIds.put(getCacheKey(dao.load(Issue.class, issueId)), issueId);			
-	}
-
 	private Long getIssueId(Long projectId, Long issueNumber) {
-		return issueIds.get(getCacheKey(projectId, issueNumber));
+		return ids.get(getCacheKey(projectId, issueNumber));
 	}
 	
 	@Sessional
@@ -1057,7 +1026,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			});
 		});
 		
-		updateCacheAfterCommit(cloneMapping.values());
 		listenerRegistry.post(new IssuesCopied(sourceProject, targetProject, cloneMapping));
 	}
 	
@@ -1117,7 +1085,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			dao.persist(issue);
 		}
 		
-		updateCacheAfterCommit(issues);
 		listenerRegistry.post(new IssuesMoved(sourceProject, targetProject, issues));
 	}
 	
@@ -1126,7 +1093,6 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public void delete(Collection<Issue> issues, Project project) {
 		for (Issue issue: issues)
 			dao.remove(issue);
-		removeFromCacheAfterCommit(issues);
 		listenerRegistry.post(new IssuesDeleted(project, issues));
 	}
 	

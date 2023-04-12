@@ -1,9 +1,7 @@
 package io.onedev.server.entitymanager;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.File;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
@@ -71,7 +69,7 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<Long> queryIds(Project project, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 
-	Collection<Long> getNumbersByProject(Long projectId);
+	Collection<Long> getNumbers(Long projectId);
 
 	Collection<Long> filterNumbers(Long projectId, Collection<String> commitHashes);
 
@@ -95,5 +93,11 @@ public interface BuildManager extends EntityManager<Build> {
 	ArtifactInfo getArtifactInfo(Build build, @Nullable String artifactPath);
 	
 	void deleteArtifact(Build build, @Nullable String artifactPath);
+	
+	void syncBuilds(Long projectId, String activeServer);
+	
+	File getStorageDir(Long projectId, Long buildNumber);
+	
+	void initArtifactsDir(Long projectId, Long buildNumber);
 	
 }

@@ -40,7 +40,7 @@ public class BearerAuthenticationFilter extends PathMatchingFilter {
 		if (!subject.isAuthenticated()) {
 			String bearerToken = SecurityUtils.getBearerToken((HttpServletRequest)request);
 			if (bearerToken != null) {
-				if (clusterManager.getCredentialValue().equals(bearerToken)) { 
+				if (clusterManager.getCredential().equals(bearerToken)) { 
 					subject.login(new BearerAuthenticationToken(userManager.getSystem()));
 				} else {
 	            	User user = userManager.findByAccessToken(bearerToken);

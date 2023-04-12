@@ -1,32 +1,6 @@
 package io.onedev.server.git;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-
-import javax.annotation.Nullable;
-
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.util.ThreadContext;
-import org.apache.sshd.common.channel.ChannelOutputStream;
-import org.apache.sshd.server.Environment;
-import org.apache.sshd.server.ExitCallback;
-import org.apache.sshd.server.channel.ChannelSession;
-import org.apache.sshd.server.command.Command;
-import org.apache.sshd.server.session.ServerSession;
-import org.apache.sshd.server.session.ServerSessionAware;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.OneDev;
@@ -41,12 +15,29 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.ssh.SshAuthenticator;
 import io.onedev.server.ssh.SshManager;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.facade.ProjectFacade;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.shiro.util.ThreadContext;
+import org.apache.sshd.common.channel.ChannelOutputStream;
+import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.channel.ChannelSession;
+import org.apache.sshd.server.command.Command;
+import org.apache.sshd.server.session.ServerSession;
+import org.apache.sshd.server.session.ServerSessionAware;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.io.*;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 class SshCommand implements Command, ServerSessionAware {
 	
@@ -118,9 +109,9 @@ class SshCommand implements Command, ServerSessionAware {
 		
 		ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
 		
-		UUID storageServerUUID = projectManager.getStorageServerUUID(projectFacade.getId(), true);
-		if (clusterAccess || storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
-	        File gitDir = OneDev.getInstance(StorageManager.class).getProjectGitDir(projectFacade.getId());
+		String activeServerAddress = projectManager.getActiveServer(projectFacade.getId(), true);
+		if (clusterAccess || activeServerAddress.equals(clusterManager.getLocalServerAddress())) {
+	        File gitDir = OneDev.getInstance(ProjectManager.class).getGitDir(projectFacade.getId());
 	        Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectFacade.getId(), SecurityUtils.getUserId());
 
 	        if (!clusterAccess) {
@@ -177,7 +168,7 @@ class SshCommand implements Command, ServerSessionAware {
 				@Override
 				public void run() {
 					SshManager sshManager = OneDev.getInstance(SshManager.class);
-					try (	var clientSession = sshManager.ssh(storageServerUUID); 
+					try (	var clientSession = sshManager.ssh(activeServerAddress); 
 							var clientChannel = clientSession.createExecChannel(commandString)) {
 						clientChannel.setIn(in);
 						clientChannel.setOut(out);

@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.exception.SystemNotReadyException;
+import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.util.ObjectReference;
 
 @Singleton
@@ -42,7 +42,7 @@ public class DefaultSessionManager implements SessionManager {
 						session.setHibernateFlushMode(FlushMode.MANUAL);
 						return session;
 					} else {
-						throw new SystemNotReadyException();
+						throw new ServerNotReadyException();
 					}
 				}
 
@@ -77,7 +77,7 @@ public class DefaultSessionManager implements SessionManager {
 	@Override
 	public Session getSession() {
 		if (sessionFactoryManager.getSessionFactory() == null)
-			throw new SystemNotReadyException();
+			throw new ServerNotReadyException();
 		else
 			return sessionReferenceHolder.get().get();
 	}
@@ -104,43 +104,26 @@ public class DefaultSessionManager implements SessionManager {
 
 	@Override
 	public void run(Runnable runnable) {
-		call(new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				runnable.run();
-				return null;
-			}
-			
+		call(() -> {
+			runnable.run();
+			return null;
 		});
 	}
 
 	@Override
 	public void runAsync(Runnable runnable) {
-		executorService.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					DefaultSessionManager.this.run(runnable);
-				} catch (Exception e) {
-					logger.error("Error executing in session", e);
-				}
+		executorService.execute(() -> {
+			try {
+				DefaultSessionManager.this.run(runnable);
+			} catch (Exception e) {
+				logger.error("Error executing in session", e);
 			}
-			
 		});
 	}
 
 	@Override
 	public void runAsyncAfterCommit(Runnable runnable) {
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				runAsync(runnable);
-			}
-			
-		});
+		transactionManager.runAfterCommit(() -> runAsync(runnable));
 	}
 
 }

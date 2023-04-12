@@ -1,7 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
@@ -11,18 +10,15 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.mailsetting.MailSetting;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.persistence.DataManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
-import org.hibernate.criterion.Restrictions;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -34,147 +30,154 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static io.onedev.server.model.Setting.PROP_KEY;
+import static org.hibernate.criterion.Restrictions.eq;
 
 @Singleton
 public class DefaultSettingManager extends BaseEntityManager<Setting> implements SettingManager {
 	
-	private final ClusterManager clusterManager;
-	
-	private volatile Map<Key, Serializable> settingValues;
+	private final Map<Key, Long> idCache = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultSettingManager(Dao dao, DataManager dataManager, ClusterManager clusterManager) {
+	public DefaultSettingManager(Dao dao) {
 		super(dao);
-		this.clusterManager = clusterManager;
 	}
 	
-	@Override
 	@Sessional
-	public void init() {
-		settingValues = clusterManager.getHazelcastInstance().getReplicatedMap("settingValues");
-		for (Setting setting: query()) {
-			if (setting.getValue() != null)
-				settingValues.put(setting.getKey(), setting.getValue());
+	protected Serializable getSettingValue(Key key) {
+		var setting = getSetting(key);
+		return setting != null? setting.getValue(): null;
+	}
+	
+	@Sessional
+	@Override
+	public Setting getSetting(Key key) {
+		Setting setting;
+		Long id = idCache.get(key);
+		if (id == null) {
+			setting = find(newCriteria().add(eq(PROP_KEY, key)));
+			if (setting != null)
+				idCache.put(key, setting.getId());
+		} else {
+			setting = load(id);
 		}
+		return setting;
 	}
 	
 	@Override
 	public SystemSetting getSystemSetting() {
-		return (SystemSetting) settingValues.get(Key.SYSTEM);
+		return (SystemSetting) getSettingValue(Key.SYSTEM);
 	}
 
-	@Sessional
-	@Override
-	public Setting findSetting(Key key) {
-		return find(EntityCriteria.of(Setting.class).add(Restrictions.eq("key", key)));
-	}
-
-	private void saveSetting(Key key, Serializable value) {
-		Setting setting = findSetting(key);
+	@Transactional
+	protected void saveSetting(Key key, Serializable value) {
+		var setting = getSetting(key);
 		if (setting == null) {
 			setting = new Setting();
 			setting.setKey(key);
 		}
 		setting.setValue(value);
 		dao.persist(setting);
-		
-		if (value != null)
-			settingValues.put(key, value);
-		else
-			settingValues.remove(key);
 	}
 	
 	@Override
 	public MailSetting getMailSetting() {
-		return (MailSetting) settingValues.get(Key.MAIL);
+		return (MailSetting) getSettingValue(Key.MAIL);
 	}
 
 	@Override
 	public BackupSetting getBackupSetting() {
-		return (BackupSetting) settingValues.get(Key.BACKUP);
+		return (BackupSetting) getSettingValue(Key.BACKUP);
 	}
 
 	@Override
 	public BrandingSetting getBrandingSetting() {
-        return (BrandingSetting) settingValues.get(Key.BRANDING);
+        return (BrandingSetting) getSettingValue(Key.BRANDING);
+	}
+	
+	@Override
+	public ClusterSetting getClusterSetting() {
+		return (ClusterSetting) getSettingValue(Key.CLUSTER_SETTING);
 	}
 
 	@Override
 	public SecuritySetting getSecuritySetting() {
-		return (SecuritySetting) settingValues.get(Key.SECURITY);
+		return (SecuritySetting) getSettingValue(Key.SECURITY);
 	}
 
 	@Override
 	public GlobalIssueSetting getIssueSetting() {
-		return (GlobalIssueSetting) settingValues.get(Key.ISSUE);
+		return (GlobalIssueSetting) getSettingValue(Key.ISSUE);
 	}
 
 	@Override
 	public Authenticator getAuthenticator() {
-		return (Authenticator) settingValues.get(Key.AUTHENTICATOR);
+		return (Authenticator) getSettingValue(Key.AUTHENTICATOR);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<JobExecutor> getJobExecutors() {
-		return (List<JobExecutor>) settingValues.get(Key.JOB_EXECUTORS);
+		return (List<JobExecutor>) getSettingValue(Key.JOB_EXECUTORS);
 	}
 
 	@Override
 	public NotificationTemplateSetting getNotificationTemplateSetting() {
-		return (NotificationTemplateSetting) settingValues.get(Key.NOTIFICATION_TEMPLATE_SETTING);
+		return (NotificationTemplateSetting) getSettingValue(Key.NOTIFICATION_TEMPLATE_SETTING);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<GroovyScript> getGroovyScripts() {
-		return (List<GroovyScript>) settingValues.get(Key.GROOVY_SCRIPTS);
+		return (List<GroovyScript>) getSettingValue(Key.GROOVY_SCRIPTS);
 	}
 
 	@Override
 	public GlobalPullRequestSetting getPullRequestSetting() {
-		return (GlobalPullRequestSetting) settingValues.get(Key.PULL_REQUEST);
+		return (GlobalPullRequestSetting) getSettingValue(Key.PULL_REQUEST);
 	}
 
 	@Override
 	public GlobalBuildSetting getBuildSetting() {
-		return (GlobalBuildSetting) settingValues.get(Key.BUILD);
+		return (GlobalBuildSetting) getSettingValue(Key.BUILD);
 	}
 
 	@Override
 	public GlobalProjectSetting getProjectSetting() {
-		return (GlobalProjectSetting) settingValues.get(Key.PROJECT);
+		return (GlobalProjectSetting) getSettingValue(Key.PROJECT);
 	}
 
 	@Override
 	public AgentSetting getAgentSetting() {
-		return (AgentSetting) settingValues.get(Key.AGENT);
+		return (AgentSetting) getSettingValue(Key.AGENT);
 	}
 
     @Override
     public SshSetting getSshSetting() {
-    	return (SshSetting) settingValues.get(Key.SSH);
+    	return (SshSetting) getSettingValue(Key.SSH);
     }
 
     @Override
     public PerformanceSetting getPerformanceSetting() {
-    	return (PerformanceSetting) settingValues.get(Key.PERFORMANCE);
+    	return (PerformanceSetting) getSettingValue(Key.PERFORMANCE);
     }
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<SsoConnector> getSsoConnectors() {
-		return (List<SsoConnector>) settingValues.get(Key.SSO_CONNECTORS);
+		return (List<SsoConnector>) getSettingValue(Key.SSO_CONNECTORS);
 	}
 
 	@Override
 	public ServiceDeskSetting getServiceDeskSetting() {
-		return (ServiceDeskSetting) settingValues.get(Key.SERVICE_DESK_SETTING); 
+		return (ServiceDeskSetting) getSettingValue(Key.SERVICE_DESK_SETTING); 
 	}
 
     @Override
     public GpgSetting getGpgSetting() {
-    	return (GpgSetting) settingValues.get(Key.GPG);
+    	return (GpgSetting) getSettingValue(Key.GPG);
     }
 
 	@Transactional
@@ -201,6 +204,12 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		saveSetting(Key.BRANDING, brandingSetting);
 	}
 
+	@Transactional
+	@Override
+	public void saveClusterSetting(ClusterSetting clusterSetting) {
+		saveSetting(Key.CLUSTER_SETTING, clusterSetting);
+	}
+	
 	@Transactional
 	@Override
 	public void saveSecuritySetting(SecuritySetting securitySetting) {
@@ -300,7 +309,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, ContributedAdministrationSetting> getContributedSettings() {
-		return (Map<String, ContributedAdministrationSetting>) settingValues.get(Key.CONTRIBUTED_SETTINGS);
+		return (Map<String, ContributedAdministrationSetting>) getSettingValue(Key.CONTRIBUTED_SETTINGS);
 	}
 
 	@Nullable

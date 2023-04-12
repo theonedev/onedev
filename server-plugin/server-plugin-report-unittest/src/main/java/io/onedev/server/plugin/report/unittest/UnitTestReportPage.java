@@ -38,7 +38,7 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 		protected UnitTestReport load() {
 			Long projectId = getProject().getId();
 			Long buildNumber = getBuild().getNumber();
-			return OneDev.getInstance(ProjectManager.class).runOnProjectServer(projectId, new GetUnitTestReport(projectId, buildNumber, getReportName()));
+			return OneDev.getInstance(ProjectManager.class).runOnActiveServer(projectId, new GetUnitTestReport(projectId, buildNumber, getReportName()));
 		}
 		
 	};
@@ -128,7 +128,7 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 
 				@Override
 				public UnitTestReport call() throws Exception {
-					File reportDir = new File(Build.getDir(projectId, buildNumber), UnitTestReport.CATEGORY + "/" + reportName);				
+					File reportDir = new File(Build.getStorageDir(projectId, buildNumber), UnitTestReport.DIR_CATEGORY + "/" + reportName);				
 					return UnitTestReport.readFrom(reportDir);
 				}
 				

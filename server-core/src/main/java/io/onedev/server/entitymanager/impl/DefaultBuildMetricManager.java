@@ -1,51 +1,13 @@
 package io.onedev.server.entitymanager.impl;
 
-import static io.onedev.commons.utils.ExceptionUtils.unchecked;
-
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.persistence.metamodel.EntityType;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.GroupAuthorization;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.Role;
-import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.model.*;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -57,6 +19,27 @@ import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.MetricIndicator;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.criteria.*;
+import javax.persistence.metamodel.EntityType;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.onedev.commons.utils.ExceptionUtils.unchecked;
+import static io.onedev.server.model.Build.PROP_JOB;
+import static io.onedev.server.model.Build.PROP_PROJECT;
+import static io.onedev.server.model.support.BuildMetric.PROP_BUILD;
+import static io.onedev.server.model.support.BuildMetric.PROP_REPORT;
 
 @Singleton
 public class DefaultBuildMetricManager implements BuildMetricManager {
@@ -88,8 +71,8 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 
 		List<Predicate> predicates = new ArrayList<>();
 		
-		Join<?, ?> buildJoin = metricRoot.join(BuildMetric.PROP_BUILD, JoinType.INNER);
-		predicates.add(builder.equal(buildJoin.get(Build.PROP_PROJECT), project));
+		Join<?, ?> buildJoin = metricRoot.join(PROP_BUILD, JoinType.INNER);
+		predicates.add(builder.equal(buildJoin.get(PROP_PROJECT), project));
 		
 		if (!SecurityUtils.canManageBuilds(project)) {
 			Key key = new Key(project.getId(), metricClass);
@@ -102,13 +85,13 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 					if (availableReportNamesOfJob != null) {
 						if (entry.getValue().containsAll(availableReportNamesOfJob)) {
 							jobsWithAllReports.add(entry.getKey());
-							jobPredicates.add(builder.equal(buildJoin.get(Build.PROP_JOB), entry.getKey()));
+							jobPredicates.add(builder.equal(buildJoin.get(PROP_JOB), entry.getKey()));
 						} else {
 							List<Predicate> reportPredicates = new ArrayList<>();
 							for (String reportName: entry.getValue()) 
-								reportPredicates.add(builder.equal(metricRoot.get(BuildMetric.PROP_REPORT), reportName));
+								reportPredicates.add(builder.equal(metricRoot.get(PROP_REPORT), reportName));
 							jobPredicates.add(builder.and(
-									builder.equal(buildJoin.get(Build.PROP_JOB), entry.getKey()), 
+									builder.equal(buildJoin.get(PROP_JOB), entry.getKey()), 
 									builder.or(reportPredicates.toArray(new Predicate[reportPredicates.size()]))));
 						}
 					} else {
@@ -159,22 +142,27 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 
 	@SuppressWarnings("unchecked")
 	@Listen
-	public void on(SystemStarted event) {
+	public void on(SystemStarting event) {
 		logger.info("Caching build metric info...");
 		
-		reportNames = clusterManager.getHazelcastInstance().getReplicatedMap("buildReportNames");
+		var hazelcastInstance = clusterManager.getHazelcastInstance();
+		reportNames = hazelcastInstance.getMap("buildReportNames");
 		
-		EntityManagerFactory emf = (EntityManagerFactory)dao.getSession().getEntityManagerFactory();
-		for (EntityType<?> entityType: emf.getMetamodel().getEntities()) {
-			Class<?> entityClass = entityType.getJavaType();
-			if (BuildMetric.class.isAssignableFrom(entityClass)) {
-				String queryString = String.format("select build.%s.id, build.%s, metric.%s from %s metric inner join metric.%s build", 
-						Build.PROP_PROJECT, Build.PROP_JOB, BuildMetric.PROP_REPORT, entityClass.getSimpleName(), BuildMetric.PROP_BUILD);
-				Query<?> query = dao.getSession().createQuery(queryString);
-				for (Object[] fields: (List<Object[]>)query.list()) 
-					populateReportNames(new Key((Long)fields[0], entityClass), (String)fields[1], (String)fields[2]);
+		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildMetricCacheInited");
+		clusterManager.init(cacheInited, () -> {
+			EntityManagerFactory emf = dao.getSession().getEntityManagerFactory();
+			for (EntityType<?> entityType: emf.getMetamodel().getEntities()) {
+				Class<?> entityClass = entityType.getJavaType();
+				if (BuildMetric.class.isAssignableFrom(entityClass)) {
+					String queryString = String.format("select build.%s.id, build.%s, metric.%s from %s metric inner join metric.%s build",
+							PROP_PROJECT, PROP_JOB, PROP_REPORT, entityClass.getSimpleName(), PROP_BUILD);
+					Query<?> query = dao.getSession().createQuery(queryString);
+					for (Object[] fields: (List<Object[]>)query.list())
+						populateReportNames(new Key((Long)fields[0], entityClass), (String)fields[1], (String)fields[2]);
+				}
 			}
-		}
+			return 1L;			
+		});
 	}
 	
 	@Transactional
@@ -182,18 +170,13 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
 			Long projectId = event.getEntity().getId();
-			transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					for (var key: reportNames.entrySet().stream()
-							.map(it->it.getKey())
-							.filter(it->it.projectId.equals(projectId))
-							.collect(Collectors.toSet())) {
-						reportNames.remove(key);
-					}
+			transactionManager.runAfterCommit(() -> {
+				for (var key: reportNames.entrySet().stream()
+						.map(it->it.getKey())
+						.filter(it->it.projectId.equals(projectId))
+						.collect(Collectors.toSet())) {
+					reportNames.remove(key);
 				}
-				
 			});
 		}
 	}
@@ -206,14 +189,7 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 			String reportName = buildMetric.getReportName();
 			String jobName = buildMetric.getBuild().getJobName();
 			Key key = new Key(buildMetric.getBuild().getProject().getId(), event.getEntity().getClass());
-			transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					populateReportNames(key, jobName, reportName);
-				}
-				
-			});
+			transactionManager.runAfterCommit(() -> populateReportNames(key, jobName, reportName));
 		}
 	}
 	

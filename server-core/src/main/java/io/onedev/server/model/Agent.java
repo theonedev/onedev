@@ -1,10 +1,12 @@
 package io.onedev.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.agent.AgentData;
 import io.onedev.k8shelper.OsInfo;
 import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.util.CollectionUtils;
 import org.hibernate.annotations.Cache;
@@ -14,13 +16,14 @@ import javax.persistence.*;
 import java.util.*;
 
 import static io.onedev.server.model.Agent.*;
+import static io.onedev.server.model.AgentLastUsedDate.PROP_VALUE;
 
 @Entity
 @Table(indexes={
 		@Index(columnList="o_token_id"), @Index(columnList=PROP_IP_ADDRESS),
 		@Index(columnList=PROP_PAUSED), @Index(columnList=PROP_NAME), 
 		@Index(columnList=PROP_OS_NAME), @Index(columnList=PROP_OS_VERSION), 
-		@Index(columnList=PROP_OS_ARCH), @Index(columnList=PROP_LAST_USED_DATE)}) 
+		@Index(columnList=PROP_OS_ARCH), @Index(columnList="o_lastUsedDate_id")}) 
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Agent extends AbstractEntity {
 	
@@ -49,8 +52,12 @@ public class Agent extends AbstractEntity {
 	public static final String NAME_OS_ARCH = "Os Arch";
 	
 	public static final String PROP_OS_ARCH = "osArch";
-	
+
+	public static final String NAME_LAST_USED_DATE = "Last Used Date";
+
 	public static final String PROP_LAST_USED_DATE = "lastUsedDate";
+	
+	public static final String PROP_TOKEN = "token";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_NAME, NAME_IP_ADDRESS, NAME_OS_NAME, NAME_OS_VERSION, NAME_OS_ARCH);
@@ -63,10 +70,11 @@ public class Agent extends AbstractEntity {
 			NAME_IP_ADDRESS, PROP_IP_ADDRESS,
 			NAME_OS_NAME, PROP_OS_NAME,
 			NAME_OS_VERSION, PROP_OS_VERSION,
-			NAME_OS_ARCH, PROP_OS_ARCH);	
+			NAME_OS_ARCH, PROP_OS_ARCH,
+			NAME_LAST_USED_DATE, PROP_LAST_USED_DATE + "." + PROP_VALUE);	
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
+	@OneToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable = false, unique = true)
 	private AgentToken token;
 	
 	@OneToMany(mappedBy="agent", cascade=CascadeType.REMOVE)
@@ -75,7 +83,7 @@ public class Agent extends AbstractEntity {
 	@OneToMany(mappedBy="agent")
 	private Collection<Build> builds = new ArrayList<>();
 	
-	@Column(nullable=false, unique=true)
+	@Column(nullable=false)
 	private String name;
 	
 	@Column(nullable=false)
@@ -96,7 +104,10 @@ public class Agent extends AbstractEntity {
 	
 	private boolean paused;
 	
-	private Date lastUsedDate;
+	@JsonIgnore
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(unique=true, nullable=false)
+	private AgentLastUsedDate lastUsedDate;
 	
 	private transient Boolean online;
 
@@ -180,11 +191,11 @@ public class Agent extends AbstractEntity {
 		this.attributes = attributes;
 	}
 
-	public Date getLastUsedDate() {
+	public AgentLastUsedDate getLastUsedDate() {
 		return lastUsedDate;
 	}
 
-	public void setLastUsedDate(Date lastUsedDate) {
+	public void setLastUsedDate(AgentLastUsedDate lastUsedDate) {
 		this.lastUsedDate = lastUsedDate;
 	}
 
@@ -196,8 +207,12 @@ public class Agent extends AbstractEntity {
 	}
 	
 	public boolean isOnline() {
-		if (online == null)
-			online = OneDev.getInstance(AgentManager.class).getAgentServers().containsKey(getId());
+		if (online == null) {
+			var agentManager = OneDev.getInstance(AgentManager.class);
+			var clusterManager = OneDev.getInstance(ClusterManager.class);
+			var server = agentManager.getAgentServer(getId());
+			online = server != null && clusterManager.getServer(server, false) != null;
+		}
 		return online;
 	}
 	

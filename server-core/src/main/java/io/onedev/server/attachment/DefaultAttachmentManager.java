@@ -23,7 +23,6 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.schedule.SchedulableTask;
@@ -38,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -46,6 +44,12 @@ import java.io.*;
 import java.util.*;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.server.model.Project.ATTACHMENT_DIR;
+import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 @Singleton
 public class DefaultAttachmentManager implements AttachmentManager, SchedulableTask, Serializable {
@@ -60,8 +64,6 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	
 	private final Dao dao;
 	
-	private final StorageManager storageManager;
-	
 	private final TransactionManager transactionManager;
 	
 	private final TaskScheduler taskScheduler;
@@ -75,11 +77,10 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
     private String taskId;
     
 	@Inject
-	public DefaultAttachmentManager(Dao dao, StorageManager storageManager, TransactionManager transactionManager,
+	public DefaultAttachmentManager(Dao dao, TransactionManager transactionManager,
 									TaskScheduler taskScheduler, SettingManager settingManager, 
 									ProjectManager projectManager, ClusterManager clusterManager) {
 		this.dao = dao;
-		this.storageManager = storageManager;
 		this.transactionManager = transactionManager;
 		this.taskScheduler = taskScheduler;
 		this.settingManager = settingManager;
@@ -92,8 +93,8 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	}
 	
 	@Override
-	public File getAttachmentGroupDirLocal(Long projectId, String attachmentGroup) {
-		File baseDir = storageManager.getProjectAttachmentDir(projectId);
+	public File getAttachmentGroupDir(Long projectId, String attachmentGroup) {
+		File baseDir = projectManager.getAttachmentDir(projectId);
 		File groupDir = getPermanentAttachmentGroupDir(baseDir, attachmentGroup);
 		if (groupDir.exists())
 			return groupDir;
@@ -106,22 +107,41 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	public void on(IssuesMoved event) {
 		Long sourceProjectId = event.getSourceProject().getId();
 		Long targetProjectId = event.getProject().getId();
-		File targetBaseDir = storageManager.getProjectAttachmentDir(targetProjectId);
+		File targetBaseDir = projectManager.getAttachmentDir(targetProjectId);
 		
-		UUID sourceStorageServerUUID = projectManager.getStorageServerUUID(sourceProjectId, true);
-		if (sourceStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
-			File sourceBaseDir = storageManager.getProjectAttachmentDir(sourceProjectId);
+		String sourceActiveServer = projectManager.getActiveServer(sourceProjectId, true);
+		if (sourceActiveServer.equals(clusterManager.getLocalServerAddress())) {
+			File sourceBaseDir = projectManager.getAttachmentDir(sourceProjectId);
 			for (Long issueId: event.getIssueIds()) {
 				Issue issue = dao.load(Issue.class, issueId);
 				String attachmentGroup = issue.getAttachmentGroup();
 				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, attachmentGroup);
 				File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, attachmentGroup);
-				FileUtils.createDir(targetGroupDir.getParentFile());
+				File tempGroupDir = new File(targetGroupDir.getParentFile(), UUID.randomUUID().toString());
 				try {
-					FileUtils.moveDirectory(sourceGroupDir, targetGroupDir);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+					write(getAttachmentLockName(sourceProjectId, attachmentGroup), () -> {
+						FileUtils.createDir(tempGroupDir.getParentFile());
+						try {
+							FileUtils.moveDirectory(sourceGroupDir, tempGroupDir);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						return null;
+					});
+					write(getAttachmentLockName(targetProjectId, attachmentGroup), () -> {
+						try {
+							FileUtils.deleteDir(targetGroupDir);
+							FileUtils.moveDirectory(tempGroupDir, targetGroupDir);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						return null;
+					});
+				} finally {
+					FileUtils.deleteDir(tempGroupDir);
 				}
+				projectManager.directoryModified(targetProjectId, sourceGroupDir.getParentFile());
+				projectManager.directoryModified(targetProjectId, targetGroupDir.getParentFile());
 			}			
 		} else {
 			Collection<String> attachmentGroups = new HashSet<>();
@@ -130,20 +150,40 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 				String attachmentGroup = issue.getAttachmentGroup();
 				attachmentGroups.add(attachmentGroup);
 				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, attachmentGroup);
-				
-				FileUtils.createDir(targetGroupDir);
-				downloadAttachments(targetGroupDir, sourceStorageServerUUID,
-						sourceProjectId, attachmentGroup);
+				File tempGroupDir = new File(targetGroupDir.getParentFile(), UUID.randomUUID().toString());
+				try {
+					FileUtils.createDir(tempGroupDir);
+					downloadAttachments(tempGroupDir, sourceActiveServer, sourceProjectId, attachmentGroup);
+
+					write(getAttachmentLockName(targetProjectId, attachmentGroup), () -> {
+						try {
+							FileUtils.deleteDir(targetGroupDir);
+							FileUtils.moveDirectory(tempGroupDir, targetGroupDir);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						return null;
+					});
+				} finally {
+					FileUtils.deleteDir(tempGroupDir);
+				}
+				projectManager.directoryModified(targetProjectId, targetGroupDir.getParentFile());
 			}
-			projectManager.runOnProjectServer(sourceProjectId, new ClusterTask<Void>() {
+			projectManager.runOnActiveServer(sourceProjectId, new ClusterTask<Void>() {
 
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				public Void call() throws Exception {
-					File sourceBaseDir = storageManager.getProjectAttachmentDir(sourceProjectId);
-					for (var attachmentGroup: attachmentGroups)
-						FileUtils.deleteDir(getPermanentAttachmentGroupDir(sourceBaseDir, attachmentGroup));
+				public Void call() {
+					File sourceBaseDir = projectManager.getAttachmentDir(sourceProjectId);
+					for (var attachmentGroup: attachmentGroups) {
+						var sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, attachmentGroup);
+						write(getAttachmentLockName(sourceProjectId, attachmentGroup), () -> {
+							FileUtils.deleteDir(sourceGroupDir);
+							return null;
+						});
+						projectManager.directoryModified(sourceProjectId, sourceGroupDir.getParentFile());
+					}
 					return null;
 				}
 
@@ -157,49 +197,81 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		Long sourceProjectId = event.getSourceProject().getId();
 		Long targetProjectId = event.getProject().getId();
 		
-		File targetBaseDir = storageManager.getProjectAttachmentDir(targetProjectId);
+		File targetBaseDir = projectManager.getAttachmentDir(targetProjectId);
 
-		UUID sourceStorageServerUUID = projectManager.getStorageServerUUID(sourceProjectId, true);
-		if (sourceStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
-			File sourceBaseDir = storageManager.getProjectAttachmentDir(sourceProjectId);
+		String sourceActiveServer = projectManager.getActiveServer(sourceProjectId, true);
+		if (sourceActiveServer.equals(clusterManager.getLocalServerAddress())) {
+			File sourceBaseDir = projectManager.getAttachmentDir(sourceProjectId);
 			for (var entry: event.getIssueIdMapping().entrySet()) {
 				Issue sourceIssue = dao.load(Issue.class, entry.getKey());
 				Issue targetIssue = dao.load(Issue.class, entry.getValue());
-				File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, sourceIssue.getAttachmentGroup());
-				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, targetIssue.getAttachmentGroup());
-
-				FileUtils.createDir(targetGroupDir.getParentFile());
+				var sourceAttachmentGroup = sourceIssue.getAttachmentGroup();
+				var targetAttachmentGroup = targetIssue.getAttachmentGroup();
+				File sourceGroupDir = getPermanentAttachmentGroupDir(sourceBaseDir, sourceAttachmentGroup);
+				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, targetAttachmentGroup);
+				File tempGroupDir = new File(targetGroupDir.getParentFile(), UUID.randomUUID().toString());
 				try {
-					FileUtils.copyDirectory(sourceGroupDir, targetGroupDir);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+					read(getAttachmentLockName(sourceProjectId, sourceAttachmentGroup), () -> {
+						try {
+							FileUtils.copyDirectory(sourceGroupDir, tempGroupDir);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						return null;
+					});
+					write(getAttachmentLockName(targetProjectId, targetAttachmentGroup), () -> {
+						try {
+							FileUtils.deleteDir(targetGroupDir);
+							FileUtils.moveDirectory(tempGroupDir, targetGroupDir);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						return null;
+					});
+				} finally {
+					FileUtils.deleteDir(tempGroupDir);
 				}
+				projectManager.directoryModified(targetProjectId, targetGroupDir.getParentFile());
 			}
 		} else {
 			for (var entry: event.getIssueIdMapping().entrySet()) {
 				Issue sourceIssue = dao.load(Issue.class, entry.getKey());
 				Issue targetIssue = dao.load(Issue.class, entry.getValue());
 				File targetGroupDir = getPermanentAttachmentGroupDir(targetBaseDir, targetIssue.getAttachmentGroup());
-
-				FileUtils.createDir(targetGroupDir);
-				downloadAttachments(targetGroupDir, sourceStorageServerUUID,
-						sourceProjectId, sourceIssue.getAttachmentGroup());
+				File tempGroupDir = new File(targetGroupDir.getParentFile(), UUID.randomUUID().toString());
+				try {
+					FileUtils.createDir(tempGroupDir);
+					downloadAttachments(tempGroupDir, sourceActiveServer,
+							sourceProjectId, sourceIssue.getAttachmentGroup());
+					write(getAttachmentLockName(targetProjectId, targetIssue.getAttachmentGroup()), () -> {
+						try {
+							FileUtils.deleteDir(targetGroupDir);
+							FileUtils.moveDirectory(tempGroupDir, targetGroupDir);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						return null;
+					});
+				} finally {
+					FileUtils.deleteDir(tempGroupDir);
+				}
+				projectManager.directoryModified(targetProjectId, targetGroupDir.getParentFile());
 			}
 		}		
 		
 	}
 	
-	private void downloadAttachments(File targetDir, UUID sourceStorageServerUUID,
+	private void downloadAttachments(File targetDir, String sourceActiveServer,
 									 Long sourceProjectId, String sourceAttachmentGroup) {
 		Client client = ClientBuilder.newClient();
 		try {
-			String fromServerUrl = clusterManager.getServerUrl(sourceStorageServerUUID);
+			String fromServerUrl = clusterManager.getServerUrl(sourceActiveServer);
 			WebTarget target = client.target(fromServerUrl).path("/~api/cluster/attachments")
 					.queryParam("projectId", sourceProjectId)
 					.queryParam("attachmentGroup", sourceAttachmentGroup);
 			Invocation.Builder builder = target.request();
-			builder.header(HttpHeaders.AUTHORIZATION,
-					KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+			builder.header(AUTHORIZATION,
+					BEARER + " " + clusterManager.getCredential());
 
 			try (Response response = builder.get()) {
 				KubernetesHelper.checkStatus(response);
@@ -219,20 +291,25 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		return new File(baseAttachmentDir, PERMANENT + "/" + prefix + "/" + attachmentGroup);
 	}
 	
-	private void permanentizeAttachmentGroup(File baseAttachmentDir, String attachmentGroup) {
-		File permanentStorage = getPermanentAttachmentGroupDir(baseAttachmentDir, attachmentGroup);
-		if (!permanentStorage.exists()) {
-			File tempStorage = new File(baseAttachmentDir, TEMP + "/" + attachmentGroup);
-			if (tempStorage.exists()) {
-				try {
-					FileUtils.moveDirectory(tempStorage, permanentStorage);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+	private void permanentizeAttachmentGroup(Long projectId, String attachmentGroup) {
+		var baseAttachmentDir = projectManager.getAttachmentDir(projectId);	
+		write(getAttachmentLockName(projectId, attachmentGroup), () -> {
+			File permanentStorage = getPermanentAttachmentGroupDir(baseAttachmentDir, attachmentGroup);
+			if (!permanentStorage.exists()) {
+				File tempStorage = new File(baseAttachmentDir, TEMP + "/" + attachmentGroup);
+				if (tempStorage.exists()) {
+					try {
+						FileUtils.moveDirectory(tempStorage, permanentStorage);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				} else {
+					FileUtils.createDir(permanentStorage);
 				}
-			} else {
-				FileUtils.createDir(permanentStorage);
+				projectManager.directoryModified(projectId, permanentStorage);
 			}
-		}
+			return null;
+		});
 	}
 
 	@Listen
@@ -249,12 +326,13 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Sessional
 	@Override
 	public void execute() {
-		try {
-			Collection<Long> projectIds = projectManager.getIds();
-			for (File file: storageManager.getProjectsDir().listFiles()) {
-				Long projectId = Long.valueOf(file.getName());
-				if (projectIds.contains(projectId)) {
-					File tempAttachmentBase = new File(storageManager.getProjectAttachmentDir(projectId), TEMP);
+		var localServer = clusterManager.getLocalServerAddress();
+		for (var entry: projectManager.getActiveServers().entrySet()) {
+			var projectId = entry.getKey();
+			var activeServer = entry.getValue();
+			if (localServer.equals(activeServer)) {
+				try {
+					File tempAttachmentBase = new File(projectManager.getAttachmentDir(projectId), TEMP);
 					if (tempAttachmentBase.exists()) {
 						for (File attachmentGroupDir: tempAttachmentBase.listFiles()) {
 							if (System.currentTimeMillis() - attachmentGroupDir.lastModified() > TEMP_PRESERVE_PERIOD) {
@@ -262,10 +340,10 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 							}
 						}
 					}
+				} catch (Exception e) {
+					logger.error("Error cleaning up temp attachments", e);
 				}
 			}
-		} catch (Exception e) {
-			logger.error("Error cleaning up temp attachments", e);
 		}
 	}
 
@@ -287,14 +365,13 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 
 				@Override
 				public void run() {
-					projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
+					projectManager.runOnActiveServer(projectId, new ClusterTask<Void>() {
 
 						private static final long serialVersionUID = 1L;
 
 						@Override
-						public Void call() throws Exception {
-							File baseDir = storageManager.getProjectAttachmentDir(projectId);
-							permanentizeAttachmentGroup(baseDir, attachmentGroup);
+						public Void call() {
+							permanentizeAttachmentGroup(projectId, attachmentGroup);
 							return null;
 						}
 						
@@ -311,25 +388,29 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 		if (event.getEntity() instanceof AttachmentStorageSupport) {
 			AttachmentStorageSupport storageSupport = (AttachmentStorageSupport) event.getEntity();
 			Long projectId = storageSupport.getAttachmentProject().getId();
-			UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, false);
-			if (storageServerUUID != null) {
+			String activeServer = projectManager.getActiveServer(projectId, false);
+			if (activeServer != null) {
 				transactionManager.runAfterCommit(new ClusterRunnable() {
 
 					private static final long serialVersionUID = 1L;
 
 					@Override
 					public void run() {
-						clusterManager.runOnServer(storageServerUUID, new ClusterTask<Void>() {
+						clusterManager.runOnServer(activeServer, new ClusterTask<Void>() {
 
 							private static final long serialVersionUID = 1L;
 
 							@Override
-							public Void call() throws Exception {
-								File attachmentStorage = getPermanentAttachmentGroupDir(
-										storageManager.getProjectAttachmentDir(storageSupport.getAttachmentProject().getId()), 
-										storageSupport.getAttachmentGroup());
-								FileUtils.deleteDir(attachmentStorage);
-								return null;
+							public Void call() {
+								var attachmentGroup = storageSupport.getAttachmentGroup();
+								return write(getAttachmentLockName(projectId, attachmentGroup), () -> {
+									File attachmentDir = getPermanentAttachmentGroupDir(
+											projectManager.getAttachmentDir(storageSupport.getAttachmentProject().getId()),
+											attachmentGroup);
+									FileUtils.deleteDir(attachmentDir);
+									projectManager.directoryModified(projectId, attachmentDir.getParentFile());
+									return null;
+								});
 							}
 							
 						});
@@ -343,37 +424,31 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Override
 	public String saveAttachment(Long projectId, String attachmentGroup, String suggestedAttachmentName, 
 			InputStream attachmentStream) {
-		UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, true);
-		if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+		String activeServer = projectManager.getActiveServer(projectId, true);
+		if (activeServer.equals(clusterManager.getLocalServerAddress())) {
 			return saveAttachmentLocal(projectId, attachmentGroup, suggestedAttachmentName, attachmentStream);
 		} else {
 			Client client = ClientBuilder.newClient();
 			client.property(ClientProperties.REQUEST_ENTITY_PROCESSING, "CHUNKED");
 			try {
-				String serverUrl = clusterManager.getServerUrl(storageServerUUID);
+				String serverUrl = clusterManager.getServerUrl(activeServer);
 				WebTarget target = client.target(serverUrl)
 						.path("~api/cluster/attachment")
 						.queryParam("projectId", projectId)
 						.queryParam("attachmentGroup", attachmentGroup)
 						.queryParam("suggestedAttachmentName", suggestedAttachmentName);
-				Invocation.Builder builder =  target.request();
-				builder.header(HttpHeaders.AUTHORIZATION, 
-						KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
-				
-				StreamingOutput os = new StreamingOutput() {
+				var builder = target.request();
+				builder.header(AUTHORIZATION, BEARER + " " + clusterManager.getCredential());
 
-					@Override
-					public void write(OutputStream output) throws IOException {
-						try {
-							IOUtils.copy(attachmentStream, output, BUFFER_SIZE);
-						} finally {
-							attachmentStream.close();
-							output.close();
-						}
-					}				   
-				   
+				StreamingOutput os = output -> {
+					try {
+						IOUtils.copy(attachmentStream, output, BUFFER_SIZE);
+					} finally {
+						attachmentStream.close();
+						output.close();
+					}
 				};
-				
+
 				try (Response response = builder.post(Entity.entity(os, MediaType.APPLICATION_OCTET_STREAM))) {
 					KubernetesHelper.checkStatus(response);
 					return response.readEntity(String.class);
@@ -385,106 +460,113 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	}
 	
 	@Override
-	public String saveAttachmentLocal(Long projectId, String attachmentGroup, String suggestedAttachmentName, 
-			InputStream attachmentStream) {
-		suggestedAttachmentName = suggestedAttachmentName.replace("..", "-");
-		
-		String attachmentName = suggestedAttachmentName;
-		File attachmentDir = getAttachmentGroupDirLocal(projectId, attachmentGroup);
+	public String saveAttachmentLocal(Long projectId, String attachmentGroup, String suggestedAttachmentName,
+								 InputStream attachmentStream) {
+		return write(getAttachmentLockName(projectId, attachmentGroup), () -> {
+			var suggestedAttachmentNameCopy = suggestedAttachmentName;
+			suggestedAttachmentNameCopy = suggestedAttachmentNameCopy.replace("..", "-");
+			String attachmentName = suggestedAttachmentNameCopy;
+			File attachmentDir = getAttachmentGroupDir(projectId, attachmentGroup);
 
-		FileUtils.createDir(attachmentDir);
-		int index = 2;
-		while (new File(attachmentDir, attachmentName).exists()) {
-			if (suggestedAttachmentName.contains(".")) {
-				String nameBeforeExt = StringUtils.substringBeforeLast(suggestedAttachmentName, ".");
-				String ext = StringUtils.substringAfterLast(suggestedAttachmentName, ".");
-				attachmentName = nameBeforeExt + "_" + index + "." + ext;
-			} else {
-				attachmentName = suggestedAttachmentName + "_" + index;
+			FileUtils.createDir(attachmentDir);
+			int index = 2;
+			while (new File(attachmentDir, attachmentName).exists()) {
+				if (suggestedAttachmentNameCopy.contains(".")) {
+					String nameBeforeExt = StringUtils.substringBeforeLast(suggestedAttachmentNameCopy, ".");
+					String ext = StringUtils.substringAfterLast(suggestedAttachmentNameCopy, ".");
+					attachmentName = nameBeforeExt + "_" + index + "." + ext;
+				} else {
+					attachmentName = suggestedAttachmentNameCopy + "_" + index;
+				}
+				index++;
 			}
-			index++;
-		}
-		
-		long maxUploadFileSize = settingManager.getPerformanceSetting().getMaxUploadFileSize()*1L*1024*1024; 
-				
-		Exception ex = null;
-		File file = new File(attachmentDir, attachmentName);
-		try (OutputStream os = new FileOutputStream(file)) {
-			byte[] buffer = new byte[Bootstrap.BUFFER_SIZE];
-	        long count = 0;
-	        int n = 0;
-	        while (-1 != (n = attachmentStream.read(buffer))) {
-	            count += n;
-		        if (count > maxUploadFileSize) {
-		        	throw new AttachmentTooLargeException("Upload must be less than " 
-		        			+ FileUtils.byteCountToDisplaySize(maxUploadFileSize));
-		        }
-	            os.write(buffer, 0, n);
-	        }
-		} catch (Exception e) {
-			ex = e;
-		} 
-		if (ex != null) {
-			if (file.exists())
-				FileUtils.deleteFile(file);
-			throw ExceptionUtils.unchecked(ex);
-		} else {
-			return file.getName();
-		}
+
+			long maxUploadFileSize = settingManager.getPerformanceSetting().getMaxUploadFileSize() * 1024L * 1024L;
+
+			Exception ex = null;
+			File file = new File(attachmentDir, attachmentName);
+			try (OutputStream os = new FileOutputStream(file)) {
+				byte[] buffer = new byte[Bootstrap.BUFFER_SIZE];
+				long count = 0;
+				int n = 0;
+				while (-1 != (n = attachmentStream.read(buffer))) {
+					count += n;
+					if (count > maxUploadFileSize) {
+						throw new AttachmentTooLargeException("Upload must be less than "
+								+ FileUtils.byteCountToDisplaySize(maxUploadFileSize));
+					}
+					os.write(buffer, 0, n);
+				}
+			} catch (Exception e) {
+				ex = e;
+			}
+			if (ex != null) {
+				if (file.exists())
+					FileUtils.deleteFile(file);
+				throw ExceptionUtils.unchecked(ex);
+			} else {
+				if (!attachmentDir.getParentFile().getName().equals(TEMP))
+					projectManager.directoryModified(projectId, attachmentDir);
+				return file.getName();
+			}
+		});
+	}
+	
+	@Override
+	public String getAttachmentLockName(Long projectId, String attachmentGroup) {
+		return "attachment:" + projectId + ":" + attachmentGroup;
 	}
 
 	@Override
 	public FileInfo getAttachmentInfo(Long projectId, String attachmentGroup, String attachment) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<FileInfo>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public FileInfo call() throws Exception {
-				File attachmentFile = new File(getAttachmentGroupDirLocal(projectId, attachmentGroup), attachment);
-				if (!attachmentFile.exists()) 
-					throw new RuntimeException("Attachment not found: " + attachment);
-				return new FileInfo(attachment, attachmentFile.lastModified(), attachmentFile.length(), null);
-			}
-			
-		});
+		return projectManager.runOnActiveServer(projectId, () -> read(getAttachmentLockName(projectId, attachmentGroup), () -> {
+			File attachmentFile = new File(getAttachmentGroupDir(projectId, attachmentGroup), attachment);
+			if (!attachmentFile.exists())
+				throw new RuntimeException("Attachment not found: " + attachment);
+			return new FileInfo(attachment, attachmentFile.lastModified(), 
+					attachmentFile.length(), null);
+		}));
 	}
 
 	@Override
 	public void deleteAttachment(Long projectId, String attachmentGroup, String attachment) {
-		projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				File attachmentFile = new File(getAttachmentGroupDirLocal(projectId, attachmentGroup), attachment);
-				if (attachmentFile.exists())
-					FileUtils.deleteFile(attachmentFile);
-				return null;
+		projectManager.runOnActiveServer(projectId, () -> write(getAttachmentLockName(projectId, attachmentGroup), () -> {
+			var attachmentGroupDir = getAttachmentGroupDir(projectId, attachmentGroup);
+			File attachmentFile = new File(attachmentGroupDir, attachment);
+			if (attachmentFile.exists()) {
+				FileUtils.deleteFile(attachmentFile);
+				projectManager.directoryModified(projectId, attachmentGroupDir);
 			}
-			
-		});
+			return null;
+		}));
 	}
 
 	@Override
 	public List<FileInfo> listAttachments(Long projectId, String attachmentGroup) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<FileInfo>>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public List<FileInfo> call() throws Exception {
-				List<FileInfo> attachments = new ArrayList<>();
-				File attachmentGroupDir = getAttachmentGroupDirLocal(projectId, attachmentGroup);
-				if (attachmentGroupDir.exists()) {
-					for (File file: attachmentGroupDir.listFiles())
+		return projectManager.runOnActiveServer(projectId, () -> read(getAttachmentLockName(projectId, attachmentGroup), () -> {
+			List<FileInfo> attachments = new ArrayList<>();
+			File attachmentGroupDir = getAttachmentGroupDir(projectId, attachmentGroup);
+			if (attachmentGroupDir.exists()) {
+				for (File file : attachmentGroupDir.listFiles()) {
+					if (!isVersionFile(file))
 						attachments.add(new FileInfo(file.getName(), file.lastModified(), file.length(), null));
 				}
-				return attachments;
 			}
-			
-		});
+			return attachments;
+		}));
+	}
+
+	@Override
+	public void syncAttachments(Long projectId, String activeServer) {
+		var permanent = ATTACHMENT_DIR + "/" + PERMANENT;
+		projectManager.syncDirectory(projectId, permanent, prefix -> {
+			var prefixPath = permanent + "/" + prefix;
+			projectManager.syncDirectory(projectId, prefixPath, attachmentGroup -> {
+				var attachmentGroupPath = permanent + "/" + prefix + "/" + attachmentGroup;				
+				var lockName = getAttachmentLockName(projectId, attachmentGroup);
+				projectManager.syncDirectory(projectId, attachmentGroupPath, lockName, activeServer);
+			}, activeServer);		
+		}, activeServer);
 	}
 
 }

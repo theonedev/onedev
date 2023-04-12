@@ -8,15 +8,14 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.project.ProjectDeleted;
+import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -37,6 +36,8 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 
+import static java.lang.Long.valueOf;
+
 @Singleton
 public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManager 
 		implements PullRequestInfoManager, Serializable {
@@ -46,8 +47,6 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	private static final int BATCH_SIZE = 5000;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestInfoManager.class);
-	
-	private static final String INFO_DIR = "pullRequest";
 	
 	private static final String DEFAULT_STORE = "default";
 	
@@ -59,29 +58,21 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 
 	private static final int PRIORITY = 100;
 	
-	private final StorageManager storageManager;
-	
 	private final BatchWorkManager batchWorkManager;
-	
-	private final ClusterManager clusterManager;
 	
 	private final ProjectManager projectManager;
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final TransactionManager transactionManager;
+	private final ClusterManager clusterManager;
 	
 	@Inject
-	public DefaultPullRequestInfoManager(TransactionManager transactionManager, 
-			ProjectManager projectManager, StorageManager storageManager, 
-			PullRequestUpdateManager pullRequestUpdateManager, 
-			BatchWorkManager batchWorkManager, ClusterManager clusterManager) {
+	public DefaultPullRequestInfoManager(ProjectManager projectManager, PullRequestUpdateManager pullRequestUpdateManager, 
+										 BatchWorkManager batchWorkManager, ClusterManager clusterManager) {
 		this.projectManager = projectManager;
-		this.storageManager = storageManager;
-		this.clusterManager = clusterManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.batchWorkManager = batchWorkManager;
-		this.transactionManager = transactionManager;
+		this.clusterManager = clusterManager;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -92,7 +83,7 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		return new BatchWorker("project-" + projectId + "-collectPullRequestInfo") {
 
 			@Override
-			public void doWorks(Collection<Prioritized> works) {
+			public void doWorks(List<Prioritized> works) {
 				// do the work batch by batch to avoid consuming too much memory
 				while (collect(projectId));
 			}
@@ -143,7 +134,7 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	public Collection<Long> getPullRequestIds(Project project, ObjectId commitId) {
 		Long projectId = project.getId();
 		
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Collection<Long>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Collection<Long>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -173,19 +164,28 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		Collection<Long> projectIds = projectManager.getIds();
-		for (File file: storageManager.getProjectsDir().listFiles()) {
-			Long projectId = Long.valueOf(file.getName());
-			if (projectIds.contains(projectId)) {
+		var localServer = clusterManager.getLocalServerAddress();
+		for (var entry: projectManager.getActiveServers().entrySet()) {
+			var projectId = entry.getKey();
+			var activeServer = entry.getValue();
+			if (localServer.equals(activeServer)) {
 				checkVersion(getEnvDir(projectId.toString()));
 				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
 			}
 		}
 	}
 	
+	@Sessional
+	@Listen
+	public void on(ActiveServerChanged event) {
+		var projectId = event.getProjectId();
+		checkVersion(getEnvDir(projectId.toString()));
+		batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+	}
+	
 	@Override
 	protected File getEnvDir(String envKey) {
-		File infoDir = new File(storageManager.getProjectInfoDir(Long.valueOf(envKey)), INFO_DIR);
+		File infoDir = new File(projectManager.getInfoDir(valueOf(envKey)), "pullRequest");
 		FileUtils.createDir(infoDir);
 		return infoDir;
 	}
@@ -201,7 +201,7 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		Long targetProjectId = request.getTargetProject().getId();
 		Long requestId = request.getId();
 		
-		return projectManager.runOnProjectServer(targetProjectId, new ClusterTask<ObjectId>() {
+		return projectManager.runOnActiveServer(targetProjectId, new ClusterTask<ObjectId>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -237,7 +237,7 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 		Long targetProjectId = request.getTargetProject().getId();
 		Long requestId = request.getId();
 		
-		projectManager.runOnProjectServer(targetProjectId, new ClusterTask<Void>() {
+		projectManager.runOnActiveServer(targetProjectId, new ClusterTask<Void>() {
 
 			private static final long serialVersionUID = 1L;
 

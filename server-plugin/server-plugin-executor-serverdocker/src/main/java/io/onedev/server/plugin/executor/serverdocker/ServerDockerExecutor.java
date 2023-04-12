@@ -2,7 +2,6 @@ package io.onedev.server.plugin.executor.serverdocker;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.hazelcast.cluster.Member;
 import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
@@ -91,8 +90,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.registryLogins = registryLogins;
 	}
 
-	@Editable(order=450, placeholder = "Number of server cpu", description = "" +
-			"Specify max number of jobs/services this executor can run concurrently")
+	@Editable(order=450, placeholder = "Number of CPU Cores", description = "" +
+			"Specify max number of jobs/services this executor can run concurrently. " +
+			"Leave empty to set as CPU cores")
 	@Numeric
 	public String getConcurrency() {
 		return concurrency;
@@ -214,7 +214,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	@Override
 	public void execute(JobContext jobContext, TaskLogger jobLogger) {
 		ClusterRunnable runnable = () -> {
-			getJobManager().runJobLocal(jobContext, new JobRunnable() {
+			getJobManager().runJob(jobContext, new JobRunnable() {
 
 				private static final long serialVersionUID = 1L;
 
@@ -233,9 +233,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						String network = getName() + "-" + jobContext.getProjectId() + "-"
 								+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
 
-						Member member = getClusterManager().getHazelcastInstance().getCluster().getLocalMember();
-						jobLogger.log(String.format("Executing job (executor: %s, server: %s, network: %s)...", getName(),
-								member.getAddress().getHost() + ":" + member.getAddress().getPort(), network));
+						String serverAddress = getClusterManager().getLocalServerAddress();
+						jobLogger.log(String.format("Executing job (executor: %s, server: %s, network: %s)...", 
+								getName(), serverAddress, network));
 
 						File hostCacheHome = getCacheHome(jobContext.getJobExecutor());
 

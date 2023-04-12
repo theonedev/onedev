@@ -1,23 +1,13 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.common.base.Preconditions;
-import org.bouncycastle.openpgp.PGPPublicKey;
-
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.GpgKeyManager;
 import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.git.signature.SignatureVerificationKey;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.GpgKey;
@@ -28,6 +18,14 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.GpgUtils;
+import org.bouncycastle.openpgp.PGPPublicKey;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements GpgKeyManager {
@@ -51,13 +49,17 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
     
     @Listen
     @Sessional
-    public void on(SystemStarted event) {
-    	entityIds = clusterManager.getHazelcastInstance().getReplicatedMap("gpgKeyEntityIds");
-    	
-    	for (GpgKey key: query()) {
-    		for (Long keyId: key.getKeyIds())
-    			entityIds.put(keyId, key.getId());
-    	}
+    public void on(SystemStarting event) {
+		var hazelcastInstance = clusterManager.getHazelcastInstance();
+    	entityIds = hazelcastInstance.getMap("gpgKeyEntityIds");
+    	var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("gpgKeyCacheInited");
+		clusterManager.init(cacheInited, () -> {
+			for (GpgKey key: query()) {
+				for (Long keyId: key.getKeyIds())
+					entityIds.put(keyId, key.getId());
+			}
+			return 1L;			
+		});
     }
     
     @Transactional
@@ -65,29 +67,19 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
     public void on(EntityRemoved event) {
     	if (event.getEntity() instanceof GpgKey) {
     		List<Long> keyIds = ((GpgKey)event.getEntity()).getKeyIds();
-    		transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					for (var id: keyIds)
-						entityIds.remove(id);
-				}
-    			
-    		});
+    		transactionManager.runAfterCommit(() -> {
+				for (var id: keyIds)
+					entityIds.remove(id);
+			});
     	} else if (event.getEntity() instanceof User) {
     		User user = (User) event.getEntity();
     		Collection<Long> keyIds = new ArrayList<>();
     		for (GpgKey key: user.getGpgKeys()) 
     			keyIds.addAll(key.getKeyIds());
-    		transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					for (var id: keyIds)
-						entityIds.remove(id);
-				}
-    			
-    		});
+    		transactionManager.runAfterCommit(() -> {
+				for (var id: keyIds)
+					entityIds.remove(id);
+			});
     	}
     }
     
@@ -98,15 +90,10 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
     		GpgKey gpgKey = (GpgKey) event.getEntity();
     		List<Long> keyIds = gpgKey.getKeyIds();
     		Long entityId = gpgKey.getId();
-    		transactionManager.runAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					for (Long keyId: keyIds)
-						entityIds.put(keyId, entityId);
-				}
-    			
-    		});
+    		transactionManager.runAfterCommit(() -> {
+				for (Long keyId: keyIds)
+					entityIds.put(keyId, entityId);
+			});
     	}
     }
 

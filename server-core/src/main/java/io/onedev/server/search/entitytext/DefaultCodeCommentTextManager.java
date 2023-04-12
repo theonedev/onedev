@@ -14,7 +14,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.lucene.BooleanQueryBuilder;
 import io.onedev.server.util.lucene.LuceneUtils;
@@ -52,11 +51,11 @@ public class DefaultCodeCommentTextManager extends ProjectTextManager<CodeCommen
 	private static final String FIELD_REPLIES = "replies";
 	
 	@Inject
-	public DefaultCodeCommentTextManager(Dao dao, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, TransactionManager transactionManager, 
-			ProjectManager projectManager, ClusterManager clusterManager) {
-		super(dao, storageManager, batchWorkManager, transactionManager, projectManager, 
-				clusterManager);
+	public DefaultCodeCommentTextManager(Dao dao, BatchWorkManager batchWorkManager, 
+										 TransactionManager transactionManager, 
+										 ProjectManager projectManager, 
+										 ClusterManager clusterManager) {
+		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager);
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -82,18 +81,24 @@ public class DefaultCodeCommentTextManager extends ProjectTextManager<CodeCommen
 	@Sessional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		requestIndexLocal(event.getComment());
+		requestIndex(event.getComment());
 	}
 	@Sessional
 	@Listen
 	public void on(CodeCommentsDeleted event) {
-		deleteEntitiesLocal(event.getCommentIds());
+		clusterManager.submitToAllServers(() -> {
+			deleteEntities(event.getCommentIds());
+			return null;
+		});
 	}
 
 	@Sessional
 	@Listen
 	public void on(CodeCommentDeleted event) {
-		deleteEntitiesLocal(Lists.newArrayList(event.getCommentId()));
+		clusterManager.submitToAllServers(() -> {
+			deleteEntities(Lists.newArrayList(event.getCommentId()));
+			return null;
+		});
 	}
 
 	private Query buildQuery(Project project, String queryString) {

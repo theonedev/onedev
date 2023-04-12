@@ -18,6 +18,7 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.project.RefUpdated;
+import io.onedev.server.event.project.ActiveServerChanged;
 import io.onedev.server.event.project.issue.IssueCommitsAttached;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.GitContribution;
@@ -28,7 +29,6 @@ import io.onedev.server.git.command.RevListCommand.Order;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.*;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
@@ -38,9 +38,6 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.backup.BackupStrategy;
-import jetbrains.exodus.backup.BackupStrategy.FileDescriptor;
-import jetbrains.exodus.backup.VirtualFileDescriptor;
 import jetbrains.exodus.env.*;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.Constants;
@@ -140,8 +137,6 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	private static final int PRIORITY = 100;
 
-	private final StorageManager storageManager;
-
 	private final BatchWorkManager batchWorkManager;
 
 	private final ProjectManager projectManager;
@@ -169,13 +164,12 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	private final Map<Long, List<NameAndEmail>> usersCache = new ConcurrentHashMap<>();
 
 	@Inject
-	public DefaultCommitInfoManager(ProjectManager projectManager, StorageManager storageManager,
+	public DefaultCommitInfoManager(ProjectManager projectManager, 
 									BatchWorkManager batchWorkManager, SessionManager sessionManager,
 									EmailAddressManager emailAddressManager, UserManager userManager,
 									ClusterManager clusterManager, ListenerRegistry listenerRegistry,
 									IssueManager issueManager, EntityReferenceManager entityReferenceManager) {
 		this.projectManager = projectManager;
-		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
 		this.emailAddressManager = emailAddressManager;
@@ -274,7 +268,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 									EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
 									fields.remove(LogCommand.Field.LINE_CHANGES);
-									new LogCommand(storageManager.getProjectGitDir(project.getId()), revisions) {
+									new LogCommand(projectManager.getGitDir(project.getId()), revisions) {
 
 										@Override
 										protected void consume(GitCommit commit) {
@@ -516,7 +510,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 										LogCommand.Field.PARENTS,
 										LogCommand.Field.LINE_CHANGES);
 
-								new LogCommand(storageManager.getProjectGitDir(project.getId()), revisions) {
+								new LogCommand(projectManager.getGitDir(project.getId()), revisions) {
 
 									@Override
 									protected void consume(GitCommit commit) {
@@ -600,7 +594,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 				@Override
 				public void execute(Transaction txn) {
-					File gitDir = storageManager.getProjectGitDir(project.getId());
+					File gitDir = projectManager.getGitDir(project.getId());
 					Collection<String> files = new ListFilesCommand(gitDir, commitId.name()).run();
 
 					byte[] bytesOfFiles = SerializationUtils.serialize((Serializable) files);
@@ -627,7 +621,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 					boolean filesChanged = false;
 					ListFileChangesCommand command = new ListFileChangesCommand(
-							storageManager.getProjectGitDir(project.getId()),
+							projectManager.getGitDir(project.getId()),
 							lastCommitId.name(), commitId.name());
 					for (FileChange change : command.run()) {
 						if (change.getOldPath() == null && change.getNewPath() != null) {
@@ -699,7 +693,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 									LogCommand.Field.COMMIT_DATE,
 									LogCommand.Field.LINE_CHANGES);
 
-							new LogCommand(storageManager.getProjectGitDir(project.getId()), revisions) {
+							new LogCommand(projectManager.getGitDir(project.getId()), revisions) {
 
 								@Override
 								protected void consume(GitCommit commit) {
@@ -739,7 +733,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 					}
 
 					ListNumStatsCommand command = new ListNumStatsCommand(
-							storageManager.getProjectGitDir(project.getId()),
+							projectManager.getGitDir(project.getId()),
 							lastCommitId.name(), commitId.name(), true);
 					List<FileChange> fileChanges = command.run();
 					RevCommit revCommit = project.getRevCommit(commitId, true);
@@ -760,7 +754,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	private void processCommitRange(Project project, ObjectId untilCommitId,
 									@Nullable ObjectId sinceCommitId, CommitRangeProcessor commitRangeProcessor) {
-		RevListCommand revList = new RevListCommand(storageManager.getProjectGitDir(project.getId()));
+		RevListCommand revList = new RevListCommand(projectManager.getGitDir(project.getId()));
 		List<String> revisions = new ArrayList<>();
 		revisions.add(untilCommitId.name());
 		if (sinceCommitId != null)
@@ -771,7 +765,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		for (String commitHash : revList.run())
 			historyIds.add(ObjectId.fromString(commitHash));
 
-		revList = new RevListCommand(storageManager.getProjectGitDir(project.getId()));
+		revList = new RevListCommand(projectManager.getGitDir(project.getId()));
 		revList.options().revisions(revisions).firstParent(true);
 
 		Set<ObjectId> firstParentIds = new HashSet<>();
@@ -872,7 +866,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	@Override
 	public List<NameAndEmail> getUsers(Long projectId) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<NameAndEmail>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<List<NameAndEmail>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -911,7 +905,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	@Override
 	public List<String> getFiles(Long projectId) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<String>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<List<String>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -959,7 +953,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	@Override
 	public Map<Day, Map<String, Integer>> getLineIncrements(Long projectId) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Map<Day, Map<String, Integer>>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Map<Day, Map<String, Integer>>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -1034,7 +1028,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	@Override
 	public Collection<ObjectId> getDescendants(Long projectId, Collection<ObjectId> ancestors) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Collection<ObjectId>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Collection<ObjectId>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -1090,23 +1084,16 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof Project) {
 			Long projectId = event.getEntity().getId();
-			UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, false);
-			if (storageServerUUID != null) {
-				clusterManager.runOnServer(storageServerUUID, new ClusterTask<Void>() {
+			String activeServer = projectManager.getActiveServer(projectId, false);
+			if (activeServer != null) {
+				clusterManager.runOnServer(activeServer, () -> {
+					removeEnv(projectId.toString());
+					filesCache.remove(projectId);
+					totalCommitCountCache.remove(projectId);
+					fileCountCache.remove(projectId);
+					usersCache.remove(projectId);
 
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Void call() throws Exception {
-						removeEnv(projectId.toString());
-						filesCache.remove(projectId);
-						totalCommitCountCache.remove(projectId);
-						fileCountCache.remove(projectId);
-						usersCache.remove(projectId);
-
-						return null;
-					}
-
+					return null;
 				});
 			}
 		}
@@ -1116,21 +1103,16 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		return new BatchWorker("project-" + projectId + "-collectCommitInfo") {
 
 			@Override
-			public void doWorks(Collection<Prioritized> works) {
-				sessionManager.run(new Runnable() {
+			public void doWorks(List<Prioritized> works) {
+				sessionManager.run(() -> {
+					Project project = projectManager.load(projectId);
+					List<CollectingWork> collectingWorks = new ArrayList<>();
+					for (Object work : works)
+						collectingWorks.add((CollectingWork) work);
+					Collections.sort(collectingWorks, new CommitTimeComparator());
 
-					@Override
-					public void run() {
-						Project project = projectManager.load(projectId);
-						List<CollectingWork> collectingWorks = new ArrayList<>();
-						for (Object work : works)
-							collectingWorks.add((CollectingWork) work);
-						Collections.sort(collectingWorks, new CommitTimeComparator());
-
-						for (CollectingWork work : collectingWorks)
-							doCollect(project, work.getCommit().copy(), work.getRefName());
-					}
-
+					for (CollectingWork work : collectingWorks)
+						doCollect(project, work.getCommit().copy(), work.getRefName());
 				});
 			}
 
@@ -1162,16 +1144,25 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		Collection<Long> projectIds = projectManager.getIds();
-		for (File file : storageManager.getProjectsDir().listFiles()) {
-			Long projectId = Long.valueOf(file.getName());
-			if (projectIds.contains(projectId)) {
+		var localServer = clusterManager.getLocalServerAddress();
+		for (var entry: projectManager.getActiveServers().entrySet()) {
+			var projectId = entry.getKey();
+			var activeServer = entry.getValue();
+			if (localServer.equals(activeServer)) {
 				checkVersion(getEnvDir(projectId.toString()));
 				collect(projectId);
 			}
 		}
 	}
 
+	@Sessional
+	@Listen
+	public void on(ActiveServerChanged event) {
+		var projectId = event.getProjectId();
+		checkVersion(getEnvDir(projectId.toString()));
+		collect(projectId);
+	}
+	
 	@Sessional
 	@Listen
 	public void on(RefUpdated event) {
@@ -1192,7 +1183,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Sessional
 	@Override
 	public int getCommitCount(Long projectId) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Integer>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Integer>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -1220,7 +1211,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	@Override
 	public int getFileCount(Long projectId) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Integer>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Integer>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -1281,19 +1272,19 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Sessional
 	@Override
 	public void cloneInfo(Long sourceProjectId, Long targetProjectId) {
-		UUID sourceStorageServerUUID = projectManager.getStorageServerUUID(sourceProjectId, true);
-		if (sourceStorageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+		String sourceActiveServer = projectManager.getActiveServer(sourceProjectId, true);
+		if (sourceActiveServer.equals(clusterManager.getLocalServerAddress())) {
 			export(sourceProjectId, getEnvDir(targetProjectId.toString()));
 		} else {
 			Client client = ClientBuilder.newClient();
 			try {
-				String serverUrl = clusterManager.getServerUrl(sourceStorageServerUUID);
+				String serverUrl = clusterManager.getServerUrl(sourceActiveServer);
 				WebTarget target = client.target(serverUrl)
 						.path("~api/cluster/commit-info")
 						.queryParam("projectId", sourceProjectId);
 				Invocation.Builder builder = target.request();
 				builder.header(HttpHeaders.AUTHORIZATION,
-						KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 				try (Response response = builder.get()) {
 					KubernetesHelper.checkStatus(response);
 					FileUtils.untar(
@@ -1308,25 +1299,12 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	@Override
 	public void export(Long projectId, File targetDir) {
-		BackupStrategy backupStrategy = getEnv(projectId.toString()).getBackupStrategy();
-		try {
-			backupStrategy.beforeBackup();
-			try {
-				for (VirtualFileDescriptor descriptor : backupStrategy.getContents()) {
-					FileUtils.copyFileToDirectory(((FileDescriptor) descriptor).getFile(), targetDir);
-				}
-			} finally {
-				backupStrategy.afterBackup();
-			}
-			writeVersion(targetDir);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		export(projectId.toString(), targetDir);
 	}
 
 	@Override
 	protected File getEnvDir(String envKey) {
-		File infoDir = new File(storageManager.getProjectInfoDir(Long.valueOf(envKey)), INFO_DIR);
+		File infoDir = new File(projectManager.getInfoDir(Long.valueOf(envKey)), INFO_DIR);
 		FileUtils.createDir(infoDir);
 		return infoDir;
 	}
@@ -1334,7 +1312,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Sessional
 	@Override
 	public Collection<String> getHistoryPaths(Long projectId, String path) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Collection<String>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Collection<String>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -1398,7 +1376,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Sessional
 	@Override
 	public Map<Day, GitContribution> getOverallContributions(Long projectId) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Map<Day, GitContribution>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Map<Day, GitContribution>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -1430,7 +1408,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Override
 	public List<GitContributor> getTopContributors(Long projectId, int top,
 												   GitContribution.Type type, int fromDay, int toDay) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<GitContributor>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<List<GitContributor>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -1618,7 +1596,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 
 	@Override
 	public Collection<ObjectId> getFixCommits(Long projectId, Long issueId) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<Collection<ObjectId>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<Collection<ObjectId>>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -1644,7 +1622,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Override
 	public List<Long> sortUsersByContribution(Map<Long, Collection<EmailAddressFacade>> userEmails,
 											  Long projectId, Collection<String> files) {
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<List<Long>>() {
+		return projectManager.runOnActiveServer(projectId, new ClusterTask<List<Long>>() {
 
 			private static final long serialVersionUID = 1L;
 

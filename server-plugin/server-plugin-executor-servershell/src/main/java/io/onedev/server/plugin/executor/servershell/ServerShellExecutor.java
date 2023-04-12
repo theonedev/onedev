@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.executor.servershell;
 
-import com.hazelcast.cluster.Member;
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -13,6 +12,7 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.*;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.git.location.GitLocation;
@@ -26,11 +26,6 @@ import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.annotation.Code;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Horizontal;
-import io.onedev.server.annotation.Numeric;
-import io.onedev.server.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang.SystemUtils;
 
@@ -66,8 +61,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	
 	private transient volatile File buildHome;
 
-	@Editable(order=1000, placeholder = "Number of server cpu", 
-			description = "Specify max number of jobs this executor can run concurrently")
+	@Editable(order=1000, description = "" +
+			"Specify max number of jobs this executor can run concurrently. " +
+			"Leave empty to set as CPU cores")
 	@Numeric
 	public String getConcurrency() {
 		return concurrency;
@@ -107,9 +103,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 	@Override
 	public void execute(JobContext jobContext, TaskLogger jobLogger) {
 		ClusterRunnable runnable = () -> {
-			getJobManager().runJobLocal(jobContext, new JobRunnable() {
-
-				private static final long serialVersionUID = 1L;
+			getJobManager().runJob(jobContext, new JobRunnable() {
 
 				@Override
 				public void run(TaskLogger jobLogger) {
@@ -127,9 +121,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					buildHome = FileUtils.createTempDir("onedev-build");
 					File workspaceDir = new File(buildHome, "workspace");
 					try {
-						Member server = getClusterManager().getHazelcastInstance().getCluster().getLocalMember();
-						jobLogger.log(String.format("Executing job (executor: %s, server: %s)...", getName(),
-								server.getAddress().getHost() + ":" + server.getAddress().getPort()));
+						String serverAddress = getClusterManager().getLocalServerAddress();
+						jobLogger.log(String.format("Executing job (executor: %s, server: %s)...", 
+								getName(), serverAddress));
 
 						jobLogger.log(String.format("Executing job with executor '%s'...", getName()));
 

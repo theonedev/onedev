@@ -1,20 +1,17 @@
 package io.onedev.server.persistence;
 
+import com.hazelcast.cp.IAtomicLong;
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.model.AbstractEntity;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import com.hazelcast.cp.IAtomicLong;
-
-import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.model.AbstractEntity;
 
 @Singleton
 public class DefaultIdManager implements IdManager {
@@ -61,14 +58,7 @@ public class DefaultIdManager implements IdManager {
 				for (var persistenceClass: sessionFactoryManager.getMetadata().getEntityBindings()) {
 					Class<?> entityClass = persistenceClass.getMappedClass();
 					var nextId = clusterManager.getHazelcastInstance().getCPSubsystem().getAtomicLong(entityClass.getName());
-					clusterManager.init(nextId, new Callable<Long>() {
-
-						@Override
-						public Long call() throws Exception {
-							return getMaxId(conn, entityClass) + 1;
-						}
-						
-					});
+					clusterManager.init(nextId, () -> getMaxId(conn, entityClass) + 1);
 					nextIds.put(entityClass, nextId);
 				}
 				return null;

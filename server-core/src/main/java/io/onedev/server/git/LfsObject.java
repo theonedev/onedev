@@ -20,7 +20,6 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ContentDetector;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,16 +48,12 @@ public class LfsObject implements Serializable {
 		return OneDev.getInstance(ProjectManager.class);
 	}
 	
-	private StorageManager getStorageManager() {
-		return OneDev.getInstance(StorageManager.class);
-	}
-	
 	private File getFile() {
 		File objectDir = new File(
 				getProjectManager().getLfsObjectsDir(projectId), 
 				objectId.substring(0, 2) + "/" + objectId.substring(2, 4));
 		String lockName = "lfs-storage:" 
-				+ getStorageManager().getProjectGitDir(projectId).getAbsolutePath();
+				+ getProjectManager().getGitDir(projectId).getAbsolutePath();
 		Lock lock = LockUtils.getLock(lockName);
 		lock.lock();
 		try {
@@ -74,12 +69,12 @@ public class LfsObject implements Serializable {
 	}
 
 	public boolean exists() {
-		return getProjectManager().runOnProjectServer(projectId, new ClusterTask<Boolean>() {
+		return getProjectManager().runOnActiveServer(projectId, new ClusterTask<Boolean>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Boolean call() throws Exception {
+			public Boolean call() {
 				Lock readLock = getLock().readLock();
 				readLock.lock();
 				try {
@@ -135,12 +130,12 @@ public class LfsObject implements Serializable {
 	}
 	
 	public void delete() {
-		getProjectManager().runOnProjectServer(projectId, new ClusterTask<Void>() {
+		getProjectManager().runOnActiveServer(projectId, new ClusterTask<Void>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Void call() throws Exception {
+			public Void call() {
 				Lock writeLock = getLock().writeLock();
 				writeLock.lock();
 				try {
@@ -155,12 +150,12 @@ public class LfsObject implements Serializable {
 	}
 	
 	public MediaType detectMediaType(String fileName) {
-		return getProjectManager().runOnProjectServer(projectId, new ClusterTask<MediaType> () {
+		return getProjectManager().runOnActiveServer(projectId, new ClusterTask<MediaType> () {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public MediaType call() throws Exception {
+			public MediaType call() {
 				try (InputStream is = getInputStream()) {
 					return ContentDetector.detectMediaType(is, fileName);
 				} catch (IOException e) {

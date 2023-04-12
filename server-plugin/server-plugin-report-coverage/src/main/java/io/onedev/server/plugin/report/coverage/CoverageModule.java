@@ -1,26 +1,6 @@
 package io.onedev.server.plugin.report.coverage;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.SerializationUtils;
-import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.commons.loader.AbstractPluginModule;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.codequality.CoverageStatus;
@@ -30,6 +10,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CoverageMetric;
 import io.onedev.server.model.Project;
+import io.onedev.server.replica.BuildStorageSyncer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.ProjectPageMapper;
@@ -38,6 +19,23 @@ import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import javax.annotation.Nullable;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.server.model.Build.getProjectRelativePath;
+import static io.onedev.server.model.Build.getStorageDir;
+import static io.onedev.server.plugin.report.coverage.CoverageReport.DIR_CATEGORY;
+import static io.onedev.server.plugin.report.coverage.CoverageReport.getReportLockName;
+import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -68,25 +66,20 @@ public class CoverageModule extends AbstractPluginModule {
 			
 		});
 		
-		contribute(LineCoverageContribution.class, new LineCoverageContribution() {
+		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> {
+			Long projectId = build.getProject().getId();
+			Long buildNumber = build.getNumber();
 			
-			@Override
-			public Map<Integer, CoverageStatus> getLineCoverages(Build build, String blobPath, String reportName) {
-				Long projectId = build.getProject().getId();
-				Long buildNumber = build.getNumber();
-				
-				Map<Integer, CoverageStatus> coverages = new HashMap<>();
-				for (var entry: getProjectManager().runOnProjectServer(projectId, new GetLineCoverages(projectId, buildNumber, blobPath, reportName)).entrySet()) {
-					if (SecurityUtils.canAccessReport(build, entry.getKey())) {
-						entry.getValue().forEach((key, value) -> {
-							coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
-						});
-					}
+			Map<Integer, CoverageStatus> coverages = new HashMap<>();
+			for (var entry: getProjectManager().runOnActiveServer(projectId, new GetLineCoverages(projectId, buildNumber, blobPath, reportName)).entrySet()) {
+				if (SecurityUtils.canAccessReport(build, entry.getKey())) {
+					entry.getValue().forEach((key, value) -> {
+						coverages.merge(key, value, CoverageStatus::mergeWith);
+					});
 				}
-				
-				return coverages;
 			}
 			
+			return coverages;
 		});
 		
 		contribute(BuildTabContribution.class, new BuildTabContribution() {
@@ -96,7 +89,7 @@ public class CoverageModule extends AbstractPluginModule {
 				Long projectId = build.getProject().getId();
 				Long buildNumber = build.getNumber();
 				
-				return getProjectManager().runOnProjectServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
+				return getProjectManager().runOnActiveServer(projectId, new GetBuildTabs(projectId, buildNumber)).stream()
 						.filter(it->SecurityUtils.canAccessReport(build, it.getTitle()))
 						.collect(Collectors.toList());
 			}
@@ -108,15 +101,16 @@ public class CoverageModule extends AbstractPluginModule {
 			
 		});
 		
-		contribute(WebApplicationConfigurator.class, new WebApplicationConfigurator() {
-			
-			@Override
-			public void configure(WebApplication application) {
-				application.mount(new ProjectPageMapper("${project}/~builds/${build}/coverage/${report}", CoverageReportPage.class));
-				application.mount(new ProjectPageMapper("${project}/~stats/coverage", CoverageStatsPage.class));
-			}
-			
-		});		
+		contribute(WebApplicationConfigurator.class, application -> {
+			application.mount(new ProjectPageMapper("${project}/~builds/${build}/coverage/${report}", CoverageReportPage.class));
+			application.mount(new ProjectPageMapper("${project}/~stats/coverage", CoverageStatsPage.class));
+		});
+
+		contribute(BuildStorageSyncer.class, ((projectId, buildNumber, activeServer) -> {
+			getProjectManager().syncDirectory(projectId, 
+					getProjectRelativePath(buildNumber) + "/" + DIR_CATEGORY, 
+					getReportLockName(projectId, buildNumber), activeServer);
+		}));
 		
 	}
 	
@@ -138,32 +132,20 @@ public class CoverageModule extends AbstractPluginModule {
 		}
 
 		@Override
-		public List<BuildTab> call() throws Exception {
-			return LockUtils.read(CoverageReport.getReportLockName(projectId, buildNumber), new Callable<List<BuildTab>>() {
-
-				@Override
-				public List<BuildTab> call() throws Exception {
-					List<BuildTab> tabs = new ArrayList<>();
-					File categoryDir = new File(Build.getDir(projectId, buildNumber), CoverageReport.CATEGORY);
-					if (categoryDir.exists()) {
-						for (File reportDir: categoryDir.listFiles()) {
-							if (!reportDir.isHidden()) {
-								tabs.add(new BuildReportTab(reportDir.getName(), CoverageReportPage.class, 
-										CoverageStatsPage.class));
-							}
+		public List<BuildTab> call() {
+			return read(getReportLockName(projectId, buildNumber), () -> {
+				List<BuildTab> tabs = new ArrayList<>();
+				File categoryDir = new File(getStorageDir(projectId, buildNumber), DIR_CATEGORY);
+				if (categoryDir.exists()) {
+					for (File reportDir: categoryDir.listFiles()) {
+						if (!reportDir.isHidden() && !isVersionFile(reportDir)) {
+							tabs.add(new BuildReportTab(reportDir.getName(), CoverageReportPage.class, 
+									CoverageStatsPage.class));
 						}
 					}
-					Collections.sort(tabs, new Comparator<BuildTab>() {
-
-						@Override
-						public int compare(BuildTab o1, BuildTab o2) {
-							return o1.getTitle().compareTo(o1.getTitle());
-						}
-						
-					});
-					return tabs;
 				}
-				
+				Collections.sort(tabs, (o1, o2) -> o1.getTitle().compareTo(o1.getTitle()));
+				return tabs;
 			});
 		}
 		
@@ -189,29 +171,23 @@ public class CoverageModule extends AbstractPluginModule {
 		}
 		
 		@Override
-		public Map<String, Map<Integer, CoverageStatus>> call() throws Exception {
-			return LockUtils.read(CoverageReport.getReportLockName(projectId, buildNumber), new Callable<Map<String, Map<Integer, CoverageStatus>>>() {
-
-				@SuppressWarnings("unchecked")
-				@Override
-				public Map<String, Map<Integer, CoverageStatus>> call() throws Exception {
-					Map<String, Map<Integer, CoverageStatus>> coverages = new HashMap<>();
-					File categoryDir = new File(Build.getDir(projectId, buildNumber), CoverageReport.CATEGORY);
-					if (categoryDir.exists()) {
-						for (File reportDir: categoryDir.listFiles()) {
-							if (reportName == null || reportName.equals(reportDir.getName())) { 
-								File lineCoveragesFile = new File(reportDir, CoverageReport.FILES_DIR + "/" + blobPath);
-								if (lineCoveragesFile.exists()) {
-									try (InputStream is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
-										coverages.put(reportDir.getName(), (Map<Integer, CoverageStatus>) SerializationUtils.deserialize(is));
-									}
+		public Map<String, Map<Integer, CoverageStatus>> call() {
+			return read(getReportLockName(projectId, buildNumber), () -> {
+				Map<String, Map<Integer, CoverageStatus>> coverages = new HashMap<>();
+				File categoryDir = new File(getStorageDir(projectId, buildNumber), DIR_CATEGORY);
+				if (categoryDir.exists()) {
+					for (File reportDir: categoryDir.listFiles()) {
+						if (reportName == null || reportName.equals(reportDir.getName())) { 
+							File lineCoveragesFile = new File(reportDir, CoverageReport.DIR_FILES + "/" + blobPath);
+							if (lineCoveragesFile.exists()) {
+								try (InputStream is = new BufferedInputStream(new FileInputStream(lineCoveragesFile))) {
+									coverages.put(reportDir.getName(), (Map<Integer, CoverageStatus>) SerializationUtils.deserialize(is));
 								}
 							}
 						}
 					}
-					return coverages;
 				}
-				
+				return coverages;
 			});
 			
 		}

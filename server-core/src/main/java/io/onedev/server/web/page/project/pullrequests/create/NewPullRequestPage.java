@@ -79,16 +79,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.validation.IErrorMessageSource;
-import org.apache.wicket.validation.IValidatable;
-import org.apache.wicket.validation.IValidationError;
-import org.apache.wicket.validation.IValidator;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -750,22 +745,10 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			}
 			
 		};
-		descriptionInput.add(new IValidator<String>() {
-
-			@Override
-			public void validate(IValidatable<String> validatable) {
-				if (validatable.getValue().length() > PullRequest.MAX_DESCRIPTION_LEN) {
-					validatable.error(new IValidationError() {
-						
-						@Override
-						public Serializable getErrorMessage(IErrorMessageSource messageSource) {
-							return "Description too long";
-						}
-						
-					});
-				}
+		descriptionInput.add(validatable -> {
+			if (validatable.getValue().length() > PullRequest.MAX_DESCRIPTION_LEN) {
+				validatable.error(messageSource -> "Description too long");
 			}
-			
 		});
 		
 		descriptionInput.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {

@@ -69,22 +69,17 @@ public class UserCache extends MapProxy<Long, UserFacade> implements Serializabl
 	}
 	
 	public Comparator<User> comparingDisplayName(Collection<User> topUsers) {
-		return new Comparator<User>() {
-
-			@Override
-			public int compare(User o1, User o2) {
-				if (topUsers.contains(o1)) {
-					if (topUsers.contains(o2))
-						return get(o1.getId()).getDisplayName().compareTo(get(o2.getId()).getDisplayName());
-					else
-						return -1;
-				} else if (topUsers.contains(o2)) {
-					return 1;
-				} else {
+		return (o1, o2) -> {
+			if (topUsers.contains(o1)) {
+				if (topUsers.contains(o2))
 					return get(o1.getId()).getDisplayName().compareTo(get(o2.getId()).getDisplayName());
-				}
+				else
+					return -1;
+			} else if (topUsers.contains(o2)) {
+				return 1;
+			} else {
+				return get(o1.getId()).getDisplayName().compareTo(get(o2.getId()).getDisplayName());
 			}
-			
 		};		
 	}
 	

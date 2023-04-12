@@ -18,9 +18,9 @@ public interface AvatarManager {
 	
 	void useProjectAvatar(Long projectId, @Nullable String avatarData);
 	
-	File getUserUploaded(Long userId);
+	File getUserUploadedFile(Long userId);
 	
-	File getProjectUploaded(Long projectId);
+	File getProjectUploadedFile(Long projectId);
 	
 	void copyProjectAvatar(Long fromProjectId, Long toProjectId);
 	

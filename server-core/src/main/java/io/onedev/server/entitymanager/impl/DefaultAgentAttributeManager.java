@@ -1,23 +1,11 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.common.base.Preconditions;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.AgentAttribute;
 import io.onedev.server.persistence.TransactionManager;
@@ -25,6 +13,13 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
 
 @Singleton
 public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribute> implements AgentAttributeManager {
@@ -46,16 +41,18 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 
 	@Sessional
 	@Listen
-	public void on(SystemStarted event) {
+	public void on(SystemStarting event) {
 		logger.info("Caching agent attribute info...");
 
-		attributeNames = clusterManager.getHazelcastInstance().getReplicatedMap("agentAttributeNames");
-		
-		if (clusterManager.isLeaderServer()) {
+		var hazelcastInstance = clusterManager.getHazelcastInstance();
+		attributeNames = hazelcastInstance.getMap("agentAttributeNames");
+		var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("agentAttributeCacheInited");
+		clusterManager.init(cacheInited, () -> {
 			Query<?> query = dao.getSession().createQuery("select name from AgentAttribute");
-			for (Object name: query.list()) 
+			for (Object name: query.list())
 				attributeNames.put((String) name, (String) name);
-		}
+			return 1L;
+		});		
 	}
 
 	@Transactional
@@ -63,22 +60,12 @@ public class DefaultAgentAttributeManager extends BaseEntityManager<AgentAttribu
 	public void create(AgentAttribute attribute) {
 		Preconditions.checkState(attribute.isNew());
 		dao.persist(attribute);
-		
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				attributeNames.put(attribute.getName(), attribute.getName());
-			}
-			
-		});
+		transactionManager.runAfterCommit(() -> attributeNames.put(attribute.getName(), attribute.getName()));
 	}
 
 	@Override
-	public List<String> getAttributeNames() {
-		List<String> copy = new ArrayList<>(attributeNames.keySet());
-		Collections.sort(copy);
-		return copy;
+	public Collection<String> getAttributeNames() {
+		return attributeNames.keySet();
 	}
 
 	@Transactional

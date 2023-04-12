@@ -10,6 +10,9 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Markdown;
+import io.onedev.server.annotation.ProjectName;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.git.*;
@@ -45,9 +48,6 @@ import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatch.UserMatch;
-import io.onedev.server.annotation.ProjectName;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Markdown;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
@@ -83,7 +83,7 @@ import static io.onedev.server.util.match.WildcardUtils.matchPath;
 @Table(
 		indexes={
 				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"),
-				@Index(columnList="o_dynamics_id"), @Index(columnList=PROP_NAME)
+				@Index(columnList="o_lastEventDate_id"), @Index(columnList=PROP_NAME)
 		}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
 )
@@ -94,6 +94,12 @@ import static io.onedev.server.util.match.WildcardUtils.matchPath;
 public class Project extends AbstractEntity implements LabelSupport<ProjectLabel> {
 
 	private static final long serialVersionUID = 1L;
+
+	public static String BUILDS_DIR = "builds";
+
+	public static String ATTACHMENT_DIR = "attachment";
+
+	public static String SITE_DIR = "site";
 	
 	public static final int MAX_DESCRIPTION_LEN = 15000;
 	
@@ -115,7 +121,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 	public static final String NAME_LAST_COMMIT_DATE = "Last Commit Date";
 	
-	public static final String PROP_DYNAMICS = "dynamics";
+	public static final String PROP_LAST_EVENT_DATE = "lastEventDate";
 	
 	public static final String NAME_LABEL = "Label";
 	
@@ -142,8 +148,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			NAME_PATH, PROP_PATH,
 			NAME_NAME, PROP_NAME, 
 			NAME_SERVICE_DESK_NAME, PROP_SERVICE_DESK_NAME,
-			NAME_LAST_ACTIVITY_DATE, PROP_DYNAMICS + "." + ProjectDynamics.PROP_LAST_ACTIVITY_DATE,
-			NAME_LAST_COMMIT_DATE, PROP_DYNAMICS + "." + ProjectDynamics.PROP_LAST_COMMIT_DATE);
+			NAME_LAST_ACTIVITY_DATE, PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_ACTIVITY,
+			NAME_LAST_COMMIT_DATE, PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_COMMIT);
 	
 	static ThreadLocal<Stack<Project>> stack =  new ThreadLocal<Stack<Project>>() {
 
@@ -162,7 +168,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		stack.get().pop();
 	}
 	
-	private static final ReferenceMap<ObjectId, Optional<byte[]>> buildSpecBytesCache = 
+	private static final ReferenceMap<ObjectId, byte[]> buildSpecBytesCache = 
 			new ReferenceMap<>(ReferenceStrength.HARD, ReferenceStrength.SOFT);
 
 	private transient Map<ObjectId, Optional<BuildSpec>> buildSpecCache;
@@ -182,7 +188,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@JsonIgnore
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(unique=true, nullable=false)
-	private ProjectDynamics dynamics;
+	private ProjectLastEventDate lastEventDate;
 
 	@Column(nullable=false)
 	private String name;
@@ -275,7 +281,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	private boolean codeManagement = true;
-	
+
 	private boolean issueManagement = true;
 
 	@Lob
@@ -346,7 +352,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     
 	private transient List<Milestone> sortedMilestones;
 	
-	private transient Optional<UUID> storageServerUUID;
+	private transient Optional<String> activeServer;
 
 	private transient Map<ObjectId, Collection<Build>> buildsCache;
 	
@@ -419,12 +425,12 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.createDate = createDate;
 	}
 
-	public ProjectDynamics getDynamics() {
-		return dynamics;
+	public ProjectLastEventDate getLastEventDate() {
+		return lastEventDate;
 	}
 
-	public void setDynamics(ProjectDynamics dynamics) {
-		this.dynamics = dynamics;
+	public void setLastEventDate(ProjectLastEventDate lastEventDate) {
+		this.lastEventDate = lastEventDate;
 	}
 
 	public Collection<PullRequest> getIncomingRequests() {
@@ -527,7 +533,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public List<RefFacade> getBranchRefs() {
-		List<RefFacade> refs = getRefs(Constants.R_HEADS);
+		List<RefFacade> refs = getCommitRefs(Constants.R_HEADS);
 		for (Iterator<RefFacade> it = refs.iterator(); it.hasNext();) {
 			RefFacade ref = it.next();
 			if (ref.getName().equals(GitUtils.branch2ref(getDefaultBranch()))) {
@@ -541,11 +547,11 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
     }
 	
 	public List<RefFacade> getTagRefs() {
-		return getRefs(Constants.R_TAGS);
+		return getCommitRefs(Constants.R_TAGS);
     }
 	
-	public List<RefFacade> getRefs(String prefix) {
-		return getGitService().getRefs(this, prefix);
+	public List<RefFacade> getCommitRefs(String prefix) {
+		return getGitService().getCommitRefs(this, prefix);
     }
 
 	/**
@@ -627,7 +633,8 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	@Override
 	public ProjectFacade getFacade() {
 		return new ProjectFacade(getId(), getName(), getPath(), getServiceDeskName(), 
-				isIssueManagement(), Role.idOf(getDefaultRole()), Project.idOf(getParent()));
+				isCodeManagement(), isIssueManagement(), getGitPackConfig(), 
+				lastEventDate.getId(), idOf(getDefaultRole()), idOf(getParent()));
 	}
 	
 	/**
@@ -714,7 +721,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			for (StatusInfo statusInfo: entry.getValue()) {
 				if ((pipeline == null || pipeline.equals(statusInfo.getPipeline()))
 						&& (refName == null || refName.equals(statusInfo.getRefName())) 
-						&& Objects.equals(PullRequest.idOf(request), statusInfo.getRequestId())) {
+						&& Objects.equals(idOf(request), statusInfo.getRequestId())) {
 					statuses.add(statusInfo.getStatus());
 				}
 			}
@@ -744,7 +751,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	 */
 	@Nullable
 	private BuildSpec loadBuildSpec(ObjectId commitId) {
-		Optional<byte[]> buildSpecBytes;
+		byte[] buildSpecBytes;
 		synchronized (buildSpecBytesCache) {
 			buildSpecBytes = buildSpecBytesCache.get(commitId);
 		}
@@ -760,18 +767,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 				else
 					buildSpec = null;
 			}
-			if (buildSpec != null)
-				buildSpecBytes = Optional.of(SerializationUtils.serialize(buildSpec));
-			else
-				buildSpecBytes = Optional.absent();
-			synchronized (buildSpecBytesCache) {
-				buildSpecBytesCache.put(commitId, buildSpecBytes);
+			if (buildSpec != null) {
+				buildSpecBytes = SerializationUtils.serialize(buildSpec);
+				synchronized (buildSpecBytesCache) {
+					buildSpecBytesCache.put(commitId, buildSpecBytes);
+				}
 			}
 			return buildSpec;
-		} else if (buildSpecBytes.isPresent()) {
-			return SerializationUtils.deserialize(buildSpecBytes.get());
 		} else {
-			return null;
+			return SerializationUtils.deserialize(buildSpecBytes);
 		}
 	}
 	
@@ -1634,13 +1638,13 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	@Nullable
-	public UUID getStorageServerUUID(boolean mustExist) {
-		if (storageServerUUID == null) {
-			storageServerUUID = Optional.fromNullable(
-					getProjectManager().getStorageServerUUID(getId(), false));
+	public String getActiveServer(boolean mustExist) {
+		if (activeServer == null) {
+			activeServer = Optional.fromNullable(
+					getProjectManager().getActiveServer(getId(), false));
 		}
-		if (storageServerUUID.isPresent())
-			return storageServerUUID.get();
+		if (activeServer.isPresent())
+			return activeServer.get();
 		else if (mustExist) 
 			throw new ExplicitException("Storage not found for project: " + getPath());
 		else
@@ -1668,17 +1672,6 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 
 		return MergeStrategy.CREATE_MERGE_COMMIT;
 	}
-
-	public boolean findPullRequestWithLFS() {
-		Project current = this;
-		do {
-			if (current.getPullRequestSetting().isWithLFS() != null)
-				return current.getPullRequestSetting().isWithLFS();
-			current = current.getParent();
-		} while (current != null);
-
-		return false;
-	}
 	
 	public String getSiteLockName() {
 		return getSiteLockName(getId());
@@ -1699,5 +1692,5 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		}
 		return builds;
 	}
-
+	
 }

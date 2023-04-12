@@ -30,7 +30,7 @@ public class GroovyScript implements Serializable {
 	private String authorization;
 
 	@Editable(order=100)
-	@RegEx(pattern="^(?!" + BUILTIN_PREFIX + ").*$", message="Name is not allowed to start with '" + BUILTIN_PREFIX + "'")
+	@RegEx(pattern ="^(?!" + BUILTIN_PREFIX + ").*$", message="Name is not allowed to start with '" + BUILTIN_PREFIX + "'")
 	@NotEmpty
 	public String getName() {
 		return name;

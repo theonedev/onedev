@@ -2,28 +2,27 @@ package io.onedev.server;
 
 import com.google.inject.Provider;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.cp.IAtomicLong;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.exception.SystemNotReadyException;
+import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.jetty.JettyLauncher;
 import io.onedev.server.persistence.*;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
-import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.schedule.TaskScheduler;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,33 +33,33 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+import java.io.*;
 import java.net.ServerSocket;
-import java.nio.charset.Charset;
-import java.sql.Connection;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
-	
+
 	private final Provider<JettyLauncher> jettyLauncherProvider;
 		
 	private final SessionManager sessionManager;
 	
 	private final DataManager dataManager;
 	
-	private final SettingManager settingManager;
-			
 	private final Provider<ServerConfig> serverConfigProvider;
 	
 	private final ListenerRegistry listenerRegistry;
@@ -82,11 +81,10 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	// Some are injected via provider as instantiation might encounter problem during upgrade 
 	@Inject
 	public OneDev(Provider<JettyLauncher> jettyLauncherProvider, TaskScheduler taskScheduler, 
-			SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider, 
-			DataManager dataManager, ExecutorService executorService, 
-			SettingManager settingManager, ListenerRegistry listenerRegistry, 
-			ClusterManager clusterManager, IdManager idManager, 
-			SessionFactoryManager sessionFactoryManager) {
+				  SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider, 
+				  DataManager dataManager, ExecutorService executorService, 
+				  ListenerRegistry listenerRegistry, ClusterManager clusterManager, 
+				  IdManager idManager, SessionFactoryManager sessionFactoryManager) {
 		this.jettyLauncherProvider = jettyLauncherProvider;
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
@@ -96,7 +94,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.listenerRegistry = listenerRegistry;
 		this.clusterManager = clusterManager;
 		this.idManager = idManager;
-		this.settingManager = settingManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 
 		initStage = new InitStage("Server is Starting...");
@@ -109,30 +106,22 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		System.setProperty("hsqldb.reconfig_logging", "false");
 		System.setProperty("hsqldb.method_class_names", "java.lang.Math");
 		
-		jettyLauncherProvider.get().start();
-		taskScheduler.start();
-		
 		sessionFactoryManager.start();
 		
-		dataManager.callWithConnection(new ConnectionCallable<Void>() {
-
-			@Override
-			public Void call(Connection conn) {
-				while (true) {
+		dataManager.callWithConnection((ConnectionCallable<Void>) conn -> {
+			while (true) {
+				try {
+					dataManager.populateDatabase(conn);
+					break;
+				} catch (Exception e) {
+					logger.warn("Error initializing data, will retry later...", e);
 					try {
-						dataManager.populateDatabase(conn);
-						break;
-					} catch (Exception e) {
-						logger.warn("Error initializing data, will retry later...", e);
-						try {
-							Thread.sleep((RandomUtils.nextInt(5)+1)*1000L);
-						} catch (InterruptedException e2) {
-						}
+						Thread.sleep((RandomUtils.nextInt(5)+1)*1000L);
+					} catch (InterruptedException ignored) {
 					}
 				}
-				return null;
 			}
-			
+			return null;
 		});
 		
 		clusterManager.start();
@@ -142,48 +131,90 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		sessionFactoryManager.stop();
 		sessionFactoryManager.start();
 		
-		settingManager.init();
+		sessionManager.run(() -> listenerRegistry.post(new SystemStarting()));
+		jettyLauncherProvider.get().start();
 
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-		IAtomicLong dataChecked = hazelcastInstance.getCPSubsystem().getAtomicLong("dataInited");
-		clusterManager.init(dataChecked, new Callable<Long>() {
-
-			@Override
-			public Long call() throws Exception {
-				List<ManualConfig> manualConfigs = dataManager.checkData();
-				if (!manualConfigs.isEmpty()) {
-					if (getIngressUrl() != null)
-						logger.warn("Please set up the server at " + getIngressUrl());
-					else
-						logger.warn("Please set up the server at " + guessServerUrl());
-					initStage = new InitStage("Server Setup", manualConfigs);
-					
-					initStage.waitForFinish();
-				}
-				return 1L;
+		var dataChecked = hazelcastInstance.getCPSubsystem().getAtomicLong("dataInited");
+		clusterManager.init(dataChecked, () -> {
+			var manualConfigs = dataManager.checkData();
+			if (!manualConfigs.isEmpty()) {
+				if (getIngressUrl() != null)
+					logger.warn("Please set up the server at " + getIngressUrl());
+				else
+					logger.warn("Please set up the server at " + guessServerUrl());
+				initStage = new InitStage("Server Setup", manualConfigs);
+				
+				initStage.waitForFinish();
 			}
-			
+			return 1L;
 		});
 		
-		sessionManager.openSession();
-		try {
-			listenerRegistry.post(new SystemStarting());
-		} finally {
-			sessionManager.closeSession();
+		var leadServer = clusterManager.getLeaderServerAddress();
+		if (!leadServer.equals(clusterManager.getLocalServerAddress())) {
+			logger.info("Syncing assets...");
+			Client client = ClientBuilder.newClient();
+			try {
+				String fromServerUrl = clusterManager.getServerUrl(leadServer);
+				WebTarget target = client.target(fromServerUrl).path("/~api/cluster/assets");
+				Invocation.Builder builder = target.request();
+				builder.header(AUTHORIZATION,
+						BEARER + " " + clusterManager.getCredential());
+
+				try (Response response = builder.get()) {
+					KubernetesHelper.checkStatus(response);
+					try (InputStream is = response.readEntity(InputStream.class)) {							
+						FileUtils.untar(is, getAssetsDir(), false);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			} finally {
+				client.close();
+			}
 		}
 		
 		// workaround for issue https://bugs.eclipse.org/bugs/show_bug.cgi?id=566170
 		FileStoreAttributes.setBackground(true);
+		taskScheduler.start();
 	}
 	
 	@Sessional
 	@Override
 	public void postStart() {
 		SecurityUtils.bindAsSystem();
-		
-		listenerRegistry.post(new SystemStarted());
-        logger.info("Server is ready at " + guessServerUrl() + ".");
 		initStage = null;
+		listenerRegistry.post(new SystemStarted());
+		clusterManager.postStart();
+        logger.info("Server is ready at " + guessServerUrl() + ".");
+	}
+
+	@Override
+	public void preStop() {
+		SecurityUtils.bindAsSystem();
+		clusterManager.preStop();
+		try {
+			sessionManager.run(() -> listenerRegistry.post(new SystemStopping()));
+		} catch (ServerNotReadyException ignore) {
+		}
+	}
+
+	@Override
+	public void stop() {
+		SecurityUtils.bindAsSystem();
+
+		try {
+			taskScheduler.stop();
+
+			jettyLauncherProvider.get().stop();
+			sessionManager.run(() -> listenerRegistry.post(new SystemStopped()));
+
+			// stop cluster manager first as it depends on metadata of session factory
+			clusterManager.stop();
+			sessionFactoryManager.stop();
+			executorService.shutdown();
+		} catch (ServerNotReadyException ignore) {
+		}
 	}
 
 	@Nullable
@@ -245,7 +276,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	}
 	
 	private Url buildServerUrl(String host, String protocol, int port) {
-        Url serverUrl = new Url(Charset.forName("UTF8"));
+        Url serverUrl = new Url(StandardCharsets.UTF_8);
 
         serverUrl.setHost(host);
         serverUrl.setProtocol(protocol);
@@ -285,46 +316,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		return bootDate;
 	}
 
-	@Override
-	public void preStop() {
-		SecurityUtils.bindAsSystem();
-		
-		try {
-			sessionManager.run(new Runnable() {
-				@Override
-				public void run() {
-					listenerRegistry.post(new SystemStopping());
-				}
-
-			});
-		} catch (SystemNotReadyException ignore) {
-		}
-	}
-
-	@Override
-	public void stop() {
-		SecurityUtils.bindAsSystem();
-
-		try {
-			sessionManager.run(new Runnable() {
-
-				@Override
-				public void run() {
-					listenerRegistry.post(new SystemStopped());
-				}
-
-			});
-
-			// stop cluster manager first as it depends on metadata of session factory
-			clusterManager.stop();
-			sessionFactoryManager.stop();
-			taskScheduler.stop();
-			executorService.shutdown();
-			jettyLauncherProvider.get().stop();
-		} catch (SystemNotReadyException ignore) {
-		}
-	}
-	
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(OneDev.class);
 	}	
@@ -332,7 +323,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	public static boolean isServerRunning(File installDir) {
 		Properties props = FileUtils.loadProperties(new File(installDir, "conf/server.properties"));
 		int sshPort = Integer.parseInt(props.get("ssh_port").toString());
-		try (ServerSocket serverSocket = new ServerSocket(sshPort)) {
+		try (ServerSocket ignored = new ServerSocket(sshPort)) {
 			return false;
 		} catch (IOException e) {
 			if (e.getMessage() != null && e.getMessage().contains("Address already in use"))
@@ -342,4 +333,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		}		
 	}
 
+	public static File getAssetsDir() {
+		return new File(Bootstrap.getSiteDir(), "assets");
+	}
+	
 }

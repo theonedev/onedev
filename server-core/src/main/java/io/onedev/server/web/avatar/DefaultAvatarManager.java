@@ -1,37 +1,37 @@
 package io.onedev.server.web.avatar;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.locks.Lock;
-
-import javax.imageio.ImageIO;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.commons.codec.binary.Hex;
-import org.eclipse.jgit.lib.PersonIdent;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.facade.EmailAddressFacade;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.web.component.avatarupload.AvatarUploadField;
+import org.apache.commons.codec.binary.Hex;
+import org.eclipse.jgit.lib.PersonIdent;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
+
+import static io.onedev.commons.utils.FileUtils.createDir;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.server.web.avatar.AvatarGenerator.generate;
+import static io.onedev.server.web.component.avatarupload.AvatarUploadField.writeToFile;
+import static javax.imageio.ImageIO.write;
 
 @Singleton
 public class DefaultAvatarManager implements AvatarManager, Serializable {
@@ -68,7 +68,7 @@ public class DefaultAvatarManager implements AvatarManager, Serializable {
 		} else if (userId.equals(User.SYSTEM_ID)) {
 			return AVATARS_BASE_URL + "onedev.png";
 		} else {
-			File uploadedFile = getUserUploaded(userId);
+			File uploadedFile = getUserUploadedFile(userId);
 			if (uploadedFile.exists())
 				return AVATARS_BASE_URL + "uploaded/users/" + userId + ".jpg?version=" + uploadedFile.lastModified();
 			
@@ -114,36 +114,31 @@ public class DefaultAvatarManager implements AvatarManager, Serializable {
 			normalizedSecondaryName = normalizedPrimaryName;
 		else
 			normalizedSecondaryName = secondaryName;
-		
-		clusterManager.runOnAllServers(new ClusterTask<Void>() {
 
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				File avatarFile = new File(Bootstrap.getSiteDir(), "assets/avatars/generated/" + encoded + ".png");
-				if (!avatarFile.exists()) {
-					Lock avatarLock = LockUtils.getLock("generated-avatar:" + encoded);
-					avatarLock.lock();
-					try {
-						String letters = getLetter(normalizedPrimaryName);
-						BufferedImage bi = AvatarGenerator.generate(letters, normalizedSecondaryName);
-						FileUtils.createDir(avatarFile.getParentFile());
-						ImageIO.write(bi, "PNG", avatarFile);
-					} catch (NoSuchAlgorithmException | IOException e) {
-						throw new RuntimeException(e);
-					} finally {
-						avatarLock.unlock();
-					}
+		var generatedPath = "generated/" + encoded + ".png";
+		var avatarFile = new File(Bootstrap.getSiteDir(), "assets/avatars/" + generatedPath);		
+		var lockName = getGeneratedLockName(encoded);
+		if (!read(lockName, () -> avatarFile.exists())) {
+			write(lockName, () -> {
+				try {
+					String letters = getLetter(normalizedPrimaryName);
+					BufferedImage bi = generate(letters, normalizedSecondaryName);
+					createDir(avatarFile.getParentFile());
+					write(bi, "PNG", avatarFile);
+				} catch(NoSuchAlgorithmException | IOException e){
+					throw new RuntimeException(e);
 				}
 				return null;
-			}
-			
-		});
+			});
+		}
 		
-		return AVATARS_BASE_URL + "generated/" + encoded + ".png";
+		return AVATARS_BASE_URL + generatedPath;
 	}
 
+	private String getGeneratedLockName(String encoded) {
+		return "generated-avatar:" + encoded;
+	}
+	
 	private String getLetter(String name) {
 		String[] tokens = Iterables.toArray(Splitter.on(" ").split(name.trim()), String.class);
 
@@ -160,36 +155,27 @@ public class DefaultAvatarManager implements AvatarManager, Serializable {
 	}
 	
 	@Override
-	public File getUserUploaded(Long userId) {
+	public File getUserUploadedFile(Long userId) {
 		return new File(Bootstrap.getSiteDir(), "assets/avatars/uploaded/users/" + userId + ".jpg");
 	}
 
+	private String getUserUploadedLockName(Long userId) {
+		return "uploaded-user-avatar:" + userId;
+	}
+	
 	@Override
 	public void useUserAvatar(Long userId, String avatarData) {
-		clusterManager.runOnAllServers(new ClusterTask<Void>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				Lock avatarLock = LockUtils.getLock("uploaded-user-avatar:" + userId);
-				avatarLock.lock();
-				try {
-					File avatarFile = getUserUploaded(userId);
-					FileUtils.createDir(avatarFile.getParentFile());
-					AvatarUploadField.writeToFile(avatarFile, avatarData);
-				} finally {
-					avatarLock.unlock();
-				}
-				return null;
-			}
-			
-		});
+		clusterManager.runOnAllServers(() -> write(getUserUploadedLockName(userId), () -> {
+			File avatarFile = getUserUploadedFile(userId);
+			createDir(avatarFile.getParentFile());
+			writeToFile(avatarFile, avatarData);
+			return null;
+		}));
 	}
 
 	@Override
 	public String getProjectAvatarUrl(Long projectId) {
-		File avatarFile = getProjectUploaded(projectId);
+		File avatarFile = getProjectUploadedFile(projectId);
 		if (avatarFile.exists())  
 			return AVATARS_BASE_URL + "uploaded/projects/" + projectId + ".jpg?version=" + avatarFile.lastModified();
 		else
@@ -198,59 +184,49 @@ public class DefaultAvatarManager implements AvatarManager, Serializable {
 
 	@Override
 	public void useProjectAvatar(Long projectId, String avatarData) {
-		clusterManager.runOnAllServers(new ClusterTask<Void>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				Lock avatarLock = getProjectUploadedAvatarLock(projectId);
-				avatarLock.lock();
-				try {
-					File avatarFile = getProjectUploaded(projectId);
-					FileUtils.createDir(avatarFile.getParentFile());
-					AvatarUploadField.writeToFile(avatarFile, avatarData);
-				} finally {
-					avatarLock.unlock();
-				}
-				return null;
-			}
-			
-		});		
+		clusterManager.runOnAllServers(() -> write(getProjectUploadedLockName(projectId), () -> {
+			File avatarFile = getProjectUploadedFile(projectId);
+			createDir(avatarFile.getParentFile());
+			writeToFile(avatarFile, avatarData);
+			return null;
+		}));		
 	}
 
 	@Override
-	public File getProjectUploaded(Long projectId) {
+	public File getProjectUploadedFile(Long projectId) {
 		return new File(Bootstrap.getSiteDir(), "assets/avatars/uploaded/projects/" + projectId + ".jpg");
 	}
 	
-	private Lock getProjectUploadedAvatarLock(Long projectId) {
-		return LockUtils.getLock("uploaded-project-avatar:" + projectId);
+	private String getProjectUploadedLockName(Long projectId) {
+		return "uploaded-project-avatar:" + projectId;
 	}
-
+	
 	@Override
 	public void copyProjectAvatar(Long fromProjectId, Long toProjectId) {
-		clusterManager.runOnAllServers(new ClusterTask<Void>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				Lock avatarLock = getProjectUploadedAvatarLock(fromProjectId);
-				avatarLock.lock();
+		clusterManager.runOnAllServers(() -> {
+			var fromFile = getProjectUploadedFile(fromProjectId);
+			var toFile = getProjectUploadedFile(toProjectId);
+			var readLockName = getProjectUploadedLockName(fromProjectId);
+			if (read(readLockName, () -> fromFile.exists())) {
+				var tempFile = new File(toFile.getParentFile(), UUID.randomUUID().toString());
 				try {
-					File uploaded = getProjectUploaded(fromProjectId);
-					if (uploaded.exists()) {
-						FileUtils.copyFile(uploaded, getProjectUploaded(toProjectId));
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+					read(readLockName, () -> {
+						try {
+							FileUtils.copyFile(fromFile, tempFile);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+						return null;
+					});
+					write(getProjectUploadedLockName(toProjectId), () -> {
+						FileUtils.moveFile(tempFile, toFile);
+						return null;
+					});
 				} finally {
-					avatarLock.unlock();
+					FileUtils.deleteFile(tempFile);
 				}
-				return null;
 			}
-			
+			return null;
 		});
 	}
 

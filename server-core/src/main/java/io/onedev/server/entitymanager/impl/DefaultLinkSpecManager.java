@@ -1,18 +1,14 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.common.base.Preconditions;
+import com.hazelcast.cp.IAtomicLong;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.LinkSpec;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -23,6 +19,12 @@ import io.onedev.server.search.entity.issue.IssueQueryUpdater;
 import io.onedev.server.util.facade.LinkSpecFacade;
 import io.onedev.server.util.usage.Usage;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
 @Singleton
 public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implements LinkSpecManager {
 
@@ -32,7 +34,7 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 	
 	private final ClusterManager clusterManager;
 	
-	private volatile Map<String, Long> ids;
+	private volatile Map<String, Long> idCache;
 	
 	private volatile Map<Long, LinkSpecFacade> cache;
 	
@@ -47,24 +49,30 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 
 	@Sessional
 	@Listen
-	public void on(SystemStarted event) {
-		ids = clusterManager.getHazelcastInstance().getReplicatedMap("linkSpecIds");
-		cache = clusterManager.getHazelcastInstance().getReplicatedMap("linkSpecCache");
+	public void on(SystemStarting event) {
+		var hazelcastInstance = clusterManager.getHazelcastInstance();
+		idCache = hazelcastInstance.getMap("linkSpecIds");
+		cache = hazelcastInstance.getMap("linkSpecCache");
 		
-		for (LinkSpec link: query(true)) {
-			ids.put(link.getName(), link.getId());
-			
-			String oppositeName = link.getOpposite()!=null?link.getOpposite().getName():null;
-			if (oppositeName != null)
-				ids.put(oppositeName, link.getId());
-			cache.put(link.getId(), link.getFacade());
-		}
+		IAtomicLong cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("linkSpecCacheInited");
+		clusterManager.init(cacheInited, () -> {
+			for (LinkSpec spec : query(true))
+				updateCache(spec.getFacade());
+			return 1L;
+		});
+	}
+	
+	private void updateCache(LinkSpecFacade facade) {
+		cache.put(facade.getId(), facade);
+		idCache.put(facade.getName(), facade.getId());
+		if (facade.getOppositeName() != null)
+			idCache.put(facade.getOppositeName(), facade.getId());
 	}
 	
 	@Sessional
 	@Override
 	public LinkSpec find(String name) {
-		Long linkId = ids.get(name);
+		Long linkId = idCache.get(name);
 		if (linkId != null) {
 			LinkSpecFacade facade = cache.get(linkId);
 			if (facade != null && (name.equals(facade.getName()) || name.equals(facade.getOppositeName())))
@@ -121,27 +129,13 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
 			}
 		}
 		dao.persist(spec);
-		
-		LinkSpecFacade facade = new LinkSpecFacade(spec);
-		
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				cache.put(facade.getId(), facade);
-				ids.put(facade.getName(), facade.getId());
-				if (facade.getOppositeName() != null)
-					ids.put(facade.getOppositeName(), facade.getId());
-			}
-			
-		});
 	}
 
 	@Transactional
 	@Override
-	public void create(LinkSpec link) {
-		Preconditions.checkState(link.isNew());
-		dao.persist(link);
+	public void create(LinkSpec spec) {
+		Preconditions.checkState(spec.isNew());
+		dao.persist(spec);
 	}
 
 	@Transactional
@@ -163,20 +157,30 @@ public class DefaultLinkSpecManager extends BaseEntityManager<LinkSpec> implemen
     			usage.add(updater.onDeleteLink(spec.getName()));
     	}
     	usage.checkInUse("Issue link '" + spec.getName() + "'");
-    	
     	super.delete(spec);
-    	
-		transactionManager.runAfterCommit(new Runnable() {
+	}
+	
+	@Transactional
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof LinkSpec) {
+			var facade = (LinkSpecFacade) event.getEntity().getFacade();
+			transactionManager.runAfterCommit(() -> updateCache(facade));
+		}
+	}
 
-			@Override
-			public void run() {
-				cache.remove(spec.getId());
-				ids.remove(spec.getName());
-				if (spec.getOpposite() != null)
-					ids.remove(spec.getOpposite().getName());
-			}
-			
-		});
+	@Transactional
+	@Listen
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof LinkSpec) {
+			var facade = (LinkSpecFacade) event.getEntity().getFacade();
+			transactionManager.runAfterCommit(() -> {
+				cache.remove(facade.getId());
+				idCache.remove(facade.getName());
+				if (facade.getOppositeName() != null)
+					idCache.remove(facade.getOppositeName());
+			});
+		}
 	}
 	
 }

@@ -32,14 +32,14 @@ public class PullRequestSummaryMarkdownPart extends PullRequestSummaryPart {
 	@Override
 	public Component render(String componentId) {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		String markdown = projectManager.runOnProjectServer(projectId, new ClusterTask<String>() {
+		String markdown = projectManager.runOnActiveServer(projectId, new ClusterTask<String>() {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public String call() throws Exception {
-				File categoryDir = new File(Build.getDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.CATEGORY);
-				File file = new File(new File(categoryDir, getReportName()), PublishPullRequestMarkdownReportStep.FILE);
+				File categoryDir = new File(Build.getStorageDir(projectId, buildNumber), PublishPullRequestMarkdownReportStep.DIR_CATEGORY);
+				File file = new File(new File(categoryDir, getReportName()), PublishPullRequestMarkdownReportStep.FILE_CONTENT);
 				return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 			}
 			

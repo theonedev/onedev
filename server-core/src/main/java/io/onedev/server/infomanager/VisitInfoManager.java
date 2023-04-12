@@ -1,5 +1,6 @@
 package io.onedev.server.infomanager;
 
+import java.io.File;
 import java.util.Date;
 
 import javax.annotation.Nullable;
@@ -30,5 +31,9 @@ public interface VisitInfoManager {
 	
 	@Nullable
 	Date getCodeCommentVisitDate(User user, CodeComment comment);
+
+    void syncVisitInfo(Long projectId, String syncWithServer);
+
+	void export(Long projectId, File targetDir);
 	
 }

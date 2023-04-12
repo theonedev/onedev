@@ -1,13 +1,17 @@
 package io.onedev.server.util.concurrent;
 
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.google.common.base.Preconditions;
 
-public abstract class BatchWorker {
+public abstract class BatchWorker implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	
 	private final String id;
 	
@@ -52,5 +56,6 @@ public abstract class BatchWorker {
 			return new HashCodeBuilder(17, 37).append(id).toHashCode();
 	}
 	
-	public abstract void doWorks(Collection<Prioritized> works);
+	public abstract void doWorks(List<Prioritized> works);
+	
 }

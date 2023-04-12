@@ -106,13 +106,6 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		return dateValue;
 	}
 	
-	public static LinkSpec getLinkSpec(String value) {
-		LinkSpec linkSpec = OneDev.getInstance(LinkSpecManager.class).find(value);
-		if (linkSpec == null)
-			throw new ExplicitException("Unable to find link spec: " + value);
-		return linkSpec;
-	}
-	
 	public static ProjectScopedCommit getCommitId(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":"))
 			value = project.getPath() + ":" + value;

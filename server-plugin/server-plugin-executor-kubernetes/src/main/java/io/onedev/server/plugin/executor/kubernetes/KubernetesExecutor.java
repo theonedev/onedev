@@ -15,8 +15,12 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.*;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Horizontal;
+import io.onedev.server.annotation.OmitName;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.EnvVar;
+import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.job.JobContext;
@@ -26,15 +30,11 @@ import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
 import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
-import io.onedev.server.buildspecmodel.inputspec.SecretInput;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Horizontal;
-import io.onedev.server.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -233,12 +233,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	@Override
 	public void execute(JobContext jobContext, TaskLogger jobLogger) {
-		var servers = new ArrayList<>(OneDev.getInstance(ClusterManager.class)
-				.getHazelcastInstance().getCluster().getMembers());
-		var serverUUID = servers.get(RandomUtils.nextInt(0, servers.size())).getUuid();
-		
-		getJobManager().runJob(serverUUID, ()-> {
-			getJobManager().runJobLocal(jobContext, new JobRunnable() {
+		var clusterManager = OneDev.getInstance(ClusterManager.class);
+		var servers = clusterManager.getServerAddresses();
+		var server = servers.get(RandomUtils.nextInt(0, servers.size()));
+		getJobManager().runJob(server, ()-> {
+			getJobManager().runJob(jobContext, new JobRunnable() {
 
 				private static final long serialVersionUID = 1L;
 

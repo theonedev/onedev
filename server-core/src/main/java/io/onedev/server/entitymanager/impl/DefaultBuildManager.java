@@ -3,22 +3,21 @@ package io.onedev.server.entitymanager.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.IMap;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
+import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.*;
-import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.persistence.SequenceGenerator;
 import io.onedev.server.persistence.SessionManager;
@@ -28,6 +27,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.replica.BuildStorageSyncer;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -68,9 +68,14 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.server.model.Build.*;
+import static io.onedev.server.model.Project.BUILDS_DIR;
+import static io.onedev.server.util.DirectoryVersionUtils.isVersionFile;
+import static java.lang.Long.valueOf;
 
 @Singleton
 public class DefaultBuildManager extends BaseEntityManager<Build> implements BuildManager, SchedulableTask, Serializable {
@@ -97,9 +102,11 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final ClusterManager clusterManager;
 	
+	private final Set<BuildStorageSyncer> storageSyncers;
+	
 	private final SequenceGenerator numberGenerator;
 	
-	private volatile Map<Long, BuildFacade> cache;
+	private volatile IMap<Long, BuildFacade> cache;
 	
 	private volatile Map<Long, Collection<String>> jobNames;
 	
@@ -110,7 +117,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
 			ProjectManager projectManager, SessionManager sessionManager, 
 			TransactionManager transactionManager, SettingManager settingManager, 
-			ClusterManager clusterManager) {
+			ClusterManager clusterManager, Set<BuildStorageSyncer> storageSyncers) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
@@ -120,28 +127,13 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		this.transactionManager = transactionManager;
 		this.settingManager = settingManager;
 		this.clusterManager = clusterManager;
-		
+		this.storageSyncers = storageSyncers;
+
 		numberGenerator = new SequenceGenerator(Build.class, clusterManager, dao);
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
 		return new ManagedSerializedForm(BuildManager.class);
-	}
-	
-	@Transactional
-	@Override
-	public void delete(Build build) {
-    	super.delete(build);
-    	
-		Long buildId = build.getId();
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				cache.remove(buildId);
-			}
-			
-		});
 	}
 	
 	@Sessional
@@ -187,21 +179,20 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public void update(Build build) {
 		Preconditions.checkState(!build.isNew());
 		dao.persist(build);
-		updateCacheAfterCommit(build);
 	}
 	
-	private void updateCacheAfterCommit(Build build) {
-		BuildFacade facade = build.getFacade();
-		String jobName = build.getJobName();
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
+	@Transactional
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof Build) {
+			Build build = (Build) event.getEntity();
+			BuildFacade facade = build.getFacade();
+			String jobName = build.getJobName();
+			transactionManager.runAfterCommit(() -> {
 				cache.put(facade.getId(), facade);
 				populateJobNames(facade.getProjectId(), jobName);
-			}
-
-		});
+			});
+		}
 	}
 	
 	@Transactional
@@ -213,17 +204,32 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	    		numberGenerator.removeNextSequence(project);
 			
 			Long projectId = project.getId();
-			transactionManager.runAfterCommit(new Runnable() {
+			transactionManager.runAfterCommit(() -> {
+				cache.removeAll(entry -> entry.getValue().getProjectId().equals(projectId));
+				jobNames.remove(projectId);
+			});
+		} else if (event.getEntity() instanceof Build) {
+			Build build = (Build) event.getEntity();
+			Long projectId = build.getProject().getId();
+			Long buildId = build.getProject().getId();
+			Long buildNumber = build.getNumber();
 
-				@Override
-				public void run() {
-					for (var id: cache.entrySet().stream()
-							.filter(it->it.getValue().getProjectId().equals(projectId))
-							.map(it->it.getKey())
-							.collect(Collectors.toSet())) {
-						cache.remove(id);
-					}
-					jobNames.remove(projectId);
+			String activeServer = projectManager.getActiveServer(projectId, false);
+			
+			transactionManager.runAfterCommit(() -> {
+				cache.remove(buildId);
+				if (activeServer != null) {
+					clusterManager.submitToServer(activeServer, () -> {
+						try {
+							var buildDir = getStorageDir(projectId, buildNumber);
+							FileUtils.deleteDir(buildDir);
+							projectManager.directoryModified(projectId, buildDir.getParentFile());
+						} catch (Exception e) {
+							logger.error("Error deleting storage directory of build id '" + buildId + "'", e);
+						}
+						return null;
+					});
+
 				}
 			});
 		}
@@ -435,7 +441,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		build.setNumber(numberGenerator.getNextSequence(build.getNumberScope()));
 		
 		dao.persist(build);
-		updateCacheAfterCommit(build);
 		
 		for (BuildParam param: build.getParams())
 			buildParamManager.create(param);
@@ -641,60 +646,50 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			long maxId = getMaxId();
 			Collection<Long> idsToPreserve = new HashSet<>();
 			
-			sessionManager.run(new Runnable() {
-
-				@Override
-				public void run() {
-					for (Project project: projectManager.query()) {
-						logger.debug("Populating preserved build ids of project '" + project.getPath() + "'...");
-						List<BuildPreservation> preservations = project.getHierarchyBuildPreservations();
-						if (preservations.isEmpty()) {
-							idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
-						} else {
-							for (BuildPreservation preservation: preservations) {
-								try {
-									BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
-									int count;
-									if (preservation.getCount() != null)
-										count = preservation.getCount();
-									else
-										count = Integer.MAX_VALUE;
-									idsToPreserve.addAll(queryIds(project, query, 0, count));
-								} catch (Exception e) {
-									String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
-											project.getPath(), preservation.getCondition());
-									logger.error(message, e);
-									idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
-								}
+			sessionManager.run(() -> {
+				for (Project project: projectManager.query()) {
+					logger.debug("Populating preserved build ids of project '" + project.getPath() + "'...");
+					List<BuildPreservation> preservations = project.getHierarchyBuildPreservations();
+					if (preservations.isEmpty()) {
+						idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+					} else {
+						for (BuildPreservation preservation: preservations) {
+							try {
+								BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
+								int count;
+								if (preservation.getCount() != null)
+									count = preservation.getCount();
+								else
+									count = Integer.MAX_VALUE;
+								idsToPreserve.addAll(queryIds(project, query, 0, count));
+							} catch (Exception e) {
+								String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
+										project.getPath(), preservation.getCondition());
+								logger.error(message, e);
+								idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
 							}
 						}
 					}
 				}
-				
 			});
 
 			EntityCriteria<Build> criteria = newCriteria();
 			AtomicInteger firstResult = new AtomicInteger(0);
 			
-			while (transactionManager.call(new Callable<Boolean>() {
-
-				@Override
-				public Boolean call() {
-					List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
-					if (!builds.isEmpty()) {
-						logger.debug("Checking build preservation: {}->{}", 
-								firstResult.get()+1, firstResult.get()+builds.size());
-					}
-					for (Build build: builds) {
-						if (build.isFinished() && build.getId() <= maxId && !idsToPreserve.contains(build.getId())) {
-							logger.debug("Deleting build " + build.getFQN() + "...");
-							delete(build);
-						}
-					}
-					firstResult.set(firstResult.get() + CLEANUP_BATCH);
-					return builds.size() == CLEANUP_BATCH;
+			while (transactionManager.call(() -> {
+				List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
+				if (!builds.isEmpty()) {
+					logger.debug("Checking build preservation: {}->{}", 
+							firstResult.get()+1, firstResult.get()+builds.size());
 				}
-				
+				for (Build build: builds) {
+					if (build.isFinished() && build.getId() <= maxId && !idsToPreserve.contains(build.getId())) {
+						logger.debug("Deleting build " + build.getFQN() + "...");
+						delete(build);
+					}
+				}
+				firstResult.set(firstResult.get() + CLEANUP_BATCH);
+				return builds.size() == CLEANUP_BATCH;
 			})) {}			
 		}
 	}
@@ -706,21 +701,25 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	@SuppressWarnings("unchecked")
 	@Listen
-	public void on(SystemStarted event) {
+	public void on(SystemStarting event) {
 		logger.info("Caching build info...");
 		
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-        cache = hazelcastInstance.getReplicatedMap("buildCache");
-        jobNames = hazelcastInstance.getReplicatedMap("jobNames");
-        
-		Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
-		for (Object[] fields: (List<Object[]>)query.list()) {
-			Long buildId = (Long) fields[0];
-			Long projectId = (Long)fields[1];
-			Long buildNumber = (Long) fields[2];
-			cache.put(buildId, new BuildFacade(buildId, projectId, buildNumber, (String)fields[3]));
-			populateJobNames(projectId, (String)fields[4]);
-		}
+        cache = hazelcastInstance.getMap("buildCache");
+        jobNames = hazelcastInstance.getMap("jobNames");
+
+		var buildCacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("buildCacheInited");
+		clusterManager.init(buildCacheInited, () -> {
+			Query<?> query = dao.getSession().createQuery("select id, project.id, number, commitHash, jobName from Build");
+			for (Object[] fields : (List<Object[]>) query.list()) {
+				Long buildId = (Long) fields[0];
+				Long projectId = (Long) fields[1];
+				Long buildNumber = (Long) fields[2];
+				cache.put(buildId, new BuildFacade(buildId, projectId, buildNumber, (String) fields[3]));
+				populateJobNames(projectId, (String) fields[4]);
+			}
+			return 1L;			
+		});
 		
 		taskId = taskScheduler.schedule(this);
 	}
@@ -791,25 +790,21 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	}
 	
 	@Override
-	public Collection<Long> getNumbersByProject(Long projectId) {
-		Collection<Long> buildNumbers = new HashSet<>();
-		for (BuildFacade build: cache.values()) {
-			if (build.getProjectId().equals(projectId))
-				buildNumbers.add(build.getNumber());
-		}
-		return buildNumbers;
+	public Collection<Long> getNumbers(Long projectId) {
+		return cache.project(
+				input -> input.getValue().getNumber(), 
+				mapEntry -> mapEntry.getValue().getProjectId().equals(projectId));
 	}
 
 	@Override
 	public Collection<Long> filterNumbers(Long projectId, Collection<String> commitHashes) {
-		Collection<Long> buildNumbers = new HashSet<>();
-		for (BuildFacade build: cache.values()) {
-			if (build.getProjectId().equals(projectId) 
-					&& commitHashes.contains(build.getCommitHash())) {
-				buildNumbers.add(build.getNumber());
-			}
-		}
-		return buildNumbers;
+		return cache.project(
+				input -> input.getValue().getNumber(),
+				mapEntry -> {
+					var build = mapEntry.getValue();
+					return build.getProjectId().equals(projectId) 
+							&& commitHashes.contains(build.getCommitHash());					
+				});
 	}
 	
 	private void populateJobNames(Long projectId, String jobName) {
@@ -958,59 +953,55 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		criteria.setCacheable(true);
 		return find(criteria);
 	}
-
+	
 	@Override
 	@Nullable
 	public ArtifactInfo getArtifactInfo(Build build, @Nullable String artifactPath) {
 		Long projectId = build.getProject().getId();
 		Long buildNumber = build.getNumber();
-		return projectManager.runOnProjectServer(projectId, new ClusterTask<ArtifactInfo>() {
+		return projectManager.runOnActiveServer(projectId, () -> {
+			File artifactsDir = getArtifactsDir(projectId, buildNumber);
+			File artifactFile;
+			if (artifactPath != null)
+				artifactFile = new File(artifactsDir, artifactPath);
+			else
+				artifactFile = artifactsDir;
 
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public ArtifactInfo call() throws Exception {
-				File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-				File artifactFile;
-				if (artifactPath != null)
-					artifactFile = new File(artifactsDir, artifactPath);
-				else 
-					artifactFile = artifactsDir;
-				
-				if (artifactFile.exists()) {
-					if (artifactFile.isFile()) {
-						String mediaType = Files.probeContentType(artifactFile.toPath());
-						if (mediaType == null)
-							mediaType = MediaType.APPLICATION_OCTET_STREAM;
-						return new FileInfo(artifactPath, artifactFile.lastModified(),
-								artifactFile.length(), mediaType);
-					} else {
-						List<ArtifactInfo> children = new ArrayList<>();
-						int baseLen = artifactsDir.getAbsolutePath().length() + 1;
-						for (File child: artifactFile.listFiles()) {
+			if (artifactFile.exists()) {
+				if (artifactFile.isFile()) {
+					String mediaType = Files.probeContentType(artifactFile.toPath());
+					if (mediaType == null)
+						mediaType = MediaType.APPLICATION_OCTET_STREAM;
+					return new FileInfo(artifactPath, artifactFile.lastModified(),
+							artifactFile.length(), mediaType);
+				} else {
+					List<ArtifactInfo> children = new ArrayList<>();
+					int baseLen = artifactsDir.getAbsolutePath().length() + 1;
+					for (File child : artifactFile.listFiles()) {
+						if (!isVersionFile(child)) {
 							var relativePath = child.getAbsolutePath().substring(baseLen);
 							if (child.isFile()) {
-								children.add(new FileInfo(relativePath, child.lastModified(), 
+								children.add(new FileInfo(relativePath, child.lastModified(),
 										child.length(), null));
 							} else {
 								children.add(new DirectoryInfo(relativePath, child.lastModified(), null));
 							}
 						}
-						Collections.sort(children, (Comparator<ArtifactInfo>) (o1, o2) -> {
-							if (o1 instanceof FileInfo && o2 instanceof FileInfo 
-									|| (o1 instanceof DirectoryInfo) && (o2 instanceof DirectoryInfo)) {
-								return o1.getPath().compareTo(o2.getPath());
-							} else if (o1 instanceof FileInfo) {
-								return 1;
-							} else {
-								return -1;
-							}
-						});
-						return new DirectoryInfo(artifactPath, artifactFile.lastModified(), children);
 					}
-				} else {
-					return null;
+					Collections.sort(children, (Comparator<ArtifactInfo>) (o1, o2) -> {
+						if (o1 instanceof FileInfo && o2 instanceof FileInfo
+								|| (o1 instanceof DirectoryInfo) && (o2 instanceof DirectoryInfo)) {
+							return o1.getPath().compareTo(o2.getPath());
+						} else if (o1 instanceof FileInfo) {
+							return 1;
+						} else {
+							return -1;
+						}
+					});
+					return new DirectoryInfo(artifactPath, artifactFile.lastModified(), children);
 				}
+			} else {
+				return null;
 			}
 		});
 	}
@@ -1019,40 +1010,53 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public void deleteArtifact(Build build, @Nullable String artifactPath) {
 		Long projectId = build.getProject().getId();
 		Long buildNumber = build.getNumber();
-		projectManager.runOnProjectServer(projectId, new ClusterTask<Void>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Void call() throws Exception {
-				return LockUtils.write(Build.getArtifactsLockName(projectId, buildNumber), new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-						if (artifactPath != null) {
-							File artifactFile = new File(artifactsDir, artifactPath);
-							if (artifactFile.exists()) {
-								if (artifactFile.isFile())
-									FileUtils.deleteFile(artifactFile);
-								else 
-									FileUtils.deleteDir(artifactsDir);
-							} else {
-								String errorMessage = String.format(
-										"Unable to find specified artifact (project: %s, build number: %d, artifact path: %s)",
-										projectId, buildNumber, artifactPath);
-								throw new ExplicitException(errorMessage);
-							}
-						} else {
-							FileUtils.cleanDir(artifactsDir);
-						}
-						return null;
-					}
-					
-				});				
+		projectManager.runOnActiveServer(projectId, () -> write(getArtifactsLockName(projectId, buildNumber), () -> {
+			File artifactsDir = getArtifactsDir(projectId, buildNumber);
+			if (artifactPath != null) {
+				File artifactFile = new File(artifactsDir, artifactPath);
+				if (artifactFile.exists()) {
+					if (artifactFile.isFile())
+						FileUtils.deleteFile(artifactFile);
+					else 
+						FileUtils.deleteDir(artifactsDir);
+				} else {
+					String errorMessage = String.format(
+							"Unable to find specified artifact (project: %s, build number: %d, artifact path: %s)",
+							projectId, buildNumber, artifactPath);
+					throw new ExplicitException(errorMessage);
+				}
+			} else {
+				FileUtils.cleanDir(artifactsDir);
 			}
-			
-		});
+			projectManager.directoryModified(projectId, artifactsDir);
+			return null;
+		}));
 	}
 
+	@Override
+	public void syncBuilds(Long projectId, String activeServer) {
+		projectManager.syncDirectory(projectId, BUILDS_DIR, (suffix) -> {
+			projectManager.syncDirectory(projectId, BUILDS_DIR + "/" + suffix, (buildNumberString) -> {
+				var buildNumber = valueOf(buildNumberString);
+				var buildPath = getProjectRelativePath(buildNumber);
+				projectManager.syncFile(projectId, buildPath + "/" + PATH_LOG, 
+						getLogLockName(projectId, buildNumber), activeServer);
+				projectManager.syncDirectory(projectId, buildPath + "/" + PATH_ARTIFACTS, 
+						getArtifactsLockName(projectId, buildNumber), activeServer);
+				storageSyncers.forEach(it->it.sync(projectId, buildNumber, activeServer));
+			}, activeServer);
+		}, activeServer);
+	}
+
+	@Override
+	public File getStorageDir(Long projectId, Long buildNumber) {
+		return projectManager.getSubDir(projectId, Build.getProjectRelativePath(buildNumber));
+	}
+	
+	@Override
+	public void initArtifactsDir(Long projectId, Long buildNumber) {
+		File buildDir = getStorageDir(projectId, buildNumber);
+		FileUtils.createDir(new File(buildDir, Build.PATH_ARTIFACTS));
+	}
+	
 }

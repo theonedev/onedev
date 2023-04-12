@@ -20,7 +20,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.lucene.BooleanQueryBuilder;
@@ -64,12 +63,11 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	private final UserManager userManager;
 	
 	@Inject
-	public DefaultPullRequestTextManager(Dao dao, StorageManager storageManager, UserManager userManager,
-										 BatchWorkManager batchWorkManager, TransactionManager transactionManager,
-										 ProjectManager projectManager, PullRequestReviewManager reviewManager,
-										 BuildManager buildManager, ClusterManager clusterManager) {
-		super(dao, storageManager, batchWorkManager, transactionManager, projectManager, 
-				clusterManager);
+	public DefaultPullRequestTextManager(Dao dao, UserManager userManager, BatchWorkManager batchWorkManager, 
+										 TransactionManager transactionManager, ProjectManager projectManager, 
+										 PullRequestReviewManager reviewManager, BuildManager buildManager, 
+										 ClusterManager clusterManager) {
+		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager);
 		this.reviewManager = reviewManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -102,7 +100,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	@Sessional
 	@Listen
 	public void on(PullRequestOpened event) {
-		requestIndexLocal(event.getRequest());
+		requestIndex(event.getRequest());
 	}
 
 	@Sessional
@@ -110,37 +108,43 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	public void on(PullRequestChanged event) {
 		PullRequestChangeData data = event.getChange().getData();
 		if (data instanceof PullRequestTitleChangeData || data instanceof PullRequestDescriptionChangeData)
-			requestIndexLocal(event.getRequest());
+			requestIndex(event.getRequest());
 	}
 
 	@Sessional
 	@Listen
 	public void on(PullRequestCommentCreated event) {
-		requestIndexLocal(event.getRequest());
+		requestIndex(event.getRequest());
 	}
 
 	@Sessional
 	@Listen
 	public void on(PullRequestCommentEdited event) {
-		requestIndexLocal(event.getRequest());
+		requestIndex(event.getRequest());
 	}
 
 	@Sessional
 	@Listen
 	public void on(PullRequestCommentDeleted event) {
-		requestIndexLocal(event.getRequest());
+		requestIndex(event.getRequest());
 	}
 
 	@Sessional
 	@Listen
 	public void on(PullRequestsDeleted event) {
-		deleteEntitiesLocal(event.getRequestIds());
+		clusterManager.submitToAllServers(() -> {
+			deleteEntities(event.getRequestIds());
+			return null;
+		});
 	}
 
 	@Sessional
 	@Listen
 	public void on(PullRequestDeleted event) {
-		deleteEntitiesLocal(Lists.newArrayList(event.getRequestId()));
+		clusterManager.submitToAllServers(() -> {
+			deleteEntities(Lists.newArrayList(event.getRequestId()));
+			return null;			
+		});
 	}
 	
 	@Nullable

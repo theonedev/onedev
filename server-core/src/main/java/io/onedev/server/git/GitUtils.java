@@ -607,7 +607,7 @@ public class GitUtils {
 				return ((PGPSignatureList) obj).get(0);
 			}
 			return null;
-		} 
+		}
 	}
 
 	@Nullable
@@ -642,9 +642,11 @@ public class GitUtils {
 			} else {
 				return new SignatureUnverified(null, "Signature does not decode into a signature object");
 			}
-		} catch (Exception e) {
+		} catch (PGPException e) {
 			logger.error("Error parsing commit signature", e);
 			return new SignatureUnverified(null, "Signature cannot be parsed");
+		} catch (IOException e2) {
+			throw new RuntimeException(e2);
 		}
 	}
 	

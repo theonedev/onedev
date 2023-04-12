@@ -2,8 +2,9 @@ package io.onedev.server.cluster;
 
 import com.google.common.collect.Sets;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.attachment.AttachmentManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitFilter;
@@ -13,11 +14,11 @@ import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.hook.HookUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.patternset.PatternSet;
@@ -34,10 +35,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.commons.utils.FileUtils.tar;
+import static io.onedev.commons.utils.LockUtils.read;
+import static io.onedev.commons.utils.LockUtils.write;
+import static io.onedev.server.model.Build.getArtifactsLockName;
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static javax.ws.rs.core.Response.ok;
+import static javax.ws.rs.core.Response.status;
 
 @Api(internal=true)
 @Path("/cluster")
@@ -47,23 +54,79 @@ public class ClusterResource {
 
 	private final ProjectManager projectManager;
 	
+	private final BuildManager buildManager;
+	
 	private final AttachmentManager attachmentManager;
 	
-	private final StorageManager storageManager;
-	
 	private final CommitInfoManager commitInfoManager;
+	
+	private final VisitInfoManager visitInfoManager;
 	
 	private final WorkExecutor workExecutor;
 	
 	@Inject
-	public ClusterResource(ProjectManager projectManager, CommitInfoManager commitInfoManager, 
-			StorageManager storageManager, AttachmentManager attachmentManager, 
-			WorkExecutor workExecutor) {
-		this.projectManager = projectManager;
+	public ClusterResource(ProjectManager projectManager, BuildManager buildManager, 
+						   CommitInfoManager commitInfoManager, AttachmentManager attachmentManager, 
+						   VisitInfoManager visitInfoManager, WorkExecutor workExecutor) {
 		this.commitInfoManager = commitInfoManager;
-		this.storageManager = storageManager;
+		this.projectManager = projectManager;
+		this.buildManager = buildManager;
 		this.workExecutor = workExecutor;
 		this.attachmentManager = attachmentManager;
+		this.visitInfoManager = visitInfoManager;
+	}
+
+	@Path("/project-files")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadFiles(@QueryParam("projectId") Long projectId,
+								  @QueryParam("path") String path,
+								  @QueryParam("patterns") String patterns,
+								  @QueryParam("readLock") String readLock) {
+		if (!SecurityUtils.getUser().isSystem())
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+
+		StreamingOutput os = output -> read(readLock, () -> {
+			File directory = new File(projectManager.getStorageDir(projectId), path);
+			PatternSet patternSet = PatternSet.parse(patterns);
+			tar(directory, patternSet.getIncludes(), patternSet.getExcludes(), output, false);
+			return null;
+		});
+		return ok(os).build();
+	}
+
+	@Path("/assets")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadAssets() {
+		if (!SecurityUtils.getUser().isSystem())
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+		
+		StreamingOutput os = output -> tar(OneDev.getAssetsDir(), Sets.newHashSet("**"), null, output, false);
+		return ok(os).build();
+	}
+	
+	@Path("/project-file")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadFile(@QueryParam("projectId") Long projectId,
+										@QueryParam("path") String path,
+										@QueryParam("readLock") String readLock) {
+		if (!SecurityUtils.getUser().isSystem())
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+
+		File file = new File(projectManager.getStorageDir(projectId), path);
+		if (read(readLock, file::exists)) {
+			StreamingOutput os = output -> read(readLock, () -> {
+				try (output; InputStream is = new FileInputStream(file)) {
+					IOUtils.copy(is, output, BUFFER_SIZE);
+				}
+				return null;
+			});
+			return ok(os).build();
+		} else {
+			return status(NO_CONTENT).build();
+		}
 	}
 	
 	@Path("/artifacts")
@@ -75,25 +138,13 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				LockUtils.read(Build.getArtifactsLockName(projectId, buildNumber), new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-						PatternSet patternSet = PatternSet.parse(artifacts);
-						FileUtils.tar(artifactsDir, patternSet.getIncludes(), patternSet.getExcludes(), output, false);
-						return null;
-					}
-					
-				});
-		   }				   
-		   
-		};
-		return Response.ok(os).build();
+		StreamingOutput os = output -> read(getArtifactsLockName(projectId, buildNumber), () -> {
+			File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+			PatternSet patternSet = PatternSet.parse(artifacts);
+			tar(artifactsDir, patternSet.getIncludes(), patternSet.getExcludes(), output, false);
+			return null;
+		});
+		return ok(os).build();
 	}
 
 	@Path("/artifact")
@@ -105,29 +156,15 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem())
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-			public void write(OutputStream output) throws IOException {
-				LockUtils.read(Build.getArtifactsLockName(projectId, buildNumber), new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-						File artifactFile = new File(artifactsDir, artifactPath);
-						try (InputStream is = new FileInputStream(artifactFile)) {
-							IOUtils.copy(is, output, BUFFER_SIZE);
-						} finally {
-							output.close();
-						}
-						return null;
-					}
-
-				});
+		StreamingOutput os = output -> read(getArtifactsLockName(projectId, buildNumber), () -> {
+			File artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+			File artifactFile = new File(artifactsDir, artifactPath);
+			try (output; InputStream is = new FileInputStream(artifactFile)) {
+				IOUtils.copy(is, output, BUFFER_SIZE);
 			}
-
-		};
-		return Response.ok(os).build();
+			return null;
+		});
+		return ok(os).build();
 	}
 	
 	@Path("/blob")
@@ -138,20 +175,13 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				Repository repository = projectManager.getRepository(projectId);
-				try (InputStream is = GitUtils.getInputStream(repository, ObjectId.fromString(revId), path)) {
-					IOUtils.copy(is, output, BUFFER_SIZE);
-				} finally {
-					output.close();
-				}
-		   }				   
-		   
-		};
-		return Response.ok(os).build();
+		StreamingOutput os = output -> {
+			Repository repository = projectManager.getRepository(projectId);
+			try (output; InputStream is = GitUtils.getInputStream(repository, ObjectId.fromString(revId), path)) {
+				IOUtils.copy(is, output, BUFFER_SIZE);
+			}
+	   };
+		return ok(os).build();
 	}
 	
 	@Path("/site")
@@ -161,28 +191,14 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				LockUtils.read(Project.getSiteLockName(projectId), new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						File file = new File(storageManager.getProjectSiteDir(projectId), filePath);
-						try (InputStream is = new FileInputStream(file)) {
-							IOUtils.copy(is, output, BUFFER_SIZE);
-						} finally {
-							output.close();
-						}
-						return null;
-					}
-
-				});
-		   }				   
-		   
-		};
-		return Response.ok(os).build();
+		StreamingOutput os = output -> read(Project.getSiteLockName(projectId), () -> {
+			File file = new File(projectManager.getSiteDir(projectId), filePath);
+			try (output; InputStream is = new FileInputStream(file)) {
+				IOUtils.copy(is, output, BUFFER_SIZE);
+			}
+			return null;
+		});
+		return ok(os).build();
 	}
 	
 	@Path("/git-advertise-refs")
@@ -193,19 +209,14 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				File gitDir = storageManager.getProjectGitDir(projectId);
-				if (upload)
-					new AdvertiseUploadRefsCommand(gitDir, output).protocol(protocol).run();
-				else
-					new AdvertiseReceiveRefsCommand(gitDir, output).protocol(protocol).run();
-		   }				   
-		   
-		};
-		return Response.ok(os).build();
+		StreamingOutput os = output -> {
+			File gitDir = projectManager.getGitDir(projectId);
+			if (upload)
+				new AdvertiseUploadRefsCommand(gitDir, output).protocol(protocol).run();
+			else
+				new AdvertiseReceiveRefsCommand(gitDir, output).protocol(protocol).run();
+	   };
+		return ok(os).build();
 	}
 		
 	@Path("/git-pack")
@@ -217,40 +228,35 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectId, userId);
-				
-				try {
-					File gitDir = storageManager.getProjectGitDir(projectId);
-					if (upload) {
-						workExecutor.submit(new PrioritizedRunnable(GitFilter.PRIORITY) {
-							
-							@Override
-							public void run() {
-								CommandUtils.uploadPack(gitDir, hookEnvs, protocol, is, output);
-							}
-							
-						}).get();
-					} else {
-						workExecutor.submit(new PrioritizedRunnable(GitFilter.PRIORITY) {
-							
-							@Override
-							public void run() {
-								CommandUtils.receivePack(gitDir, hookEnvs, protocol, is, output);
-							}
-							
-						}).get();
-					}
-				} catch (InterruptedException | ExecutionException e) {
-					throw new RuntimeException(e);
+		StreamingOutput os = output -> {
+			Map<String, String> hookEnvs = HookUtils.getHookEnvs(projectId, userId);
+			
+			try {
+				File gitDir = projectManager.getGitDir(projectId);
+				if (upload) {
+					workExecutor.submit(new PrioritizedRunnable(GitFilter.PRIORITY) {
+						
+						@Override
+						public void run() {
+							CommandUtils.uploadPack(gitDir, hookEnvs, protocol, is, output);
+						}
+						
+					}).get();
+				} else {
+					workExecutor.submit(new PrioritizedRunnable(GitFilter.PRIORITY) {
+						
+						@Override
+						public void run() {
+							CommandUtils.receivePack(gitDir, hookEnvs, protocol, is, output);
+						}
+						
+					}).get();
 				}
-		   }				   
-		   
-		};
-		return Response.ok(os).build();
+			} catch (InterruptedException | ExecutionException e) {
+				throw new RuntimeException(e);
+			}
+	   };
+		return ok(os).build();
 	}
 	
 	@Path("/commit-info")
@@ -260,21 +266,35 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = new StreamingOutput() {
+		StreamingOutput os = output -> {
+			File tempDir = FileUtils.createTempDir("commit-info"); 
+			try {
+				commitInfoManager.export(projectId, tempDir);
+				tar(tempDir, output, false);
+			} finally {
+				FileUtils.deleteDir(tempDir);
+			}
+	   };
+		return ok(os).build();
+	}
 
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				File tempDir = FileUtils.createTempDir("commit-info"); 
-				try {
-					commitInfoManager.export(projectId, tempDir);
-					FileUtils.tar(tempDir, output, false);
-				} finally {
-					FileUtils.deleteDir(tempDir);
-				}
-		   }				   
-		   
+	@Path("/visit-info")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@GET
+	public Response downloadVisitInfo(@QueryParam("projectId") Long projectId) {
+		if (!SecurityUtils.getUser().isSystem())
+			throw new UnauthorizedException("This api can only be accessed via cluster credential");
+
+		StreamingOutput os = output -> {
+			File tempDir = FileUtils.createTempDir("visit-info");
+			try {
+				visitInfoManager.export(projectId, tempDir);
+				tar(tempDir, output, false);
+			} finally {
+				FileUtils.deleteDir(tempDir);
+			}
 		};
-		return Response.ok(os).build();
+		return ok(os).build();
 	}
 	
 	@Path("/lfs")
@@ -284,19 +304,12 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 		
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				try (InputStream is = new LfsObject(projectId, objectId).getInputStream()) {
-					IOUtils.copy(is, output, BUFFER_SIZE);
-				} finally {
-					output.close();
-				}
-		   }				   
-		   
-		};
-		return Response.ok(os).build();
+		StreamingOutput os = output -> {
+			try (output; InputStream is = new LfsObject(projectId, objectId).getInputStream()) {
+				IOUtils.copy(is, output, BUFFER_SIZE);
+			}
+	   };
+		return ok(os).build();
 	}
 	
 	@Path("/lfs")
@@ -306,18 +319,13 @@ public class ClusterResource {
 			@QueryParam("objectId") String objectId) {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
-		
-		try (OutputStream os = new LfsObject(projectId, objectId).getOutputStream()) {
+
+		try (input; OutputStream os = new LfsObject(projectId, objectId).getOutputStream()) {
 			IOUtils.copy(input, os, BUFFER_SIZE);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		} finally {
-			try {
-				input.close();
-			} catch (IOException ignore) {
-			}
 		}
-		return Response.ok().build();
+		return ok().build();
 	}
 
 	@Path("/attachment")
@@ -331,7 +339,7 @@ public class ClusterResource {
 
 		String attachmentName = attachmentManager.saveAttachmentLocal(
 				projectId, attachmentGroup, suggestedAttachmentName, input);
-		return Response.ok(attachmentName).build();
+		return ok(attachmentName).build();
 	}
 	
 	@Path("/attachments")
@@ -342,16 +350,12 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
-		StreamingOutput os = new StreamingOutput() {
-
-			@Override
-		   public void write(OutputStream output) throws IOException {
-				FileUtils.tar(attachmentManager.getAttachmentGroupDirLocal(projectId, attachmentGroup), 
-						Sets.newHashSet("**"), Sets.newHashSet(), output, false);
-		   }				   
-		   
-		};
-		return Response.ok(os).build();
+		StreamingOutput os = output -> read(attachmentManager.getAttachmentLockName(projectId, attachmentGroup), () -> {
+			tar(attachmentManager.getAttachmentGroupDir(projectId, attachmentGroup),
+					Sets.newHashSet("**"), Sets.newHashSet(), output, false);
+			return null;					
+		});
+		return ok(os).build();
 	}
 	
 	@Path("/artifact")
@@ -362,26 +366,21 @@ public class ClusterResource {
 		if (!SecurityUtils.getUser().isSystem()) 
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
-		LockUtils.write(Build.getArtifactsLockName(projectId, buildNumber), new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				storageManager.initArtifactsDir(projectId, buildNumber);
-				File artifactFile = new File(Build.getArtifactsDir(projectId, buildNumber), artifactPath);
-				FileUtils.createDir(artifactFile.getParentFile());
-				try (OutputStream os = new FileOutputStream(artifactFile)) {
-					IOUtils.copy(input, os, BUFFER_SIZE);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} finally {
-					input.close();
-				}
-				return null;
+		write(getArtifactsLockName(projectId, buildNumber), () -> {
+			buildManager.initArtifactsDir(projectId, buildNumber);
+			var artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+			File artifactFile = new File(artifactsDir, artifactPath);
+			FileUtils.createDir(artifactFile.getParentFile());
+			try (input; OutputStream os = new FileOutputStream(artifactFile)) {
+				IOUtils.copy(input, os, BUFFER_SIZE);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			
+			projectManager.directoryModified(projectId, artifactsDir);
+			return null;
 		});
 		
-		return Response.ok().build();
+		return ok().build();
 	}
 	
 }

@@ -35,7 +35,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
 
@@ -95,9 +94,9 @@ public class ArchiveResource extends AbstractResource {
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				UUID storageServerUUID = projectManager.getStorageServerUUID(projectId, true);
+				String activeServer = projectManager.getActiveServer(projectId, true);
 				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-				if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
+				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
 					if (format.equals("zip"))
 						ArchiveCommand.registerFormat(format, new ZipFormat());
 					else
@@ -124,12 +123,12 @@ public class ArchiveResource extends AbstractResource {
 	    				CharSequence path = RequestCycle.get().urlFor(
 	    						new ArchiveResourceReference(), 
 	    						ArchiveResource.paramsOf(projectId, revision, format));
-	    				String storageServerUrl = clusterManager.getServerUrl(storageServerUUID) + path;
+	    				String activeServerUrl = clusterManager.getServerUrl(activeServer) + path;
 	    				
-	    				WebTarget target = client.target(storageServerUrl).path(path.toString());
+	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+	    						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);

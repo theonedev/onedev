@@ -1,14 +1,5 @@
 package io.onedev.server.web.mapper;
 
-import io.onedev.server.web.page.project.setting.build.*;
-import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
-import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
-import org.apache.wicket.core.request.mapper.ResourceMapper;
-import org.apache.wicket.markup.html.pages.BrowserInfoPage;
-import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.request.IRequestMapper;
-import org.apache.wicket.request.mapper.CompoundRequestMapper;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
@@ -18,6 +9,7 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
+import io.onedev.server.web.page.admin.clustermanagement.ClusterManagementPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.gpgsigningkey.GpgSigningKeyPage;
 import io.onedev.server.web.page.admin.gpgtrustedkeys.GpgTrustedKeysPage;
@@ -101,18 +93,10 @@ import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.detail.IssueAuthorizationsPage;
-import io.onedev.server.web.page.project.issues.detail.IssueBuildsPage;
-import io.onedev.server.web.page.project.issues.detail.IssueCommitsPage;
-import io.onedev.server.web.page.project.issues.detail.IssuePullRequestsPage;
+import io.onedev.server.web.page.project.issues.detail.*;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneBurndownPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
-import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
+import io.onedev.server.web.page.project.issues.milestones.*;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -121,12 +105,18 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
-import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
+import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
+import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
+import io.onedev.server.web.page.project.setting.build.JobPropertiesPage;
+import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
+import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
+import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
+import io.onedev.server.web.page.project.setting.code.pullrequest.PullRequestSettingPage;
+import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.servicedesk.ProjectServiceDeskSettingPage;
-import io.onedev.server.web.page.project.setting.code.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
@@ -134,25 +124,14 @@ import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
 import io.onedev.server.web.page.simple.error.MethodNotAllowedErrorPage;
 import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
-import io.onedev.server.web.page.simple.security.CreateUserFromInvitationPage;
-import io.onedev.server.web.page.simple.security.EmailAddressVerificationPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
-import io.onedev.server.web.page.simple.security.LogoutPage;
-import io.onedev.server.web.page.simple.security.OAuthCallbackPage;
-import io.onedev.server.web.page.simple.security.PasswordResetPage;
-import io.onedev.server.web.page.simple.security.SignUpPage;
+import io.onedev.server.web.page.simple.security.*;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
-import io.onedev.server.web.resource.AgentLibResourceReference;
-import io.onedev.server.web.resource.AgentLogResourceReference;
-import io.onedev.server.web.resource.AgentResourceReference;
-import io.onedev.server.web.resource.ArchiveResourceReference;
-import io.onedev.server.web.resource.ArtifactResourceReference;
-import io.onedev.server.web.resource.AttachmentResourceReference;
-import io.onedev.server.web.resource.BuildLogResourceReference;
-import io.onedev.server.web.resource.RawBlobResourceReference;
-import io.onedev.server.web.resource.ServerLogResourceReference;
-import io.onedev.server.web.resource.SpriteResourceReference;
-import io.onedev.server.web.resource.SiteFileResourceReference;
+import io.onedev.server.web.resource.*;
+import org.apache.wicket.core.request.mapper.ResourceMapper;
+import org.apache.wicket.markup.html.pages.BrowserInfoPage;
+import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.request.IRequestMapper;
+import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 public class BaseUrlMapper extends CompoundRequestMapper {
 
@@ -252,7 +231,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/users/${user}/ssh-keys", UserSshKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/gpg-keys", UserGpgKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/access-token", UserAccessTokenPage.class));
-		add(new BasePageMapper("~administration/users/${user}/two-factor-authentication", UserTwoFactorAuthenticationPage.class));
+		add(new BasePageMapper("~administration/users/${user}/two-factor-authentication", 
+				UserTwoFactorAuthenticationPage.class));
 		add(new BasePageMapper("~administration/invitations", InvitationListPage.class));
 		add(new BasePageMapper("~administration/invitations/new", NewInvitationPage.class));
 		
@@ -288,6 +268,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/agents/${agent}/log", AgentLogPage.class));
 		add(new BasePageMapper("~administration/settings/job-executors", JobExecutorsPage.class));
 		add(new BasePageMapper("~administration/settings/groovy-scripts", GroovyScriptListPage.class));
+		add(new BasePageMapper("~administration/cluster", ClusterManagementPage.class));
 		
 		add(new BasePageMapper("~administration/settings/issue-fields", IssueFieldListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-states", IssueStateListPage.class));

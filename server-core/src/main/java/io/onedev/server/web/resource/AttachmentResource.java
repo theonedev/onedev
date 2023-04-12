@@ -29,10 +29,10 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import static io.onedev.commons.bootstrap.Bootstrap.BUFFER_SIZE;
+import static io.onedev.commons.utils.LockUtils.read;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class AttachmentResource extends AbstractResource {
 
@@ -63,7 +63,7 @@ public class AttachmentResource extends AbstractResource {
 			
 			String authorization = params.get(PARAM_AUTHORIZATION).toOptionalString();
 			if (authorization == null 
-					|| !new String(CryptoUtils.decrypt(Base64.decodeBase64(authorization)), StandardCharsets.UTF_8).equals(attachmentGroup)) {
+					|| !new String(CryptoUtils.decrypt(Base64.decodeBase64(authorization)), UTF_8).equals(attachmentGroup)) {
 				Issue issue;
 				Build build;
 				if (OneDev.getInstance(PullRequestManager.class).findByUUID(attachmentGroup) != null 
@@ -93,38 +93,37 @@ public class AttachmentResource extends AbstractResource {
 		
 		response.getHeaders().addHeader("X-Content-Type-Options", "nosniff");
 		response.setContentType(MimeTypes.OCTET_STREAM);
-		
-		try {
-			response.setFileName(URLEncoder.encode(attachment, StandardCharsets.UTF_8.name()));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-		
+
+		response.setFileName(URLEncoder.encode(attachment, UTF_8));
+
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				UUID storageServerUUID = getProjectManager().getStorageServerUUID(projectId, true);
+				String activeServer = getProjectManager().getActiveServer(projectId, true);
 				ClusterManager clusterManager = OneDev.getInstance(ClusterManager.class);
-				if (storageServerUUID.equals(clusterManager.getLocalServerUUID())) {
-					File attachmentFile = new File(getAttachmentManager().getAttachmentGroupDirLocal(projectId, attachmentGroup), attachment);
-					try (
-							InputStream is = new FileInputStream(attachmentFile);
-							OutputStream os = attributes.getResponse().getOutputStream()) {
-						IOUtils.copy(is, os, BUFFER_SIZE);
-					}
+				if (activeServer.equals(clusterManager.getLocalServerAddress())) {
+					read(getAttachmentManager().getAttachmentLockName(projectId, attachmentGroup), () -> {
+						File attachmentFile = new File(getAttachmentManager().getAttachmentGroupDir(projectId, attachmentGroup), attachment);
+						try (
+								InputStream is = new FileInputStream(attachmentFile);
+								OutputStream os = attributes.getResponse().getOutputStream()) {
+							IOUtils.copy(is, os, BUFFER_SIZE);
+						}
+						return null;						
+					});
 				} else {
 	    			Client client = ClientBuilder.newClient();
 	    			try {
 	    				CharSequence path = RequestCycle.get().urlFor(
 	    						new AttachmentResourceReference(), 
 	    						AttachmentResource.paramsOf(projectId, attachmentGroup, attachment));
-	    				String storageServerUrl = clusterManager.getServerUrl(storageServerUUID) + path;
+	    				String activeServerUrl = clusterManager.getServerUrl(activeServer) + path;
 	    				
-	    				WebTarget target = client.target(storageServerUrl).path(path.toString());
+	    				WebTarget target = client.target(activeServerUrl).path(path.toString());
 	    				Invocation.Builder builder =  target.request();
 	    				builder.header(HttpHeaders.AUTHORIZATION, 
-	    						KubernetesHelper.BEARER + " " + clusterManager.getCredentialValue());
+	    						KubernetesHelper.BEARER + " " + clusterManager.getCredential());
 	    				
 	    				try (Response response = builder.get()) {
 	    					KubernetesHelper.checkStatus(response);
@@ -169,7 +168,7 @@ public class AttachmentResource extends AbstractResource {
 			URIBuilder builder = new URIBuilder(attachmentUrl);
 			if (builder.getPathSegments().size() >= 5) {
 				String group = builder.getPathSegments().get(4);
-				byte[] encrypted = CryptoUtils.encrypt(group.getBytes(StandardCharsets.UTF_8));
+				byte[] encrypted = CryptoUtils.encrypt(group.getBytes(UTF_8));
 				String base64 = Base64.encodeBase64URLSafeString(encrypted);
 				builder.addParameter(PARAM_AUTHORIZATION, base64);
 			}

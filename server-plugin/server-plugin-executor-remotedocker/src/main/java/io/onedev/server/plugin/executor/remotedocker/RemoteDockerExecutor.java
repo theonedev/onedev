@@ -8,12 +8,14 @@ import io.onedev.agent.job.TestDockerJobData;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Numeric;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.job.*;
 import io.onedev.server.job.log.LogManager;
-import io.onedev.server.job.log.LogTask;
+import io.onedev.server.job.log.ServerJobLogger;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
@@ -22,8 +24,6 @@ import io.onedev.server.terminal.AgentShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Numeric;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.Serializable;
@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
+
+import static io.onedev.agent.WebsocketUtils.call;
 
 @Editable(order=210, description="This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>")
 public class RemoteDockerExecutor extends ServerDockerExecutor {
@@ -53,8 +55,9 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		this.agentQuery = agentQuery;
 	}
 
-	@Editable(order=450, placeholder = "Number of agent cpu", description = "" +
-			"Specify max number of jobs/services this executor can run concurrently on each matched agent")
+	@Editable(order=450, description = "" +
+			"Specify max number of jobs/services this executor can run concurrently " +
+			"on each matched agent. Leave empty to set as agent CPU cores")
 	@Numeric
 	@Override
 	public String getConcurrency() {
@@ -88,7 +91,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 	@Override
 	public void execute(JobContext jobContext, TaskLogger jobLogger) {
 		AgentRunnable runnable = (agentId) -> {
-			getJobManager().runJobLocal(jobContext, new JobRunnable() {
+			getJobManager().runJob(jobContext, new JobRunnable() {
 				
 				@Override
 				public void run(TaskLogger jobLogger) {
@@ -124,7 +127,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 							getCpuLimit(), getMemoryLimit(), getRunOptions());
 
 					try {
-						WebsocketUtils.call(agentSession, jobData, 0);
+						call(agentSession, jobData, jobContext.getTimeout()*1000L);
 					} catch (InterruptedException|TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
 					}
@@ -170,21 +173,10 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		String jobToken = UUID.randomUUID().toString();
 		getLogManager().addJobLogger(jobToken, jobLogger);
 		try {
-			UUID localServerUUID = getClusterManager().getLocalServerUUID();
+			String testServer = getClusterManager().getLocalServerAddress();
 			jobLogger.log("Pending resource allocation...");
-			
 			AgentRunnable runnable = agentId -> {
-				TaskLogger currentJobLogger = new TaskLogger() {
-
-					@Override
-					public void log(String message, String sessionId) {
-						getClusterManager().runOnServer(
-								localServerUUID,
-								new LogTask(jobToken, message, sessionId));
-					}
-
-				};
-
+				TaskLogger currentJobLogger = new ServerJobLogger(testServer, jobToken);
 				var agentData = getSessionManager().call(
 						() -> getAgentManager().load(agentId).getAgentData());
 
@@ -205,10 +197,11 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken,
 						testData.getDockerImage(), registryLogins, getRunOptions());
 
+				long timeout = 300*1000L;
 				if (getLogManager().getJobLogger(jobToken) == null) {
 					getLogManager().addJobLogger(jobToken, currentJobLogger);
 					try {
-						WebsocketUtils.call(agentSession, jobData, 0);
+						call(agentSession, jobData, timeout);
 					} catch (InterruptedException | TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
 					} finally {
@@ -216,7 +209,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					}
 				} else {
 					try {
-						WebsocketUtils.call(agentSession, jobData, 0);
+						call(agentSession, jobData, timeout);
 					} catch (InterruptedException | TimeoutException e) {
 						new Message(MessageTypes.CANCEL_JOB, jobToken).sendBy(agentSession);
 					}

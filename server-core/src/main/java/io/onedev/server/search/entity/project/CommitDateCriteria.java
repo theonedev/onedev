@@ -1,7 +1,7 @@
 package io.onedev.server.search.entity.project;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.model.ProjectDynamics;
+import io.onedev.server.model.ProjectLastEventDate;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
 
@@ -26,7 +26,7 @@ public class CommitDateCriteria extends Criteria<Project> {
 
 	@Override
 	public Predicate getPredicate(CriteriaQuery<?> query, From<Project, Project> from, CriteriaBuilder builder) {
-		Path<Date> attribute = ProjectQuery.getPath(from, Project.PROP_DYNAMICS + "." + ProjectDynamics.PROP_LAST_COMMIT_DATE);
+		Path<Date> attribute = ProjectQuery.getPath(from, Project.PROP_LAST_EVENT_DATE + "." + ProjectLastEventDate.PROP_COMMIT);
 		if (operator == ProjectQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
@@ -35,11 +35,11 @@ public class CommitDateCriteria extends Criteria<Project> {
 
 	@Override
 	public boolean matches(Project project) {
-		if (project.getDynamics().getLastCommitDate() != null) {
+		if (project.getLastEventDate().getCommit() != null) {
 			if (operator == ProjectQueryLexer.IsUntil)
-				return project.getDynamics().getLastCommitDate().before(date);
+				return project.getLastEventDate().getCommit().before(date);
 			else
-				return project.getDynamics().getLastCommitDate().after(date);
+				return project.getLastEventDate().getCommit().after(date);
 		} else {
 			return false;
 		}
