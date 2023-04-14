@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
@@ -11,7 +12,9 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Null;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +33,8 @@ public abstract class SyncRepository extends ServerSideStep {
 	private String passwordSecret;
 	
 	private boolean force;
+	
+	private String proxy;
 
 	@Editable(order=100, name="Remote URL", description="Specify URL of remote git repository. "
 			+ "Only http/https protocol is supported")
@@ -95,6 +100,16 @@ public abstract class SyncRepository extends ServerSideStep {
 		this.force = force;
 	}
 
+	@Editable(order=600, placeholder = "No proxy", description = "Optionally configure proxy for this step. Proxy " +
+			"should be in the format of &lt;proxy host&gt;:&lt;proxy port&gt;")
+	public String getProxy() {
+		return proxy;
+	}
+
+	public void setProxy(String proxy) {
+		this.proxy = proxy;
+	}
+
 	public String getRemoteUrlWithCredential(Build build) {
 		String encodedPassword = null;
 		if (getPasswordSecret() != null) {
@@ -121,6 +136,11 @@ public abstract class SyncRepository extends ServerSideStep {
 			remoteUrlWithCredentials += hostAndPath;
 		
 		return remoteUrlWithCredentials;
+	}
+	
+	protected static void configureProxy(Commandline git, @Nullable String proxy) {
+		if (proxy != null)
+			git.addArgs("-c", "http.proxy=" + proxy, "-c", "https.proxy=" + proxy);
 	}
 	
 }

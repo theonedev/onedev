@@ -36,6 +36,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import java.io.File;
 import java.util.ArrayList;
@@ -146,7 +147,7 @@ public class PullRepository extends SyncRepository {
 		String remoteUrl = getRemoteUrlWithCredential(build);
 		Long projectId = getTargetProject(build).getId();
 		
-		var task = new PullTask(projectId, remoteUrl, getRefs(), isForce(), isWithLfs());
+		var task = new PullTask(projectId, remoteUrl, getRefs(), isForce(), isWithLfs(), getProxy());
 		getProjectManager().runOnActiveServer(projectId, task);
 		
 		return null;
@@ -181,12 +182,16 @@ public class PullRepository extends SyncRepository {
 		
 		private final boolean withLfs;
 		
-		PullTask(Long projectId, String remoteUrl, String refs, boolean force, boolean withLfs) {
+		private final String proxy;
+		
+		PullTask(Long projectId, String remoteUrl, String refs, boolean force, 
+				 boolean withLfs, @Nullable String proxy) {
 			this.projectId = projectId;
 			this.remoteUrl = remoteUrl;
 			this.refs = refs;
 			this.force = force;
 			this.withLfs = withLfs;
+			this.proxy = proxy;
 		}
 
 		private Map<String, ObjectId> getRefCommits(Repository repository) {
@@ -213,7 +218,9 @@ public class PullRepository extends SyncRepository {
 			Map<String, ObjectId> oldCommitIds = getRefCommits(repository);
 
 			Commandline git = CommandUtils.newGit();
+			configureProxy(git, proxy);
 			git.workingDir(repository.getDirectory());
+			
 			git.addArgs("fetch");
 			git.addArgs(remoteUrl);
 			if (force)
@@ -247,6 +254,7 @@ public class PullRepository extends SyncRepository {
 				logger.debug("Determining remote head branch...");
 
 				git.clearArgs();
+				configureProxy(git, proxy);
 				git.addArgs("remote", "show", remoteUrl);
 
 				AtomicReference<String> headBranch = new AtomicReference<>(null);
@@ -302,10 +310,16 @@ public class PullRepository extends SyncRepository {
 			}
 
 			if (withLfs) {
+				git.clearArgs();
+				configureProxy(git, proxy);
 				var sinceCommitIds = getProjectManager().readLfsSinceCommits(projectId);
 
 				if (sinceCommitIds.isEmpty()) {
-					new LfsFetchAllCommand(git.workingDir(), remoteUrl).run();
+					new LfsFetchAllCommand(git.workingDir(), remoteUrl) {
+						protected Commandline newGit() {
+							return git;
+						}
+					}.run();
 				} else {
 					var fetchCommitIds = new ArrayList<>(getReachableCommits(repository, sinceCommitIds, newCommitIds.values()));
 					new LfsFetchCommand(git.workingDir(), remoteUrl, fetchCommitIds) {

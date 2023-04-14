@@ -31,6 +31,7 @@ public class PushRepository extends SyncRepository {
 			Project project = build.getProject();
 			Commandline git = CommandUtils.newGit();
 			git.workingDir(OneDev.getInstance(ProjectManager.class).getGitDir(project.getId()));
+			configureProxy(git, getProxy());
 			
 			String remoteUrl = getRemoteUrlWithCredential(build);
 			AtomicReference<String> remoteCommitId = new AtomicReference<>(null);
@@ -59,6 +60,7 @@ public class PushRepository extends SyncRepository {
 			
 			if (remoteCommitId.get() != null) {
 				git.clearArgs();
+				configureProxy(git, getProxy());
 				git.addArgs("fetch", remoteUrl, remoteCommitId.get());
 				git.execute(new LineConsumer() {
 
@@ -85,6 +87,7 @@ public class PushRepository extends SyncRepository {
 					String input = String.format("%s %s %s %s\n", build.getRefName(), build.getCommitHash(), 
 							build.getRefName(), remoteCommitId.get());
 					git.clearArgs();
+					configureProxy(git, getProxy());
 					git.addArgs("lfs", "pre-push", remoteUrl, remoteUrl);
 					git.execute(new LineConsumer() {
 
@@ -104,6 +107,7 @@ public class PushRepository extends SyncRepository {
 				}
 			} else {
 				git.clearArgs();
+				configureProxy(git, getProxy());
 				git.addArgs("lfs", "push", "--all", remoteUrl, build.getCommitHash());
 				git.execute(new LineConsumer() {
 
@@ -129,6 +133,7 @@ public class PushRepository extends SyncRepository {
 	
 	private void push(Build build, TaskLogger logger) {
 		Commandline git = CommandUtils.newGit();
+		configureProxy(git, getProxy());
 		git.workingDir(OneDev.getInstance(ProjectManager.class).getGitDir(build.getProject().getId()));
 		git.addArgs("push");
 		if (isForce())
