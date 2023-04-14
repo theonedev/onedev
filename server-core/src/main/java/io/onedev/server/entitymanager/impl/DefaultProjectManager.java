@@ -1306,6 +1306,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public void on(RefUpdated event) {
 		Long projectId = event.getProject().getId();
 		directoryModified(projectId, getGitDir(projectId));
+		if (!event.getNewCommitId().equals(ObjectId.zeroId()))
+			writeLfsSinceCommits(projectId, Sets.newHashSet(event.getNewCommitId()));
 	}
 
 	@Listen
