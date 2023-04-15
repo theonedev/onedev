@@ -1,14 +1,5 @@
 package io.onedev.server.web.page.my.sshkeys;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -16,6 +7,14 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.sshkey.InsertSshKeyPanel;
 import io.onedev.server.web.component.user.sshkey.SshKeyListPanel;
 import io.onedev.server.web.page.my.MyPage;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class MySshKeysPage extends MyPage {
@@ -29,16 +28,6 @@ public class MySshKeysPage extends MyPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-        add(new Label("sshKeyNote", "Your SSH keys are managed from " + getLoginUser().getAuthSource()) {
-        	
-        	@Override
-        	protected void onConfigure() {
-        		super.onConfigure();
-        		setVisible(getLoginUser().isSshKeyExternalManaged());
-        	}
-        	
-        });
         
 		add(new ModalLink("newKey") {
             
@@ -63,12 +52,6 @@ public class MySshKeysPage extends MyPage {
 					}
 					
 				};
-            }
-            
-            @Override
-            protected void onConfigure() {
-            	super.onConfigure();
-            	setVisible(!getLoginUser().isSshKeyExternalManaged());
             }
 		});
             

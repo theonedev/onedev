@@ -57,7 +57,5 @@ public abstract class Authenticator implements Serializable {
 	public abstract Authenticated authenticate(UsernamePasswordToken token) throws AuthenticationException;
 	
 	public abstract boolean isManagingMemberships();
-
-	public abstract boolean isManagingSshKeys();
 	
 }

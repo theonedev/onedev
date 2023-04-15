@@ -29,7 +29,7 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 
 	@Editable(order=300, description=""
 			+ "Specify manager DN to authenticate OneDev itself to Active Directory. The manager DN should be specified "
-			+ "in form of <i>&lt;account name&gt;@&lt;domain&gt;</i>, for instance: <i>onedev@example.com</i>")
+			+ "in form of <i>&lt;account name&gt;@&lt;domain&gt;</i>, for instance: <i>manager@example.com</i>")
 	@NotEmpty
 	@ShowCondition("isAuthenticationRequiredEnabled")
 	@Override

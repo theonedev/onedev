@@ -1,38 +1,25 @@
 package io.onedev.server.security.realm;
 
-import java.util.Collection;
-import java.util.concurrent.Callable;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authc.credential.PasswordMatcher;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.MembershipManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.*;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Transactional;
+import org.apache.shiro.authc.*;
+import org.apache.shiro.authc.credential.PasswordMatcher;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
 
 @Singleton
 public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
@@ -78,15 +65,17 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 			user.setFullName(authenticated.getFullName());
 		userManager.create(user);
 		
-		EmailAddress emailAddress = new EmailAddress();
-		emailAddress.setValue(authenticated.getEmail());
-		emailAddress.setVerificationCode(null);
-		emailAddress.setOwner(user);
-		emailAddress.setPrimary(true);
-		emailAddress.setGit(true);
-		emailAddressManager.create(emailAddress);
-		
-		user.getEmailAddresses().add(emailAddress);
+		if (authenticated.getEmail() != null) {
+			EmailAddress emailAddress = new EmailAddress();
+			emailAddress.setValue(authenticated.getEmail());
+			emailAddress.setVerificationCode(null);
+			emailAddress.setOwner(user);
+			emailAddress.setPrimary(true);
+			emailAddress.setGit(true);
+			emailAddressManager.create(emailAddress);
+
+			user.getEmailAddresses().add(emailAddress);
+		}
 
 		Collection<String> groupNames = authenticated.getGroupNames();
 		if (groupNames == null && defaultGroup != null)
@@ -99,11 +88,16 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
     	return user;
 	}
 	
-	private void updateUser(User user, Authenticated authenticated, @Nullable EmailAddress emailAddress) {
+	@Transactional
+	protected void updateUser(User user, Authenticated authenticated, @Nullable EmailAddress emailAddress) {
 		if (emailAddress != null) {
 			emailAddress.setVerificationCode(null);
 			emailAddressManager.setAsPrimary(emailAddress);
-		} else {
+		} else if (authenticated.getEmail() != null) {
+			for (var eachEmailAddress: user.getEmailAddresses()) {
+				eachEmailAddress.setPrimary(false);
+				emailAddressManager.update(eachEmailAddress);
+			}
 			emailAddress = new EmailAddress();
 			emailAddress.setValue(authenticated.getEmail());
 			emailAddress.setVerificationCode(null);
@@ -126,67 +120,70 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 	@Override
 	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) 
 			throws AuthenticationException {
-		return transactionManager.call(new Callable<AuthenticationInfo>() {
-
-			@Override
-			public AuthenticationInfo call() {
-				try {
-					String userNameOrEmailAddressValue = (String) token.getPrincipal();
-					User user;
-					EmailAddress emailAddress = emailAddressManager.findByValue(userNameOrEmailAddressValue);
-					if (emailAddress != null)
-						user = emailAddress.getOwner();
-					else 
-						user = userManager.findByName(userNameOrEmailAddressValue);
-					if (user != null) {
-						if (user.isExternalManaged()) {
-					    	Authenticator authenticator = settingManager.getAuthenticator();
-			    			if (authenticator != null) {
-			    				UsernamePasswordToken authToken = (UsernamePasswordToken) token;
-			    				authToken = new UsernamePasswordToken(user.getName(), authToken.getPassword(), 
-			    						authToken.isRememberMe(), authToken.getHost());
-			    				Authenticated authenticated = authenticator.authenticate(authToken);
-			    				String emailAddressValue = authenticated.getEmail();
-			    				emailAddress = emailAddressManager.findByValue(emailAddressValue);
-			    				if (emailAddress != null && !emailAddress.getOwner().equals(user)) {
-			    					throw new AuthenticationException("Email address '" + emailAddressValue 
-			    							+ "' has already been used by another user");
-			    				} else {
-				        			updateUser(user, authenticated, emailAddress);
-				        			return user;
-			    				}
-			    			} else {
-			    				throw new AuthenticationException("No external authenticator to authenticate user '" 
-			    						+ userNameOrEmailAddressValue + "'");
-			    			}
+		return transactionManager.call(() -> {
+			try {
+				String userNameOrEmailAddressValue = (String) token.getPrincipal();
+				User user;
+				EmailAddress emailAddress = emailAddressManager.findByValue(userNameOrEmailAddressValue);
+				if (emailAddress != null)
+					user = emailAddress.getOwner();
+				else 
+					user = userManager.findByName(userNameOrEmailAddressValue);
+				if (user != null) {
+					if (user.isExternalManaged()) {
+						Authenticator authenticator = settingManager.getAuthenticator();
+						if (authenticator != null) {
+							UsernamePasswordToken authToken = (UsernamePasswordToken) token;
+							authToken = new UsernamePasswordToken(user.getName(), authToken.getPassword(), 
+									authToken.isRememberMe(), authToken.getHost());
+							Authenticated authenticated = authenticator.authenticate(authToken);
+							String emailAddressValue = authenticated.getEmail();
+							if (emailAddressValue != null) {
+								emailAddress = emailAddressManager.findByValue(emailAddressValue);
+								if (emailAddress != null && !emailAddress.getOwner().equals(user)) {
+									throw new AuthenticationException("Email address '" + emailAddressValue
+											+ "' has already been used by another user");
+								} else {
+									updateUser(user, authenticated, emailAddress);
+									return user;
+								}
+							} else {
+								updateUser(user, authenticated, emailAddress);
+								return user;																
+							}
 						} else {
-							return user;
+							throw new AuthenticationException("No external authenticator to authenticate user '" 
+									+ userNameOrEmailAddressValue + "'");
 						}
-					} else if (emailAddress == null) {
-				    	Authenticator authenticator = settingManager.getAuthenticator();
-		    			if (authenticator != null) {
-		    				Authenticated authenticated = authenticator.authenticate((UsernamePasswordToken) token);
-		    				String emailAddressValue = authenticated.getEmail();
-		    				if (emailAddressManager.findByValue(emailAddressValue) != null) {
-		    					throw new AuthenticationException("Email address '" + emailAddressValue
-		    							+ "' has already been used by another user");
-		    				} else {
-		    					return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
-		    				}
-		    			} else {
-		    	            throw new UnknownAccountException("Invalid credentials");
-		    			}
-			    	} else {
-	    	            throw new UnknownAccountException("Invalid credentials");
-			    	}
-				} catch (Exception e) {
-	    			if (e instanceof AuthenticationException) {
-	    				logger.debug("Authentication not passed", e);
-	        			throw ExceptionUtils.unchecked(e);
-	    			} else {
-	    				logger.error("Error authenticating user", e);
-	        			throw new AuthenticationException("Error authenticating user", e);
-	    			}
+					} else {
+						return user;
+					}
+				} else {
+					Authenticator authenticator = settingManager.getAuthenticator();
+					if (authenticator != null) {
+						Authenticated authenticated = authenticator.authenticate((UsernamePasswordToken) token);
+						String emailAddressValue = authenticated.getEmail();
+						if (emailAddressValue != null) {
+							if (emailAddressManager.findByValue(emailAddressValue) != null) {
+								throw new AuthenticationException("Email address '" + emailAddressValue
+										+ "' has already been used by another user");
+							} else {
+								return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
+							}
+						} else {
+							return newUser(userNameOrEmailAddressValue, authenticated, authenticator.getDefaultGroup());
+						}
+					} else {
+						throw new UnknownAccountException("Invalid credentials");
+					}
+				}
+			} catch (Exception e) {
+				if (e instanceof AuthenticationException) {
+					logger.debug("Authentication not passed", e);
+					throw ExceptionUtils.unchecked(e);
+				} else {
+					logger.error("Error authenticating user", e);
+					throw new AuthenticationException("Error authenticating user", e);
 				}
 			}
 		});

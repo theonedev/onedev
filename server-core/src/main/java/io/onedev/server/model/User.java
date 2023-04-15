@@ -5,6 +5,9 @@ import com.google.common.base.MoreObjects;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Password;
+import io.onedev.server.annotation.UserName;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -19,11 +22,8 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Password;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -620,19 +620,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.gpgKeys = gpgKeys;
 	}
 
-	public boolean isSshKeyExternalManaged() {
-    	if (isExternalManaged()) {
-    		if (getSsoConnector() != null) {
-    			return false;
-    		} else {
-	    		Authenticator authenticator = OneDev.getInstance(SettingManager.class).getAuthenticator();
-	    		return authenticator != null && authenticator.isManagingSshKeys();
-    		}
-    	} else {
-    		return false;
-    	}
-    }
-    
     public boolean isMembershipExternalManaged() {
     	if (isExternalManaged()) {
     		SettingManager settingManager = OneDev.getInstance(SettingManager.class);

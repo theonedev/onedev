@@ -14,7 +14,7 @@ public class Authenticated {
 	
 	private final Collection<String> sshKeys;
 	
-	public Authenticated(String email, @Nullable String fullName, 
+	public Authenticated(@Nullable String email, @Nullable String fullName, 
 			@Nullable Collection<String> groupNames, @Nullable Collection<String> sshKeys) {
 		this.email = email;
 		this.fullName = fullName;
@@ -27,6 +27,7 @@ public class Authenticated {
 		return fullName;
 	}
 
+	@Nullable
 	public String getEmail() {
 		return email;
 	}

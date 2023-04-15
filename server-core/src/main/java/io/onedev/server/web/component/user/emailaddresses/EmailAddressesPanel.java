@@ -1,9 +1,17 @@
 package io.onedev.server.web.component.user.emailaddresses;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.EmailAddressManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.EmailAddress;
+import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.page.my.MyPage;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -20,23 +28,12 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.validation.IErrorMessageSource;
-import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
-import org.apache.wicket.validation.IValidator;
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.EmailAddressManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.EmailAddress;
-import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.EmailAddressVerificationStatusBadge;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.page.my.MyPage;
-import io.onedev.server.web.util.ConfirmClickModifier;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class EmailAddressesPanel extends GenericPanel<User> {
@@ -77,13 +74,6 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 				
 				item.add(new EmailAddressVerificationStatusBadge("verificationStatus", item.getModel())); 
 				
-				if (getUser().isExternalManaged() && address.equals(getUser().getPrimaryEmailAddress())) {
-					item.add(new Label("externalManagedNote", 
-							"This primary email address is managed from " + getUser().getAuthSource()));
-				} else {
-					item.add(new WebMarkupContainer("externalManagedNote").setVisible(false));
-				}
-				
 				item.add(new MenuLink("operations") {
 
 					@Override
@@ -91,7 +81,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 						List<MenuItem> menuItems = new ArrayList<>();
 						EmailAddress address = item.getModelObject();
 						Long addressId = address.getId();
-						if (!getUser().isExternalManaged() && !address.equals(getUser().getPrimaryEmailAddress())) {
+						if (!address.equals(getUser().getPrimaryEmailAddress())) {
 							menuItems.add(new MenuItem() {
 
 								@Override
@@ -164,8 +154,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 								
 							});
 						}
-						if (!(getUser().isExternalManaged() && address.equals(getUser().getPrimaryEmailAddress())) 
-								&& getUser().getEmailAddresses().size() > 1) {
+						if (getUser().getEmailAddresses().size() > 1) {
 							menuItems.add(new MenuItem() {
 
 								@Override
@@ -223,7 +212,7 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 			}
 			
 		};
-		TextField<String> input = new TextField<String>("emailAddress", new IModel<String>() {
+		TextField<String> input = new TextField<String>("emailAddress", new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -238,27 +227,22 @@ public class EmailAddressesPanel extends GenericPanel<User> {
 			public void setObject(String object) {
 				emailAddressValue = object;
 			}
-			
+
 		});
 		input.setLabel(Model.of("Email address"));
 		input.setRequired(true);
-		input.add(new IValidator<String>() {
+		input.add(validatable -> {
+			String emailAddress = validatable.getValue();
+			if (!new EmailValidator().isValid(emailAddress, null)) {
+				validatable.error(new IValidationError() {
 
-			@Override
-			public void validate(IValidatable<String> validatable) {
-				String emailAddress = validatable.getValue();
-				if (!new EmailValidator().isValid(emailAddress, null)) {
-					validatable.error(new IValidationError() {
-						
-						@Override
-						public Serializable getErrorMessage(IErrorMessageSource messageSource) {
-							return "Malformed email address";
-						}
-						
-					});
-				}
+					@Override
+					public Serializable getErrorMessage(IErrorMessageSource messageSource) {
+						return "Malformed email address";
+					}
+
+				});
 			}
-			
 		});
 		form.add(input);
 		add(new FencedFeedbackPanel("feedback", form));

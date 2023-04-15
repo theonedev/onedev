@@ -1,9 +1,12 @@
 package io.onedev.server.web.component.user.sshkey;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.model.SshKey;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -23,13 +26,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.model.SshKey;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
@@ -50,43 +49,43 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
         
 		List<IColumn<SshKey, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<SshKey, Void>(Model.of("Digest")) {
+		columns.add(new AbstractColumn<>(Model.of("Digest")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
-					IModel<SshKey> rowModel) {
+									 IModel<SshKey> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getDigest()));
 			}
-			
+
 		});
 		
-		columns.add(new AbstractColumn<SshKey, Void>(Model.of("Comment")) {
+		columns.add(new AbstractColumn<>(Model.of("Comment")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
-					IModel<SshKey> rowModel) {
+									 IModel<SshKey> rowModel) {
 				String comment = rowModel.getObject().getComment();
 				if (comment != null)
 					cellItem.add(new Label(componentId, comment));
 				else
 					cellItem.add(new Label(componentId, "<i>No comment</i>").setEscapeModelStrings(false));
 			}
-			
+
 		});
 		
-		columns.add(new AbstractColumn<SshKey, Void>(Model.of("Created At")) {
+		columns.add(new AbstractColumn<>(Model.of("Created At")) {
 
 			@Override
 			public String getCssClass() {
 				return "expanded";
 			}
-			
+
 			@Override
 			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
-					IModel<SshKey> rowModel) {
+									 IModel<SshKey> rowModel) {
 				cellItem.add(new Label(componentId, DateUtils.formatDateTime(rowModel.getObject().getCreatedAt())));
 			}
-			
+
 		});
 		
 		columns.add(new AbstractColumn<SshKey, Void>(Model.of("")) {
@@ -113,7 +112,7 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 
-				}.setVisible(!rowModel.getObject().getOwner().isSshKeyExternalManaged()));
+				});
 				
 				cellItem.add(fragment);
 			}

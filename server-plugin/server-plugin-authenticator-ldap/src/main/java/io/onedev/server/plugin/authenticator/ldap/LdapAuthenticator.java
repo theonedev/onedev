@@ -1,13 +1,12 @@
 package io.onedev.server.plugin.authenticator.ldap;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import io.onedev.server.model.support.administration.authenticator.Authenticator;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 import io.onedev.server.annotation.ShowCondition;
-import org.apache.shiro.authc.AccountException;
+import io.onedev.server.model.support.administration.authenticator.Authenticated;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.util.EditContext;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.slf4j.Logger;
@@ -138,9 +137,8 @@ public class LdapAuthenticator extends Authenticator {
 	}
 
 	@Editable(order=800, description=""
-			+ "Specifies name of the attribute inside the user LDAP entry whose value will be taken as user "
+			+ "Optionally specifies name of the attribute inside the user LDAP entry whose value will be taken as user "
 			+ "email. This field is normally set to <i>mail</i> according to RFC 2798")
-	@NotEmpty
 	public String getUserEmailAttribute() {
 		return userEmailAttribute;
 	}
@@ -200,8 +198,8 @@ public class LdapAuthenticator extends Authenticator {
         
         if (getUserSshKeyAttribute() != null)
         	attributeNames.add(getUserSshKeyAttribute());
-        
-        attributeNames.add(getUserEmailAttribute());
+        if (getUserEmailAttribute() != null)
+        	attributeNames.add(getUserEmailAttribute());
         
         if (getGroupRetrieval() instanceof GetGroupsUsingAttribute) {
         	GetGroupsUsingAttribute groupRetrieval = (GetGroupsUsingAttribute)getGroupRetrieval();
@@ -282,9 +280,11 @@ public class LdapAuthenticator extends Authenticator {
                         fullName = (String) attribute.get();
                 }
                 
-                Attribute attribute = searchResultAttributes.get(getUserEmailAttribute());
-                if (attribute != null && attribute.get() != null)
-                    email = (String) attribute.get();
+				if (getUserEmailAttribute() != null) {
+					Attribute attribute = searchResultAttributes.get(getUserEmailAttribute());
+					if (attribute != null && attribute.get() != null)
+						email = (String) attribute.get();
+				}
                 
                 if (getGroupRetrieval() instanceof GetGroupsUsingAttribute) 
                 	groupNames = retrieveGroupsByAttribute(effectiveCtxt, searchResultAttributes);
@@ -296,10 +296,7 @@ public class LdapAuthenticator extends Authenticator {
             if (getGroupRetrieval() instanceof SearchGroupsUsingFilter) 
             	groupNames = retrieveGroupsByFilter(effectiveCtxt, userDN);
             
-            if (StringUtils.isBlank(email))
-            	throw new AccountException("Email is required but not available in ldap directory");
-            else
-            	return new Authenticated(email, fullName, groupNames, sshKeys);
+			return new Authenticated(email, fullName, groupNames, sshKeys);
         } catch (NamingException e) {
         	throw new RuntimeException(e);
         } finally {
@@ -433,11 +430,6 @@ public class LdapAuthenticator extends Authenticator {
 	@Override
 	public boolean isManagingMemberships() {
 		return !(getGroupRetrieval() instanceof DoNotRetrieveGroups);
-	}
-
-	@Override
-	public boolean isManagingSshKeys() {
-		return getUserSshKeyAttribute() != null;
 	}
 	
 	/* Copied from Spring LdapEncoder.java */
