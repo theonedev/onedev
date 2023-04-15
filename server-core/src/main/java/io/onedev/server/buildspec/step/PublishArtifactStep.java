@@ -70,9 +70,9 @@ public class PublishArtifactStep extends ServerSideStep {
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger jobLogger) {
 		LockUtils.write(build.getArtifactsLockName(), () -> {
 			var projectId = build.getProject().getId();
-			OneDev.getInstance(StorageManager.class).initArtifactsDir(projectId, build.getNumber());
-			FileUtils.copyDirectory(inputDir, build.getArtifactsDir());
-			OneDev.getInstance(ProjectManager.class).directoryModified(projectId, build.getArtifactsDir());
+			var artifactsDir = OneDev.getInstance(StorageManager.class).initArtifactsDir(projectId, build.getNumber());
+			FileUtils.copyDirectory(inputDir, artifactsDir);
+			OneDev.getInstance(ProjectManager.class).directoryModified(projectId, artifactsDir);
 			return null;
 		});
 		return null;

@@ -1241,7 +1241,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		String jobToken = jobContext.getJobToken();
 		return clusterManager.runOnServer(leaderServer, () -> {
 			synchronized (allocatedCaches) {
-				JobContext jobContext1 = getJobContext(jobToken, true);
+				JobContext innerJobContext = getJobContext(jobToken, true);
 
 				List<CacheInstance> sortedInstances = new ArrayList<>(request.getInstances().keySet());
 				sortedInstances.sort((o1, o2) -> request.getInstances().get(o2).compareTo(request.getInstances().get(o1)));
@@ -1261,7 +1261,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				Map<CacheInstance, String> allocations = new HashMap<>();
 
 				Collection<String> allocatedCachesOfJob = new ArrayList<>();
-				for (CacheSpec cacheSpec : jobContext1.getCacheSpecs()) {
+				for (CacheSpec cacheSpec : innerJobContext.getCacheSpecs()) {
 					Optional<CacheInstance> result = sortedInstances
 							.stream()
 							.filter(it -> it.getCacheKey().equals(cacheSpec.getNormalizedKey()))
@@ -1276,7 +1276,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 				Consumer<CacheInstance> deletionMarker = instance -> {
 					long ellapsed = request.getCurrentTime().getTime() - request.getInstances().get(instance).getTime();
-					if (ellapsed > jobContext1.getJobExecutor().getCacheTTL() * 24L * 3600L * 1000L) {
+					if (ellapsed > innerJobContext.getJobExecutor().getCacheTTL() * 24L * 3600L * 1000L) {
 						allocations.put(instance, null);
 						allocatedCachesOfJob.add(instance.getName());
 						allAllocated.add(instance.getName());

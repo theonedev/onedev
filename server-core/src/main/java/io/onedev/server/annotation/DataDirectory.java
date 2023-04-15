@@ -8,21 +8,17 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import io.onedev.server.validation.validator.DirectoryValidator;
+import io.onedev.server.validation.validator.DataDirectoryValidator;
 
 /**
  * @author robin
  */
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=DirectoryValidator.class) 
-public @interface Directory {
+@Constraint(validatedBy= DataDirectoryValidator.class) 
+public @interface DataDirectory {
 
-	boolean writeable();
-	
-	boolean outsideOfInstallDir();
-	
-	boolean absolute();
+	boolean exists() default true;
 
 	String message() default "";
 	

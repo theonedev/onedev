@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 
+import static io.onedev.server.model.Build.getArtifactsDir;
+
 @Singleton
 public class DefaultStorageManager implements StorageManager {
 
@@ -23,14 +25,17 @@ public class DefaultStorageManager implements StorageManager {
 	}
 	
 	@Override
-	public void initLfsDir(Long projectId) {
-		FileUtils.createDir(new File(projectManager.getGitDir(projectId), "lfs"));
+	public File initLfsDir(Long projectId) {
+		var lfsDir = new File(projectManager.getGitDir(projectId), "lfs");
+		FileUtils.createDir(lfsDir);
+		return lfsDir;
 	}
 
 	@Override
-	public void initArtifactsDir(Long projectId, Long buildNumber) {
-		File buildDir = buildManager.getStorageDir(projectId, buildNumber);
-		FileUtils.createDir(new File(buildDir, Build.ARTIFACTS_DIR));
+	public File initArtifactsDir(Long projectId, Long buildNumber) {
+		var artifactsDir = getArtifactsDir(projectId, buildNumber);
+		FileUtils.createDir(artifactsDir);
+		return artifactsDir;
 	}
 	
 }

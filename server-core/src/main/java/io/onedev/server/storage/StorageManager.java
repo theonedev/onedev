@@ -6,8 +6,8 @@ import java.io.File;
 
 public interface StorageManager {
 	
-	void initLfsDir(Long projectId);
+	File initLfsDir(Long projectId);
 
-	void initArtifactsDir(Long projectId, Long buildNumber);
+	File initArtifactsDir(Long projectId, Long buildNumber);
 	
 }

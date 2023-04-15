@@ -1048,22 +1048,23 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				var buildPath = getProjectRelativeStoragePath(buildNumber);
 				projectManager.syncFile(projectId, buildPath + "/" + LOG_FILE, 
 						getLogLockName(projectId, buildNumber), activeServer);
-				storageManager.initArtifactsDir(projectId, buildNumber);
-				var artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-				boolean artifactsDirShared;
-				var testFile = new File(artifactsDir, SHARE_TEST_DIR + "/" + UUID.randomUUID());
-				FileUtils.touchFile(testFile);
-				try {
-					artifactsDirShared = clusterManager.runOnServer(activeServer, () -> {
-						var remoteArtifactsDir = Build.getArtifactsDir(projectId, buildNumber);
-						return new File(remoteArtifactsDir, SHARE_TEST_DIR + "/" + testFile.getName()).exists();
-					});
-				} finally {
-					FileUtils.deleteFile(testFile);					
-				}
-				if (!artifactsDirShared) {
-					projectManager.syncDirectory(projectId, buildPath + "/" + ARTIFACTS_DIR,
-							getArtifactsLockName(projectId, buildNumber), activeServer);
+				if (clusterManager.runOnServer(activeServer, () -> getArtifactsDir(projectId, buildNumber).exists())) {
+					var artifactsDir = storageManager.initArtifactsDir(projectId, buildNumber);
+					boolean artifactsDirShared;
+					var testFile = new File(artifactsDir, SHARE_TEST_DIR + "/" + UUID.randomUUID());
+					FileUtils.touchFile(testFile);
+					try {
+						artifactsDirShared = clusterManager.runOnServer(activeServer, () -> {
+							var remoteArtifactsDir = getArtifactsDir(projectId, buildNumber);
+							return new File(remoteArtifactsDir, SHARE_TEST_DIR + "/" + testFile.getName()).exists();
+						});
+					} finally {
+						FileUtils.deleteFile(testFile);
+					}
+					if (!artifactsDirShared) {
+						projectManager.syncDirectory(projectId, buildPath + "/" + ARTIFACTS_DIR,
+								getArtifactsLockName(projectId, buildNumber), activeServer);
+					}
 				}
 				storageSyncers.forEach(it->it.sync(projectId, buildNumber, activeServer));
 			}, activeServer);

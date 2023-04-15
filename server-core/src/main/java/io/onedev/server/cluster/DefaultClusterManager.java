@@ -27,10 +27,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -137,9 +134,18 @@ public class DefaultClusterManager implements ClusterManager {
 		config.getMapConfig("default").setStatisticsEnabled(false);
 		config.getNetworkConfig().setPort(serverConfig.getClusterPort()).setPortAutoIncrement(false);
 		config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
-
-		for (String server: servers.values())
+		
+		var hasLocalhost = false;
+		var hasNonLocalhost = false;
+		for (String server: servers.values()) {
+			if (server.startsWith("127.0.0.1:"))
+				hasLocalhost = true;
+			else 
+				hasNonLocalhost = true;
 			config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(server);
+		}
+		if (hasLocalhost && hasNonLocalhost)
+			throw new ExplicitException("Invalid servers detected in cluster: loopback address should not be used");
 
 		hazelcastInstance = Hazelcast.newHazelcastInstance(config);
 		hazelcastInstance.getCluster().addMembershipListener(new MembershipListener() {
@@ -368,13 +374,13 @@ public class DefaultClusterManager implements ClusterManager {
 	}
 
 	@Override
-	public void redistributeProjects(Map<Long, Map<String, ProjectReplica>> replicas) {
+	public void redistributeProjects(Map<Long, LinkedHashMap<String, ProjectReplica>> replicas) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Map<String, ProjectReplica> addProject(Map<Long, Map<String, ProjectReplica>> replicas, Long projectId) {
-		var replicasOfProject = new HashMap<String, ProjectReplica>();
+	public LinkedHashMap<String, ProjectReplica> addProject(Map<Long, LinkedHashMap<String, ProjectReplica>> replicas, Long projectId) {
+		var replicasOfProject = new LinkedHashMap<String, ProjectReplica>();
 		var replica = new ProjectReplica();
 		replica.setType(PRIMARY);
 		replica.setVersion(0);

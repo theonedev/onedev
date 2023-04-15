@@ -186,7 +186,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
 	
-	private volatile IMap<Long, Map<String, ProjectReplica>> replicas;
+	private volatile IMap<Long, LinkedHashMap<String, ProjectReplica>> replicas;
 	
 	private volatile IMap<Long, String> activeServers;
 	
@@ -327,7 +327,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		userAuthorizationManager.create(authorization);
 		
 		Long projectId = project.getId();
-		Map<String, ProjectReplica> replicasOfProject = clusterManager.addProject(
+		LinkedHashMap<String, ProjectReplica> replicasOfProject = clusterManager.addProject(
 				new HashMap<>(replicas), projectId);
 		var gitPackConfig = project.getGitPackConfig();
 		for (var entry: replicasOfProject.entrySet()) {
@@ -768,7 +768,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					}
 				}
 				
-				Map<String, ProjectReplica> newReplicasOfProject;
+				LinkedHashMap<String, ProjectReplica> newReplicasOfProject;
 				var replica = new ProjectReplica();
 				replica.loadType(projectDir);
 				replica.setVersion(readVersion(projectDir));
@@ -1618,8 +1618,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 								git.clearArgs();
 
 								if (withLfs) {
-									storageManager.initLfsDir(projectId);
-									var lfsDir = new File(git.workingDir(), "lfs");
+									var lfsDir = storageManager.initLfsDir(projectId);
 									boolean lfsDirShared;
 									var testFile = new File(lfsDir, SHARE_TEST_DIR + "/" + UUID.randomUUID());
 									FileUtils.touchFile(testFile);

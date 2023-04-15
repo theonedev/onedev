@@ -7,8 +7,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.web.page.base.BasePage;
-
 public class TestPage extends BasePage {
 
 	public TestPage(PageParameters params) {

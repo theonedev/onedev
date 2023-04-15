@@ -104,9 +104,8 @@ public abstract class ArtifactUploadPanel extends Panel {
 					
 					if (activeServer.equals(clusterManager.getLocalServerAddress())) {
 						LockUtils.write(getBuild().getArtifactsLockName(), () -> {
-							File artifactsDir = getBuild().getArtifactsDir();
 							StorageManager storageManager = OneDev.getInstance(StorageManager.class);
-							storageManager.initArtifactsDir(getBuild().getProject().getId(), getBuild().getNumber());
+							var artifactsDir = storageManager.initArtifactsDir(getBuild().getProject().getId(), getBuild().getNumber());
 							for (FileUpload upload: uploads) {
 								String filePath = getArtifactPath(upload);
 								File file = new File(artifactsDir, filePath);

@@ -371,8 +371,7 @@ public class ClusterResource {
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
 		write(getArtifactsLockName(projectId, buildNumber), () -> {
-			storageManager.initArtifactsDir(projectId, buildNumber);
-			var artifactsDir = Build.getArtifactsDir(projectId, buildNumber);
+			var artifactsDir = storageManager.initArtifactsDir(projectId, buildNumber);
 			File artifactFile = new File(artifactsDir, artifactPath);
 			FileUtils.createDir(artifactFile.getParentFile());
 			try (input; OutputStream os = new FileOutputStream(artifactFile)) {

@@ -160,26 +160,6 @@
 			<artifactId>server-plugin-notification-discord</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>server-ee-dashboard</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>server-ee-storage</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>server-ee-terminal</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>server-ee-clustering</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		
 		<!-- Add explicit dependencies to make sure standalone plugins use expected lib version -->
 		<dependency>
