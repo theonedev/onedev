@@ -291,10 +291,15 @@ public class DefaultMailManager implements MailManager, Serializable {
 				    	message.addHeader(entry.getKey(), createFoldedHeaderValue(entry.getKey(), entry.getValue()));
 				}
 				
-				if (senderName == null)
-					senderName = QUOTE_MARK;
-				else 
+				var brandName = settingManager.getBrandingSetting().getName();
+				if (senderName == null || senderName.equalsIgnoreCase(User.SYSTEM_NAME)) {
+					if (brandName.equalsIgnoreCase(User.SYSTEM_NAME))
+						senderName = QUOTE_MARK;
+					else 
+						senderName = brandName + " " + QUOTE_MARK;
+				} else {
 					senderName += " " + QUOTE_MARK;
+				}
 				message.setFrom(createInetAddress(sendSetting.getSenderAddress(), senderName));
 				
 				if (toList.isEmpty() && ccList.isEmpty() && bccList.isEmpty())
