@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.hazelcast.map.IMap;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.*;
@@ -100,9 +101,11 @@ import java.util.function.Consumer;
 
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
+import static java.util.stream.Collectors.toSet;
 
 @Singleton
-public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, Serializable {
+public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, 
+		Serializable, SchedulableTask {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
 
@@ -116,7 +119,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private final Map<String, JobRunnable> jobRunnables = new ConcurrentHashMap<>();
 
-	private final Map<Long, Collection<String>> scheduledTasks = new ConcurrentHashMap<>();
+	private final Map<Long, Collection<String>> projectTasks = new ConcurrentHashMap<>();
 
 	private final Map<String, Shell> jobShells = new ConcurrentHashMap<>();
 
@@ -158,11 +161,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private volatile Thread thread;
 
-	private volatile Map<String, JobContext> jobContexts;
+	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
 
-	private volatile Map<String, String> jobServers;
+	private volatile IMap<String, String> jobServers;
 
 	private volatile Map<String, Collection<String>> allocatedCaches;
+	
+	private volatile String maintenanceTaskId;
 
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry,
@@ -533,7 +538,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				// Store original job actions as the copy in job context will be fetched from cluster and 
 				// some transient fields (such as step object in ServerSideFacade) will not be preserved 
 				jobActions.put(jobToken, actions);
-				jobContexts.put(jobToken, jobContext);
 				logManager.addJobLogger(jobToken, jobLogger);
 				serverStepThreads.put(jobToken, new ArrayList<>());
 				try {
@@ -562,13 +566,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						log(e, jobLogger);
 						jobLogger.warning("Job will be retried after a while...");
 						transactionManager.run(() -> {
-							Build build1 = buildManager.load(buildId);
-							build1.setRunningDate(null);
-							build1.setPendingDate(null);
-							build1.setRetryDate(new Date());
-							build1.setStatus(Status.WAITING);
-							listenerRegistry.post(new BuildRetrying(build1));
-							buildManager.update(build1);
+							Build innerBuild = buildManager.load(buildId);
+							innerBuild.setRunningDate(null);
+							innerBuild.setPendingDate(null);
+							innerBuild.setRetryDate(new Date());
+							innerBuild.setStatus(Status.WAITING);
+							listenerRegistry.post(new BuildRetrying(innerBuild));
+							buildManager.update(innerBuild);
 						});
 						try {
 							Thread.sleep(retryDelay.get() * (long) (Math.pow(2, retried.get())) * 1000L);
@@ -579,11 +583,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							JobExecution execution = executionRef.get();
 							if (execution != null)
 								execution.updateBeginTime();
-							Build build1 = buildManager.load(buildId);
-							build1.setPendingDate(new Date());
-							build1.setStatus(Status.PENDING);
-							listenerRegistry.post(new BuildPending(build1));
-							buildManager.update(build1);
+							Build innerBuild = buildManager.load(buildId);
+							innerBuild.setPendingDate(new Date());
+							innerBuild.setStatus(Status.PENDING);
+							listenerRegistry.post(new BuildPending(innerBuild));
+							buildManager.update(innerBuild);
 						});
 					} else {
 						throw ExceptionUtils.unchecked(e);
@@ -595,7 +599,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							thread.interrupt();
 					}
 					logManager.removeJobLogger(jobToken);
-					jobContexts.remove(jobToken);
 					jobActions.remove(jobToken);
 				}
 			}
@@ -613,7 +616,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public JobContext getJobContext(String jobToken, boolean mustExist) {
-		JobContext jobContext = jobContexts.get(jobToken);
+		var jobServer = jobServers.get(jobToken);
+		if (mustExist && jobServer == null)
+			throw new ExplicitException("No job context found for specified job token");
+		var jobContext = clusterManager.runOnServer(jobServer, () -> jobContexts.get(jobToken));
 		if (mustExist && jobContext == null)
 			throw new ExplicitException("No job context found for specified job token");
 		return jobContext;
@@ -818,10 +824,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			if (shellServer != null) {
 				if (SecurityUtils.isAdministrator() || jobContext.getJobExecutor().isShellAccessEnabled()) {
 					clusterManager.runOnServer(shellServer, () -> {
-						JobContext jobContext1 = getJobContext(jobToken, true);
-						JobRunnable jobRunnable = jobRunnables.get(jobContext1.getJobToken());
+						JobContext innerJobContext = getJobContext(jobToken, true);
+						JobRunnable jobRunnable = jobRunnables.get(innerJobContext.getJobToken());
 						if (jobRunnable != null) {
-							Shell shell = jobRunnable.openShell(jobContext1, terminal);
+							Shell shell = jobRunnable.openShell(innerJobContext, terminal);
 							jobShells.put(terminal.getSessionId(), shell);
 						} else {
 							throw new ExplicitException("Job shell not ready");
@@ -895,12 +901,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public JobContext getJobContext(Long buildId) {
-		for (Map.Entry<String, JobContext> entry : jobContexts.entrySet()) {
-			JobContext jobContext = entry.getValue();
-			if (jobContext.getBuildId().equals(buildId))
-				return jobContext;
-		}
-		return null;
+		Map<String, JobContext> result = clusterManager.runOnAllServers(() -> {
+			for (Map.Entry<String, JobContext> entry : jobContexts.entrySet()) {
+				JobContext jobContext = entry.getValue();
+				if (jobContext.getBuildId().equals(buildId))
+					return jobContext;
+			}
+			return null;
+		});
+		return result.values().stream().filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
 	@Transactional
@@ -932,9 +941,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(SystemStarting event) {
 		var hazelcastInstance = clusterManager.getHazelcastInstance();
-		jobContexts = hazelcastInstance.getMap("jobContexts");
 		allocatedCaches = hazelcastInstance.getMap("allocatedCaches");
-		jobServers = hazelcastInstance.getMap("jobRunServers");
+		jobServers = hazelcastInstance.getMap("jobServers");
 	}
 	
 	@Sessional
@@ -947,6 +955,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 		thread = new Thread(this);
 		thread.start();
+		maintenanceTaskId = taskScheduler.schedule(this);
 	}
 	
 	@Sessional
@@ -1009,7 +1018,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		} catch (Exception e) {
 			logger.error("Error scheduling project '" + project.getPath() + "'", e);
 		} finally {
-			tasksOfProject = scheduledTasks.put(project.getId(), tasksOfProject);
+			tasksOfProject = projectTasks.put(project.getId(), tasksOfProject);
 			if (tasksOfProject != null)
 				tasksOfProject.forEach(taskScheduler::unschedule);
 		}
@@ -1018,7 +1027,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Sessional
 	@Override
 	public void unschedule(Long projectId) {
-		var tasksOfProject = scheduledTasks.remove(projectId);
+		var tasksOfProject = projectTasks.remove(projectId);
 		if (tasksOfProject != null)
 			tasksOfProject.forEach(taskScheduler::unschedule);
 	}
@@ -1068,8 +1077,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			} catch (InterruptedException ignored) {
 			}
 		}
-		scheduledTasks.values().forEach(it -> it.forEach(taskScheduler::unschedule));
-		scheduledTasks.clear();
+		projectTasks.values().forEach(it -> it.forEach(taskScheduler::unschedule));
+		projectTasks.clear();
+		
+		if (maintenanceTaskId != null)
+			taskScheduler.unschedule(maintenanceTaskId);
 	}
 
 	@Override
@@ -1228,7 +1240,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public boolean canPullCode(HttpServletRequest request, Project project) {
 		String jobToken = SecurityUtils.getBearerToken(request);
 		if (jobToken != null) {
-			JobContext jobContext = jobContexts.get(jobToken);
+			JobContext jobContext = getJobContext(jobToken, false);
 			if (jobContext != null)
 				return jobContext.getProjectId().equals(project.getId());
 		}
@@ -1237,9 +1249,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public Map<CacheInstance, String> allocateCaches(JobContext jobContext, CacheAllocationRequest request) {
-		String leaderServer = clusterManager.getServerAddresses().iterator().next();
 		String jobToken = jobContext.getJobToken();
-		return clusterManager.runOnServer(leaderServer, () -> {
+		return clusterManager.runOnServer(clusterManager.getLeaderServerAddress(), () -> {
 			synchronized (allocatedCaches) {
 				JobContext innerJobContext = getJobContext(jobToken, true);
 
@@ -1247,7 +1258,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				sortedInstances.sort((o1, o2) -> request.getInstances().get(o2).compareTo(request.getInstances().get(o1)));
 
 				Collection<String> allAllocated = new HashSet<>();
-				Collection<String> activeJobTokens = jobContexts.keySet();
+				var activeJobTokens = getActiveJobTokens();
 				Collection<String> removeKeys = new HashSet<>();
 				for (var entry : allocatedCaches.entrySet()) {
 					if (activeJobTokens.contains(entry.getKey()))
@@ -1265,21 +1276,21 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					Optional<CacheInstance> result = sortedInstances
 							.stream()
 							.filter(it -> it.getCacheKey().equals(cacheSpec.getNormalizedKey()))
-							.filter(it -> !allAllocated.contains(it.getName()))
+							.filter(it -> !allAllocated.contains(it.getCacheUUID()))
 							.findFirst();
 					CacheInstance allocation;
-					allocation = result.orElseGet(() -> new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getNormalizedKey()));
+					allocation = result.orElseGet(() -> new CacheInstance(cacheSpec.getNormalizedKey(), UUID.randomUUID().toString()));
 					allocations.put(allocation, cacheSpec.getPath());
-					allocatedCachesOfJob.add(allocation.getName());
-					allAllocated.add(allocation.getName());
+					allocatedCachesOfJob.add(allocation.getCacheUUID());
+					allAllocated.add(allocation.getCacheUUID());
 				}
 
 				Consumer<CacheInstance> deletionMarker = instance -> {
 					long ellapsed = request.getCurrentTime().getTime() - request.getInstances().get(instance).getTime();
 					if (ellapsed > innerJobContext.getJobExecutor().getCacheTTL() * 24L * 3600L * 1000L) {
 						allocations.put(instance, null);
-						allocatedCachesOfJob.add(instance.getName());
-						allAllocated.add(instance.getName());
+						allocatedCachesOfJob.add(instance.getCacheUUID());
+						allAllocated.add(instance.getCacheUUID());
 					}
 				};
 
@@ -1287,7 +1298,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 				request.getInstances().keySet()
 						.stream()
-						.filter(it -> !allAllocated.contains(it.getName()))
+						.filter(it -> !allAllocated.contains(it.getCacheUUID()))
 						.forEach(deletionMarker);
 
 				return allocations;
@@ -1329,7 +1340,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 		String jobToken = jobContext.getJobToken();
 		jobServers.put(jobToken, clusterManager.getLocalServerAddress());
-
+		jobContexts.put(jobToken, jobContext);
 		jobRunnables.put(jobToken, runnable);
 		try {
 			TaskLogger jobLogger = logManager.getJobLogger(jobToken);
@@ -1347,6 +1358,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 		} finally {
 			jobRunnables.remove(jobToken);
+			jobContexts.remove(jobToken);
 			jobServers.remove(jobToken);
 		}
 	}
@@ -1471,5 +1483,26 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					placeholderValues, logger);
 		}
 	}
+	
+	private Collection<String> getActiveJobTokens() {
+		var activeJobTokens = new HashSet<String>();
+		for (var value: clusterManager.runOnAllServers(() -> jobContexts.keySet()).values()) {
+			activeJobTokens.addAll(value);
+		}
+		return activeJobTokens;
+	}
 
+	@Override
+	public void execute() {
+		if (clusterManager.isLeaderServer()) {
+			var activeJobTokens = getActiveJobTokens();
+			jobServers.removeAll(it -> !activeJobTokens.contains(it.getKey()));
+		}
+	}
+
+	@Override
+	public ScheduleBuilder<?> getScheduleBuilder() {
+		return CronScheduleBuilder.dailyAtHourAndMinute(4, 0);
+	}
+	
 }

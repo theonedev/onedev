@@ -6,7 +6,10 @@ import com.hazelcast.cp.IAtomicLong;
 import io.onedev.server.replica.ProjectReplica;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -14,11 +17,7 @@ public interface ClusterManager {
 
 	void start();
 	
-	void postStart();
-	
 	void stop();
-	
-	void preStop();
 	
 	Collection<String> getRunningServers();
 	

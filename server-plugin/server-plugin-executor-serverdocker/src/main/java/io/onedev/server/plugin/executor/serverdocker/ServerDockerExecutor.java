@@ -328,7 +328,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 											}
 
 											for (Map.Entry<CacheInstance, String> entry : cache.getAllocations().entrySet()) {
-												String hostCachePath = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
+												String hostCachePath = new File(hostCacheHome, entry.getKey().toString()).getAbsolutePath();
 												String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
 												docker.addArgs("-v", getHostPath(hostCachePath) + ":" + containerCachePath);
 											}

@@ -119,7 +119,7 @@ public class ClusterResource {
 			throw new UnauthorizedException("This api can only be accessed via cluster credential");
 
 		File file = new File(projectManager.getStorageDir(projectId), path);
-		if (read(readLock, file::exists)) {
+		if (read(readLock, () -> file.exists())) {
 			StreamingOutput os = output -> read(readLock, () -> {
 				try (output; InputStream is = new FileInputStream(file)) {
 					IOUtils.copy(is, output, BUFFER_SIZE);

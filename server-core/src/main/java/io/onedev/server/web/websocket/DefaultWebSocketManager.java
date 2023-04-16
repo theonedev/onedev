@@ -139,21 +139,14 @@ public class DefaultWebSocketManager implements WebSocketManager, Serializable {
 
 			@Override
 			public void run() {
-				clusterManager.submitToAllServers(new ClusterTask<Void>() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Void call() throws Exception {
-						notifiedObservables.put(observable, new Date());
-						for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
-							Collection<String> registeredObservables = getRegisteredObservables(connection); 
-							if (registeredObservables != null && registeredObservables.contains(observable))
-								notifyObservables(connection, Sets.newHashSet(observable));
-						}
-						return null;
+				clusterManager.submitToAllServers(() -> {
+					notifiedObservables.put(observable, new Date());
+					for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
+						Collection<String> registeredObservables = getRegisteredObservables(connection); 
+						if (registeredObservables != null && registeredObservables.contains(observable))
+							notifyObservables(connection, Sets.newHashSet(observable));
 					}
-					
+					return null;
 				});
 			}
 			
