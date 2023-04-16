@@ -105,7 +105,7 @@
       }
     } else {
       var match = this.string.slice(this.pos).match(pattern);
-      if (match && (match.index > 0 || /* fix infinite loop issue */ match[0].length == 0)) return null;
+      if (match && match.index > 0) { return null }
       if (match && consume !== false) { this.pos += match[0].length; }
       return match
     }
