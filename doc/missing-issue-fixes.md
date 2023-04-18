@@ -27,3 +27,4 @@ issue #1001
 issue #1134 
 issue #1326
 issue #1327 
+issue #1338 
