@@ -13,17 +13,16 @@ import io.onedev.server.migration.MigrationHelper;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.security.SecurityUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -712,18 +711,15 @@ public class Upgrade extends AbstractPlugin {
 				var buildsDir = new File(projectDir, "builds");
 				if (buildsDir.exists()) {
 					for (var buildDir: buildsDir.listFiles()) {
-						if (buildDir.getName().equals(directoryVersion))
+						if (!NumberUtils.isDigits(buildDir.getName())) 
 							continue;
-						if (new File(buildDir, "build.log").exists() 
-								|| new File(buildDir, "artifacts").exists()) {
-							var buildNumber = Integer.parseInt(buildDir.getName());
-							File suffixDir = new File(buildsDir, String.format("%03d", buildNumber%1000));
-							FileUtils.createDir(suffixDir);
-							try {
-								FileUtils.moveDirectory(buildDir, new File(suffixDir, String.valueOf(buildNumber)));
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
+						var buildNumber = Integer.parseInt(buildDir.getName());
+						File suffixDir = new File(buildsDir, String.format("s%03d", buildNumber%1000));
+						FileUtils.createDir(suffixDir);
+						try {
+							FileUtils.moveDirectory(buildDir, new File(suffixDir, String.valueOf(buildNumber)));
+						} catch (IOException e) {
+							throw new RuntimeException(e);
 						}
 					}
 				}

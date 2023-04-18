@@ -192,7 +192,7 @@ public class Build extends ProjectBelonging
 	}
 	
 	public static String getStoragePath(Long buildNumber) {
-		return String.format("%03d", buildNumber%1000) + "/" + buildNumber;
+		return String.format("s%03d", buildNumber%1000) + "/" + buildNumber;
 	}
 	
 	public File getLogFile() {
