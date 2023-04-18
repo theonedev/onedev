@@ -704,10 +704,12 @@ public class Upgrade extends AbstractPlugin {
 		}
 		
 		if (oldDataVersion <= 116) {
+			logger.info("Upgrading build storage directory...");
 			var directoryVersion = ".onedev-directory-version";
 			for (var projectDir: new File(upgradeDir, "site/projects").listFiles()) {
 				if (projectDir.getName().equals(directoryVersion)) 
 					continue;	
+				logger.info("Processing project with id '" + projectDir.getName() + "'...");
 				var buildsDir = new File(projectDir, "builds");
 				if (buildsDir.exists()) {
 					for (var buildDir: buildsDir.listFiles()) {
