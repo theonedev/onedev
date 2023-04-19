@@ -282,8 +282,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/${" + ContributedAdministrationSettingPage.PARAM_SETTING + "}", 
 				ContributedAdministrationSettingPage.class));
 		
-		add(new BasePageMapper("~administration/server-log", ServerLogPage.class));
-		add(new BasePageMapper("~administration/server-information", ServerInformationPage.class));
+		add(new BasePageMapper("~administration/server-log/#{" + ServerLogPage.PARAM_SERVER + "}", ServerLogPage.class));
+		add(new BasePageMapper("~administration/server-information/#{" + ServerInformationPage.PARAM_SERVER + "}", ServerInformationPage.class));
 	}
 	
 	private void addProjectPages() {

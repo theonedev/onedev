@@ -1,6 +1,9 @@
 <wicket:extend>
 	<div class="card">
 		<div class="card-body">
+			<wicket:enclosure child="leadServer">
+				<div class="alert alert-light-warning mb-5">If enabled, scheduled backup will run on lead server which is <span wicket:id="leadServer"></span> currently</div>
+			</wicket:enclosure>
 			<form wicket:id="backupSetting" class="leave-confirm">
 				<div wicket:id="editor" class="mb-4"></div>
 				<input type="submit" class="btn btn-primary dirty-aware mr-1" value="Save Settings">

@@ -1,21 +1,18 @@
 package io.onedev.server.web.page.admin.serverlog;
 
-import java.util.List;
-
-import org.apache.wicket.Component;
+import com.google.common.base.Joiner;
+import io.onedev.server.web.page.admin.ServerDetailPage;
+import io.onedev.server.web.resource.ServerLogResource;
+import io.onedev.server.web.resource.ServerLogResourceReference;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Joiner;
-
-import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.resource.ServerLogResource;
-import io.onedev.server.web.resource.ServerLogResourceReference;
+import java.util.List;
 
 @SuppressWarnings("serial")
-public class ServerLogPage extends AdministrationPage {
+public class ServerLogPage extends ServerDetailPage {
 
 	private static final int MAX_DISPLAY_LINES = 5000;
 	
@@ -27,9 +24,10 @@ public class ServerLogPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new ResourceLink<Void>("download", new ServerLogResourceReference()));
+		add(new ResourceLink<Void>("download", new ServerLogResourceReference(), 
+				ServerLogResource.paramsOf(server)));
 		
-		List<String> lines = ServerLogResource.readServerLog();		
+		List<String> lines = ServerLogResource.readServerLog(server);		
 		String content;
 		if (lines.size() > MAX_DISPLAY_LINES) {
 			add(new Label("warning", "Too many log entries, displaying recent " + MAX_DISPLAY_LINES));
@@ -43,8 +41,8 @@ public class ServerLogPage extends AdministrationPage {
 	}
 
 	@Override
-	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Server Log");
+	protected String newTopbarTitle() {
+		return "Server Log";
 	}
 
 }

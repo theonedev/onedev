@@ -3,25 +3,9 @@
 		<div class="card-body">
 			<table class="table table-borderless">
 				<tbody>
-					<tr>
-						<td class="name font-weight-bold">System Date and Time</td>
-						<td wicket:id="systemDateTime" class="value"></td>
-					</tr>
-					<tr>
-						<td class="name font-weight-bold">Operating System</td>
-						<td wicket:id="os" class="value"></td>
-					</tr>
-					<tr>
-						<td class="name font-weight-bold">JVM</td>
-						<td wicket:id="jvm" class="value"></td>
-					</tr>
-					<tr>
-						<td class="name font-weight-bold">Total Heap Memory</td>
-						<td wicket:id="totalMemory" class="value"></td>
-					</tr>
-					<tr>
-						<td class="name font-weight-bold">Used Heap Memory</td>
-						<td wicket:id="usedMemory" class="value"></td>
+					<tr wicket:id="properties">
+						<td wicket:id="name" class="name font-weight-bold"></td>
+						<td wicket:id="value" class="value"></td>
 					</tr>
 					<tr>
 						<td class="name font-weight-bold">Heap Memory Usage</td>
@@ -31,10 +15,6 @@
 							</div>					
 							<button wicket:id="gc" class="btn btn-outline-primary btn-sm gc">Force Garbage Collection</button>
 						</td>
-					</tr>
-					<tr>
-						<td class="name font-weight-bold">OS User Name</td>
-						<td wicket:id="osUserName" class="value"></td>
 					</tr>
 				</tbody>
 			</table>

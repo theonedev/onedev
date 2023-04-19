@@ -62,7 +62,7 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 			
 		});
 		
-		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
+		editor = BeanContext.editModel("editor", new IModel<>() {
 
 			@Override
 			public void detach() {
@@ -80,7 +80,7 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 					oldOppositeName = getSpec().getOpposite().getName();
 				editor.getDescriptor().copyProperties(object, getSpec());
 			}
-			
+
 		});
 		
 		form.add(editor);
@@ -111,15 +111,21 @@ abstract class LinkSpecEditPanel extends GenericPanel<LinkSpec> {
 							editor.error(new Path(new PathNode.Named("opposite"), new PathNode.Named("name")), errorMessage);
 							target.add(form);
 						} else {
-							if (getSpec().isNew()) 
-								getSpec().setOrder(manager.query().stream().mapToInt(it->it.getOrder()).max().orElse(0)+1);
-							manager.update(getSpec(), oldName, oldOppositeName);
+							if (getSpec().isNew()) {
+								getSpec().setOrder(manager.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
+								manager.create(getSpec());
+							} else {
+								manager.update(getSpec(), oldName, oldOppositeName);
+							}
 							onSave(target);
 						}
 					} else {
-						if (getSpec().isNew()) 
-							getSpec().setOrder(manager.query().stream().mapToInt(it->it.getOrder()).max().orElse(0)+1);
-						manager.update(getSpec(), oldName, oldOppositeName);
+						if (getSpec().isNew()) {
+							getSpec().setOrder(manager.query().stream().mapToInt(it -> it.getOrder()).max().orElse(0) + 1);
+							manager.create(getSpec());
+						} else {
+							manager.update(getSpec(), oldName, oldOppositeName);
+						}
 						onSave(target);
 					}
 				}

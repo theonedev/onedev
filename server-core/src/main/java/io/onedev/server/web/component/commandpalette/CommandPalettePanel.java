@@ -1,12 +1,27 @@
 package io.onedev.server.web.component.commandpalette;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import edu.emory.mathcs.backport.java.util.Arrays;
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.utils.PathUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebApplication;
+import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.behavior.SelectByTypingBehavior;
+import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
+import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
+import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
+import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
+import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -28,29 +43,8 @@ import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.mapper.ICompoundRequestMapper;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.utils.PathUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.WebApplication;
-import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.behavior.SelectByTypingBehavior;
-import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
-import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
-import io.onedev.server.web.page.layout.AdministrationSettingContribution;
-import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
-import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
-import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
+import java.lang.reflect.Field;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public abstract class CommandPalettePanel extends Panel {
@@ -70,15 +64,7 @@ public abstract class CommandPalettePanel extends Panel {
 		for (IRequestMapper mapper: OneDev.getInstance(WebApplication.class).getRequestMappers())
 			availableUrls.addAll(getMountedPaths(mapper));
 		
-		Collections.sort(availableUrls, new Comparator<String[]>() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public int compare(String[] o1, String[] o2) {
-				return PathUtils.compare(Arrays.asList(o1), Arrays.asList(o2));
-			}
-			
-		});
+		Collections.sort(availableUrls, (Comparator<String[]>) (o1, o2) -> PathUtils.compare(Arrays.asList(o1), Arrays.asList(o2)));
 		
 	}
 	

@@ -1,10 +1,24 @@
 package io.onedev.server.web.component.symboltooltip;
 
-import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.git.Blob;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.IndexConstants;
+import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.hit.SymbolHit;
+import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.server.search.code.query.SymbolQuery;
+import io.onedev.server.search.code.query.TextQuery;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.CtrlClickBehavior;
+import io.onedev.server.web.behavior.RunTaskBehavior;
+import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -26,25 +40,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.jsymbol.Symbol;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.Project;
-import io.onedev.server.search.code.CodeSearchManager;
-import io.onedev.server.search.code.IndexConstants;
-import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.hit.SymbolHit;
-import io.onedev.server.search.code.query.BlobQuery;
-import io.onedev.server.search.code.query.SymbolQuery;
-import io.onedev.server.search.code.query.TextQuery;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.behavior.CtrlClickBehavior;
-import io.onedev.server.web.behavior.RunTaskBehavior;
-import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.BlobRenderer;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 @SuppressWarnings("serial")
 public abstract class SymbolTooltipPanel extends Panel {
@@ -71,13 +70,13 @@ public abstract class SymbolTooltipPanel extends Panel {
 		content.setOutputMarkupId(true);
 		add(content);
 		
-		content.add(new ListView<QueryHit>("declarations", new AbstractReadOnlyModel<List<QueryHit>>() {
+		content.add(new ListView<QueryHit>("declarations", new AbstractReadOnlyModel<>() {
 
 			@Override
 			public List<QueryHit> getObject() {
 				return symbolHits;
 			}
-			
+
 		}) {
 
 			@Override
@@ -201,10 +200,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 				String charsToStrip = "@#'\"./\\";
 				symbolName = StringUtils.stripEnd(StringUtils.stripStart(symbolName, charsToStrip), charsToStrip);
-				symbolName = StringUtils.replace(symbolName, "\\", "/");
-				if (symbolName.contains("/"))
-					symbolName = StringUtils.substringAfterLast(symbolName, "/");
-				
 				symbolHits.clear();
 				
 				// do this check to avoid TooGeneralQueryException

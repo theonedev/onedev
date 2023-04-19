@@ -268,10 +268,24 @@ public abstract class LayoutPage extends BasePage {
 					List<SidebarMenuItem> maintenanceMenuItems = new ArrayList<>();
 					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Database Backup", 
 							DatabaseBackupPage.class, new PageParameters()));
-					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Server Log", 
-							ServerLogPage.class, new PageParameters()));
-					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Server Information", 
-							ServerInformationPage.class, new PageParameters()));
+					var servers = OneDev.getInstance(ClusterManager.class).getServerAddresses();
+					if (servers.size() > 1) {
+						List<SidebarMenuItem> serverLogMenuItems = new ArrayList<>();
+						List<SidebarMenuItem> serverInformationMenuItems = new ArrayList<>();
+						for (var server: servers) {
+							serverLogMenuItems.add(new SidebarMenuItem.Page(null, server,
+									ServerLogPage.class, ServerLogPage.paramsOf(server)));
+							serverInformationMenuItems.add(new SidebarMenuItem.Page(null, server,
+									ServerInformationPage.class, ServerInformationPage.paramsOf(server)));
+						}
+						maintenanceMenuItems.add(new SidebarMenuItem.SubMenu(null, "Server Log", serverLogMenuItems));
+						maintenanceMenuItems.add(new SidebarMenuItem.SubMenu(null, "Server Information", serverInformationMenuItems));
+					} else {
+						maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Server Log",
+								ServerLogPage.class, new PageParameters()));
+						maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Server Information",
+								ServerInformationPage.class, new PageParameters()));
+					}
 					
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "System Maintenance", maintenanceMenuItems));
 					

@@ -77,9 +77,9 @@ public class Mark implements Serializable {
 	@Override
 	public String toString() {
 		if (range != null) 
-			return commitHash + ":" + path + ":" + range;
+			return commitHash + "~" + path + "~" + range;
 		else if (path != null)
-			return commitHash + ":" + path;
+			return commitHash + "~" + path;
 		else
 			return commitHash;
 	}
@@ -87,13 +87,13 @@ public class Mark implements Serializable {
 	@Nullable
 	public static Mark fromString(@Nullable String string) {
 		if (string != null) {
-			String commit = StringUtils.substringBefore(string, ":");
+			String commit = StringUtils.substringBefore(string, "~");
 			String path = null;
 			PlanarRange range = null;
-			String pathAndRange = StringUtils.substringAfter(string, ":");
+			String pathAndRange = StringUtils.substringAfter(string, "~");
 			if (pathAndRange.length() != 0) {
-				path = StringUtils.substringBefore(pathAndRange, ":");
-				String rangeString = StringUtils.substringAfter(pathAndRange, ":");
+				path = StringUtils.substringBeforeLast(pathAndRange, "~");
+				String rangeString = StringUtils.substringAfterLast(pathAndRange, "~");
 				if (rangeString.length() != 0)
 					range = new PlanarRange(rangeString);
 			}

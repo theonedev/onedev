@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>8.1.0</version>
+		<version>8.1.1</version>
 	</parent>
 	<dependencies>
 		<dependency>
@@ -160,7 +160,6 @@
 			<artifactId>server-plugin-notification-discord</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
 		<!-- Add explicit dependencies to make sure standalone plugins use expected lib version -->
 		<dependency>
 			<groupId>commons-codec</groupId>

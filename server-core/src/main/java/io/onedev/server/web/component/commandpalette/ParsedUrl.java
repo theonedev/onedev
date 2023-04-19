@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.cluster.ClusterManager;
+import io.onedev.server.web.page.admin.ServerDetailPage;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Splitter;
@@ -53,44 +55,48 @@ public abstract class ParsedUrl implements Serializable {
 				boolean optional = segment.contains("#");
 				String paramName = StringUtils.strip(segment, "$#{}");
 				switch (paramName) {
-				case ProjectMapperUtils.PARAM_PROJECT:
-					parsedSegments.add(new ProjectParam(optional));
-					break;
-				case IssueDetailPage.PARAM_ISSUE:
-					parsedSegments.add(new IssueParam(optional));
-					break;
-				case PullRequestDetailPage.PARAM_REQUEST:
-					parsedSegments.add(new PullRequestParam(optional));
-					break;
-				case BuildDetailPage.PARAM_BUILD:
-					parsedSegments.add(new BuildParam(optional));
-					break;
-				case UserPage.PARAM_USER:
-					parsedSegments.add(new UserParam(optional));
-					break;
-				case GroupPage.PARAM_GROUP:
-					parsedSegments.add(new GroupParam(optional));
-					break;
-				case RoleDetailPage.PARAM_ROLE:
-					parsedSegments.add(new RoleParam(optional));
-					break;
-				case RevisionAndPathParam.NAME:
-					parsedSegments.add(new RevisionAndPathParam(optional));
-					break;
-				case CommitDetailPage.PARAM_COMMIT:
-					parsedSegments.add(new CommitParam(optional));
-					break;
-				case IssueBoardsPage.PARAM_BOARD:
-					parsedSegments.add(new BoardParam(optional));
-					break;
-				case AgentDetailPage.PARAM_AGENT:
-					parsedSegments.add(new AgentParam(optional));
-					break;
-				case MilestoneDetailPage.PARAM_MILESTONE:
-					parsedSegments.add(new MilestoneParam(optional));
-					break;
-				default:
-					throw new IgnoredUrlParam(paramName);
+					case ProjectMapperUtils.PARAM_PROJECT:
+						parsedSegments.add(new ProjectParam(optional));
+						break;
+					case IssueDetailPage.PARAM_ISSUE:
+						parsedSegments.add(new IssueParam(optional));
+						break;
+					case PullRequestDetailPage.PARAM_REQUEST:
+						parsedSegments.add(new PullRequestParam(optional));
+						break;
+					case BuildDetailPage.PARAM_BUILD:
+						parsedSegments.add(new BuildParam(optional));
+						break;
+					case UserPage.PARAM_USER:
+						parsedSegments.add(new UserParam(optional));
+						break;
+					case GroupPage.PARAM_GROUP:
+						parsedSegments.add(new GroupParam(optional));
+						break;
+					case RoleDetailPage.PARAM_ROLE:
+						parsedSegments.add(new RoleParam(optional));
+						break;
+					case RevisionAndPathParam.NAME:
+						parsedSegments.add(new RevisionAndPathParam(optional));
+						break;
+					case CommitDetailPage.PARAM_COMMIT:
+						parsedSegments.add(new CommitParam(optional));
+						break;
+					case IssueBoardsPage.PARAM_BOARD:
+						parsedSegments.add(new BoardParam(optional));
+						break;
+					case AgentDetailPage.PARAM_AGENT:
+						parsedSegments.add(new AgentParam(optional));
+						break;
+					case MilestoneDetailPage.PARAM_MILESTONE:
+						parsedSegments.add(new MilestoneParam(optional));
+						break;
+					case ServerDetailPage.PARAM_SERVER:
+						if (getServers().size() > 1)
+							parsedSegments.add(new ServerParam());
+						break;
+					default:
+						throw new IgnoredUrlParam(paramName);
 				}
 			} else {
 				if (builder.length() != 0)
@@ -100,6 +106,10 @@ public abstract class ParsedUrl implements Serializable {
 		}
 		if (builder.length() != 0)
 			parsedSegments.add(new FixedSegment(builder.toString()));
+	}
+	
+	private List<String> getServers() {
+		return OneDev.getInstance(ClusterManager.class).getServerAddresses();
 	}
 	
 	private boolean isApplicable(Project project, String path) {
