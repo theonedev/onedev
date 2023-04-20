@@ -17,8 +17,8 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.cluster.ConnectionRestored;
 import io.onedev.server.model.ClusterServer;
-import io.onedev.server.persistence.DataManager;
 import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.persistence.PersistenceManager;
 import io.onedev.server.replica.ProjectReplica;
 
 import javax.inject.Inject;
@@ -34,6 +34,7 @@ import java.util.concurrent.Future;
 
 import static io.onedev.server.model.AbstractEntity.PROP_ID;
 import static io.onedev.server.model.ClusterServer.PROP_ADDRESS;
+import static io.onedev.server.persistence.PersistenceUtils.callWithDatabaseLock;
 import static io.onedev.server.replica.ProjectReplica.Type.PRIMARY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.max;
@@ -46,7 +47,9 @@ public class DefaultClusterManager implements ClusterManager {
 	
 	private final ServerConfig serverConfig;
 	
-	private final DataManager dataManager;
+	private final HibernateConfig hibernateConfig;
+	
+	private final PersistenceManager persistenceManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
@@ -61,11 +64,12 @@ public class DefaultClusterManager implements ClusterManager {
 	private final String credential;
 	
 	@Inject
-	public DefaultClusterManager(ServerConfig serverConfig, DataManager dataManager, 
+	public DefaultClusterManager(ServerConfig serverConfig, PersistenceManager persistenceManager, 
 								 ListenerRegistry listenerRegistry, HibernateConfig hibernateConfig) { 
 		this.serverConfig = serverConfig;
-		this.dataManager = dataManager;
+		this.persistenceManager = persistenceManager;
 		this.listenerRegistry = listenerRegistry;
+		this.hibernateConfig = hibernateConfig;
 		var dbPassword = hibernateConfig.getPassword();
 		if (dbPassword == null)
 			dbPassword = "";
@@ -81,7 +85,7 @@ public class DefaultClusterManager implements ClusterManager {
 		try (Statement stmt = conn.createStatement()) {
 			stmt.executeUpdate(String.format(
 					"insert into %s values(%d, '%s')",
-					dataManager.getTableName(ClusterServer.class), id, server));
+					persistenceManager.getTableName(ClusterServer.class), id, server));
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -90,41 +94,43 @@ public class DefaultClusterManager implements ClusterManager {
 	@Override
 	public void start() {
 		var localServer = getLocalServerAddress();
-		var servers = dataManager.callWithConnection(conn -> {
-			boolean hasLock;
-			try (Statement stmt = conn.createStatement()) {
-				String query = String.format("select * from %s where %s=0 for update",
-						dataManager.getTableName(ClusterServer.class),
-						dataManager.getColumnName(PROP_ID));
-				hasLock = stmt.executeQuery(query).next();
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
-			if (!hasLock)
-				saveServer(conn, 0L, "lock");
+		Collection<String> servers;
+		try (var conn = persistenceManager.openConnection()) {
+			var callable = new Callable<Collection<String>>() {
 
-			var theServers = new HashMap<Long, String>();
-			try (Statement stmt = conn.createStatement()) {
-				String query = String.format("select %s, %s from %s where %s!=0",
-						dataManager.getColumnName(PROP_ID),
-						dataManager.getColumnName(PROP_ADDRESS),
-						dataManager.getTableName(ClusterServer.class),
-						dataManager.getColumnName(PROP_ID));
-				try (ResultSet resultset = stmt.executeQuery(query)) {
-					while (resultset.next()) 
-						theServers.put(resultset.getLong(1), resultset.getString(2));
+				@Override
+				public Collection<String> call() {
+					var servers = new HashMap<Long, String>();
+					try (Statement stmt = conn.createStatement()) {
+						String query = String.format("select %s, %s from %s",
+								persistenceManager.getColumnName(PROP_ID),
+								persistenceManager.getColumnName(PROP_ADDRESS),
+								persistenceManager.getTableName(ClusterServer.class),
+								persistenceManager.getColumnName(PROP_ID));
+						try (ResultSet resultset = stmt.executeQuery(query)) {
+							while (resultset.next())
+								servers.put(resultset.getLong(1), resultset.getString(2));
+						}
+					} catch (SQLException e) {
+						throw new RuntimeException(e);
+					}
+
+					if (!servers.containsValue(localServer)) {
+						Long nextId = servers.isEmpty() ? 1L : max(servers.keySet()) + 1L;
+						saveServer(conn, nextId, localServer);
+						servers.put(nextId, localServer);
+					}
+
+					return servers.values();
 				}
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
-
-			if (!theServers.containsValue(localServer)) {
-				Long nextId = theServers.isEmpty() ? 1L : max(theServers.keySet()) + 1L;
-				saveServer(conn, nextId, localServer);
-				theServers.put(nextId, localServer);
-			}
-			return theServers;
-		});
+			};		
+			if (hibernateConfig.isHSQLDialect())
+				servers = callable.call();
+			else
+				servers = callWithDatabaseLock(conn, callable);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		};
 
 		Config config = new Config();
 		config.setClusterName(credential);
@@ -137,7 +143,7 @@ public class DefaultClusterManager implements ClusterManager {
 		
 		var hasLocalhost = false;
 		var hasNonLocalhost = false;
-		for (String server: servers.values()) {
+		for (String server: servers) {
 			if (server.startsWith("127.0.0.1:"))
 				hasLocalhost = true;
 			else 
@@ -188,18 +194,19 @@ public class DefaultClusterManager implements ClusterManager {
 			hazelcastInstance = null;
 		}
 
-		dataManager.callWithConnection(conn -> {
+		try (var conn = persistenceManager.openConnection()) {
 			try (Statement stmt = conn.createStatement()) {
 				stmt.executeUpdate(String.format(
 						"delete from %s where %s='%s'",
-						dataManager.getTableName(ClusterServer.class),
-						dataManager.getColumnName(PROP_ADDRESS),
+						persistenceManager.getTableName(ClusterServer.class),
+						persistenceManager.getColumnName(PROP_ADDRESS),
 						localServer));
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}
-			return null;
-		});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override

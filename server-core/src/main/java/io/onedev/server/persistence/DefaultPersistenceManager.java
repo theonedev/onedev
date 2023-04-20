@@ -69,14 +69,19 @@ import javax.validation.Validator;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Singleton
-public class DefaultDataManager implements DataManager, Serializable {
+import static io.onedev.server.persistence.PersistenceUtils.tableExists;
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultDataManager.class);
+@Singleton
+public class DefaultPersistenceManager implements PersistenceManager, Serializable {
+
+	private static final Logger logger = LoggerFactory.getLogger(DefaultPersistenceManager.class);
 	
 	private static final String ENV_INITIAL_USER = "initial_user";
 	
@@ -123,12 +128,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 	private String backupTaskId;
 
 	@Inject
-	public DefaultDataManager(PhysicalNamingStrategy physicalNamingStrategy, HibernateConfig hibernateConfig, 
-			Validator validator, Dao dao, SessionFactoryManager sessionFactoryManager,
-			SettingManager settingManager, MailManager mailManager, TaskScheduler taskScheduler, 
-			PasswordService passwordService, RoleManager roleManager, LinkSpecManager linkSpecManager, 
-			EmailAddressManager emailAddressManager, UserManager userManager, ClusterManager clusterManager, 
-			TransactionManager transactionManager) {
+	public DefaultPersistenceManager(PhysicalNamingStrategy physicalNamingStrategy, HibernateConfig hibernateConfig,
+									 Validator validator, Dao dao, SessionFactoryManager sessionFactoryManager,
+									 SettingManager settingManager, MailManager mailManager, TaskScheduler taskScheduler,
+									 PasswordService passwordService, RoleManager roleManager, LinkSpecManager linkSpecManager,
+									 EmailAddressManager emailAddressManager, UserManager userManager, ClusterManager clusterManager,
+									 TransactionManager transactionManager) {
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.hibernateConfig = hibernateConfig;
 		this.validator = validator;
@@ -146,35 +151,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.clusterManager = clusterManager;
 		this.transactionManager = transactionManager;
 	}
-	
-	@Override
-	public <T> T callWithConnection(ConnectionCallable<T> callable, boolean autoCommit) {
-		try (Connection conn = openConnection()) {
-			if (autoCommit) {
-				conn.setAutoCommit(true);
-				return callable.call(conn);
-			} else {
-				conn.setAutoCommit(false);
-				conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-				try {
-					T result = callable.call(conn);
-					conn.commit();
-					return result;
-				} catch (Exception e) {
-					conn.rollback();
-					throw ExceptionUtils.unchecked(e);
-				}
-			}
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	@Override
-	public <T> T callWithConnection(ConnectionCallable<T> callable) {
-		return callWithConnection(callable, false);
-	}
-	
+
 	private Metadata getMetadata() {
 		return sessionFactoryManager.getMetadata();
 	}
@@ -247,24 +224,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 		} 
 	}
 
-	private Connection openConnection() {
-		try {
-			Driver driver = (Driver) Class.forName(hibernateConfig.getDriver(), true, 
-					Thread.currentThread().getContextClassLoader()).getDeclaredConstructor().newInstance();
-			Properties connectProps = new Properties();
-			String user = hibernateConfig.getUser();
-			String password = hibernateConfig.getPassword();
-	        if (user != null) 
-	            connectProps.put("user", user);
-	        if (password != null) 
-	            connectProps.put("password", password);
-			
-			return driver.connect(hibernateConfig.getUrl(), connectProps);
-		} catch (Exception e) {
-			throw ExceptionUtils.unchecked(e);
-		}
+	@Override
+	public Connection openConnection() {
+		return PersistenceUtils.openConnection(hibernateConfig, 
+				Thread.currentThread().getContextClassLoader());
 	}
-
+	
 	@Override
 	public String getTableName(Class<? extends AbstractEntity> entityClass) {
 		JdbcEnvironment environment = getMetadata().getDatabase()
@@ -283,31 +248,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private String readDbDataVersion(Connection conn) {
 		try {
-			String versionTableName = getTableName(ModelVersion.class);
-			boolean versionTableExists = false;
-			try (ResultSet resultset = conn.getMetaData().getTables(null, null, versionTableName.toUpperCase(), null)) {
-				if (resultset.next())
-					versionTableExists = true;
-			}
-			if (!versionTableExists) {
-				try (ResultSet resultset = conn.getMetaData().getTables(null, null, versionTableName.toLowerCase(), null)) {
-					if (resultset.next()) {
-						versionTableExists = true;
-					}
-				}
-			}
-			if (!versionTableExists) {
-				try (ResultSet resultset = conn.getMetaData().getTables(null, null, versionTableName, null)) {
-					if (resultset.next()) {
-						versionTableExists = true;
-					}
-				}
-			}
-			if (!versionTableExists) {
-				return null;
-			} else {
+			var versionTableName = getTableName(ModelVersion.class);
+			if (tableExists(conn, versionTableName)) {
 				try (	Statement stmt = conn.createStatement();
-						ResultSet resultset = stmt.executeQuery("select " + getColumnName(ModelVersion.PROP_VERSION_COLUMN) + " from " + versionTableName)) {
+						 ResultSet resultset = stmt.executeQuery("select " + getColumnName(ModelVersion.PROP_VERSION_COLUMN) + " from " + versionTableName)) {
 					if (!resultset.next()) {
 						throw new RuntimeException("No data version found in database: this is normally caused "
 								+ "by unsuccessful restore/upgrade, please clean the database and try again");
@@ -317,6 +261,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 						throw new RuntimeException("Illegal data version format in database");
 					return dataVersion;
 				}
+			} else {
+				return null;
 			}
 		} catch (Exception e) {
 			if (e.getMessage() != null && e.getMessage().contains("ORA-00942")) 
@@ -1026,7 +972,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
-		return new ManagedSerializedForm(DataManager.class);
+		return new ManagedSerializedForm(PersistenceManager.class);
 	}
 	
 }

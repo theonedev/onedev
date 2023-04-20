@@ -212,7 +212,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(SshManager.class).to(DefaultSshManager.class);
 		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		
 		bind(SettingManager.class).to(DefaultSettingManager.class);
-		bind(DataManager.class).to(DefaultDataManager.class);
+		bind(PersistenceManager.class).to(DefaultPersistenceManager.class);
 		bind(TaskScheduler.class).to(DefaultTaskScheduler.class);
 		bind(PullRequestCommentManager.class).to(DefaultPullRequestCommentManager.class);
 		bind(CodeCommentManager.class).to(DefaultCodeCommentManager.class);
@@ -540,7 +540,7 @@ public class CoreModule extends AbstractPluginModule {
 	}
 	
 	private void configurePersistence() {
-		bind(DataManager.class).to(DefaultDataManager.class);
+		bind(PersistenceManager.class).to(DefaultPersistenceManager.class);
 		
 		bind(Session.class).toProvider(SessionProvider.class);
 		bind(EntityManager.class).toProvider(SessionProvider.class);

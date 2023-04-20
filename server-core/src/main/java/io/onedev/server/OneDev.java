@@ -18,13 +18,15 @@ import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.ServerNotReadyException;
 import io.onedev.server.jetty.JettyLauncher;
-import io.onedev.server.persistence.*;
+import io.onedev.server.persistence.IdManager;
+import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.persistence.SessionFactoryManager;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.schedule.TaskScheduler;
-import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.request.Url;
 import org.eclipse.jgit.util.FS.FileStoreAttributes;
@@ -41,24 +43,27 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.onedev.commons.utils.FileUtils.loadProperties;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 public class OneDev extends AbstractPlugin implements Serializable {
-
+	
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
 
 	private final Provider<JettyLauncher> jettyLauncherProvider;
 		
 	private final SessionManager sessionManager;
 	
-	private final DataManager dataManager;
+	private final PersistenceManager persistenceManager;
 	
 	private final Provider<ServerConfig> serverConfigProvider;
 	
@@ -80,15 +85,15 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	// Some are injected via provider as instantiation might encounter problem during upgrade 
 	@Inject
-	public OneDev(Provider<JettyLauncher> jettyLauncherProvider, TaskScheduler taskScheduler, 
-				  SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider, 
-				  DataManager dataManager, ExecutorService executorService, 
-				  ListenerRegistry listenerRegistry, ClusterManager clusterManager, 
+	public OneDev(Provider<JettyLauncher> jettyLauncherProvider, TaskScheduler taskScheduler,
+				  SessionManager sessionManager, Provider<ServerConfig> serverConfigProvider,
+				  PersistenceManager persistenceManager, ExecutorService executorService,
+				  ListenerRegistry listenerRegistry, ClusterManager clusterManager,
 				  IdManager idManager, SessionFactoryManager sessionFactoryManager) {
 		this.jettyLauncherProvider = jettyLauncherProvider;
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
-		this.dataManager = dataManager;
+		this.persistenceManager = persistenceManager;
 		this.serverConfigProvider = serverConfigProvider;
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
@@ -107,22 +112,15 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		System.setProperty("hsqldb.method_class_names", "java.lang.Math");
 		
 		sessionFactoryManager.start();
-		
-		dataManager.callWithConnection((ConnectionCallable<Void>) conn -> {
-			while (true) {
-				try {
-					dataManager.populateDatabase(conn);
-					break;
-				} catch (Exception e) {
-					logger.warn("Error initializing data, will retry later...", e);
-					try {
-						Thread.sleep((RandomUtils.nextInt(5)+1)*1000L);
-					} catch (InterruptedException ignored) {
-					}
-				}
-			}
-			return null;
-		});
+
+		try (var conn = persistenceManager.openConnection()) {
+			callWithTransaction(conn, () -> {
+				persistenceManager.populateDatabase(conn);
+				return null;
+			});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		};
 		
 		clusterManager.start();
 		idManager.init();
@@ -137,7 +135,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
 		var dataChecked = hazelcastInstance.getCPSubsystem().getAtomicLong("dataInited");
 		clusterManager.init(dataChecked, () -> {
-			var manualConfigs = dataManager.checkData();
+			var manualConfigs = persistenceManager.checkData();
 			if (!manualConfigs.isEmpty()) {
 				if (getIngressUrl() != null)
 					logger.warn("Please set up the server at " + getIngressUrl());
@@ -319,7 +317,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	}	
 	
 	public static boolean isServerRunning(File installDir) {
-		Properties props = FileUtils.loadProperties(new File(installDir, "conf/server.properties"));
+		Properties props = loadProperties(new File(installDir, "conf/server.properties"));
 		int sshPort = Integer.parseInt(props.get("ssh_port").toString());
 		try (ServerSocket ignored = new ServerSocket(sshPort)) {
 			return false;

@@ -1,24 +1,23 @@
 package io.onedev.server.commandhandler;
 
-import java.io.File;
-import java.sql.Connection;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.persistence.ConnectionCallable;
-import io.onedev.server.persistence.DataManager;
 import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.persistence.PersistenceManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.File;
+import java.sql.SQLException;
+
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 
 @Singleton
 public class BackupDatabase extends AbstractPlugin {
@@ -27,16 +26,16 @@ public class BackupDatabase extends AbstractPlugin {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BackupDatabase.class);
 	
-	private final DataManager dataManager;
+	private final PersistenceManager persistenceManager;
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public BackupDatabase(DataManager dataManager, SessionFactoryManager sessionFactoryManager, 
-			HibernateConfig hibernateConfig) {
-		this.dataManager = dataManager;
+	public BackupDatabase(PersistenceManager persistenceManager, SessionFactoryManager sessionFactoryManager,
+                          HibernateConfig hibernateConfig) {
+		this.persistenceManager = persistenceManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.hibernateConfig = hibernateConfig;
 	}
@@ -66,21 +65,21 @@ public class BackupDatabase extends AbstractPlugin {
 
 		sessionFactoryManager.start();
 
-		dataManager.callWithConnection(new ConnectionCallable<Void>() {
-
-			@Override
-			public Void call(Connection conn) {
-				dataManager.checkDataVersion(conn, false);
-				return null;
-			}
-			
-		});
+		try (var conn = persistenceManager.openConnection()) {
+			callWithTransaction(conn, () -> {
+				persistenceManager.checkDataVersion(conn, false);
+				return null;				
+			});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		;
 		
 		logger.info("Backing up database to {}...", backupFile.getAbsolutePath());
 		
 		File tempDir = FileUtils.createTempDir("backup");
 		try {
-			dataManager.exportData(tempDir);
+			persistenceManager.exportData(tempDir);
 			FileUtils.zip(tempDir, backupFile, null);
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);

@@ -13,10 +13,12 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
+
 @Singleton
 public class DefaultIdManager implements IdManager {
 
-	private final DataManager dataManager;
+	private final PersistenceManager persistenceManager;
 	
 	private final ClusterManager clusterManager;
 	
@@ -25,9 +27,9 @@ public class DefaultIdManager implements IdManager {
 	private final Map<Class<?>, IAtomicLong> nextIds = new HashMap<>();
 	
 	@Inject
-	public DefaultIdManager(DataManager dataManager, ClusterManager clusterManager, 
-			SessionFactoryManager sessionFactoryManager) {
-		this.dataManager = dataManager;
+	public DefaultIdManager(PersistenceManager persistenceManager, ClusterManager clusterManager,
+                            SessionFactoryManager sessionFactoryManager) {
+		this.persistenceManager = persistenceManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.clusterManager = clusterManager;
 	}
@@ -36,8 +38,8 @@ public class DefaultIdManager implements IdManager {
 	private long getMaxId(Connection conn, Class<?> entityClass) {
 		try (Statement stmt = conn.createStatement()) {
 			String query = String.format("select max(%s) from %s", 
-					dataManager.getColumnName(AbstractEntity.PROP_ID), 
-					dataManager.getTableName((Class<? extends AbstractEntity>) entityClass));
+					persistenceManager.getColumnName(AbstractEntity.PROP_ID), 
+					persistenceManager.getTableName((Class<? extends AbstractEntity>) entityClass));
 			try (ResultSet resultset = stmt.executeQuery(query)) {
 				if (resultset.next()) 
 					return Math.max(resultset.getLong(1), 0);
@@ -51,10 +53,8 @@ public class DefaultIdManager implements IdManager {
 	
 	@Override
 	public void init() {
-		dataManager.callWithConnection(new ConnectionCallable<Void>() {
-
-			@Override
-			public Void call(Connection conn) {
+		try (var conn = persistenceManager.openConnection()) {
+			callWithTransaction(conn, () -> {
 				for (var persistenceClass: sessionFactoryManager.getMetadata().getEntityBindings()) {
 					Class<?> entityClass = persistenceClass.getMappedClass();
 					var nextId = clusterManager.getHazelcastInstance().getCPSubsystem().getAtomicLong(entityClass.getName());
@@ -62,9 +62,10 @@ public class DefaultIdManager implements IdManager {
 					nextIds.put(entityClass, nextId);
 				}
 				return null;
-			}
-			
-		});
+			});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		};
 	}
 
 	@Override

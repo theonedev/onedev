@@ -1,21 +1,20 @@
 package io.onedev.server.commandhandler;
 
-import java.sql.Connection;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.server.OneDev;
-import io.onedev.server.persistence.ConnectionCallable;
-import io.onedev.server.persistence.DataManager;
 import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.persistence.PersistenceManager;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.sql.SQLException;
+
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 
 @Singleton
 public class CheckDataVersion extends AbstractPlugin {
@@ -26,15 +25,15 @@ public class CheckDataVersion extends AbstractPlugin {
 
 	private final SessionFactoryManager sessionFactoryManager;
 	
-	private final DataManager dataManager;
+	private final PersistenceManager persistenceManager;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public CheckDataVersion(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
+	public CheckDataVersion(SessionFactoryManager sessionFactoryManager, PersistenceManager persistenceManager, 
 			HibernateConfig hibernateConfig) {
 		this.sessionFactoryManager = sessionFactoryManager;
-		this.dataManager = dataManager;
+		this.persistenceManager = persistenceManager;
 		this.hibernateConfig = hibernateConfig;
 	}
 
@@ -51,14 +50,12 @@ public class CheckDataVersion extends AbstractPlugin {
 		
 		// Use system.out in case logger is suppressed by user as this output is important to 
 		// upgrade procedure
-		String dataVersion = dataManager.callWithConnection(new ConnectionCallable<String>() {
-
-			@Override
-			public String call(Connection conn) {
-				return dataManager.checkDataVersion(conn, false);
-			}
-			
-		});
+		String dataVersion;
+		try (var conn = persistenceManager.openConnection()) {
+			dataVersion = callWithTransaction(conn, () -> persistenceManager.checkDataVersion(conn, false));			
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 		System.out.println("Data version: " + dataVersion);
 		System.exit(0);
 	}

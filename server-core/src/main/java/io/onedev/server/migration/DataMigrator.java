@@ -5270,7 +5270,13 @@ public class DataMigrator {
 			agentLastUsedDatesDom.writeToFile(agentLastUsedDatesFile, true);
 			partialAgentTokensDom.writeToFile(partialAgentTokensFile, true);
 		}
-		
 	}
+
+	private void migrate118(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("ClusterServers.xml")) 
+				FileUtils.deleteFile(file);
+		}
+	}	
 	
 }

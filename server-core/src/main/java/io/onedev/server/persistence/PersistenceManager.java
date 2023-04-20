@@ -1,16 +1,15 @@
 package io.onedev.server.persistence;
 
-import java.io.File;
-import java.sql.Connection;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.util.init.ManualConfig;
 
-public interface DataManager {
+import javax.annotation.Nullable;
+import java.io.File;
+import java.sql.Connection;
+import java.util.List;
+
+public interface PersistenceManager {
 
 	String checkDataVersion(Connection conn, boolean allowEmptyDB);
 	
@@ -42,8 +41,6 @@ public interface DataManager {
 	
 	String getColumnName(String fieldName);
 	
-	<T> T callWithConnection(ConnectionCallable<T> callable, boolean autoCommit);
-	
-	<T> T callWithConnection(ConnectionCallable<T> callable);
+	Connection openConnection();
 	
 }

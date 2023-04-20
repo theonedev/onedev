@@ -1,24 +1,24 @@
 package io.onedev.server.commandhandler;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.server.OneDev;
-import io.onedev.server.persistence.ConnectionCallable;
-import io.onedev.server.persistence.DataManager;
 import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.persistence.PersistenceUtils;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.SQLException;
+
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 
 @Singleton
 public class ApplyDatabaseConstraints extends AbstractPlugin {
@@ -29,15 +29,15 @@ public class ApplyDatabaseConstraints extends AbstractPlugin {
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
-	private final DataManager dataManager;
+	private final PersistenceManager persistenceManager;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public ApplyDatabaseConstraints(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
+	public ApplyDatabaseConstraints(SessionFactoryManager sessionFactoryManager, PersistenceManager persistenceManager, 
 			HibernateConfig hibernateConfig) {
 		this.sessionFactoryManager = sessionFactoryManager;
-		this.dataManager = dataManager;
+		this.persistenceManager = persistenceManager;
 		this.hibernateConfig = hibernateConfig;
 	}
 
@@ -52,14 +52,12 @@ public class ApplyDatabaseConstraints extends AbstractPlugin {
 
 		sessionFactoryManager.start();
 		
-		dataManager.callWithConnection(new ConnectionCallable<Void>() {
+		try (var conn = persistenceManager.openConnection()) {
+			callWithTransaction(conn, () -> {
+				persistenceManager.checkDataVersion(conn, false);
 
-			@Override
-			public Void call(Connection conn) {
-				dataManager.checkDataVersion(conn, false);
-				
 				logger.warn("This script is mainly used to apply database constraints after fixing database integrity issues (may happen during restore/upgrade)");
-				
+
 				BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 				while (true) {
 					logger.warn("Press 'y' to run the script, or 'n' to stop");
@@ -75,13 +73,13 @@ public class ApplyDatabaseConstraints extends AbstractPlugin {
 						System.exit(0);
 				}
 
-				dataManager.dropConstraints(conn);
-				dataManager.applyConstraints(conn);
-				
+				persistenceManager.dropConstraints(conn);
+				persistenceManager.applyConstraints(conn);
 				return null;
-			}
-			
-		});
+			});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 
 		if (hibernateConfig.isHSQLDialect()) {
 			try {

@@ -1,24 +1,24 @@
 package io.onedev.server.commandhandler;
 
-import java.sql.Connection;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.apache.shiro.authc.credential.PasswordService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.ConnectionCallable;
-import io.onedev.server.persistence.DataManager;
+import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.persistence.PersistenceUtils;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.sql.SQLException;
+
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 
 @Singleton
 public class ResetAdminPassword extends AbstractPlugin {
@@ -27,7 +27,7 @@ public class ResetAdminPassword extends AbstractPlugin {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ResetAdminPassword.class);
 	
-	private final DataManager dataManager;
+	private final PersistenceManager persistenceManager;
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
@@ -36,10 +36,10 @@ public class ResetAdminPassword extends AbstractPlugin {
 	private final PasswordService passwordService;
 	
 	@Inject
-	public ResetAdminPassword(DataManager dataManager, SessionFactoryManager sessionFactoryManager, 
-			UserManager userManager, PasswordService passwordService, 
-			TransactionManager transactionManager) {
-		this.dataManager = dataManager;
+	public ResetAdminPassword(PersistenceManager persistenceManager, SessionFactoryManager sessionFactoryManager,
+                              UserManager userManager, PasswordService passwordService,
+                              TransactionManager transactionManager) {
+		this.persistenceManager = persistenceManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.userManager = userManager;
 		this.passwordService = passwordService;
@@ -60,15 +60,14 @@ public class ResetAdminPassword extends AbstractPlugin {
 
 		sessionFactoryManager.start();
 		
-		dataManager.callWithConnection(new ConnectionCallable<Void>() {
-
-			@Override
-			public Void call(Connection conn) {
-				dataManager.checkDataVersion(conn, false);
-				return null;
-			}
-			
-		});
+		try (var conn = persistenceManager.openConnection()) {
+			callWithTransaction(conn, () -> {
+				persistenceManager.checkDataVersion(conn, false);
+				return null;				
+			});	
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		};
 		
 		User root = userManager.get(User.ROOT_ID);
 		if (root == null) {

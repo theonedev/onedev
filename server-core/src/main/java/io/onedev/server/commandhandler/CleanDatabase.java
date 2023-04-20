@@ -1,6 +1,7 @@
 package io.onedev.server.commandhandler;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,8 +12,7 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.server.OneDev;
-import io.onedev.server.persistence.ConnectionCallable;
-import io.onedev.server.persistence.DataManager;
+import io.onedev.server.persistence.PersistenceManager;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
@@ -26,15 +26,15 @@ public class CleanDatabase extends AbstractPlugin {
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
-	private final DataManager dataManager;
+	private final PersistenceManager persistenceManager;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public CleanDatabase(SessionFactoryManager sessionFactoryManager, DataManager dataManager, 
+	public CleanDatabase(SessionFactoryManager sessionFactoryManager, PersistenceManager persistenceManager, 
 			HibernateConfig hibernateConfig) {
 		this.sessionFactoryManager = sessionFactoryManager;
-		this.dataManager = dataManager;
+		this.persistenceManager = persistenceManager;
 		this.hibernateConfig = hibernateConfig;
 	}
 
@@ -53,16 +53,13 @@ public class CleanDatabase extends AbstractPlugin {
 		// when drop non-existent constraints, and we want to ignore them and 
 		// continue to execute other sql statements without rolling back whole 
 		// transaction
-		dataManager.callWithConnection(new ConnectionCallable<Void>() {
-
-			@Override
-			public Void call(Connection conn) {
-				dataManager.checkDataVersion(conn, false);
-				dataManager.cleanDatabase(conn);
-				return null;
-			}
-			
-		}, true);
+		try (var conn = persistenceManager.openConnection()) {
+			conn.setAutoCommit(true);
+			persistenceManager.checkDataVersion(conn, false);
+			persistenceManager.cleanDatabase(conn);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		};
 
 		if (hibernateConfig.isHSQLDialect()) {
 			try {

@@ -1,24 +1,24 @@
 package io.onedev.server.commandhandler;
 
-import java.io.File;
-import java.sql.Connection;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.bootstrap.Command;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.persistence.ConnectionCallable;
-import io.onedev.server.persistence.DataManager;
 import io.onedev.server.persistence.HibernateConfig;
+import io.onedev.server.persistence.PersistenceManager;
+import io.onedev.server.persistence.PersistenceUtils;
 import io.onedev.server.persistence.SessionFactoryManager;
 import io.onedev.server.security.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.File;
+import java.sql.SQLException;
+
+import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 
 @Singleton
 public class RestoreDatabase extends AbstractPlugin {
@@ -27,16 +27,16 @@ public class RestoreDatabase extends AbstractPlugin {
 	
 	public static final String COMMAND = "restore-db";
 	
-	private final DataManager dataManager;
+	private final PersistenceManager persistenceManager;
 	
 	private final SessionFactoryManager sessionFactoryManager;
 	
 	private final HibernateConfig hibernateConfig;
 	
 	@Inject
-	public RestoreDatabase(DataManager dataManager, SessionFactoryManager sessionFactoryManager, 
-			HibernateConfig hibernateConfig) {
-		this.dataManager = dataManager;
+	public RestoreDatabase(PersistenceManager persistenceManager, SessionFactoryManager sessionFactoryManager,
+						   HibernateConfig hibernateConfig) {
+		this.persistenceManager = persistenceManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.hibernateConfig = hibernateConfig;
 	}
@@ -97,40 +97,37 @@ public class RestoreDatabase extends AbstractPlugin {
 	}
 
 	private void doRestore(File dataDir, boolean validateData) {
-		dataManager.migrateData(dataDir);
+		persistenceManager.migrateData(dataDir);
 		
 		if (validateData)
-			dataManager.validateData(dataDir);
+			persistenceManager.validateData(dataDir);
 
-		dataManager.callWithConnection(new ConnectionCallable<Void>() {
-
-			@Override
-			public Void call(Connection conn) {
-				String dbDataVersion = dataManager.checkDataVersion(conn, true);
+		try (var conn = persistenceManager.openConnection()) {
+			callWithTransaction(conn, () -> {
+				String dbDataVersion = persistenceManager.checkDataVersion(conn, true);
 
 				if (dbDataVersion != null) {
 					logger.info("Cleaning database...");
-					dataManager.cleanDatabase(conn);
+					persistenceManager.cleanDatabase(conn);
 				}
-				
+
 				logger.info("Creating tables...");
-				dataManager.createTables(conn);
-				
+				persistenceManager.createTables(conn);
+
 				return null;
-			}
-			
-		});
+			});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 				
 		logger.info("Importing data into database...");
-		dataManager.importData(dataDir);
+		persistenceManager.importData(dataDir);
 
-		dataManager.callWithConnection(new ConnectionCallable<Void>() {
-
-			@Override
-			public Void call(Connection conn) {
+		try (var conn = persistenceManager.openConnection()) {
+			callWithTransaction(conn, () -> {
 				logger.info("Applying foreign key constraints...");
 				try {
-					dataManager.applyConstraints(conn);		
+					persistenceManager.applyConstraints(conn);
 				} catch (Exception e) {
 					logger.error("Failed to apply database constraints", e);
 					logger.info("If above error is caused by foreign key constraint violations, you may fix it via your database sql tool, "
@@ -138,9 +135,10 @@ public class RestoreDatabase extends AbstractPlugin {
 					System.exit(1);
 				}
 				return null;
-			}
-			
-		});
+			});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

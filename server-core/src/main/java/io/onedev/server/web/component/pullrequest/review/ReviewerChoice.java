@@ -55,6 +55,7 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 			review = new PullRequestReview();
 			review.setRequest(getPullRequest());
 			review.setUser(user);
+			getPullRequest().getReviews().add(review);
 		} else {
 			review.setStatus(Status.PENDING);
 		}
@@ -64,8 +65,6 @@ public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 				OneDev.getInstance(PullRequestReviewManager.class).create(review);
 			else
 				OneDev.getInstance(PullRequestReviewManager.class).update(review);				
-		} else {
-			getPullRequest().getReviews().add(review);
 		}
 	};
 	
