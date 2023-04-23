@@ -533,7 +533,7 @@
 			<dependency>
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
-				<version>20090211</version>
+				<version>20230227</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -614,12 +614,12 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.7.12</commons.version>
-		<agent.version>1.8.4</agent.version>
+		<commons.version>2.7.13</commons.version>
+		<agent.version>1.8.6</agent.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<logback.version>1.2.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>
-		<jetty.version>9.4.43.v20210629</jetty.version>
+		<jetty.version>9.4.51.v20230217</jetty.version>
 		<wicket.version>7.17.0</wicket.version>
 		<jersey.version>2.37</jersey.version>
 		<hibernate.version>5.4.24.Final</hibernate.version>
