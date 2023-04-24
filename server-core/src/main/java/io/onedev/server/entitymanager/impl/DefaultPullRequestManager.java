@@ -334,10 +334,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 		if (mergePreview != null) 
 			updateMergePreviewRef(request);
 		
-		if (request.getBuildCommitHash() != null) 
-			updateBuildCommitRef(request);
-		
-		checkAsync(request, false, request.getBuildCommitHash() == null);
+		checkAsync(request, false, true);
 		
 		listenerRegistry.post(new PullRequestOpened(request));
 	}

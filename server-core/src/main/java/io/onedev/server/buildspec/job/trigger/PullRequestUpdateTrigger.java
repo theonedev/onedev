@@ -1,11 +1,10 @@
 package io.onedev.server.buildspec.job.trigger;
 
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.TriggerMatch;
 import io.onedev.server.event.project.ProjectEvent;
 import io.onedev.server.event.project.pullrequest.PullRequestBuildCommitUpdated;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.annotation.Editable;
 
 @Editable(order=300, name="Pull request open or update", description=""
 		+ "Job will run on merge commit of target branch and source branch.<br>"
@@ -20,7 +19,7 @@ public class PullRequestUpdateTrigger extends PullRequestTrigger {
 	protected TriggerMatch triggerMatches(ProjectEvent event, Job job) {
 		if (event instanceof PullRequestBuildCommitUpdated) {
 			PullRequestBuildCommitUpdated pullRequestBuildCommitUpdated = (PullRequestBuildCommitUpdated) event;
-			PullRequest request = pullRequestBuildCommitUpdated.getRequest();
+			var request = pullRequestBuildCommitUpdated.getRequest();
 			if (request.getBuildRequirement().getRequiredJobs().contains(job.getName()) || !SKIP_COMMIT.apply(request.getLatestUpdate().getHeadCommit()))
 				return triggerMatches(request);
 		}

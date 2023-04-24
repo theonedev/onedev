@@ -840,10 +840,8 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 				mergePreview.setHeadCommitHash(request.getLatestUpdate().getHeadCommitHash());
 				mergePreview.setMergeStrategy(request.getMergeStrategy());
 				ObjectId merged = mergePreview.getMergeStrategy().merge(request, "Pull request merge preview");
-				if (merged != null) {
+				if (merged != null)
 					mergePreview.setMergeCommitHash(merged.name());
-					request.setBuildCommitHash(merged.name());
-				}
 				request.setMergePreview(mergePreview);
 				
 				if (merged != null) {
