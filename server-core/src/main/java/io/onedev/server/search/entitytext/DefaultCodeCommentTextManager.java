@@ -16,7 +16,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.lucene.BooleanQueryBuilder;
-import io.onedev.server.util.lucene.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
@@ -39,6 +38,8 @@ import java.io.ObjectStreamException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.onedev.server.util.lucene.LuceneUtils.escape;
 
 @Singleton
 public class DefaultCodeCommentTextManager extends ProjectTextManager<CodeComment> 
@@ -101,32 +102,37 @@ public class DefaultCodeCommentTextManager extends ProjectTextManager<CodeCommen
 		});
 	}
 
+	@Nullable
 	private Query buildQuery(Project project, String queryString) {
 		BooleanQueryBuilder queryBuilder = new BooleanQueryBuilder();
 		queryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
 		BooleanQueryBuilder contentQueryBuilder = new BooleanQueryBuilder();
 		
-		queryString = LuceneUtils.escape(queryString);
-		Query pathQuery = new BoostQuery(new WildcardQuery(new Term(FIELD_PATH, "*" + queryString + "*")), 0.75f);
-		try (Analyzer analyzer = newAnalyzer()) {
-			Map<String, Float> boosts = new HashMap<>();
-			boosts.put(FIELD_COMMENT, 0.75f);
-			boosts.put(FIELD_REPLIES, 0.5f);
-			MultiFieldQueryParser parser = new MultiFieldQueryParser(
-					new String[] {FIELD_COMMENT, FIELD_REPLIES}, analyzer, boosts) {
-				
-				protected Query newTermQuery(Term term, float boost) {
-					return new BoostQuery(new PrefixQuery(term), boost);
-				}
-				
-			};
-			contentQueryBuilder.add(parser.parse(LuceneUtils.escape(queryString)), Occur.SHOULD);
-		} catch (ParseException e) {
-			throw new RuntimeException(e);
+		var escaped = escape(queryString);
+		if (escaped != null) {
+			Query pathQuery = new BoostQuery(new WildcardQuery(new Term(FIELD_PATH, "*" + escaped + "*")), 0.75f);
+			try (Analyzer analyzer = newAnalyzer()) {
+				Map<String, Float> boosts = new HashMap<>();
+				boosts.put(FIELD_COMMENT, 0.75f);
+				boosts.put(FIELD_REPLIES, 0.5f);
+				MultiFieldQueryParser parser = new MultiFieldQueryParser(
+						new String[] {FIELD_COMMENT, FIELD_REPLIES}, analyzer, boosts) {
+
+					protected Query newTermQuery(Term term, float boost) {
+						return new BoostQuery(new PrefixQuery(term), boost);
+					}
+
+				};
+				contentQueryBuilder.add(parser.parse(escaped), Occur.SHOULD);
+			} catch (ParseException e) {
+				throw new RuntimeException(e);
+			}
+			queryBuilder.add(contentQueryBuilder.build(), Occur.MUST);
+
+			return queryBuilder.build();
+		} else {
+			return null;
 		}
-		queryBuilder.add(contentQueryBuilder.build(), Occur.MUST);
-		
-		return queryBuilder.build();		
 	}
 	
 	@Override

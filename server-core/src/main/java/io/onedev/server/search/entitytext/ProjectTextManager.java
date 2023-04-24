@@ -367,72 +367,80 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		}
 	}
 	
-	protected long count(Query query) {
-		String queryString = query.toString();
-		return clusterManager.runOnAllServers(() -> {
-			if (searcherManager != null) {
-				try {
-					IndexSearcher indexSearcher = searcherManager.acquire();
+	protected long count(@Nullable Query query) {
+		if (query != null) {
+			String queryString = query.toString();
+			return clusterManager.runOnAllServers(() -> {
+				if (searcherManager != null) {
 					try {
-						TotalHitCountCollector collector = new TotalHitCountCollector();
-						indexSearcher.search(parse(queryString), collector);
-						return (long) collector.getTotalHits();
-					} finally {
-						searcherManager.release(indexSearcher);
+						IndexSearcher indexSearcher = searcherManager.acquire();
+						try {
+							TotalHitCountCollector collector = new TotalHitCountCollector();
+							indexSearcher.search(parse(queryString), collector);
+							return (long) collector.getTotalHits();
+						} finally {
+							searcherManager.release(indexSearcher);
+						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				} else {
+					return 0L;
 				}
-			} else {
-				return 0L;
-			}
-		}).values().stream().reduce(0L, Long::sum);
+			}).values().stream().reduce(0L, Long::sum);
+		} else {
+			return 0;
+		}
 	}
 
-	protected List<T> search(Query query, int firstResult, int maxResults) {
-		String queryString = query.toString();
-		Map<Long, Float> entityScores = new HashMap<>();
-		for (var entry: clusterManager.runOnAllServers((ClusterTask<Map<Long, Float>>) () -> {
-			if (searcherManager != null) {
-				try {
-					IndexSearcher indexSearcher = searcherManager.acquire();
+	protected List<T> search(@Nullable Query query, int firstResult, int maxResults) {
+		if (query != null) {
+			String queryString = query.toString();
+			Map<Long, Float> entityScores = new HashMap<>();
+			for (var entry : clusterManager.runOnAllServers((ClusterTask<Map<Long, Float>>) () -> {
+				if (searcherManager != null) {
 					try {
-						Map<Long, Float> theEntityScores = new HashMap<>();
-						TopDocs topDocs = indexSearcher.search(parse(queryString), firstResult + maxResults);
-						for (var scoreDoc: topDocs.scoreDocs) {
-							Document doc = indexSearcher.doc(scoreDoc.doc);
-							theEntityScores.put(valueOf(doc.get(FIELD_ENTITY_ID)), scoreDoc.score);
+						IndexSearcher indexSearcher = searcherManager.acquire();
+						try {
+							Map<Long, Float> theEntityScores = new HashMap<>();
+							TopDocs topDocs = indexSearcher.search(parse(queryString), firstResult + maxResults);
+							for (var scoreDoc : topDocs.scoreDocs) {
+								Document doc = indexSearcher.doc(scoreDoc.doc);
+								theEntityScores.put(valueOf(doc.get(FIELD_ENTITY_ID)), scoreDoc.score);
+							}
+							return theEntityScores;
+						} finally {
+							searcherManager.release(indexSearcher);
 						}
-						return theEntityScores;
-					} finally {
-						searcherManager.release(indexSearcher);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+				} else {
+					return new HashMap<>();
 				}
-			} else {
-				return new HashMap<>();
+			}).entrySet()) {
+				entityScores.putAll(entry.getValue());
 			}
-		}).entrySet()) {
-			entityScores.putAll(entry.getValue());
-		}
-		
-		List<Long> entityIds = new ArrayList<>(entityScores.keySet());
-		entityIds.sort((o1, o2) -> {
-			Float score1 = entityScores.get(o1);
-			Float score2 = entityScores.get(o2);
-			return Float.compare(score1, score2) * -1;
-		});
-		
-		if (firstResult < entityIds.size()) {
-			EntityCriteria<T> criteria = EntityCriteria.of(entityClass);
-			criteria.add(Restrictions.in(
-					AbstractEntity.PROP_ID, 
-					entityIds.subList(firstResult, Math.min(firstResult + maxResults, entityIds.size()))));
-			
-			List<T> entities = dao.query(criteria);
-			entities.sort(comparingInt(o -> entityIds.indexOf(o.getId())));
-			return entities;
+
+			List<Long> entityIds = new ArrayList<>(entityScores.keySet());
+			entityIds.sort((o1, o2) -> {
+				Float score1 = entityScores.get(o1);
+				Float score2 = entityScores.get(o2);
+				return Float.compare(score1, score2) * -1;
+			});
+
+			if (firstResult < entityIds.size()) {
+				EntityCriteria<T> criteria = EntityCriteria.of(entityClass);
+				criteria.add(Restrictions.in(
+						AbstractEntity.PROP_ID,
+						entityIds.subList(firstResult, Math.min(firstResult + maxResults, entityIds.size()))));
+
+				List<T> entities = dao.query(criteria);
+				entities.sort(comparingInt(o -> entityIds.indexOf(o.getId())));
+				return entities;
+			} else {
+				return new ArrayList<>();
+			}
 		} else {
 			return new ArrayList<>();
 		}

@@ -48,6 +48,8 @@ import java.io.ObjectStreamException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.lucene.document.LongPoint.newExactQuery;
+
 @Singleton
 public class DefaultIssueTextManager extends ProjectTextManager<Issue> implements IssueTextManager {
 
@@ -205,14 +207,14 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 			if (projectScope.isRecursive()) 
 				projectQueryBuilder.add(buildQuery(projectManager.getSubtreeIds(project.getId())), Occur.SHOULD);
 			else if (SecurityUtils.canAccessConfidentialIssues(projectScope.getProject()))
-				projectQueryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.SHOULD);
+				projectQueryBuilder.add(newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.SHOULD);
 			else 
 				projectQueryBuilder.add(getNonConfidentialQuery(project), Occur.SHOULD);
 			
 			if (projectScope.isInherited()) {
 				for (Project ancestor: projectScope.getProject().getAncestors()) {
 					if (SecurityUtils.canAccessConfidentialIssues(ancestor))
-						projectQueryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, ancestor.getId()), Occur.SHOULD);
+						projectQueryBuilder.add(newExactQuery(FIELD_PROJECT_ID, ancestor.getId()), Occur.SHOULD);
 					else if (SecurityUtils.canAccess(ancestor)) 
 						projectQueryBuilder.add(getNonConfidentialQuery(ancestor), Occur.SHOULD);
 				}
@@ -236,7 +238,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 			numberString = numberString.substring(1);
 		try {
 			Long number = Long.valueOf(numberString);
-			contentQueryBuilder.add(new BoostQuery(LongPoint.newExactQuery(FIELD_NUMBER, number), 1f), Occur.SHOULD);
+			contentQueryBuilder.add(new BoostQuery(newExactQuery(FIELD_NUMBER, number), 1f), Occur.SHOULD);
 		} catch (NumberFormatException e) {
 		}
 		
@@ -252,7 +254,11 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 					return new BoostQuery(new PrefixQuery(term), boost);
 				}
 			};
-			contentQueryBuilder.add(parser.parse(LuceneUtils.escape(queryString)), Occur.SHOULD);
+			var escaped = LuceneUtils.escape(queryString);
+			if (escaped != null)
+				contentQueryBuilder.add(parser.parse(escaped), Occur.SHOULD);
+			else 
+				return null;
 		} catch (ParseException e) {
 			throw new RuntimeException(e);
 		}
@@ -281,7 +287,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 			BooleanQueryBuilder nonConfidentialQueryBuilder = new BooleanQueryBuilder();
 			nonConfidentialQueryBuilder.add(Criteria.forManyValues(
 					FIELD_PROJECT_ID, projectIdsWithoutConfidentialIssuePermission, allIds), Occur.MUST);
-			nonConfidentialQueryBuilder.add(LongPoint.newExactQuery(FIELD_CONFIDENTIAL, 0L), Occur.MUST);
+			nonConfidentialQueryBuilder.add(newExactQuery(FIELD_CONFIDENTIAL, 0L), Occur.MUST);
 			queryBuilder.add(nonConfidentialQueryBuilder.build(), Occur.SHOULD);
 			return queryBuilder.build();
 		}
@@ -289,36 +295,27 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	
 	private BooleanQuery getNonConfidentialQuery(Project project) {
 		BooleanQueryBuilder builder = new BooleanQueryBuilder();
-		builder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
-		builder.add(LongPoint.newExactQuery(FIELD_CONFIDENTIAL, 0L), Occur.MUST);
+		builder.add(newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
+		builder.add(newExactQuery(FIELD_CONFIDENTIAL, 0L), Occur.MUST);
 		return builder.build();
 	}
 	
 	@Override
 	public List<Issue> query(@Nullable ProjectScope projectScope, String queryString, 
 			boolean loadFieldsAndLinks, int firstResult, int maxResults) {
-		Query query = buildQuery(projectScope, queryString);
-		if (query != null) {
-			List<Issue> issues = search(query, firstResult, maxResults);
-			
-			if (loadFieldsAndLinks && !issues.isEmpty()) {
-				fieldManager.populateFields(issues);
-				linkManager.populateLinks(issues);
-			}
-	
-			return issues;
-		} else {
-			return new ArrayList<>();
+		var issues = search(buildQuery(projectScope, queryString), firstResult, maxResults);
+		
+		if (loadFieldsAndLinks && !issues.isEmpty()) {
+			fieldManager.populateFields(issues);
+			linkManager.populateLinks(issues);
 		}
+
+		return issues;
 	}
 
 	@Override
 	public long count(@Nullable ProjectScope projectScope, String queryString) {
-		Query query = buildQuery(projectScope, queryString);
-		if (query != null) 
-			return count(query);
-		else 
-			return 0;
+		return count(buildQuery(projectScope, queryString));
 	}
 	
 }

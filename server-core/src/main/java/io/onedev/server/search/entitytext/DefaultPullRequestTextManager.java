@@ -41,8 +41,13 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.ObjectStreamException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.apache.lucene.document.LongPoint.newExactQuery;
 
 @Singleton
 public class DefaultPullRequestTextManager extends ProjectTextManager<PullRequest> 
@@ -151,7 +156,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	private Query buildQuery(@Nullable Project project, String queryString) {
 		BooleanQueryBuilder queryBuilder = new BooleanQueryBuilder();
 		if (project != null) {
-			queryBuilder.add(LongPoint.newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
+			queryBuilder.add(newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode());
 			if (!projects.isEmpty()) {
@@ -171,7 +176,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 			numberString = numberString.substring(1);
 		try {
 			Long number = Long.valueOf(numberString);
-			contentQueryBuilder.add(new BoostQuery(LongPoint.newExactQuery(FIELD_NUMBER, number), 1f), Occur.SHOULD);
+			contentQueryBuilder.add(new BoostQuery(newExactQuery(FIELD_NUMBER, number), 1f), Occur.SHOULD);
 		} catch (NumberFormatException ignored) {
 		}
 		
@@ -188,7 +193,11 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 				}
 				
 			};
-			contentQueryBuilder.add(parser.parse(LuceneUtils.escape(queryString)), Occur.SHOULD);
+			var escaped = LuceneUtils.escape(queryString);
+			if (escaped != null)
+				contentQueryBuilder.add(parser.parse(escaped), Occur.SHOULD);
+			else 
+				return null;
 		} catch (ParseException e) {
 			throw new RuntimeException(e);
 		}
@@ -199,27 +208,18 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 
 	@Override
 	public List<PullRequest> query(@Nullable Project project, String queryString, 
-			boolean loadReviewsAndBuilds, int firstResult, int maxResults) {
-		Query query = buildQuery(project, queryString);
-		if (query != null) {
-			List<PullRequest> requests = search(query, firstResult, maxResults);
-			if (!requests.isEmpty() && loadReviewsAndBuilds) {
-				reviewManager.populateReviews(requests);
-				buildManager.populateBuilds(requests);
-			}
-			return requests;
-		} else { 
-			return new ArrayList<>();
+		boolean loadReviewsAndBuilds, int firstResult, int maxResults) {
+		List<PullRequest> requests = search(buildQuery(project, queryString), firstResult, maxResults);
+		if (!requests.isEmpty() && loadReviewsAndBuilds) {
+			reviewManager.populateReviews(requests);
+			buildManager.populateBuilds(requests);
 		}
+		return requests;
 	}
 
 	@Override
 	public long count(@Nullable Project project, String queryString) {
-		Query query = buildQuery(project, queryString);
-		if (query != null) 
-			return count(query);
-		else 
-			return 0;
+		return count(buildQuery(project, queryString));
 	}
 	
 }
