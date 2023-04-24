@@ -89,7 +89,7 @@ public abstract class PullRequestTrigger extends JobTrigger {
 				&& touchedFile(request)) {
 			
 			return new TriggerMatch(request.getMergeRef(), request, getParams(), 
-					"Pull request #" + request.getNumber() + " is opened/updated");
+					"Pull request is opened/updated");
 		}
 		return null;
 	}

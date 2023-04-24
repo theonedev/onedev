@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -1052,7 +1053,7 @@ public abstract class BuildListPanel extends Panel {
 		}
 		
 		if (showRef) {
-			columns.add(new AbstractColumn<Build, Void>(Model.of("Branch/Tag")) {
+			columns.add(new AbstractColumn<Build, Void>(Model.of("On Behalf Of")) {
 	
 				@Override
 				public String getCssClass() {
@@ -1064,12 +1065,19 @@ public abstract class BuildListPanel extends Panel {
 						IModel<Build> rowModel) {
 					Build build = rowModel.getObject();
 					if (SecurityUtils.canReadCode(build.getProject())) {
-						if (build.getBranch() != null) {
+						if (build.getRequest() != null) {
+							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+							PageParameters params = PullRequestActivitiesPage.paramsOf(build.getRequest());
+							Link<Void> link = new BookmarkablePageLink<Void>("link",PullRequestActivitiesPage.class, params);
+							link.add(new Label("label", "pull request #" + build.getRequest().getNumber()));
+							fragment.add(link);
+							cellItem.add(fragment);
+						} else if (build.getBranch() != null) {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
 									new BlobIdent(build.getBranch(), null, FileMode.TREE.getBits()));
 							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
-							link.add(new Label("label", build.getBranch()));
+							link.add(new Label("label", "branch " + build.getBranch()));
 							fragment.add(link);
 							cellItem.add(fragment);
 						} else if (build.getTag() != null) {
@@ -1077,17 +1085,19 @@ public abstract class BuildListPanel extends Panel {
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
 									new BlobIdent(build.getTag(), null, FileMode.TREE.getBits()));
 							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
-							link.add(new Label("label", build.getTag()));
+							link.add(new Label("label", "tag " + build.getTag()));
 							fragment.add(link);
 							cellItem.add(fragment);
 						} else { 
 							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
 						}
 					} else {
-						if (build.getBranch() != null) 
-							cellItem.add(new Label(componentId, build.getBranch()));
+						if (build.getRequest() != null)
+							cellItem.add(new Label(componentId, "pull request #" + build.getRequest().getNumber()));							
+						else if (build.getBranch() != null) 
+							cellItem.add(new Label(componentId, "branch " + build.getBranch()));
 						else if (build.getTag() != null)
-							cellItem.add(new Label(componentId, build.getTag()));
+							cellItem.add(new Label(componentId, "tag " + build.getTag()));
 						else 
 							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
 					}
