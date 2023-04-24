@@ -1057,7 +1057,7 @@ public abstract class BuildListPanel extends Panel {
 	
 				@Override
 				public String getCssClass() {
-					return "branch-tag d-none d-lg-table-cell";
+					return "on-behalf-of d-none d-lg-table-cell";
 				}
 	
 				@Override
