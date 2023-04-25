@@ -5282,7 +5282,4 @@ public class DataMigrator {
 	private void migrate119(File dataDir, Stack<Integer> versions) {
 	}
 
-	private void migrate120(File dataDir, Stack<Integer> versions) {
-	}
-	
 }
