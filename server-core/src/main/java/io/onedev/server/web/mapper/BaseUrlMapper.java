@@ -1,6 +1,8 @@
 package io.onedev.server.web.mapper;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.brandingsetting.BrandingSettingPage;
@@ -268,7 +270,9 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/agents/${agent}/log", AgentLogPage.class));
 		add(new BasePageMapper("~administration/settings/job-executors", JobExecutorsPage.class));
 		add(new BasePageMapper("~administration/settings/groovy-scripts", GroovyScriptListPage.class));
-		add(new BasePageMapper("~administration/cluster", ClusterManagementPage.class));
+
+		if (OneDev.getInstance(ClusterManager.class).isClusteringSupported()) 
+			add(new BasePageMapper("~administration/cluster", ClusterManagementPage.class));
 		
 		add(new BasePageMapper("~administration/settings/issue-fields", IssueFieldListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-states", IssueStateListPage.class));

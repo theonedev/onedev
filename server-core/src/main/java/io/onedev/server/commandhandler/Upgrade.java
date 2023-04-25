@@ -733,21 +733,21 @@ public class Upgrade extends AbstractPlugin {
 			}
 			FileUtils.deleteDir(new File(upgradeDir, "site/info"));
 		}
-		
+
+		var directoryVersion = ".onedev-directory-version";
 		if (oldDataVersion <= 116) {
 			logger.info("Upgrading build storage directory...");
-			var directoryVersion = ".onedev-directory-version";
-			for (var projectDir: new File(upgradeDir, "site/projects").listFiles()) {
-				if (projectDir.getName().equals(directoryVersion)) 
-					continue;	
+			for (var projectDir : new File(upgradeDir, "site/projects").listFiles()) {
+				if (projectDir.getName().equals(directoryVersion))
+					continue;
 				logger.info("Processing project with id '" + projectDir.getName() + "'...");
 				var buildsDir = new File(projectDir, "builds");
 				if (buildsDir.exists()) {
-					for (var buildDir: buildsDir.listFiles()) {
-						if (!NumberUtils.isDigits(buildDir.getName())) 
+					for (var buildDir : buildsDir.listFiles()) {
+						if (!NumberUtils.isDigits(buildDir.getName()))
 							continue;
 						var buildNumber = parseInt(buildDir.getName());
-						File suffixDir = new File(buildsDir, String.format("s%03d", buildNumber%1000));
+						File suffixDir = new File(buildsDir, String.format("s%03d", buildNumber % 1000));
 						FileUtils.createDir(suffixDir);
 						try {
 							FileUtils.moveDirectory(buildDir, new File(suffixDir, valueOf(buildNumber)));
@@ -756,60 +756,67 @@ public class Upgrade extends AbstractPlugin {
 						}
 					}
 				}
+			}
+		}
+		if (oldDataVersion <= 118) {
+			for (var projectDir : new File(upgradeDir, "site/projects").listFiles()) {
+				if (projectDir.getName().equals(directoryVersion))
+					continue;
+				var buildsDir = new File(projectDir, "builds");
 				try {
-					writeStringToFile(new File(projectDir, directoryVersion), "1", UTF_8);
+					writeStringToFile(new File(projectDir, directoryVersion), "10000", UTF_8);
 					var attachmentDir = new File(projectDir, "attachment");					
 					if (attachmentDir.exists()) {
-						writeStringToFile(new File(attachmentDir, directoryVersion), "1", UTF_8);
+						writeStringToFile(new File(attachmentDir, directoryVersion), "10000", UTF_8);
 						var permanentDir = new File(attachmentDir, "permanent");
 						if (permanentDir.exists()) {
-							writeStringToFile(new File(permanentDir, directoryVersion), "1", UTF_8);
+							writeStringToFile(new File(permanentDir, directoryVersion), "10000", UTF_8);
 							for (var prefixDir: permanentDir.listFiles()) {
 								if (prefixDir.getName().equals(directoryVersion))
 									continue;
-								writeStringToFile(new File(prefixDir, directoryVersion), "1", UTF_8);
+								writeStringToFile(new File(prefixDir, directoryVersion), "10000", UTF_8);
 								for (var groupDir : prefixDir.listFiles()) {
 									if (groupDir.getName().equals(directoryVersion))
 										continue;
-									writeStringToFile(new File(groupDir, directoryVersion), "1", UTF_8);
+									writeStringToFile(new File(groupDir, directoryVersion), "10000", UTF_8);
 								}
 							}								
 						}
 					}
 					var gitDir = new File(projectDir, "git");
 					if (gitDir.exists()) 
-						writeStringToFile(new File(gitDir, directoryVersion), "1", UTF_8);
+						writeStringToFile(new File(gitDir, directoryVersion), "10000", UTF_8);
 					var siteDir = new File(projectDir, "site");
 					if (siteDir.exists())
-						writeStringToFile(new File(siteDir, directoryVersion), "1", UTF_8);
+						writeStringToFile(new File(siteDir, directoryVersion), "10000", UTF_8);
 					if (buildsDir.exists()) {
-						writeStringToFile(new File(buildsDir, directoryVersion), "1", UTF_8);
+						writeStringToFile(new File(buildsDir, directoryVersion), "10000", UTF_8);
 						for (var suffixDir: buildsDir.listFiles()) {
 							if (suffixDir.getName().equals(directoryVersion)) 
 								continue;
-							writeStringToFile(new File(suffixDir, directoryVersion), "1", UTF_8);
+							writeStringToFile(new File(suffixDir, directoryVersion), "10000", UTF_8);
 							for (var buildDir: suffixDir.listFiles()) {
 								if (buildDir.getName().equals(directoryVersion)) 
 									continue;
-								writeStringToFile(new File(buildDir, directoryVersion), "1", UTF_8);
+								writeStringToFile(new File(buildDir, directoryVersion), "10000", UTF_8);
 								var artifactsDir = new File(buildDir, "artifacts");
 								if (artifactsDir.exists())
-									writeStringToFile(new File(artifactsDir, directoryVersion), "1", UTF_8);
+									writeStringToFile(new File(artifactsDir, directoryVersion), "10000", UTF_8);
 								var markdownDir = new File(buildDir, "markdown");
 								if (markdownDir.exists())
-									writeStringToFile(new File(markdownDir, directoryVersion), "1", UTF_8);
+									writeStringToFile(new File(markdownDir, directoryVersion), "10000", UTF_8);
 								var pullRequestMarkdownDir = new File(buildDir, "pull-request-markdown");
 								if (pullRequestMarkdownDir.exists())
-									writeStringToFile(new File(pullRequestMarkdownDir, directoryVersion), "1", UTF_8);
+									writeStringToFile(new File(pullRequestMarkdownDir, directoryVersion), "10000", UTF_8);
 								var unitTestDir = new File(buildDir, "unit-test");
 								if (unitTestDir.exists())
-									writeStringToFile(new File(unitTestDir, directoryVersion), "1", UTF_8);
+									writeStringToFile(new File(unitTestDir, directoryVersion), "10000", UTF_8);
 								var problemDir = new File(buildDir, "problem");
 								if (problemDir.exists())
-									writeStringToFile(new File(problemDir, directoryVersion), "1", UTF_8);
+									writeStringToFile(new File(problemDir, directoryVersion), "10000", UTF_8);
 								var coverageDir = new File(buildDir, "coverage");
 								if (coverageDir.exists())
-									writeStringToFile(new File(coverageDir, directoryVersion), "1", UTF_8);
+									writeStringToFile(new File(coverageDir, directoryVersion), "10000", UTF_8);
 							}
 						}
 					}

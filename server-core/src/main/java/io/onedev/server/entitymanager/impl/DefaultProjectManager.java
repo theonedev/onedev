@@ -1569,10 +1569,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 							syncDirectory(projectId, SITE_DIR, getSiteLockName(projectId), syncWithServer);
 							
 							writeVersion(projectDir, remoteVersion);
-							updateReplicaVersion(projectId);
-
 							logger.debug("Project synced (project: {}, server: {})", project.getPath(), syncWithServer);
 						}
+						updateReplicaVersion(projectId);
 					} catch (Exception e) {
 						logger.error(String.format("Error syncing (project: %s, server: %s)", project.getPath(), syncWithServer), e);
 					}
