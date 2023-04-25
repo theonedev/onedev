@@ -1437,11 +1437,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public void syncDirectory(Long projectId, String path, Consumer<String> childSyncer, String activeServer) {
 		var directory = new File(getStorageDir(projectId), path);
-		int version = readVersion(directory);
 		
 		int remoteVersion = clusterManager.runOnServer(activeServer, () -> {
 			return readVersion(new File(getStorageDir(projectId), path));
 		});
+		int version = readVersion(directory);
 		
 		if (version < remoteVersion) {
 			Collection<String> remoteChildren = clusterManager.runOnServer(activeServer, () -> {
@@ -1554,13 +1554,13 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				if (project != null) {
 					try {
 						var projectDir = getStorageDir(projectId);
-						var version = readVersion(projectDir);
 						var remoteVersion = clusterManager.runOnServer(syncWithServer, () -> {
 							return readVersion(getStorageDir(projectId));
 						});
+						var version = readVersion(projectDir);
 
 						if (version < remoteVersion) {
-							logger.debug("Syncing project (project: {}, server: {})...", project.getPath(), syncWithServer);
+							logger.info("Syncing project (project: {}, server: {})...", project.getPath(), syncWithServer);
 							syncGit(projectId, syncWithServer);
 							attachmentManager.syncAttachments(projectId, syncWithServer);
 							buildManager.syncBuilds(projectId, syncWithServer);
@@ -1581,8 +1581,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 			private void syncGit(Long projectId, String activeServer) {
 				var gitDir = getGitDir(projectId);
-				var gitVersion = readVersion(gitDir);
 				var remoteGitVersion = clusterManager.runOnServer(activeServer, () -> readVersion(getGitDir(projectId)));
+				var gitVersion = readVersion(gitDir);
 				if (gitVersion < remoteGitVersion) {
 					var repository = getRepository(projectId);
 					var defaultBranch = getDefaultBranch(repository);
