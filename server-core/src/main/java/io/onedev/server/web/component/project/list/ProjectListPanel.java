@@ -320,7 +320,7 @@ public class ProjectListPanel extends Panel {
 		if (getParentProject() != null)
 			canCreateProjects = SecurityUtils.canCreateChildren(getParentProject());
 		else
-			canCreateProjects = SecurityUtils.canCreateProjects();
+			canCreateProjects = true;
 		
 		add(new MenuLink("operations") {
 
