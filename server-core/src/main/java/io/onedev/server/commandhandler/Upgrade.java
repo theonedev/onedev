@@ -150,29 +150,25 @@ public class Upgrade extends AbstractPlugin {
 			return new Properties();
 	}
 	
-	private int getDataVersion(File upgradeDir, int sourceAppDataVersion) {
-		AtomicInteger oldDataVersion = new AtomicInteger(-1);
+	private DataVersion getDataVersion(File upgradeDir) {
+		var dataVersion = new DataVersion();
 
 		buildCommandline(upgradeDir, "check-data-version").execute(new LineConsumer() {
 
 			 @Override
 			 public void consume(String line) {
 				if (line.startsWith("Data version: ")) {
-					var dbDataVersion = parseInt(line.substring("Data version: ".length()));
-					oldDataVersion.set(dbDataVersion);
-					logger.info("Data version: " + dbDataVersion);
+					var value = parseInt(line.substring("Data version: ".length()));
+					dataVersion.app = dataVersion.db = value;
 				} else if (line.contains("Database is not populated yet")) {
-					oldDataVersion.set(0);
-					logger.info(prefixUpgradeTargetLog(line));
+					dataVersion.db = 0;
 				} else if (line.contains("Data version mismatch")) {
-					var temp = StringUtils.substringAfter(line, "db data version: ");
+					var temp = StringUtils.substringAfter(line, "app data version: ");
+					var appDataVersion = parseInt(StringUtils.substringBefore(temp, ","));
+					temp = StringUtils.substringAfter(line, "db data version: ");
 					var dbDataVersion = parseInt(StringUtils.substringBefore(temp, ")"));
-					if (dbDataVersion != sourceAppDataVersion) {
-						logger.info(prefixUpgradeTargetLog(line));
-					} else {
-						oldDataVersion.set(dbDataVersion);
-						logger.info("Data version: " + dbDataVersion);
-					}
+					dataVersion.app = appDataVersion;
+					dataVersion.db = dbDataVersion;
 				} else {
 					logger.info(prefixUpgradeTargetLog(line));
 				}
@@ -187,7 +183,7 @@ public class Upgrade extends AbstractPlugin {
 			 
 		});
 		
-		return oldDataVersion.get();
+		return dataVersion;
 	}
 	
 	@Override
@@ -278,15 +274,23 @@ public class Upgrade extends AbstractPlugin {
 					throw new RuntimeException(e);
 				}
 
-				int appDataVersion = parseInt(MigrationHelper.getVersion(DataMigrator.class));
-
-				int dbDataVersion = getDataVersion(upgradeDir, appDataVersion);
-				if (dbDataVersion <= 0) {
+				var newAppDataVersion = parseInt(MigrationHelper.getVersion(DataMigrator.class));
+				var dataVersion = getDataVersion(upgradeDir);
+				var oldAppDataVersion = dataVersion.app;
+				var dbDataVersion = dataVersion.db;
+				if (dbDataVersion == 0) {
+					logger.error("Unable to upgrade specified installation as database is not populated yet");
+					System.exit(1);
+				}
+				if (dbDataVersion == -1) {
 					logger.error("Unable to upgrade specified installation due to above error");
 					System.exit(1);
 				}
-
-				if (dbDataVersion > appDataVersion) {
+				if (dbDataVersion != oldAppDataVersion && dbDataVersion != newAppDataVersion) {
+					logger.error("Unable to upgrade specified installation as data version of application and database is not the same");
+					System.exit(1);
+				}
+				if (newAppDataVersion < oldAppDataVersion) {
 					logger.error("OneDev program is too old, please use a newer version");
 					System.exit(1);
 				}
@@ -321,7 +325,7 @@ public class Upgrade extends AbstractPlugin {
 						boolean dbChanged = false;
 						boolean dbCleaned = false;
 						try {
-							if (dbDataVersion != appDataVersion) {
+							if (dbDataVersion != newAppDataVersion) {
 								logger.info("Backing up database as {}...", dbBackupFile.getAbsolutePath());
 
 								FileUtils.createDir(dbBackupFile.getParentFile());
@@ -371,7 +375,7 @@ public class Upgrade extends AbstractPlugin {
 
 								if (ret == 0) {
 									logger.info("Updating program files...");
-									updateProgramFiles(upgradeDir, dbDataVersion);
+									updateProgramFiles(upgradeDir, oldAppDataVersion);
 
 									logger.info("Restoring database with new program...");
 									ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
@@ -393,14 +397,14 @@ public class Upgrade extends AbstractPlugin {
 
 								if (ret != 0) {
 									logger.error("Failed to upgrade {}", upgradeDir.getAbsolutePath());
-									dbCleaned = getDataVersion(upgradeDir, appDataVersion) == 0;
+									dbCleaned = getDataVersion(upgradeDir).db == 0;
 									failed = true;
 								} else {
 									dbCleaned = false;
 								}
 							} else {
 								logger.info("Copying new program files into {}...", upgradeDir.getAbsolutePath());
-								updateProgramFiles(upgradeDir, dbDataVersion);
+								updateProgramFiles(upgradeDir, oldAppDataVersion);
 							}
 						} catch (Exception e) {
 							logger.error("Error upgrading " + upgradeDir.getAbsolutePath(), e);
@@ -448,7 +452,7 @@ public class Upgrade extends AbstractPlugin {
 									}
 								}
 
-								if (dbDataVersion <= 102)
+								if (oldAppDataVersion <= 102)
 									FileUtils.createDir(new File(upgradeDir, "site/assets/root"));
 
 								restoreExecutables(upgradeDir);
@@ -499,17 +503,6 @@ public class Upgrade extends AbstractPlugin {
 							return 1;
 						} else {
 							logger.info("Successfully upgraded {}", upgradeDir.getAbsolutePath());
-
-							if (dbDataVersion <= 5) {
-								logger.warn("\n"
-										+ "************************* IMPORTANT NOTICE *************************\n"
-										+ "* OneDev password hash algorithm has been changed for security    *\n"
-										+ "* reason. Please reset administrator password with the             *\n"
-										+ "* reset_admin_password command. Other users' password will be      *\n"
-										+ "* reset and sent to their mail box automatically when they logs    *\n"
-										+ "* into OneDev.                                                    *\n"
-										+ "********************************************************************");
-							}
 							FileUtils.deleteDir(programBackup);
 							return 0;
 						}
@@ -551,7 +544,7 @@ public class Upgrade extends AbstractPlugin {
 		}
 	}
 	
-	protected void updateProgramFiles(File upgradeDir, int oldDataVersion) {
+	protected void updateProgramFiles(File upgradeDir, int oldAppDataVersion) {
 		cleanAndCopy(new File(Bootstrap.installDir, "3rdparty-licenses"), new File(upgradeDir, "3rdparty-licenses"));
 
 		File siteServerScriptFile = new File(upgradeDir, "bin/server.sh");
@@ -689,7 +682,7 @@ public class Upgrade extends AbstractPlugin {
 			}
 		}
 		
-		if (oldDataVersion <= 102) {
+		if (oldAppDataVersion <= 102) {
 			File assetsRootDir = new File(upgradeDir, "site/assets/root");
 			FileUtils.createDir(assetsRootDir);
 			if (new File(upgradeDir, "site/assets/robots.txt").exists()) {
@@ -735,7 +728,7 @@ public class Upgrade extends AbstractPlugin {
 		}
 
 		var directoryVersion = ".onedev-directory-version";
-		if (oldDataVersion <= 116) {
+		if (oldAppDataVersion <= 116) {
 			logger.info("Upgrading build storage directory...");
 			for (var projectDir : new File(upgradeDir, "site/projects").listFiles()) {
 				if (projectDir.getName().equals(directoryVersion))
@@ -758,7 +751,7 @@ public class Upgrade extends AbstractPlugin {
 				}
 			}
 		}
-		if (oldDataVersion <= 118) {
+		if (oldAppDataVersion <= 118) {
 			for (var projectDir : new File(upgradeDir, "site/projects").listFiles()) {
 				if (projectDir.getName().equals(directoryVersion))
 					continue;
@@ -1026,5 +1019,10 @@ public class Upgrade extends AbstractPlugin {
 	@Override
 	public void stop() {
 	}
-
+	
+	static class DataVersion {
+		int app = -1;
+		
+		int db = -1;
+	}
 }
