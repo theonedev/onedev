@@ -109,11 +109,11 @@ public class BuildStatusIcon extends SpriteImage {
 	
 	public static String getIconClass(@Nullable Status status) {
 		if (status == Build.Status.RUNNING)
-			return "icon build-status-running spin";
+			return "icon flex-shrink-0 build-status-running spin";
 		else if (status != null)
-			return "icon build-status-" + status.name().toLowerCase();
+			return "icon flex-shrink-0 build-status-" + status.name().toLowerCase();
 		else
-			return "icon build-status-none";
+			return "icon flex-shrink-0 build-status-none";
 	}
 	
 }
