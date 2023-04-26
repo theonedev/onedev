@@ -1,38 +1,37 @@
 package io.onedev.server.search.entity.project;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.project.ProjectQueryParser.AndCriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.CriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.FieldOperatorValueCriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.NotCriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorCriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorValueCriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.ParensCriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.QueryContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.*;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
+import org.antlr.v4.runtime.*;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.ChildrenOf;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.Contains;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.ForkRoots;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.ForksOf;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.HasOutdatedReplicas;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.Is;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.IsSince;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.IsUntil;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.Leafs;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.MissingStorage;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.OwnedByMe;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.OwnedByNone;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.Roots;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.WithoutEnoughReplicas;
+import static io.onedev.server.search.entity.project.ProjectQueryLexer.ruleNames;
 
 public class ProjectQuery extends EntityQuery<Project> {
 
@@ -90,23 +89,33 @@ public class ProjectQuery extends EntityQuery<Project> {
 
 					@Override
 					public Criteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
-						if (ctx.operator.getType() == ProjectQueryLexer.Roots)
-							return new RootsCriteria();
-						else if (ctx.operator.getType() == ProjectQueryLexer.Leafs)
-							return new LeafsCriteria();
-						else if (ctx.operator.getType() == ProjectQueryLexer.ForkRoots)
-							return new ForkRootsCriteria();
-						else if (ctx.operator.getType() == ProjectQueryLexer.OwnedByMe)
-							return new OwnedByMeCriteria();
-						else
-							return new OwnedByNoneCriteria();
+						switch (ctx.operator.getType()) {
+							case Roots:
+								return new RootsCriteria();
+							case Leafs:
+								return new LeafsCriteria();
+							case ForkRoots:
+								return new ForkRootsCriteria();
+							case OwnedByMe:
+								return new OwnedByMeCriteria();
+							case OwnedByNone:
+								return new OwnedByNoneCriteria();
+							case WithoutEnoughReplicas:
+								return new WithoutEnoughReplicasCriteria();
+							case HasOutdatedReplicas:
+								return new HasOutdatedReplicasCriteria();
+							case MissingStorage:
+								return new MissingStorageCriteria();
+							default:
+								throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
+						}
 					}
 					
 					public Criteria<Project> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						if (ctx.operator.getType() == ProjectQueryLexer.ChildrenOf)
+						if (ctx.operator.getType() == ChildrenOf)
 							return new ChildrenOfCriteria(value);
-						else if (ctx.operator.getType() == ProjectQueryLexer.ForksOf)
+						else if (ctx.operator.getType() == ForksOf)
 							return new ForksOfCriteria(value);
 						else
 							return new OwnedByCriteria(getUser(value));
@@ -125,7 +134,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 						checkField(fieldName, operator);
 						
 						switch (operator) {
-						case ProjectQueryLexer.Is:
+						case Is:
 							if (fieldName.equals(Project.NAME_NAME))
 								return new NameCriteria(value);
 							else if (fieldName.equals(Project.NAME_SERVICE_DESK_NAME))
@@ -134,10 +143,10 @@ public class ProjectQuery extends EntityQuery<Project> {
 								return new PathCriteria(value);
 							else
 								return new LabelCriteria(getLabelSpec(value));
-						case ProjectQueryLexer.Contains:
+						case Contains:
 							return new DescriptionCriteria(value);
-						case ProjectQueryLexer.IsUntil:
-						case ProjectQueryLexer.IsSince:
+						case IsUntil:
+						case IsSince:
 							if (fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE))
 								return new LastActivityDateCriteria(value, operator);
 							else 
@@ -202,11 +211,11 @@ public class ProjectQuery extends EntityQuery<Project> {
 		if (!Project.QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case ProjectQueryLexer.Contains:
+		case Contains:
 			if (!fieldName.equals(Project.NAME_DESCRIPTION))
 				throw newOperatorException(fieldName, operator);
 			break;
-		case ProjectQueryLexer.Is:
+		case Is:
 			if (!fieldName.equals(Project.NAME_NAME) 
 					&& !fieldName.equals(Project.NAME_LABEL)
 					&& !fieldName.equals(Project.NAME_SERVICE_DESK_NAME) 
@@ -214,8 +223,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
-		case ProjectQueryLexer.IsUntil:
-		case ProjectQueryLexer.IsSince:
+		case IsUntil:
+		case IsSince:
 			if (!fieldName.equals(Project.NAME_LAST_ACTIVITY_DATE) 
 					&& !fieldName.equals(Project.NAME_LAST_COMMIT_DATE)) {
 				throw newOperatorException(fieldName, operator);
@@ -242,11 +251,11 @@ public class ProjectQuery extends EntityQuery<Project> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return AntlrUtils.getLexerRuleName(ProjectQueryLexer.ruleNames, rule);
+		return AntlrUtils.getLexerRuleName(ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return AntlrUtils.getLexerRule(ProjectQueryLexer.ruleNames, operatorName);
+		return AntlrUtils.getLexerRule(ruleNames, operatorName);
 	}
 	
 }

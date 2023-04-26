@@ -115,6 +115,18 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Map<String, ProjectReplica> getReplicas(Long projectId);
 	
+	Collection<Long> getIdsWithoutEnoughReplicas();
+	
+	Collection<Long> getIdsHasOutdatedReplicas();
+	
+	Collection<Long> getIdsMissingStorage();
+	
+	boolean hasOutdatedReplicas(Long projectId);
+	
+	boolean isWithoutEnoughReplicas(Long projectId);
+	
+	boolean isMissingStorage(Long projectId);
+	
 	void requestToSyncReplica(Long projectId, String syncWithServer);
 
 	Collection<ObjectId> readLfsSinceCommits(Long projectId);

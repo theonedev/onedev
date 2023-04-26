@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-	: operator=(Roots|Leafs|ForkRoots|OwnedByMe|OwnedByNone) #OperatorCriteria
+	: operator=(Roots|Leafs|ForkRoots|OwnedByMe|OwnedByNone|HasOutdatedReplicas|WithoutEnoughReplicas|MissingStorage) #OperatorCriteria
 	| operator=(OwnedBy|ForksOf|ChildrenOf) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|Contains|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
@@ -39,7 +39,7 @@ OwnedByMe
 OwnedByNone
 	: 'owned' WS+ 'by' WS+ 'none'
 	;
-	
+
 IsSince
 	: 'is' WS+ 'since'
 	;
@@ -67,7 +67,19 @@ Leafs
 ForkRoots
 	: 'fork' WS+ 'roots'
 	;
-	
+
+WithoutEnoughReplicas
+    : 'without' WS+ 'enough' WS+ 'replicas'
+    ;
+
+HasOutdatedReplicas
+    : 'has' WS+ 'outdated' WS+ 'replicas'
+    ;
+
+MissingStorage
+    : 'missing' WS+ 'storage'
+    ;
+
 ChildrenOf
 	: 'children' WS+ 'of'
 	;

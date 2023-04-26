@@ -1343,7 +1343,72 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public Map<String, ProjectReplica> getReplicas(Long projectId) {
 		return replicas.get(projectId);
 	}
+
+	@Override
+	public Collection<Long> getIdsWithoutEnoughReplicas() {
+		var ids = new HashSet<Long>();
+		for (var entry: replicas.entrySet()) {
+			if (isWithoutEnoughReplicas(entry.getValue()))
+				ids.add(entry.getKey());
+		}
+		return ids;
+	}
+
+	@Override
+	public Collection<Long> getIdsHasOutdatedReplicas() {
+		var ids = new HashSet<Long>();
+		var activeServers = new HashMap<>(this.activeServers);
+		for (var entry: replicas.entrySet()) {
+			var activeServer = activeServers.get(entry.getKey());
+			if (hasOutdatedReplicas(entry.getValue(), activeServer))
+				ids.add(entry.getKey());
+		}
+		return ids;
+	}
+
+	@Override
+	public boolean hasOutdatedReplicas(Long projectId) {
+		var replicasOfProject = replicas.get(projectId);
+		var activeServer = getActiveServer(projectId, false);
+		if (replicasOfProject != null && activeServer != null) 
+			return hasOutdatedReplicas(replicasOfProject, activeServer);
+		else 
+			return false;
+	}
+
+	private boolean hasOutdatedReplicas(Map<String, ProjectReplica> replicasOfProject, String activeServer) {
+		var activeReplica = replicasOfProject.get(activeServer);
+		return replicasOfProject.entrySet().stream().anyMatch(it -> clusterManager.getServer(it.getKey(), false) != null && it.getValue().getType() != REDUNDANT && it.getValue().getVersion() < activeReplica.getVersion());
+	}
 	
+	@Override
+	public boolean isWithoutEnoughReplicas(Long projectId) {
+		var replicasOfProject = replicas.get(projectId);
+		if (replicasOfProject != null)
+			return isWithoutEnoughReplicas(replicasOfProject);
+		else 
+			return false;
+	}
+
+	private boolean isWithoutEnoughReplicas(Map<String, ProjectReplica> replicasOfProject) {
+		var count = replicasOfProject.entrySet().stream()
+				.filter(it -> it.getValue().getType() != REDUNDANT && clusterManager.getServer(it.getKey(), false) != null)
+				.count();
+		return count < settingManager.getClusterSetting().getReplicaCount();
+	}
+
+	@Override
+	public Collection<Long> getIdsMissingStorage() {
+		var ids = getIds();
+		ids.removeAll(activeServers.keySet());
+		return ids;
+	}
+
+	@Override
+	public boolean isMissingStorage(Long projectId) {
+		return replicas.get(projectId) == null;
+	}
+
 	private void updateReplicaVersion(Long projectId) {
 		var projectDir = getStorageDir(projectId);
 		while (true) {

@@ -1,12 +1,14 @@
 package io.onedev.server.web.behavior;
 
 import static io.onedev.server.search.entity.project.ProjectQuery.getRuleName;
+import static io.onedev.server.search.entity.project.ProjectQueryParser.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.onedev.server.cluster.ClusterManager;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Optional;
@@ -134,9 +136,13 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		if (!OneDev.getInstance(ClusterManager.class).isClusteringSupported() 
+				&& (suggestedLiteral.equals(getRuleName(WithoutEnoughReplicas)) || suggestedLiteral.equals(getRuleName(HasOutdatedReplicas)))) {
+			return null;
+		}
 		if (childQuery) {
-			if (suggestedLiteral.equals(getRuleName(ProjectQueryParser.ChildrenOf))
-					|| suggestedLiteral.equals(getRuleName(ProjectQueryParser.Roots))) { 
+			if (suggestedLiteral.equals(getRuleName(ChildrenOf))
+					|| suggestedLiteral.equals(getRuleName(Roots))) { 
 				return null;
 			}
 		}

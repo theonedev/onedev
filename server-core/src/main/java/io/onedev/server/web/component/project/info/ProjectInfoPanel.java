@@ -203,7 +203,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				for (var server: getClusterManager().getServerAddresses()) 
 					orders.put(server, index++);					
 				return replicas.stream()
-						.filter(it -> getClusterManager().getServer(it.getKey(), false) != null && (it.getValue().getType() != REDUNDANT || it.getKey().equals(activeServer)))
+						.filter(it -> orders.containsKey(it.getKey()) && (it.getValue().getType() != REDUNDANT || it.getKey().equals(activeServer)))
 						.sorted(comparingInt(o -> orders.get(o.getKey())))
 						.collect(Collectors.toList());
 			}
