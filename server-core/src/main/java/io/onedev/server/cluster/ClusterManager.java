@@ -17,6 +17,10 @@ public interface ClusterManager {
 
 	void start();
 	
+	void postStart();
+
+	void preStop();
+	
 	void stop();
 	
 	Collection<String> getRunningServers();

@@ -176,7 +176,18 @@ public class DefaultClusterManager implements ClusterManager {
 		
 		httpPorts.put(getLocalServerAddress(), serverConfig.getHttpPort());
 		sshPorts.put(getLocalServerAddress(), serverConfig.getSshPort());
+	}
+
+	@Override
+	public void postStart() {
+		var localServer = getLocalServerAddress();
 		runningServers.put(localServer, localServer);
+	}
+
+	@Override
+	public void preStop() {
+		if (runningServers != null)
+			runningServers.remove(getLocalServerAddress());
 	}
 
 	@Override
@@ -186,8 +197,6 @@ public class DefaultClusterManager implements ClusterManager {
 			httpPorts.put(localServer, serverConfig.getHttpPort());
 		if (sshPorts != null)
 			sshPorts.put(localServer, serverConfig.getSshPort());
-		if (runningServers != null)
-			runningServers.remove(getLocalServerAddress());
 
 		if (hazelcastInstance != null) {
 			hazelcastInstance.shutdown();

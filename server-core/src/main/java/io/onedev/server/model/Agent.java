@@ -211,7 +211,8 @@ public class Agent extends AbstractEntity {
 			var agentManager = OneDev.getInstance(AgentManager.class);
 			var clusterManager = OneDev.getInstance(ClusterManager.class);
 			var server = agentManager.getAgentServer(getId());
-			online = server != null && clusterManager.getServer(server, false) != null;
+			online = server != null && clusterManager.getServer(server, false) != null
+					&& clusterManager.getRunningServers().contains(server);
 		}
 		return online;
 	}

@@ -183,11 +183,13 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		SecurityUtils.bindAsSystem();
 		initStage = null;
 		listenerRegistry.post(new SystemStarted());
+		clusterManager.postStart();
         logger.info("Server is ready at " + guessServerUrl() + ".");
 	}
 
 	@Override
 	public void preStop() {
+		clusterManager.preStop();
 		SecurityUtils.bindAsSystem();
 		try {
 			sessionManager.run(() -> listenerRegistry.post(new SystemStopping()));
