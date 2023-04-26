@@ -56,6 +56,7 @@ import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -950,13 +951,13 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 		User root = userManager.getRoot();
 		String url = settingManager.getSystemSetting().getServerUrl();
 		String htmlBody = String.format(""
-				+ "OneDev url: <a href='%s'>%s</a>"
+				+ "OneDev URL: <a href='%s'>%s</a>"
 				+ "<p style='margin: 16px 0;'>"
 				+ "<b>Error detail:</b>"
 				+ "<pre style='font-family: monospace;'>%s</pre>"
 				+ "<p style='margin: 16px 0;'>"
 				+ "-- Sent by OneDev", 
-				url, url, Throwables.getStackTraceAsString(e));
+				url, url, HtmlEscape.escapeHtml5(Throwables.getStackTraceAsString(e)));
 		String textBody = String.format(""
 				+ "OneDev url: %s\n\n"
 				+ "Error detail:\n"

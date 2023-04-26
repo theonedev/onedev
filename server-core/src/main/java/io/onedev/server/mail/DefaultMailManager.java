@@ -1,6 +1,7 @@
 package io.onedev.server.mail;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
@@ -18,6 +19,7 @@ import io.onedev.server.cluster.ClusterRunnable;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
+import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -334,6 +336,36 @@ public class DefaultMailManager implements MailManager, Serializable {
 						 @Nullable String senderName, @Nullable String references) {
 		sendMail(null, toList, ccList, bccList, subject, htmlBody, textBody, replyAddress, 
 				senderName, references);
+	}
+	
+	@Listen
+	public void on(ConnectionLost event) {
+		if (clusterManager.isLeaderServer()) {
+			var server = event.getServer();
+			User root = userManager.getRoot();
+			String url = settingManager.getSystemSetting().getServerUrl();
+			String message = "Server '" + server + "' is part of OneDev cluster, but can not be reached for some reason";
+			String htmlBody = String.format(""
+							+ "OneDev URL: <a href='%s'>%s</a>"
+							+ "<p style='margin: 16px 0;'>"
+							+ "<b>Error detail:</b>"
+							+ "<pre style='font-family: monospace;'>%s</pre>"
+							+ "<p style='margin: 16px 0;'>"
+							+ "-- Sent by OneDev",
+					url, url, message);
+			String textBody = String.format(""
+							+ "OneDev url: %s\n\n"
+							+ "Error detail:\n"
+							+ "%s",
+					url, message);
+
+			EmailAddress emailAddress = root.getPrimaryEmailAddress();
+			if (emailAddress != null && emailAddress.isVerified()) {
+				sendMail(Lists.newArrayList(emailAddress.getValue()), Lists.newArrayList(),
+						Lists.newArrayList(), "[Clustering] Server '" + server + "' can not be reached",
+						htmlBody, textBody, null, null, null);
+			}
+		}
 	}
 	
 	@Transactional
