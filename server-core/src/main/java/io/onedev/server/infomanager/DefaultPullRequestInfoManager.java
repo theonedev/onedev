@@ -178,9 +178,10 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	@Sessional
 	@Listen
 	public void on(ActiveServerChanged event) {
-		var projectId = event.getProjectId();
-		checkVersion(getEnvDir(projectId.toString()));
-		batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+		for (var projectId: event.getProjectIds()) {
+			checkVersion(getEnvDir(projectId.toString()));
+			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
+		}
 	}
 	
 	@Override

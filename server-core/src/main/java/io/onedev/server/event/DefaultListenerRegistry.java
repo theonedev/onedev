@@ -140,9 +140,8 @@ public class DefaultListenerRegistry implements ListenerRegistry, Serializable {
 				}));
 			}
 		} else if (event instanceof ActiveServerChanged) {
-			ActiveServerChanged serverActivated = (ActiveServerChanged) event;
-			Long projectId = serverActivated.getProjectId();
-			transactionManager.runAfterCommit(() -> projectManager.submitToActiveServer(projectId, () -> {
+			ActiveServerChanged activeServerChanged = (ActiveServerChanged) event;
+			transactionManager.runAfterCommit(() -> clusterManager.submitToServer(activeServerChanged.getActiveServer(), () -> {
 				try {
 					sessionManager.run(() -> invokeListeners(event));
 				} catch (Exception e) {

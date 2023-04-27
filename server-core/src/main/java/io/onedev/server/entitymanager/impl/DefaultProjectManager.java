@@ -135,7 +135,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 
 	private static final String LFS_SINCE_COMMITS = "lfs/.lfs-since-commits";
 	
-	private static final int SYNC_PRIORITY = 40;
+	private static final int SYNC_PRIORITY = 10000;
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 	
@@ -296,14 +296,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		String projectPath = project.getPath();
 		submitToActiveServer(projectId, () -> {
 			try {
-				sessionManager.run(() -> jobManager.schedule(load(projectId)));
+				sessionManager.run(() -> jobManager.schedule(load(projectId), true));
 			} catch (Exception e) {
-				logger.error("Error scheduling project '" + projectPath + "'", e);
+				logger.error("Error scheduling project tree '" + projectPath + "'", e);
 			}
 			return null;
 		});
-		for (Project child : project.getChildren())
-			scheduleJobs(child);
 	}
 
 	@Transactional
@@ -792,7 +790,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 						throw new RuntimeException(e);
 					}
 				}
-				updateActiveServer(projectId, newReplicasOfProject, false, false);
+				updateActiveServer(projectId, newReplicasOfProject, false);
 			}
 		}
 	}
@@ -800,8 +798,12 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Listen
 	public void on(ConnectionEvent event) {
 		if (clusterManager.isLeaderServer()) {
-			for (var entry: replicas)
-				updateActiveServer(entry.getKey(), entry.getValue(), true, true);
+			var newActiveServers = new HashMap<Long, String>();
+			for (var entry: replicas) {
+				var projectId = entry.getKey();
+				newActiveServers.put(projectId, updateActiveServer(projectId, entry.getValue(), true));
+			}
+			notifyActiveServerChanged(newActiveServers);
 		}
 	}
 
@@ -836,6 +838,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public void on(SystemStopped event) {
 		var localServer = clusterManager.getLocalServerAddress();
 		if (replicas != null) {
+			var newActiveServers = new HashMap<Long, String>();
 			for (var projectToReplicas : replicas.entrySet()) {
 				var projectId = projectToReplicas.getKey();
 				var replicasOfProject = projectToReplicas.getValue();
@@ -844,7 +847,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					if (newReplicasOfProject.remove(localServer) == null) {
 						break;
 					} else if (replicas.replace(projectId, replicasOfProject, newReplicasOfProject)) {
-						updateActiveServer(projectId, newReplicasOfProject, true, true);
+						newActiveServers.put(projectId, updateActiveServer(projectId, newReplicasOfProject, true));
 						break;
 					} else {
 						replicasOfProject = replicas.get(projectId);
@@ -858,6 +861,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					}
 				}
 			}
+			notifyActiveServerChanged(newActiveServers);
 		}
 		
 		synchronized (repositoryCache) {
@@ -1124,8 +1128,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return new HashMap<>(activeServers);
 	}
 	
-	private void updateActiveServer(Long projectId, Map<String, ProjectReplica> replicasOfProject, 
-									boolean postEvent, boolean syncReplicas) {
+	private String updateActiveServer(Long projectId, 
+									  Map<String, ProjectReplica> replicasOfProject, 
+									  boolean syncReplicas) {
 		var effectiveReplicasOfProject = new LinkedHashMap<String, ProjectReplica>();
 		for (var entry : replicasOfProject.entrySet()) {
 			if (clusterManager.getServer(entry.getKey(), false) != null)
@@ -1163,11 +1168,23 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			oldActiveServer = activeServers.remove(projectId);
 		
 		if (newActiveServer != null) {
-			if (!newActiveServer.equals(oldActiveServer) && postEvent)
-				listenerRegistry.post(new ActiveServerChanged(projectId, oldActiveServer));
 			if (syncReplicas)
 				requestToSyncReplicas(projectId, newActiveServer, replicasOfProject);
+			if (!newActiveServer.equals(oldActiveServer))
+				return newActiveServer;
 		}
+		return null;
+	}
+	
+	private void notifyActiveServerChanged(Map<Long, String> newActiveServers) {
+		var projectIds = new HashMap<String, Collection<Long>>();
+		newActiveServers.forEach((projectId, server) -> {
+			if (server != null) {
+				var projectIdsOfServer = projectIds.computeIfAbsent(server, k -> new HashSet<>());
+				projectIdsOfServer.add(projectId);
+			}
+		});
+		projectIds.forEach((key, value) -> listenerRegistry.post(new ActiveServerChanged(key, value)));
 	}
 	
 	@Override
@@ -1251,6 +1268,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	public void redistributeReplicas() {
 		var snapshot = new HashMap<>(replicas);
 		clusterManager.redistributeProjects(snapshot);	
+		var newActiveServers = new HashMap<Long, String>();
 		for (var newProjectToReplicas: snapshot.entrySet()) {
 			var projectId = newProjectToReplicas.getKey();
 			var project = cache.get(projectId);
@@ -1280,7 +1298,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					if (replicasOfProject.equals(newReplicasOfProject)) {
 						break;
 					} else if (replicas.replace(projectId, replicasOfProject, newReplicasOfProject)) {
-						updateActiveServer(projectId, newReplicasOfProject, true, true);
+						newActiveServers.put(projectId, updateActiveServer(projectId, newReplicasOfProject, true));
 						break;
 					}
 				} else {
@@ -1293,6 +1311,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 				}
 			}
 		}
+		notifyActiveServerChanged(newActiveServers);
 	}
 	
 	private void initGit(Long projectId, GitPackConfig gitPackConfig) {
@@ -1625,7 +1644,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 						var version = readVersion(projectDir);
 
 						if (version < remoteVersion) {
-							logger.info("Syncing project (project: {}, server: {})...", project.getPath(), syncWithServer);
+							logger.debug("Syncing project (project: {}, server: {})...", project.getPath(), syncWithServer);
 							syncGit(projectId, syncWithServer);
 							attachmentManager.syncAttachments(projectId, syncWithServer);
 							buildManager.syncBuilds(projectId, syncWithServer);
@@ -1788,6 +1807,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public void execute() {
 		if (clusterManager.isLeaderServer()) {
+			var newActiveServers = new HashMap<Long, String>();
 			var replicaCount = settingManager.getClusterSetting().getReplicaCount();
 			for (var projectToReplicas: replicas.entrySet()) {
 				var projectId = projectToReplicas.getKey();
@@ -1798,7 +1818,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 						var activeServer = getActiveServer(projectId, false);
 						var replica = newReplicasOfProject.get(activeServer);
 						if (replica == null || replica.getType() != PRIMARY)
-							updateActiveServer(projectId, newReplicasOfProject, true, true);
+							newActiveServers.put(projectId, updateActiveServer(projectId, newReplicasOfProject, true));
 						var maxVersion = newReplicasOfProject.values().stream()
 								.map(ProjectReplica::getVersion)
 								.max(naturalOrder())
@@ -1840,6 +1860,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 					}
 				}
 			}
+			notifyActiveServerChanged(newActiveServers);
 		}
 	}
 	

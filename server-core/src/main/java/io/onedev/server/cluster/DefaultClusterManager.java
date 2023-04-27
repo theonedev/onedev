@@ -5,6 +5,7 @@ import com.hazelcast.cluster.Member;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
 import com.hazelcast.config.Config;
+import com.hazelcast.config.SerializerConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
@@ -20,6 +21,7 @@ import io.onedev.server.model.ClusterServer;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.PersistenceManager;
 import io.onedev.server.replica.ProjectReplica;
+import org.eclipse.jetty.server.session.SessionData;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -140,6 +142,10 @@ public class DefaultClusterManager implements ClusterManager {
 		config.getMapConfig("default").setStatisticsEnabled(false);
 		config.getNetworkConfig().setPort(serverConfig.getClusterPort()).setPortAutoIncrement(false);
 		config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
+		SerializerConfig sc = new SerializerConfig()
+				.setImplementation(new SessionDataSerializer())
+				.setTypeClass(SessionData.class);
+		config.getSerializationConfig().addSerializerConfig(sc);
 		
 		var hasLocalhost = false;
 		var hasNonLocalhost = false;

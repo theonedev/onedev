@@ -1,25 +1,25 @@
 package io.onedev.server.event.project;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.Collection;
 
 public class ActiveServerChanged implements Serializable {
+
+	private final String activeServer;
+
+	private final Collection<Long> projectIds;
 	
-	private final Long projectId;
-	
-	private final String oldActiveServer;
-	
-	public ActiveServerChanged(Long projectId, @Nullable String oldActiveServer) {
-		this.projectId = projectId;
-		this.oldActiveServer = oldActiveServer;
+	public ActiveServerChanged(String activeServer, Collection<Long> projectIds) {
+		this.activeServer = activeServer;
+		this.projectIds = projectIds;
 	}
 
-	public Long getProjectId() {
-		return projectId;
+	public String getActiveServer() {
+		return activeServer;
 	}
 
-	@Nullable
-	public String getOldActiveServer() {
-		return oldActiveServer;
+	public Collection<Long> getProjectIds() {
+		return projectIds;
 	}
+
 }

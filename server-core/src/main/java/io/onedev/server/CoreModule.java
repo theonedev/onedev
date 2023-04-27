@@ -54,6 +54,7 @@ import io.onedev.server.git.signature.DefaultSignatureVerificationKeyLoader;
 import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
 import io.onedev.server.infomanager.*;
 import io.onedev.server.jetty.DefaultJettyLauncher;
+import io.onedev.server.jetty.DefaultSessionDataStoreFactory;
 import io.onedev.server.jetty.JettyLauncher;
 import io.onedev.server.job.DefaultJobManager;
 import io.onedev.server.job.DefaultResourceAllocator;
@@ -141,6 +142,7 @@ import org.apache.shiro.web.servlet.ShiroFilter;
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
+import org.eclipse.jetty.server.session.SessionDataStoreFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -451,6 +453,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WicketFilter.class).to(DefaultWicketFilter.class);
 		bind(EditSupportRegistry.class).to(DefaultEditSupportRegistry.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
+		bind(SessionDataStoreFactory.class).to(DefaultSessionDataStoreFactory.class);
 
 		contributeFromPackage(EditSupport.class, EditSupport.class);
 		

@@ -1158,9 +1158,10 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(ActiveServerChanged event) {
-		var projectId = event.getProjectId();
-		checkVersion(getEnvDir(projectId.toString()));
-		collect(projectId);
+		for (var projectId: event.getProjectIds()) {
+			checkVersion(getEnvDir(projectId.toString()));
+			collect(projectId);
+		}
 	}
 	
 	@Sessional

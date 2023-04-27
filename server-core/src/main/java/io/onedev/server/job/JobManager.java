@@ -20,7 +20,7 @@ import java.util.Map;
 
 public interface JobManager {
 	
-	void schedule(Project project);
+	void schedule(Project project, boolean recursive);
 	
 	void unschedule(Long projectId);
 	

@@ -103,7 +103,7 @@ public class DefaultServerConfig implements ServerConfig {
 		if (StringUtils.isBlank(clusterPortStr))
 			clusterPortStr = props.getProperty(PROP_CLUSTER_PORT);
 		if (StringUtils.isBlank(clusterPortStr))
-			clusterPort = 5701;
+			clusterPort = 5710;
 		else
 			clusterPort = Integer.parseInt(clusterPortStr.trim());
 	}

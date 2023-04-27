@@ -1,34 +1,33 @@
 package io.onedev.server.jetty;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import com.google.inject.servlet.GuiceFilter;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.cluster.ClusterManager;
+import org.apache.tika.mime.MimeTypes;
+import org.eclipse.jetty.http.HttpCookie.SameSite;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.server.session.SessionDataStoreFactory;
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.tika.mime.MimeTypes;
-import org.eclipse.jetty.http.HttpCookie.SameSite;
-import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-
-import com.google.inject.servlet.GuiceFilter;
-
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.utils.ExceptionUtils;
+import java.util.*;
 
 @Singleton
 public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletContextHandler> {
 
 	private static final int MAX_CONTENT_SIZE = 5000000;
+	
+	private final ClusterManager clusterManager;
+	
+	private final SessionDataStoreFactory sessionDataStoreFactory;
 	
 	private Server jettyServer;
 	
@@ -48,8 +47,11 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
 	 */
 	@Inject
 	public DefaultJettyLauncher(
+			ClusterManager clusterManager, SessionDataStoreFactory sessionDataStoreFactory,
 			Provider<Set<ServerConfigurator>> serverConfiguratorsProvider, 
 			Provider<Set<ServletConfigurator>> servletConfiguratorsProvider) {
+		this.clusterManager = clusterManager;
+		this.sessionDataStoreFactory = sessionDataStoreFactory;
 		this.serverConfiguratorsProvider = serverConfiguratorsProvider;
 		this.servletConfiguratorsProvider = servletConfiguratorsProvider;
 	}
@@ -58,6 +60,8 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
 	public void start() {
 		jettyServer = new Server();
 
+		jettyServer.addBean(sessionDataStoreFactory);
+		
         servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setMaxFormContentSize(MAX_CONTENT_SIZE);
 

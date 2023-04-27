@@ -635,7 +635,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Listen
 	public void on(ProjectCreated event) {
-		schedule(event.getProject());
+		schedule(event.getProject(), false);
 	}
 
 	@Listen
@@ -951,7 +951,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		var localServer = clusterManager.getLocalServerAddress();
 		for (var projectId: projectManager.getIds()) {
 			if (localServer.equals(projectManager.getActiveServer(projectId, false))) 
-				schedule(projectManager.load(projectId));
+				schedule(projectManager.load(projectId), false);
 		}
 		thread = new Thread(this);
 		thread.start();
@@ -961,13 +961,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Sessional
 	@Listen
 	public void on(ActiveServerChanged event) {
-		schedule(projectManager.load(event.getProjectId()));
+		for (var projectId: event.getProjectIds())
+			schedule(projectManager.load(projectId), false);
 	}
 
 	@Sessional
 	@Listen
 	public void on(DefaultBranchChanged event) {
-		schedule(event.getProject());
+		schedule(event.getProject(), false);
 	}
 
 	@Sessional
@@ -976,12 +977,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		String branch = GitUtils.ref2branch(event.getRefName());
 		Project project = event.getProject();
 		if (branch != null && branch.equals(project.getDefaultBranch()) && !event.getNewCommitId().equals(ObjectId.zeroId()))
-			schedule(project);
+			schedule(project, false);
 	}
 
 	@Sessional
 	@Override
-	public void schedule(Project project) {
+	public void schedule(Project project, boolean recursive) {
 		Collection<String> tasksOfProject = new HashSet<>();
 		try {
 			String defaultBranch = project.getDefaultBranch();
@@ -1021,6 +1022,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			tasksOfProject = projectTasks.put(project.getId(), tasksOfProject);
 			if (tasksOfProject != null)
 				tasksOfProject.forEach(taskScheduler::unschedule);
+		}
+		if (recursive) {
+			for (var child : project.getChildren())
+				schedule(child, true);
 		}
 	}
 
