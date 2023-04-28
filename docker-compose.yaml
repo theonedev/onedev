@@ -1,38 +1,39 @@
+version: "3.0"
 services:
-  onedev:
-    image: 1dev/server
+  database-mysql:
+    image: "mysql:8.0.29"
+    restart: "always"
+    environment:
+      ### You must change root database password
+      MYSQL_ROOT_PASSWORD: "db-password"
+
+      # No need to change the following
+      MYSQL_DATABASE: "onedev"
     volumes:
-      - ./onedev:/opt/onedev
-    restart: always
+      - "./db-data:/var/lib/mysql"
+    #ports:
+      #- 3306:3306
+      #- 0.0.0.0:3306:3306
+
+  onedev:
+    image: "1dev/server"
+    volumes:
+      - "./onedev:/opt/onedev"
+    restart: "always"
     ports:
       - "6610:6610"
       - "6611:6611"
     environment:
-      ### Must change:
-      initial_password: "user-secure-password"
+      ### You must change database connection password, and admin account password:
+      hibernate_connection_password: "db-password"
+      initial_password: "admin-password"
+      ### It is also a good idea to set up initial email, and server URL
       initial_email: "your@email.com"
-      initial_user: admin
-      hibernate_connection_password: secure-db-password
       # initial_server_url: "https://your.domain.name"
 
-      ### No need to change:
-      hibernate_dialect: io.onedev.server.persistence.PostgreSQLDialect
-      hibernate_connection_driver_class: org.postgresql.Driver
-      hibernate_connection_url: jdbc:postgresql://postgres:5432/onedev
-      hibernate_connection_username: postgres  
-    
-  postgres:
-    image: postgres:14-alpine3.15
-    restart: always
-    environment:
-      ### Must change:
-      POSTGRES_PASSWORD: "secure-db-password"
-
-      ### No need to change:
-      POSTGRES_USER: "postgres"
-      POSTGRES_DB: "onedev"
-    ports:
-      - 5432:5432
-      #- 0.0.0.0:5432:5432
-    volumes:
-      - ./postgres:/var/lib/postgresql/data
+      # No need to change the following
+      initial_user: "admin"
+      hibernate_dialect: "org.hibernate.dialect.MySQL5InnoDBDialect"
+      hibernate_connection_driver_class: "com.mysql.cj.jdbc.Driver"
+      hibernate_connection_url: "jdbc:mysql://database-mysql:3306/onedev?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false&disableMariaDbDriver=true"
+      hibernate_connection_username: "root"
