@@ -3,36 +3,32 @@ services:
     image: 1dev/server
     volumes:
       - ./onedev:/opt/onedev
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: always
     ports:
       - "6610:6610"
       - "6611:6611"
     environment:
-      ### Must change:
-      initial_password: "user-secure-password"
-      initial_email: "your@email.com"
-      initial_user: admin
-      hibernate_connection_password: secure-db-password
-      # initial_server_url: "https://your.domain.name"
+      ### This should be the same as POSTGRES_PASSWORD env below
+      hibernate_connection_password: "changeit"
 
-      ### No need to change:
       hibernate_dialect: io.onedev.server.persistence.PostgreSQLDialect
       hibernate_connection_driver_class: org.postgresql.Driver
       hibernate_connection_url: jdbc:postgresql://postgres:5432/onedev
       hibernate_connection_username: postgres  
-    
+    depends_on:
+      - "postgres"
+
   postgres:
     image: postgres:14-alpine3.15
     restart: always
     environment:
-      ### Must change:
-      POSTGRES_PASSWORD: "secure-db-password"
+      ### Change this
+      POSTGRES_PASSWORD: "changeit"
 
-      ### No need to change:
       POSTGRES_USER: "postgres"
       POSTGRES_DB: "onedev"
-    ports:
-      - 5432:5432
-      #- 0.0.0.0:5432:5432
+    expose:
+      - "5432"
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./onedev/site/postgres:/var/lib/postgresql/data
