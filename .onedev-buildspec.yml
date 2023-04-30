@@ -1,4 +1,4 @@
-version: 20
+version: 21
 properties:
 - name: buildEnvironment
   value: 1dev/build-environment:1.5
@@ -154,11 +154,13 @@ jobs:
       - sha256sum onedev-${buildVersion}.tar.gz > onedev-${buildVersion}.tar.gz.sha256
       - sha256sum server-plugin-archetype-${buildVersion}.zip > server-plugin-archetype-${buildVersion}.zip.sha256
       - sha256sum server-plugin-archetype-${buildVersion}.tar.gz > server-plugin-archetype-${buildVersion}.tar.gz.sha256
+      - ''
+      - cp server-product/target/docker/*.yaml .
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifact
-    artifacts: '*.zip *.tar.gz *.sha256'
+    artifacts: '*.zip *.tar.gz *.sha256 *.yaml'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishMarkdownReportStep
     name: publish markdown report
