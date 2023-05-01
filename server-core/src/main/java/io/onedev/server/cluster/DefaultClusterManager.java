@@ -1,6 +1,5 @@
 package io.onedev.server.cluster;
 
-import com.google.common.hash.Hashing;
 import com.hazelcast.cluster.Member;
 import com.hazelcast.cluster.MembershipEvent;
 import com.hazelcast.cluster.MembershipListener;
@@ -17,7 +16,6 @@ import io.onedev.server.ServerConfig;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.cluster.ConnectionLost;
 import io.onedev.server.event.cluster.ConnectionRestored;
-import io.onedev.server.model.ClusterServer;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.PersistenceManager;
 import io.onedev.server.replica.ProjectReplica;
@@ -25,7 +23,6 @@ import org.eclipse.jetty.server.session.SessionData;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -34,18 +31,19 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static io.onedev.server.model.AbstractEntity.PROP_ID;
-import static io.onedev.server.model.ClusterServer.PROP_ADDRESS;
-import static io.onedev.server.persistence.PersistenceUtils.callWithDatabaseLock;
+import static io.onedev.server.persistence.PersistenceUtils.*;
 import static io.onedev.server.replica.ProjectReplica.Type.PRIMARY;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.max;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class DefaultClusterManager implements ClusterManager {
 	
 	private static final String EXECUTOR_SERVICE_NAME = "default";
+	
+	private static final String TABLE_SERVER = "o_ClusterServer";
+	
+	private static final String COLUMN_ADDRESS = "o_address";
 	
 	private final ServerConfig serverConfig;
 	
@@ -63,8 +61,6 @@ public class DefaultClusterManager implements ClusterManager {
 	
 	private volatile HazelcastInstance hazelcastInstance;
 	
-	private final String credential;
-	
 	@Inject
 	public DefaultClusterManager(ServerConfig serverConfig, PersistenceManager persistenceManager, 
 								 ListenerRegistry listenerRegistry, HibernateConfig hibernateConfig) { 
@@ -72,10 +68,6 @@ public class DefaultClusterManager implements ClusterManager {
 		this.persistenceManager = persistenceManager;
 		this.listenerRegistry = listenerRegistry;
 		this.hibernateConfig = hibernateConfig;
-		var dbPassword = hibernateConfig.getPassword();
-		if (dbPassword == null)
-			dbPassword = "";
-		credential = Hashing.sha256().hashString(dbPassword, UTF_8).toString();
 	}
 	
 	@Override
@@ -83,59 +75,48 @@ public class DefaultClusterManager implements ClusterManager {
 		return serverConfig.getClusterIp() + ":" +  serverConfig.getClusterPort();
 	}
 	
-	private void saveServer(Connection conn, Long id, String server) {
-		try (Statement stmt = conn.createStatement()) {
-			stmt.executeUpdate(String.format(
-					"insert into %s values(%d, '%s')",
-					persistenceManager.getTableName(ClusterServer.class), id, server));
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	@Override
 	public void start() {
 		var localServer = getLocalServerAddress();
 		Collection<String> servers;
 		try (var conn = persistenceManager.openConnection()) {
-			var callable = new Callable<Collection<String>>() {
-
-				@Override
-				public Collection<String> call() {
-					var servers = new HashMap<Long, String>();
-					try (Statement stmt = conn.createStatement()) {
-						String query = String.format("select %s, %s from %s",
-								persistenceManager.getColumnName(PROP_ID),
-								persistenceManager.getColumnName(PROP_ADDRESS),
-								persistenceManager.getTableName(ClusterServer.class),
-								persistenceManager.getColumnName(PROP_ID));
-						try (ResultSet resultset = stmt.executeQuery(query)) {
-							while (resultset.next())
-								servers.put(resultset.getLong(1), resultset.getString(2));
-						}
+			servers = callWithLock(conn, () -> {
+				var innerServers = new HashSet<String>();
+				if (!tableExists(conn, TABLE_SERVER)) {
+					try (var stmt = conn.createStatement()) {
+						stmt.execute(format("create table %s (%s varchar(255))", TABLE_SERVER, COLUMN_ADDRESS));
 					} catch (SQLException e) {
 						throw new RuntimeException(e);
 					}
-
-					if (!servers.containsValue(localServer)) {
-						Long nextId = servers.isEmpty() ? 1L : max(servers.keySet()) + 1L;
-						saveServer(conn, nextId, localServer);
-						servers.put(nextId, localServer);
-					}
-
-					return servers.values();
 				}
-			};		
-			if (hibernateConfig.isHSQLDialect())
-				servers = callable.call();
-			else
-				servers = callWithDatabaseLock(conn, callable);
+				try (Statement stmt = conn.createStatement()) {
+					String query = format("select %s from %s", COLUMN_ADDRESS, TABLE_SERVER);
+					try (ResultSet resultset = stmt.executeQuery(query)) {
+						while (resultset.next())
+							innerServers.add(resultset.getString(1));
+					}
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				}
+
+				if (!innerServers.contains(localServer)) {
+					try (Statement stmt = conn.createStatement()) {
+						stmt.executeUpdate(format(
+								"insert into %s values('%s')",
+								TABLE_SERVER, localServer));
+					} catch (SQLException e) {
+						throw new RuntimeException(e);
+					}
+					innerServers.add(localServer);
+				}
+				return innerServers;
+			});
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		};
 
 		Config config = new Config();
-		config.setClusterName(credential);
+		config.setClusterName(hibernateConfig.getClusterCredential());
 		config.setInstanceName(localServer);
 		config.setProperty("hazelcast.shutdownhook.enabled", "false");
 		config.getExecutorConfig(EXECUTOR_SERVICE_NAME).setPoolSize(Integer.MAX_VALUE);
@@ -210,15 +191,16 @@ public class DefaultClusterManager implements ClusterManager {
 		}
 
 		try (var conn = persistenceManager.openConnection()) {
-			try (Statement stmt = conn.createStatement()) {
-				stmt.executeUpdate(String.format(
-						"delete from %s where %s='%s'",
-						persistenceManager.getTableName(ClusterServer.class),
-						persistenceManager.getColumnName(PROP_ADDRESS),
-						localServer));
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
+			callWithTransaction(conn, () -> {
+				try (Statement stmt = conn.createStatement()) {
+					stmt.executeUpdate(String.format(
+							"delete from %s where %s='%s'",
+							TABLE_SERVER, COLUMN_ADDRESS, localServer));
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				}
+				return true;				
+			});
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -378,7 +360,7 @@ public class DefaultClusterManager implements ClusterManager {
 
 	@Override
 	public String getCredential() {
-		return credential;
+		return hibernateConfig.getClusterCredential();
 	}
 
 	@Override

@@ -41,21 +41,20 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.onedev.commons.utils.FileUtils.loadProperties;
 import static io.onedev.k8shelper.KubernetesHelper.BEARER;
 import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
-public class OneDev extends AbstractPlugin implements Serializable {
+public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
 
@@ -83,6 +82,10 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private volatile InitStage initStage;
 	
+	private Class<?> wrapperManagerClass;	
+	
+	private volatile Thread thread;
+	
 	// Some are injected via provider as instantiation might encounter problem during upgrade 
 	@Inject
 	public OneDev(Provider<JettyLauncher> jettyLauncherProvider, TaskScheduler taskScheduler,
@@ -100,19 +103,36 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.clusterManager = clusterManager;
 		this.idManager = idManager;
 		this.sessionFactoryManager = sessionFactoryManager;
+		
+		try {
+			wrapperManagerClass = Class.forName("org.tanukisoftware.wrapper.WrapperManager");
+		} catch (ClassNotFoundException e) {
+		}
+		thread = new Thread(this);
 
 		initStage = new InitStage("Server is Starting...");
 	}
 	
 	@Override
 	public void start() {
+		var maintenanceFile = getMaintenanceFile(Bootstrap.installDir);
+		while (maintenanceFile.exists()) {
+			logger.info("Maintenance in progress, waiting...");
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
 		SecurityUtils.bindAsSystem();
 		
 		System.setProperty("hsqldb.reconfig_logging", "false");
 		System.setProperty("hsqldb.method_class_names", "java.lang.Math");
-		
-		sessionFactoryManager.start();
 
+		clusterManager.start();
+		sessionFactoryManager.start();
+		
 		try (var conn = persistenceManager.openConnection()) {
 			callWithTransaction(conn, () -> {
 				persistenceManager.populateDatabase(conn);
@@ -122,13 +142,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			throw new RuntimeException(e);
 		};
 		
-		clusterManager.start();
 		idManager.init();
 
-		// restart session factory to pick up Hazelcast 2nd level cache 
-		sessionFactoryManager.stop();
-		sessionFactoryManager.start();
-		
 		sessionManager.run(() -> listenerRegistry.post(new SystemStarting()));
 		jettyLauncherProvider.get().start();
 
@@ -184,11 +199,13 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		initStage = null;
 		listenerRegistry.post(new SystemStarted());
 		clusterManager.postStart();
+		thread.start();
         logger.info("Server is ready at " + guessServerUrl() + ".");
 	}
 
 	@Override
 	public void preStop() {
+		thread = null;
 		clusterManager.preStop();
 		SecurityUtils.bindAsSystem();
 		try {
@@ -207,9 +224,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			jettyLauncherProvider.get().stop();
 			sessionManager.run(() -> listenerRegistry.post(new SystemStopped()));
 
-			// stop cluster manager first as it depends on metadata of session factory
-			clusterManager.stop();
 			sessionFactoryManager.stop();
+			clusterManager.stop();
 			executorService.shutdown();
 		} catch (ServerNotReadyException ignore) {
 		}
@@ -319,9 +335,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	}	
 	
 	public static boolean isServerRunning(File installDir) {
-		Properties props = loadProperties(new File(installDir, "conf/server.properties"));
-		int sshPort = Integer.parseInt(props.get("ssh_port").toString());
-		try (ServerSocket ignored = new ServerSocket(sshPort)) {
+		var serverConfig = new ServerConfig(installDir);
+		try (ServerSocket ignored = new ServerSocket(serverConfig.getClusterPort())) {
 			return false;
 		} catch (IOException e) {
 			if (e.getMessage() != null && e.getMessage().contains("Address already in use"))
@@ -333,6 +348,52 @@ public class OneDev extends AbstractPlugin implements Serializable {
 
 	public static File getAssetsDir() {
 		return new File(Bootstrap.getSiteDir(), "assets");
+	}
+	
+	public static File getMaintenanceFile(File installDir) {
+		return new File(installDir, "maintenance");
+	}
+	
+	private void restart() {
+		if (wrapperManagerClass != null) {
+			try {
+				Method method = wrapperManagerClass.getDeclaredMethod("restartAndReturn");
+				method.invoke(null, new Object[0]);
+			} catch (Exception e) {
+				logger.error("Error restarting server", e);
+			}
+		} else {
+			logger.warn("Restart request ignored as there is no wrapper manager available");
+		}
+	}
+
+	@Override
+	public void run() {
+		var localServer = clusterManager.getLocalServerAddress();
+		var maintenanceFile = getMaintenanceFile(Bootstrap.installDir);
+		while (thread != null) {
+			if (maintenanceFile.exists()) {
+				logger.info("Maintenance requested, trying to stop all servers...");
+				clusterManager.submitToAllServers(() -> {
+					if (!localServer.equals(clusterManager.getLocalServerAddress())) 
+						restart();
+					return null;
+				});
+				while (thread != null && clusterManager.getServerAddresses().size() != 1) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException ignored) {
+					}
+				}
+				restart();
+				break;
+			} else {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException ignored) {
+				}
+			}
+		}
 	}
 	
 }

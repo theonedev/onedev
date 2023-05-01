@@ -1,10 +1,9 @@
 package io.onedev.server.commandhandler;
 
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.PersistenceManager;
 import io.onedev.server.persistence.SessionFactoryManager;
@@ -20,7 +19,7 @@ import java.sql.SQLException;
 import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 
 @Singleton
-public class BackupDatabase extends AbstractPlugin {
+public class BackupDatabase extends CommandHandler {
 
 	public static final String COMMAND = "backup-db";
 	
@@ -32,9 +31,12 @@ public class BackupDatabase extends AbstractPlugin {
 	
 	private final HibernateConfig hibernateConfig;
 	
+	private File backupFile;
+	
 	@Inject
-	public BackupDatabase(PersistenceManager persistenceManager, SessionFactoryManager sessionFactoryManager,
-                          HibernateConfig hibernateConfig) {
+	public BackupDatabase(PersistenceManager persistenceManager, SessionFactoryManager sessionFactoryManager, 
+						  HibernateConfig hibernateConfig) {
+		super(hibernateConfig);
 		this.persistenceManager = persistenceManager;
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.hibernateConfig = hibernateConfig;
@@ -48,7 +50,7 @@ public class BackupDatabase extends AbstractPlugin {
 			logger.error("Missing backup file parameter. Usage: {} <path to database backup file>", Bootstrap.command.getScript());
 			System.exit(1);
 		}
-		File backupFile = new File(Bootstrap.command.getArgs()[0]);
+		backupFile = new File(Bootstrap.command.getArgs()[0]);
 		
 		if (!backupFile.isAbsolute() && System.getenv("WRAPPER_INIT_DIR") != null)
 			backupFile = new File(System.getenv("WRAPPER_INIT_DIR"), backupFile.getPath());
@@ -57,39 +59,40 @@ public class BackupDatabase extends AbstractPlugin {
 			logger.error("Backup file already exists: {}", backupFile.getAbsolutePath());
 			System.exit(1);
 		}
-		
-		if (OneDev.isServerRunning(Bootstrap.installDir) && hibernateConfig.isHSQLDialect()) {
-			logger.error("Please stop server before backing up database");
+
+		try {
+			doMaintenance(() -> {
+				sessionFactoryManager.start();
+
+				try (var conn = persistenceManager.openConnection()) {
+					callWithTransaction(conn, () -> {
+						persistenceManager.checkDataVersion(conn, false);
+						return null;
+					});
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				}
+
+				logger.info("Backing up database to {}...", backupFile.getAbsolutePath());
+
+				File tempDir = FileUtils.createTempDir("backup");
+				try {
+					persistenceManager.exportData(tempDir);
+					FileUtils.zip(tempDir, backupFile, null);
+				} catch (Exception e) {
+					throw ExceptionUtils.unchecked(e);
+				} finally {
+					FileUtils.deleteDir(tempDir);
+				}
+
+				logger.info("Database is successfully backed up to {}", backupFile.getAbsolutePath());
+				return null;
+			});
+			System.exit(0);
+		} catch (ExplicitException e) {
+			logger.error(e.getMessage());
 			System.exit(1);
 		}
-
-		sessionFactoryManager.start();
-
-		try (var conn = persistenceManager.openConnection()) {
-			callWithTransaction(conn, () -> {
-				persistenceManager.checkDataVersion(conn, false);
-				return null;				
-			});
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-		;
-		
-		logger.info("Backing up database to {}...", backupFile.getAbsolutePath());
-		
-		File tempDir = FileUtils.createTempDir("backup");
-		try {
-			persistenceManager.exportData(tempDir);
-			FileUtils.zip(tempDir, backupFile, null);
-		} catch (Exception e) {
-			throw ExceptionUtils.unchecked(e);
-		} finally {
-			FileUtils.deleteDir(tempDir);
-		}
-
-		logger.info("Database is successfully backed up to {}", backupFile.getAbsolutePath());
-		
-		System.exit(0);
 	}
 
 	@Override

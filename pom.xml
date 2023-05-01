@@ -614,8 +614,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.7.13</commons.version>
-		<agent.version>1.8.6</agent.version>
+		<commons.version>2.7.14</commons.version>
+		<agent.version>1.8.7</agent.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<logback.version>1.2.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>

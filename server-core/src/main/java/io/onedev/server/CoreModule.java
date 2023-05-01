@@ -689,7 +689,7 @@ public class CoreModule extends AbstractPluginModule {
 				return CleanDatabase.class;
 			else if (ResetAdminPassword.COMMAND.equals(Bootstrap.command.getName()))
 				return ResetAdminPassword.class;
-			else	
+			else
 				throw new RuntimeException("Unrecognized command: " + Bootstrap.command.getName());
 		} else {
 			return OneDev.class;

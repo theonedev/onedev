@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -180,14 +181,12 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 	public String checkDataVersion(Connection conn, boolean allowEmptyDB) {
 		String dbDataVersion = readDbDataVersion(conn);
 		
-		if (!allowEmptyDB && dbDataVersion == null) {
-			logger.error("Database is not populated yet");
-			System.exit(1);
-		}
+		if (!allowEmptyDB && dbDataVersion == null) 
+			throw new ExplicitException("Database is not populated yet");
 		String appDataVersion = MigrationHelper.getVersion(DataMigrator.class);
 		if (dbDataVersion != null && !dbDataVersion.equals(appDataVersion)) {
-			logger.error("Data version mismatch (app data version: {}, db data version: {})", appDataVersion, dbDataVersion);
-			System.exit(1);
+			throw new ExplicitException(String.format("Data version mismatch (app data version: %s, db data version: %s)", 
+					appDataVersion, dbDataVersion));
 		}
 		return dbDataVersion;
 	}

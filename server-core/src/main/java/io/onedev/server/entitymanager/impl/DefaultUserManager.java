@@ -466,7 +466,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof User) {
+		// Cache will be null when we run reset-admin-password command
+		if (cache != null && event.getEntity() instanceof User) {
 			var facade = (UserFacade) event.getEntity().getFacade();
 			transactionManager.runAfterCommit(() -> cache.put(facade.getId(), facade));
 		}
@@ -475,7 +476,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {
-		if (event.getEntity() instanceof User) {
+		// Cache will be null when we run reset-admin-password command
+		if (cache != null && event.getEntity() instanceof User) {
 			var id = event.getEntity().getId();
 			transactionManager.runAfterCommit(() -> cache.remove(id));
 		}

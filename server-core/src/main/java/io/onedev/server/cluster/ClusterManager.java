@@ -27,6 +27,7 @@ public interface ClusterManager {
 	
 	boolean isLeaderServer();
 
+	@Nullable
 	HazelcastInstance getHazelcastInstance();
 	
 	void init(IAtomicLong data, Callable<Long> initializer);

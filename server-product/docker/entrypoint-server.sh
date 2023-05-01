@@ -11,21 +11,19 @@ _sigterm() {
 trap _sigterm SIGTERM
 trap _sigterm SIGINT
 
-MOD_OPTIONS="--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED --add-modules=java.se --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED"
+UNAME=`uname -m`
 
-MEM_OPTIONS=-XX:MaxRAMPercentage=50.0
-if [[ $JAVA_TOOL_OPTIONS == *"-XX:MaxRAMPercentage"* ]] || [[ $JAVA_TOOL_OPTIONS == *"-Xmx"* ]]; then
-  unset MEM_OPTIONS
+if [[ $UNAME == "aarch64" ]]; then
+    CPUARCH="arm-64"
+else
+    CPUARCH="x86-64"
 fi
 
-cd /app/bin
-java -cp "../boot/*" ${MEM_OPTIONS} ${MOD_OPTIONS} io.onedev.commons.bootstrap.Bootstrap upgrade /opt/onedev &
+/app/boot/wrapper-linux-$CPUARCH /app/conf/wrapper.conf -- upgrade /opt/onedev &
 child=$!
 wait "$child"
 
 touch /opt/onedev/IN_DOCKER
-
-cd /opt/onedev/bin
-java -cp "../boot/*" ${MEM_OPTIONS} ${MOD_OPTIONS} io.onedev.commons.bootstrap.Bootstrap &
+/opt/onedev/boot/wrapper-linux-$CPUARCH /opt/onedev/conf/wrapper.conf &
 child=$!
 wait "$child"

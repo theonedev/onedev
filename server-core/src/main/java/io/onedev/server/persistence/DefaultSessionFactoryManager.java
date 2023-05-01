@@ -48,17 +48,17 @@ public class DefaultSessionFactoryManager implements SessionFactoryManager {
 	@Override
 	public void start() {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
-		Properties effectiveConfig = new Properties();
-		effectiveConfig.putAll(hibernateConfig);
+		Properties hibernateSettings = new Properties();
+		hibernateSettings.putAll(hibernateConfig);
 		if (hazelcastInstance != null) {
-			effectiveConfig.put("hibernate.cache.hazelcast.instance_name", hazelcastInstance.getName());
+			hibernateSettings.put("hibernate.cache.hazelcast.instance_name", hazelcastInstance.getName());
 		} else { 
-			effectiveConfig.put("hibernate.cache.use_second_level_cache", "false");
-			effectiveConfig.put("hibernate.cache.use_query_cache", "false");
-			effectiveConfig.put("hibernate.hikari.maximumPoolSize", "1");
+			hibernateSettings.put("hibernate.cache.use_second_level_cache", "false");
+			hibernateSettings.put("hibernate.cache.use_query_cache", "false");
+			hibernateSettings.put("hibernate.hikari.maximumPoolSize", "1");
 		}
 		ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-				.applySettings(effectiveConfig).build();
+				.applySettings(hibernateSettings).build();
 		MetadataSources metadataSources = new MetadataSources(serviceRegistry);
 		for (Class<? extends AbstractEntity> each: 
 				ClassUtils.findImplementations(AbstractEntity.class, AbstractEntity.class)) {
@@ -75,8 +75,8 @@ public class DefaultSessionFactoryManager implements SessionFactoryManager {
 		if (sessionFactory != null) {
 			sessionFactory.close();
 			sessionFactory = null;
-			metadata = null;
 		}
+		metadata = null;
 	}
 	
 	@Override

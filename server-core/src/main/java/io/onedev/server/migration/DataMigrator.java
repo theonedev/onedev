@@ -5282,4 +5282,11 @@ public class DataMigrator {
 	private void migrate119(File dataDir, Stack<Integer> versions) {
 	}
 
+	private void migrate120(File dataDir, Stack<Integer> versions) {
+		for (File file : dataDir.listFiles()) {
+			if (file.getName().startsWith("ClusterServers.xml"))
+				FileUtils.deleteFile(file);
+		}
+	}
+	
 }

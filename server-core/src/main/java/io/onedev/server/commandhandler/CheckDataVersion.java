@@ -1,7 +1,7 @@
 package io.onedev.server.commandhandler;
 
 import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.AbstractPlugin;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.persistence.HibernateConfig;
 import io.onedev.server.persistence.PersistenceManager;
@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import static io.onedev.server.persistence.PersistenceUtils.callWithTransaction;
 
 @Singleton
-public class CheckDataVersion extends AbstractPlugin {
+public class CheckDataVersion extends CommandHandler {
 
 	public static final String COMMAND = "check-data-version";
 	
@@ -31,7 +31,8 @@ public class CheckDataVersion extends AbstractPlugin {
 	
 	@Inject
 	public CheckDataVersion(SessionFactoryManager sessionFactoryManager, PersistenceManager persistenceManager, 
-			HibernateConfig hibernateConfig) {
+							HibernateConfig hibernateConfig) {
+		super(hibernateConfig);
 		this.sessionFactoryManager = sessionFactoryManager;
 		this.persistenceManager = persistenceManager;
 		this.hibernateConfig = hibernateConfig;
@@ -40,24 +41,27 @@ public class CheckDataVersion extends AbstractPlugin {
 	@Override
 	public void start() {
 		SecurityUtils.bindAsSystem();
-		
-		if (OneDev.isServerRunning(Bootstrap.installDir) && hibernateConfig.isHSQLDialect()) {
-			logger.error("Please stop server before checking data version");
+
+		try {
+			doMaintenance(() -> {
+				sessionFactoryManager.start();
+
+				// Use system.out in case logger is suppressed by user as this output is important to 
+				// upgrade procedure
+				String dataVersion;
+				try (var conn = persistenceManager.openConnection()) {
+					dataVersion = callWithTransaction(conn, () -> persistenceManager.checkDataVersion(conn, false));
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
+				}
+				System.out.println("Data version: " + dataVersion);
+				return null;
+			});
+			System.exit(0);
+		} catch (ExplicitException e) {
+			logger.error(e.getMessage());
 			System.exit(1);
 		}
-		
-		sessionFactoryManager.start();
-		
-		// Use system.out in case logger is suppressed by user as this output is important to 
-		// upgrade procedure
-		String dataVersion;
-		try (var conn = persistenceManager.openConnection()) {
-			dataVersion = callWithTransaction(conn, () -> persistenceManager.checkDataVersion(conn, false));			
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-		System.out.println("Data version: " + dataVersion);
-		System.exit(0);
 	}
 
 	@Override
