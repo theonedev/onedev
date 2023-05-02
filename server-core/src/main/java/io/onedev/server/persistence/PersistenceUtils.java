@@ -1,5 +1,8 @@
 package io.onedev.server.persistence;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,6 +19,8 @@ import static io.onedev.commons.utils.ExceptionUtils.unchecked;
 import static java.lang.String.format;
 
 public class PersistenceUtils {
+	
+	private static final Logger logger = LoggerFactory.getLogger(PersistenceUtils.class);
 	
 	public static Connection openConnection(HibernateConfig hibernateConfig, ClassLoader classLoader) {
 		try {
@@ -104,7 +109,8 @@ public class PersistenceUtils {
 					stmt.executeQuery(format("select * from %s for update", tableName));
 					break;
 				} catch (Exception e) {
-					Thread.sleep(1000);
+					logger.debug("Unable to get database lock, will retry", e);
+					Thread.sleep(5000);
 				}
 			}
 			return callable.call();

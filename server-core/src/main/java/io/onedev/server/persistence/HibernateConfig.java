@@ -30,7 +30,10 @@ public class HibernateConfig extends Properties {
 		put("hibernate.cache.hazelcast.shutdown_on_session_factory_close", "false");
 		
 		String url = getProperty(URL);
-		setProperty(URL, StringUtils.replace(url, "${installDir}", installDir.getAbsolutePath()));
+		url = StringUtils.replace(url, "${installDir}", installDir.getAbsolutePath());
+		if (url.contains(":sqlserver:") && !url.toLowerCase().contains("selectMethod=cursor".toLowerCase())) 
+			url = StringUtils.stripEnd(url, ";") + ";selectMethod=cursor";
+		setProperty(URL, url);
 
 		for (String env: ENVS) {
 			String value = System.getenv(env.replace('.', '_'));
