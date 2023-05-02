@@ -213,7 +213,6 @@ public class Upgrade extends AbstractPlugin {
 		for (File file: upgradeDir.listFiles()) {
 			if (!file.getName().equals("lost+found") 
 					&& !file.getName().equals("site") 
-					&& !file.getName().equals("externaldb")
 					&& !file.getName().equals("conf") // conf/trust-certs might be mounted
 					&& !file.getName().startsWith(".")) {
 				isEmpty = false;
