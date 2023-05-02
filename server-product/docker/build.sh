@@ -17,7 +17,6 @@ buildVersion=`ls onedev-*.zip|sed -e 's/onedev-\(.*\).zip/\1/'`
 
 unzip onedev-$buildVersion.zip -d docker
 mv docker/onedev-$buildVersion docker/app
-cp sandbox/site/lib/mysql* sandbox/site/lib/postgresql* docker/app/site/lib
 
 docker buildx create --name $BUILDER
 docker buildx use $BUILDER
