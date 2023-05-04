@@ -948,7 +948,7 @@ public abstract class BuildListPanel extends Panel {
 		if (getProject() != null && SecurityUtils.canManageBuilds(getProject())) 
 			columns.add(selectionColumn = new SelectionColumn<Build, Void>());
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Build")) {
+		columns.add(new AbstractColumn<>(Model.of("Build")) {
 
 			@Override
 			public String getCssClass() {
@@ -960,22 +960,22 @@ public abstract class BuildListPanel extends Panel {
 				Fragment fragment = new Fragment(componentId, "buildFrag", BuildListPanel.this);
 				Build build = rowModel.getObject();
 				Long buildId = build.getId();
-				
-				WebMarkupContainer link = new ActionablePageLink("link", 
+
+				WebMarkupContainer link = new ActionablePageLink("link",
 						BuildDashboardPage.class, BuildDashboardPage.paramsOf(build)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
 						OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-						Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
-								(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
-						WebSession.get().setBuildCursor(cursor);								
+						Cursor cursor = new Cursor(queryModel.getObject().toString(), (int) buildsTable.getItemCount(),
+								(int) buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
+						WebSession.get().setBuildCursor(cursor);
 
 						String directUrlAfterDelete = RequestCycle.get().urlFor(
 								getPage().getClass(), getPage().getPageParameters()).toString();
 						WebSession.get().setRedirectUrlAfterDelete(Build.class, directUrlAfterDelete);
 					}
-					
+
 				};
 				link.add(new BuildStatusIcon("icon", new LoadableDetachableModel<Status>() {
 
@@ -983,7 +983,7 @@ public abstract class BuildListPanel extends Panel {
 					protected Status load() {
 						return getBuildManager().load(buildId).getStatus();
 					}
-					
+
 				}));
 				link.add(new Label("text", new AbstractReadOnlyModel<String>() {
 
@@ -991,7 +991,7 @@ public abstract class BuildListPanel extends Panel {
 					public String getObject() {
 						Build build = rowModel.getObject();
 						StringBuilder builder = new StringBuilder();
-						
+
 						Project currentProject = null;
 						if (getPage() instanceof ProjectPage)
 							currentProject = ((ProjectPage) getPage()).getProject();
@@ -1002,12 +1002,12 @@ public abstract class BuildListPanel extends Panel {
 							builder.append(" (" + build.getVersion() + ")");
 						return builder.toString();
 					}
-					
+
 				}));
 				fragment.add(link);
-				
+
 				fragment.add(new EntityLabelsPanel<BuildLabel>("labels", rowModel));
-				
+
 				fragment.add(newBuildObserver(buildId));
 				fragment.setOutputMarkupId(true);
 				cellItem.add(fragment);
@@ -1015,32 +1015,32 @@ public abstract class BuildListPanel extends Panel {
 		});
 		
 		if (showJob) {
-			columns.add(new AbstractColumn<Build, Void>(Model.of(Build.NAME_JOB)) {
-	
+			columns.add(new AbstractColumn<>(Model.of(Build.NAME_JOB)) {
+
 				@Override
 				public String getCssClass() {
 					return "job";
 				}
-	
+
 				@Override
 				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-						IModel<Build> rowModel) {
+										 IModel<Build> rowModel) {
 					Build build = rowModel.getObject();
 					if (SecurityUtils.canReadCode(build.getProject())) {
 						Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
 						Link<Void> link = new JobDefLink("link", build.getCommitId(), build.getJobName()) {
-	
+
 							@Override
 							protected Project getProject() {
 								return rowModel.getObject().getProject();
 							}
-	
+
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
 								setEnabled(isEnabled() && build.getJob() != null);
 							}
-							
+
 						};
 						link.add(new Label("label", build.getJobName()));
 						fragment.add(link);
@@ -1053,28 +1053,29 @@ public abstract class BuildListPanel extends Panel {
 		}
 		
 		if (showRef) {
-			columns.add(new AbstractColumn<Build, Void>(Model.of("On Behalf Of")) {
-	
+			columns.add(new AbstractColumn<>(Model.of("On Behalf Of")) {
+
 				@Override
 				public String getCssClass() {
 					return "on-behalf-of d-none d-lg-table-cell";
 				}
-	
+
 				@Override
 				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-						IModel<Build> rowModel) {
+										 IModel<Build> rowModel) {
 					Build build = rowModel.getObject();
-					if (SecurityUtils.canReadCode(build.getProject())) {
+					if (SecurityUtils.canReadCode(build.getProject()) 
+							&& build.getProject().getObjectId(build.getRefName(), false) != null) {
 						if (build.getRequest() != null) {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
 							PageParameters params = PullRequestActivitiesPage.paramsOf(build.getRequest());
-							Link<Void> link = new BookmarkablePageLink<Void>("link",PullRequestActivitiesPage.class, params);
+							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, params);
 							link.add(new Label("label", "pull request #" + build.getRequest().getNumber()));
 							fragment.add(link);
 							cellItem.add(fragment);
 						} else if (build.getBranch() != null) {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
+							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(),
 									new BlobIdent(build.getBranch(), null, FileMode.TREE.getBits()));
 							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
 							link.add(new Label("label", "branch " + build.getBranch()));
@@ -1082,23 +1083,23 @@ public abstract class BuildListPanel extends Panel {
 							cellItem.add(fragment);
 						} else if (build.getTag() != null) {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
+							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(),
 									new BlobIdent(build.getTag(), null, FileMode.TREE.getBits()));
 							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
 							link.add(new Label("label", "tag " + build.getTag()));
 							fragment.add(link);
 							cellItem.add(fragment);
-						} else { 
+						} else {
 							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
 						}
 					} else {
 						if (build.getRequest() != null)
-							cellItem.add(new Label(componentId, "pull request #" + build.getRequest().getNumber()));							
-						else if (build.getBranch() != null) 
+							cellItem.add(new Label(componentId, "pull request #" + build.getRequest().getNumber()));
+						else if (build.getBranch() != null)
 							cellItem.add(new Label(componentId, "branch " + build.getBranch()));
 						else if (build.getTag() != null)
 							cellItem.add(new Label(componentId, "tag " + build.getTag()));
-						else 
+						else
 							cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
 					}
 				}
@@ -1106,7 +1107,7 @@ public abstract class BuildListPanel extends Panel {
 		}
 		
 		for (String paramName: getListParams()) {
-			columns.add(new AbstractColumn<Build, Void>(Model.of(paramName)) {
+			columns.add(new AbstractColumn<>(Model.of(paramName)) {
 
 				@Override
 				public String getCssClass() {
@@ -1122,7 +1123,7 @@ public abstract class BuildListPanel extends Panel {
 					else
 						cellItem.add(new Label(componentId, "<i>Unspecified</i>").setEscapeModelStrings(false));
 				}
-				
+
 			});
 		}	
 		

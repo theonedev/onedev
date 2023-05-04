@@ -761,9 +761,16 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Override
 	public Collection<Long> queryStreamPreviousNumbers(Build build, Status status, int limit) {
 		Map<ObjectId, Long> buildNumbers = new HashMap<>();
-		CriteriaQuery<Object[]> query = buildStreamPreviousQuery(build, status, "commitHash", "number");
-		for (Object[] fields: getSession().createQuery(query).list()) {
-			buildNumbers.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
+		CriteriaQuery<Object[]> query = buildStreamPreviousQuery(build, status, "commitHash", "number", "refName");
+		var result = getSession().createQuery(query).list();
+		for (Object[] fields: result) {
+			if (build.getRefName().equals(fields[2]))
+				buildNumbers.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
+		}
+		
+		if (buildNumbers.isEmpty()) {
+			for (Object[] fields: result) 
+				buildNumbers.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
 		}
 		
 		if (!buildNumbers.isEmpty()) {
@@ -782,9 +789,15 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Override
 	public Build findStreamPrevious(Build build, Status status) {
 		Map<ObjectId, Long> buildIds = new HashMap<>();
-		for (Object[] fields: getSession().createQuery(buildStreamPreviousQuery(
-				build, status, "commitHash", "id")).list()) {
-			buildIds.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
+		var result = getSession().createQuery(buildStreamPreviousQuery(
+				build, status, "commitHash", "id", "refName")).list();
+		for (Object[] fields: result) {
+			if (build.getRefName().equals(fields[2]))
+				buildIds.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
+		}
+		if (buildIds.isEmpty()) {
+			for (Object[] fields: result) 
+				buildIds.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
 		}
 		
 		if (!buildIds.isEmpty()) {

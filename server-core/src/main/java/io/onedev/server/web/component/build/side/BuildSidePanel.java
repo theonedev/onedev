@@ -135,7 +135,8 @@ public abstract class BuildSidePanel extends Panel {
 		};
 		branchLink.add(new Label("label", branch));
 		branchLink.setVisible(branch != null);
-		branchLink.setEnabled(SecurityUtils.canReadCode(getProject()));
+		branchLink.setEnabled(SecurityUtils.canReadCode(getProject()) 
+				&& getProject().getObjectId(getBuild().getRefName(), false) != null);
 		general.add(branchLink);
 		
 		String tag = getBuild().getTag();
@@ -156,7 +157,8 @@ public abstract class BuildSidePanel extends Panel {
 		};
 		tagLink.add(new Label("label", tag));
 		tagLink.setVisible(tag != null);
-		tagLink.setEnabled(SecurityUtils.canReadCode(getProject()));
+		tagLink.setEnabled(SecurityUtils.canReadCode(getProject())
+				&& getProject().getObjectId(getBuild().getRefName(), false) != null);
 		general.add(tagLink);
 		
 		CommitDetailPage.State commitState = new CommitDetailPage.State();
