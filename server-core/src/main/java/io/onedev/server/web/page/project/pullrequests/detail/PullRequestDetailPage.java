@@ -253,7 +253,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				title = object;
 			}
 			
-		}).setRequired(true).add(new ReferenceInputBehavior(false) {
+		}).setRequired(true).add(new ReferenceInputBehavior() {
 
 			@Override
 			protected Project getProject() {

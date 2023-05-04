@@ -49,7 +49,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 		}));
 		
 		TextField<String> titleInput = new TextField<String>("title", Model.of(getIssue().getTitle()));
-		titleInput.add(new ReferenceInputBehavior(false) {
+		titleInput.add(new ReferenceInputBehavior() {
 
 			@Override
 			protected Project getProject() {

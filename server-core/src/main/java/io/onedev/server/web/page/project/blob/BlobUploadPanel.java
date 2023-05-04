@@ -101,7 +101,7 @@ public abstract class BlobUploadPanel extends Panel {
 		
 		form.add(new TextField<String>("directory", new PropertyModel<String>(this, "directory")));
 		
-		ReferenceInputBehavior behavior = new ReferenceInputBehavior(true) {
+		ReferenceInputBehavior behavior = new ReferenceInputBehavior() {
 			
 			@Override
 			protected Project getProject() {

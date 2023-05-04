@@ -518,7 +518,7 @@ abstract class InsertUrlPanel extends Panel {
 				
 			});
 			
-			ReferenceInputBehavior behavior = new ReferenceInputBehavior(true) {
+			ReferenceInputBehavior behavior = new ReferenceInputBehavior() {
 				
 				@Override
 				protected Project getProject() {

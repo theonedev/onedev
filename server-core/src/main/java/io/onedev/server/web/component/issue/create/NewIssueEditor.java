@@ -112,7 +112,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			}
 			
 		}));
-		titleInput.add(new ReferenceInputBehavior(false) {
+		titleInput.add(new ReferenceInputBehavior() {
 
 			@Override
 			protected Project getProject() {

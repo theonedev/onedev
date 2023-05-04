@@ -52,7 +52,7 @@ public class ReferenceAwareEditSupport implements EditSupport {
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
 		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
-		        			new ReferenceInputBehavior(true) {
+		        			new ReferenceInputBehavior() {
 
 						@Override
 						protected Project getProject() {

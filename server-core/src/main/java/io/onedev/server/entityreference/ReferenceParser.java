@@ -1,28 +1,21 @@
 package io.onedev.server.entityreference;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.TextNode;
-import org.jsoup.select.NodeTraversor;
-
 import com.google.common.collect.ImmutableSet;
-
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Project;
+import io.onedev.server.model.*;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.TextNodeVisitor;
 import io.onedev.server.validation.validator.ProjectPathValidator;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.NodeTraversor;
+
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ReferenceParser {
 	
@@ -30,32 +23,34 @@ public class ReferenceParser {
 	
 	private final Pattern pattern;
 	
-	private final String referenceType;
-	
 	public ReferenceParser(Class<? extends AbstractEntity> referenceClass) {
-		referenceType = referenceClass.getSimpleName();
-		String[] words = StringUtils.split(WordUtils.uncamel(referenceType).toLowerCase(), " ");
-		StringBuilder builder = new StringBuilder("(^|\\W+)(");
-		for (int i=0; i<words.length-1; i++) 
-			builder.append(words[i]).append("\\s*");
-		builder.append(words[words.length-1]).append("\\s+)(");
+		StringBuilder builder = new StringBuilder();
+		if (referenceClass == Build.class) 
+			builder.append("(^|\\W+)((build)\\s+)(");
+		else if (referenceClass == PullRequest.class) 
+			builder.append("(^|\\W+)((pull\\s*request|pr)\\s+)(");
+		else if (referenceClass == Issue.class) 
+			builder.append("(^|\\W+)((issue)\\s+)?(");
+		else 
+			throw new RuntimeException("Unexpected reference class: " + referenceClass);
+		
 		builder.append(ProjectPathValidator.PATTERN.pattern());
 		builder.append(")?#(\\d+)(?=$|[\\W|/]+)");
 		pattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
 	}
 	
-	public Collection<ProjectScopedNumber> parseReferences(String text, @Nullable Project project) {
-		Collection<ProjectScopedNumber> references = new HashSet<>();
-		if (StringUtils.deleteWhitespace(text.toLowerCase()).contains(referenceType.toLowerCase()) 
-				&& text.contains("#")) { // fast scan here, do pattern match later
+	public List<ProjectScopedNumber> parseReferences(String text, @Nullable Project project) {
+		Collection<ProjectScopedNumber> references = new LinkedHashSet<>();
+		var projectManager = OneDev.getInstance(ProjectManager.class);
+		if (fastScan(text)) { 
 			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
-				String referenceProjectName = matcher.group(3);
-				Long referenceNumber = Long.valueOf(matcher.group(5));
+				String referenceProjectName = matcher.group(4);
+				Long referenceNumber = Long.valueOf(matcher.group(6));
 
 				Project referenceProject;
 				if (referenceProjectName != null) {
-					referenceProject = OneDev.getInstance(ProjectManager.class).findByPath(referenceProjectName);
+					referenceProject = projectManager.findByPath(referenceProjectName);
 				} else {
 					referenceProject = project;
 				}
@@ -64,11 +59,20 @@ public class ReferenceParser {
 					references.add(new ProjectScopedNumber(referenceProject, referenceNumber));
 			}
 		}
-		return references;
+		return new ArrayList<>(references);
 	}
 	
-	public Collection<ProjectScopedNumber> parseReferences(Document document, @Nullable Project project) {
-		Collection<ProjectScopedNumber> references = new HashSet<>();
+	private boolean fastScan(String text) {
+		var chars = text.toCharArray();
+		for (var i=0; i<chars.length; i++) {
+			if (chars[i] == '#' && i<chars.length-1 && Character.isDigit(chars[i+1]))
+				return true;
+		}
+		return false;
+	}
+	
+	public List<ProjectScopedNumber> parseReferences(Document document, @Nullable Project project) {
+		Collection<ProjectScopedNumber> references = new LinkedHashSet<>();
 		
 		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
@@ -77,23 +81,25 @@ public class ReferenceParser {
 				if (HtmlUtils.hasAncestor(node, IGNORED_TAGS))
 					return false;
 				
-				String text = StringUtils.deleteWhitespace(node.getWholeText()).toLowerCase();
-				return text.contains(referenceType.toLowerCase()) && text.contains("#"); // fast scan here, do pattern match later
+				return fastScan(node.getWholeText());
 			}
 		};
 		
 		NodeTraversor.traverse(visitor, document);
 		
+		var projectManager = OneDev.getInstance(ProjectManager.class);
 		for (TextNode node : visitor.getMatchedNodes()) {
 			Matcher matcher = pattern.matcher(node.getWholeText());
 			while (matcher.find()) {
 				String referenceText = matcher.group(2);
-				String referenceProjectName = matcher.group(3);
-				Long referenceNumber = Long.valueOf(matcher.group(5));
+				if (referenceText == null)
+					referenceText = "";
+				String referenceProjectName = matcher.group(4);
+				Long referenceNumber = Long.valueOf(matcher.group(6));
 
 				Project referenceProject;
 				if (referenceProjectName != null) {
-					referenceProject = OneDev.getInstance(ProjectManager.class).findByPath(referenceProjectName);
+					referenceProject = projectManager.findByPath(referenceProjectName);
 					referenceText += referenceProjectName;
 				} else {
 					referenceProject = project;
@@ -113,7 +119,7 @@ public class ReferenceParser {
 			HtmlUtils.appendTail(matcher, node);
 		}
 
-		return references;
+		return new ArrayList<>(references);
 	}
 
 	protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {

@@ -691,7 +691,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			}
 			
 		});
-		titleInput.add(new ReferenceInputBehavior(false) {
+		titleInput.add(new ReferenceInputBehavior() {
 			
 			@Override
 			protected Project getProject() {

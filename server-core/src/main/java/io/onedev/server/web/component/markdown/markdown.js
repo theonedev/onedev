@@ -435,7 +435,7 @@ onedev.server.markdown = {
 		    });	
 	    } 
 
-		var referencePattern = "(^|[\\W|/]+)((pull\\s*request|issue|build)\\s+)?(" + projectPathPattern + ")?#(\\S*)$";
+		var referencePattern = "(^|[\\W|/]+)((pull\\s*request|pr|issue|build)\\s+)?(" + projectPathPattern + ")?#(\\S*)$";
 		
 	    if (canReferenceEntity) {
 	    	function matchReference() {
@@ -454,7 +454,7 @@ onedev.server.markdown = {
 	    			return undefined;   		
 	    		}
 	    	}
-	    	
+
 		    $input.atwho({
 		    	at: '#',
 		    	startWithSpace: false,
@@ -468,16 +468,10 @@ onedev.server.markdown = {
 		        	}
 		        },
 		        displayTpl: function() {
-	        		if (matchReference().type) 
-			    		return "<li><span>#${referenceNumber}</span> - ${referenceTitle}</li>";
-	        		else
-                        return "<li><span>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
+					return "<li><span>#${referenceNumber}</span> - ${referenceTitle}</li>";
 		        },
 		        insertTpl: function() {
-	        		if (matchReference().type) 
-		    			return "#${referenceNumber} ";
-	        		else
-                        return "${referenceType} #${referenceNumber} ";
+					return "#${referenceNumber} ";
 		        }, 
 		        limit: atWhoLimit
 		    });		

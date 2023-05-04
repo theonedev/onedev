@@ -424,7 +424,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					else
 						referenceProject = null;
 					if (referenceProject != null || StringUtils.isBlank(referenceProjectPath)) {
-						if ("issue".equals(referenceQueryType)) {
+						if (referenceQueryType.length() == 0 || "issue".equals(referenceQueryType)) {
 							for (Issue issue: getReferenceSupport().findIssues(referenceProject, referenceQuery, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "issue");
@@ -433,7 +433,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								referenceMap.put("searchKey", issue.getNumber() + " " + StringUtils.deleteWhitespace(issue.getTitle()));
 								referenceList.add(referenceMap);
 							}
-						} else if ("pullrequest".equals(referenceQueryType)) {
+						} else if ("pr".equals(referenceQueryType) || "pullrequest".equals(referenceQueryType)) {
 							for (PullRequest request: getReferenceSupport().findPullRequests(referenceProject, referenceQuery, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "pull request");

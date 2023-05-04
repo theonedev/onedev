@@ -41,16 +41,6 @@ public class ReferenceTransformer implements Function<String, String> {
 		String escaped = "<pre>" + HtmlEscape.escapeHtml5(t) + "</pre>";
 		Document doc = Jsoup.parseBodyFragment(escaped);
 		
-		new ReferenceParser(Issue.class) {
-
-			@Override
-			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
-				return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
-			}
-
-		}.parseReferences(doc, project);
-
 		new ReferenceParser(PullRequest.class) {
 
 			@Override
@@ -70,7 +60,17 @@ public class ReferenceTransformer implements Function<String, String> {
 			}
 
 		}.parseReferences(doc, project);
-		
+
+		new ReferenceParser(Issue.class) {
+
+			@Override
+			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
+				return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(IssueActivitiesPage.class,
+						IssueActivitiesPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
+			}
+
+		}.parseReferences(doc, project);
+
 		if (url != null) {
 			StringBuilder builder = new StringBuilder();
 			for (Node node: Jsoup.parseBodyFragment(doc.body().html()).body().child(0).childNodes()) {
