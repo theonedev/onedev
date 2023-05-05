@@ -500,13 +500,13 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldName);
 											extraIssueInfo.put(fieldName, fieldValue);
-										} else if (!(mapped.getFirst() instanceof TextField)) {
+										} else if (!(mapped.getLeft() instanceof TextField)) {
 											mismatchedIssueFields.put(fieldName, "Should be mapped to a text field");
 											extraIssueInfo.put(fieldName, fieldValue);
 										} else {
 											IssueField issueField = new IssueField();
 											issueField.setIssue(issue);
-											issueField.setName(mapped.getFirst().getName());
+											issueField.setName(mapped.getLeft().getName());
 											issueField.setType(InputSpec.TEXT);
 											issueField.setValue(fieldValue);
 											issue.getFields().add(issueField);
@@ -524,13 +524,13 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldName);
 											extraIssueInfo.put(fieldName, joinAsMultilineHtml(fieldValues));
-										} else if (!(mapped.getFirst() instanceof TextField)) {
+										} else if (!(mapped.getLeft() instanceof TextField)) {
 											mismatchedIssueFields.put(fieldName, "Should be mapped to a text field");
 											extraIssueInfo.put(fieldName, joinAsMultilineHtml(fieldValues));
 										} else {
 											IssueField issueField = new IssueField();
 											issueField.setIssue(issue);
-											issueField.setName(mapped.getFirst().getName());
+											issueField.setName(mapped.getLeft().getName());
 											issueField.setType(InputSpec.TEXT);
 											issueField.setValue(StringUtils.join(fieldValues, ", "));
 											issue.getFields().add(issueField);
@@ -546,15 +546,15 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldNameWithValue);
 											extraIssueInfo.put(fieldName, fieldValue);
-										} else if (!(mapped.getFirst() instanceof ChoiceField) || mapped.getFirst().isAllowMultiple()) {
+										} else if (!(mapped.getLeft() instanceof ChoiceField) || mapped.getLeft().isAllowMultiple()) {
 											mismatchedIssueFields.put(fieldNameWithValue, "Should be mapped to a single-valued enum field");
 											extraIssueInfo.put(fieldName, fieldValue);
 										} else {
 											IssueField issueField = new IssueField();
 											issueField.setIssue(issue);
-											issueField.setName(mapped.getFirst().getName());
+											issueField.setName(mapped.getLeft().getName());
 											issueField.setType(InputSpec.ENUMERATION);
-											issueField.setValue(mapped.getSecond());
+											issueField.setValue(mapped.getRight());
 											issue.getFields().add(issueField);
 										}
 									}
@@ -573,15 +573,15 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldNameWithValue);
 											hasErrors = true;
-										} else if (!(mapped.getFirst() instanceof ChoiceField) || !mapped.getFirst().isAllowMultiple()) {
+										} else if (!(mapped.getLeft() instanceof ChoiceField) || !mapped.getLeft().isAllowMultiple()) {
 											mismatchedIssueFields.put(fieldNameWithValue, "Should be mapped to a multi-valued enum field");
 											hasErrors = true;
 										} else {
 											IssueField issueField = new IssueField();
 											issueField.setIssue(issue);
-											issueField.setName(mapped.getFirst().getName());
+											issueField.setName(mapped.getLeft().getName());
 											issueField.setType(InputSpec.ENUMERATION);
-											issueField.setValue(mapped.getSecond());
+											issueField.setValue(mapped.getRight());
 											issueFields.add(issueField);
 										}
 									}
@@ -602,7 +602,7 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldName);
 											extraIssueInfo.put(fieldName, fullName);
-										} else if (!(mapped.getFirst() instanceof UserChoiceField) || mapped.getFirst().isAllowMultiple()) {
+										} else if (!(mapped.getLeft() instanceof UserChoiceField) || mapped.getLeft().isAllowMultiple()) {
 											mismatchedIssueFields.put(fieldName, "Should be mapped to a single-valued user field");
 											extraIssueInfo.put(fieldName, fullName);
 										} else {
@@ -622,7 +622,7 @@ public class ImportServer implements Serializable, Validatable {
 											if (fieldValue != null) {
 												IssueField issueField = new IssueField();
 												issueField.setIssue(issue);
-												issueField.setName(mapped.getFirst().getName());
+												issueField.setName(mapped.getLeft().getName());
 												issueField.setType(InputSpec.USER);
 												issueField.setValue(fieldValue);
 												issue.getFields().add(issueField);
@@ -639,7 +639,7 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldName);
 											extraIssueInfo.put(fieldName, joinAsMultilineHtml(fullNames));
-										} else if (!(mapped.getFirst() instanceof UserChoiceField) || !mapped.getFirst().isAllowMultiple()) {
+										} else if (!(mapped.getLeft() instanceof UserChoiceField) || !mapped.getLeft().isAllowMultiple()) {
 											mismatchedIssueFields.put(fieldName, "Should be mapped to a multi-valued user field");
 											extraIssueInfo.put(fieldName, joinAsMultilineHtml(fullNames));
 										} else {
@@ -663,7 +663,7 @@ public class ImportServer implements Serializable, Validatable {
 												if (fieldValue != null) {
 													IssueField issueField = new IssueField();
 													issueField.setIssue(issue);
-													issueField.setName(mapped.getFirst().getName());
+													issueField.setName(mapped.getLeft().getName());
 													issueField.setType(InputSpec.USER);
 													issueField.setValue(fieldValue);
 													issue.getFields().add(issueField);
@@ -679,13 +679,13 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldName);
 											extraIssueInfo.put(fieldName, DateUtils.formatDate(date));
-										} else if (!(mapped.getFirst() instanceof DateField)) {
+										} else if (!(mapped.getLeft() instanceof DateField)) {
 											mismatchedIssueFields.put(fieldName, "Should be mapped to a date field");
 											extraIssueInfo.put(fieldName, DateUtils.formatDate(date));
 										} else {
 											IssueField issueField = new IssueField();
 											issueField.setIssue(issue);
-											issueField.setName(mapped.getFirst().getName());
+											issueField.setName(mapped.getLeft().getName());
 											issueField.setType(InputSpec.DATE);
 											issueField.setValue(DateUtils.formatDate(date));
 											issue.getFields().add(issueField);
@@ -704,13 +704,13 @@ public class ImportServer implements Serializable, Validatable {
 													if (mapped == null) {
 														unmappedIssueFields.add(fieldName);
 														extraIssueInfo.put(fieldName, DateUtils.formatDateTime(date));
-													} else if (!(mapped.getFirst() instanceof DateTimeField)) {
+													} else if (!(mapped.getLeft() instanceof DateTimeField)) {
 														mismatchedIssueFields.put(fieldName, "Should be mapped to a datetime field");
 														extraIssueInfo.put(fieldName, DateUtils.formatDateTime(date));
 													} else {
 														IssueField issueField = new IssueField();
 														issueField.setIssue(issue);
-														issueField.setName(mapped.getFirst().getName());
+														issueField.setName(mapped.getLeft().getName());
 														issueField.setType(InputSpec.DATE_TIME);
 														issueField.setValue(DateUtils.formatDateTime(date));
 														issue.getFields().add(issueField);
@@ -722,13 +722,13 @@ public class ImportServer implements Serializable, Validatable {
 													if (mapped == null) {
 														unmappedIssueFields.add(fieldName);
 														extraIssueInfo.put(fieldName, fieldValue);
-													} else if (!(mapped.getFirst() instanceof FloatField)) {
+													} else if (!(mapped.getLeft() instanceof FloatField)) {
 														mismatchedIssueFields.put(fieldName, "Should be mapped to a float field");
 														extraIssueInfo.put(fieldName, fieldValue);
 													} else {
 														IssueField issueField = new IssueField();
 														issueField.setIssue(issue);
-														issueField.setName(mapped.getFirst().getName());
+														issueField.setName(mapped.getLeft().getName());
 														issueField.setType(InputSpec.FLOAT);
 														issueField.setValue(fieldValue);
 														issue.getFields().add(issueField);
@@ -740,13 +740,13 @@ public class ImportServer implements Serializable, Validatable {
 													if (mapped == null) {
 														unmappedIssueFields.add(fieldName);
 														extraIssueInfo.put(fieldName, fieldValue);
-													} else if (!(mapped.getFirst() instanceof IntegerField)) {
+													} else if (!(mapped.getLeft() instanceof IntegerField)) {
 														mismatchedIssueFields.put(fieldName, "Should be mapped to an integer field");
 														extraIssueInfo.put(fieldName, fieldValue);
 													} else {
 														IssueField issueField = new IssueField();
 														issueField.setIssue(issue);
-														issueField.setName(mapped.getFirst().getName());
+														issueField.setName(mapped.getLeft().getName());
 														issueField.setType(InputSpec.INTEGER);
 														issueField.setValue(fieldValue);
 														issue.getFields().add(issueField);
@@ -758,13 +758,13 @@ public class ImportServer implements Serializable, Validatable {
 													if (mapped == null) {
 														unmappedIssueFields.add(fieldName);
 														extraIssueInfo.put(fieldName, fieldValue);
-													} else if (!(mapped.getFirst() instanceof TextField)) {
+													} else if (!(mapped.getLeft() instanceof TextField)) {
 														mismatchedIssueFields.put(fieldName, "Should be mapped to a text field");
 														extraIssueInfo.put(fieldName, fieldValue);
 													} else {
 														IssueField issueField = new IssueField();
 														issueField.setIssue(issue);
-														issueField.setName(mapped.getFirst().getName());
+														issueField.setName(mapped.getLeft().getName());
 														issueField.setType(InputSpec.TEXT);
 														issueField.setValue(fieldValue);
 														issue.getFields().add(issueField);
@@ -781,14 +781,14 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldName);
 											extraIssueInfo.put(fieldName, fieldValue);
-										} else if (!(mapped.getFirst() instanceof TextField)
-												|| !((TextField) mapped.getFirst()).isMultiline()) {
+										} else if (!(mapped.getLeft() instanceof TextField)
+												|| !((TextField) mapped.getLeft()).isMultiline()) {
 											mismatchedIssueFields.put(fieldName, "Should be mapped to a multi-line text field");
 											extraIssueInfo.put(fieldName, fieldValue);
 										} else {
 											IssueField issueField = new IssueField();
 											issueField.setIssue(issue);
-											issueField.setName(mapped.getFirst().getName());
+											issueField.setName(mapped.getLeft().getName());
 											issueField.setType(InputSpec.TEXT);
 											issueField.setValue(fieldValue);
 											issue.getFields().add(issueField);
@@ -802,13 +802,13 @@ public class ImportServer implements Serializable, Validatable {
 										if (mapped == null) {
 											unmappedIssueFields.add(fieldName);
 											extraIssueInfo.put(fieldName, fieldValue);
-										} else if (!(mapped.getFirst() instanceof WorkingPeriodField)) {
+										} else if (!(mapped.getLeft() instanceof WorkingPeriodField)) {
 											mismatchedIssueFields.put(fieldName, "Should be mapped to a working period field");
 											extraIssueInfo.put(fieldName, fieldValue);
 										} else {
 											IssueField issueField = new IssueField();
 											issueField.setIssue(issue);
-											issueField.setName(mapped.getFirst().getName());
+											issueField.setName(mapped.getLeft().getName());
 											issueField.setType(InputSpec.WORKING_PERIOD);
 											issueField.setValue(fieldValue);
 											issue.getFields().add(issueField);
@@ -878,10 +878,10 @@ public class ImportServer implements Serializable, Validatable {
 							if (mapped != null) {
 								IssueField tagField = new IssueField();
 								tagField.setIssue(issue);
-								tagField.setName(mapped.getFirst().getName());
+								tagField.setName(mapped.getLeft().getName());
 								tagField.setType(InputSpec.ENUMERATION);
-								tagField.setValue(mapped.getSecond());
-								tagField.setOrdinal(mapped.getFirst().getOrdinal(mapped.getSecond()));
+								tagField.setValue(mapped.getRight());
+								tagField.setOrdinal(mapped.getLeft().getOrdinal(mapped.getRight()));
 								issue.getFields().add(tagField);
 							} else {
 								currentUnmappedTags.add(HtmlEscape.escapeHtml5(tagName));
@@ -995,16 +995,16 @@ public class ImportServer implements Serializable, Validatable {
 				for (Map.Entry<Long, Pair<LinkSpec, List<Long>>> entry : issueLinkInfo.entrySet()) {
 					Issue source = issueMappings.get(entry.getKey());
 					if (source != null) {
-						for (Long targetNumber : entry.getValue().getSecond()) {
+						for (Long targetNumber : entry.getValue().getRight()) {
 							Issue target = issueMappings.get(targetNumber);
 							if (target != null) {
 								var triple = new ImmutableTriple<>(source.getId(), target.getId(),
-										entry.getValue().getFirst().getId());
+										entry.getValue().getLeft().getId());
 								if (linkTriples.add(triple)) {
 									IssueLink link = new IssueLink();
 									link.setSource(source);
 									link.setTarget(target);
-									link.setSpec(entry.getValue().getFirst());
+									link.setSpec(entry.getValue().getLeft());
 									OneDev.getInstance(IssueLinkManager.class).create(link);
 								}
 							}

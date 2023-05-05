@@ -1,11 +1,11 @@
 package io.onedev.server.entitymanager.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.*;
@@ -44,18 +44,15 @@ import io.onedev.server.util.ProjectIssueStats;
 import io.onedev.server.util.ProjectScope;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.validation.validator.ProjectPathValidator;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.java.JavaEscape;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -64,30 +61,12 @@ import javax.persistence.criteria.*;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultIssueManager extends BaseEntityManager<Issue> implements IssueManager, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueManager.class);
-	
-	private static final List<String> ISSUE_FIX_WORDS = Lists.newArrayList(
-			"fix", "fixed", "fixes", "fixing", 
-			"resolve", "resolved", "resolves", "resolving", 
-			"close", "closed", "closes", "closing");
-	
-    private static final Pattern ISSUE_FIX_PATTERN;
-    
-    static {
-    	StringBuilder builder = new StringBuilder("(^|[\\W|/]+)(");
-    	builder.append(StringUtils.join(ISSUE_FIX_WORDS, "|"));
-    	builder.append(")\\s+issue\\s+(");
-    	builder.append(JavaEscape.unescapeJava(ProjectPathValidator.PATTERN.pattern()));
-    	builder.append(")?#(\\d+)(?=$|[\\W|/]+)");
-    	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
-    }
     
 	private final IssueFieldManager fieldManager;
 	
@@ -1175,39 +1154,22 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Override
 	public Collection<Long> parseFixedIssueIds(Project project, String commitMessage) {
 		Collection<Long> issueIds = new HashSet<>();
-
-		// Skip unmatched commit message quickly 
-		boolean fixWordsFound = false;
-		String lowerCaseCommitMessage = commitMessage.toLowerCase();
-		for (String word: ISSUE_FIX_WORDS) {
-			if (lowerCaseCommitMessage.indexOf(word) != -1) {
-				fixWordsFound = true;
-				break;
+		
+		for (var issue: getIssueSetting().getCommitMessageFixPatterns().parseFixedIssues(commitMessage)) {
+			Project projectOfIssue;
+			var projectPath = issue.getLeft();
+			if (projectPath == null)
+				projectOfIssue = project;
+			else
+				projectOfIssue = projectManager.findByPath(projectPath);
+			if (projectOfIssue != null
+					&& (projectOfIssue.isSelfOrAncestorOf(project) || project.isSelfOrAncestorOf(projectOfIssue))) {
+				var issueNumber = issue.getRight();
+				Long issueId = getIssueId(projectOfIssue.getId(), issueNumber);
+				if (issueId != null)
+					issueIds.add(issueId);
 			}
 		}
-		
-		if (fixWordsFound 
-				&& lowerCaseCommitMessage.contains("#") 
-				&& lowerCaseCommitMessage.contains("issue")) {
-			Matcher matcher = ISSUE_FIX_PATTERN.matcher(lowerCaseCommitMessage);
-		
-			while (matcher.find()) {
-				String projectPath = matcher.group(3);
-				Project projectOfIssue;
-				if (projectPath == null) 
-					projectOfIssue = project;
-				else 
-					projectOfIssue = projectManager.findByPath(projectPath);
-				if (projectOfIssue != null 
-						&& (projectOfIssue.isSelfOrAncestorOf(project) || project.isSelfOrAncestorOf(projectOfIssue))) {
-					Long issueNumber = Long.parseLong(matcher.group(matcher.groupCount()));
-					Long issueId = getIssueId(projectOfIssue.getId(), issueNumber);
-					if (issueId != null)
-						issueIds.add(issueId);
-				}
-			}
-		}
-		
 		return issueIds;
 	}
 

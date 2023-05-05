@@ -358,10 +358,10 @@ public class ImportServer implements Serializable, Validatable {
 							if (mapped != null) {
 								IssueField tagField = new IssueField();
 								tagField.setIssue(issue);
-								tagField.setName(mapped.getFirst().getName());
+								tagField.setName(mapped.getLeft().getName());
 								tagField.setType(InputSpec.ENUMERATION);
-								tagField.setValue(mapped.getSecond());
-								tagField.setOrdinal(mapped.getFirst().getOrdinal(mapped.getSecond()));
+								tagField.setValue(mapped.getRight());
+								tagField.setOrdinal(mapped.getLeft().getOrdinal(mapped.getRight()));
 								issue.getFields().add(tagField);
 							} else {
 								currentUnmappedLabels.add(labelName);

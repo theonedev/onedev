@@ -57,15 +57,15 @@ public class OAuthUtils {
 					new Date());
 			accessTokenCache.put(refreshToken, cacheEntry);
 		} else {
-			long lifetime = cacheEntry.getFirst().getLifetime();
-			if (lifetime != 0 && new DateTime(cacheEntry.getSecond()).plusSeconds((int)lifetime).isBeforeNow()) {
+			long lifetime = cacheEntry.getLeft().getLifetime();
+			if (lifetime != 0 && new DateTime(cacheEntry.getRight()).plusSeconds((int)lifetime).isBeforeNow()) {
 				cacheEntry = new Pair<>(
 						generateAccessToken(tokenEndpoint, clientId, clientSecret, refreshToken), 
 						new Date());
 				accessTokenCache.put(refreshToken, cacheEntry);
 			}
 		}
-		return cacheEntry.getFirst().getValue();
+		return cacheEntry.getLeft().getValue();
 	}
 
 	public static AccessToken generateAccessToken(String tokenEndpoint, 

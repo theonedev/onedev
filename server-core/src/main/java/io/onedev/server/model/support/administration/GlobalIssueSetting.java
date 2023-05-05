@@ -1,39 +1,23 @@
 package io.onedev.server.model.support.administration;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.Lists;
-
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ShowCondition;
 import io.onedev.server.buildspecmodel.inputspec.showcondition.ValueIsOneOf;
-import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.IssueTemplate;
-import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.*;
 import io.onedev.server.model.support.issue.field.spec.BuildChoiceField;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.DefaultValue;
 import io.onedev.server.model.support.issue.field.spec.choicefield.defaultvalueprovider.SpecifiedDefaultValue;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
 import io.onedev.server.model.support.issue.transitiontrigger.BranchUpdateTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
@@ -44,15 +28,18 @@ import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
-import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import io.onedev.server.annotation.Editable;
+import io.onedev.server.validation.Validatable;
+import io.onedev.server.web.component.issue.workflowreconcile.*;
+
+import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Editable
-public class GlobalIssueSetting implements Serializable {
+@ClassValidating
+public class GlobalIssueSetting implements Serializable, Validatable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -71,6 +58,8 @@ public class GlobalIssueSetting implements Serializable {
 	private List<NamedIssueQuery> namedQueries = new ArrayList<>();
 	
 	private List<IssueTemplate> issueTemplates = new ArrayList<>();
+	
+	private CommitMessageFixPatterns commitMessageFixPatterns;
 	
 	private boolean reconciled = true;
 	
@@ -277,6 +266,16 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
 		namedQueries.add(new NamedIssueQuery("All", null));
+		
+		commitMessageFixPatterns = new CommitMessageFixPatterns();
+		var entry = new CommitMessageFixPatterns.Entry();
+		entry.setPrefix("(^|\\W)(fix|fixed|fixes|fixing|resolve|resolved|resolves|resolving|close|closed|closes|closing)[\\s:]+");
+		entry.setSuffix("(?=$|\\W)");
+		commitMessageFixPatterns.getEntries().add(entry);
+		entry = new CommitMessageFixPatterns.Entry();
+		entry.setPrefix("\\(\\s*");
+		entry.setSuffix("\\s*\\)\\s*$");
+		commitMessageFixPatterns.getEntries().add(entry);
 	}
 	
 	public List<String> sortFieldNames(Collection<String> fieldNames) {
@@ -716,6 +715,14 @@ public class GlobalIssueSetting implements Serializable {
 		this.issueTemplates = issueTemplates;
 	}
 
+	public CommitMessageFixPatterns getCommitMessageFixPatterns() {
+		return commitMessageFixPatterns;
+	}
+
+	public void setCommitMessageFixPatterns(CommitMessageFixPatterns commitMessageFixPatterns) {
+		this.commitMessageFixPatterns = commitMessageFixPatterns;
+	}
+
 	@Nullable
 	public NamedIssueQuery getNamedQuery(String name) {
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
@@ -735,6 +742,13 @@ public class GlobalIssueSetting implements Serializable {
 	
 	public int getStateOrdinal(String state) {
 		return getStateSpecs().indexOf(getStateSpec(state));
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		context.disableDefaultConstraintViolation();
+		context.buildConstraintViolationWithTemplate("shit").addPropertyNode("commitMessageFixPatterns").addConstraintViolation();
+		return false;
 	}
 	
 }

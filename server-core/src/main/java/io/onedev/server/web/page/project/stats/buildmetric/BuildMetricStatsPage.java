@@ -167,13 +167,13 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 
 						@Override
 						public int compare(Pair<Method, Integer> o1, Pair<Method, Integer> o2) {
-							return o1.getSecond() - o2.getSecond();
+							return o1.getRight() - o2.getRight();
 						}
 						
 					});
 					
 					List<List<Method>> groupedMetricGetters = new ArrayList<>();
-					metricGetters.stream().map(it->it.getFirst()).forEach(it-> {
+					metricGetters.stream().map(it->it.getLeft()).forEach(it-> {
 						MetricIndicator indicator = Preconditions.checkNotNull(it.getAnnotation(MetricIndicator.class));
 						if (indicator.group().length() != 0) {
 							List<Method> metricGettersOfGroup = null;

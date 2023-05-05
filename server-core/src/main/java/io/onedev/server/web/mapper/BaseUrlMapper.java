@@ -23,6 +23,7 @@ import io.onedev.server.web.page.admin.groupmanagement.membership.GroupMembershi
 import io.onedev.server.web.page.admin.groupmanagement.profile.GroupProfilePage;
 import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardListPage;
 import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
+import io.onedev.server.web.page.admin.issuesetting.commitmessagefixpatterns.CommitMessageFixPatternsPage;
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
 import io.onedev.server.web.page.admin.issuesetting.linkspec.LinkSpecListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
@@ -280,6 +281,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/settings/issue-boards", DefaultBoardListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-links", LinkSpecListPage.class));
 		add(new BasePageMapper("~administration/settings/issue-templates", IssueTemplateListPage.class));
+		add(new BasePageMapper("~administration/settings/commit-message-fix-patterns", CommitMessageFixPatternsPage.class));
 		
 		add(new BasePageMapper("~administration/settings/branding", BrandingSettingPage.class));
 		

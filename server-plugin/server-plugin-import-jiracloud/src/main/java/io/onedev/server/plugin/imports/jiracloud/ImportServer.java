@@ -524,10 +524,10 @@ public class ImportServer implements Serializable, Validatable {
 							if (mapped != null) {
 								IssueField typeField = new IssueField();
 								typeField.setIssue(issue);
-								typeField.setName(mapped.getFirst().getName());
+								typeField.setName(mapped.getLeft().getName());
 								typeField.setType(InputSpec.ENUMERATION);
-								typeField.setValue(mapped.getSecond());
-								typeField.setOrdinal(mapped.getFirst().getOrdinal(mapped.getSecond()));
+								typeField.setValue(mapped.getRight());
+								typeField.setOrdinal(mapped.getLeft().getOrdinal(mapped.getRight()));
 								issue.getFields().add(typeField);
 							} else {
 								extraIssueInfo.put("Type", HtmlEscape.escapeHtml5(untranslatedTypeName));
@@ -544,10 +544,10 @@ public class ImportServer implements Serializable, Validatable {
 						if (mapped != null) {
 							IssueField priorityField = new IssueField();
 							priorityField.setIssue(issue);
-							priorityField.setName(mapped.getFirst().getName());
+							priorityField.setName(mapped.getLeft().getName());
 							priorityField.setType(InputSpec.ENUMERATION);
-							priorityField.setValue(mapped.getSecond());
-							priorityField.setOrdinal(mapped.getFirst().getOrdinal(mapped.getSecond()));
+							priorityField.setValue(mapped.getRight());
+							priorityField.setOrdinal(mapped.getLeft().getOrdinal(mapped.getRight()));
 							issue.getFields().add(priorityField);
 						} else {
 							extraIssueInfo.put("Priority", HtmlEscape.escapeHtml5(priorityName));

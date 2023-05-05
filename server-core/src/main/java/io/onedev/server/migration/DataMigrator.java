@@ -4741,8 +4741,8 @@ public class DataMigrator {
 			Element mentionElement = mentionsElement.addElement("io.onedev.server.model.IssueMention");
 			mentionElement.addElement("id").setText(String.valueOf(id++));
 			mentionElement.addAttribute("revision", "0.0");
-			mentionElement.addElement("issue").setText(issueMention.getFirst());
-			mentionElement.addElement("user").setText(issueMention.getSecond());
+			mentionElement.addElement("issue").setText(issueMention.getLeft());
+			mentionElement.addElement("user").setText(issueMention.getRight());
 		}
 		mentionsDom.writeToFile(mentionsFile, true);
 
@@ -4755,8 +4755,8 @@ public class DataMigrator {
 			Element mentionElement = mentionsElement.addElement("io.onedev.server.model.PullRequestMention");
 			mentionElement.addElement("id").setText(String.valueOf(id++));
 			mentionElement.addAttribute("revision", "0.0");
-			mentionElement.addElement("request").setText(it.getFirst());
-			mentionElement.addElement("user").setText(it.getSecond());
+			mentionElement.addElement("request").setText(it.getLeft());
+			mentionElement.addElement("user").setText(it.getRight());
 		}
 		mentionsDom.writeToFile(mentionsFile, true);
 
@@ -4769,8 +4769,8 @@ public class DataMigrator {
 			Element mentionElement = mentionsElement.addElement("io.onedev.server.model.CodeCommentMention");
 			mentionElement.addElement("id").setText(String.valueOf(id++));
 			mentionElement.addAttribute("revision", "0.0");
-			mentionElement.addElement("comment").setText(it.getFirst());
-			mentionElement.addElement("user").setText(it.getSecond());
+			mentionElement.addElement("comment").setText(it.getLeft());
+			mentionElement.addElement("user").setText(it.getRight());
 		}
 		mentionsDom.writeToFile(mentionsFile, true);
 	}
@@ -5286,6 +5286,30 @@ public class DataMigrator {
 		for (File file : dataDir.listFiles()) {
 			if (file.getName().startsWith("ClusterServers.xml"))
 				FileUtils.deleteFile(file);
+		}
+	}
+
+	private void migrate121(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							var commitMessageFixPatternsElement = valueElement.addElement("commitMessageFixPatterns");							
+							var entriesElement = commitMessageFixPatternsElement.addElement("entries");
+							var entryElement = entriesElement.addElement("io.onedev.server.model.support.issue.CommitMessageFixPatterns_-Entry");
+							entryElement.addElement("prefix").setText("(^|\\W)(fix|fixed|fixes|fixing|resolve|resolved|resolves|resolving|close|closed|closes|closing)[\\s:]+");
+							entryElement.addElement("suffix").setText("(?=$|\\W)");
+							entryElement = entriesElement.addElement("io.onedev.server.model.support.issue.CommitMessageFixPatterns_-Entry");
+							entryElement.addElement("prefix").setText("\\(\\s*");
+							entryElement.addElement("suffix").setText("\\s*\\)\\s*$");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
 		}
 	}
 	

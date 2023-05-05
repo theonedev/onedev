@@ -920,7 +920,7 @@ public abstract class RevisionDiffPanel extends Panel {
 								} else {
 									Pair<CodeComment, DiffPlanarRange> openCommentPair = getOpenComment();
 									if (openCommentPair != null) 
-										return openCommentPair.getSecond();
+										return openCommentPair.getRight();
 									else
 										return null;
 								}

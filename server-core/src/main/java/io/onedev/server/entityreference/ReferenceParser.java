@@ -62,7 +62,7 @@ public class ReferenceParser {
 		return new ArrayList<>(references);
 	}
 	
-	private boolean fastScan(String text) {
+	public static boolean fastScan(String text) {
 		var chars = text.toCharArray();
 		for (var i=0; i<chars.length; i++) {
 			if (chars[i] == '#' && i<chars.length-1 && Character.isDigit(chars[i+1]))

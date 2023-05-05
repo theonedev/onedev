@@ -8,43 +8,47 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class Pair<FirstType, SecondType> implements Serializable {
+import javax.annotation.Nullable;
+
+public class Pair<L, R> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	private FirstType first;
+	private L left;
 	
-	private SecondType second;
+	private R right;
 	
 	public Pair() {
 		
 	}
 	
-	public Pair(FirstType first, SecondType second) {
-		this.first = first;
-		this.second = second;
+	public Pair(@Nullable L left, @Nullable R right) {
+		this.left = left;
+		this.right = right;
 	}
 
-	public FirstType getFirst() {
-		return first;
+	@Nullable
+	public L getLeft() {
+		return left;
 	}
 
-	public void setFirst(FirstType first) {
-		this.first = first;
+	public void setLeft(@Nullable L left) {
+		this.left = left;
 	}
 
-	public SecondType getSecond() {
-		return second;
+	@Nullable
+	public R getRight() {
+		return right;
 	}
 
-	public void setSecond(SecondType second) {
-		this.second = second;
+	public void setRight(@Nullable R right) {
+		this.right = right;
 	}
 	
-	public static <FirstType, SecondType> List<Pair<FirstType, SecondType>> getPairs(Map<FirstType, SecondType> map) {
-		List<Pair<FirstType, SecondType>> pairs = new ArrayList<Pair<FirstType, SecondType>>();
-		for (Map.Entry<FirstType, SecondType> entry: map.entrySet()) {
-			pairs.add(new Pair<FirstType, SecondType>(entry.getKey(), entry.getValue()));
+	public static <L, R> List<Pair<L, R>> getPairs(Map<L, R> map) {
+		List<Pair<L, R>> pairs = new ArrayList<Pair<L, R>>();
+		for (Map.Entry<L, R> entry: map.entrySet()) {
+			pairs.add(new Pair<L, R>(entry.getKey(), entry.getValue()));
 		}
 		return pairs;
 	}
@@ -58,16 +62,16 @@ public class Pair<FirstType, SecondType> implements Serializable {
 			return true;
 		Pair otherPair = (Pair) other;
 		return new EqualsBuilder()
-			.append(first, otherPair.getFirst())
-			.append(second, otherPair.getSecond())
+			.append(left, otherPair.getLeft())
+			.append(right, otherPair.getRight())
 			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(first)
-			.append(second)
+			.append(left)
+			.append(right)
 			.toHashCode();
 	}		
 }

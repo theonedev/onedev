@@ -228,8 +228,8 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			return new Pair<>(commitBytes, lastCommitId);
 		});
 
-		if (!isCommitCollected(result.getFirst())) {
-			processCommitRange(project, commitId, result.getSecond(), (untilCommitId, sinceCommitId) -> env.executeInTransaction(txn -> {
+		if (!isCommitCollected(result.getLeft())) {
+			processCommitRange(project, commitId, result.getRight(), (untilCommitId, sinceCommitId) -> env.executeInTransaction(txn -> {
 				AtomicInteger totalCommitCount = new AtomicInteger(readInt(defaultStore, txn, COMMIT_COUNT_KEY, 0));
 
 				NextIndex nextIndex = new NextIndex();

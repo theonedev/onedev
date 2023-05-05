@@ -482,7 +482,7 @@ public class BlobTextDiffPanel extends Panel {
 			markRange = change.getAnnotationSupport().getMarkRange();
 			Pair<CodeComment, DiffPlanarRange> openCommentPair = change.getAnnotationSupport().getOpenComment();
 			if (openCommentPair != null) 
-				openCommentInfo = new DiffCodeCommentInfo(openCommentPair.getFirst(), openCommentPair.getSecond());
+				openCommentInfo = new DiffCodeCommentInfo(openCommentPair.getLeft(), openCommentPair.getRight());
 			else 
 				openCommentInfo = null;
 			commentContainerId = "'" + change.getAnnotationSupport().getCommentContainer().getMarkupId() + "'";

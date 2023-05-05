@@ -81,7 +81,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -151,9 +150,9 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			if (verifiedEmailAddresses.contains(commit.getAuthorIdent().getEmailAddress().toLowerCase()))
 				branchUpdates.add(new Pair<>(GitUtils.ref2branch(ref.getName()), commit.getCommitTime()));
 		}
-		branchUpdates.sort(Comparator.comparing(Pair::getSecond));
+		branchUpdates.sort(Comparator.comparing(Pair::getRight));
 		if (!branchUpdates.isEmpty())
-			return branchUpdates.get(branchUpdates.size()-1).getFirst();
+			return branchUpdates.get(branchUpdates.size()-1).getLeft();
 		else
 			return getProject().getDefaultBranch();
 	}
