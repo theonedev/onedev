@@ -1,10 +1,7 @@
 package io.onedev.server.git.command;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,6 +17,8 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.CommandUtils;
 import io.onedev.server.git.GitUtils;
 
+import javax.annotation.Nullable;
+
 public abstract class LogCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogCommand.class); 
@@ -31,21 +30,30 @@ public abstract class LogCommand {
  	private final File workingDir;
  	
     private final List<String> revisions;
-    
+	
+	private Map<String, String> envs = new HashMap<>();
+	
     private boolean firstParent;
     
     private boolean noRenames;
+	
+	private int limit;
     
     private EnumSet<Field> fields = EnumSet.noneOf(Field.class);
-    
-    public LogCommand(File workingDir, List<String> revisions) {
-    	this.workingDir = workingDir;
-    	Preconditions.checkArgument(!revisions.isEmpty());
-    	this.revisions = revisions;
-    }
 
+	public LogCommand(File workingDir, List<String> revisions) {
+		this.workingDir = workingDir;
+		Preconditions.checkArgument(!revisions.isEmpty());
+		this.revisions = revisions;
+	}
+	
 	public LogCommand fields(EnumSet<Field> fields) {
 		this.fields = fields;
+		return this;
+	}
+
+	public LogCommand envs(@Nullable Map<String, String> envs) {
+		this.envs = envs;
 		return this;
 	}
 	
@@ -58,13 +66,20 @@ public abstract class LogCommand {
 		this.noRenames = noRenames;
 		return this;
 	}
+	
+	public LogCommand limit(int limit) {
+		this.limit = limit;
+		return this;
+	}
 
 	protected Commandline newGit() {
 		return CommandUtils.newGit();
 	}
 	
     public void run() {
-        Commandline cmd = newGit().workingDir(workingDir);
+        Commandline git = newGit().workingDir(workingDir);
+		if (envs != null)
+			git.environments().putAll(envs);
 
         String format = "hash:%H %n";
 
@@ -92,33 +107,36 @@ public abstract class LogCommand {
 
         if (noRenames) {
             if (fields.contains(Field.LINE_CHANGES)) 
-    	        cmd.addArgs("log", "--numstat", "--no-renames");
+    	        git.addArgs("log", "--numstat", "--no-renames");
             else if (fields.contains(Field.FILE_CHANGES))
-                cmd.addArgs("log", "--name-status", "--no-renames");
+                git.addArgs("log", "--name-status", "--no-renames");
             else 
-    	        cmd.addArgs("log");
+    	        git.addArgs("log");
         } else {
             if (fields.contains(Field.LINE_CHANGES)) 
-    	        cmd.addArgs("-c", "diff.renameLimit=1000", "log", "--numstat", "--find-renames");
+    	        git.addArgs("-c", "diff.renameLimit=1000", "log", "--numstat", "--find-renames");
             else if (fields.contains(Field.FILE_CHANGES))
-                cmd.addArgs("-c", "diff.renameLimit=1000", "log", "--name-status", "--find-renames");
+                git.addArgs("-c", "diff.renameLimit=1000", "log", "--name-status", "--find-renames");
             else 
-    	        cmd.addArgs("log");
+    	        git.addArgs("log");
         }
-        
-        cmd.addArgs("--format=" + format, "--date=raw");
+		
+		if (limit != 0)
+			git.addArgs("-n", String.valueOf(limit));
+		
+        git.addArgs("--format=" + format, "--date=raw");
         if (firstParent) {
-        	cmd.addArgs("--first-parent");
+        	git.addArgs("--first-parent");
             if (fields.contains(Field.LINE_CHANGES) || fields.contains(Field.FILE_CHANGES))
-            	cmd.addArgs("-m");
+            	git.addArgs("-m");
         }
 
     	for (String revision: revisions)
-    		cmd.addArgs(revision);
+    		git.addArgs(revision);
 
         AtomicReference<GitCommit.Builder> commitBuilderRef = new AtomicReference<>(null);
         AtomicBoolean inBodyRef = new AtomicBoolean(false);
-        cmd.execute(new LineConsumer() {
+        git.execute(new LineConsumer() {
 
             @Override
             public void consume(String line) {

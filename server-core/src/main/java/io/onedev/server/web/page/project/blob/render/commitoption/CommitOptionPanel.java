@@ -191,12 +191,13 @@ public class CommitOptionPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				
 				if (save(target)) {
 					String script = String.format(""
 							+ "$('#%s').attr('disabled', 'disabled').val('Please wait...');"
 							+ "onedev.server.form.markClean($('form'));", getMarkupId());
 					target.appendJavaScript(script);
-				}
+				} 
 			}
 			
 		};
@@ -242,9 +243,15 @@ public class CommitOptionPanel extends Panel {
 			target.add(form);
 			return false;
 		} else {
-			String commitMessage = commitMessageBean.getCommitMessage();
 			User user = Preconditions.checkNotNull(SecurityUtils.getUser());
-
+			String commitMessage = commitMessageBean.getCommitMessage();
+			var branchProtection = context.getProject().getBranchProtection(context.getBlobIdent().revision, user);
+			var errorMessage = branchProtection.checkCommitMessage(commitMessage, false);
+			if (errorMessage != null) {
+				form.error(errorMessage);
+				target.add(form);
+				return false;
+			}
 			String revision = context.getBlobIdent().revision;
 			ObjectId prevCommitId;
 			if (revision != null)

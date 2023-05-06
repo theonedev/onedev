@@ -4,6 +4,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_ME
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 
@@ -31,24 +32,28 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 
 		String commitMessage = null;
 		String description = null;
-		MergeStrategy mergeStrategy = getPullRequest().getMergeStrategy();
-		MergePreview mergePreview = getPullRequest().checkMergePreview();
-		if (mergeStrategy == CREATE_MERGE_COMMIT) 
-			commitMessage = "Merge pull request " + request.getNumberAndTitle();
-		else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS)  
-			commitMessage = "Pull request " + request.getNumberAndTitle();
-		else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS)  
+		MergeStrategy mergeStrategy = request.getMergeStrategy();
+		MergePreview mergePreview = request.checkMergePreview();
+		if (mergeStrategy == CREATE_MERGE_COMMIT) {
+			commitMessage = "Merges pull request #" + request.getNumber();
+			commitMessage += "\n\n" + request.getTitle();
+		} else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) {
+			commitMessage = request.getTitle();
+			if (request.getDescription() != null)
+				commitMessage += "\n\n" + request.getDescription();
+			commitMessage += "\n\nMerges pull request #" + request.getNumber();
+		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
 			description = "Source branch commits will be rebased onto target branch";
-		else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash()))  
+		} else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) {
 			description = "Source branch commits will be fast-forwarded to target branch";
-		else 
-			commitMessage = "Merge pull request " + request.getNumberAndTitle();
+		} else {
+			commitMessage = "Merges pull request #" + request.getNumber();
+			commitMessage += "\n\n" + request.getTitle();
+		}
 		
 		getForm().add(new Label("description", description).setVisible(description != null));
 
 		if (commitMessage != null) {
-			if (request.getDescription() != null)
-				commitMessage += "\n\n" + request.getDescription();
 			bean.setCommitMessage(commitMessage);
 			getForm().add(BeanContext.edit("commitMessage", bean));
 		} else {

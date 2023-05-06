@@ -1,27 +1,8 @@
 package io.onedev.server.git.hook;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -36,6 +17,18 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ProjectPermission;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.*;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -137,11 +130,11 @@ public class GitPreReceiveCallback extends HttpServlet {
     	    		} else if (refName.startsWith(Constants.R_HEADS)) {
     	    			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(refName));
     	    			List<String> errorMessages = new ArrayList<>();
-    	    			BranchProtection protection = project.getHierarchyBranchProtection(branchName, user);
+    	    			BranchProtection protection = project.getBranchProtection(branchName, user);
     					if (oldObjectId.equals(ObjectId.zeroId())) {
     						if (protection.isPreventCreation()) {
     							errorMessages.add("Can not create this branch according to branch protection setting");
-    						} else if (protection.isSignatureRequired() 
+    						} else if (protection.isCommitSignatureRequired() 
     								&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
     							errorMessages.add("Can not create this branch as branch protection setting "
     									+ "requires valid signature on head commit");
@@ -152,13 +145,18 @@ public class GitPreReceiveCallback extends HttpServlet {
     					} else if (protection.isPreventForcedPush() 
     							&& !GitUtils.isMergedInto(projectManager.getRepository(project.getId()), gitEnvs, oldObjectId, newObjectId)) {
     						errorMessages.add("Can not force-push to this branch according to branch protection setting");
-    					} else if (protection.isSignatureRequired() 
+    					} else if (protection.isCommitSignatureRequired() 
     							&& !project.hasValidCommitSignature(newObjectId, gitEnvs)) {
     						errorMessages.add("Can not push to this branch as branch protection rule requires "
     								+ "valid signature for head commit");
     					} else if (protection.isReviewRequiredForPush(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
         					errorMessages.add("Review required for your change. Please submit pull request instead");
     					}
+						if (errorMessages.isEmpty() && !newObjectId.equals(ObjectId.zeroId())) {
+							var commitMessageError = project.checkCommitMessages(branchName, user, oldObjectId, newObjectId, gitEnvs);
+							if (commitMessageError != null)
+								errorMessages.add(commitMessageError.toString());
+						}
     	    			if (errorMessages.isEmpty() 
     	    					&& !oldObjectId.equals(ObjectId.zeroId()) 
     	    					&& !newObjectId.equals(ObjectId.zeroId()) 
@@ -177,11 +175,11 @@ public class GitPreReceiveCallback extends HttpServlet {
     	    		} else if (refName.startsWith(Constants.R_TAGS)) {
     	    			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
     	    			List<String> errorMessages = new ArrayList<>();
-    	    			TagProtection protection = project.getHierarchyTagProtection(tagName, user);
+    	    			TagProtection protection = project.getTagProtection(tagName, user);
     					if (oldObjectId.equals(ObjectId.zeroId())) {
     						if (protection.isPreventCreation()) {
     							errorMessages.add("Can not create this tag according to tag protection setting");
-    						} else if (protection.isSignatureRequired() 
+    						} else if (protection.isCommitSignatureRequired() 
     								&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
     							errorMessages.add("Can not create this tag as tag protection setting requires "
     									+ "valid tag signature");
@@ -191,7 +189,7 @@ public class GitPreReceiveCallback extends HttpServlet {
     							errorMessages.add("Can not delete this tag according to tag protection setting");
     					} else if (protection.isPreventUpdate()) {
     						errorMessages.add("Can not update this tag according to tag protection setting");
-    					} else if (protection.isSignatureRequired() 
+    					} else if (protection.isCommitSignatureRequired() 
     							&& !project.hasValidTagSignature(newObjectId, gitEnvs)) {
     						errorMessages.add("Can not update this tag as tag protection setting requires "
     								+ "valid tag signature");

@@ -155,3 +155,12 @@
 .inplace-property-edit {
 	width: 300px !important;
 }
+.select2-drop.string-list .select2-result, 
+.select2-drop.string-list .select2-no-results,
+.select2-drop.string-list .select2-searching {
+	display: none;
+}
+
+.select2-container-multi.string-list .select2-choices .select2-search-field input.select2-active {
+	background: none !important;
+}

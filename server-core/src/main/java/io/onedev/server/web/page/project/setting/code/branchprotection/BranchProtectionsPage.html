@@ -2,7 +2,9 @@
 	<div class="branch-protections">
 		<div class="alert alert-notice bg-white shadow mb-5 text-gray">
 			<wicket:svg href="bulb" class="icon mr-2"></wicket:svg>
-			Define branch protection rules. Rules defined in parent projects will also take effect 
+			Define branch protection rules. Rules defined in parent project are considered 
+			to be defined after rules defined here. For a given branch and user, the first 
+			matching rule will take effect
 		</div>
 		
 		<div class="body">

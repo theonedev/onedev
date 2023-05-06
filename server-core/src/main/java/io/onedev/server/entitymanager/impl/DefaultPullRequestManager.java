@@ -701,7 +701,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest>
 	@Override
 	public void checkReviews(PullRequest request, boolean sourceUpdated) {
 		BranchProtection branchProtection = request.getTargetProject()
-				.getHierarchyBranchProtection(request.getTargetBranch(), request.getSubmitter());
+				.getBranchProtection(request.getTargetBranch(), request.getSubmitter());
 		Collection<String> changedFiles;
 		if (sourceUpdated) {
 			changedFiles = request.getLatestUpdate().getChangedFiles();

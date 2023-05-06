@@ -1,6 +1,7 @@
 package io.onedev.server.git.service;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.*;
@@ -20,6 +21,7 @@ import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import org.apache.commons.lang3.SerializationUtils;
@@ -38,6 +40,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
@@ -45,6 +48,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
+
+import static io.onedev.server.git.command.LogCommand.Field.*;
 
 @Singleton
 public class DefaultGitService implements GitService, Serializable {
@@ -1289,6 +1294,74 @@ public class DefaultGitService implements GitService, Serializable {
 		});
 	}
 
+	@Nullable
+	@Override
+	public CommitMessageError checkCommitMessages(Project project, String branch, User user,
+									  ObjectId oldId, ObjectId newId, 
+									  @Nullable Map<String, String> envs) {
+		Long projectId = project.getId();
+		var branchProtection = project.getBranchProtection(branch, user);
+		if (branchProtection.getMaxCommitMessageLineLength() != null
+				|| branchProtection.isEnforceConventionalCommits()) {
+			return runOnProjectServer(projectId, () -> {
+				Map<ObjectId, String> commitMessages = new LinkedHashMap<>();
+				Set<ObjectId> mergeCommits = new HashSet<>();
+				if (envs != null) {
+					File gitDir = projectManager.getGitDir(projectId);
+
+					List<String> revisions;
+					if (oldId.equals(ObjectId.zeroId()))
+						revisions = Lists.newArrayList(newId.name());
+					else
+						revisions = Lists.newArrayList("^" + oldId.name(), newId.name());
+
+					var logCommand = new LogCommand(gitDir, revisions) {
+
+						@Override
+						protected void consume(GitCommit commit) {
+							var commitId = ObjectId.fromString(commit.getHash());
+							if (commit.getParentHashes().size() > 1)
+								mergeCommits.add(commitId);
+							var commitMessage = commit.getSubject();
+							if (commit.getBody() != null)
+								commitMessage += "\n\n" + commit.getBody();
+							commitMessages.put(commitId, commitMessage);
+						}
+
+					};
+					if (oldId.equals(ObjectId.zeroId()))
+						logCommand.limit(1);
+					logCommand.envs(envs).fields(EnumSet.of(SUBJECT, BODY, PARENTS)).run();
+				} else {
+					var repository = projectManager.getRepository(projectId);
+					if (!oldId.equals(ObjectId.zeroId())) {
+						for (var commit: GitUtils.getReachableCommits(repository, 
+								Sets.newHashSet(oldId), Sets.newHashSet(newId))) {
+							commitMessages.put(commit.copy(), commit.getFullMessage());
+							if (commit.getParentCount() > 1)
+								mergeCommits.add(commit.copy());
+						}
+					} else {
+						var commit = repository.parseCommit(newId);
+						commitMessages.put(commit.copy(), commit.getFullMessage());
+						if (commit.getParentCount() > 1)
+							mergeCommits.add(commit.copy());
+					}
+				}
+				for (var entry: commitMessages.entrySet()) {
+					var errorMessage = branchProtection.checkCommitMessage(
+							entry.getValue(), mergeCommits.contains(entry.getKey()));
+					if (errorMessage != null) {
+						return new CommitMessageError(entry.getKey(), errorMessage);
+					}
+				}
+				return null;
+			});
+		} else {
+			return null;
+		}
+	}
+	
 	@Override
 	public List<String> revList(Project project, RevListOptions options) {
 		Long projectId = project.getId();

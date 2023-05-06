@@ -76,6 +76,11 @@
 					<div wicket:id="unfinishedBuilds" class="unfinished-builds text-warning">
 						<wicket:svg href="clock" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">some required builds</a> are not finished yet
 					</div>
+					<wicket:enclosure child="commitMessageCheckError">
+					<div class="invalid-commit-messages text-warning">
+						<wicket:svg href="times-circle" class="icon"></wicket:svg> <span wicket:id="commitMessageCheckError"></span>
+					</div>
+					</wicket:enclosure>
 					<wicket:enclosure child="requiredJobs">
 					<div class="required-jobs text-warning">
 						<wicket:svg href="warning" class="icon"></wicket:svg> 

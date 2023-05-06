@@ -1728,7 +1728,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 												}
 											}.run();
 										} else {
-											var fetchCommitIds = new ArrayList<>(getReachableCommits(repository, sinceCommitIds, untilCommitIds));
+											var fetchCommitIds = getReachableCommits(repository, sinceCommitIds, untilCommitIds)
+													.stream().map(AnyObjectId::copy).collect(toList());
 											new LfsFetchCommand(git.workingDir(), fetchUrl, fetchCommitIds) {
 												@Override
 												protected Commandline newGit() {

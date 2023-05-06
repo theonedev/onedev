@@ -4,6 +4,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.git.*;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -127,6 +128,11 @@ public interface GitService {
 			@Nullable LinearRange range);
 	
 	byte[] getRawCommit(Project project, ObjectId revId, Map<String, String> envs);
+	
+	@Nullable
+	CommitMessageError checkCommitMessages(Project project, String branch, User user,
+							   ObjectId oldId, ObjectId newId, 
+							   @Nullable Map<String, String> envs);
 	
 	byte[] getRawTag(Project project, ObjectId tagId, Map<String, String> envs);
 	

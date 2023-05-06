@@ -52,6 +52,7 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.InplacePropertyEditLink;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
@@ -98,6 +99,7 @@ import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jetbrains.annotations.Nullable;
+import org.unbescape.html.HtmlEscape;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ValidationException;
@@ -106,6 +108,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.*;
+import static org.unbescape.html.HtmlEscape.escapeHtml5;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
@@ -131,7 +134,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					ProjectPullRequestsPage.paramsOf(getProject(), null, 0));
 		}
 		
-		requestModel = new LoadableDetachableModel<PullRequest>() {
+		requestModel = new LoadableDetachableModel<>() {
 
 			@Override
 			protected PullRequest load() {
@@ -140,11 +143,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					requestNumber = Long.valueOf(requestNumberString);
 				} catch (NumberFormatException e) {
 					throw new ValidationException("Invalid pull request number: " + requestNumberString);
-				}				
-				
+				}
+
 				PullRequest request = getPullRequestManager().find(getProject(), requestNumber);
 				if (request == null) {
-					throw new EntityNotFoundException("Unable to find pull request #" 
+					throw new EntityNotFoundException("Unable to find pull request #"
 							+ requestNumber + " in project " + getProject());
 				} else if (!request.getTargetProject().equals(getProject())) {
 					throw new RestartResponseException(getPageClass(), paramsOf(request));
@@ -237,7 +240,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		requestHead.add(form);
 		
 		title = getPullRequest().getTitle();
-		form.add(new TextField<String>("title", new IModel<String>() {
+		form.add(new TextField<>("title", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -252,7 +255,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			public void setObject(String object) {
 				title = object;
 			}
-			
+
 		}).setRequired(true).add(new ReferenceInputBehavior() {
 
 			@Override
@@ -585,20 +588,31 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			
 		});
 
-		IModel<List<String>> requiredJobsModel = new LoadableDetachableModel<List<String>>() {
+		summaryContainer.add(new Label("commitMessageCheckError", new LoadableDetachableModel<>() {
 			@Override
-			protected List<String> load() {
-				PullRequest request = getPullRequest();
-				BuildRequirement buildRequirement = request.getBuildRequirement();
-				List<String> requiredJobs = new ArrayList<>(buildRequirement.getRequiredJobs());
-				if (!buildRequirement.isStictMode() || !request.isBuildCommitOutdated()) {
-					for (Build build: request.getCurrentBuilds())
-						requiredJobs.remove(build.getJobName());
+			protected String load() {
+				var commitMessageError = getPullRequest().checkCommitMessages();
+				if (commitMessageError != null) {
+					var params = CommitDetailPage.paramsOf(getProject(), commitMessageError.getCommitId().name());
+					return String.format("Error validating commit message of <a href='%s' class='text-monospace font-size-sm'>%s</a>: %s",
+							RequestCycle.get().urlFor(CommitDetailPage.class, params),								
+							GitUtils.abbreviateSHA(commitMessageError.getCommitId().name()),
+							escapeHtml5(commitMessageError.getErrorMessage()));
+				} else {
+					return null;
 				}
-				return requiredJobs;
 			}
-
-		};
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				PullRequest request = getPullRequest();
+				if (request.isOpen())
+					setVisible(getDefaultModelObject() != null);
+				else
+					setVisible(false);
+			}
+		}.setEscapeModelStrings(false));
 		
 		summaryContainer.add(new Label("requiredJobsMessage", new AbstractReadOnlyModel<String>() {
 			@Override
@@ -1340,13 +1354,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected boolean operate() {
+					protected String operate() {
 						if (canOperate()) {
 							getPullRequestReviewManager().review(getPullRequest(), true, getComment());
 							Session.get().success("Approved");
-							return true;
+							return null;
 						} else {
-							return false; 
+							return "Can not perform this operation now"; 
 						}
 					}
 					
@@ -1382,13 +1396,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected boolean operate() {
+					protected String operate() {
 						if (canOperate()) {
 							getPullRequestReviewManager().review(getPullRequest(), false, getComment());
 							Session.get().success("Requested For changes");
-							return true;
+							return null;
 						} else {
-							return false; 
+							return "Can not perform this operation now"; 
 						}
 					}
 					
@@ -1419,12 +1433,20 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new MergeConfirmPanel(id, modal, latestUpdateId) {
 
 					@Override
-					protected boolean operate() {
+					protected String operate() {
 						if (canOperate()) {
-							OneDev.getInstance(PullRequestManager.class).merge(getPullRequest(), getCommitMessage());
-							return true;
+							var request = getPullRequest();
+							var branchProtection = getProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
+							var errorMessage = branchProtection.checkCommitMessage(getCommitMessage(), 
+									request.getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS);
+							if (errorMessage != null) {
+								return errorMessage;
+							} else {
+								getPullRequestManager().merge(getPullRequest(), getCommitMessage());
+								return null;
+							}
 						} else {
-							return false;
+							return "Can not perform this operation now";
 						}
 					}
 					
@@ -1450,12 +1472,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected boolean operate() {
+					protected String operate() {
 						if (canOperate()) {
-							OneDev.getInstance(PullRequestManager.class).discard(getPullRequest(), getComment());			
-							return true;
+							getPullRequestManager().discard(getPullRequest(), getComment());			
+							return null;
 						} else {
-							return false; 
+							return "Can not perform this operation now";
 						}
 					}
 					
@@ -1486,12 +1508,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected boolean operate() {
+					protected String operate() {
 						if (canOperate()) {
-							OneDev.getInstance(PullRequestManager.class).reopen(getPullRequest(), getComment());
-							return true;
+							getPullRequestManager().reopen(getPullRequest(), getComment());
+							return null;
 						} else {
-							return false; 
+							return "Can not perform this operation now";
 						}
 					}
 					
@@ -1524,13 +1546,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected boolean operate() {
+					protected String operate() {
 						if (canOperate()) {
-							OneDev.getInstance(PullRequestManager.class).deleteSourceBranch(getPullRequest(), getComment());
+							getPullRequestManager().deleteSourceBranch(getPullRequest(), getComment());
 							Session.get().success("Deleted source branch");
-							return true;
+							return null;
 						} else {
-							return false; 
+							return "Can not perform this operation now";
 						}
 					}
 					
@@ -1563,13 +1585,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
 					
 					@Override
-					protected boolean operate() {
+					protected String operate() {
 						if (canOperate()) {
-							OneDev.getInstance(PullRequestManager.class).restoreSourceBranch(getPullRequest(), getComment());
+							getPullRequestManager().restoreSourceBranch(getPullRequest(), getComment());
 							Session.get().success("Restored source branch");
-							return true;
+							return null;
 						} else {
-							return false; 
+							return "Can not perform this operation now";
 						}
 					}
 					

@@ -30,6 +30,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.match.WildcardUtils;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Maps.difference;
 import static io.onedev.server.git.GitUtils.getReachableCommits;
+import static java.util.stream.Collectors.toList;
 
 @Editable(order=60, name="Pull from Remote", group=StepGroup.REPOSITORY_SYNC, description=""
 		+ "This step pulls specified refs from remote. For security reason, it is only allowed "
@@ -96,7 +98,7 @@ public class PullRepository extends SyncRepository {
 	private static List<String> getChildProjects() {
 		int prefixLen = Project.get().getPath().length() + 1;
 		List<String> choices = new ArrayList<>(Project.get().getDescendants()
-				.stream().map(pr -> pr.getPath().substring(prefixLen)).collect(Collectors.toList()));
+				.stream().map(pr -> pr.getPath().substring(prefixLen)).collect(toList()));
 		Collections.sort(choices);
 		return choices;
 	}
@@ -321,7 +323,8 @@ public class PullRepository extends SyncRepository {
 						}
 					}.run();
 				} else {
-					var fetchCommitIds = new ArrayList<>(getReachableCommits(repository, sinceCommitIds, newCommitIds.values()));
+					var fetchCommitIds = getReachableCommits(repository, sinceCommitIds, newCommitIds.values())
+							.stream().map(AnyObjectId::copy).collect(toList());
 					new LfsFetchCommand(git.workingDir(), remoteUrl, fetchCommitIds) {
 						@Override
 						protected Commandline newGit() {

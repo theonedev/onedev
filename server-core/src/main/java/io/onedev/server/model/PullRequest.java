@@ -10,6 +10,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.infomanager.VisitInfoManager;
 import io.onedev.server.model.support.EntityWatch;
@@ -41,6 +42,8 @@ import java.util.stream.Collectors;
 
 import static io.onedev.server.model.AbstractEntity.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.*;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
+import static java.lang.ThreadLocal.withInitial;
 
 @Entity
 @Table(
@@ -150,14 +153,7 @@ public class PullRequest extends ProjectBelonging
 			NAME_SOURCE_BRANCH, PROP_SOURCE_BRANCH,
 			NAME_COMMENT_COUNT, PROP_COMMENT_COUNT);
 	
-	private static ThreadLocal<Stack<PullRequest>> stack =  new ThreadLocal<Stack<PullRequest>>() {
-
-		@Override
-		protected Stack<PullRequest> initialValue() {
-			return new Stack<PullRequest>();
-		}
-	
-	};
+	private static ThreadLocal<Stack<PullRequest>> stack = withInitial(Stack::new);
 	
 	public enum Status {
 		OPEN, MERGED, DISCARDED;
@@ -302,6 +298,8 @@ public class PullRequest extends ProjectBelonging
 	private transient Collection<Build> currentBuilds;
 	
 	private transient Collection<User> assignees;
+	
+	private transient Optional<CommitMessageError> commitMessageCheckError;
 	
 	public String getTitle() {
 		return title;
@@ -960,7 +958,7 @@ public class PullRequest extends ProjectBelonging
 		if (buildRequirement == null) {
 			MergePreview preview = checkMergePreview();
 			if (preview != null && preview.getMergeCommitHash() != null) {
-				BranchProtection protection = getTargetProject().getHierarchyBranchProtection(getTargetBranch(), getSubmitter());
+				BranchProtection protection = getTargetProject().getBranchProtection(getTargetBranch(), getSubmitter());
 				ObjectId targetCommitId = getTarget().getObjectId(false);
 				ObjectId mergeCommitId = getTargetProject().getObjectId(preview.getMergeCommitHash(), false);
 				if (targetCommitId != null && mergeCommitId != null) {
@@ -994,7 +992,11 @@ public class PullRequest extends ProjectBelonging
     		return "Some required builds not passed";
     	if (!isSignatureRequirementSatisfied())
     		return "No valid signature for head commit";
-    	return null;
+		var commitMessageError = checkCommitMessages();
+		if (commitMessageError != null)
+			return commitMessageError.toString();
+		
+		return null;
 	}
 
 	@Nullable
@@ -1054,6 +1056,19 @@ public class PullRequest extends ProjectBelonging
 		if (getSource().getObjectName(false) != null)
 			return "Source branch already exists";
 		return null;
+	}
+	
+	@Nullable
+	public CommitMessageError checkCommitMessages() {
+		if (commitMessageCheckError == null) {
+			if (getMergeStrategy() != SQUASH_SOURCE_BRANCH_COMMITS) {
+				commitMessageCheckError = Optional.ofNullable(getProject().checkCommitMessages(getTargetBranch(), getSubmitter(), 
+						getBaseCommit().copy(), getLatestUpdate().getHeadCommit().copy(), null));
+			} else {
+				commitMessageCheckError = Optional.empty();
+			}
+		}
+		return commitMessageCheckError.orElse(null);
 	}
 
 	public static String getSerialLockName(Long requestId) {

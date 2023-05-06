@@ -274,18 +274,18 @@ public class GitUtils {
 		return blobIdent;
 	}
 
-	public static Collection<ObjectId> getReachableCommits(Repository repository,
+	public static Collection<RevCommit> getReachableCommits(Repository repository,
 														   Collection<ObjectId> sinceCommits,
 														   Collection<ObjectId> untilCommits) {
 		try (RevWalk revWalk = new RevWalk(repository)) {
-			var reachableCommits = new HashSet<ObjectId>();
+			var reachableCommits = new LinkedHashSet<RevCommit>();
 			for (var commitId: untilCommits)
 				revWalk.markStart(revWalk.parseCommit(commitId));
 			for (var commitId: sinceCommits)
 				revWalk.markUninteresting(revWalk.parseCommit(commitId));
 			RevCommit commit;
 			while ((commit = revWalk.next()) != null)
-				reachableCommits.add(commit.copy());
+				reachableCommits.add(commit);
 			return reachableCommits;
 		} catch (IOException e) {
 			throw new RuntimeException(e);

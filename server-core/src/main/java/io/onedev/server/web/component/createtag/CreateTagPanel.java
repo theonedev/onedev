@@ -65,7 +65,7 @@ public abstract class CreateTagPanel extends Panel {
 					editor.error(new Path(new PathNode.Named("name")), 
 							"Tag '" + helperBean.getName() + "' already exists, please choose a different name.");
 					target.add(form);
-				} else if (project.getHierarchyTagProtection(tagName, user).isPreventCreation()) {
+				} else if (project.getTagProtection(tagName, user).isPreventCreation()) {
 					editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
 					target.add(form);
 				} else {

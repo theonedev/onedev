@@ -21,6 +21,9 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import org.unbescape.html.HtmlEscape;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("serial")
 public abstract class OperationConfirmPanel extends Panel {
@@ -93,10 +96,11 @@ public abstract class OperationConfirmPanel extends Panel {
 				PullRequestUpdate latestUpdate = getLatestUpdate();
 				PullRequest request = latestUpdate.getRequest();
 				if (latestUpdate.equals(request.getLatestUpdate())) {
-					if (operate()) {
+					var errorMessage = operate();
+					if (errorMessage == null) {
 						modal.close();
 					} else {
-						form.error("Can not perform this operation now");
+						form.error(HtmlEscape.escapeHtml5(errorMessage));
 						target.add(form);
 					}
 				} else {
@@ -138,7 +142,8 @@ public abstract class OperationConfirmPanel extends Panel {
 		response.render(CssHeaderItem.forReference(new OperationConfirmCssResourceReference()));
 	}
 
-	protected abstract boolean operate();
+	@Nullable
+	protected abstract String operate();
 	
 	protected final Form<?> getForm() {
 		return form;

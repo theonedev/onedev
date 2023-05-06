@@ -136,7 +136,7 @@ public class RepositoryResource {
 			throw new UnauthorizedException();
 		else if (project.getBranchRef(request.getBranchName()) != null) 
 			throw new InvalidParamException("Branch '" + request.getBranchName() + "' already exists");
-		else if (project.getHierarchyBranchProtection(request.getBranchName(), user).isPreventCreation()) 
+		else if (project.getBranchProtection(request.getBranchName(), user).isPreventCreation()) 
 			throw new ExplicitException("Branch creation prohibited by branch protection rule");
 		
 		if (!project.isCommitSignatureRequirementSatisfied(

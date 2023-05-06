@@ -60,7 +60,7 @@ abstract class CreateBranchPanel extends Panel {
 					editor.error(new Path(new PathNode.Named("name")), 
 							"Branch '" + branchName + "' already exists, please choose a different name");
 					target.add(form);
-				} else if (project.getHierarchyBranchProtection(branchName, user).isPreventCreation()) {
+				} else if (project.getBranchProtection(branchName, user).isPreventCreation()) {
 					editor.error(new Path(new PathNode.Named("name")), 
 							"Creation of this branch is prohibited per branch protection rule");
 					target.add(form);

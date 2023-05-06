@@ -34,7 +34,7 @@ public class TagProtection implements Serializable {
 	
 	private boolean preventCreation = true;
 	
-	private boolean signatureRequired;
+	private boolean commitSignatureRequired;
 	
 	public boolean isEnabled() {
 		return enabled;
@@ -109,12 +109,12 @@ public class TagProtection implements Serializable {
 	}
 
 	@Editable(order=560, description="Check this to require valid signature of head commit")
-	public boolean isSignatureRequired() {
-		return signatureRequired;
+	public boolean isCommitSignatureRequired() {
+		return commitSignatureRequired;
 	}
 
-	public void setSignatureRequired(boolean signatureRequired) {
-		this.signatureRequired = signatureRequired;
+	public void setCommitSignatureRequired(boolean commitSignatureRequired) {
+		this.commitSignatureRequired = commitSignatureRequired;
 	}
 
 	public void onRenameGroup(String oldName, String newName) {

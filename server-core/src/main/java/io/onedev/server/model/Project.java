@@ -17,6 +17,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.git.*;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
 import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
@@ -26,7 +27,6 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.*;
 import io.onedev.server.model.support.build.*;
 import io.onedev.server.model.support.code.BranchProtection;
-import io.onedev.server.model.support.code.FileProtection;
 import io.onedev.server.model.support.code.GitPackConfig;
 import io.onedev.server.model.support.code.TagProtection;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -46,7 +46,6 @@ import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
@@ -1136,65 +1135,38 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		this.webHooks = webHooks;
 	}
 
-	public TagProtection getHierarchyTagProtection(String tagName, User user) {
-		boolean noCreation = false;
-		boolean noDeletion = false;
-		boolean noUpdate = false;
-		boolean signatureRequired = false;
+	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: getHierarchyTagProtections()) {
 			if (protection.isEnabled() 
 					&& UserMatch.parse(protection.getUserMatch()).matches(this, user)
 					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
-				noCreation = noCreation || protection.isPreventCreation();
-				noDeletion = noDeletion || protection.isPreventDeletion();
-				noUpdate = noUpdate || protection.isPreventUpdate();
-				signatureRequired = signatureRequired || protection.isSignatureRequired();
+				return protection;
 			}
 		}
 		
 		TagProtection protection = new TagProtection();
-		protection.setPreventCreation(noCreation);
-		protection.setPreventDeletion(noDeletion);
-		protection.setPreventUpdate(noUpdate);
-		protection.setSignatureRequired(signatureRequired);
+		protection.setPreventCreation(false);
+		protection.setPreventDeletion(false);
+		protection.setPreventUpdate(false);
 		
 		return protection;
 	}
 	
-	public BranchProtection getHierarchyBranchProtection(String branchName, @Nullable User user) {
-		boolean noCreation = false;
-		boolean noDeletion = false;
-		boolean noForcedPush = false;
-		boolean signatureRequired = false;
-		boolean requireStrictBuilds = false;
-		
-		Set<String> jobNames = new HashSet<>();
-		List<FileProtection> fileProtections = new ArrayList<>();
-		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null);
+	public BranchProtection getBranchProtection(@Nullable String branchName, @Nullable User user) {
+		if (branchName == null)
+			branchName = "main";
 		for (BranchProtection protection: getHierarchyBranchProtections()) {
 			if (protection.isEnabled() 
 					&& UserMatch.parse(protection.getUserMatch()).matches(this, user) 
 					&& PatternSet.parse(protection.getBranches()).matches(new PathMatcher(), branchName)) {
-				noCreation = noCreation || protection.isPreventCreation();
-				noDeletion = noDeletion || protection.isPreventDeletion();
-				noForcedPush = noForcedPush || protection.isPreventForcedPush();
-				signatureRequired = signatureRequired || protection.isSignatureRequired();
-				requireStrictBuilds = requireStrictBuilds || protection.isRequireStrictBuilds();
-				jobNames.addAll(protection.getJobNames());
-				fileProtections.addAll(protection.getFileProtections());
-				reviewRequirement.mergeWith(protection.getParsedReviewRequirement());
+				return protection;
 			}
 		}
 		
 		BranchProtection protection = new BranchProtection();
-		protection.setFileProtections(fileProtections);
-		protection.setJobNames(new ArrayList<>(jobNames));
-		protection.setPreventCreation(noCreation);
-		protection.setPreventDeletion(noDeletion);
-		protection.setPreventForcedPush(noForcedPush);
-		protection.setSignatureRequired(signatureRequired);
-		protection.setRequireStrictBuilds(requireStrictBuilds);
-		protection.setParsedReviewRequirement(reviewRequirement);
+		protection.setPreventCreation(false);
+		protection.setPreventDeletion(false);
+		protection.setPreventForcedPush(false);
 		
 		return protection;
 	}
@@ -1367,39 +1339,45 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public boolean isReviewRequiredForModification(User user, String branch, @Nullable String file) {
-		return getHierarchyBranchProtection(branch, user).isReviewRequiredForModification(user, this, branch, file);
+		return getBranchProtection(branch, user).isReviewRequiredForModification(user, this, branch, file);
 	}
 
 	public boolean isCommitSignatureRequiredButNoSigningKey(User user, String branch) {
-		return getHierarchyBranchProtection(branch, user).isSignatureRequired()
+		return getBranchProtection(branch, user).isCommitSignatureRequired()
 				&& getSettingManager().getGpgSetting().getSigningKey() == null;
 	}
 	
 	public boolean isCommitSignatureRequired(User user, String branch) {
-		return getHierarchyBranchProtection(branch, user).isSignatureRequired();
+		return getBranchProtection(branch, user).isCommitSignatureRequired();
 	}
 	
 	public boolean isTagSignatureRequired(User user, String tag) {
-		return getHierarchyTagProtection(tag, user).isSignatureRequired();
+		return getTagProtection(tag, user).isCommitSignatureRequired();
 	}
 	
 	public boolean isTagSignatureRequiredButNoSigningKey(User user, String tag) {
-		return getHierarchyTagProtection(tag, user).isSignatureRequired()
+		return getTagProtection(tag, user).isCommitSignatureRequired()
 				&& getSettingManager().getGpgSetting().getSigningKey() == null;
 	}
 	
 	public boolean isReviewRequiredForPush(User user, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		return getHierarchyBranchProtection(branch, user).isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
+		return getBranchProtection(branch, user).isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
 	}
 	
 	public boolean isBuildRequiredForModification(User user, String branch, @Nullable String file) {
-		return getHierarchyBranchProtection(branch, user).isBuildRequiredForModification(this, branch, file);
+		return getBranchProtection(branch, user).isBuildRequiredForModification(this, branch, file);
 	}
 	
 	public boolean isBuildRequiredForPush(User user, String branch, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
-		return getHierarchyBranchProtection(branch, user).isBuildRequiredForPush(this, oldObjectId, newObjectId, gitEnvs);
+		return getBranchProtection(branch, user).isBuildRequiredForPush(this, oldObjectId, newObjectId, gitEnvs);
+	}
+	
+	@Nullable
+	public CommitMessageError checkCommitMessages(String branch, User user, ObjectId oldCommitId, ObjectId newCommitId,
+												  @Nullable Map<String, String> gitEnvs) {
+		return getGitService().checkCommitMessages(this, branch, user, oldCommitId, newCommitId, gitEnvs);
 	}
 	
 	@Nullable

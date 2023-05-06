@@ -1,31 +1,34 @@
 package io.onedev.server.model.support.code;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.*;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Horizontal;
-import io.onedev.server.annotation.JobChoice;
-import io.onedev.server.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Editable
@@ -33,6 +36,9 @@ import java.util.stream.Collectors;
 public class BranchProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Pattern CONVENTIONAL_COMMIT_SUBJECT = 
+			Pattern.compile("([\\w\\-.]+)\\s*(\\(([\\w\\s\\-./,]+)\\)\\s*)?(!\\s*)?:.+");
 
 	private boolean enabled = true;
 	
@@ -46,7 +52,15 @@ public class BranchProtection implements Serializable {
 	
 	private boolean preventCreation = true;
 	
-	private boolean signatureRequired = false;
+	private boolean commitSignatureRequired = false;
+
+	private boolean enforceConventionalCommits;
+
+	private List<String> commitTypes = new ArrayList<>();
+
+	private List<String> commitScopes = new ArrayList<>();
+
+	private Integer maxCommitMessageLineLength;
 	
 	private String reviewRequirement;
 	
@@ -122,14 +136,59 @@ public class BranchProtection implements Serializable {
 	}
 
 	@Editable(order=360, description="Check this to require valid signature of head commit")
-	public boolean isSignatureRequired() {
-		return signatureRequired;
+	public boolean isCommitSignatureRequired() {
+		return commitSignatureRequired;
 	}
 
-	public void setSignatureRequired(boolean signatureRequired) {
-		this.signatureRequired = signatureRequired;
+	public void setCommitSignatureRequired(boolean commitSignatureRequired) {
+		this.commitSignatureRequired = commitSignatureRequired;
 	}
 
+	@Editable(order=370, description = "Check this to require <a href='https://www.conventionalcommits.org' target='_blank'>conventional commits</a>")
+	public boolean isEnforceConventionalCommits() {
+		return enforceConventionalCommits;
+	}
+
+	public void setEnforceConventionalCommits(boolean enforceConventionalCommits) {
+		this.enforceConventionalCommits = enforceConventionalCommits;
+	}
+
+	private static boolean isEnforceConventionalCommitsEnabled() {
+		return (boolean) EditContext.get().getInputValue("enforceConventionalCommits");
+	}
+
+	@Editable(order=380, placeholder = "Arbitrary type", description = "Optionally specify valid " +
+			"types of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary type")
+	@ShowCondition("isEnforceConventionalCommitsEnabled")
+	public List<String> getCommitTypes() {
+		return commitTypes;
+	}
+
+	public void setCommitTypes(List<String> commitTypes) {
+		this.commitTypes = commitTypes;
+	}
+
+	@Editable(order=390, placeholder = "Arbitrary scope", description = "Optionally specify valid " +
+			"scopes of conventional commits (hit ENTER to add value). Leave empty to allow arbitrary scope")
+	@ShowCondition("isEnforceConventionalCommitsEnabled")
+	public List<String> getCommitScopes() {
+		return commitScopes;
+	}
+
+	public void setCommitScopes(List<String> commitScopes) {
+		this.commitScopes = commitScopes;
+	}
+
+	@Editable(order=395, placeholder = "No limit")
+	@Min(40)
+	public Integer getMaxCommitMessageLineLength() {
+		return maxCommitMessageLineLength;
+	}
+
+	public void setMaxCommitMessageLineLength(Integer maxCommitMessageLineLength) {
+		this.maxCommitMessageLineLength = maxCommitMessageLineLength;
+	}
+	
 	@Editable(order=400, name="Required Reviewers", placeholder="No one", description="Optionally specify "
 			+ "required reviewers for changes of specified branch")
 	@io.onedev.server.annotation.ReviewRequirement
@@ -335,4 +394,50 @@ public class BranchProtection implements Serializable {
 		return !requiredJobs.isEmpty();			
 	}
 
+	@Nullable
+	public String checkCommitMessage(String commitMessage, boolean merged) {
+		var lines = Splitter.on('\n').trimResults().splitToList(commitMessage);
+		if (lines.isEmpty())
+			return "Message is empty";
+		
+		if (!merged && enforceConventionalCommits) {
+			var matcher = CONVENTIONAL_COMMIT_SUBJECT.matcher(lines.get(0));
+			if (matcher.matches()) {
+				var type = matcher.group(1);
+				if (!commitTypes.isEmpty() && !commitTypes.contains(type))
+					return "Line 1: Unexpected type '" + type + "': Should be one of [" + Joiner.on(',').join(commitTypes) + "]";
+				var scopes = matcher.group(3);
+				if (scopes != null) {
+					var scopeFound = false;
+					for (var scope: StringUtils.split(scopes, " /,")) {
+						if (!commitScopes.isEmpty() && !commitScopes.contains(scope))
+							return "Line 1: Unexpected scope '" + scope + "': Should be one of [" + Joiner.on(',').join(commitScopes) + "]";
+						scopeFound = true;
+					}
+					if (!scopeFound)
+						return "Line 1: Scope not specified";
+				}
+			} else {
+				return "Line 1: Subject is expected of format: <type>[optional scope][!]: <description>";
+			}
+		
+			for (int i=1; i<lines.size(); i++) {
+				var line = lines.get(i);
+				if (line.length() != 0) {
+					if (i != 2) 
+						return "One and only one blank line is expected between subject and body";
+					break;
+				}
+			}
+		}
+		if (maxCommitMessageLineLength != null) {
+			for (int i=0; i<lines.size(); i++) {
+				var line = lines.get(i);
+				if (line.length() > maxCommitMessageLineLength) 
+					return "Line " + (i+1) + ": Length exceeds " + maxCommitMessageLineLength;
+			}
+		}
+		return null;
+	} 
+	
 }

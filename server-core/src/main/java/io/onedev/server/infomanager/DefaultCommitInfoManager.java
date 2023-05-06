@@ -259,7 +259,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 						EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
 						fields.remove(LogCommand.Field.LINE_CHANGES);
 						new LogCommand(projectManager.getGitDir(project.getId()), revisions) {
-
+							
 							@Override
 							protected void consume(GitCommit commit) {
 								consumer.accept(commit);
