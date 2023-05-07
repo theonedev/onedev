@@ -1,3 +1,7 @@
+# 8.2.0
+
+Branch/tag protection rules are changed to apply first matching instead of apply all matching
+
 # 8.1.0
 
 1. **[Agent]** A particular agent token can only be used by one agent now. If you have multiple agents using same token, only the first one can connect to server, and others will be rejected. To fix this, open detail page of each rejected agent and copy the newly generated token to agent side
