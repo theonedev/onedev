@@ -155,7 +155,6 @@
 .inplace-property-edit {
 	width: 300px !important;
 }
-.select2-drop.string-list .select2-result, 
 .select2-drop.string-list .select2-no-results,
 .select2-drop.string-list .select2-searching {
 	display: none;
