@@ -1,4 +1,4 @@
-package io.onedev.server.search.code;
+package io.onedev.server.search.code.insidecommit;
 
 import javax.annotation.Nullable;
 

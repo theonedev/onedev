@@ -1,13 +1,15 @@
-package io.onedev.server.search.code.query;
+package io.onedev.server.search.code.insidecommit.query;
 
-import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
-import static io.onedev.server.search.code.FieldConstants.BLOB_PRIMARY_SYMBOLS;
-import static io.onedev.server.search.code.FieldConstants.BLOB_SECONDARY_SYMBOLS;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.server.OneDev;
+import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.hit.SymbolHit;
+import io.onedev.server.search.code.insidecommit.CodeSearchManager;
+import io.onedev.server.search.code.query.TooGeneralQueryException;
+import io.onedev.server.util.match.WildcardUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -16,16 +18,10 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import io.onedev.commons.jsymbol.Symbol;
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.OneDev;
-import io.onedev.server.search.code.CodeSearchManager;
-import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.hit.SymbolHit;
-import io.onedev.server.util.match.WildcardUtils;
+import javax.annotation.Nullable;
+import java.util.List;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
+import static io.onedev.server.search.code.insidecommit.FieldConstants.*;
 
 public class SymbolQuery extends BlobQuery {
 
@@ -139,13 +135,9 @@ public class SymbolQuery extends BlobQuery {
 		}
 	}
 	
-	public static class Builder {
+	public static class Builder extends BlobQuery.Builder {
 
 		private String term;
-		
-		private int count;
-		
-		private String directory;
 
 		private String excludeTerm;
 		
@@ -161,16 +153,6 @@ public class SymbolQuery extends BlobQuery {
 		
 		public Builder term(String term) {
 			this.term = term;
-			return this;
-		}
-		
-		public Builder count(int count) {
-			this.count = count;
-			return this;
-		}
-		
-		public Builder directory(String directory) {
-			this.directory = directory;
 			return this;
 		}
 		
@@ -204,7 +186,8 @@ public class SymbolQuery extends BlobQuery {
 			return this;
 		}
 		
-		public SymbolQuery build() {
+		@Override
+		public BlobQuery build() {
 			Preconditions.checkArgument(term!=null, "Query term should be specified");
 			Preconditions.checkArgument(count!=0, "Query count should be specified");
 			return new SymbolQuery(term, excludeTerm, excludeBlobPath, primary, local, 

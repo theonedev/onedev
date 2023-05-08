@@ -141,7 +141,7 @@ public abstract class LayoutPage extends BasePage {
 			
 		});
 
-		sidebar.add(new ListView<SidebarMenu>("menus", new LoadableDetachableModel<List<SidebarMenu>>() {
+		sidebar.add(new ListView<SidebarMenu>("menus", new LoadableDetachableModel<>() {
 
 			@Override
 			protected List<SidebarMenu> load() {
@@ -149,84 +149,84 @@ public abstract class LayoutPage extends BasePage {
 				List<SidebarMenuItem> menuItems = new ArrayList<>(customization.getMainMenuItems());
 				if (SecurityUtils.isAdministrator()) {
 					List<SidebarMenuItem> administrationMenuItems = new ArrayList<>();
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "System Settings", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "System Settings",
 							SystemSettingPage.class, new PageParameters()));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Security Settings", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Security Settings",
 							SecuritySettingPage.class, new PageParameters()));
 					List<SidebarMenuItem> userManagementMenuItems = new ArrayList<>();
-					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Users", UserListPage.class, 
+					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Users", UserListPage.class,
 							new PageParameters(), Lists.newArrayList(NewUserPage.class, UserPage.class)));
-					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Invitations", InvitationListPage.class, 
+					userManagementMenuItems.add(new SidebarMenuItem.Page(null, "Invitations", InvitationListPage.class,
 							new PageParameters(), Lists.newArrayList(NewInvitationPage.class)));
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "User Management", userManagementMenuItems));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Role Management", RoleListPage.class, 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Role Management", RoleListPage.class,
 							new PageParameters(), Lists.newArrayList(NewRolePage.class, RoleDetailPage.class)));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Group Management", GroupListPage.class, 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Group Management", GroupListPage.class,
 							new PageParameters(), Lists.newArrayList(NewGroupPage.class, GroupPage.class)));
-					
+
 					List<SidebarMenuItem> authenticationMenuItems = new ArrayList<>();
-					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "External Authentication", 
+					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "External Authentication",
 							AuthenticatorPage.class, new PageParameters()));
-					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "Single Sign On", 
+					authenticationMenuItems.add(new SidebarMenuItem.Page(null, "Single Sign On",
 							SsoConnectorListPage.class, new PageParameters()));
-					
+
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Authentication Source", authenticationMenuItems));
-					
+
 					List<SidebarMenuItem> keyManagementMenuItems = new ArrayList<>();
-					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "SSH Server Key", 
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "SSH Server Key",
 							SshServerKeyPage.class, new PageParameters()));
-					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Signing Key", 
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Signing Key",
 							GpgSigningKeyPage.class, new PageParameters()));
-					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Trusted Keys", 
+					keyManagementMenuItems.add(new SidebarMenuItem.Page(null, "GPG Trusted Keys",
 							GpgTrustedKeysPage.class, new PageParameters()));
-					
+
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "SSH & GPG Keys", keyManagementMenuItems));
-					
+
 					List<SidebarMenuItem> issueSettingMenuItems = new ArrayList<>();
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Custom Fields", 
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Custom Fields",
 							IssueFieldListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "States", 
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "States",
 							IssueStateListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "State Transitions", 
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "State Transitions",
 							StateTransitionListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Boards", 
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Boards",
 							DefaultBoardListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Links", 
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Links",
 							LinkSpecListPage.class, new PageParameters()));
-					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates", 
+					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Description Templates",
 							IssueTemplateListPage.class, new PageParameters()));
 					issueSettingMenuItems.add(new SidebarMenuItem.Page(null, "Commit Message Fix Patterns",
 							CommitMessageFixPatternsPage.class, new PageParameters()));
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Settings", issueSettingMenuItems));
-					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors", 
+
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors",
 							JobExecutorsPage.class, new PageParameters()));
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Agents", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Agents",
 							AgentListPage.class, AgentListPage.paramsOf(0), Lists.newArrayList(AgentDetailPage.class)));
-					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Settings", 
+
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Settings",
 							MailSettingPage.class, new PageParameters()));
-					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Settings", 
+
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Service Desk Settings",
 							ServiceDeskSettingPage.class, new PageParameters()));
-					
+
 					List<SidebarMenuItem> notificationTemplateSettingMenuItems = new ArrayList<>();
-					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Issue", 
+					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Issue",
 							IssueNotificationTemplatePage.class, new PageParameters()));
-					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request", 
+					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request",
 							PullRequestNotificationTemplatePage.class, new PageParameters()));
-					
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Notification Templates", 
+
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Notification Templates",
 							notificationTemplateSettingMenuItems));
-					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Label Management", 
+
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Label Management",
 							LabelManagementPage.class, new PageParameters()));
-					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Performance Settings", 
+
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Performance Settings",
 							PerformanceSettingPage.class, new PageParameters()));
-					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts", 
+
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts",
 							GroovyScriptListPage.class, new PageParameters()));
 
 					if (OneDev.getInstance(ClusterManager.class).isClusteringSupported()) {
@@ -235,14 +235,14 @@ public abstract class LayoutPage extends BasePage {
 					}
 
 					List<Class<? extends ContributedAdministrationSetting>> contributedSettingClasses = new ArrayList<>();
-					for (AdministrationSettingContribution contribution:OneDev.getExtensions(AdministrationSettingContribution.class)) {
-						for (Class<? extends ContributedAdministrationSetting> settingClass: contribution.getSettingClasses())
+					for (AdministrationSettingContribution contribution : OneDev.getExtensions(AdministrationSettingContribution.class)) {
+						for (Class<? extends ContributedAdministrationSetting> settingClass : contribution.getSettingClasses())
 							contributedSettingClasses.add(settingClass);
 					}
 					contributedSettingClasses.sort(Comparator.comparingInt(EditableUtils::getOrder));
 
 					Map<String, List<SidebarMenuItem>> contributedMenuItems = new HashMap<>();
-					for (var contributedSettingClass: contributedSettingClasses) {
+					for (var contributedSettingClass : contributedSettingClasses) {
 						var group = EditableUtils.getGroup(contributedSettingClass);
 						if (group == null)
 							group = "";
@@ -257,25 +257,25 @@ public abstract class LayoutPage extends BasePage {
 								ContributedAdministrationSettingPage.class,
 								ContributedAdministrationSettingPage.paramsOf(contributedSettingClass)));
 					}
-					for (var entry: contributedMenuItems.entrySet()) {
+					for (var entry : contributedMenuItems.entrySet()) {
 						if (entry.getKey().length() == 0) {
 							administrationMenuItems.addAll(entry.getValue());
 						} else {
 							administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, entry.getKey(), entry.getValue()));
 						}
 					}
-					
-					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Branding", 
+
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Branding",
 							BrandingSettingPage.class, new PageParameters()));
-					
+
 					List<SidebarMenuItem> maintenanceMenuItems = new ArrayList<>();
-					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Database Backup", 
+					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Database Backup",
 							DatabaseBackupPage.class, new PageParameters()));
 					var servers = OneDev.getInstance(ClusterManager.class).getServerAddresses();
 					if (servers.size() > 1) {
 						List<SidebarMenuItem> serverLogMenuItems = new ArrayList<>();
 						List<SidebarMenuItem> serverInformationMenuItems = new ArrayList<>();
-						for (var server: servers) {
+						for (var server : servers) {
 							serverLogMenuItems.add(new SidebarMenuItem.Page(null, server,
 									ServerLogPage.class, ServerLogPage.paramsOf(server)));
 							serverInformationMenuItems.add(new SidebarMenuItem.Page(null, server,
@@ -289,16 +289,16 @@ public abstract class LayoutPage extends BasePage {
 						maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Server Information",
 								ServerInformationPage.class, new PageParameters()));
 					}
-					
+
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "System Maintenance", maintenanceMenuItems));
-					
+
 					menuItems.add(new SidebarMenuItem.SubMenu("gear", "Administration", administrationMenuItems));
-				}		
+				}
 				menus.add(new SidebarMenu(null, menuItems));
 				menus.addAll(getSidebarMenus());
 				return menus;
 			}
-			
+
 		}) {
 
 			@Override

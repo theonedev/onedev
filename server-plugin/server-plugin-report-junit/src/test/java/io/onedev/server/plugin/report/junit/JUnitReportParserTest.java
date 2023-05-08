@@ -1,11 +1,17 @@
 package io.onedev.server.plugin.report.junit;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
+import com.google.common.io.Resources;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.AppLoaderMocker;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
+import io.onedev.server.plugin.report.unittest.UnitTestReport;
+import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
+import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.insidecommit.CodeSearchManager;
+import io.onedev.server.search.code.insidecommit.query.BlobQuery;
+import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.lucene.search.IndexSearcher;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
@@ -14,19 +20,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 
-import com.google.common.io.Resources;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
-import io.onedev.commons.jsymbol.Symbol;
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.loader.AppLoaderMocker;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
-import io.onedev.server.plugin.report.unittest.UnitTestReport;
-import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.search.code.CodeSearchManager;
-import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.query.BlobQuery;
-import io.onedev.server.search.code.query.TooGeneralQueryException;
+import static org.junit.Assert.assertEquals;
 
 public class JUnitReportParserTest extends AppLoaderMocker {
 

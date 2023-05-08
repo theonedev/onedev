@@ -274,13 +274,13 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			
 		});
 		
-		edit.add(input = new TextArea<String>("input", Model.of(getModelObject())) {
+		edit.add(input = new TextArea<>("input", Model.of(getModelObject())) {
 
 			@Override
 			protected boolean shouldTrimInput() {
 				return MarkdownEditor.this.shouldTrimInput();
 			}
-			
+
 		});
 		for (Behavior behavior: getInputBehaviors()) 
 			input.add(behavior);
@@ -628,16 +628,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	@Nullable
 	public BlobRenderContext getBlobRenderContext() {
 		return blobRenderContext;
-	}
-
-	static class ReferencedEntity implements Serializable {
-		String entityType;
-		
-		String entityTitle;
-		
-		String entityNumber;
-		
-		String searchKey;
 	}
 	
 }
