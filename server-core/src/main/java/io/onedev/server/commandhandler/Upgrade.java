@@ -734,7 +734,7 @@ public class Upgrade extends AbstractPlugin {
 		}
 
 		var directoryVersion = ".onedev-directory-version";
-		if (oldAppDataVersion <= 116) {
+		if (oldAppDataVersion <= 118) {
 			logger.info("Upgrading build storage directory...");
 			for (var projectDir : new File(upgradeDir, "site/projects").listFiles()) {
 				if (projectDir.getName().equals(directoryVersion))
@@ -748,16 +748,25 @@ public class Upgrade extends AbstractPlugin {
 						var buildNumber = parseInt(buildDir.getName());
 						File suffixDir = new File(buildsDir, String.format("s%03d", buildNumber % 1000));
 						FileUtils.createDir(suffixDir);
-						try {
-							FileUtils.moveDirectory(buildDir, new File(suffixDir, valueOf(buildNumber)));
-						} catch (IOException e) {
-							throw new RuntimeException(e);
+						var newBuildDir = new File(suffixDir, valueOf(buildNumber));
+						if (!newBuildDir.exists()) {
+							try {
+								FileUtils.moveDirectory(buildDir, newBuildDir);
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+						if (buildDir.exists()) {
+							try {
+								FileUtils.copyDirectory(buildDir, newBuildDir);
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+							FileUtils.deleteDir(buildDir);								
 						}
 					}
 				}
 			}
-		}
-		if (oldAppDataVersion <= 118) {
 			for (var projectDir : new File(upgradeDir, "site/projects").listFiles()) {
 				if (projectDir.getName().equals(directoryVersion))
 					continue;
