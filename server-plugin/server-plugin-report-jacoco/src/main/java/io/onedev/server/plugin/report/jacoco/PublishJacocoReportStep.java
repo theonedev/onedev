@@ -29,7 +29,7 @@ import io.onedev.server.plugin.report.coverage.CoverageReport;
 import io.onedev.server.plugin.report.coverage.FileCoverageInfo;
 import io.onedev.server.plugin.report.coverage.PackageCoverageInfo;
 import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
-import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.insidecommit.CodeSearchManager;
 import io.onedev.server.util.XmlUtils;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;

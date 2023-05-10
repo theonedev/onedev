@@ -1,4 +1,4 @@
-package io.onedev.server.search.code;
+package io.onedev.server.search.code.insidecommit;
 
 import com.google.common.base.Preconditions;
 import io.onedev.commons.jsymbol.Symbol;
@@ -15,8 +15,8 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.query.BlobQuery;
-import io.onedev.server.search.code.query.FileQuery;
+import io.onedev.server.search.code.insidecommit.query.BlobQuery;
+import io.onedev.server.search.code.insidecommit.query.FileQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.lucene.document.Document;
@@ -47,7 +47,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.onedev.server.search.code.FieldConstants.*;
+import static io.onedev.server.search.code.insidecommit.FieldConstants.*;
 
 @Singleton
 public class DefaultCodeSearchManager implements CodeSearchManager, Serializable {
@@ -94,7 +94,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 		} catch (ClosedByInterruptException e) {
 			// catch this exception and convert to normal InterruptedException as 
 			// we do not want to throw the original exception to surprise the user
-			// when they searches by typing fast (and subsequent typing will cancel 
+			// when they search by typing fast (and subsequent typing will cancel 
 			// search of previous typing by interrupting previous search thread 
 			// which may creating the searcher manager if it does not exist yet
 			throw new InterruptedException();
@@ -331,7 +331,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 				builder.count(MAX_BLOB_PATH_QUERY_COUNT);
 				
 				String blobPath = null;
-				FileQuery query = builder.fileNames(fileName).build();
+				BlobQuery query = builder.fileNames(fileName).build();
 				try {
 					for (QueryHit hit: search(projectId, commit, query)) {
 						if (partialBlobPath == null || hit.getBlobPath().contains(partialBlobPath)) { 

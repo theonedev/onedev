@@ -1,16 +1,16 @@
-package io.onedev.server.search.code.query;
+package io.onedev.server.search.code.insidecommit.query;
 
-import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
-import static io.onedev.server.search.code.FieldConstants.BLOB_TEXT;
-import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.search.code.IndexConstants;
+import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.hit.TextHit;
+import io.onedev.server.search.code.query.NGramLuceneQuery;
+import io.onedev.server.search.code.query.TooGeneralQueryException;
+import io.onedev.server.search.code.query.regex.RegexLiterals;
+import io.onedev.server.util.ContentDetector;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
@@ -20,16 +20,15 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.search.code.IndexConstants;
-import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.hit.TextHit;
-import io.onedev.server.search.code.query.regex.RegexLiterals;
-import io.onedev.server.util.ContentDetector;
+import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
+import static io.onedev.server.search.code.insidecommit.FieldConstants.BLOB_NAME;
+import static io.onedev.server.search.code.insidecommit.FieldConstants.BLOB_TEXT;
 
 public class TextQuery extends BlobQuery {
 
@@ -193,19 +192,15 @@ public class TextQuery extends BlobQuery {
 			throw new TooGeneralQueryException();
 	}
 	
-	public static class Builder {
+	public static class Builder extends BlobQuery.Builder {
 
 		private String term;
-		
-		private int count;
 
 		private boolean regex;
 		
 		private boolean wholeWord;
 		
 		private boolean caseSensitive;
-		
-		private String directory;
 		
 		private String fileNames;
 		
@@ -244,7 +239,8 @@ public class TextQuery extends BlobQuery {
 			return this;
 		}
 		
-		public TextQuery build() {
+		@Override
+		public BlobQuery build() {
 			Preconditions.checkArgument(term!=null, "Query term should be specified");
 			Preconditions.checkArgument(count!=0, "Query count should be specified");
 			return new TextQuery(term, regex, caseSensitive, wholeWord, directory, fileNames, count);

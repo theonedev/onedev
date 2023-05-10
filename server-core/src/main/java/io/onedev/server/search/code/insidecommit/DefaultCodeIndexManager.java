@@ -1,4 +1,4 @@
-package io.onedev.server.search.code;
+package io.onedev.server.search.code.insidecommit;
 
 import com.google.common.base.Preconditions;
 import io.onedev.commons.jsymbol.Symbol;
@@ -18,6 +18,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.search.code.NGramAnalyzer;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.IndexResult;
 import io.onedev.server.util.concurrent.BatchWorkManager;
@@ -55,7 +56,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.onedev.server.search.code.FieldConstants.*;
+import static io.onedev.server.search.code.insidecommit.FieldConstants.*;
 import static io.onedev.server.search.code.IndexConstants.MAX_INDEXABLE_SIZE;
 import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
 

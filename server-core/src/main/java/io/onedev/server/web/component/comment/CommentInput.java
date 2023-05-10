@@ -35,28 +35,23 @@ public abstract class CommentInput extends MarkdownEditor {
 
 	@Override
 	protected final UserMentionSupport getUserMentionSupport() {
-		return new UserMentionSupport() {
-
-			@Override
-			public List<User> findUsers(String query, int count) {
-				List<User> mentionables = getMentionables();
-				UserCache cache = getUserManager().cloneCache();
-				
-				List<User> similarities = new Similarities<User>(mentionables) {
-
-					@Override
-					public double getSimilarScore(User object) {
-						return cache.getSimilarScore(object, query);
-					}
-					
-				};
-				
-				if (similarities.size() > count)
-					return similarities.subList(0, count);
-				else
-					return similarities;
-			}
+		return (query, count) -> {
+			List<User> mentionables = getMentionables();
+			UserCache cache = getUserManager().cloneCache();
 			
+			List<User> similarities = new Similarities<User>(mentionables) {
+
+				@Override
+				public double getSimilarScore(User object) {
+					return cache.getSimilarScore(object, query);
+				}
+				
+			};
+			
+			if (similarities.size() > count)
+				return similarities.subList(0, count);
+			else
+				return similarities;
 		};
 	}
 	

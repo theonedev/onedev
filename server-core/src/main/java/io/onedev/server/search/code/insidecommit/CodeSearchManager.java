@@ -1,16 +1,16 @@
-package io.onedev.server.search.code;
+package io.onedev.server.search.code.insidecommit;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.search.code.insidecommit.query.BlobQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 
 public interface CodeSearchManager {

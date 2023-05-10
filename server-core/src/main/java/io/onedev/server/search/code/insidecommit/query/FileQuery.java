@@ -1,11 +1,12 @@
-package io.onedev.server.search.code.query;
+package io.onedev.server.search.code.insidecommit.query;
 
-import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
+import static io.onedev.server.search.code.insidecommit.FieldConstants.BLOB_NAME;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -73,27 +74,13 @@ public class FileQuery extends BlobQuery {
 		builder.add(new WildcardQuery(new Term(BLOB_NAME.name(), fileNames.toLowerCase())), Occur.MUST);
 	}
 
-	public static class Builder {
-
-		private int count;
-		
-		private String directory;
+	public static class Builder extends BlobQuery.Builder {
 
 		private String excludeFileName;
 		
 		private boolean caseSensitive;
 		
 		private String fileNames;
-		
-		public Builder count(int count) {
-			this.count = count;
-			return this;
-		}
-		
-		public Builder directory(String directory) {
-			this.directory = directory;
-			return this;
-		}
 		
 		public Builder excludeFileName(String excludeFileName) {
 			this.excludeFileName = excludeFileName;
@@ -110,7 +97,8 @@ public class FileQuery extends BlobQuery {
 			return this;
 		}
 		
-		public FileQuery build() {
+		@Override
+		public BlobQuery build() {
 			Preconditions.checkArgument(fileNames!=null, "File names should be specified");
 			Preconditions.checkArgument(count!=0, "Query count should be specified");
 			

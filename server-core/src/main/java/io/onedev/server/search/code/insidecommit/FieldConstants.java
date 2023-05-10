@@ -1,4 +1,4 @@
-package io.onedev.server.search.code;
+package io.onedev.server.search.code.insidecommit;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.TermQuery;

@@ -53,7 +53,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.search.code.CodeIndexManager;
+import io.onedev.server.search.code.insidecommit.CodeIndexManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
@@ -101,7 +101,6 @@ import java.util.function.Consumer;
 
 import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
-import static java.util.stream.Collectors.toSet;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource, 
