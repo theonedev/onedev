@@ -16,6 +16,7 @@ import io.onedev.server.entitymanager.*;
 import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.issue.IssuesImported;
+import io.onedev.server.exception.AttachmentTooLargeException;
 import io.onedev.server.git.command.LsRemoteCommand;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.LastActivity;

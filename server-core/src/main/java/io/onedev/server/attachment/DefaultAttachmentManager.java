@@ -23,7 +23,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.AttachmentTooLargeException;
+import io.onedev.server.exception.AttachmentTooLargeException;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
