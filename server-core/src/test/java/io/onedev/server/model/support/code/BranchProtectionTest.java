@@ -22,6 +22,7 @@ public class BranchProtectionTest {
 		assertNull(branchProtection.checkCommitMessage("feat ( docs , api ) ! :hello world", false));
 		assertNull(branchProtection.checkCommitMessage("feat:hello world\n\nbody", false));
 		assertNull(branchProtection.checkCommitMessage("hello world", true));
+		assertNull(branchProtection.checkCommitMessage("fix(ä): ö", true));
 		assertNotNull(branchProtection.checkCommitMessage("feat ( docs/api ) ! hello world", false));
 		assertNotNull(branchProtection.checkCommitMessage("unknown ( docs/api ) ! : hello world", false));
 		assertNotNull(branchProtection.checkCommitMessage("feat ( docs unknown ) ! : hello world", false));
