@@ -420,14 +420,14 @@ public class BranchProtection implements Serializable {
 						return "Line 1: Scope not specified";
 				}
 			} else {
-				return "Line 1: Subject is expected of format: <type>[optional scope][!]: <description>";
+				return "Line 1: Subject is expected of format: <type>[optional (scope)][!]: <description>";
 			}
 		
 			for (int i=1; i<lines.size(); i++) {
 				var line = lines.get(i);
 				if (line.length() != 0) {
 					if (i != 2) 
-						return "One and only one blank line is expected between subject and body";
+						return "One and only one blank line is expected between subject and body/footer";
 					break;
 				}
 			}
