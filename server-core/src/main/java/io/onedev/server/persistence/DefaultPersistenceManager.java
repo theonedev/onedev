@@ -71,6 +71,7 @@ import javax.validation.Validator;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -86,6 +87,8 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPersistenceManager.class);
 	
 	private static final String ENV_INITIAL_USER = "initial_user";
+
+	private static final String ENV_INITIAL_PASSWORD_FILE = "initial_password_file";
 	
 	private static final String ENV_INITIAL_PASSWORD = "initial_password";
 	
@@ -659,7 +662,17 @@ public class DefaultPersistenceManager implements PersistenceManager, Serializab
 		if (userManager.get(User.ROOT_ID) == null) {
 			NewUserBean bean = new NewUserBean();
 			bean.setName(System.getenv(ENV_INITIAL_USER));
-			bean.setPassword(System.getenv(ENV_INITIAL_PASSWORD));
+			var passwordPath = System.getenv(ENV_INITIAL_PASSWORD_FILE);
+			if (passwordPath != null) {
+				try {
+					bean.setPassword(FileUtils.readFileToString(new File(passwordPath), StandardCharsets.UTF_8).trim());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			var password = System.getenv(ENV_INITIAL_PASSWORD);
+			if (password != null)
+				bean.setPassword(password);
 			bean.setEmailAddress(System.getenv(ENV_INITIAL_EMAIL));
 			
 			if (validator.validate(bean).isEmpty()) {

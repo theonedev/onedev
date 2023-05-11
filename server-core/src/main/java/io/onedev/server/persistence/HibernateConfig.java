@@ -1,10 +1,12 @@
 package io.onedev.server.persistence;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 import com.google.common.hash.Hashing;
 import io.onedev.commons.utils.StringUtils;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.cfg.Environment;
 
 import static io.onedev.commons.utils.FileUtils.loadProperties;
@@ -15,6 +17,8 @@ public class HibernateConfig extends Properties {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String ENV_PASS_FILE ="hibernate_connection_password_file";
+	
 	private static final String[] ENVS = new String[] {
 			DIALECT, DRIVER, URL, USER, PASS, "hibernate.hikari.leakDetectionThreshold",
 			"hibernate.hikari.maxLifetime", "hibernate.hikari.connectionTimeout",
@@ -35,8 +39,16 @@ public class HibernateConfig extends Properties {
 			url = StringUtils.stripEnd(url, ";") + ";selectMethod=cursor";
 		setProperty(URL, url);
 
+		String value = System.getenv(ENV_PASS_FILE);
+		if (value != null) {
+			try {
+				setProperty(PASS, FileUtils.readFileToString(new File(value), UTF_8).trim());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		for (String env: ENVS) {
-			String value = System.getenv(env.replace('.', '_'));
+			value = System.getenv(env.replace('.', '_'));
 			if (value != null)
 				setProperty(env, value);
 		}
