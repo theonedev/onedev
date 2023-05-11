@@ -1,5 +1,14 @@
 package io.onedev.server.web.component.issue.editabletitle;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.asset.emoji.Emojis;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.util.ReferenceTransformer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -12,16 +21,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.asset.emoji.Emojis;
-import io.onedev.server.web.behavior.ReferenceInputBehavior;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public abstract class IssueEditableTitlePanel extends Panel {
@@ -147,7 +146,7 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			}
 			
 		});
-		titleViewer.add(new CopyToClipboardLink("copy", Model.of(getIssue().getNumberAndTitle())));
+		titleViewer.add(new CopyToClipboardLink("copy", Model.of(getIssue().getTitle())));
 		
 		titleViewer.setOutputMarkupId(true);
 		

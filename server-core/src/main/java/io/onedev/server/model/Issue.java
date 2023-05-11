@@ -834,10 +834,6 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 		return new ProjectScopedNumber(getProject(), getNumber());
 	}
 	
-	public String getNumberAndTitle() {
-		return "#" + getNumber() + " - " + getTitle();
-	}
-	
 	public Collection<Milestone> getMilestones() {
 		return getSchedules().stream().map(it->it.getMilestone()).collect(Collectors.toList());
 	}

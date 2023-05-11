@@ -18,10 +18,10 @@ import io.onedev.server.model.LinkSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.IntegerField;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryParseOption;
@@ -1326,10 +1326,7 @@ public abstract class IssueListPanel extends Panel {
 					
 				});
 				
-				String copyContent = issue.getNumberAndTitle();
-				if (!issue.getProject().equals(getProject()))
-					copyContent = issue.getProject().getPath() + copyContent;
-				fragment.add(new CopyToClipboardLink("copy", Model.of(copyContent)));
+				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.getTitle())));
 				
 				AtomicReference<String> expandedLinkName = new AtomicReference<>(null);
 				
