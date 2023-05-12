@@ -1,7 +1,5 @@
 package io.onedev.server.search.code.query;
 
-import io.onedev.server.search.code.insidecommit.query.BlobQuery;
-import io.onedev.server.search.code.insidecommit.query.TextQuery;
 import io.onedev.server.web.component.codequeryoption.TextQueryOptionPanel;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;

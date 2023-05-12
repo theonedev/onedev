@@ -3,14 +3,14 @@ package io.onedev.server.web.component.commandpalette;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import io.onedev.server.search.code.insidecommit.query.BlobQuery;
+import io.onedev.server.search.code.query.BlobQuery;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.code.insidecommit.CodeSearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.insidecommit.query.FileQuery;
+import io.onedev.server.search.code.query.FileQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 
 public class RevisionAndPathParam extends ParamSegment {

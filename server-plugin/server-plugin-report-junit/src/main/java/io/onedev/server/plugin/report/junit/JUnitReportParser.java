@@ -13,7 +13,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
-import io.onedev.server.search.code.insidecommit.CodeSearchManager;
+import io.onedev.server.search.code.CodeSearchManager;
 
 public class JUnitReportParser {
 

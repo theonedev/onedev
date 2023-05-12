@@ -1,12 +1,11 @@
-package io.onedev.server.search.code.insidecommit.query;
+package io.onedev.server.search.code.query;
 
-import static io.onedev.server.search.code.insidecommit.FieldConstants.BLOB_NAME;
+import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;

@@ -1,4 +1,4 @@
-package io.onedev.server.search.code.insidecommit.query;
+package io.onedev.server.search.code.query;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -7,8 +7,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.SymbolHit;
-import io.onedev.server.search.code.insidecommit.CodeSearchManager;
-import io.onedev.server.search.code.query.TooGeneralQueryException;
+import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.util.match.WildcardUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
@@ -21,7 +20,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static io.onedev.server.search.code.insidecommit.FieldConstants.*;
+import static io.onedev.server.search.code.FieldConstants.*;
 
 public class SymbolQuery extends BlobQuery {
 

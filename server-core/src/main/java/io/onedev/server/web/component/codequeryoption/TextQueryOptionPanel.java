@@ -1,8 +1,7 @@
 package io.onedev.server.web.component.codequeryoption;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.search.code.insidecommit.query.BlobQuery;
-import io.onedev.server.search.code.insidecommit.query.TextQuery;
+import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.search.code.query.TextQueryOption;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -43,24 +42,21 @@ public class TextQueryOptionPanel extends FormComponentPanel<TextQueryOption> {
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
+		term.setRequired(true).setLabel(Model.of("Text"));
 		term.add(validatable -> {
-			if (StringUtils.isBlank(validatable.getValue())) {
-				validatable.error((IValidationError) messageSource -> "This field is required");
-			} else {
-				boolean regex = this.regex.getInput()!=null?true:false;
-				BlobQuery query = new TextQuery.Builder()
-						.term(validatable.getValue()).regex(regex)
-						.count(1)
-						.build();
-				try {
-					if (regex)
-						Pattern.compile(validatable.getValue());
-					query.asLuceneQuery();
-				} catch (PatternSyntaxException e) {
-					validatable.error((IValidationError) messageSource -> "Invalid PCRE syntax");
-				} catch (TooGeneralQueryException e) {
-					validatable.error((IValidationError) messageSource -> "Search is too general");
-				}
+			boolean regex = this.regex.getInput()!=null?true:false;
+			BlobQuery query = new TextQuery.Builder()
+					.term(validatable.getValue()).regex(regex)
+					.count(1)
+					.build();
+			try {
+				if (regex)
+					Pattern.compile(validatable.getValue());
+				query.asLuceneQuery();
+			} catch (PatternSyntaxException e) {
+				validatable.error((IValidationError) messageSource -> "Invalid PCRE syntax");
+			} catch (TooGeneralQueryException e) {
+				validatable.error((IValidationError) messageSource -> "Search is too general");
 			}
 		});
 

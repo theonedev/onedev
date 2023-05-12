@@ -1,7 +1,6 @@
-package io.onedev.server.search.code.insidecommit.query;
+package io.onedev.server.search.code.query;
 
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -13,7 +12,7 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.List;
 
-import static io.onedev.server.search.code.insidecommit.FieldConstants.BLOB_PATH;
+import static io.onedev.server.search.code.FieldConstants.BLOB_PATH;
 
 public abstract class BlobQuery implements Serializable {
 

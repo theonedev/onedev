@@ -7,8 +7,8 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.insidecommit.CodeSearchManager;
-import io.onedev.server.search.code.insidecommit.query.SymbolQuery;
+import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.query.SymbolQuery;
 import io.onedev.server.search.code.query.FileQueryOption;
 import io.onedev.server.search.code.query.QueryOption;
 import io.onedev.server.search.code.query.SymbolQueryOption;
@@ -105,7 +105,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 		});
 		
 		List<Tab> tabs = new ArrayList<Tab>();
-		tabs.add(new AjaxActionTab(Model.of("Text occurrences")) {
+		tabs.add(new AjaxActionTab(Model.of("Text")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -115,7 +115,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 			
 		}.setSelected(option instanceof TextQueryOption));
 		
-		tabs.add(new AjaxActionTab(Model.of("File names")) {
+		tabs.add(new AjaxActionTab(Model.of("Files")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -125,7 +125,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 			
 		}.setSelected(option instanceof FileQueryOption));
 		
-		tabs.add(new AjaxActionTab(Model.of("Symbol names")) {
+		tabs.add(new AjaxActionTab(Model.of("Symbols")) {
 			
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {

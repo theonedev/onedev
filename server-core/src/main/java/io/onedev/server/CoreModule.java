@@ -2,7 +2,6 @@ package io.onedev.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.google.inject.Provider;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.thoughtworks.xstream.XStream;
@@ -28,9 +27,7 @@ import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterResource;
 import io.onedev.server.cluster.DefaultClusterManager;
-import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.codequality.CodeProblemContribution;
-import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.commandhandler.*;
 import io.onedev.server.entitymanager.*;
@@ -67,7 +64,6 @@ import io.onedev.server.mail.MailManager;
 import io.onedev.server.markdown.DefaultMarkdownManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MarkdownProcessor;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.notification.*;
@@ -82,10 +78,10 @@ import io.onedev.server.rest.exception.UnauthenticatedExceptionHandler;
 import io.onedev.server.rest.jersey.DefaultServletContainer;
 import io.onedev.server.rest.jersey.JerseyConfigurator;
 import io.onedev.server.rest.jersey.ResourceConfigProvider;
-import io.onedev.server.search.code.insidecommit.CodeIndexManager;
-import io.onedev.server.search.code.insidecommit.CodeSearchManager;
-import io.onedev.server.search.code.insidecommit.DefaultCodeIndexManager;
-import io.onedev.server.search.code.insidecommit.DefaultCodeSearchManager;
+import io.onedev.server.search.code.CodeIndexManager;
+import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.DefaultCodeIndexManager;
+import io.onedev.server.search.code.DefaultCodeSearchManager;
 import io.onedev.server.search.entitytext.*;
 import io.onedev.server.security.*;
 import io.onedev.server.security.realm.AbstractAuthorizingRealm;
@@ -121,11 +117,9 @@ import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.exception.PageExpiredExceptionHandler;
 import io.onedev.server.web.mapper.BasePageMapper;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
-import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.project.blob.render.BlobRenderer;
-import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.websocket.*;
@@ -302,8 +296,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeIndexManager.class).to(DefaultCodeIndexManager.class);
 		bind(CodeSearchManager.class).to(DefaultCodeSearchManager.class);
 
-		Bootstrap.executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, 
-        		new SynchronousQueue<Runnable>()) {
+		Bootstrap.executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
+				new SynchronousQueue<>()) {
 
 			@Override
 			public void execute(Runnable command) {
@@ -317,60 +311,18 @@ public class CoreModule extends AbstractPluginModule {
 
         };
 
-	    bind(ExecutorService.class).toProvider(new Provider<ExecutorService>() {
-
-			@Override
-			public ExecutorService get() {
-				return Bootstrap.executorService;
-			}
-	    	
-	    }).in(Singleton.class);
+	    bind(ExecutorService.class).toProvider(() -> Bootstrap.executorService).in(Singleton.class);
 	    
-	    bind(OsInfo.class).toProvider(new Provider<OsInfo>() {
-
-			@Override
-			public OsInfo get() {
-				return ExecutorUtils.getOsInfo();
-			}
-	    	
-	    }).in(Singleton.class);
+	    bind(OsInfo.class).toProvider(() -> ExecutorUtils.getOsInfo()).in(Singleton.class);
 	    
 	    contributeFromPackage(LogInstruction.class, LogInstruction.class);
 	    
 	    
-		contribute(CodeProblemContribution.class, new CodeProblemContribution() {
-			
-			@Override
-			public List<CodeProblem> getCodeProblems(Build build, String blobPath, String reportName) {
-				return Lists.newArrayList();
-			}
-			
-		});
+		contribute(CodeProblemContribution.class, (build, blobPath, reportName) -> Lists.newArrayList());
 	    
-		contribute(LineCoverageContribution.class, new LineCoverageContribution() {
-			
-			@Override
-			public Map<Integer, CoverageStatus> getLineCoverages(Build build, String blobPath, String reportName) {
-				return new HashMap<>();
-			}
-			
-		});
-		contribute(AdministrationSettingContribution.class, new AdministrationSettingContribution() {
-			
-			@Override
-			public List<Class<? extends ContributedAdministrationSetting>> getSettingClasses() {
-				return new ArrayList<>();
-			}
-			
-		});
-		contribute(ProjectSettingContribution.class, new ProjectSettingContribution() {
-			
-			@Override
-			public List<Class<? extends ContributedProjectSetting>> getSettingClasses() {
-				return new ArrayList<>();
-			}
-			
-		});
+		contribute(LineCoverageContribution.class, (build, blobPath, reportName) -> new HashMap<>());
+		contribute(AdministrationSettingContribution.class, () -> new ArrayList<>());
+		contribute(ProjectSettingContribution.class, () -> new ArrayList<>());
 		
 	}
 	

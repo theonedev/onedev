@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.codequeryoption;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.search.code.insidecommit.query.BlobQuery;
-import io.onedev.server.search.code.insidecommit.query.SymbolQuery;
+import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.server.search.code.query.SymbolQuery;
 import io.onedev.server.search.code.query.SymbolQueryOption;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -36,6 +36,7 @@ public class SymbolQueryOptionPanel extends FormComponentPanel<SymbolQueryOption
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
+		term.setRequired(true).setLabel(Model.of("Symbol name"));
 		term.add(validatable -> {
 			if (StringUtils.isBlank(validatable.getValue())) {
 				validatable.error(messageSource -> "This field is required");

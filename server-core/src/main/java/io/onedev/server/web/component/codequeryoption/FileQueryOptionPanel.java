@@ -1,8 +1,7 @@
 package io.onedev.server.web.component.codequeryoption;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.search.code.insidecommit.query.BlobQuery;
-import io.onedev.server.search.code.insidecommit.query.FileQuery;
+import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.server.search.code.query.FileQuery;
 import io.onedev.server.search.code.query.FileQueryOption;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -33,19 +32,16 @@ public class FileQueryOptionPanel extends FormComponentPanel<FileQueryOption> {
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
+		term.setRequired(true).setLabel(Model.of("File name"));
 		term.add(validatable -> {
-			if (StringUtils.isBlank(validatable.getValue())) {
-				validatable.error(messageSource -> "This field is required");
-			} else {
-				BlobQuery query = new FileQuery.Builder()
-						.fileNames(validatable.getValue())
-						.count(1)
-						.build();
-				try {
-					query.asLuceneQuery();
-				} catch (TooGeneralQueryException e) {
-					validatable.error(messageSource -> "Search is too general");
-				}
+			BlobQuery query = new FileQuery.Builder()
+					.fileNames(validatable.getValue())
+					.count(1)
+					.build();
+			try {
+				query.asLuceneQuery();
+			} catch (TooGeneralQueryException e) {
+				validatable.error(messageSource -> "Search is too general");
 			}
 		});
 

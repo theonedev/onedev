@@ -26,7 +26,6 @@ public class DefaultMainMenuCustomization implements MainMenuCustomization {
 		
 		menuItems.add(new SidebarMenuItem.Page("project", "Projects", ProjectListPage.class, 
 				ProjectListPage.paramsOf(0, 0), Lists.newArrayList(NewProjectPage.class)));
-//		menuItems.add(new SidebarMenuItem.Page("code", "Code Search", CodeSearchPage.class, new PageParameters()));
 		menuItems.add(new SidebarMenuItem.Page("pull-request", "Pull Requests", PullRequestListPage.class, 
 				PullRequestListPage.paramsOf(0)));
 		menuItems.add(new SidebarMenuItem.Page("bug", "Issues", IssueListPage.class, 

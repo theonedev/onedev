@@ -1,4 +1,4 @@
-package io.onedev.server.search.code.insidecommit;
+package io.onedev.server.search.code;
 
 import com.google.common.base.Preconditions;
 import io.onedev.commons.jsymbol.Symbol;
@@ -15,8 +15,8 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.insidecommit.query.BlobQuery;
-import io.onedev.server.search.code.insidecommit.query.FileQuery;
+import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.server.search.code.query.FileQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.lucene.document.Document;
@@ -47,7 +47,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.onedev.server.search.code.insidecommit.FieldConstants.*;
+import static io.onedev.server.search.code.FieldConstants.*;
 
 @Singleton
 public class DefaultCodeSearchManager implements CodeSearchManager, Serializable {

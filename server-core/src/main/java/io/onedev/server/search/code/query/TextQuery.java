@@ -1,4 +1,4 @@
-package io.onedev.server.search.code.insidecommit.query;
+package io.onedev.server.search.code.query;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -7,8 +7,6 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.search.code.IndexConstants;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.TextHit;
-import io.onedev.server.search.code.query.NGramLuceneQuery;
-import io.onedev.server.search.code.query.TooGeneralQueryException;
 import io.onedev.server.search.code.query.regex.RegexLiterals;
 import io.onedev.server.util.ContentDetector;
 import org.apache.commons.lang3.CharUtils;
@@ -27,8 +25,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
-import static io.onedev.server.search.code.insidecommit.FieldConstants.BLOB_NAME;
-import static io.onedev.server.search.code.insidecommit.FieldConstants.BLOB_TEXT;
+import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
+import static io.onedev.server.search.code.FieldConstants.BLOB_TEXT;
 
 public class TextQuery extends BlobQuery {
 
@@ -48,8 +46,8 @@ public class TextQuery extends BlobQuery {
 	
 	private transient Pattern pattern;
 	
-	private TextQuery(String term, boolean regex, boolean caseSensitive, boolean wholeWord, 
-			@Nullable String directory, @Nullable String fileNames, int count) {
+	private TextQuery(String term, boolean regex, boolean caseSensitive, boolean wholeWord,
+					  @Nullable String directory, @Nullable String fileNames, int count) {
 		super(directory, count);
 		
 		this.term = term;

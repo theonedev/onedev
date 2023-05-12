@@ -149,7 +149,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~init", ServerInitPage.class));
 		add(new BasePageMapper("~loading", BrowserInfoPage.class));
 		addProjectPages();
-//		add(new BasePageMapper("~code-search", CodeSearchPage.class));
 		add(new BasePageMapper("~issues", IssueListPage.class));
 		add(new BasePageMapper("~pulls", PullRequestListPage.class));
 		add(new BasePageMapper("~builds", BuildListPage.class));

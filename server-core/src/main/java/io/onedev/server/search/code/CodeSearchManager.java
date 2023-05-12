@@ -1,10 +1,10 @@
-package io.onedev.server.search.code.insidecommit;
+package io.onedev.server.search.code;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.search.code.insidecommit.query.BlobQuery;
+import io.onedev.server.search.code.query.BlobQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.eclipse.jgit.lib.ObjectId;
 

@@ -28,6 +28,7 @@ import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.Permission;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -181,9 +182,13 @@ public class SuggestionUtils {
 	private static ProjectManager getProjectManager() {
 		return OneDev.getInstance(ProjectManager.class);
 	}
-	
+
 	public static List<InputSuggestion> suggestProjectPaths(String matchWith) {
-		Collection<Project> projects = getProjectManager().getPermittedProjects(new AccessProject());
+		return suggestProjectPaths(matchWith, new AccessProject());
+	}
+	
+	public static List<InputSuggestion> suggestProjectPaths(String matchWith, Permission permission) {
+		Collection<Project> projects = getProjectManager().getPermittedProjects(permission);
 		ProjectCache cache = getProjectManager().cloneCache();
 		
 		List<String> projectPaths = projects.stream()
