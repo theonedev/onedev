@@ -147,8 +147,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 						if (symbolName.length() >= IndexConstants.NGRAM_SIZE) {
 							int maxQueryEntries = OneDev.getInstance(SettingManager.class)
 									.getPerformanceSetting().getMaxCodeSearchEntries();
-							BlobQuery query = new TextQuery.Builder()
-									.term(symbolName)
+							var query = new TextQuery.Builder(symbolName)
 									.wholeWord(true)
 									.caseSensitive(true)
 									.count(maxQueryEntries)
@@ -238,21 +237,21 @@ public abstract class SymbolTooltipPanel extends Panel {
 							ObjectId commit = getProject().getRevCommit(revision, true);
 							BlobQuery query;
 							if (symbolHits.size() < QUERY_ENTRIES) {
-								query = new SymbolQuery.Builder().term(symbolName)
+								query = new SymbolQuery.Builder(symbolName)
+										.caseSensitive(true)
 										.excludeBlobPath(blobIdent.path)
 										.primary(true)
 										.local(false)
-										.caseSensitive(true)
 										.count(QUERY_ENTRIES)
 										.build();
 								symbolHits.addAll(searchManager.search(getProject(), commit, query));
 							}							
 							if (symbolHits.size() < QUERY_ENTRIES) {
-								query = new SymbolQuery.Builder().term(symbolName)
+								query = new SymbolQuery.Builder(symbolName)
+										.caseSensitive(true)
 										.excludeBlobPath(blobIdent.path)
 										.primary(false)
 										.local(false)
-										.caseSensitive(true)
 										.count(QUERY_ENTRIES - symbolHits.size())
 										.build();
 								symbolHits.addAll(searchManager.search(getProject(), commit, query));

@@ -1631,15 +1631,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 			return null;
 	}
 	
-	public PatternSet findCodeAnalysisPatterns() {
+	public String findCodeAnalysisPatterns() {
 		Project current = this;
 		do {
 			if (current.getCodeAnalysisSetting().getAnalyzeFiles() != null)
-				return PatternSet.parse(current.getCodeAnalysisSetting().getAnalyzeFiles());
+				return current.getCodeAnalysisSetting().getAnalyzeFiles();
 			current = current.getParent();
 		} while (current != null);
-
-		return PatternSet.parse("**");
+		
+		return "**";
 	}
 
 	public MergeStrategy findDefaultMergeStrategy() {

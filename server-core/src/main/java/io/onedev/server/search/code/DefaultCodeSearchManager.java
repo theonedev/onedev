@@ -241,7 +241,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 							BytesRef bytesRef = document.getBinaryValue(BLOB_SYMBOL_LIST.name());
 							if (bytesRef != null) {
 								try {
-									symbolsRef.set((List<Symbol>) SerializationUtils.deserialize(bytesRef.bytes));
+									symbolsRef.set(SerializationUtils.deserialize(bytesRef.bytes));
 								} catch (Exception e) {
 									logger.error("Error deserializing symbols", e);
 								}
@@ -325,13 +325,12 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public String call() throws Exception {
-				FileQuery.Builder builder = new FileQuery.Builder();
-				builder.caseSensitive(true);
-				builder.count(MAX_BLOB_PATH_QUERY_COUNT);
-				
+			public String call() {
+				var query = new FileQuery.Builder(fileName)
+						.caseSensitive(true)
+						.count(MAX_BLOB_PATH_QUERY_COUNT)
+						.build();
 				String blobPath = null;
-				BlobQuery query = builder.fileNames(fileName).build();
 				try {
 					for (QueryHit hit: search(projectId, commit, query)) {
 						if (partialBlobPath == null || hit.getBlobPath().contains(partialBlobPath)) { 
@@ -343,7 +342,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 							}
 						}
 					}
-				} catch (TooGeneralQueryException e) {
+				} catch (TooGeneralQueryException ignored) {
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}

@@ -1,17 +1,15 @@
 package io.onedev.server.web.component.commandpalette;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import io.onedev.server.search.code.query.BlobQuery;
-import org.eclipse.jgit.lib.ObjectId;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.CodeSearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.FileQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
+import org.eclipse.jgit.lib.ObjectId;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class RevisionAndPathParam extends ParamSegment {
 
@@ -34,10 +32,9 @@ public class RevisionAndPathParam extends ParamSegment {
 			if (project.getDefaultBranch() != null) {
 				CodeSearchManager codeSearchManager = OneDev.getInstance(CodeSearchManager.class);
 				ObjectId commitId = project.getObjectId(project.getDefaultBranch(), true);
-				FileQuery.Builder builder = new FileQuery.Builder();
-				builder.fileNames("*" + matchWith + "*");
-				builder.count(count);
-				BlobQuery query = builder.build();
+				var query = new FileQuery.Builder("*" + matchWith + "*")
+						.count(count)
+						.build();
 				try {
 					for (QueryHit hit: codeSearchManager.search(project, commitId, query)) {
 						String revisionAndPath = project.getDefaultBranch() + "/" + hit.getBlobPath();

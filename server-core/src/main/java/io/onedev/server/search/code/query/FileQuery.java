@@ -1,110 +1,97 @@
 package io.onedev.server.search.code.query;
 
-import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.WildcardQuery;
-import org.eclipse.jgit.treewalk.TreeWalk;
-
 import com.google.common.base.Preconditions;
-
-import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.util.match.WildcardUtils;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
+import org.eclipse.jgit.treewalk.TreeWalk;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class FileQuery extends BlobQuery {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String fileNames;
-	
-	private final String excludeFileName;
+	private final String term;
 	
 	private final boolean caseSensitive;
 	
-	private FileQuery(String fileNames, @Nullable String excludeFileName, boolean caseSensitive,  
-			@Nullable String directory, int count) {
+	private final String excludeFileName;
+	
+	private FileQuery(String term, boolean caseSensitive, @Nullable String excludeFileName, 
+					  @Nullable String directory, int count) {
 		super(directory, count);
-		
-		this.fileNames = fileNames;
-		this.excludeFileName = excludeFileName;
+
+		this.term = term;
 		this.caseSensitive = caseSensitive;
+		this.excludeFileName = excludeFileName;
 	}
 
 	@Override
 	public void collect(IndexSearcher searcher, TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
 		String blobName = blobPath.substring(blobPath.lastIndexOf('/')+1);
-		if (caseSensitive) {
-			if (WildcardUtils.matchString(fileNames, blobName) 
-					&& (excludeFileName == null || !excludeFileName.equals(blobName))) {
-				LinearRange match = WildcardUtils.rangeOfMatch(fileNames, blobName);
-				hits.add(new FileHit(blobPath, match));
-			}
-		} else {
-			if (WildcardUtils.matchString(fileNames, blobName.toLowerCase()) 
-					&& (excludeFileName == null || !excludeFileName.equalsIgnoreCase(blobName))) {
-				LinearRange match = WildcardUtils.rangeOfMatch(fileNames, blobName.toLowerCase());
-				hits.add(new FileHit(blobPath, match));
-			}
-		}
+		var match = getOption().matches(blobName, excludeFileName);
+		if (match != null)
+			hits.add(new FileHit(blobPath, match.orElse(null)));
 	}
 
 	@Override
 	protected void applyConstraints(BooleanQuery.Builder builder) {
-		boolean tooGeneral = true;
-		for (char ch: fileNames.toCharArray()) {
-			if (ch != '?' && ch != '*' && ch != ',' && ch != '.') {
-				tooGeneral = false;
-				break;
-			}
-		}
-		if (tooGeneral)
-			throw new TooGeneralQueryException();
-		
-		builder.add(new WildcardQuery(new Term(BLOB_NAME.name(), fileNames.toLowerCase())), Occur.MUST);
+		getOption().applyConstraints(builder);
 	}
 
-	public static class Builder extends BlobQuery.Builder {
+	private FileQueryOption getOption() {
+		return new FileQueryOption(term, caseSensitive);
+	}
+	
+	public static class Builder {
 
-		private String excludeFileName;
+		private String term;
 		
 		private boolean caseSensitive;
-		
-		private String fileNames;
-		
-		public Builder excludeFileName(String excludeFileName) {
-			this.excludeFileName = excludeFileName;
-			return this;
+
+		private String excludeFileName;
+
+		private String directory;
+
+		private int count;
+
+		public Builder(String term) {
+			this.term = term;
+		}
+
+		public Builder(FileQueryOption option) {
+			this(option.getTerm());
+			caseSensitive(option.isCaseSensitive());
 		}
 		
 		public Builder caseSensitive(boolean caseSensitive) {
 			this.caseSensitive = caseSensitive;
 			return this;
 		}
-		
-		public Builder fileNames(String fileNames) {
-			this.fileNames = fileNames;
+
+		public Builder excludeFileName(@Nullable String excludeFileName) {
+			this.excludeFileName = excludeFileName;
 			return this;
 		}
 		
-		@Override
-		public BlobQuery build() {
-			Preconditions.checkArgument(fileNames!=null, "File names should be specified");
-			Preconditions.checkArgument(count!=0, "Query count should be specified");
-			
-			return new FileQuery(fileNames, excludeFileName, caseSensitive, 
-					directory, count);
+		public Builder directory(String directory) {
+			this.directory = directory;
+			return this;
 		}
-		
-	}
 
+		public Builder count(int count) {
+			this.count = count;
+			return this;
+		}
+
+		public FileQuery build() {
+			Preconditions.checkState(term != null);
+			Preconditions.checkState(count != 0);
+			return new FileQuery(term, caseSensitive, excludeFileName, directory, count);
+		}
+	}	
 }

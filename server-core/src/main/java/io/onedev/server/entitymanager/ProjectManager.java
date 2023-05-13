@@ -10,6 +10,7 @@ import io.onedev.server.util.artifact.ArtifactInfo;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.facade.ProjectCache;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.patternset.PatternSet;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -78,6 +79,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Collection<Long> getSubtreeIds(Long projectId);
 	
+	Collection<Long> getPathMatchingIds(PatternSet patternSet);
+	
 	Collection<Project> getPermittedProjects(Permission permission);
 	
 	ProjectCache cloneCache();
@@ -88,7 +91,7 @@ public interface ProjectManager extends EntityManager<Project> {
 	@Nullable
 	String getActiveServer(Long projectId, boolean mustExist);
 	
-	Map<Long, String> getActiveServers();
+	Collection<Long> getActiveIds();
 	
 	<T> T runOnActiveServer(Long projectId, ClusterTask<T> task);
 

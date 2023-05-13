@@ -6,15 +6,14 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.CodeSearchManager;
-import io.onedev.server.search.code.query.SymbolQuery;
-import io.onedev.server.search.code.query.FileQueryOption;
-import io.onedev.server.search.code.query.QueryOption;
-import io.onedev.server.search.code.query.SymbolQueryOption;
-import io.onedev.server.search.code.query.TextQueryOption;
+import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.search.code.query.*;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.RunTaskBehavior;
+import io.onedev.server.web.component.codequeryoption.FileQueryOptionEditor;
+import io.onedev.server.web.component.codequeryoption.SymbolQueryOptionEditor;
+import io.onedev.server.web.component.codequeryoption.TextQueryOptionEditor;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -136,6 +135,15 @@ public abstract class AdvancedSearchPanel extends Panel {
 		}.setSelected(option instanceof SymbolQueryOption));
 		
 		form.add(new Tabbable("tabs", tabs));
+		
+		if (option instanceof FileQueryOption)
+			optionEditor = new FileQueryOptionEditor("option", Model.of((FileQueryOption) option));
+		else if (option instanceof SymbolQueryOption)
+			optionEditor = new SymbolQueryOptionEditor("option", Model.of((SymbolQueryOption) option));
+		else
+			optionEditor = new TextQueryOptionEditor("option", Model.of((TextQueryOption) option));
+
+		
 		form.add(optionEditor = option.newOptionEditor("option"));
 		optionEditor.setOutputMarkupId(true);
 		form.add(new CheckBox("insideCurrentDir", new IModel<>() {
@@ -182,30 +190,39 @@ public abstract class AdvancedSearchPanel extends Panel {
 						var count = getMaxQueryEntries();
 						if (revision != null) {
 							try {
+								var directory = getDirectory(insideCurrentDir);
 								var searchManager = OneDev.getInstance(CodeSearchManager.class);
-								if (option instanceof SymbolQueryOption) {
-									SymbolQuery.Builder builder = (SymbolQuery.Builder) option.newInsideCommitQueryBuilder();
-									var query = builder.primary(true)
-											.directory(getDirectory(insideCurrentDir))
+								if (option instanceof TextQueryOption) {
+									var query = new TextQuery.Builder((TextQueryOption) option)
+											.directory(directory)
+											.count(count)
+											.build();
+									ObjectId commit = project.getRevCommit(revision, true);
+									hits = searchManager.search(project, commit, query);
+								} else if (option instanceof FileQueryOption) {
+									var query = new FileQuery.Builder((FileQueryOption) option)
+											.directory(directory)
+											.count(count)
+											.build();
+									ObjectId commit = project.getRevCommit(revision, true);
+									hits = searchManager.search(project, commit, query);
+								} else {
+									var query = new SymbolQuery.Builder((SymbolQueryOption) option)
+											.primary(true)
+											.directory(directory)
 											.count(count)
 											.build();
 									ObjectId commit = project.getRevCommit(revision, true);
 									hits = searchManager.search(project, commit, query);
 
 									if (hits.size() < count) {
-										query = builder.primary(false)
-												.directory(getDirectory(insideCurrentDir))
-												.count(count)
+										query = new SymbolQuery.Builder((SymbolQueryOption) option)
+												.primary(false)
+												.directory(directory)
+												.count(count-hits.size())
 												.build();
 										hits.addAll(searchManager.search(project, commit, query));
 									}
-								} else {
-									var query = option.newInsideCommitQueryBuilder()
-											.directory(getDirectory(insideCurrentDir))
-											.count(count)
-											.build();
-									ObjectId commit = project.getRevCommit(revision, true);
-									hits = searchManager.search(project, commit, query);
 								}
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);

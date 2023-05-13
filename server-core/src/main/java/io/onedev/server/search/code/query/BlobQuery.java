@@ -62,25 +62,5 @@ public abstract class BlobQuery implements Serializable {
 	}
 
 	protected abstract void applyConstraints(BooleanQuery.Builder query);
-
-	public static abstract class Builder {
-
-		protected String directory;
-
-		protected int count;
-		
-		public Builder directory(String directory) {
-			this.directory = directory;
-			return this;
-		}
-
-		public Builder count(int count) {
-			this.count = count;
-			return this;
-		}
-		
-		public abstract BlobQuery build();
-		
-	}
 	
 }

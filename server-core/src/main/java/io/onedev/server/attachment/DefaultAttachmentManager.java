@@ -18,12 +18,12 @@ import io.onedev.server.event.project.issue.IssuesCopied;
 import io.onedev.server.event.project.issue.IssuesMoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.exception.AttachmentTooLargeException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.exception.AttachmentTooLargeException;
 import io.onedev.server.util.artifact.FileInfo;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
@@ -326,23 +326,18 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Sessional
 	@Override
 	public void execute() {
-		var localServer = clusterManager.getLocalServerAddress();
-		for (var entry: projectManager.getActiveServers().entrySet()) {
-			var projectId = entry.getKey();
-			var activeServer = entry.getValue();
-			if (localServer.equals(activeServer)) {
-				try {
-					File tempAttachmentBase = new File(projectManager.getAttachmentDir(projectId), TEMP);
-					if (tempAttachmentBase.exists()) {
-						for (File attachmentGroupDir: tempAttachmentBase.listFiles()) {
-							if (System.currentTimeMillis() - attachmentGroupDir.lastModified() > TEMP_PRESERVE_PERIOD) {
-								FileUtils.deleteDir(attachmentGroupDir);
-							}
+		for (var projectId: projectManager.getActiveIds()) {
+			try {
+				File tempAttachmentBase = new File(projectManager.getAttachmentDir(projectId), TEMP);
+				if (tempAttachmentBase.exists()) {
+					for (File attachmentGroupDir: tempAttachmentBase.listFiles()) {
+						if (System.currentTimeMillis() - attachmentGroupDir.lastModified() > TEMP_PRESERVE_PERIOD) {
+							FileUtils.deleteDir(attachmentGroupDir);
 						}
 					}
-				} catch (Exception e) {
-					logger.error("Error cleaning up temp attachments", e);
 				}
+			} catch (Exception e) {
+				logger.error("Error cleaning up temp attachments", e);
 			}
 		}
 	}

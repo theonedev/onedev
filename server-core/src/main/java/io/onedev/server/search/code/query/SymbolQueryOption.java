@@ -1,55 +1,165 @@
 package io.onedev.server.search.code.query;
 
-import io.onedev.server.web.component.codequeryoption.SymbolQueryOptionPanel;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.component.codequeryoption.SymbolQueryOptionEditor;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.onedev.server.search.code.FieldConstants.*;
+import static io.onedev.server.util.match.WildcardUtils.matchString;
+import static io.onedev.server.util.match.WildcardUtils.rangeOfMatch;
 
 public class SymbolQueryOption implements QueryOption {
 
 	private static final long serialVersionUID = 1L;
 	
-	private String term;
-
-	private String fileNames;
-
-	private boolean caseSensitive;
-
-	public String getTerm() {
-		return term;
+	private final String term;
+	
+	private final boolean caseSensitive;
+	
+	private final String fileNames;
+	
+	public SymbolQueryOption(@Nullable String term, boolean caseSensitive, @Nullable String fileNames) {
+		this.term = term;
+		this.caseSensitive = caseSensitive;
+		this.fileNames = fileNames;
+	}
+	
+	public SymbolQueryOption() {
+		this(null, false, null);
 	}
 
-	public void setTerm(String term) {
-		this.term = term;
+	@Nullable
+	public String getTerm() {
+		return term;
 	}
 
 	public String getFileNames() {
 		return fileNames;
 	}
 
-	public void setFileNames(String fileNames) {
-		this.fileNames = fileNames;
-	}
-
 	public boolean isCaseSensitive() {
 		return caseSensitive;
 	}
+	
+	public List<Match> matches(String blobPath, List<Symbol> symbols, @Nullable String excludeTerm, 
+							   @Nullable String excludeBlobPath, @Nullable Boolean primary, 
+							   @Nullable Boolean local, int count) {
+		Preconditions.checkNotNull(term != null);
+		
+		var matches = new ArrayList<Match>();
+		for (Symbol symbol: symbols) {
+			if (matches.size() < count) {
+				if ((primary==null || primary.booleanValue() == symbol.isPrimary())
+						&& symbol.getName() != null
+						&& symbol.isSearchable()
+						&& (local == null || local.booleanValue() == symbol.isLocalInHierarchy())) {
+					String normalizedTerm;
+					if (!caseSensitive)
+						normalizedTerm = term.toLowerCase();
+					else
+						normalizedTerm = term;
 
-	public void setCaseSensitive(boolean caseSensitive) {
-		this.caseSensitive = caseSensitive;
+					String normalizedSymbolName;
+					if (!caseSensitive)
+						normalizedSymbolName = symbol.getName().toLowerCase();
+					else
+						normalizedSymbolName = symbol.getName();
+
+					String normalizedExcludeTerm;
+					if (excludeTerm != null) {
+						if (!caseSensitive)
+							normalizedExcludeTerm = excludeTerm.toLowerCase();
+						else
+							normalizedExcludeTerm = excludeTerm;
+					} else {
+						normalizedExcludeTerm = null;
+					}
+					if (matchString(normalizedTerm, normalizedSymbolName)
+							&& !normalizedSymbolName.equals(normalizedExcludeTerm)
+							&& !blobPath.equals(excludeBlobPath)) {
+						matches.add(new Match(symbol, rangeOfMatch(normalizedTerm, normalizedSymbolName)));
+					}
+				}
+			} else {
+				break;
+			}
+		}
+		return matches;
 	}
 
-	@Override
-	public BlobQuery.Builder newInsideCommitQueryBuilder() {
-		return new SymbolQuery.Builder()
-				.term(term)
-				.primary(true)
-				.caseSensitive(caseSensitive)
-				.fileNames(fileNames);
+	public void applyConstraints(BooleanQuery.Builder builder, @Nullable Boolean primary) {
+		Preconditions.checkNotNull(term != null);
+		if (fileNames != null) {
+			BooleanQuery.Builder subQueryBuilder = new BooleanQuery.Builder();
+			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))
+				subQueryBuilder.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), BooleanClause.Occur.SHOULD);
+			BooleanQuery subQuery = subQueryBuilder.build();
+			if (subQuery.clauses().size() != 0)
+				builder.add(subQuery, BooleanClause.Occur.MUST);
+		}
+
+		boolean tooGeneral = true;
+		for (char ch: term.toCharArray()) {
+			if (ch != '?' && ch != '*') {
+				tooGeneral = false;
+				break;
+			}
+		}
+		if (tooGeneral)
+			throw new TooGeneralQueryException();
+
+		if (primary != null) {
+			String fieldName;
+			if (primary)
+				fieldName = BLOB_PRIMARY_SYMBOLS.name();
+			else
+				fieldName = BLOB_SECONDARY_SYMBOLS.name();
+
+			builder.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), BooleanClause.Occur.MUST);
+		}
 	}
 
 	@Override
 	public FormComponentPanel<? extends QueryOption> newOptionEditor(String componentId) {
-		return new SymbolQueryOptionPanel(componentId, Model.of(this));
+		return new SymbolQueryOptionEditor(componentId, Model.of(this));
+	}
+
+	public static class Match implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final Symbol symbol;
+
+		private final LinearRange position;
+
+		public Match(Symbol symbol, @Nullable LinearRange position) {
+			this.symbol = symbol;
+			this.position = position;
+		}
+
+		public Symbol getSymbol() {
+			return symbol;
+		}
+
+		@Nullable
+		public LinearRange getPosition() {
+			return position;
+		}
 	}
 
 }

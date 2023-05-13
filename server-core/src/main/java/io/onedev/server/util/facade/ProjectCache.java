@@ -1,26 +1,18 @@
 package io.onedev.server.util.facade;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.Sets;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.MapProxy;
 import io.onedev.server.util.Similarities;
-import io.onedev.server.util.match.WildcardUtils;
+import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.patternset.PatternSet;
+
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.onedev.server.util.match.WildcardUtils.matchPath;
 import static java.util.Comparator.comparing;
@@ -54,6 +46,15 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Seria
 		return ids;
 	}
 
+	public Collection<Long> getMatchingIds(PatternSet patternSet) {
+		Collection<Long> ids = new HashSet<>();
+		for (ProjectFacade project: values()) {
+			if (patternSet.matches(new PathMatcher(), project.getPath()))
+				ids.add(project.getId());
+		}
+		return ids;
+	}
+	
 	public Collection<Long> getSubtreeIds(Long id) {
 		return getSubtreeIds(values(), id);
 	}

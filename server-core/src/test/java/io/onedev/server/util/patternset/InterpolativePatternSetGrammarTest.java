@@ -14,14 +14,7 @@ public class InterpolativePatternSetGrammarTest {
 
 	@Test
 	public void test() {
-		Function<String, String> variableResolver = new Function<String, String>() {
-
-			@Override
-			public String apply(String t) {
-				return t;
-			}
-			
-		};
+		Function<String, String> variableResolver = t -> t;
 		
 		PatternSet expected, actual;
 		String interpolated;

@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.codequeryoption;
 
-import io.onedev.server.search.code.query.BlobQuery;
-import io.onedev.server.search.code.query.FileQuery;
-import io.onedev.server.search.code.query.FileQueryOption;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.search.code.query.SymbolQuery;
+import io.onedev.server.search.code.query.SymbolQueryOption;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -13,14 +13,17 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.validation.IValidationError;
 
-public class FileQueryOptionPanel extends FormComponentPanel<FileQueryOption> {
+public class SymbolQueryOptionEditor extends FormComponentPanel<SymbolQueryOption> {
 
 	private TextField<String> term;
 	
 	private CheckBox caseSensitive;
+	
+	private TextField<String> fileNames;
 
-	public FileQueryOptionPanel(String id, IModel<FileQueryOption> model) {
+	public SymbolQueryOptionEditor(String id, IModel<SymbolQueryOption> model) {
 		super(id, model);
 	}
 
@@ -32,23 +35,25 @@ public class FileQueryOptionPanel extends FormComponentPanel<FileQueryOption> {
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
-		term.setRequired(true).setLabel(Model.of("File name"));
+		term.setRequired(true).setLabel(Model.of("Symbol name"));
 		term.add(validatable -> {
-			BlobQuery query = new FileQuery.Builder()
-					.fileNames(validatable.getValue())
-					.count(1)
-					.build();
-			try {
-				query.asLuceneQuery();
-			} catch (TooGeneralQueryException e) {
-				validatable.error(messageSource -> "Search is too general");
+			if (StringUtils.isBlank(validatable.getValue())) {
+				validatable.error(messageSource -> "This field is required");
+			} else {
+				try {
+					new SymbolQuery.Builder(validatable.getValue())
+							.count(1)
+							.build()
+							.asLuceneQuery();
+				} catch (TooGeneralQueryException e) {
+					validatable.error((IValidationError) messageSource -> "Search is too general");
+				}
 			}
 		});
-
 		termContainer.add(term);
 		termContainer.add(new FencedFeedbackPanel("feedback", term));
 		termContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
+			
 			@Override
 			protected String load() {
 				if (term.hasErrorMessage())
@@ -60,14 +65,13 @@ public class FileQueryOptionPanel extends FormComponentPanel<FileQueryOption> {
 		}));
 
 		add(caseSensitive = new CheckBox("caseSensitive", Model.of(option.isCaseSensitive())));
+
+		add(fileNames = new TextField<String>("fileNames", Model.of(option.getFileNames())));
 	}
 
 	@Override
 	public void convertInput() {
-		var option = new FileQueryOption();
-		option.setTerm(term.getConvertedInput());
-		option.setCaseSensitive(caseSensitive.getConvertedInput());
-		setConvertedInput(option);
+		setConvertedInput(new SymbolQueryOption(term.getConvertedInput(), caseSensitive.getConvertedInput(), fileNames.getConvertedInput()));
 	}
 	
 }

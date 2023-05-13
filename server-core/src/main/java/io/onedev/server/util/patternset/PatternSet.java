@@ -131,9 +131,9 @@ public class PatternSet implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (String include: getIncludes())
-			builder.append(include).append(" ");
+			builder.append(quoteIfNecessary(include)).append(" ");
 		for (String exclude: getExcludes())
-			builder.append("-").append(exclude).append(" ");
+			builder.append("-").append("\"" + exclude + "\"").append(" ");
 		return builder.toString().trim();
 	}
 	

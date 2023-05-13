@@ -14,25 +14,24 @@ public class TextHit extends QueryHit {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final String lineContent;
+	private final String line;
 	
-	public TextHit(String blobPath, String lineContent, PlanarRange hitPos) {
+	public TextHit(String blobPath, PlanarRange hitPos, String line) {
 		super(blobPath, hitPos);
-		
-		this.lineContent = lineContent;
+		this.line = line;
 	}
 
-	public String getLineContent() {
-		return lineContent;
+	public String getLine() {
+		return line;
 	}
 	
 	@Override
 	public Component render(String componentId) {
 		if (getTokenPos() != null) {
-			return new HighlightableLabel(componentId, lineContent, 
+			return new HighlightableLabel(componentId, line, 
 					new LinearRange(getTokenPos().getFromColumn(), getTokenPos().getToColumn()));
 		} else {
-			return new HighlightableLabel(componentId, lineContent, null);
+			return new HighlightableLabel(componentId, line, null);
 		}
 	}
 

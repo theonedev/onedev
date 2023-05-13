@@ -3,14 +3,13 @@ package io.onedev.server.infomanager;
 import com.google.common.base.Preconditions;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.ActiveServerChanged;
+import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.issue.*;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
@@ -68,19 +67,15 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	
 	private final IssueChangeManager issueChangeManager;
 	
-	private final ClusterManager clusterManager;
-	
 	private final ProjectManager projectManager;
 	
 	@Inject
 	public DefaultIssueInfoManager(IssueManager issueManager, IssueChangeManager issueChangeManager, 
-								   BatchWorkManager batchWorkManager, ProjectManager projectManager, 
-								   ClusterManager clusterManager) {
+								   BatchWorkManager batchWorkManager, ProjectManager projectManager) {
 		this.issueManager = issueManager;
 		this.issueChangeManager = issueChangeManager;
 		this.batchWorkManager = batchWorkManager;
 		this.projectManager = projectManager;
-		this.clusterManager = clusterManager;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -246,14 +241,9 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		var localServer = clusterManager.getLocalServerAddress();
-		for (var entry: projectManager.getActiveServers().entrySet()) {
-			var projectId = entry.getKey();
-			var activeServer = entry.getValue();
-			if (localServer.equals(activeServer)) {
-				checkVersion(getEnvDir(projectId.toString()));
-				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
-			}
+		for (var projectId: projectManager.getActiveIds()) {
+			checkVersion(getEnvDir(projectId.toString()));
+			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
 		}
 	}
 

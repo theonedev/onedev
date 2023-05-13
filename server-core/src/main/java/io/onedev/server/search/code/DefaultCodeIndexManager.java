@@ -279,19 +279,14 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 
 			@Override
 			public void doWorks(List<Prioritized> works) {
-				sessionManager.run(new Runnable() {
+				sessionManager.run(() -> {
+					Preconditions.checkState(works.size() == 1);
 
-					@Override
-					public void run() {
-						Preconditions.checkState(works.size() == 1);
-
-						Project project = projectManager.load(projectId);
-						ObjectId commitId = ((IndexWork) works.iterator().next()).getCommitId();
-						doIndex(project, commitId);
-						
-						listenerRegistry.post(new CommitIndexed(project, commitId.copy()));
-					}
+					Project project = projectManager.load(projectId);
+					ObjectId commitId = ((IndexWork) works.iterator().next()).getCommitId();
+					doIndex(project, commitId);
 					
+					listenerRegistry.post(new CommitIndexed(project, commitId.copy()));
 				});
 			}
 			
@@ -305,7 +300,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 			try {
 				logger.debug("Indexing commit (project: {}, commit: {})", project.getPath(), commit.getName());
 				IndexResult indexResult = index(projectManager.getRepository(project.getId()), 
-						commit, writer, searcher, project.findCodeAnalysisPatterns());
+						commit, writer, searcher, PatternSet.parse(project.findCodeAnalysisPatterns()));
 				writer.commit();
 				return indexResult;
 			} catch (Exception e) {
@@ -335,8 +330,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 		}
 	}
 
-	@Override
-	public String getIndexVersion() {
+	private String getIndexVersion() {
 		return DigestUtils.md5Hex(DATA_VERSION + ";" + SymbolExtractorRegistry.getVersion());
 	}
 	
@@ -357,7 +351,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Boolean call() throws Exception {
+			public Boolean call() {
 				File indexDir = projectManager.getIndexDir(projectId);
 				try (Directory directory = FSDirectory.open(indexDir.toPath())) {
 					if (DirectoryReader.indexExists(directory)) {

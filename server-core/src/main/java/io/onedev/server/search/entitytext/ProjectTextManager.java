@@ -4,6 +4,7 @@ import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -159,9 +160,7 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 	}
 
 	private File getIndexDir() {
-		File indexDir = new File(Bootstrap.getSiteDir(), "index");
-		FileUtils.createDir(indexDir);
-		return new File(indexDir, getIndexName());
+		return new File(OneDev.getIndexDir(), getIndexName());
 	}
 
 	@Sessional
@@ -400,17 +399,17 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 			for (var entry : clusterManager.runOnAllServers((ClusterTask<Map<Long, Float>>) () -> {
 				if (searcherManager != null) {
 					try {
-						IndexSearcher indexSearcher = searcherManager.acquire();
+						IndexSearcher searcher = searcherManager.acquire();
 						try {
-							Map<Long, Float> theEntityScores = new HashMap<>();
-							TopDocs topDocs = indexSearcher.search(parse(queryString), firstResult + maxResults);
+							Map<Long, Float> innerEntityScores = new HashMap<>();
+							TopDocs topDocs = searcher.search(parse(queryString), firstResult + maxResults);
 							for (var scoreDoc : topDocs.scoreDocs) {
-								Document doc = indexSearcher.doc(scoreDoc.doc);
-								theEntityScores.put(valueOf(doc.get(FIELD_ENTITY_ID)), scoreDoc.score);
+								Document doc = searcher.doc(scoreDoc.doc);
+								innerEntityScores.put(valueOf(doc.get(FIELD_ENTITY_ID)), scoreDoc.score);
 							}
-							return theEntityScores;
+							return innerEntityScores;
 						} finally {
-							searcherManager.release(indexSearcher);
+							searcherManager.release(searcher);
 						}
 					} catch (IOException e) {
 						throw new RuntimeException(e);

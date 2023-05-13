@@ -25,9 +25,9 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.CodeIndexManager;
 import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -272,10 +272,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		List<QueryHit> queryHits;
 		if (state.query != null) {
 			int maxQueryEntries = getSettingManager().getPerformanceSetting().getMaxCodeSearchEntries();
-			BlobQuery query = new TextQuery.Builder()
-					.term(state.query)
+			BlobQuery query = new TextQuery.Builder(state.query)
 					.wholeWord(true)
-					.caseSensitive(true) 
+					.caseSensitive(true)
 					.count(maxQueryEntries)
 					.build();
 			try {
@@ -1340,8 +1339,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		public String urlBeforeEdit;
 		
 		public String urlAfterEdit;
-		
-		public boolean renderSource;
 		
 		public String query;
 		

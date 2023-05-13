@@ -78,8 +78,7 @@ public abstract class QuickSearchPanel extends Panel {
 		try {
 			// first try an exact search against primary symbol to make sure the result 
 			// always contains exact match if exists
-			BlobQuery query = new SymbolQuery.Builder()
-					.term(searchInput)
+			BlobQuery query = new SymbolQuery.Builder(searchInput)
 					.primary(true)
 					.count(count)
 					.build();
@@ -87,7 +86,7 @@ public abstract class QuickSearchPanel extends Panel {
 			
 			// now do wildcard search but exclude the exact match returned above 
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery.Builder().term("*"+searchInput+"*")
+				query = new SymbolQuery.Builder("*"+searchInput+"*")
 						.excludeTerm(searchInput)
 						.primary(true)
 						.count(count-symbolHits.size())
@@ -97,15 +96,12 @@ public abstract class QuickSearchPanel extends Panel {
 
 			// do the same for file names
 			if (symbolHits.size() < count) {
-				query = new FileQuery.Builder()
-						.fileNames(searchInput)
-						.count(count-symbolHits.size())
-						.build();
+				query = new FileQuery.Builder(searchInput).count(count-symbolHits.size()).build();
 				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new FileQuery.Builder().fileNames("*"+searchInput+"*")
+				query = new FileQuery.Builder("*"+searchInput+"*")
 						.excludeFileName(searchInput)
 						.count(count-symbolHits.size())
 						.build();
@@ -114,23 +110,21 @@ public abstract class QuickSearchPanel extends Panel {
 			
 			// do the same for secondary symbols
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery.Builder()
-						.term(searchInput)
+				query = new SymbolQuery.Builder(searchInput)
 						.primary(false)
 						.count(count-symbolHits.size())
-						.build();
+						.build(); 
 				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
 			}
 			
 			if (symbolHits.size() < count) {
-				query = new SymbolQuery.Builder().term("*"+searchInput+"*")
+				query = new SymbolQuery.Builder("*"+searchInput+"*")
 						.excludeTerm(searchInput)
 						.primary(false)
 						.count(count-symbolHits.size())
 						.build();
 				symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
 			}
-			
 		} catch (Exception e) {
 			if (ExceptionUtils.find(e, TooGeneralQueryException.class) != null)
 				symbolHits = new ArrayList<>();

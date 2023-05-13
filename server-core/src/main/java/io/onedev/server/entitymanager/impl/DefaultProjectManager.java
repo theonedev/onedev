@@ -1053,6 +1053,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 
 	@Override
+	public Collection<Long> getPathMatchingIds(PatternSet patternSet) {
+		return cache.getMatchingIds(patternSet);
+	}
+
+	@Override
 	public Collection<Long> getIds() {
 		return new HashSet<>(cache.keySet());
 	}
@@ -1124,12 +1129,13 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	}
 	
 	@Override
-	public Map<Long, String> getActiveServers() {
-		return new HashMap<>(activeServers);
+	public Collection<Long> getActiveIds() {
+		var localServer = clusterManager.getLocalServerAddress();
+		return activeServers.project(Map.Entry::getKey, entry -> entry.getValue().equals(localServer));
 	}
-	
-	private String updateActiveServer(Long projectId, 
-									  Map<String, ProjectReplica> replicasOfProject, 
+
+	private String updateActiveServer(Long projectId,
+									  Map<String, ProjectReplica> replicasOfProject,
 									  boolean syncReplicas) {
 		var effectiveReplicasOfProject = new LinkedHashMap<String, ProjectReplica>();
 		for (var entry : replicasOfProject.entrySet()) {
@@ -1251,7 +1257,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 							String mediaType = Files.probeContentType(siteArtifact.toPath());
 							if (mediaType == null)
 								mediaType = MediaType.APPLICATION_OCTET_STREAM;
-							return new FileInfo(siteArtifactPath, siteArtifact.length(), siteArtifact.lastModified(), mediaType);
+							return new FileInfo(siteArtifactPath, siteArtifact.lastModified(), siteArtifact.length(), mediaType);
 						} else {
 							return new DirectoryInfo(siteArtifactPath, siteArtifact.lastModified(), null);
 						}

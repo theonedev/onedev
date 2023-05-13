@@ -346,6 +346,12 @@ public class OneDev extends AbstractPlugin implements Serializable, Runnable {
 		}		
 	}
 
+	public static File getIndexDir() {
+		File indexDir = new File(Bootstrap.getSiteDir(), "index");
+		FileUtils.createDir(indexDir);
+		return indexDir;
+	}
+	
 	public static File getAssetsDir() {
 		return new File(Bootstrap.getSiteDir(), "assets");
 	}

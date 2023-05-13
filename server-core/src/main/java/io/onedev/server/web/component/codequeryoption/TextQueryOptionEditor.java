@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.codequeryoption;
 
-import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.search.code.query.TextQueryOption;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
@@ -18,7 +17,7 @@ import org.apache.wicket.validation.IValidationError;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class TextQueryOptionPanel extends FormComponentPanel<TextQueryOption> {
+public class TextQueryOptionEditor extends FormComponentPanel<TextQueryOption> {
 	
 	private TextField<String> term;
 	
@@ -30,7 +29,7 @@ public class TextQueryOptionPanel extends FormComponentPanel<TextQueryOption> {
 	
 	private TextField<String> fileNames;
 	
-	public TextQueryOptionPanel(String id, IModel<TextQueryOption> model) {
+	public TextQueryOptionEditor(String id, IModel<TextQueryOption> model) {
 		super(id, model);
 	}
 
@@ -42,17 +41,17 @@ public class TextQueryOptionPanel extends FormComponentPanel<TextQueryOption> {
 		WebMarkupContainer termContainer = new WebMarkupContainer("term");
 		add(termContainer);
 		term = new TextField<>("term", Model.of(option.getTerm()));
-		term.setRequired(true).setLabel(Model.of("Text"));
+		term.setRequired(true).setLabel(Model.of("Search for"));
 		term.add(validatable -> {
-			boolean regex = this.regex.getInput()!=null?true:false;
-			BlobQuery query = new TextQuery.Builder()
-					.term(validatable.getValue()).regex(regex)
-					.count(1)
-					.build();
+			boolean regex = this.regex.getInput() != null;
 			try {
 				if (regex)
 					Pattern.compile(validatable.getValue());
-				query.asLuceneQuery();
+				new TextQuery.Builder(validatable.getValue())
+						.regex(regex)
+						.count(1)
+						.build()
+						.asLuceneQuery();
 			} catch (PatternSyntaxException e) {
 				validatable.error((IValidationError) messageSource -> "Invalid PCRE syntax");
 			} catch (TooGeneralQueryException e) {
@@ -82,12 +81,6 @@ public class TextQueryOptionPanel extends FormComponentPanel<TextQueryOption> {
 
 	@Override
 	public void convertInput() {
-		var option = new TextQueryOption();
-		option.setTerm(term.getConvertedInput());
-		option.setRegex(regex.getConvertedInput());
-		option.setWholeWord(wholeWord.getConvertedInput());
-		option.setCaseSensitive(caseSensitive.getConvertedInput());
-		option.setFileNames(fileNames.getConvertedInput());
-		setConvertedInput(option);
+		setConvertedInput(new TextQueryOption(term.getConvertedInput(), regex.getConvertedInput(), wholeWord.getConvertedInput(), caseSensitive.getConvertedInput(), fileNames.getConvertedInput()));
 	}
 }

@@ -2,13 +2,12 @@ package io.onedev.server.infomanager;
 
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.cluster.ClusterTask;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.ActiveServerChanged;
+import io.onedev.server.event.project.ProjectDeleted;
 import io.onedev.server.event.project.pullrequest.PullRequestOpened;
 import io.onedev.server.event.project.pullrequest.PullRequestUpdated;
 import io.onedev.server.event.system.SystemStarted;
@@ -64,15 +63,12 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
-	private final ClusterManager clusterManager;
-	
 	@Inject
 	public DefaultPullRequestInfoManager(ProjectManager projectManager, PullRequestUpdateManager pullRequestUpdateManager, 
-										 BatchWorkManager batchWorkManager, ClusterManager clusterManager) {
+										 BatchWorkManager batchWorkManager) {
 		this.projectManager = projectManager;
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.batchWorkManager = batchWorkManager;
-		this.clusterManager = clusterManager;
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {
@@ -164,14 +160,9 @@ public class DefaultPullRequestInfoManager extends AbstractMultiEnvironmentManag
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		var localServer = clusterManager.getLocalServerAddress();
-		for (var entry: projectManager.getActiveServers().entrySet()) {
-			var projectId = entry.getKey();
-			var activeServer = entry.getValue();
-			if (localServer.equals(activeServer)) {
-				checkVersion(getEnvDir(projectId.toString()));
-				batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
-			}
+		for (var projectId: projectManager.getActiveIds()) {
+			checkVersion(getEnvDir(projectId.toString()));
+			batchWorkManager.submit(getBatchWorker(projectId), new Prioritized(PRIORITY));
 		}
 	}
 	

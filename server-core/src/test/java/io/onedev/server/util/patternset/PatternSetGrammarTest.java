@@ -1,10 +1,9 @@
 package io.onedev.server.util.patternset;
 
-import static org.junit.Assert.*;
-
+import com.google.common.collect.Sets;
 import org.junit.Test;
 
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
 
 public class PatternSetGrammarTest {
 

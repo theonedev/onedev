@@ -13,8 +13,6 @@ public interface CodeIndexManager {
 	
 	boolean isIndexed(Long projectId, ObjectId commitId);
 	
-	String getIndexVersion();
-	
 	String getIndexVersion(@Nullable SymbolExtractor<Symbol> extractor);
 	
 }

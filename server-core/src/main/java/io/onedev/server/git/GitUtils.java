@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.*;
 import com.google.common.collect.Iterables;
 import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.command.IsAncestorCommand;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
@@ -536,6 +537,13 @@ public class GitUtils {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static String getBlobName(String blobPath) {
+		String blobName = blobPath;
+		if (blobPath.indexOf('/') != -1)
+			blobName = StringUtils.substringAfterLast(blobPath, "/");
+		return blobName;
 	}
 
 	public static void sign(ObjectBuilder object, PGPSecretKeyRing signingKey) {

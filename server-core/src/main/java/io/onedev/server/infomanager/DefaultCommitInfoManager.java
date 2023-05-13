@@ -444,7 +444,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);
 
 		Repository repository = projectManager.getRepository(project.getId());
-		PatternSet filePatterns = project.findCodeAnalysisPatterns();
+		PatternSet filePatterns = PatternSet.parse(project.findCodeAnalysisPatterns());
 
 		ObjectId lastCommitId = env.computeInTransaction(txn -> {
 			ObjectId innerLastCommitId;
@@ -624,7 +624,7 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 			return null;
 		});
 
-		PatternSet filePatterns = project.findCodeAnalysisPatterns();
+		PatternSet filePatterns = PatternSet.parse(project.findCodeAnalysisPatterns());
 		if (lastCommitId == null) {
 			env.executeInTransaction(txn -> {
 				Map<Integer, Map<String, Integer>> lineStats = new HashMap<>();
@@ -1049,14 +1049,9 @@ public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		var localServer = clusterManager.getLocalServerAddress();
-		for (var entry: projectManager.getActiveServers().entrySet()) {
-			var projectId = entry.getKey();
-			var activeServer = entry.getValue();
-			if (localServer.equals(activeServer)) {
-				checkVersion(getEnvDir(projectId.toString()));
-				collect(projectId);
-			}
+		for (var projectId: projectManager.getActiveIds()) {
+			checkVersion(getEnvDir(projectId.toString()));
+			collect(projectId);
 		}
 	}
 
