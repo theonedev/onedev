@@ -292,7 +292,8 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return "Displaying first " + context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines().size() 
+				var text = context.getProject().getBlob(context.getBlobIdent(), true).getText();
+				return "Displaying first " + text.getLines().size()
 						+ " lines as file is too large";
 			}
 			
@@ -301,7 +302,8 @@ public abstract class BlobViewPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(context.getProject().getBlob(context.getBlobIdent(), true).isPartial());
+				var blob = context.getProject().getBlob(context.getBlobIdent(), true);
+				setVisible(blob.getText() != null && blob.isPartial());
 			}
 			
 		});
