@@ -312,7 +312,11 @@ public class ProjectTagsPage extends ProjectPage {
 				RefFacade ref = rowModel.getObject();
 				String tagName = GitUtils.ref2tag(ref.getName());
 				
-				BlobIdent blobIdent = new BlobIdent(tagName, null, FileMode.TREE.getBits());
+				BlobIdent blobIdent;
+				if (getProject().getBranchRef(tagName) != null)
+					blobIdent = new BlobIdent(ref.getName(), null, FileMode.TREE.getBits());
+				else
+					blobIdent = new BlobIdent(tagName, null, FileMode.TREE.getBits());
 				ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 				AbstractLink link = new ViewStateAwarePageLink<Void>("tagLink", 
 						ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), state));
@@ -385,7 +389,7 @@ public class ProjectTagsPage extends ProjectPage {
 
 					@Override
 					protected String getRevision() {
-						return tagName;
+						return ref.getName();
 					}
 					
 				});

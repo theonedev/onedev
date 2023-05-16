@@ -120,7 +120,12 @@ public abstract class BuildSidePanel extends Panel {
 		String branch = getBuild().getBranch();
 		
 		ProjectBlobPage.State state = new ProjectBlobPage.State();
-		state.blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
+		
+		var revision = branch;
+		if (revision != null && getProject().getTagRef(revision) != null)
+			revision = GitUtils.branch2ref(revision);
+		
+		state.blobIdent = new BlobIdent(revision, null, FileMode.TREE.getBits());
 		PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 		
 		Link<Void> branchLink = new BookmarkablePageLink<Void>("branch", ProjectBlobPage.class, params) {
@@ -140,9 +145,13 @@ public abstract class BuildSidePanel extends Panel {
 		general.add(branchLink);
 		
 		String tag = getBuild().getTag();
+
+		revision = tag;
+		if (revision != null && getProject().getBranchRef(revision) != null)
+			revision = GitUtils.tag2ref(revision);
 		
 		state = new ProjectBlobPage.State();
-		state.blobIdent = new BlobIdent(tag, null, FileMode.TREE.getBits());
+		state.blobIdent = new BlobIdent(revision, null, FileMode.TREE.getBits());
 		params = ProjectBlobPage.paramsOf(getProject(), state);
 		
 		Link<Void> tagLink = new BookmarkablePageLink<Void>("tag", ProjectBlobPage.class, params) {

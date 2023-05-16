@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -1075,16 +1076,22 @@ public abstract class BuildListPanel extends Panel {
 							cellItem.add(fragment);
 						} else if (build.getBranch() != null) {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+							var revision = build.getBranch();
+							if (getProject().getTagRef(revision) != null)
+								revision = GitUtils.branch2ref(revision);
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(),
-									new BlobIdent(build.getBranch(), null, FileMode.TREE.getBits()));
+									new BlobIdent(revision, null, FileMode.TREE.getBits()));
 							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
 							link.add(new Label("label", "branch " + build.getBranch()));
 							fragment.add(link);
 							cellItem.add(fragment);
 						} else if (build.getTag() != null) {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+							var revision = build.getTag();
+							if (getProject().getBranchRef(revision) != null)
+								revision = GitUtils.tag2ref(revision);
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(),
-									new BlobIdent(build.getTag(), null, FileMode.TREE.getBits()));
+									new BlobIdent(revision, null, FileMode.TREE.getBits()));
 							Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
 							link.add(new Label("label", "tag " + build.getTag()));
 							fragment.add(link);

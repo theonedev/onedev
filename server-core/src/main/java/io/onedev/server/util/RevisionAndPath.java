@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 
@@ -48,7 +49,10 @@ public class RevisionAndPath implements Serializable {
 			throw new ObjectNotFoundException("Revision/path not found: " + revisionBuilder.toString());
 		} else {
 			revision = project.getDefaultBranch();
-			return new RevisionAndPath(revision, path);
+			if (project.getTagRef(revision) != null)
+				return new RevisionAndPath(GitUtils.branch2ref(revision), path);
+			else
+				return new RevisionAndPath(revision, path);				
 		}
 	}
 

@@ -53,6 +53,10 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 
+import static io.onedev.server.git.GitUtils.branch2ref;
+import static io.onedev.server.git.GitUtils.tag2ref;
+import static org.eclipse.jgit.lib.Constants.R_REFS;
+
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
 
@@ -363,13 +367,16 @@ public abstract class RevisionSelector extends Panel {
 			label += " from " + HtmlEscape.escapeHtml5(revision);
 			link.add(new Label("label", label).setEscapeModelStrings(false));
 			icon = "plus";
-		} else if (ref.equals(revision)) {
-			link.add(new Label("label", ref));
-			icon = "tick";
 		} else {
-			link.add(new Label("label", ref));
-			icon = null;
-		}
+			if (branchesActive && revision != null && branch2ref(ref).equals(branch2ref(revision))
+					|| !branchesActive && revision != null && tag2ref(ref).equals(tag2ref(revision))) {
+				link.add(new Label("label", ref));
+				icon = "tick";
+			} else {
+				link.add(new Label("label", ref));
+				icon = null;
+			}
+		} 
 		if (icon != null)
 			link.add(new SpriteImage("icon", icon));
 		else
@@ -432,6 +439,14 @@ public abstract class RevisionSelector extends Panel {
 	}
 	
 	private void selectRevision(AjaxRequestTarget target, String revision) {
+		if (!revision.startsWith(R_REFS)) {
+			var project = projectModel.getObject();
+			if (branchesActive && project.getTagRef(revision) != null)
+				revision = branch2ref(revision);
+			if (!branchesActive && project.getBranchRef(revision) != null)
+				revision = tag2ref(revision);
+		}
+		
 		try {
 			if (projectModel.getObject().getRevCommit(revision, false) != null) {
 				onSelect(target, revision);

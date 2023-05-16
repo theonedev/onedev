@@ -50,6 +50,9 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.eclipse.jgit.lib.Constants.R_HEADS;
+import static org.eclipse.jgit.lib.Constants.R_TAGS;
+
 public class GitUtils {
 
 	public static final int SHORT_SHA_LENGTH = 8;
@@ -75,7 +78,7 @@ public class GitUtils {
 			Ref headRef = repository.findRef("HEAD");
 			if (headRef != null
 					&& headRef.isSymbolic()
-					&& headRef.getTarget().getName().startsWith(Constants.R_HEADS)
+					&& headRef.getTarget().getName().startsWith(R_HEADS)
 					&& headRef.getObjectId() != null) {
 				return Repository.shortenRefName(headRef.getTarget().getName());
 			} else {
@@ -141,7 +144,7 @@ public class GitUtils {
 	public static RevCommit getLastCommit(Repository repository) {
 		RevCommit lastCommit = null;
 		try (RevWalk revWalk = new RevWalk(repository)) {
-			for (Ref ref: repository.getRefDatabase().getRefsByPrefix(Constants.R_HEADS)) {
+			for (Ref ref: repository.getRefDatabase().getRefsByPrefix(R_HEADS)) {
 				if (ref.getObjectId() != null) {
 					RevCommit commit =  parseCommit(revWalk, ref.getObjectId());
 					if (commit != null && (lastCommit == null || lastCommit.getCommitTime() < commit.getCommitTime())) {
@@ -237,14 +240,17 @@ public class GitUtils {
 	 *         represent a branch
 	 */
 	public static @Nullable String ref2branch(String refName) {
-		if (refName.startsWith(Constants.R_HEADS))
-			return refName.substring(Constants.R_HEADS.length());
+		if (refName.startsWith(R_HEADS))
+			return refName.substring(R_HEADS.length());
 		else
 			return null;
 	}
 
 	public static String branch2ref(String branch) {
-		return Constants.R_HEADS + branch;
+		if (!branch.startsWith(R_HEADS))
+			return R_HEADS + branch;
+		else 
+			return branch;
 	}
 
 	/**
@@ -255,14 +261,17 @@ public class GitUtils {
 	 *         a tag
 	 */
 	public static @Nullable String ref2tag(String refName) {
-		if (refName.startsWith(Constants.R_TAGS))
-			return refName.substring(Constants.R_TAGS.length());
+		if (refName.startsWith(R_TAGS))
+			return refName.substring(R_TAGS.length());
 		else
 			return null;
 	}
 
 	public static String tag2ref(String tag) {
-		return Constants.R_TAGS + tag;
+		if (!tag.startsWith(R_TAGS))
+			return R_TAGS + tag;
+		else 
+			return tag;
 	}
 
 	public static BlobIdent getOldBlobIdent(DiffEntryFacade diffEntry, String oldRev) {

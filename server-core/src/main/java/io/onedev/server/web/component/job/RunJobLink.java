@@ -114,6 +114,11 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 					}
 
 					@Override
+					protected Project getProject() {
+						return RunJobLink.this.getProject();
+					}
+
+					@Override
 					public List<String> getInputNames() {
 						return new ArrayList<>(job.getParamSpecMap().keySet());
 					}

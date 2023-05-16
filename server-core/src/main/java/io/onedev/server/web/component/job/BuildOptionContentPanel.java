@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import io.onedev.server.model.Project;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -80,12 +81,24 @@ abstract class BuildOptionContentPanel extends Panel {
 					}
 					
 				}));
-				
-				String branch = GitUtils.ref2branch(refName);
-				if (branch != null)
-					item.add(new Label("label", branch));
-				else
-					item.add(new Label("label", GitUtils.ref2tag(refName)));
+
+				var branch = GitUtils.ref2branch(refName);
+				if (branch != null) {
+ 					if (getProject().getTagRef(branch) != null)
+						item.add(new Label("label", refName));
+					 else
+						item.add(new Label("label", branch));						 
+				} else {
+					var tag = GitUtils.ref2tag(refName);
+					if (tag != null) {
+						if (getProject().getBranchRef(tag) != null)
+							item.add(new Label("label", refName));
+						else
+							item.add(new Label("label", tag));
+					} else {
+						item.add(new Label("label", refName));
+					}
+				}
 			}
 
 			@Override
@@ -137,4 +150,7 @@ abstract class BuildOptionContentPanel extends Panel {
 			Serializable populatedParamBean);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
+	
+	protected abstract Project getProject();
+	
 }

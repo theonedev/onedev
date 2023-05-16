@@ -437,8 +437,11 @@ public class ProjectBranchesPage extends ProjectPage {
 				fragment.setRenderBodyOnly(true);
 				RefFacade ref = rowModel.getObject();
 				String branch = GitUtils.ref2branch(ref.getName());
-				
-				BlobIdent blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
+				BlobIdent blobIdent;
+				if (getProject().getTagRef(branch) != null)
+					blobIdent = new BlobIdent(ref.getName(), null, FileMode.TREE.getBits());
+				else
+					blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
 				ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 				AbstractLink link = new ViewStateAwarePageLink<Void>("branchLink", 
 						ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), state));
@@ -516,7 +519,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 					@Override
 					protected String getRevision() {
-						return branch;
+						return ref.getName();
 					}
 					
 				});

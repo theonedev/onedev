@@ -11,6 +11,7 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.CodeCommentStatusChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.model.*;
 import io.onedev.server.model.support.CompareContext;
@@ -178,12 +179,16 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 
 	public RevisionComparePage(PageParameters params) {
 		super(params);
+
+		var defaultRevision = getProject().getDefaultBranch();
+		if (defaultRevision != null && getProject().getTagRef(defaultRevision) != null)
+			defaultRevision = GitUtils.branch2ref(defaultRevision);
 		
 		String str = params.get(PARAM_LEFT).toString();
 		if (str != null) 
 			state.leftSide = new ProjectAndRevision(str);
-		else if (getProject().getDefaultBranch() != null) 
-			state.leftSide = new ProjectAndRevision(getProject(), getProject().getDefaultBranch());
+		else if (defaultRevision != null) 
+			state.leftSide = new ProjectAndRevision(getProject(), defaultRevision);
 		else
 			state.leftSide = new ProjectAndRevision(getProject(), null);
 		
@@ -193,8 +198,8 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		str = params.get(PARAM_RIGHT).toString();
 		if (str != null) 
 			state.rightSide = new ProjectAndRevision(str);
-		else if (getProject().getDefaultBranch() != null) 
-			state.rightSide = new ProjectAndRevision(getProject(), getProject().getDefaultBranch());
+		else if (defaultRevision != null) 
+			state.rightSide = new ProjectAndRevision(getProject(), defaultRevision);
 		else
 			state.rightSide = new ProjectAndRevision(getProject(), null);
 		
