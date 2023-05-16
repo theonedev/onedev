@@ -64,7 +64,7 @@ public class SymbolQueryOption implements QueryOption {
 		var matches = new ArrayList<Match>();
 		for (Symbol symbol: symbols) {
 			if (matches.size() < count) {
-				if ((primary==null || primary.booleanValue() == symbol.isPrimary())
+				if ((primary == null || primary.booleanValue() == symbol.isPrimary())
 						&& symbol.getName() != null
 						&& symbol.isSearchable()
 						&& (local == null || local.booleanValue() == symbol.isLocalInHierarchy())) {

@@ -20,6 +20,7 @@ import org.eclipse.jgit.lib.ObjectLoader;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,8 +32,10 @@ import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
 public class TextQueryOption implements QueryOption {
 	
 	private static final long serialVersionUID = 1L;
+	
+	private static final int MAX_LINE_LEN = 1024;
 
-	private static int MAX_LINE_LEN = 1024;
+	private static final int CONTEXT_SIZE = 3;
 	
 	private final String term;
 
@@ -116,13 +119,14 @@ public class TextQueryOption implements QueryOption {
 				Pattern pattern = getPattern();
 				if (pattern != null) {
 					int lineNo = 0;
-					for (String line: Splitter.on('\n').split(content)) {
+					var lines = Splitter.on('\n').splitToList(content);
+					for (String line: lines) {
 						if (line.length() <= MAX_LINE_LEN) {
 							Matcher matcher = pattern.matcher(line);
 							while (matcher.find()) {
 								LinearRange range = new LinearRange(matcher.start(), matcher.end());
 								PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
-								matches.add(new Match(line, position));
+								matches.add(new Match(line, position, getPrefixLines(lines, lineNo), getSuffixLines(lines, lineNo)));
 								if (matches.size() >= count)
 									break;
 							}
@@ -138,8 +142,9 @@ public class TextQueryOption implements QueryOption {
 					else
 						normalizedTerm = term;
 
+					var lines = Splitter.on('\n').splitToList(content);
 					int lineNo = 0;
-					for (String line: Splitter.on('\n').split(content)) {
+					for (String line: lines) {
 						if (line.length() <= MAX_LINE_LEN) {
 							String normalizedLine;
 							if (!caseSensitive)
@@ -166,14 +171,14 @@ public class TextQueryOption implements QueryOption {
 									if (!isWordChar(beforeChar) && !isWordChar(afterChar)) {
 										LinearRange range = new LinearRange(start, end);
 										PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
-										matches.add(new Match(line, position));
+										matches.add(new Match(line, position, getPrefixLines(lines, lineNo), getSuffixLines(lines, lineNo)));
 										if (matches.size() >= count)
 											break;
 									}
 								} else {
 									LinearRange range = new LinearRange(start, end);
 									PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
-									matches.add(new Match(line, position));
+									matches.add(new Match(line, position, getPrefixLines(lines, lineNo), getSuffixLines(lines, lineNo)));
 									if (matches.size() >= count)
 										break;
 								}
@@ -215,6 +220,27 @@ public class TextQueryOption implements QueryOption {
 		return new TextQueryOptionEditor(componentId, Model.of(this));
 	}
 
+	private List<String> getPrefixLines(List<String> lines, int index) {
+		var prefixLines = new ArrayList<String>();
+		for (int i=index-1; i>=0; i--) {
+			prefixLines.add(lines.get(i));
+			if (prefixLines.size() >= CONTEXT_SIZE)
+				break;
+		}
+		Collections.reverse(prefixLines);
+		return prefixLines;
+	}
+
+	private List<String> getSuffixLines(List<String> lines, int index) {
+		var suffixLines = new ArrayList<String>();
+		for (int i=index+1; i<lines.size(); i++) {
+			suffixLines.add(lines.get(i));
+			if (suffixLines.size() >= CONTEXT_SIZE)
+				break;
+		}
+		return suffixLines;
+	}
+
 	public static class Match implements Serializable {
 
 		private static final long serialVersionUID = 1L;
@@ -222,10 +248,17 @@ public class TextQueryOption implements QueryOption {
 		private final String line;
 		
 		private final PlanarRange position;
+		
+		private final List<String> prefixLines;
+		
+		private final List<String> suffixLines;
 
-		public Match(String line, @Nullable PlanarRange position) {
+		public Match(String line, @Nullable PlanarRange position, 
+					 List<String> prefixLines, List<String> suffixLines) {
 			this.line = line;
 			this.position = position;
+			this.prefixLines = prefixLines;
+			this.suffixLines = suffixLines;
 		}
 
 		public String getLine() {

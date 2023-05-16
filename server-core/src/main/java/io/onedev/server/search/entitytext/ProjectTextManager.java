@@ -1,6 +1,5 @@
 package io.onedev.server.search.entitytext;
 
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.WordUtils;
@@ -19,6 +18,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.WriterRunnable;
 import io.onedev.server.util.concurrent.BatchWorkManager;
 import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
@@ -472,11 +472,5 @@ public abstract class ProjectTextManager<T extends ProjectBelonging> implements 
 		}
 
 	}
-	
-	protected static interface WriterRunnable {
 
-		void run(IndexWriter writer) throws IOException;
-
-	}
-	
 }
