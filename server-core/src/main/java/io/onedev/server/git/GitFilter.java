@@ -118,7 +118,7 @@ public class GitFilter implements Filter {
 	}
 	
 	protected void processPack(final HttpServletRequest request, final HttpServletResponse response) 
-			throws ServletException, IOException, InterruptedException, ExecutionException {
+			throws IOException, InterruptedException, ExecutionException {
 		Long userId = SecurityUtils.getUserId();
 		boolean clusterAccess = userId.equals(User.SYSTEM_ID);
 		
@@ -139,14 +139,14 @@ public class GitFilter implements Filter {
 		InputStream stdin = new InputStreamWrapper(ServletUtils.getInputStream(request)) {
 
 			@Override
-			public void close() throws IOException {
+			public void close() {
 			}
 			
 		};
 		OutputStream stdout = new OutputStreamWrapper(response.getOutputStream()) {
 			
 			@Override
-			public void close() throws IOException {
+			public void close() {
 			}
 			
 		};

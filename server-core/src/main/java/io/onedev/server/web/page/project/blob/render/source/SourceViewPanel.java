@@ -833,7 +833,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent blobIdent = new BlobIdent(
 						getRevision(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
-				context.onSelect(target, blobIdent, BlobRenderer.getSourcePosition(hit.getTokenPos()));
+				context.onSelect(target, blobIdent, BlobRenderer.getSourcePosition(hit.getHitPos()));
 			}
 
 			@Override

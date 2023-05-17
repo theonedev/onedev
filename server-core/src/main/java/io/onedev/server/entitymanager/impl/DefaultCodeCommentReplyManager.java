@@ -1,8 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.event.ListenerRegistry;
@@ -17,10 +14,13 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 @Singleton
 public class DefaultCodeCommentReplyManager extends BaseEntityManager<CodeCommentReply> 
 		implements CodeCommentReplyManager {
-
+	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject

@@ -1,6 +1,7 @@
 package io.onedev.server.search.code;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractor;
 import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
@@ -15,6 +16,7 @@ import io.onedev.server.event.ListenerRegistry;
 import io.onedev.server.event.project.CommitIndexed;
 import io.onedev.server.event.project.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -56,8 +58,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.onedev.server.search.code.FieldConstants.*;
-import static io.onedev.server.search.code.IndexConstants.MAX_INDEXABLE_SIZE;
-import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
+import static io.onedev.server.search.code.IndexConstants.*;
 
 @Singleton
 public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
@@ -68,7 +69,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 	
 	private static final int BACKEND_INDEXING_PRIORITY = 50;
 	
-	private static final int DATA_VERSION = 6;
+	private static final int DATA_VERSION = 7;
 	
 	private final BatchWorkManager batchWorkManager;
 	
@@ -226,18 +227,19 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.NO));
 		document.add(new BinaryDocValuesField(BLOB_PATH.name(), new BytesRef(blobPath.getBytes(StandardCharsets.UTF_8))));
 		
-		String blobName = blobPath;
-		if (blobPath.indexOf('/') != -1) 
-			blobName = StringUtils.substringAfterLast(blobPath, "/");
+		String blobName = GitUtils.getBlobName(blobPath);
 		
 		document.add(new StringField(BLOB_NAME.name(), blobName.toLowerCase(), Store.NO));
 		
 		ObjectLoader objectLoader = repository.open(blobId);
-		if (objectLoader.getSize() <= MAX_INDEXABLE_SIZE) {
+		if (objectLoader.getSize() <= MAX_INDEXABLE_BLOB_SIZE) {
 			byte[] bytes = objectLoader.getCachedBytes();
 			String content = ContentDetector.convertToText(bytes, blobName);
 			if (content != null) {
-				document.add(new TextField(BLOB_TEXT.name(), content, Store.NO));
+				for (var line: Splitter.on('\n').split(content)) {
+					if (line.length() <= MAX_INDEXABLE_LINE_LEN)
+						document.add(new TextField(BLOB_TEXT.name(), line, Store.NO));
+				}
 				
 				if (extractor != null) {
 					List<Symbol> symbols = null;
@@ -298,10 +300,11 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 		writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		try (IndexWriter writer = new IndexWriter(directory, writerConfig)) {
 			try {
-				logger.debug("Indexing commit (project: {}, commit: {})", project.getPath(), commit.getName());
+				logger.debug("Indexing commit (project: {}, commit: {})...", project.getPath(), commit.getName());
 				IndexResult indexResult = index(projectManager.getRepository(project.getId()), 
 						commit, writer, searcher, PatternSet.parse(project.findCodeAnalysisPatterns()));
 				writer.commit();
+				logger.debug("Commit indexed (project: {}, commit: {})", project.getPath(), commit.getName());
 				return indexResult;
 			} catch (Exception e) {
 				writer.rollback();
@@ -381,7 +384,7 @@ public class DefaultCodeIndexManager implements CodeIndexManager, Serializable {
 			batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
 		}
 	}
-	
+
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {

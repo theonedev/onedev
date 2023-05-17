@@ -253,7 +253,7 @@ public abstract class QuickSearchPanel extends Panel {
 				BlobIdent blobIdent = new BlobIdent(revisionModel.getObject(), hit.getBlobPath(), 
 						FileMode.REGULAR_FILE.getBits());
 				ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-				state.position = BlobRenderer.getSourcePosition(hit.getTokenPos());
+				state.position = BlobRenderer.getSourcePosition(hit.getHitPos());
 				PageParameters params = ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 				CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, params);
 				link.add(AttributeAppender.replace("href", url.toString()));

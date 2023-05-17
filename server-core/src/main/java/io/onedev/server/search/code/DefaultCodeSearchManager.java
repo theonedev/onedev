@@ -104,8 +104,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 	}
 	
 	@Override
-	public List<QueryHit> search(Project project, ObjectId commitId, final BlobQuery query) 
-			throws InterruptedException {
+	public List<QueryHit> search(Project project, ObjectId commitId, final BlobQuery query) {
 		Long projectId = project.getId();
 		return projectManager.runOnActiveServer(projectId, new ClusterTask<List<QueryHit>>() {
 
@@ -140,7 +139,7 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 							
 							@Override
 							public void collect(int doc) throws IOException {
-								if (hits.size() < query.getCount() && !Thread.currentThread().isInterrupted()) {
+								if (hits.size() < query.getCount()) {
 									Preconditions.checkState(blobPathValues.advanceExact(doc));
 									String blobPath = blobPathValues.binaryValue().utf8ToString();
 									
@@ -150,6 +149,8 @@ public class DefaultCodeSearchManager implements CodeSearchManager, Serializable
 											query.collect(searcher, treeWalk, hits);
 										checkedBlobPaths.add(blobPath);
 									}
+								} else {
+									throw new CollectionTerminatedException();
 								}
 							}
 	

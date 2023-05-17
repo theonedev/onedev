@@ -159,7 +159,9 @@ import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.concurrent.*;
 
 /**
@@ -288,6 +290,9 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestLabelManager.class).to(DefaultPullRequestLabelManager.class);
 		bind(ClusterManager.class).to(DefaultClusterManager.class);
 		bind(StorageManager.class).to(DefaultStorageManager.class);
+		bind(IssueTouchManager.class).to(DefaultIssueTouchManager.class);
+		bind(PullRequestTouchManager.class).to(DefaultPullRequestTouchManager.class);
+		bind(CodeCommentTouchManager.class).to(DefaultCodeCommentTouchManager.class);
 		
 		bind(WebHookManager.class);
 		

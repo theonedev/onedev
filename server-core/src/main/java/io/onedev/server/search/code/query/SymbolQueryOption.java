@@ -59,7 +59,7 @@ public class SymbolQueryOption implements QueryOption {
 	public List<Match> matches(String blobPath, List<Symbol> symbols, @Nullable String excludeTerm, 
 							   @Nullable String excludeBlobPath, @Nullable Boolean primary, 
 							   @Nullable Boolean local, int count) {
-		Preconditions.checkNotNull(term != null);
+		Preconditions.checkNotNull(term);
 		
 		var matches = new ArrayList<Match>();
 		for (Symbol symbol: symbols) {
@@ -103,7 +103,8 @@ public class SymbolQueryOption implements QueryOption {
 	}
 
 	public void applyConstraints(BooleanQuery.Builder builder, @Nullable Boolean primary) {
-		Preconditions.checkNotNull(term != null);
+		Preconditions.checkNotNull(term);
+		
 		if (fileNames != null) {
 			BooleanQuery.Builder subQueryBuilder = new BooleanQuery.Builder();
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))

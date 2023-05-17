@@ -277,13 +277,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 					.caseSensitive(true)
 					.count(maxQueryEntries)
 					.build();
-			try {
-				CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
-				queryHits = searchManager.search(projectModel.getObject(), getProject().getRevCommit(resolvedRevision, true), 
-						query);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}								
+			CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
+			queryHits = searchManager.search(projectModel.getObject(), 
+					getProject().getRevCommit(resolvedRevision, true), query);
 		} else {
 			queryHits = null;
 		}
@@ -665,7 +661,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent selected = new BlobIdent(state.blobIdent.revision, hit.getBlobPath(), 
 						FileMode.REGULAR_FILE.getBits()); 
-				ProjectBlobPage.this.onSelect(target, selected, BlobRenderer.getSourcePosition(hit.getTokenPos()));
+				ProjectBlobPage.this.onSelect(target, selected, BlobRenderer.getSourcePosition(hit.getHitPos()));
 				modal.close();
 			}
 			

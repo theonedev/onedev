@@ -25,7 +25,7 @@ public class WildcardUtils {
      * 
      * @param pattern
      * 			the pattern to match against. Must not be null
-     * @param str     
+     * @param path     
      * 			the path to match, as a String. Must not be null
      *
      * @return 
@@ -44,40 +44,40 @@ public class WildcardUtils {
      *
      * @param pattern 
      * 			the pattern to match against. Must not be null.
-     * @param str     
+     * @param string     
      * 			the string which must be matched against the pattern. Must not be null.
      * @return 
      * 			true if the string matches against the pattern, or false otherwise.
      */
-    public static boolean matchString(String pattern, String str) {
-    	return STRING_MATCHER.matches(pattern, str);
+    public static boolean matchString(String pattern, String string) {
+    	return STRING_MATCHER.matches(pattern, string);
     }
     
-    private static int indexOf(String str, String substr, int index) {
-        if (index >= str.length()) {
-            return (substr.length() == 0 ? str.length(): -1);
+    private static int indexOf(String string, String substring, int index) {
+        if (index >= string.length()) {
+            return (substring.length() == 0 ? string.length(): -1);
         }
         if (index < 0) {
         	index = 0;
         }
-        if (substr.length() == 0) {
+        if (substring.length() == 0) {
             return index;
         }
 
-        char first = substr.charAt(0);
-        int max = (str.length() - substr.length());
+        char first = substring.charAt(0);
+        int max = (string.length() - substring.length());
 
         for (int i = index; i <= max; i++) {
             /* Look for first character. */
-            if ('?' != first && str.charAt(i) != first) {
-                while (++i <= max && '?' != first && str.charAt(i) != first);
+            if ('?' != first && string.charAt(i) != first) {
+                while (++i <= max && '?' != first && string.charAt(i) != first);
             }
 
             /* Found first character, now look at the rest of v2 */
             if (i <= max) {
                 int j = i + 1;
-                int end = j + substr.length() - 1;
-                for (int k = 1; j < end && ('?' == substr.charAt(k) || str.charAt(j) == substr.charAt(k)); j++, k++);
+                int end = j + substring.length() - 1;
+                for (int k = 1; j < end && ('?' == substring.charAt(k) || string.charAt(j) == substring.charAt(k)); j++, k++);
 
                 if (j == end) {
                     /* Found whole string. */
@@ -292,14 +292,14 @@ public class WildcardUtils {
     }
     
     @Nullable
-    public static LinearRange rangeOfMatch(String pattern, String str) {
+    public static LinearRange rangeOfMatch(String pattern, String string) {
 		List<LinearRange> literalRanges = getLiteralRanges(pattern);
 
 		int first = -1;
 		int pos = 0;
 		for (LinearRange literalRange: literalRanges) {
 			String literal = pattern.substring(literalRange.getFrom(), literalRange.getTo());
-			int index = indexOf(str, literal, pos);
+			int index = indexOf(string, literal, pos);
 			if (index != -1) {
 				if (first == -1)
 					first = index;

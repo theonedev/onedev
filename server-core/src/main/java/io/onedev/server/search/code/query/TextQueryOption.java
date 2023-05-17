@@ -20,22 +20,18 @@ import org.eclipse.jgit.lib.ObjectLoader;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.onedev.server.search.code.FieldConstants.BLOB_NAME;
 import static io.onedev.server.search.code.FieldConstants.BLOB_TEXT;
+import static io.onedev.server.search.code.IndexConstants.MAX_INDEXABLE_LINE_LEN;
 import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
 
 public class TextQueryOption implements QueryOption {
 	
 	private static final long serialVersionUID = 1L;
-	
-	private static final int MAX_LINE_LEN = 1024;
-
-	private static final int CONTEXT_SIZE = 3;
 	
 	private final String term;
 
@@ -110,23 +106,22 @@ public class TextQueryOption implements QueryOption {
 	}
 	
 	public List<Match> matches(String blobPath, ObjectLoader objectLoader, int count) {
-		Preconditions.checkNotNull(term != null);
+		Preconditions.checkNotNull(term);
 		
 		var matches = new ArrayList<Match>();
-		if (objectLoader.getSize() <= IndexConstants.MAX_INDEXABLE_SIZE) {
+		if (objectLoader.getSize() <= IndexConstants.MAX_INDEXABLE_BLOB_SIZE) {
 			String content = ContentDetector.convertToText(objectLoader.getCachedBytes(), blobPath);
 			if (content != null) {
 				Pattern pattern = getPattern();
 				if (pattern != null) {
 					int lineNo = 0;
-					var lines = Splitter.on('\n').splitToList(content);
-					for (String line: lines) {
-						if (line.length() <= MAX_LINE_LEN) {
+					for (String line: Splitter.on('\n').split(content)) {
+						if (line.length() <= MAX_INDEXABLE_LINE_LEN) {
 							Matcher matcher = pattern.matcher(line);
 							while (matcher.find()) {
 								LinearRange range = new LinearRange(matcher.start(), matcher.end());
 								PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
-								matches.add(new Match(line, position, getPrefixLines(lines, lineNo), getSuffixLines(lines, lineNo)));
+								matches.add(new Match(line, position));
 								if (matches.size() >= count)
 									break;
 							}
@@ -142,10 +137,9 @@ public class TextQueryOption implements QueryOption {
 					else
 						normalizedTerm = term;
 
-					var lines = Splitter.on('\n').splitToList(content);
 					int lineNo = 0;
-					for (String line: lines) {
-						if (line.length() <= MAX_LINE_LEN) {
+					for (String line: Splitter.on('\n').split(content)) {
+						if (line.length() <= MAX_INDEXABLE_LINE_LEN) {
 							String normalizedLine;
 							if (!caseSensitive)
 								normalizedLine = line.toLowerCase();
@@ -171,14 +165,14 @@ public class TextQueryOption implements QueryOption {
 									if (!isWordChar(beforeChar) && !isWordChar(afterChar)) {
 										LinearRange range = new LinearRange(start, end);
 										PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
-										matches.add(new Match(line, position, getPrefixLines(lines, lineNo), getSuffixLines(lines, lineNo)));
+										matches.add(new Match(line, position));
 										if (matches.size() >= count)
 											break;
 									}
 								} else {
 									LinearRange range = new LinearRange(start, end);
 									PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
-									matches.add(new Match(line, position, getPrefixLines(lines, lineNo), getSuffixLines(lines, lineNo)));
+									matches.add(new Match(line, position));
 									if (matches.size() >= count)
 										break;
 								}
@@ -196,7 +190,7 @@ public class TextQueryOption implements QueryOption {
 	}
 
 	public void applyConstraints(BooleanQuery.Builder builder) {
-		Preconditions.checkNotNull(term != null);
+		Preconditions.checkNotNull(term);
 		
 		if (fileNames != null) {
 			BooleanQuery.Builder subQueryBuilder = new BooleanQuery.Builder();
@@ -220,27 +214,6 @@ public class TextQueryOption implements QueryOption {
 		return new TextQueryOptionEditor(componentId, Model.of(this));
 	}
 
-	private List<String> getPrefixLines(List<String> lines, int index) {
-		var prefixLines = new ArrayList<String>();
-		for (int i=index-1; i>=0; i--) {
-			prefixLines.add(lines.get(i));
-			if (prefixLines.size() >= CONTEXT_SIZE)
-				break;
-		}
-		Collections.reverse(prefixLines);
-		return prefixLines;
-	}
-
-	private List<String> getSuffixLines(List<String> lines, int index) {
-		var suffixLines = new ArrayList<String>();
-		for (int i=index+1; i<lines.size(); i++) {
-			suffixLines.add(lines.get(i));
-			if (suffixLines.size() >= CONTEXT_SIZE)
-				break;
-		}
-		return suffixLines;
-	}
-
 	public static class Match implements Serializable {
 
 		private static final long serialVersionUID = 1L;
@@ -249,23 +222,15 @@ public class TextQueryOption implements QueryOption {
 		
 		private final PlanarRange position;
 		
-		private final List<String> prefixLines;
-		
-		private final List<String> suffixLines;
-
-		public Match(String line, @Nullable PlanarRange position, 
-					 List<String> prefixLines, List<String> suffixLines) {
+		public Match(String line, PlanarRange position) {
 			this.line = line;
 			this.position = position;
-			this.prefixLines = prefixLines;
-			this.suffixLines = suffixLines;
 		}
 
 		public String getLine() {
 			return line;
 		}
 
-		@Nullable
 		public PlanarRange getPosition() {
 			return position;
 		}

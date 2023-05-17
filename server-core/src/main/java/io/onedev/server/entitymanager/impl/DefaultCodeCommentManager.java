@@ -64,7 +64,8 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	private final CommitInfoManager commitInfoManager;
 	
 	@Inject
-	public DefaultCodeCommentManager(Dao dao, ListenerRegistry listenerRegistry, CommitInfoManager commitInfoManager) {
+	public DefaultCodeCommentManager(Dao dao, ListenerRegistry listenerRegistry, 
+									 CommitInfoManager commitInfoManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
 		this.commitInfoManager = commitInfoManager;

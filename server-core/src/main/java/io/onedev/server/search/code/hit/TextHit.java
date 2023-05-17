@@ -27,9 +27,9 @@ public class TextHit extends QueryHit {
 	
 	@Override
 	public Component render(String componentId) {
-		if (getTokenPos() != null) {
+		if (getHitPos() != null) {
 			return new HighlightableLabel(componentId, line, 
-					new LinearRange(getTokenPos().getFromColumn(), getTokenPos().getToColumn()));
+					new LinearRange(getHitPos().getFromColumn(), getHitPos().getToColumn()));
 		} else {
 			return new HighlightableLabel(componentId, line, null);
 		}

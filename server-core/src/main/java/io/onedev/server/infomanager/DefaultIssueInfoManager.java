@@ -224,7 +224,7 @@ public class DefaultIssueInfoManager extends AbstractMultiEnvironmentManager
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Void call() throws Exception {
+			public Void call() {
 				try {
 					event.getIssueIds().forEach(it -> remove(sourceProjectId, it));
 				} catch (Exception e) {

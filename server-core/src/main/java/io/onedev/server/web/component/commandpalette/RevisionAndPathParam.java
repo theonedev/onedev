@@ -42,8 +42,6 @@ public class RevisionAndPathParam extends ParamSegment {
 					}
 				} catch (TooGeneralQueryException e) {
 					suggestions.put("Query is too general", null);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
 				}
 			}
 		}

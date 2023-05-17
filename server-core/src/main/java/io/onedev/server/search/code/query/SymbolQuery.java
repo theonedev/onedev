@@ -72,7 +72,7 @@ public class SymbolQuery extends BlobQuery {
 
 	public static class Builder {
 
-		private String term;
+		private final String term;
 
 		private boolean caseSensitive;
 

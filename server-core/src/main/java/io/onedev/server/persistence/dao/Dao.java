@@ -77,8 +77,6 @@ public interface Dao {
 	<T extends AbstractEntity> List<T> query(Class<T> entityClass);
 	
 	<T extends AbstractEntity> List<T> query(Class<T> entityClass, boolean cacheable);
-	
-	<T extends AbstractEntity> List<T> queryAfter(Class<T> entityClass, Long afterEntityId, int count);
 
 	<T extends AbstractEntity> int count(Class<T> entityClass);
 	
@@ -99,7 +97,7 @@ public interface Dao {
 	 * 			number of entities matching specified {@link DetachedCriteria}
 	 */
 	<T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria);
-
+	
 	SessionManager getSessionManager();
 
 	Session getSession();

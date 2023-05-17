@@ -45,7 +45,7 @@ public class FileQueryOption implements QueryOption {
 	}
 
 	public void applyConstraints(BooleanQuery.Builder builder) {
-		Preconditions.checkNotNull(term != null);
+		Preconditions.checkNotNull(term);
 		
 		boolean tooGeneral = true;
 		for (char ch: term.toCharArray()) {
@@ -62,22 +62,22 @@ public class FileQueryOption implements QueryOption {
 
 	@Nullable
 	public Optional<LinearRange> matches(String blobName, @Nullable String excludeFileName) {
-		Preconditions.checkNotNull(term != null);
+		Preconditions.checkNotNull(term);
 		
-		if (caseSensitive) {
-			if (WildcardUtils.matchString(term, blobName)
-					&& (excludeFileName == null || !excludeFileName.equals(blobName))) {
-				return ofNullable(rangeOfMatch(term, blobName));
-			} else {
-				return null;
-			}
+		var normalizedTerm = term;
+		var normalizedBlobName = blobName;
+		var normalizedExcludeFileName = excludeFileName;
+		if (!caseSensitive) {
+			normalizedBlobName = normalizedBlobName.toLowerCase();
+			normalizedTerm = normalizedTerm.toLowerCase();
+			if (normalizedExcludeFileName != null)
+				normalizedExcludeFileName = normalizedExcludeFileName.toLowerCase();
+		}
+		if (WildcardUtils.matchString(normalizedTerm, normalizedBlobName)
+				&& (normalizedExcludeFileName == null || !normalizedExcludeFileName.equals(normalizedBlobName))) {
+			return ofNullable(rangeOfMatch(normalizedTerm, normalizedBlobName));
 		} else {
-			if (WildcardUtils.matchString(term, blobName.toLowerCase())
-					&& (excludeFileName == null || !excludeFileName.equalsIgnoreCase(blobName))) {
-				return ofNullable(rangeOfMatch(term, blobName.toLowerCase()));
-			} else {
-				return null;
-			}
+			return null;
 		}
 	}
 

@@ -93,6 +93,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Collection<Long> getActiveIds();
 	
+	Map<String, Collection<Long>> groupByActiveServers(Collection<Long> projectIds);
+	
 	<T> T runOnActiveServer(Long projectId, ClusterTask<T> task);
 
 	<T> Map<String, T> runOnReplicaServers(Long projectId, ClusterTask<T> task);

@@ -102,13 +102,13 @@ public abstract class SearchResultPanel extends Panel {
 
 				@Override
 				public int compare(QueryHit o1, QueryHit o2) {
-					if (o1.getTokenPos() != null) {
-						if (o2.getTokenPos() != null) 
-							return o1.getTokenPos().getFromRow() - o2.getTokenPos().getFromRow();
+					if (o1.getHitPos() != null) {
+						if (o2.getHitPos() != null) 
+							return o1.getHitPos().getFromRow() - o2.getHitPos().getFromRow();
 						else
 							return -1;
 					} else {
-						if (o2.getTokenPos() != null) 
+						if (o2.getHitPos() != null) 
 							return 1;
 						else
 							return 0;
@@ -156,7 +156,7 @@ public abstract class SearchResultPanel extends Panel {
 		
 		BlobIdent selected = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
 				FileMode.REGULAR_FILE.getBits());
-		context.onSelect(target, selected, BlobRenderer.getSourcePosition(hit.getTokenPos()));
+		context.onSelect(target, selected, BlobRenderer.getSourcePosition(hit.getHitPos()));
 	}
 	
 	private String getActiveBlobPath(ActiveIndex activeIndex) {
@@ -170,7 +170,7 @@ public abstract class SearchResultPanel extends Panel {
 	private PlanarRange getActiveBlobMark(ActiveIndex activeIndex) {
 		MatchedBlob activeBlob = blobs.get(activeIndex.blob);
 		if (activeIndex.hit != -1)
-			return activeBlob.getHits().get(activeIndex.hit).getTokenPos();
+			return activeBlob.getHits().get(activeIndex.hit).getHitPos();
 		else
 			return null;
 	}
@@ -532,8 +532,8 @@ public abstract class SearchResultPanel extends Panel {
 								super.onInitialize();
 								
 								add(hit.renderIcon("icon"));
-								if (hit.getTokenPos() != null)
-									add(new Label("lineNo", String.valueOf(hit.getTokenPos().getFromRow()+1) + ":"));
+								if (hit.getHitPos() != null)
+									add(new Label("lineNo", String.valueOf(hit.getHitPos().getFromRow()+1) + ":"));
 								else
 									add(new Label("lineNo").setVisible(false));
 								add(hit.render("label"));
@@ -546,7 +546,7 @@ public abstract class SearchResultPanel extends Panel {
 								BlobIdent blobIdent = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
 										FileMode.REGULAR_FILE.getBits());
 								ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-								state.position = BlobRenderer.getSourcePosition(hit.getTokenPos());
+								state.position = BlobRenderer.getSourcePosition(hit.getHitPos());
 								PageParameters params = ProjectBlobPage.paramsOf(context.getProject(), state);
 								CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, params);
 								add(AttributeAppender.replace("href", url.toString()));

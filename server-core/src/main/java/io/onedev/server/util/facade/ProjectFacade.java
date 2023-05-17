@@ -47,7 +47,6 @@ public class ProjectFacade extends EntityFacade {
 		return name;
 	}
 
-	@Nullable
 	public String getPath() {
 		return path;
 	}

@@ -189,43 +189,39 @@ public abstract class AdvancedSearchPanel extends Panel {
 						var revision = revisionModel.getObject();
 						var count = getMaxQueryEntries();
 						if (revision != null) {
-							try {
-								var directory = getDirectory(insideCurrentDir);
-								var searchManager = OneDev.getInstance(CodeSearchManager.class);
-								if (option instanceof TextQueryOption) {
-									var query = new TextQuery.Builder((TextQueryOption) option)
-											.directory(directory)
-											.count(count)
-											.build();
-									ObjectId commit = project.getRevCommit(revision, true);
-									hits = searchManager.search(project, commit, query);
-								} else if (option instanceof FileQueryOption) {
-									var query = new FileQuery.Builder((FileQueryOption) option)
-											.directory(directory)
-											.count(count)
-											.build();
-									ObjectId commit = project.getRevCommit(revision, true);
-									hits = searchManager.search(project, commit, query);
-								} else {
-									var query = new SymbolQuery.Builder((SymbolQueryOption) option)
-											.primary(true)
-											.directory(directory)
-											.count(count)
-											.build();
-									ObjectId commit = project.getRevCommit(revision, true);
-									hits = searchManager.search(project, commit, query);
+							var directory = getDirectory(insideCurrentDir);
+							var searchManager = OneDev.getInstance(CodeSearchManager.class);
+							if (option instanceof TextQueryOption) {
+								var query = new TextQuery.Builder((TextQueryOption) option)
+										.directory(directory)
+										.count(count)
+										.build();
+								ObjectId commit = project.getRevCommit(revision, true);
+								hits = searchManager.search(project, commit, query);
+							} else if (option instanceof FileQueryOption) {
+								var query = new FileQuery.Builder((FileQueryOption) option)
+										.directory(directory)
+										.count(count)
+										.build();
+								ObjectId commit = project.getRevCommit(revision, true);
+								hits = searchManager.search(project, commit, query);
+							} else {
+								var query = new SymbolQuery.Builder((SymbolQueryOption) option)
+										.primary(true)
+										.directory(directory)
+										.count(count)
+										.build();
+								ObjectId commit = project.getRevCommit(revision, true);
+								hits = searchManager.search(project, commit, query);
 
-									if (hits.size() < count) {
-										query = new SymbolQuery.Builder((SymbolQueryOption) option)
-												.primary(false)
-												.directory(directory)
-												.count(count-hits.size())
-												.build();
-										hits.addAll(searchManager.search(project, commit, query));
-									}
+								if (hits.size() < count) {
+									query = new SymbolQuery.Builder((SymbolQueryOption) option)
+											.primary(false)
+											.directory(directory)
+											.count(count-hits.size())
+											.build();
+									hits.addAll(searchManager.search(project, commit, query));
 								}
-							} catch (InterruptedException e) {
-								throw new RuntimeException(e);
 							}
 						} else {
 							hits = new ArrayList<>();
@@ -308,7 +304,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 	
 	protected String getDirectory(boolean insideDir) {
 		BlobIdent blobIdent = getCurrentBlob();
-		if (blobIdent == null || blobIdent.path == null || !blobIdent.path.contains("/") || !insideDir) 
+		if (blobIdent == null || blobIdent.path == null || !insideDir) 
 			return null;
 		else if (blobIdent.isTree()) 
 			return blobIdent.path;

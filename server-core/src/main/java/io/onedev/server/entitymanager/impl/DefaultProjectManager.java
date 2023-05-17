@@ -1134,6 +1134,19 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return activeServers.project(Map.Entry::getKey, entry -> entry.getValue().equals(localServer));
 	}
 
+	@Override
+	public Map<String, Collection<Long>> groupByActiveServers(Collection<Long> projectIds) {
+		Map<String, Collection<Long>> projectIdsByServer = new HashMap<>();
+		for (var projectId: projectIds) {
+			var activeServer = activeServers.get(projectId);
+			if (activeServer != null) {
+				var projectIdsOnServer = projectIdsByServer.computeIfAbsent(activeServer, k -> new HashSet<>());
+				projectIdsOnServer.add(projectId);
+			}
+		}
+		return projectIdsByServer;
+	}
+
 	private String updateActiveServer(Long projectId,
 									  Map<String, ProjectReplica> replicasOfProject,
 									  boolean syncReplicas) {

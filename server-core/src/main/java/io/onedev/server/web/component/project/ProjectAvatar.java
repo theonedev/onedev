@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.project.avatar;
+package io.onedev.server.web.component.project;
 
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebComponent;

@@ -50,6 +50,7 @@ public class WildcardUtilsTest {
 		assertEquals("hello:0-0", applyStringPattern("", "hello", false).toString());
 		assertEquals("*:0-1", applyStringPattern("*", "hello", false).toString());
 		assertEquals("**:0-2", applyStringPattern("**", "hello", false).toString());
+		assertEquals("he*:0-3", applyStringPattern("he*", "hello", false).toString());
 	}
 	
 	@Test

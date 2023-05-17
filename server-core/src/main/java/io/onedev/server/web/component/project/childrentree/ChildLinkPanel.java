@@ -5,7 +5,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.web.component.project.avatar.ProjectAvatar;
+import io.onedev.server.web.component.project.ProjectAvatar;
 
 @SuppressWarnings("serial")
 abstract class ChildLinkPanel extends Panel {

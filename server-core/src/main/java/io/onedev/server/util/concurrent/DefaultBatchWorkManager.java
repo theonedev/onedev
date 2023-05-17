@@ -1,22 +1,20 @@
 package io.onedev.server.util.concurrent;
 
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import io.onedev.server.event.Listen;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.security.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.security.SecurityUtils;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
@@ -50,9 +48,32 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 	}
 
 	@Listen
-	public synchronized void on(SystemStopping event) {
-		thread = null;
-		notify();
+	public void on(SystemStopping event) {
+		synchronized (this) {
+			thread = null;
+			notify();
+		}
+		while (true) {
+			var hasWorkings = false;
+			synchronized (this) {
+				for (var worksOfWorker : works.values()) {
+					if (!worksOfWorker.working.isEmpty()) {
+						hasWorkings = true;
+						break;
+					}
+				}
+			}
+			if (hasWorkings) {
+				logger.info("Waiting for batch works to complete...");
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				break;
+			}
+		}
 	}
 
 	@Override

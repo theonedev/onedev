@@ -25,7 +25,7 @@ public interface CodeSearchManager {
 	 * 			InterruptedException if the search process is interrupted
 	 */
 	List<QueryHit> search(Project project, ObjectId commitId, BlobQuery query) 
-			throws InterruptedException, TooGeneralQueryException;
+			throws TooGeneralQueryException;
 	
 	@Nullable
 	List<Symbol> getSymbols(Project project, ObjectId blobId, String blobPath);

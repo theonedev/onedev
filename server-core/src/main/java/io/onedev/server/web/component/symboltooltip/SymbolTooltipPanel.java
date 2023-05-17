@@ -152,13 +152,9 @@ public abstract class SymbolTooltipPanel extends Panel {
 									.caseSensitive(true)
 									.count(maxQueryEntries)
 									.build();
-							try {
-								CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
-								ObjectId commit = getProject().getRevCommit(revision, true);
-								hits = searchManager.search(getProject(), commit, query);
-							} catch (InterruptedException e) {
-								throw new RuntimeException(e);
-							}								
+							CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
+							ObjectId commit = getProject().getRevCommit(revision, true);
+							hits = searchManager.search(getProject(), commit, query);
 						} else {
 							hits = new ArrayList<>();
 						}
@@ -232,33 +228,29 @@ public abstract class SymbolTooltipPanel extends Panel {
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						// then find in other files for public symbols
-						try {
-							CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
-							ObjectId commit = getProject().getRevCommit(revision, true);
-							BlobQuery query;
-							if (symbolHits.size() < QUERY_ENTRIES) {
-								query = new SymbolQuery.Builder(symbolName)
-										.caseSensitive(true)
-										.excludeBlobPath(blobIdent.path)
-										.primary(true)
-										.local(false)
-										.count(QUERY_ENTRIES)
-										.build();
-								symbolHits.addAll(searchManager.search(getProject(), commit, query));
-							}							
-							if (symbolHits.size() < QUERY_ENTRIES) {
-								query = new SymbolQuery.Builder(symbolName)
-										.caseSensitive(true)
-										.excludeBlobPath(blobIdent.path)
-										.primary(false)
-										.local(false)
-										.count(QUERY_ENTRIES - symbolHits.size())
-										.build();
-								symbolHits.addAll(searchManager.search(getProject(), commit, query));
-							}
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						}								
+						CodeSearchManager searchManager = OneDev.getInstance(CodeSearchManager.class);
+						ObjectId commit = getProject().getRevCommit(revision, true);
+						BlobQuery query;
+						if (symbolHits.size() < QUERY_ENTRIES) {
+							query = new SymbolQuery.Builder(symbolName)
+									.caseSensitive(true)
+									.excludeBlobPath(blobIdent.path)
+									.primary(true)
+									.local(false)
+									.count(QUERY_ENTRIES)
+									.build();
+							symbolHits.addAll(searchManager.search(getProject(), commit, query));
+						}							
+						if (symbolHits.size() < QUERY_ENTRIES) {
+							query = new SymbolQuery.Builder(symbolName)
+									.caseSensitive(true)
+									.excludeBlobPath(blobIdent.path)
+									.primary(false)
+									.local(false)
+									.count(QUERY_ENTRIES - symbolHits.size())
+									.build();
+							symbolHits.addAll(searchManager.search(getProject(), commit, query));
+						}
 					}					
 				}
 				target.add(content);
@@ -287,7 +279,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	public PageParameters getQueryHitParams(QueryHit hit) {
 		BlobIdent blobIdent = new BlobIdent(revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-		state.position = BlobRenderer.getSourcePosition(hit.getTokenPos());
+		state.position = BlobRenderer.getSourcePosition(hit.getHitPos());
 		return ProjectBlobPage.paramsOf(getProject(), state);
 	}
 	

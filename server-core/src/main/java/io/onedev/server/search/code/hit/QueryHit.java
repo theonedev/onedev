@@ -15,11 +15,11 @@ public abstract class QueryHit implements Serializable {
 	
 	private final String blobPath;
 	
-	private final PlanarRange tokenPos;
+	private final PlanarRange hitPos;
 	
-	public QueryHit(String blobPath, @Nullable PlanarRange tokenPos) {
+	public QueryHit(String blobPath, @Nullable PlanarRange hitPos) {
 		this.blobPath = blobPath;
-		this.tokenPos = tokenPos;
+		this.hitPos = hitPos;
 	}
 
 	public String getBlobPath() {
@@ -27,8 +27,8 @@ public abstract class QueryHit implements Serializable {
 	}
 	
 	@Nullable
-	public PlanarRange getTokenPos() {
-		return tokenPos;
+	public PlanarRange getHitPos() {
+		return hitPos;
 	}
 
 	public abstract Component render(String componentId);

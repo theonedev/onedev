@@ -8,8 +8,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.unittest.UnitTestReport;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
-import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.CodeSearchManager;
+import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
 import org.apache.lucene.search.IndexSearcher;
@@ -35,7 +35,7 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 
 				@Override
 				public List<QueryHit> search(Project project, ObjectId commit, BlobQuery query)
-						throws InterruptedException, TooGeneralQueryException {
+						throws TooGeneralQueryException {
 					return null;
 				}
 
@@ -79,7 +79,7 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 
 				@Override
 				public List<QueryHit> search(Project project, ObjectId commit, BlobQuery query)
-						throws InterruptedException, TooGeneralQueryException {
+						throws TooGeneralQueryException {
 					return null;
 				}
 

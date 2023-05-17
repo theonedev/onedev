@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import static io.onedev.server.util.match.WildcardUtils.matchPath;
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toSet;
 
 public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Serializable {
 
@@ -109,7 +110,7 @@ public class ProjectCache extends MapProxy<Long, ProjectFacade> implements Seria
 
 	public Collection<Project> getProjects() {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		return keySet().stream().map(it->projectManager.load(it)).collect(Collectors.toSet());
+		return keySet().stream().map(projectManager::load).collect(toSet());
 	}
 	
 	public Comparator<Project> comparingPath() {

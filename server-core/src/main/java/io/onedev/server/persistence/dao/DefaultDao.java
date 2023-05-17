@@ -10,9 +10,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -133,15 +131,6 @@ public class DefaultDao implements Dao, Serializable {
 	@Override
 	public Session getSession() {
 		return sessionManager.getSession();
-	}
-
-	@Sessional
-	@Override
-	public <T extends AbstractEntity> List<T> queryAfter(Class<T> entityClass, Long afterEntityId, int count) {
-		EntityCriteria<T> criteria = EntityCriteria.of(entityClass);
-		criteria.add(Restrictions.gt(AbstractEntity.PROP_ID, afterEntityId));
-		criteria.addOrder(Order.asc(AbstractEntity.PROP_ID));
-		return query(criteria, 0, count);
 	}
 	
 }

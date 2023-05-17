@@ -61,64 +61,53 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
     }
 
 	private AuthorizationInfo newAuthorizationInfo(Long userId) {
-		Collection<Permission> permissions = 
-				sessionManager.call(new Callable<Collection<Permission>>() {
-
-			@Override
-			public Collection<Permission> call() throws Exception {
-				Collection<Permission> permissions = new ArrayList<>();
-				
-		        if (userId != 0L) { 
-		        	Permission systemAdministration = new SystemAdministration();
-		        	
-		            User user = userManager.load(userId);
-		        	if (user.isRoot() || user.isSystem()) 
-		        		return Lists.newArrayList(systemAdministration);
-		        	
-		        	List<Group> groups = new ArrayList<>(user.getGroups());
-		           	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
-	           		if (defaultLoginGroup != null) 
-	           			groups.add(defaultLoginGroup);
-		        	
-		           	for (Group group: groups) {
-		           		if (group.implies(systemAdministration))
-		           			return Lists.newArrayList(systemAdministration);
-		           		permissions.add(group);
-		           	}
-		           	
-		        	permissions.add(new UserAdministration(user));
-		        	
-		        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
-    					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-		        	for (IssueAuthorization authorization: user.getIssueAuthorizations()) {
-    					permissions.add(new ProjectPermission(
-    							authorization.getIssue().getProject(), 
-    							new ConfidentialIssuePermission(authorization.getIssue())));
-		        	}
-		        } 
-		        if (userId != 0L || settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
-		        	permissions.add(new Permission() {
-
-						@Override
-						public boolean implies(Permission p) {
-							if (p instanceof ProjectPermission) {
-					        	ProjectPermission projectPermission = (ProjectPermission) p;
-					        	Project project = projectPermission.getProject();
-					        	Permission privilege = projectPermission.getPrivilege();
-					        	do {
-					        		if (project.getDefaultRole() != null && project.getDefaultRole().implies(privilege))
-					        			return true;
-					        		project = project.getParent();
-					        	} while (project != null);
-							}
-							return false;
-						}
-		        		
-		        	});
-		        }
-				return permissions;
-			}
+		Collection<Permission> permissions = sessionManager.call(() -> {
+			Collection<Permission> innerPermissions = new ArrayList<>();
 			
+			if (userId != 0L) { 
+				Permission systemAdministration = new SystemAdministration();
+				
+				User user = userManager.load(userId);
+				if (user.isRoot() || user.isSystem()) 
+					return Lists.newArrayList(systemAdministration);
+				
+				List<Group> groups = new ArrayList<>(user.getGroups());
+				   Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+				   if (defaultLoginGroup != null) 
+					   groups.add(defaultLoginGroup);
+				
+				   for (Group group: groups) {
+					   if (group.implies(systemAdministration))
+						   return Lists.newArrayList(systemAdministration);
+					   innerPermissions.add(group);
+				   }
+				   
+				innerPermissions.add(new UserAdministration(user));
+				
+				for (UserAuthorization authorization: user.getProjectAuthorizations()) 
+					innerPermissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+				for (IssueAuthorization authorization: user.getIssueAuthorizations()) {
+					innerPermissions.add(new ProjectPermission(
+							authorization.getIssue().getProject(), 
+							new ConfidentialIssuePermission(authorization.getIssue())));
+				}
+			} 
+			if (userId != 0L || settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
+				innerPermissions.add(p -> {
+					if (p instanceof ProjectPermission) {
+						ProjectPermission projectPermission = (ProjectPermission) p;
+						Project project = projectPermission.getProject();
+						Permission privilege = projectPermission.getPrivilege();
+						do {
+							if (project.getDefaultRole() != null && project.getDefaultRole().implies(privilege))
+								return true;
+							project = project.getParent();
+						} while (project != null);
+					}
+					return false;
+				});
+			}
+			return innerPermissions;
 		});
 		
 		return new AuthorizationInfo() {

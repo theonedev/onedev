@@ -33,7 +33,7 @@ import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference
 import io.onedev.server.web.behavior.InputChangeBehavior;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
-import io.onedev.server.web.component.project.avatar.ProjectAvatar;
+import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 
 @SuppressWarnings("serial")

@@ -1,32 +1,22 @@
 package io.onedev.server.search.entitytext;
 
-import com.google.common.collect.Lists;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.cluster.ClusterManager;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.Listen;
-import io.onedev.server.event.project.pullrequest.*;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
+import io.onedev.server.model.support.EntityTouch;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.concurrent.BatchWorkManager;
-import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.lucene.BooleanQueryBuilder;
 import io.onedev.server.util.lucene.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.Term;
@@ -41,12 +31,13 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.ObjectStreamException;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+import static org.apache.lucene.document.Field.Store.NO;
 import static org.apache.lucene.document.LongPoint.newExactQuery;
 
 @Singleton
@@ -59,7 +50,7 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	
 	private static final String FIELD_DESCRIPTION = "description";
 
-	private static final String FIELD_COMMENTS = "comments";
+	private static final String FIELD_COMMENT = "comment";
 	
 	private final PullRequestReviewManager reviewManager;
 	
@@ -67,15 +58,19 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	
 	private final UserManager userManager;
 	
+	private final PullRequestTouchManager touchManager;
+	
 	@Inject
 	public DefaultPullRequestTextManager(Dao dao, UserManager userManager, BatchWorkManager batchWorkManager, 
 										 TransactionManager transactionManager, ProjectManager projectManager, 
 										 PullRequestReviewManager reviewManager, BuildManager buildManager, 
-										 ClusterManager clusterManager) {
-		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager);
+										 ClusterManager clusterManager, SessionManager sessionManager, 
+										 PullRequestTouchManager touchManager) {
+		super(dao, batchWorkManager, transactionManager, projectManager, clusterManager, sessionManager);
 		this.reviewManager = reviewManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
+		this.touchManager = touchManager;
 	}
 
 	public Object writeReplace() throws ObjectStreamException {
@@ -84,126 +79,72 @@ public class DefaultPullRequestTextManager extends ProjectTextManager<PullReques
 	
 	@Override
 	protected int getIndexVersion() {
-		return 4;
+		return 5;
 	}
 
 	@Override
-	protected void addFields(Document document, PullRequest entity) {
-		document.add(new LongPoint(FIELD_NUMBER, entity.getNumber()));
-		document.add(new TextField(FIELD_TITLE, entity.getTitle(), Store.NO));
+	protected List<? extends EntityTouch> queryTouchesAfter(Long projectId, Long afterTouchId) {
+		return touchManager.queryTouchesAfter(projectId, afterTouchId, Integer.MAX_VALUE);
+	}
+
+	@Override
+	protected void addFields(Document entityDoc, PullRequest entity) {
+		entityDoc.add(new LongPoint(FIELD_NUMBER, entity.getNumber()));
+		entityDoc.add(new TextField(FIELD_TITLE, entity.getTitle(), NO));
 		if (entity.getDescription() != null)
-			document.add(new TextField(FIELD_DESCRIPTION, entity.getDescription(), Store.NO));
-		StringBuilder builder = new StringBuilder();
+			entityDoc.add(new TextField(FIELD_DESCRIPTION, entity.getDescription(), NO));
 		for (PullRequestComment comment: entity.getComments()) {
 			if (!comment.getUser().equals(userManager.getSystem()))
-				builder.append(comment.getContent()).append("\n");
+				entityDoc.add(new TextField(FIELD_COMMENT, comment.getContent(), NO));
 		}
-		if (builder.length() != 0)
-			document.add(new TextField(FIELD_COMMENTS, builder.toString(), Store.NO));
-	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestOpened event) {
-		requestIndex(event.getRequest());
-	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestChanged event) {
-		PullRequestChangeData data = event.getChange().getData();
-		if (data instanceof PullRequestTitleChangeData || data instanceof PullRequestDescriptionChangeData)
-			requestIndex(event.getRequest());
-	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestCommentCreated event) {
-		requestIndex(event.getRequest());
-	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestCommentEdited event) {
-		requestIndex(event.getRequest());
-	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestCommentDeleted event) {
-		requestIndex(event.getRequest());
-	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestsDeleted event) {
-		clusterManager.submitToAllServers(() -> {
-			deleteEntities(event.getRequestIds());
-			return null;
-		});
-	}
-
-	@Sessional
-	@Listen
-	public void on(PullRequestDeleted event) {
-		clusterManager.submitToAllServers(() -> {
-			deleteEntities(Lists.newArrayList(event.getRequestId()));
-			return null;			
-		});
 	}
 	
 	@Nullable
-	private Query buildQuery(@Nullable Project project, String queryString) {
-		BooleanQueryBuilder queryBuilder = new BooleanQueryBuilder();
-		if (project != null) {
-			queryBuilder.add(newExactQuery(FIELD_PROJECT_ID, project.getId()), Occur.MUST);
-		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode());
-			if (!projects.isEmpty()) {
-				Query projectsQuery = Criteria.forManyValues(
-						FIELD_PROJECT_ID, 
-						projects.stream().map(it->it.getId()).collect(Collectors.toSet()), 
-						projectManager.getIds());
-				queryBuilder.add(projectsQuery, Occur.MUST);
+	private EntityTextQuery buildQuery(@Nullable Project project, String queryString) {
+		var escaped = LuceneUtils.escape(queryString);
+		if (escaped != null) {
+			var applicableProjectIds = new HashSet<Long>();
+			if (project != null) {
+				applicableProjectIds.add(project.getId());
 			} else {
-				return null;
+				applicableProjectIds.addAll(projectManager.getPermittedProjects(new ReadCode())
+						.stream().map(AbstractEntity::getId).collect(toList()));
+			}
+			if (!applicableProjectIds.isEmpty()) {
+				BooleanQueryBuilder contentQueryBuilder = new BooleanQueryBuilder();
+
+				String numberString = queryString;
+				if (numberString.startsWith("#"))
+					numberString = numberString.substring(1);
+				try {
+					long number = Long.parseLong(numberString);
+					contentQueryBuilder.add(new BoostQuery(newExactQuery(FIELD_NUMBER, number), 1f), Occur.SHOULD);
+				} catch (NumberFormatException ignored) {
+				}
+
+				try (Analyzer analyzer = newAnalyzer()) {
+					Map<String, Float> boosts = new HashMap<>();
+					boosts.put(FIELD_TITLE, 0.75f);
+					boosts.put(FIELD_DESCRIPTION, 0.5f);
+					boosts.put(FIELD_COMMENT, 0.25f);
+					MultiFieldQueryParser parser = new MultiFieldQueryParser(
+							new String[]{FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENT}, analyzer, boosts) {
+
+						protected Query newTermQuery(Term term, float boost) {
+							return new BoostQuery(new PrefixQuery(term), boost);
+						}
+
+					};
+					contentQueryBuilder.add(parser.parse(escaped), Occur.SHOULD);
+				} catch (ParseException e) {
+					throw new RuntimeException(e);
+				}
+				var contentQuery = contentQueryBuilder.build();
+				if (contentQuery != null)
+					return new EntityTextQuery(contentQuery, applicableProjectIds);
 			}
 		}
-		BooleanQueryBuilder contentQueryBuilder = new BooleanQueryBuilder();
-		
-		String numberString = queryString;
-		if (numberString.startsWith("#")) 
-			numberString = numberString.substring(1);
-		try {
-			Long number = Long.valueOf(numberString);
-			contentQueryBuilder.add(new BoostQuery(newExactQuery(FIELD_NUMBER, number), 1f), Occur.SHOULD);
-		} catch (NumberFormatException ignored) {
-		}
-		
-		try (Analyzer analyzer = newAnalyzer()) {
-			Map<String, Float> boosts = new HashMap<>();
-			boosts.put(FIELD_TITLE, 0.75f);
-			boosts.put(FIELD_DESCRIPTION, 0.5f);
-			boosts.put(FIELD_COMMENTS, 0.25f);
-			MultiFieldQueryParser parser = new MultiFieldQueryParser(
-					new String[] {FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENTS}, analyzer, boosts) {
-				
-				protected Query newTermQuery(Term term, float boost) {
-					return new BoostQuery(new PrefixQuery(term), boost);
-				}
-				
-			};
-			var escaped = LuceneUtils.escape(queryString);
-			if (escaped != null)
-				contentQueryBuilder.add(parser.parse(escaped), Occur.SHOULD);
-			else 
-				return null;
-		} catch (ParseException e) {
-			throw new RuntimeException(e);
-		}
-		queryBuilder.add(contentQueryBuilder.build(), Occur.MUST);
-		
-		return queryBuilder.build();		
+		return null;
 	}
 
 	@Override

@@ -160,6 +160,11 @@
 			<artifactId>server-plugin-notification-discord</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-ee</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- Add explicit dependencies to make sure standalone plugins use expected lib version -->
 		<dependency>
 			<groupId>commons-codec</groupId>

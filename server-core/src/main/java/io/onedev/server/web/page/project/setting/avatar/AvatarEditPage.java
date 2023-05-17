@@ -14,7 +14,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.avatarupload.AvatarFileSelected;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
-import io.onedev.server.web.component.project.avatar.ProjectAvatar;
+import io.onedev.server.web.component.project.ProjectAvatar;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")

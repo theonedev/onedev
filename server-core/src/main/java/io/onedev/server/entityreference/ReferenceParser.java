@@ -45,18 +45,19 @@ public class ReferenceParser {
 		if (fastScan(text)) { 
 			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
-				String referenceProjectName = matcher.group(4);
-				Long referenceNumber = Long.valueOf(matcher.group(6));
-
-				Project referenceProject;
-				if (referenceProjectName != null) {
-					referenceProject = projectManager.findByPath(referenceProjectName);
-				} else {
-					referenceProject = project;
+				try {
+					String referenceProjectName = matcher.group(4);
+					Long referenceNumber = Long.valueOf(matcher.group(6));
+					Project referenceProject;
+					if (referenceProjectName != null) {
+						referenceProject = projectManager.findByPath(referenceProjectName);
+					} else {
+						referenceProject = project;
+					}
+					if (referenceProject != null)
+						references.add(new ProjectScopedNumber(referenceProject, referenceNumber));
+				} catch (NumberFormatException ignored) {
 				}
-
-				if (referenceProject != null) 
-					references.add(new ProjectScopedNumber(referenceProject, referenceNumber));
 			}
 		}
 		return new ArrayList<>(references);

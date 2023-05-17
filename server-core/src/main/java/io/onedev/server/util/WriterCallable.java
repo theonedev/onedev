@@ -4,8 +4,8 @@ import org.apache.lucene.index.IndexWriter;
 
 import java.io.IOException;
 
-public interface WriterRunnable {
+public interface WriterCallable<T> {
 
-	void run(IndexWriter writer) throws IOException;
+	T call(IndexWriter writer) throws IOException;
 
 }

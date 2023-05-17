@@ -1,6 +1,7 @@
 package io.onedev.server.search.code.query;
 
 import com.google.common.base.Preconditions;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
 import org.apache.lucene.search.BooleanQuery;
@@ -32,7 +33,7 @@ public class FileQuery extends BlobQuery {
 	@Override
 	public void collect(IndexSearcher searcher, TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
-		String blobName = blobPath.substring(blobPath.lastIndexOf('/')+1);
+		String blobName = GitUtils.getBlobName(blobPath);
 		var match = getOption().matches(blobName, excludeFileName);
 		if (match != null)
 			hits.add(new FileHit(blobPath, match.orElse(null)));
@@ -49,7 +50,7 @@ public class FileQuery extends BlobQuery {
 	
 	public static class Builder {
 
-		private String term;
+		private final String term;
 		
 		private boolean caseSensitive;
 

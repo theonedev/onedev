@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.event.Listen;
+import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import jetbrains.exodus.backup.BackupStrategy;
 import jetbrains.exodus.backup.VirtualFileDescriptor;
@@ -38,7 +39,7 @@ public abstract class AbstractMultiEnvironmentManager extends AbstractEnvironmen
 	}
 
 	@Listen
-	public void on(SystemStopping event) {
+	public void on(SystemStopped event) {
 		synchronized (envs) {
 			for (Environment env: envs.values())
 				env.close();

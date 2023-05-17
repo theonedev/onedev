@@ -92,6 +92,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final ClusterManager clusterManager;
 	
+	private final IssueTouchManager touchManager;
+	
 	private final SequenceGenerator numberGenerator;
 	
 	private volatile IMap<String, Long> ids;
@@ -102,7 +104,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 							   SettingManager settingManager, ListenerRegistry listenerRegistry,
 							   ProjectManager projectManager, UserManager userManager, ClusterManager clusterManager,
 							   RoleManager roleManager, LinkSpecManager linkSpecManager, IssueLinkManager linkManager, 
-							   IssueAuthorizationManager authorizationManager) {
+							   IssueAuthorizationManager authorizationManager, IssueTouchManager touchManager) {
 		super(dao);
 		this.fieldManager = fieldManager;
 		this.queryPersonalizationManager = queryPersonalizationManager;
@@ -116,6 +118,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.linkManager = linkManager;
 		this.authorizationManager = authorizationManager;
 		this.clusterManager = clusterManager;
+		this.touchManager = touchManager;
 		
 		numberGenerator = new SequenceGenerator(Issue.class, clusterManager, dao);
 	}
@@ -1063,6 +1066,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			}
 			dao.persist(issue);
 		}
+
+		for (var issue: issues)
+			touchManager.touch(sourceProject, issue.getId());
 		
 		listenerRegistry.post(new IssuesMoved(sourceProject, targetProject, issues));
 	}

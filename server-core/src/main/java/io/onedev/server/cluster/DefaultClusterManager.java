@@ -9,6 +9,7 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.cp.IAtomicLong;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -23,6 +24,8 @@ import org.eclipse.jetty.server.session.SessionData;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -37,7 +40,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 @Singleton
-public class DefaultClusterManager implements ClusterManager {
+public class DefaultClusterManager implements ClusterManager, Serializable {
 	
 	private static final String EXECUTOR_SERVICE_NAME = "default";
 	
@@ -289,8 +292,9 @@ public class DefaultClusterManager implements ClusterManager {
 	@Override
 	public <T> Map<String, Future<T>> submitToAllServers(ClusterTask<T> task) {
 		Map<String, Future<T>> futures = new HashMap<>();
-		for (var entry: getExecutorService().submitToAllMembers(task).entrySet())
+		for (var entry: getExecutorService().submitToAllMembers(task).entrySet()) {
 			futures.put(getServerAddress(entry.getKey()), entry.getValue());
+		}
 		return futures;
 	}
 
@@ -299,8 +303,9 @@ public class DefaultClusterManager implements ClusterManager {
 		Map<String, Future<T>> futures = new HashMap<>();
 		var servers = hazelcastInstance.getCluster().getMembers().stream().filter(it -> serverAddresses.contains(getServerAddress(it))).collect(toList());
 		if (!servers.isEmpty()) {
-			for (var entry : getExecutorService().submitToMembers(task, servers).entrySet())
+			for (var entry : getExecutorService().submitToMembers(task, servers).entrySet()) {
 				futures.put(getServerAddress(entry.getKey()), entry.getValue());
+			}
 		}
 		return futures;
 	}
@@ -387,6 +392,10 @@ public class DefaultClusterManager implements ClusterManager {
 	@Override
 	public boolean isClusteringSupported() {
 		return false;
+	}
+
+	public Object writeReplace() throws ObjectStreamException {
+		return new ManagedSerializedForm(ClusterManager.class);
 	}
 	
 }
