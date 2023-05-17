@@ -17,7 +17,7 @@ public class RevisionAndPath implements Serializable {
 	
 	private final String path;
 	
-	public RevisionAndPath(String revision, @Nullable String path) {
+	public RevisionAndPath(@Nullable String revision, @Nullable String path) {
 		this.revision = revision;
 		this.path = path;
 	}
@@ -49,13 +49,14 @@ public class RevisionAndPath implements Serializable {
 			throw new ObjectNotFoundException("Revision/path not found: " + revisionBuilder.toString());
 		} else {
 			revision = project.getDefaultBranch();
-			if (project.getTagRef(revision) != null)
+			if (revision != null && project.getTagRef(revision) != null)
 				return new RevisionAndPath(GitUtils.branch2ref(revision), path);
 			else
 				return new RevisionAndPath(revision, path);				
 		}
 	}
 
+	@Nullable
 	public String getRevision() {
 		return revision;
 	}
