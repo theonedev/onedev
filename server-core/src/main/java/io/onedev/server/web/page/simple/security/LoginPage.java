@@ -109,7 +109,7 @@ public class LoginPage extends SimplePage {
 			
 		};
 		
-		form.add(new FencedFeedbackPanel("feedback"));
+		form.add(new FencedFeedbackPanel("feedback", form));
 		
 		if (errorMessage != null) 
 			form.error(errorMessage);

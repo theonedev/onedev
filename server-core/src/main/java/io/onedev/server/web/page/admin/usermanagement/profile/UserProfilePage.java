@@ -35,7 +35,7 @@ public class UserProfilePage extends UserPage {
 					return UserProfilePage.this.getUser();
 				}
 				
-			});
+			}).setVisible(!getUser().isRoot() && !getUser().equals(getLoginUser()));
 		} else {
 			add(new ProfileEditPanel("content", userModel));
 			add(new WebMarkupContainer("delete").setVisible(false));

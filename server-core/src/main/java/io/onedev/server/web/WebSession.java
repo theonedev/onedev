@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpSession;
 
+import io.onedev.server.web.page.admin.ssosetting.SsoProcessPage;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
@@ -54,6 +55,7 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	public void logout() {
 		SecurityUtils.getSubject().logout();
         replaceSession();
+		SsoProcessPage.clearConnectorCookie();
 	}
 	
 	@Nullable

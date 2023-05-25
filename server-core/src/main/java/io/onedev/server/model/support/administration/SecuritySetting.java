@@ -25,6 +25,8 @@ public class SecuritySetting implements Serializable {
 	
 	private boolean enableSelfRegister = true;
 	
+	private boolean enableSelfDeregister;
+	
 	private String defaultLoginGroupName;
 	
 	private boolean enforce2FA;
@@ -38,7 +40,7 @@ public class SecuritySetting implements Serializable {
 		this.enableAnonymousAccess = enableAnonymousAccess;
 	}
 
-	@Editable(order=200, name="Enable Self Sign-Up", description="User can sign up if this option is enabled")
+	@Editable(order=200, name="Enable Account Self Sign-Up", description="User can sign up if this option is enabled")
 	public boolean isEnableSelfRegister() {
 		return enableSelfRegister;
 	}
@@ -56,6 +58,16 @@ public class SecuritySetting implements Serializable {
 
 	public void setDefaultLoginGroupName(String defaultLoginGroupName) {
 		this.defaultLoginGroupName = defaultLoginGroupName;
+	}
+
+	@Editable(order=350, name="Enable Account Self Removal", description = "Whether or not user " +
+			"can remove own account")
+	public boolean isEnableSelfDeregister() {
+		return enableSelfDeregister;
+	}
+
+	public void setEnableSelfDeregister(boolean enableSelfDeregister) {
+		this.enableSelfDeregister = enableSelfDeregister;
 	}
 
 	@Editable(order=400, name="Enforce Two-factor Authentication", description="Check this to enforce "

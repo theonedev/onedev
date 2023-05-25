@@ -334,6 +334,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		};
 	}
 	
+	public static Long getPrevUserId() {
+		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
+		if (prevPrincipals != null) 
+			return (Long) prevPrincipals.getPrimaryPrincipal();
+		else 
+			return 0L;
+	}
+	
 	public static PrioritizedRunnable inheritSubject(PrioritizedRunnable task) {
 		Subject subject = SecurityUtils.getSubject();
 		return new PrioritizedRunnable(task.getPriority()) {
