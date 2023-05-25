@@ -28,6 +28,8 @@ public class BuildImageStep extends Step {
 	private String tags;
 	
 	private boolean publish;
+
+	private String moreOptions;
 	
 	@Editable(order=100, description="Optionally specify build path relative to <a href='https://docs.onedev.io/concepts#job-workspace' target='_blank'>job workspace</a>. "
 			+ "Leave empty to use job workspace itself")
@@ -65,7 +67,15 @@ public class BuildImageStep extends Step {
 	public void setTags(String tags) {
 		this.tags = tags;
 	}
-
+	
+	@Editable(order=350, description="Optionally specify additional options to build image. " +
+			"Different options should be separated by spaces, and single option containing " +
+			"spaces should be quoted")
+	@Interpolative(variableSuggester="suggestVariables")
+	public String getMoreOptions() {
+		return moreOptions;
+	}
+	
 	@Editable(order=400, name="Publish After Build", description="Whether or not to publish built image to docker registry")
 	public boolean isPublish() {
 		return publish;
@@ -75,13 +85,18 @@ public class BuildImageStep extends Step {
 		this.publish = publish;
 	}
 
+	public void setMoreOptions(String moreOptions) {
+		this.moreOptions = moreOptions;
+	}
+
+
 	static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, true, false);
 	}
 	
 	@Override
 	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
-		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), isPublish());
+		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), getMoreOptions(), isPublish());
 	}
 
 }
