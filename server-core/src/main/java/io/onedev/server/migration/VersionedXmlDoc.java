@@ -404,6 +404,7 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 	}
 	
 	public static VersionedXmlDoc fromXML(String xml) {
+		xml = stripInvalidChars(xml);
 		try {
 			// remove special characters
 		     Matcher matcher = SPECIAL_CHARACTERS.matcher(xml);
@@ -417,7 +418,27 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 			throw ExceptionUtils.unchecked(e);
 		}
 	}
-	
+
+	private static String stripInvalidChars(String string) {
+		StringBuilder builder = new StringBuilder(); 
+		
+		char ch;
+		for (int i=0; i<string.length(); i++) {
+			ch = string.charAt(i);
+			if (ch == 0x9 
+					|| ch == 0xA 
+					|| ch == 0xD 
+					|| (ch >= 0x20 && ch <= 0xD7FF) 
+					|| (ch >= 0xE000 && ch <= 0xFFFD) 
+					|| (ch >= 0x10000 && ch <= 0x10FFFF)) {
+				builder.append(ch);
+			} else {
+				builder.append('?');
+			}
+		}
+		return builder.toString();
+	}
+
 	public static VersionedXmlDoc fromFile(File file) {
 		try {
 			return fromXML(FileUtils.readFileToString(file, StandardCharsets.UTF_8.name()));
