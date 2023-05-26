@@ -21,10 +21,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.model.*;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
@@ -147,6 +144,19 @@ public abstract class RevisionSelector extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		add(new Label("title", new AbstractReadOnlyModel<>() {
+			@Override
+			public Object getObject() {
+				return getTitle();
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getTitle() != null);
+			}
+		});
 		
 		revField = new TextField<String>("revision", Model.of(""));
 		revField.add(AttributeModifier.replace("placeholder", new LoadableDetachableModel<String>() {
@@ -475,6 +485,11 @@ public abstract class RevisionSelector extends Panel {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
+	@Nullable
+	protected String getTitle() {
+		return null;	
+	}
+	
 	protected abstract void onSelect(AjaxRequestTarget target, String revision);
 
 	@Override

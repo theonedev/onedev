@@ -835,14 +835,18 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	@Nullable
-	public RefFacade getBranchRef(String revision) {
+	public RefFacade getBranchRef(@Nullable String revision) {
+		if (revision == null)
+			return null;
 		if (!revision.startsWith(Constants.R_HEADS))
 			revision = GitUtils.branch2ref(revision);
 		return getRef(revision);
 	}
 	
 	@Nullable
-	public RefFacade getTagRef(String revision) {
+	public RefFacade getTagRef(@Nullable String revision) {
+		if (revision == null)
+			return null;
 		if (!revision.startsWith(Constants.R_TAGS))
 			revision = GitUtils.tag2ref(revision);
 		return getRef(revision);

@@ -1,16 +1,67 @@
 package io.onedev.server.web.component.build.list;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Sets;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.job.JobManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.BuildLabel;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.build.*;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.RunJob;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Input;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.util.criteria.OrCriteria;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.behavior.BuildQueryBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.build.ParamValuesLabel;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.Alignment;
+import io.onedev.server.web.component.floating.ComponentTarget;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.job.JobDefLink;
+import io.onedev.server.web.component.job.runselector.JobRunSelector;
+import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.project.selector.ProjectSelector;
+import io.onedev.server.web.component.revision.RevisionSelector;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
+import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QuerySaveSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
@@ -18,6 +69,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
@@ -46,63 +98,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.job.JobManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.BuildLabel;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.search.entity.build.BuildQueryLexer;
-import io.onedev.server.search.entity.build.JobCriteria;
-import io.onedev.server.search.entity.build.NumberCriteria;
-import io.onedev.server.search.entity.build.VersionCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.criteria.OrCriteria;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.WebSession;
-import io.onedev.server.web.behavior.BuildQueryBehavior;
-import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.build.ParamValuesLabel;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
-import io.onedev.server.web.component.entity.labels.EntityLabelsPanel;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.JobDefLink;
-import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
-import io.onedev.server.web.component.orderedit.OrderEditPanel;
-import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.stringchoice.StringMultiChoice;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
-import io.onedev.server.web.util.Cursor;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
-import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
+import javax.annotation.Nullable;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public abstract class BuildListPanel extends Panel {
@@ -131,6 +128,8 @@ public abstract class BuildListPanel extends Panel {
 	private SortableDataProvider<Build, Void> dataProvider;	
 	
 	private TextField<String> queryInput;
+	
+	private Component runJobLink;
 	
 	private WebMarkupContainer body;
 	
@@ -894,6 +893,48 @@ public abstract class BuildListPanel extends Panel {
 			
 		});
 		add(queryForm);
+
+		if (getProject() == null) {
+			add(runJobLink = new DropdownLink("runJob") {
+
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new ProjectSelector(id, new LoadableDetachableModel<>() {
+
+						@Override
+						protected List<Project> load() {
+							ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+							List<Project> projects = new ArrayList<>(projectManager.getPermittedProjects(new JobPermission(null, new RunJob())));
+							projects.sort(projectManager.cloneCache().comparingPath());
+							return projects;
+						}
+
+					}) {
+						@Override
+						protected String getTitle() {
+							return "Select Project";
+						}
+
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Project project) {
+							dropdown.close();
+							newRevisionSelector(target, project);
+						}
+
+					}.add(AttributeAppender.append("class", "no-current"));
+				}
+
+			});
+		} else {
+			add(runJobLink = new AjaxLink<Void>("runJob") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					newRevisionSelector(target, getProject());
+				}
+				
+			});
+		}
 		
 		dataProvider = new LoadableDetachableDataProvider<Build, Void>() {
 
@@ -1192,6 +1233,60 @@ public abstract class BuildListPanel extends Panel {
 		});
 		
 		setOutputMarkupId(true);
+	}
+	
+	private void newRevisionSelector(AjaxRequestTarget target, Project project) {
+		var projectId = project.getId();
+		
+		var placement = new AlignPlacement(100, 100, 100, 0, 0);
+		Alignment alignment = new Alignment(new ComponentTarget(runJobLink), placement);
+		new FloatingPanel(target, alignment, true, true, null) {
+
+			private Project getRevisionProject() {
+				return OneDev.getInstance(ProjectManager.class).load(projectId);
+			}
+			
+			@Override
+			protected Component newContent(String id) {
+				return new RevisionSelector(id, new LoadableDetachableModel<>() {
+					@Override
+					protected Project load() {
+						return getRevisionProject(); 
+					}
+				}, null, false) {
+					
+					@Override
+					protected String getTitle() {
+						return "Select Branch/Tag";
+					}
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, String revision) {
+						close();
+						
+						new FloatingPanel(target, alignment, true, true, null) {
+
+							@Override
+							protected Component newContent(String id) {
+								return new JobRunSelector(id, revision) {
+									@Override
+									protected void onSelect(AjaxRequestTarget target, String jobName) {
+										close();
+									}
+
+									@Override
+									protected Project getProject() {
+										return getRevisionProject();
+									}
+								};
+							}
+							
+						};
+					}
+				};
+			}
+			
+		};
 	}
 	
 	private List<String> getListParams() {

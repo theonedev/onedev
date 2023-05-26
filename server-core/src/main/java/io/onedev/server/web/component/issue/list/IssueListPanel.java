@@ -450,7 +450,12 @@ public abstract class IssueListPanel extends Panel {
 						}
 						
 					}) {
-	
+						
+						@Override
+						protected String getTitle() {
+							return "Select Project";
+						}
+
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Project project) {
 							PageParameters params = NewIssuePage.paramsOf(project, getBaseQuery().toString());

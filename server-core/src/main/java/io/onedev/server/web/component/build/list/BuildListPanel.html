@@ -1,14 +1,17 @@
 <wicket:panel>
 	<div class="build-list card">
 		<div class="card-body">
-			<form wicket:id="query" class="clearable-wrapper mb-4">
-				<div class="input-group">
-					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order builds here">
-					<span class="input-group-append">
-						<button wicket:id="submit" type="submit" class="btn btn-icon btn-outline-secondary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
-					</span>
-				</div>
-			</form>
+			<div class="d-flex mb-4">
+				<form wicket:id="query" class="clearable-wrapper flex-grow-1">
+					<div class="input-group">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order builds here">
+						<span class="input-group-append">
+							<button wicket:id="submit" type="submit" class="btn btn-icon btn-outline-secondary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						</span>
+					</div>
+				</form>
+				<a wicket:id="runJob" class="btn btn-primary btn-icon flex-shrink-0 ml-3" title="Run job"><wicket:svg href="play" class="icon"/></a>
+			</div>
 			<div class="mb-4">
 				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray d-inline-block mb-2 mr-4 text-nowrap">
 					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries

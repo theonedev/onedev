@@ -23,11 +23,12 @@ public class JobPermission implements Permission {
 			jobNamesPatternSet = PatternSet.parse(jobNames);
 		return jobNamesPatternSet;
 	}
+	
 	@Override
 	public boolean implies(Permission p) {
 		if (p instanceof JobPermission) {
 			JobPermission jobPermission = (JobPermission) p;
-			return getJobNamesPatternSet().matches(new StringMatcher(), jobPermission.jobNames) 
+			return (jobPermission.jobNames == null || getJobNamesPatternSet().matches(new StringMatcher(), jobPermission.jobNames)) 
 					&& privilege.implies(jobPermission.privilege);
 		} 
 		return false;

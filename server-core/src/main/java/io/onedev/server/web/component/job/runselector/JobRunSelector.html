@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="job-run-selector py-4 px-3">
+		<div class="mb-3 font-weight-bold font-size-lg border-bottom pb-3">Select Job</div>
+		<div class="d-flex align-items-center">
+			<input wicket:id="search" class="form-control form-control-sm job" placeholder="Search job"></input>
+			<wicket:svg href="magnify" class="icon text-muted icon-magnify"></wicket:svg>
+		</div>
+		<ul wicket:id="jobs" class="list-unstyled jobs overflow-auto mb-0 mt-3">
+			<li wicket:id="jobs" class="job selectable">
+				<a wicket:id="link"><span wicket:id="label"></span></a>
+			</li>
+		</ul>
+		<div wicket:id="noJobs" class="no-jobs mb-0 mt-4"><div class=" alert alert-notice alert-light-warning">No jobs found</div></div>
+	</div>
+</wicket:panel>

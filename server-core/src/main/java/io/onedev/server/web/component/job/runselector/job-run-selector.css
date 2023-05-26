@@ -1,0 +1,13 @@
+.job-run-selector .jobs, .job-run-selector .no-jobs {
+	height: 400px;
+}
+
+.job-run-selector {
+	min-width: 250px;
+}
+.job-run-selector input {
+	padding-right: 2rem;
+}
+.job-run-selector input+.icon {
+	margin-left: -1.8rem;
+}

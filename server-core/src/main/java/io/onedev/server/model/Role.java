@@ -2,6 +2,10 @@ package io.onedev.server.model;
 
 import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
+import io.onedev.server.annotation.ChoiceProvider;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.RoleName;
+import io.onedev.server.annotation.ShowCondition;
 import io.onedev.server.entitymanager.LinkSpecManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.role.AllIssueFields;
@@ -12,18 +16,11 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.*;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.facade.RoleFacade;
-import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.RoleName;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.ShowCondition;
 import org.apache.shiro.authz.Permission;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -35,9 +32,8 @@ import java.util.*;
 @Entity
 @Table(indexes={@Index(columnList="name")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-@ClassValidating
 @Editable
-public class Role extends AbstractEntity implements Permission, Validatable {
+public class Role extends AbstractEntity implements Permission {
 
 	private static final long serialVersionUID = 1L;
 
@@ -373,34 +369,6 @@ public class Role extends AbstractEntity implements Permission, Validatable {
 		}
 		
 		return permissions;
-	}
-
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		boolean isValid = true;
-		if (!isManageProject() && !isManagePullRequests() && !isManageCodeComments() && getCodePrivilege() == CodePrivilege.NONE) {
-			if (isManageBuilds()) {
-				isValid = false;
-				context.disableDefaultConstraintViolation();
-				context.buildConstraintViolationWithTemplate("Code read privilege is required to manage builds")
-						.addPropertyNode("manageBuilds").addConstraintViolation();
-			} else {
-				for (JobPrivilege privilege: getJobPrivileges()) {
-					if (privilege.isManageJob()) {
-						isValid = false;
-						context.disableDefaultConstraintViolation();
-						context.buildConstraintViolationWithTemplate("Code read privilege is required to manage jobs")
-								.addPropertyNode("jobPrivileges").addConstraintViolation();
-					} else if (privilege.isRunJob()) {
-						isValid = false;
-						context.disableDefaultConstraintViolation();
-						context.buildConstraintViolationWithTemplate("Code read privilege is required to run jobs")
-								.addPropertyNode("jobPrivileges").addConstraintViolation();
-					}
-				}
-			}
-		}
-		return isValid;
 	}
 	
 }

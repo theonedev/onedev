@@ -1,9 +1,17 @@
 package io.onedev.server.web.component.project.selector;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.util.facade.ProjectCache;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
+import io.onedev.server.web.behavior.InputChangeBehavior;
+import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
+import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
+import io.onedev.server.web.component.project.ProjectAvatar;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -18,23 +26,14 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.util.Similarities;
-import io.onedev.server.util.facade.ProjectCache;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.asset.selectbytyping.SelectByTypingResourceReference;
-import io.onedev.server.web.behavior.InputChangeBehavior;
-import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
-import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
-import io.onedev.server.web.component.project.ProjectAvatar;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import javax.annotation.Nullable;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class ProjectSelector extends Panel {
@@ -75,6 +74,18 @@ public abstract class ProjectSelector extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new Label("title", new AbstractReadOnlyModel<>() {
+			@Override
+			public Object getObject() {
+				return getTitle();
+			}
+		}) {
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getTitle() != null);
+			}
+		});
 		WebMarkupContainer projectsContainer = new WebMarkupContainer("projects") {
 
 			@Override
@@ -137,7 +148,7 @@ public abstract class ProjectSelector extends Panel {
 		noProjectsContainer.setOutputMarkupPlaceholderTag(true);
 		add(noProjectsContainer);
 		
-		searchField = new TextField<String>("search", Model.of(""));
+		searchField = new TextField<>("search", Model.of(""));
 		add(searchField);
 		searchField.add(new InputChangeBehavior() {
 			
@@ -208,6 +219,11 @@ public abstract class ProjectSelector extends Panel {
 	
 	@Nullable
 	protected Project getCurrent() {
+		return null;
+	}
+	
+	@Nullable
+	protected String getTitle() {
 		return null;
 	}
 	
