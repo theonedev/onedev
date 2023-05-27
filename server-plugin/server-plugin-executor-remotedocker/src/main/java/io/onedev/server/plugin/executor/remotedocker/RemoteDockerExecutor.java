@@ -2,7 +2,6 @@ package io.onedev.server.plugin.executor.remotedocker;
 
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageTypes;
-import io.onedev.agent.WebsocketUtils;
 import io.onedev.agent.job.DockerJobData;
 import io.onedev.agent.job.TestDockerJobData;
 import io.onedev.commons.utils.ExplicitException;
@@ -124,7 +123,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(),
 							services, registryLogins, isMountDockerSock(), getDockerSockPath(),
-							getCpuLimit(), getMemoryLimit(), getRunOptions());
+							getCpuLimit(), getMemoryLimit(), getRunOptions(), getNetworkOptions());
 
 					try {
 						call(agentSession, jobData, jobContext.getTimeout()*1000L);

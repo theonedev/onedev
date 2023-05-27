@@ -29,7 +29,6 @@ import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.validation.Validatable;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.lang3.SystemUtils;
@@ -66,6 +65,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	private boolean mountDockerSock;
 	
 	private String dockerSockPath;
+	
+	private String networkOptions;
 	
 	private String cpuLimit;
 	
@@ -125,6 +126,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.mountDockerSock = mountDockerSock;
 	}
 
+	@Editable(order=530, group="More Settings", description = "Optionally specify docker options to create network. " +
+			"Multiple options should be separated by space, and single option containing spaces should be quoted")
+	public String getNetworkOptions() {
+		return networkOptions;
+	}
+
+	public void setNetworkOptions(String networkOptions) {
+		this.networkOptions = networkOptions;
+	}
+
 	@Editable(order=50010, group="More Settings", placeholder = "No limit", description = "" +
 			"Optionally specify cpu limit of jobs/services using this executor. This will be " +
 			"used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a> " +
@@ -149,7 +160,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.memoryLimit = memoryLimit;
 	}
 
-	@Editable(order=50050, group="More Settings", description="Optionally specify options to run container")
+	@Editable(order=50050, group="More Settings", description="Optionally specify docker options to run container. " +
+			"Multiple options should be separated by space, and single option containing spaces should be quoted")
 	public String getRunOptions() {
 		return runOptions;
 	}
@@ -254,7 +266,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 						login(jobLogger);
 
-						createNetwork(newDocker(), network, jobLogger);
+						createNetwork(newDocker(), network, getNetworkOptions(), jobLogger);
 						try {
 							OsInfo osInfo = OneDev.getInstance(OsInfo.class);
 
@@ -609,12 +621,23 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			String reservedOptions[] = new String[] {"-w", "--workdir", "-d", "--detach", "-a", "--attach", "-t", "--tty", 
 					"-i", "--interactive", "--rm", "--restart", "--name"}; 
 			if (hasOptions(arguments, reservedOptions)) {
-				StringBuilder errorMessage = new StringBuilder("Can not use options: "
+				StringBuilder errorMessage = new StringBuilder("Can not use reserved options: "
 						+ Joiner.on(", ").join(reservedOptions));
 				context.buildConstraintViolationWithTemplate(errorMessage.toString())
 						.addPropertyNode("runOptions").addConstraintViolation();
 				isValid = false;
 			} 
+		}
+		if (getNetworkOptions() != null) {
+			String[] arguments = StringUtils.parseQuoteTokens(getNetworkOptions());
+			String reservedOptions[] = new String[] {"-d", "--driver"};
+			if (hasOptions(arguments, reservedOptions)) {
+				StringBuilder errorMessage = new StringBuilder("Can not use reserved options: "
+						+ Joiner.on(", ").join(reservedOptions));
+				context.buildConstraintViolationWithTemplate(errorMessage.toString())
+						.addPropertyNode("networkOptions").addConstraintViolation();
+				isValid = false;
+			}
 		}
 		if (!isValid)
 			context.disableDefaultConstraintViolation();
