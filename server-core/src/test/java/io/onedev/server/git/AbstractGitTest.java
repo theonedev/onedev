@@ -44,9 +44,17 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 			throw new RuntimeException(e);
 		}
 		
-		git.getRepository().getConfig().setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, 
+		var config = git.getRepository().getConfig();
+		config.setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, 
 				ConfigConstants.CONFIG_KEY_ALGORITHM, SupportedAlgorithm.HISTOGRAM);
-		
+		config.setBoolean(ConfigConstants.CONFIG_COMMIT_SECTION, null, 
+				ConfigConstants.CONFIG_KEY_GPGSIGN, false);
+		try {
+			config.save();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
 		Mockito.when(AppLoader.getInstance(GitLocation.class)).thenReturn(new GitLocation() {
 
 			private static final long serialVersionUID = 1L;
