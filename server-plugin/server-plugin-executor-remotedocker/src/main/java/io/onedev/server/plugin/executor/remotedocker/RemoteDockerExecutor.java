@@ -195,7 +195,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				}
 
 				TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken,
-						testData.getDockerImage(), registryLogins, getRunOptions());
+						testData.getDockerImage(), getDockerSockPath(), registryLogins, 
+						getRunOptions());
 
 				long timeout = 300*1000L;
 				if (getLogManager().getJobLogger(jobToken) == null) {

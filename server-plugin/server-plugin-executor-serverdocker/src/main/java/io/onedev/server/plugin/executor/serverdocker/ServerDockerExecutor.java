@@ -102,7 +102,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.concurrency = concurrency;
 	}
 
-	@Editable(order=500, group="More Settings", description="Whether or not to mount docker sock into job container to "
+	@Editable(order=510, group="More Settings", placeholder="Default", description="Optionally specify docker sock to use. "
+			+ "Defaults to <i>/var/run/docker.sock</i> on Linux, and <i>//./pipe/docker_engine</i> on Windows")
+	public String getDockerSockPath() {
+		return dockerSockPath;
+	}
+
+	public void setDockerSockPath(String dockerSockPath) {
+		this.dockerSockPath = dockerSockPath;
+	}
+
+	@Editable(order=520, group="More Settings", description="Whether or not to mount docker sock into job container to "
 			+ "support docker operations in job commands, for instance to build docker image.<br>"
 			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of whole OneDev "
 			+ "by operating the mounted docker sock. You should configure job requirement above to make sure the " +
@@ -113,22 +123,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	public void setMountDockerSock(boolean mountDockerSock) {
 		this.mountDockerSock = mountDockerSock;
-	}
-	
-	@SuppressWarnings("unused")
-	private static boolean isMountDockerSockEnabled() {
-		return (Boolean)EditContext.get().getInputValue("mountDockerSock");
-	}
-
-	@Editable(order=510, group="More Settings", placeholder="Default", description="Optionally specify docker sock path to mount from. "
-			+ "Defaults to <i>/var/run/docker.sock</i> on Linux, and <i>//./pipe/docker_engine</i> on Windows")
-	@ShowCondition("isMountDockerSockEnabled")
-	public String getDockerSockPath() {
-		return dockerSockPath;
-	}
-
-	public void setDockerSockPath(String dockerSockPath) {
-		this.dockerSockPath = dockerSockPath;
 	}
 
 	@Editable(order=50010, group="More Settings", placeholder = "No limit", description = "" +
@@ -176,12 +170,15 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	private Commandline newDocker() {
+		Commandline docker;
 		if (getDockerExecutable() != null)
-			return new Commandline(getDockerExecutable());
+			docker = new Commandline(getDockerExecutable());
 		else if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/docker").exists())
-			return new Commandline("/usr/local/bin/docker");
+			docker = new Commandline("/usr/local/bin/docker");
 		else
-			return new Commandline("docker");
+			docker = new Commandline("docker");
+		useDockerSock(docker, getDockerSockPath());
+		return docker;
 	}
 	
 	private File getCacheHome(JobExecutor jobExecutor) {
