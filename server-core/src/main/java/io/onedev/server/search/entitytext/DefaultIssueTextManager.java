@@ -18,7 +18,6 @@ import io.onedev.server.util.lucene.BooleanQueryBuilder;
 import io.onedev.server.util.lucene.LuceneUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.Term;
@@ -41,7 +40,6 @@ import static io.onedev.server.util.criteria.Criteria.forManyValues;
 import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.lucene.document.Field.Store.NO;
-import static org.apache.lucene.document.LongPoint.newExactQuery;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 
@@ -85,7 +83,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 	
 	@Override
 	protected int getIndexVersion() {
-		return 6;
+		return 7;
 	}
 
 	@Override
@@ -95,12 +93,11 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 
 	@Override
 	protected void addFields(Document entityDoc, Issue entity) {
-		entityDoc.add(new LongPoint(FIELD_NUMBER, entity.getNumber()));
+		entityDoc.add(new StringField(FIELD_NUMBER, valueOf(entity.getNumber()), NO));
 		entityDoc.add(new StringField(FIELD_CONFIDENTIAL, valueOf(entity.isConfidential()), NO));
 		entityDoc.add(new TextField(FIELD_TITLE, entity.getTitle(), NO));
 		if (entity.getDescription() != null)
 			entityDoc.add(new TextField(FIELD_DESCRIPTION, entity.getDescription(), NO));
-		StringBuilder builder = new StringBuilder();
 		for (var comment: entity.getComments()) {
 			if (!comment.getUser().equals(userManager.getSystem()))
 				entityDoc.add(new TextField(FIELD_COMMENT, comment.getContent(), NO));
@@ -152,7 +149,7 @@ public class DefaultIssueTextManager extends ProjectTextManager<Issue> implement
 				numberString = numberString.substring(1);
 			try {
 				long number = Long.parseLong(numberString);
-				contentQueryBuilder.add(new BoostQuery(newExactQuery(FIELD_NUMBER, number), 1f), SHOULD);
+				contentQueryBuilder.add(new BoostQuery(getTermQuery(FIELD_NUMBER, valueOf(number)), 1f), SHOULD);
 			} catch (NumberFormatException ignored) {
 			}
 

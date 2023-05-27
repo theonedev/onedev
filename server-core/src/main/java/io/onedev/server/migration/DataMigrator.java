@@ -5344,5 +5344,56 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate123(File dataDir, Stack<Integer> versions) {
+		var issueTouchesDoc = new VersionedXmlDoc();
+		var issueTouchesElement = issueTouchesDoc.addElement("list");
+		var pullRequestTouchesDoc = new VersionedXmlDoc();
+		var pullRequestTouchesElement = pullRequestTouchesDoc.addElement("list");
+		var codeCommentTouchesDoc = new VersionedXmlDoc();
+		var codeCommentTouchesElement = codeCommentTouchesDoc.addElement("list");
+		
+		var issueTouchId = 1L;
+		var pullRequestTouchId = 1L;
+		var codeCommentTouchId = 1L;
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					var issueTouchElement = issueTouchesElement.addElement("io.onedev.server.model.IssueTouch");
+					issueTouchElement.addAttribute("revision", "0.0.0");
+					issueTouchElement.addElement("id").setText(String.valueOf(issueTouchId++));
+					issueTouchElement.addElement("project").setText(element.elementTextTrim("project"));
+					issueTouchElement.addElement("issueId").setText(element.elementTextTrim("id"));
+				}
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					var pullRequestTouchElement = pullRequestTouchesElement.addElement("io.onedev.server.model.PullRequestTouch");
+					pullRequestTouchElement.addAttribute("revision", "0.0.0");
+					pullRequestTouchElement.addElement("id").setText(String.valueOf(pullRequestTouchId++));
+					pullRequestTouchElement.addElement("project").setText(element.elementTextTrim("targetProject"));
+					pullRequestTouchElement.addElement("requestId").setText(element.elementTextTrim("id"));
+				}
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					var codeCommentTouchElement = codeCommentTouchesElement.addElement("io.onedev.server.model.CodeCommentTouch");
+					codeCommentTouchElement.addAttribute("revision", "0.0.0");
+					codeCommentTouchElement.addElement("id").setText(String.valueOf(codeCommentTouchId++));
+					codeCommentTouchElement.addElement("project").setText(element.elementTextTrim("project"));
+					codeCommentTouchElement.addElement("commentId").setText(element.elementTextTrim("id"));
+				}
+			} else if (file.getName().startsWith("IssueTouchs.xml")
+					|| file.getName().startsWith("PullRequestTouchs.xml")
+					|| file.getName().startsWith("CodeCommentTouchs.xml")) {
+				FileUtils.deleteFile(file);
+			}
+		}
+
+		issueTouchesDoc.writeToFile(new File(dataDir, "IssueTouchs.xml"), true);
+		pullRequestTouchesDoc.writeToFile(new File(dataDir, "PullRequestTouchs.xml"), true);
+		codeCommentTouchesDoc.writeToFile(new File(dataDir, "CodeCommentTouchs.xml"), true);
+	}
 	
 }
