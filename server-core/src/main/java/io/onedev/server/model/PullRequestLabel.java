@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.EntityLabel;
+import io.onedev.server.rest.annotation.Api;
 
 @Entity
 @Table(
@@ -25,10 +26,12 @@ public class PullRequestLabel extends EntityLabel {
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
+	@Api(description = "id of <a href='/~help/api/io.onedev.server.rest.PullRequestResource'>pull request</a>")
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	@Api(description = "id of <a href='/~help/api/io.onedev.server.rest.LabelSpecResource'>label spec</a>")
 	private LabelSpec spec;
 
 	public PullRequest getRequest() {

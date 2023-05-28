@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LabelManager;
+import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -20,8 +20,8 @@ public class LabelManagementPage extends AdministrationPage {
 		super(params);
 	}
 
-	private LabelManager getLabelManager() {
-		return OneDev.getInstance(LabelManager.class);
+	private LabelSpecManager getLabelManager() {
+		return OneDev.getInstance(LabelSpecManager.class);
 	}
 	
 	@Override

@@ -52,7 +52,7 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestLabels(String matchWith) {
-		var labelNames = OneDev.getInstance(LabelManager.class).query().stream()
+		var labelNames = OneDev.getInstance(LabelSpecManager.class).query().stream()
 				.map(it->it.getName())
 				.sorted()
 				.collect(Collectors.toList());

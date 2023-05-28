@@ -17,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.model.BuildLabel;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 
@@ -58,6 +59,16 @@ public class BuildResource {
     	return build;
     }
 
+	@Api(order=150, description = "Get list of <a href='/~help/api/io.onedev.server.rest.BuildLabelResource'>labels</a>")
+	@Path("/{buildId}/labels")
+	@GET
+	public Collection<BuildLabel> getLabels(@PathParam("buildId") Long buildId) {
+		Build build = buildManager.load(buildId);
+		if (!SecurityUtils.canAccess(build))
+			throw new UnauthorizedException();
+		return build.getLabels();
+	}
+	
 	@Api(order=200)
 	@Path("/{buildId}/params")
     @GET
@@ -108,7 +119,7 @@ public class BuildResource {
 	@Api(order=600)
 	@GET
     public List<Build> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/builds'>builds page</a>", example="\"Number\" is \"projectName#100\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~builds'>builds page</a>", example="\"Number\" is \"projectName#100\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		

@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.persistence.dao.EntityManager;
 
-public interface LabelManager extends EntityManager<LabelSpec> {
+public interface LabelSpecManager extends EntityManager<LabelSpec> {
 	
 	@Nullable
 	LabelSpec find(String name);
@@ -16,6 +16,10 @@ public interface LabelManager extends EntityManager<LabelSpec> {
 	
 	List<LabelSpec> query(@Nullable String term, int firstResult, int maxResults);
 
-	void sync(List<LabelSpec> labels);
+	void sync(List<LabelSpec> labelSpecs);
+	
+	void create(LabelSpec labelSpec);
+	
+	void update(LabelSpec labelSpec);
 	
 }

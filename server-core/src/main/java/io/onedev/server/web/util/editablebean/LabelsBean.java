@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.LabelManager;
+import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.model.support.LabelSupport;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
@@ -30,7 +30,7 @@ public class LabelsBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getLabelChoices() {
-		var labels = OneDev.getInstance(LabelManager.class).query();
+		var labels = OneDev.getInstance(LabelSpecManager.class).query();
 		return labels.stream().map(it->it.getName()).sorted().collect(Collectors.toList());
 	}
 	

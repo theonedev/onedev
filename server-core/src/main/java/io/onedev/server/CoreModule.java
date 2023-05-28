@@ -284,7 +284,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(DashboardUserShareManager.class).to(DefaultDashboardUserShareManager.class);
 		bind(DashboardGroupShareManager.class).to(DefaultDashboardGroupShareManager.class);
 		bind(DashboardVisitManager.class).to(DefaultDashboardVisitManager.class);
-		bind(LabelManager.class).to(DefaultLabelManager.class);
+		bind(LabelSpecManager.class).to(DefaultLabelSpecManager.class);
 		bind(ProjectLabelManager.class).to(DefaultProjectLabelManager.class);
 		bind(BuildLabelManager.class).to(DefaultBuildLabelManager.class);
 		bind(PullRequestLabelManager.class).to(DefaultPullRequestLabelManager.class);

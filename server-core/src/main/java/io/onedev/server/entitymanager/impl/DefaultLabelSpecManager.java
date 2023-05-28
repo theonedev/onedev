@@ -6,11 +6,12 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.base.Preconditions;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.server.entitymanager.LabelManager;
+import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -19,10 +20,10 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
-public class DefaultLabelManager extends BaseEntityManager<LabelSpec> implements LabelManager {
+public class DefaultLabelSpecManager extends BaseEntityManager<LabelSpec> implements LabelSpecManager {
 
 	@Inject
-    public DefaultLabelManager(Dao dao) {
+    public DefaultLabelSpecManager(Dao dao) {
         super(dao);
     }
 
@@ -58,13 +59,26 @@ public class DefaultLabelManager extends BaseEntityManager<LabelSpec> implements
 
 	@Transactional
 	@Override
-	public void sync(List<LabelSpec> labels) {
-		for (var label: labels) 
+	public void sync(List<LabelSpec> labelSpecs) {
+		for (var label: labelSpecs) 
 			dao.persist(label);
 		for (var existingLabel: query()) {
-			if (!labels.contains(existingLabel))
+			if (!labelSpecs.contains(existingLabel))
 				delete(existingLabel);
 		}
 	}
-	
+
+	@Transactional
+	@Override
+	public void create(LabelSpec labelSpec) {
+		Preconditions.checkState(labelSpec.isNew());
+		dao.persist(labelSpec);
+	}
+
+	@Transactional
+	@Override
+	public void update(LabelSpec labelSpec) {
+		Preconditions.checkState(!labelSpec.isNew());
+		dao.persist(labelSpec);
+	}
 }

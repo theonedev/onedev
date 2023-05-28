@@ -111,7 +111,7 @@ public class MethodDetailPage extends ApiHelpPage {
 		add(new Label("title", getMethodTitle(getResourceMethod())));
 		
 		String description = getMethodDescription(method);
-		add(new Label("description", description).setVisible(description!=null));
+		add(new Label("description", description).setEscapeModelStrings(false).setVisible(description!=null));
 
 		String httpMethod = getHttpMethod(method);
 		add(new Label("method", httpMethod));

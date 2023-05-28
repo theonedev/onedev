@@ -3,12 +3,10 @@ package io.onedev.server.entitymanager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.server.entitymanager.LabelManager;
+import com.google.common.base.Preconditions;
+import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.entitymanager.PullRequestLabelManager;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.LabelSpec;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestLabel;
+import io.onedev.server.model.*;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
@@ -16,8 +14,8 @@ public class DefaultPullRequestLabelManager extends BaseEntityLabelManager<PullR
 		implements PullRequestLabelManager {
 
 	@Inject
-    public DefaultPullRequestLabelManager(Dao dao, LabelManager labelManager) {
-        super(dao, labelManager);
+    public DefaultPullRequestLabelManager(Dao dao, LabelSpecManager labelSpecManager) {
+        super(dao, labelSpecManager);
     }
 
 	@Override
@@ -28,4 +26,10 @@ public class DefaultPullRequestLabelManager extends BaseEntityLabelManager<PullR
 		return label;
 	}
 
+	@Override
+	public void create(PullRequestLabel pullRequestLabel) {
+		Preconditions.checkState(pullRequestLabel.isNew());
+		dao.persist(pullRequestLabel);
+	}
+	
 }

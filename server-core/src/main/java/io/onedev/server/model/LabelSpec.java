@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
+import io.onedev.server.rest.annotation.Api;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -33,6 +34,7 @@ public class LabelSpec extends AbstractEntity {
 	private String name;
 	
 	@Column(nullable=false)
+	@Api(example = "#0d87e9")
 	private String color = "#0d87e9";
 	
 	@OneToMany(mappedBy="spec", cascade=CascadeType.REMOVE)

@@ -3,7 +3,8 @@ package io.onedev.server.entitymanager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.server.entitymanager.LabelManager;
+import com.google.common.base.Preconditions;
+import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.entitymanager.ProjectLabelManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.LabelSpec;
@@ -15,8 +16,8 @@ import io.onedev.server.persistence.dao.Dao;
 public class DefaultProjectLabelManager extends BaseEntityLabelManager<ProjectLabel> implements ProjectLabelManager {
 	
 	@Inject
-    public DefaultProjectLabelManager(Dao dao, LabelManager labelManager) {
-        super(dao, labelManager);
+    public DefaultProjectLabelManager(Dao dao, LabelSpecManager labelSpecManager) {
+        super(dao, labelSpecManager);
     }
 
 	@Override
@@ -27,4 +28,10 @@ public class DefaultProjectLabelManager extends BaseEntityLabelManager<ProjectLa
 		return label;
 	}
 
+	@Override
+	public void create(ProjectLabel projectLabel) {
+		Preconditions.checkState(projectLabel.isNew());
+		dao.persist(projectLabel);
+	}
+	
 }

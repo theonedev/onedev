@@ -25,6 +25,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.model.*;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
@@ -35,10 +36,6 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.git.GitContribution;
 import io.onedev.server.git.GitContributor;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.model.GroupAuthorization;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.code.BranchProtection;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
@@ -167,11 +164,21 @@ public class ProjectResource {
 			throw new UnauthorizedException();
     	return project.getUserAuthorizations();
     }
+
+	@Api(order=600, description = "Get list of <a href='/~help/api/io.onedev.server.rest.ProjectLabelResource'>labels</a>")
+	@Path("/{projectId}/labels")
+	@GET
+	public Collection<ProjectLabel> getLabels(@PathParam("projectId") Long projectId) {
+		Project project = projectManager.load(projectId);
+		if (!SecurityUtils.canAccess(project))
+			throw new UnauthorizedException();
+		return project.getLabels();
+	}
 	
 	@Api(order=700)
 	@GET
     public List<Project> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/projects'>projects page</a>", example="\"Name\" is \"projectName\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~projects'>projects page</a>", example="\"Name\" is \"projectName\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		

@@ -70,6 +70,16 @@ public class PullRequestResource {
     	return pullRequest;
     }
 
+	@Api(order=150, description = "Get list of <a href='/~help/api/io.onedev.server.rest.PullRequestLabelResource'>labels</a>")
+	@Path("/{requestId}/labels")
+	@GET
+	public Collection<PullRequestLabel> getLabels(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+		if (!SecurityUtils.canReadCode(pullRequest.getProject()))
+			throw new UnauthorizedException();
+		return pullRequest.getLabels();
+	}
+
 	@Api(order=200)
 	@Path("/{requestId}/merge-preview")
     @GET
@@ -165,7 +175,7 @@ public class PullRequestResource {
 	@Api(order=1100)
 	@GET
     public List<PullRequest> queryBasicInfo(
-    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/pulls'>pull requests page</a>", example="\"Number\" is \"projectName#100\"") String query, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/~pulls'>pull requests page</a>", example="\"Number\" is \"projectName#100\"") String query, 
     		@QueryParam("offset") @Api(example="0") int offset, 
     		@QueryParam("count") @Api(example="100") int count) {
 		

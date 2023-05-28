@@ -1,6 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
-import io.onedev.server.entitymanager.LabelManager;
+import io.onedev.server.entitymanager.LabelSpecManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.LabelSpec;
 import io.onedev.server.model.support.EntityLabel;
@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 
 public abstract class BaseEntityLabelManager<T extends EntityLabel> extends BaseEntityManager<T> {
 
-	private final LabelManager labelManager;
+	private final LabelSpecManager labelSpecManager;
 	
 	@Inject
-    public BaseEntityLabelManager(Dao dao, LabelManager labelManager) {
+    public BaseEntityLabelManager(Dao dao, LabelSpecManager labelSpecManager) {
         super(dao);
-        this.labelManager = labelManager;
+        this.labelSpecManager = labelSpecManager;
     }
 
 	@Transactional
@@ -36,7 +36,7 @@ public abstract class BaseEntityLabelManager<T extends EntityLabel> extends Base
 				.map(it->it.getSpec().getName())
 				.collect(Collectors.toSet());
 		labelNames.stream().filter(it->!existingLabelNames.contains(it)).forEach(it-> {
-			var label = newEntityLabel((AbstractEntity) entity, labelManager.find(it));
+			var label = newEntityLabel((AbstractEntity) entity, labelSpecManager.find(it));
 			dao.persist(label);
 			entity.getLabels().add(label);
 		});
