@@ -31,6 +31,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
+
 @Editable
 @Horizontal
 public class BranchProtection implements Serializable {
@@ -38,8 +41,8 @@ public class BranchProtection implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private static final Pattern CONVENTIONAL_COMMIT_SUBJECT = Pattern.compile(
-			"([\\w\\-.]+)\\s*(\\(([\\w\\s\\-./,]+)\\)\\s*)?(!\\s*)?:.+", 
-			Pattern.UNICODE_CHARACTER_CLASS);
+			"(([\\w\\-.]+)\\s*(\\(([\\w\\s\\-./,]+)\\)\\s*)?(!\\s*)?:.+)|(revert\\s+\".*\")", 
+			UNICODE_CHARACTER_CLASS | CASE_INSENSITIVE);
 
 	private boolean enabled = true;
 	
@@ -404,31 +407,33 @@ public class BranchProtection implements Serializable {
 		if (!merged && enforceConventionalCommits) {
 			var matcher = CONVENTIONAL_COMMIT_SUBJECT.matcher(lines.get(0));
 			if (matcher.matches()) {
-				var type = matcher.group(1);
-				if (!commitTypes.isEmpty() && !commitTypes.contains(type))
-					return "Line 1: Unexpected type '" + type + "': Should be one of [" + Joiner.on(',').join(commitTypes) + "]";
-				var scopes = matcher.group(3);
-				if (scopes != null) {
-					var scopeFound = false;
-					for (var scope: StringUtils.split(scopes, " /,")) {
-						if (!commitScopes.isEmpty() && !commitScopes.contains(scope))
-							return "Line 1: Unexpected scope '" + scope + "': Should be one of [" + Joiner.on(',').join(commitScopes) + "]";
-						scopeFound = true;
+				if (matcher.group(1) != null) {
+					var type = matcher.group(2);
+					if (!commitTypes.isEmpty() && !commitTypes.contains(type))
+						return "Line 1: Unexpected type '" + type + "': Should be one of [" + Joiner.on(',').join(commitTypes) + "]";
+					var scopes = matcher.group(4);
+					if (scopes != null) {
+						var scopeFound = false;
+						for (var scope : StringUtils.split(scopes, " /,")) {
+							if (!commitScopes.isEmpty() && !commitScopes.contains(scope))
+								return "Line 1: Unexpected scope '" + scope + "': Should be one of [" + Joiner.on(',').join(commitScopes) + "]";
+							scopeFound = true;
+						}
+						if (!scopeFound)
+							return "Line 1: Scope not specified";
 					}
-					if (!scopeFound)
-						return "Line 1: Scope not specified";
 				}
 			} else {
-				return "Line 1: Subject is expected of format: <type>[optional (scope)][!]: <description>";
+				return "Line 1: Subject is expected of either a git revert message, or format: <type>[optional (scope)][!]: <description>";
 			}
-		
-			for (int i=1; i<lines.size(); i++) {
-				var line = lines.get(i);
-				if (line.length() != 0) {
-					if (i != 2) 
-						return "One and only one blank line is expected between subject and body/footer";
-					break;
-				}
+		}
+	
+		for (int i=1; i<lines.size(); i++) {
+			var line = lines.get(i);
+			if (line.length() != 0) {
+				if (i != 2) 
+					return "One and only one blank line is expected between subject and body/footer";
+				break;
 			}
 		}
 		if (maxCommitMessageLineLength != null) {
