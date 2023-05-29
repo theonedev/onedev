@@ -1,61 +1,85 @@
 package io.onedev.server.web.component.user.accesstoken;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
-import io.onedev.server.util.CryptoUtils;
+import io.onedev.server.model.support.AccessToken;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
-import io.onedev.server.web.util.ConfirmClickModifier;
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+
+import java.util.Date;
+
+import static io.onedev.server.util.DateUtils.formatDate;
 
 @SuppressWarnings("serial")
-public abstract class AccessTokenPanel extends Panel {
+abstract class AccessTokenPanel extends Panel {
 
-	public AccessTokenPanel(String id) {
+	private final AccessToken accessToken;
+	
+	public AccessTokenPanel(String id, AccessToken accessToken) {
 		super(id);
+		this.accessToken = accessToken;
 	}
 
-	protected abstract User getUser();
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		IModel<String> valueModel = new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getUser().getAccessToken();
-			}
-			
-		};
-		add(new TextField<String>("value", valueModel) {
+		
+		add(new Label("value", accessToken.getMaskedValue()));
+		add(new CopyToClipboardLink("copy", Model.of(accessToken.getValue())));
+		add(new AjaxLink<Void>("edit") {
 
 			@Override
-			protected String[] getInputTypes() {
-				return new String[] {"password"};
+			public void onClick(AjaxRequestTarget target) {
+				onEdit(target);
 			}
 			
 		});
 		
-		add(new CopyToClipboardLink("copy", valueModel));
-		
-		add(new Link<Void>("regenerate") {
+		add(new AjaxLink<Void>("delete") {
 
 			@Override
-			public void onClick() {
-				getUser().setAccessToken(CryptoUtils.generateSecret());
-				OneDev.getInstance(UserManager.class).update(getUser(), null);
-				Session.get().success("Access token regenerated");
-				setResponsePage(getPage());
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this access token?"));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onDelete(target);
 			}
 			
-		}.add(new ConfirmClickModifier("This will invalidate current token and generate a new one, do you want to continue?")));
+		});
+		
+		if (accessToken.getDescription() != null)
+			add(new MultilineLabel("description", accessToken.getDescription()));
+		else
+			add(new Label("description", "<i>No description</i>").setEscapeModelStrings(false));
+			
+		add(new Label("createdAt", formatDate(accessToken.getCreateDate())));
+		
+		var expireDate = accessToken.getExpireDate();
+		if (expireDate != null) {
+			if (expireDate.before(new Date())) {
+				add(new Label("expiresAt", formatDate(expireDate))
+						.add(AttributeAppender.append("class", "text-danger")));
+			} else {
+				add(new Label("expiresAt", formatDate(expireDate)));
+			}
+		} else {
+			add(new Label("expiresAt", "Never expires"));
+		}
+		
+		setOutputMarkupId(true);
 	}
+	
+	protected abstract void onDelete(AjaxRequestTarget target);
 
+	protected abstract void onEdit(AjaxRequestTarget target);
+	
 }

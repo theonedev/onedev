@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.IMap;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.*;
 import io.onedev.server.event.Listen;
@@ -36,6 +37,7 @@ import javax.inject.Singleton;
 import javax.persistence.criteria.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static io.onedev.server.model.User.*;
 
@@ -61,6 +63,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	private final PasswordService passwordService;
     
 	private volatile UserCache cache;
+	
+	private volatile IMap<String, Long> temporalAccessTokens;
 	
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
@@ -294,17 +298,29 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	
 	@Sessional
     @Override
-    public User findByAccessToken(String accessToken) {
+    public User findByAccessToken(String accessTokenValue) {
 		if (cache != null) {
-			UserFacade facade = cache.findByAccessToken(accessToken);
-			if (facade != null)
+			UserFacade facade = cache.findByAccessToken(accessTokenValue);
+			if (facade != null) {
 				return load(facade.getId());
-			else
-				return null;
+			} else {
+				Long userId = temporalAccessTokens.get(accessTokenValue);
+				if (userId != null)
+					return load(userId);
+				else
+					return null;
+			}
 		} else {
 			throw new ServerNotReadyException();
 		}
     }
+	
+	@Override
+	public String createTemporalAccessToken(Long userId, long secondsToExpire) {
+		var value = CryptoUtils.generateSecret();
+		temporalAccessTokens.put(value, userId, secondsToExpire, TimeUnit.SECONDS);
+		return value;
+	}
 	
 	@Override
 	public List<User> query() {
@@ -323,6 +339,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     @Listen
     public void on(SystemStarting event) {
 		HazelcastInstance hazelcastInstance = clusterManager.getHazelcastInstance();
+		temporalAccessTokens = hazelcastInstance.getMap("temporalAccessTokens");
         cache = new UserCache(hazelcastInstance.getMap("userCache"));
         var cacheInited = hazelcastInstance.getCPSubsystem().getAtomicLong("userCacheInited");
 		clusterManager.init(cacheInited, () -> {

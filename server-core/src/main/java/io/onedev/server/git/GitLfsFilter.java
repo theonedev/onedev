@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.HashingInputStream;
 import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
 import io.onedev.server.cluster.ClusterManager;
 import io.onedev.server.entitymanager.GitLfsLockManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.GitLfsLock;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -285,8 +287,9 @@ public class GitLfsFilter implements Filter {
 						httpResponse.setContentType(CONTENT_TYPE);
 						if (pathInfo.endsWith("/batch")) {
 							String accessToken;
-							if (SecurityUtils.getUser() != null)
-								accessToken = SecurityUtils.getUser().getAccessToken();
+							var user = SecurityUtils.getUser();
+							if (user != null)
+								accessToken = OneDev.getInstance(UserManager.class).createTemporalAccessToken(user.getId(), 300);
 							else 
 								accessToken = null;
 							processBatch(httpRequest, httpResponse, project.getFacade(), 

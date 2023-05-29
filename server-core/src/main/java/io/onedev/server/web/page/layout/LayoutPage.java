@@ -59,7 +59,7 @@ import io.onedev.server.web.page.admin.usermanagement.*;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.help.IncompatibilitiesPage;
 import io.onedev.server.web.page.my.MyPage;
-import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
+import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
@@ -70,7 +70,6 @@ import io.onedev.server.web.page.my.twofactorauthentication.MyTwoFactorAuthentic
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.security.LogoutPage;
 import io.onedev.server.web.util.WicketUtils;
-import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
@@ -507,8 +506,8 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyGpgKeysPage)
 		    item.add(AttributeAppender.append("class", "active"));
 		
-		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAccessToken", MyAccessTokenPage.class));
-		if (getPage() instanceof MyAccessTokenPage)
+		userInfo.add(item = new ViewStateAwarePageLink<Void>("myAccessTokens", MyAccessTokensPage.class));
+		if (getPage() instanceof MyAccessTokensPage)
 		    item.add(AttributeAppender.append("class", "active"));
 		
 		userInfo.add(item = new ViewStateAwarePageLink<Void>("myTwoFactorAuthentication", MyTwoFactorAuthenticationPage.class));

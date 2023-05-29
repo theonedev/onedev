@@ -5396,4 +5396,21 @@ public class DataMigrator {
 		codeCommentTouchesDoc.writeToFile(new File(dataDir, "CodeCommentTouchs.xml"), true);
 	}
 	
+	private void migrate124(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					var accessTokenElement = element.element("accessToken");
+					var accessTokensElement = element.addElement("accessTokens");
+					var newAccessTokenElement = accessTokensElement.addElement("io.onedev.server.model.support.AccessToken");
+					newAccessTokenElement.addElement("value").setText(accessTokenElement.getText().trim());
+					newAccessTokenElement.addElement("createDate").setText("2023-05-28T22:07:56.311+01:00");
+					accessTokenElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

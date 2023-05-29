@@ -82,7 +82,9 @@ public interface UserManager extends EntityManager<User> {
 	User findByFullName(String fullName);
 
 	@Nullable
-	User findByAccessToken(String accessToken);
+	User findByAccessToken(String accessTokenValue);
+
+	String createTemporalAccessToken(Long userId, long secondsToExpire);
 	
 	@Nullable
 	User findByVerifiedEmailAddress(String emailAddress);

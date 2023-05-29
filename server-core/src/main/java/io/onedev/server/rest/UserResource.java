@@ -23,6 +23,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.onedev.server.model.support.AccessToken;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -104,13 +105,13 @@ public class UserResource {
     }
 	
 	@Api(order=250)
-	@Path("/{userId}/access-token")
+	@Path("/{userId}/access-tokens")
     @GET
-    public String getAccessToken(@PathParam("userId") Long userId) {
+    public List<AccessToken> getAccessTokens(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
-		return user.getAccessToken();
+		return user.getAccessTokens();
     }
 	
 	@Api(order=275)

@@ -43,10 +43,12 @@ public class UserCache extends MapProxy<Long, UserFacade> implements Serializabl
 	}
 	
 	@Nullable
-	public UserFacade findByAccessToken(String accessToken) {
+	public UserFacade findByAccessToken(String accessTokenValue) {
 		for (UserFacade facade: values()) {
-			if (accessToken.equals(facade.getAccessToken()))
-				return facade;
+			for (var accessToken: facade.getAccessTokens()) {
+				if (accessTokenValue.equals(accessToken.getValue()) && !accessToken.isExpired())
+					return facade;
+			}
 		}
 		return null;
 	}

@@ -49,7 +49,7 @@ import io.onedev.server.web.page.admin.usermanagement.InvitationListPage;
 import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
 import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
-import io.onedev.server.web.page.admin.usermanagement.accesstoken.UserAccessTokenPage;
+import io.onedev.server.web.page.admin.usermanagement.accesstoken.UserAccessTokensPage;
 import io.onedev.server.web.page.admin.usermanagement.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.usermanagement.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.usermanagement.emailaddresses.UserEmailAddressesPage;
@@ -65,7 +65,7 @@ import io.onedev.server.web.page.help.MethodDetailPage;
 import io.onedev.server.web.page.help.ResourceDetailPage;
 import io.onedev.server.web.page.help.ResourceListPage;
 import io.onedev.server.web.page.issues.IssueListPage;
-import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
+import io.onedev.server.web.page.my.accesstoken.MyAccessTokensPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.emailaddresses.MyEmailAddressesPage;
 import io.onedev.server.web.page.my.gpgkeys.MyGpgKeysPage;
@@ -174,7 +174,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~my/password", MyPasswordPage.class));
 		add(new BasePageMapper("~my/ssh-keys", MySshKeysPage.class));
 		add(new BasePageMapper("~my/gpg-keys", MyGpgKeysPage.class));
-		add(new BasePageMapper("~my/access-token", MyAccessTokenPage.class));
+		add(new BasePageMapper("~my/access-tokens", MyAccessTokensPage.class));
 		add(new BasePageMapper("~my/two-factor-authentication", MyTwoFactorAuthenticationPage.class));
 	}
 
@@ -233,7 +233,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BasePageMapper("~administration/users/${user}/password", UserPasswordPage.class));
 		add(new BasePageMapper("~administration/users/${user}/ssh-keys", UserSshKeysPage.class));
 		add(new BasePageMapper("~administration/users/${user}/gpg-keys", UserGpgKeysPage.class));
-		add(new BasePageMapper("~administration/users/${user}/access-token", UserAccessTokenPage.class));
+		add(new BasePageMapper("~administration/users/${user}/access-tokens", UserAccessTokensPage.class));
 		add(new BasePageMapper("~administration/users/${user}/two-factor-authentication", 
 				UserTwoFactorAuthenticationPage.class));
 		add(new BasePageMapper("~administration/invitations", InvitationListPage.class));

@@ -5,13 +5,13 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
-import io.onedev.server.web.component.user.accesstoken.AccessTokenPanel;
+import io.onedev.server.web.component.user.accesstoken.AccessTokenListPanel;
 import io.onedev.server.web.page.my.MyPage;
 
 @SuppressWarnings("serial")
-public class MyAccessTokenPage extends MyPage {
+public class MyAccessTokensPage extends MyPage {
 
-	public MyAccessTokenPage(PageParameters params) {
+	public MyAccessTokensPage(PageParameters params) {
 		super(params);
 	}
 
@@ -19,7 +19,7 @@ public class MyAccessTokenPage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AccessTokenPanel("accessToken") {
+		add(new AccessTokenListPanel("accessTokens") {
 			
 			@Override
 			protected User getUser() {
@@ -32,7 +32,7 @@ public class MyAccessTokenPage extends MyPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "My Access Token");
+		return new Label(componentId, "My Access Tokens");
 	}
 
 }

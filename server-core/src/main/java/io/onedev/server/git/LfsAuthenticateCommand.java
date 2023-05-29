@@ -91,36 +91,31 @@ public class LfsAuthenticateCommand implements Command, ServerSessionAware {
     public void start(ChannelSession channel, Environment env) throws IOException {
     	SshAuthenticator authenticator = OneDev.getInstance(SshAuthenticator.class);
     	Long userId = authenticator.getPublicKeyOwnerId(session);
-    	OneDev.getInstance(ExecutorService.class).submit(new Runnable() {
-
-			@Override
-			public void run() {
-				SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
-		        sessionManager.openSession(); 
-		        try {
-		        	String accessToken = OneDev.getInstance(UserManager.class).load(userId).getAccessToken();
-		        	String projectPath = StringUtils.strip(StringUtils.substringBefore(
-		        			commandString.substring(COMMAND_PREFIX.length()+1), " "), "/\\");
-		        	Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
-		        	if (project == null)
-		        		throw new ExplicitException("Project not found: " + projectPath);
-		        	String url = OneDev.getInstance(UrlManager.class).cloneUrlFor(project, false);
-		        	Map<Object, Object> response = CollectionUtils.newHashMap(
-		        			"href", url + ".git/info/lfs", 
-		        			"header", CollectionUtils.newHashMap(
-		        					"Authorization", KubernetesHelper.BEARER + " " + accessToken)); 
-		        	out.write(OneDev.getInstance(ObjectMapper.class).writeValueAsBytes(response));
-		        	callback.onExit(0);
-		        } catch (Exception e) {
-		        	logger.error("Error executing " + COMMAND_PREFIX, e);
-		    		new PrintStream(err).println("Check server log for details");
-		    		callback.onExit(-1);
-		        } finally {                
-		            sessionManager.closeSession();
-		        }
+    	OneDev.getInstance(ExecutorService.class).submit(() -> {
+			SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
+			sessionManager.openSession(); 
+			try {
+				String accessToken = OneDev.getInstance(UserManager.class).createTemporalAccessToken(userId, 300);
+				String projectPath = StringUtils.strip(StringUtils.substringBefore(
+						commandString.substring(COMMAND_PREFIX.length()+1), " "), "/\\");
+				Project project = OneDev.getInstance(ProjectManager.class).findByPath(projectPath);
+				if (project == null)
+					throw new ExplicitException("Project not found: " + projectPath);
+				String url = OneDev.getInstance(UrlManager.class).cloneUrlFor(project, false);
+				Map<Object, Object> response = CollectionUtils.newHashMap(
+						"href", url + ".git/info/lfs", 
+						"header", CollectionUtils.newHashMap(
+								"Authorization", KubernetesHelper.BEARER + " " + accessToken)); 
+				out.write(OneDev.getInstance(ObjectMapper.class).writeValueAsBytes(response));
+				callback.onExit(0);
+			} catch (Exception e) {
+				logger.error("Error executing " + COMMAND_PREFIX, e);
+				new PrintStream(err).println("Check server log for details");
+				callback.onExit(-1);
+			} finally {                
+				sessionManager.closeSession();
 			}
-    		
-    	});
+		});
     }
 
     @Override

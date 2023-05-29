@@ -5,7 +5,9 @@ import javax.annotation.Nullable;
 public class EmailAddressFacade extends EntityFacade {
 	
 	private static final long serialVersionUID = 1L;
-
+	
+	private final Long ownerId;
+	
 	private final String value;
 	
 	private final boolean primary;
@@ -14,16 +16,18 @@ public class EmailAddressFacade extends EntityFacade {
 	
 	private final String verificationCode;
 	
-	private final Long ownerId;
-	
-	public EmailAddressFacade(Long id, String value, boolean primary, boolean git, 
-			@Nullable String verificationCode, Long ownerId) {
+	public EmailAddressFacade(Long id, Long ownerId, String value, boolean primary, 
+							  boolean git, @Nullable String verificationCode) {
 		super(id);
+		this.ownerId = ownerId;
 		this.value = value;
 		this.primary = primary;
 		this.git = git;
 		this.verificationCode = verificationCode;
-		this.ownerId = ownerId;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
 	}
 
 	public String getValue() {
@@ -41,10 +45,6 @@ public class EmailAddressFacade extends EntityFacade {
 	@Nullable
 	public String getVerificationCode() {
 		return verificationCode;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
 	}
 
 	public boolean isVerified() {

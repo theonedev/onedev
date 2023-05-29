@@ -3,13 +3,13 @@ package io.onedev.server.web.page.admin.usermanagement.accesstoken;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
-import io.onedev.server.web.component.user.accesstoken.AccessTokenPanel;
+import io.onedev.server.web.component.user.accesstoken.AccessTokenListPanel;
 import io.onedev.server.web.page.admin.usermanagement.UserPage;
 
 @SuppressWarnings("serial")
-public class UserAccessTokenPage extends UserPage {
+public class UserAccessTokensPage extends UserPage {
 
-	public UserAccessTokenPage(PageParameters params) {
+	public UserAccessTokensPage(PageParameters params) {
 		super(params);
 	}
 
@@ -17,11 +17,11 @@ public class UserAccessTokenPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AccessTokenPanel("accessToken") {
+		add(new AccessTokenListPanel("accessTokens") {
 			
 			@Override
 			protected User getUser() {
-				return UserAccessTokenPage.this.getUser();
+				return UserAccessTokensPage.this.getUser();
 			}
 			
 		});

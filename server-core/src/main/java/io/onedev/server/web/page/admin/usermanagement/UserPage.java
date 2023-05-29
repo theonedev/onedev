@@ -23,7 +23,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.usermanagement.accesstoken.UserAccessTokenPage;
+import io.onedev.server.web.page.admin.usermanagement.accesstoken.UserAccessTokensPage;
 import io.onedev.server.web.page.admin.usermanagement.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.usermanagement.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.usermanagement.emailaddresses.UserEmailAddressesPage;
@@ -76,7 +76,7 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("Authorized Projects", "project", UserAuthorizationsPage.class));
 		tabs.add(new UserTab("SSH Keys", "key", UserSshKeysPage.class));
 		tabs.add(new UserTab("GPG Keys", "key", UserGpgKeysPage.class));
-		tabs.add(new UserTab("Access Token", "token", UserAccessTokenPage.class));
+		tabs.add(new UserTab("Access Tokens", "token", UserAccessTokensPage.class));
 		tabs.add(new UserTab("Two-factor Authentication", "shield", UserTwoFactorAuthenticationPage.class));
 		
 		add(new Tabbable("userTabs", tabs));

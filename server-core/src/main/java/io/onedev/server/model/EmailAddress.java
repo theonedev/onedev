@@ -89,8 +89,8 @@ public class EmailAddress extends AbstractEntity {
 
 	@Override
 	public EmailAddressFacade getFacade() {
-		return new EmailAddressFacade(getId(), getValue(), isPrimary(), isGit(), 
-				getVerificationCode(), getOwner().getId());
+		return new EmailAddressFacade(getId(), getOwner().getId(), getValue(), 
+				isPrimary(), isGit(), getVerificationCode());
 	}
 	
 }

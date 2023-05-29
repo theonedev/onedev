@@ -11,6 +11,7 @@ import io.onedev.server.annotation.UserName;
 import io.onedev.server.entitymanager.EmailAddressManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.support.AccessToken;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.TwoFactorAuthentication;
@@ -20,7 +21,6 @@ import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
@@ -43,7 +43,7 @@ import static io.onedev.server.model.User.*;
 @Entity
 @Table(
 		indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_FULL_NAME), 
-				@Index(columnList=PROP_SSO_CONNECTOR), @Index(columnList=PROP_ACCESS_TOKEN)})
+				@Index(columnList=PROP_SSO_CONNECTOR)})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractEntity implements AuthenticationInfo {
@@ -94,10 +94,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	@JsonIgnore
 	private String ssoConnector;
-	
-	@Column(unique=true, nullable=false)
+
 	@JsonIgnore
-	private String accessToken = CryptoUtils.generateSecret();
+	@Lob
+	@Column(length=65535)
+	private ArrayList<AccessToken> accessTokens = new ArrayList<>();
 	
 	@JsonIgnore
 	@Lob
@@ -477,12 +478,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.ssoConnector = ssoConnector;
 	}
 
-	public String getAccessToken() {
-		return accessToken;
+	public ArrayList<AccessToken> getAccessTokens() {
+		return accessTokens;
 	}
 
-	public void setAccessToken(String accessToken) {
-		this.accessToken = accessToken;
+	public void setAccessTokens(ArrayList<AccessToken> accessTokens) {
+		this.accessTokens = accessTokens;
 	}
 
 	@Nullable
@@ -850,7 +851,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Override
 	public UserFacade getFacade() {
-		return new UserFacade(getId(), getName(), getFullName(), getAccessToken());
+		return new UserFacade(getId(), getName(), getFullName(), getAccessTokens());
 	}
 	
 }

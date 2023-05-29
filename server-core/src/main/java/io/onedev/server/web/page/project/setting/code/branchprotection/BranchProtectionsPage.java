@@ -51,14 +51,14 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
 						getProject().getBranchProtections().remove(item.getIndex());
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						getProjectManager().update(getProject());
 						target.add(container);
 					}
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
 						getProject().getBranchProtections().set(item.getIndex(), protection);
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						getProjectManager().update(getProject());
 					}
 					
 				});
@@ -73,7 +73,7 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 				List<BranchProtection> protections = getProject().getBranchProtections();
 				BranchProtection protection = protections.get(from.getItemIndex());
 				protections.set(from.getItemIndex(), protections.set(to.getItemIndex(), protection));
-				OneDev.getInstance(ProjectManager.class).update(getProject());
+				getProjectManager().update(getProject());
 				
 				target.add(container);
 			}
@@ -96,7 +96,7 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 					@Override
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
 						getProject().getBranchProtections().add(protection);
-						OneDev.getInstance(ProjectManager.class).update(getProject());
+						getProjectManager().update(getProject());
 						container.replace(newAddNewFrag());
 						target.add(container);
 					}
@@ -117,7 +117,7 @@ public class BranchProtectionsPage extends ProjectSettingPage {
 		fragment.setOutputMarkupId(true);
 		return fragment;
 	}
-
+	
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "Branch Protection");
