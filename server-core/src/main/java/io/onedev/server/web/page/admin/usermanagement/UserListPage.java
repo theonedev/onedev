@@ -26,6 +26,7 @@ import io.onedev.server.web.page.admin.usermanagement.profile.UserProfilePage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -672,7 +673,7 @@ public class UserListPage extends AdministrationPage {
 					@Override
 					public void onClick() {
 						SecurityUtils.getSubject().runAs(rowModel.getObject().getPrincipals());
-						setResponsePage(HomePage.class);
+						throw new RestartResponseException(HomePage.class);
 					}
 										
 				});

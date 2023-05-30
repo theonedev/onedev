@@ -51,9 +51,13 @@ import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPa
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
-import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
+import io.onedev.server.web.page.project.setting.authorization.GroupAuthorizationsPage;
+import io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
-import io.onedev.server.web.page.project.setting.build.*;
+import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
+import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
+import io.onedev.server.web.page.project.setting.build.JobPropertiesPage;
+import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.code.analysis.CodeAnalysisSettingPage;
 import io.onedev.server.web.page.project.setting.code.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.code.git.GitPackConfigPage;
@@ -254,8 +258,13 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					GeneralProjectSettingPage.class, GeneralProjectSettingPage.paramsOf(getProject())));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Edit Avatar", 
 					AvatarEditPage.class, AvatarEditPage.paramsOf(getProject())));
-			settingMenuItems.add(new SidebarMenuItem.Page(null, "Authorizations", 
-					ProjectAuthorizationsPage.class, ProjectAuthorizationsPage.paramsOf(getProject())));
+
+			List<SidebarMenuItem> authorizationMenuItems = new ArrayList<>();
+			authorizationMenuItems.add(new SidebarMenuItem.Page(null, "By User", 
+					UserAuthorizationsPage.class, UserAuthorizationsPage.paramsOf(getProject())));
+			authorizationMenuItems.add(new SidebarMenuItem.Page(null, "By Group",
+					GroupAuthorizationsPage.class, GroupAuthorizationsPage.paramsOf(getProject())));
+			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Authorization", authorizationMenuItems));
 
 			List<SidebarMenuItem> codeSettingMenuItems = new ArrayList<>();
 			codeSettingMenuItems.add(new SidebarMenuItem.Page(null, "Branch Protection", 

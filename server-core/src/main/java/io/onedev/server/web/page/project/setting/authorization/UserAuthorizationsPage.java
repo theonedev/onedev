@@ -26,9 +26,9 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")
-public class ProjectAuthorizationsPage extends ProjectSettingPage {
+public class UserAuthorizationsPage extends ProjectSettingPage {
 
-	public ProjectAuthorizationsPage(PageParameters params) {
+	public UserAuthorizationsPage(PageParameters params) {
 		super(params);
 	}
 
@@ -36,9 +36,9 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		AuthorizationsBean authorizationsBean = new AuthorizationsBean();
+		UserAuthorizationsBean authorizationsBean = new UserAuthorizationsBean();
 		for (UserAuthorization authorization: getProject().getUserAuthorizations()) {
-			AuthorizationBean authorizationBean = new AuthorizationBean();
+			UserAuthorizationBean authorizationBean = new UserAuthorizationBean();
 			authorizationBean.setUserName(authorization.getUser().getName());
 			authorizationBean.setRoleName(authorization.getRole().getName());
 			authorizationsBean.getAuthorizations().add(authorizationBean);
@@ -50,43 +50,46 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 
-				boolean canManageProject = false; 
-				Project project = getProject();
-				User user = SecurityUtils.getUser();
-				if (user.isRoot()) {
-					canManageProject = true;
-				} else {
-					for (Membership membership: user.getMemberships()) {
-						if (membership.getGroup().isAdministrator()) {
-							canManageProject = true;
-						} else {
-							for (GroupAuthorization authorization: membership.getGroup().getAuthorizations()) {
-								if (authorization.getProject().equals(project) && authorization.getRole().isManageProject()) {
+				if (getProject().getParent() == null 
+						|| !SecurityUtils.canManage(getProject().getParent())) {
+					boolean canManageProject = false;
+					Project project = getProject();
+					User user = SecurityUtils.getUser();
+					if (user.isRoot()) {
+						canManageProject = true;
+					} else {
+						for (Membership membership: user.getMemberships()) {
+							if (membership.getGroup().isAdministrator()) {
+								canManageProject = true;
+							} else {
+								for (GroupAuthorization authorization: membership.getGroup().getAuthorizations()) {
+									if (authorization.getProject().equals(project) && authorization.getRole().isManageProject()) {
+										canManageProject = true;
+										break;
+									}
+								}
+							}
+							if (canManageProject)
+								break;
+						}
+						if (!canManageProject) {
+							for (UserAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
+								if (authorizationBean.getUserName().equals(user.getName())
+										&& OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()).isManageProject()) {
 									canManageProject = true;
 									break;
 								}
 							}
 						}
-						if (canManageProject)
-							break;
 					}
 					if (!canManageProject) {
-						for (AuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
-							if (authorizationBean.getUserName().equals(user.getName()) 
-									&& OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()).isManageProject()) {
-								canManageProject = true;
-								break;
-							}
-						}
+						error("Unable to apply change as otherwise you will not be able to manage this project");
+						return;
 					}
-				}
-				if (!canManageProject) {
-					error("You can not unauthorize yourself as a manager");
-					return;
 				}
 				Set<String> userNames = new HashSet<>();
 				Collection<UserAuthorization> authorizations = new ArrayList<>();
-				for (AuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
+				for (UserAuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
 					if (userNames.contains(authorizationBean.getUserName())) {
 						error("Duplicate authorizations found: " + authorizationBean.getUserName());
 						return;
@@ -112,7 +115,7 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Project Authorizations");
+		return new Label(componentId, "User Authorizations");
 	}
 	
 }

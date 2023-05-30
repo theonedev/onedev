@@ -11,6 +11,8 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -53,6 +55,40 @@ public class DefaultGroupAuthorizationManager extends BaseEntityManager<GroupAut
 			}
 			if (!found) {
 				group.getAuthorizations().add(newAuthorization);
+				dao.persist(newAuthorization);
+			}
+		}
+	}
+
+	@Transactional
+	@Override
+	public void syncAuthorizations(Project project, Collection<GroupAuthorization> authorizations) {
+		for (Iterator<GroupAuthorization> it = project.getGroupAuthorizations().iterator(); it.hasNext();) {
+			GroupAuthorization authorization = it.next();
+			boolean found = false;
+			for (GroupAuthorization newAuthorization: authorizations) {
+				if (newAuthorization.getGroup().equals(authorization.getGroup())) {
+					found = true;
+					authorization.setRole(newAuthorization.getRole());
+					dao.persist(authorization);
+				}
+			}
+			if (!found) {
+				it.remove();
+				delete(authorization);
+			}
+		}
+
+		for (GroupAuthorization newAuthorization: authorizations) {
+			boolean found = false;
+			for (GroupAuthorization authorization: project.getGroupAuthorizations()) {
+				if (authorization.getGroup().equals(newAuthorization.getGroup())) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				project.getGroupAuthorizations().add(newAuthorization);
 				dao.persist(newAuthorization);
 			}
 		}

@@ -7,18 +7,18 @@ import java.util.List;
 import io.onedev.server.annotation.Editable;
 
 @Editable
-public class AuthorizationsBean implements Serializable {
+public class UserAuthorizationsBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<AuthorizationBean> authorizations = new ArrayList<>();
+	private List<UserAuthorizationBean> authorizations = new ArrayList<>();
 
 	@Editable
-	public List<AuthorizationBean> getAuthorizations() {
+	public List<UserAuthorizationBean> getAuthorizations() {
 		return authorizations;
 	}
 
-	public void setAuthorizations(List<AuthorizationBean> authorizations) {
+	public void setAuthorizations(List<UserAuthorizationBean> authorizations) {
 		this.authorizations = authorizations;
 	}
 	

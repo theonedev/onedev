@@ -1,17 +1,14 @@
 package io.onedev.server.web.page.project.setting.authorization;
 
-import java.io.Serializable;
-
-import javax.validation.constraints.Size;
-
-import javax.validation.constraints.NotEmpty;
-
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.RoleChoice;
 import io.onedev.server.annotation.UserChoice;
 
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+
 @Editable
-public class AuthorizationBean implements Serializable {
+public class UserAuthorizationBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,7 +29,7 @@ public class AuthorizationBean implements Serializable {
 
 	@Editable(order=200, name="Role")
 	@RoleChoice
-	@Size(min=1, message="At least one role needs to be specified")
+	@NotEmpty
 	public String getRoleName() {
 		return roleName;
 	}

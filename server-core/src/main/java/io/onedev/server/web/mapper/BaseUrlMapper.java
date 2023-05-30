@@ -50,7 +50,6 @@ import io.onedev.server.web.page.admin.usermanagement.NewInvitationPage;
 import io.onedev.server.web.page.admin.usermanagement.NewUserPage;
 import io.onedev.server.web.page.admin.usermanagement.UserListPage;
 import io.onedev.server.web.page.admin.usermanagement.accesstoken.UserAccessTokensPage;
-import io.onedev.server.web.page.admin.usermanagement.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.usermanagement.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.usermanagement.emailaddresses.UserEmailAddressesPage;
 import io.onedev.server.web.page.admin.usermanagement.gpgkeys.UserGpgKeysPage;
@@ -106,7 +105,7 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
-import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
+import io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
@@ -349,7 +348,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new ProjectPageMapper("${project}/~children", ProjectChildrenPage.class));
 		
 		add(new ProjectPageMapper("${project}/~settings/general", GeneralProjectSettingPage.class));
-		add(new ProjectPageMapper("${project}/~settings/authorizations", ProjectAuthorizationsPage.class));
+		add(new ProjectPageMapper("${project}/~settings/user-authorizations", io.onedev.server.web.page.project.setting.authorization.UserAuthorizationsPage.class));
+		add(new ProjectPageMapper("${project}/~settings/group-authorizations", io.onedev.server.web.page.project.setting.authorization.GroupAuthorizationsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/avatar-edit", AvatarEditPage.class));
 		add(new ProjectPageMapper("${project}/~settings/branch-protection", BranchProtectionsPage.class));
 		add(new ProjectPageMapper("${project}/~settings/tag-protection", TagProtectionsPage.class));

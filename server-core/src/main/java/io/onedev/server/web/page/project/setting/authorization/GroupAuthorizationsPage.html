@@ -1,0 +1,15 @@
+<wicket:extend>
+	<div class="alert alert-notice bg-white text-gray mb-4">
+		<wicket:svg href="bulb" class="icon mr-2"></wicket:svg>
+		When authorize a group, the group will also be authorized with the role for all child projects
+	</div>
+	<div class="card group-authorizations">
+		<div class="card-body">
+			<form wicket:id="form" class="authorization-list leave-confirm">
+				<div wicket:id="feedback" class="mb-4"></div>
+				<div wicket:id="editor"></div>
+				<input type="submit" class="btn btn-primary dirty-aware mt-4" value="Save">
+			</form>
+		</div>
+	</div>
+</wicket:extend>
