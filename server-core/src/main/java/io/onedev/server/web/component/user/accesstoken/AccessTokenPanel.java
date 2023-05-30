@@ -72,7 +72,7 @@ abstract class AccessTokenPanel extends Panel {
 				add(new Label("expiresAt", formatDate(expireDate)));
 			}
 		} else {
-			add(new Label("expiresAt", "Never expires"));
+			add(new Label("expiresAt", "<i>Never expires</i>").setEscapeModelStrings(false));
 		}
 		
 		setOutputMarkupId(true);
