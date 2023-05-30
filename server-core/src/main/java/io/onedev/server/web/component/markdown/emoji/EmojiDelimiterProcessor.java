@@ -55,14 +55,14 @@ public class EmojiDelimiterProcessor implements DelimiterProcessor {
 	public boolean canBeOpener(String before, String after, boolean leftFlanking, boolean rightFlanking,
 			boolean beforeIsPunctuation, boolean afterIsPunctuation, boolean beforeIsWhitespace,
 			boolean afterIsWhiteSpace) {
-        return leftFlanking;
+        return leftFlanking && (beforeIsPunctuation || beforeIsWhitespace);
 	}
 
 	@Override
 	public boolean canBeCloser(String before, String after, boolean leftFlanking, boolean rightFlanking,
 			boolean beforeIsPunctuation, boolean afterIsPunctuation, boolean beforeIsWhitespace,
 			boolean afterIsWhiteSpace) {
-        return rightFlanking;
+        return rightFlanking && (afterIsPunctuation || afterIsWhiteSpace);
 	}
 
 	@Override
