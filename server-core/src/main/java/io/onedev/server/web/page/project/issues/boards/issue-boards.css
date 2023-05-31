@@ -1,4 +1,4 @@
-.issue-boards>.body>.feedback>.feedbackPanel {
+.group>.body>.feedback>.feedbackPanel {
 	margin-bottom: 0;
 }
 .issue-boards>.body>.columns>.column {
@@ -72,6 +72,10 @@
 .issue-boards>.body .board-card .primary {
 	position: relative;
 	padding-right: 20px;
+}
+.issue-boards>.body .board-card .primary .title {
+	word-break: break-word !important;
+	overflow-wrap: break-word !important;
 }
 .issue-boards>.body .board-card .primary .number {
 	margin-right: 0.25rem;
