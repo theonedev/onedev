@@ -1129,7 +1129,7 @@ public abstract class BuildListPanel extends Panel {
 						} else if (build.getTag() != null) {
 							Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
 							var revision = build.getTag();
-							if (getProject().getBranchRef(revision) != null)
+							if (build.getProject().getBranchRef(revision) != null)
 								revision = GitUtils.tag2ref(revision);
 							PageParameters params = ProjectBlobPage.paramsOf(build.getProject(),
 									new BlobIdent(revision, null, FileMode.TREE.getBits()));
