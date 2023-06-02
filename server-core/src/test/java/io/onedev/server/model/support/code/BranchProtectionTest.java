@@ -12,7 +12,7 @@ public class BranchProtectionTest {
 		var branchProtection = new BranchProtection();
 		branchProtection.setEnforceConventionalCommits(true);
 		branchProtection.setCommitTypes(Lists.newArrayList("feat", "bug"));
-		branchProtection.setCommitScopes(Lists.newArrayList("docs", "api"));
+		branchProtection.setCommitScopes(Lists.newArrayList("docs", "api", "docs/api", "docs api"));
 		branchProtection.setMaxCommitMessageLineLength(80);
 		assertNull(branchProtection.checkCommitMessage("Revert \"hello world\"", false));
 		assertNotNull(branchProtection.checkCommitMessage("revert  \"hello world\"", false));
@@ -21,6 +21,8 @@ public class BranchProtectionTest {
 		assertNull(branchProtection.checkCommitMessage("feat(docs): hello world", false));
 		assertNull(branchProtection.checkCommitMessage("feat(docs)!: hello world", false));
 		assertNull(branchProtection.checkCommitMessage("feat(docs/api)!: hello world", false));
+		assertNull(branchProtection.checkCommitMessage("feat(docs api)!: hello world", false));
+		assertNotNull(branchProtection.checkCommitMessage("feat(docs  api)!: hello world", false));
 		assertNotNull(branchProtection.checkCommitMessage("feat(docs2)!: hello world", false));
 		assertNotNull(branchProtection.checkCommitMessage("feat(docs)!:  hello world", false));
 		assertNotNull(branchProtection.checkCommitMessage("feat:hello world", false));

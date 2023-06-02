@@ -41,7 +41,7 @@ public class BranchProtection implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private static final Pattern CONVENTIONAL_COMMIT_SUBJECT = Pattern.compile(
-			"^(([\\w\\-.]+)(\\(([\\w\\-./]+)\\))?!?: [^ ].+)|^(revert \".*\")", 
+			"^(([a-zA-Z]+)(\\(([a-zA-Z]+([\\-/ ][a-zA-Z]+)*)\\))?!?: [^ ].+)|^(revert \".*\")", 
 			UNICODE_CHARACTER_CLASS | CASE_INSENSITIVE);
 
 	private boolean enabled = true;
@@ -411,17 +411,9 @@ public class BranchProtection implements Serializable {
 					var type = matcher.group(2);
 					if (!commitTypes.isEmpty() && !commitTypes.contains(type))
 						return "Line 1: Unexpected type '" + type + "': Should be one of [" + Joiner.on(',').join(commitTypes) + "]";
-					var scopes = matcher.group(4);
-					if (scopes != null) {
-						var scopeFound = false;
-						for (var scope : StringUtils.split(scopes, " /,")) {
-							if (!commitScopes.isEmpty() && !commitScopes.contains(scope))
-								return "Line 1: Unexpected scope '" + scope + "': Should be one of [" + Joiner.on(',').join(commitScopes) + "]";
-							scopeFound = true;
-						}
-						if (!scopeFound)
-							return "Line 1: Scope not specified";
-					}
+					var scope = matcher.group(4);
+					if (scope != null && !commitScopes.isEmpty() && !commitScopes.contains(scope))
+						return "Line 1: Unexpected scope '" + scope + "': Should be one of [" + Joiner.on(',').join(commitScopes) + "]";
 				}
 			} else {
 				return "Line 1: Subject is expected of either a git revert message, or format: <type>[optional (scope)][!]: <description>";
