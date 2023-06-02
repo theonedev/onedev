@@ -98,7 +98,7 @@ public abstract class JobListPanel extends Panel {
 		add(jobsView);
 		for (Job job: accessibleJobsModel.getObject()) {
 			WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
-			Status status = getProject().getCommitStatus(commitId, null, getPullRequest(), refName).get(job.getName());
+			Status status = getProject().getCommitStatuses(commitId, null, getPullRequest(), refName).get(job.getName());
 					
 			Link<Void> defLink = new JobDefLink("name", commitId, job.getName()) {
 

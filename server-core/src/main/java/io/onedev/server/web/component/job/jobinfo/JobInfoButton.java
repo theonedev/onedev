@@ -96,7 +96,7 @@ public abstract class JobInfoButton extends Panel {
 				super.onComponentTag(tag);
 				
 				String cssClasses = "btn btn-outline-secondary";
-				Build.Status status = getProject().getCommitStatus(getCommitId(), getPipeline(), null, null).get(getJobName());
+				Build.Status status = getProject().getCommitStatuses(getCommitId(), getPipeline(), null, null).get(getJobName());
 				String title;
 				if (status != null) {
 					if (status != Status.SUCCESSFUL)
@@ -117,7 +117,7 @@ public abstract class JobInfoButton extends Panel {
 
 			@Override
 			protected Status load() {
-				return getProject().getCommitStatus(getCommitId(), getPipeline(), null, null).get(getJobName());
+				return getProject().getCommitStatuses(getCommitId(), getPipeline(), null, null).get(getJobName());
 			}
 			
 		}));

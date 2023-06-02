@@ -717,15 +717,15 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
 
-	public Map<String, Status> getCommitStatus(ObjectId commitId, 
-			@Nullable String pipeline, @Nullable PullRequest request, @Nullable String refName) {
+	public Map<String, Status> getCommitStatuses(ObjectId commitId,
+												 @Nullable String pipeline, @Nullable PullRequest request, @Nullable String refName) {
 		Map<String, Collection<StatusInfo>> commitStatusInfos = getCommitStatusCache().get(commitId);
 		if (commitStatusInfos == null) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 			commitStatusInfos = buildManager.queryStatus(this, Sets.newHashSet(commitId)).get(commitId);
 			getCommitStatusCache().put(commitId, Preconditions.checkNotNull(commitStatusInfos));
 		}
-		Map<String, Status> commitStatus = new HashMap<>();
+		Map<String, Status> commitStatuses = new HashMap<>();
 		for (Map.Entry<String, Collection<StatusInfo>> entry: commitStatusInfos.entrySet()) {
 			Collection<Status> statuses = new ArrayList<>();
 			for (StatusInfo statusInfo: entry.getValue()) {
@@ -735,9 +735,9 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 					statuses.add(statusInfo.getStatus());
 				}
 			}
-			commitStatus.put(entry.getKey(), Status.getOverallStatus(statuses));
+			commitStatuses.put(entry.getKey(), Status.getOverallStatus(statuses));
 		}
-		return commitStatus;
+		return commitStatuses;
 	}
 	
 	private Map<ObjectId, Map<String, Collection<StatusInfo>>> getCommitStatusCache() {
@@ -746,7 +746,7 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 		return commitStatusCache;
 	}
 	
-	public void cacheCommitStatus(Map<ObjectId, Map<String, Collection<StatusInfo>>> commitStatuses) {
+	public void cacheCommitStatuses(Map<ObjectId, Map<String, Collection<StatusInfo>>> commitStatuses) {
 		getCommitStatusCache().putAll(commitStatuses);
 	}
 	

@@ -291,7 +291,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		
 		newParentsContainer(null);
 
-		add(new ListView<Job>("jobs", new LoadableDetachableModel<List<Job>>() {
+		add(new ListView<Job>("jobs", new LoadableDetachableModel<>() {
 
 			@Override
 			protected List<Job> load() {
@@ -299,18 +299,18 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 				try {
 					BuildSpec buildSpec = getProject().getBuildSpec(getCommit().copy());
 					if (buildSpec != null) {
-						for (Job job: buildSpec.getJobMap().values()) {
+						for (Job job : buildSpec.getJobMap().values()) {
 							if (SecurityUtils.canAccess(getProject(), job.getName()))
 								jobs.add(job);
 						}
 					}
 				} catch (Exception e) {
-					logger.error("Error retrieving build spec (project: {}, commit: {})", 
+					logger.error("Error retrieving build spec (project: {}, commit: {})",
 							getProject().getPath(), getCommit().name(), e);
 				}
 				return jobs;
 			}
-			
+
 		}) {
 
 			@Override

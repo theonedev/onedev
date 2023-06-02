@@ -10,7 +10,6 @@ import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.*;
-import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCommitData;
 import io.onedev.server.security.SecurityUtils;
@@ -228,7 +227,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				PullRequest request = getPullRequest();
 				Project project = request.getTargetProject();
-				project.cacheCommitStatus(getBuildManager().queryStatus(project, commitIds));
+				project.cacheCommitStatuses(getBuildManager().queryStatus(project, commitIds));
 					
 				List<PullRequestActivity> oldActivities = new ArrayList<>();
 				List<PullRequestActivity> newActivities = new ArrayList<>();
@@ -405,7 +404,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				PullRequest request = getPullRequest();
 				Project project = request.getTargetProject();
-				project.cacheCommitStatus(getBuildManager().queryStatus(project, commitIds));
+				project.cacheCommitStatuses(getBuildManager().queryStatus(project, commitIds));
 			}
 			
 		});

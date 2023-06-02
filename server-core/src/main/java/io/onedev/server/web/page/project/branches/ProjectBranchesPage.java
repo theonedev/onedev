@@ -704,7 +704,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			@Override
 			protected void onBeforeRender() {
 				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-				getProject().cacheCommitStatus(buildManager.queryStatus(getProject(), getCommitIdsToDisplay()));
+				getProject().cacheCommitStatuses(buildManager.queryStatus(getProject(), getCommitIdsToDisplay()));
 				super.onBeforeRender();
 			}
 			

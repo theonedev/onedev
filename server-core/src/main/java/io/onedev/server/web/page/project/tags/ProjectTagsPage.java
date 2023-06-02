@@ -480,7 +480,7 @@ public class ProjectTagsPage extends ProjectPage {
 				}
 				
 				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-				getProject().cacheCommitStatus(buildManager.queryStatus(getProject(), commitIdsToDisplay));
+				getProject().cacheCommitStatuses(buildManager.queryStatus(getProject(), commitIdsToDisplay));
 				super.onBeforeRender();
 			}
 			

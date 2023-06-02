@@ -67,7 +67,7 @@ public abstract class CommitStatusLink extends DropdownLink {
 
 		@Override
 		protected Status load() {
-			return Status.getOverallStatus(getProject().getCommitStatus(commitId, null, getPullRequest(), refName).values());
+			return Status.getOverallStatus(getProject().getCommitStatuses(commitId, null, getPullRequest(), refName).values());
 		}
 		
 	};

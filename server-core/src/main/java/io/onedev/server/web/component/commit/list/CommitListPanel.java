@@ -463,7 +463,7 @@ public abstract class CommitListPanel extends Panel {
 						target.add(tooMany);
 						target.appendJavaScript(renderCommitGraph());
 						
-						getProject().cacheCommitStatus(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));						
+						getProject().cacheCommitStatuses(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));						
 					}
 					
 				});
@@ -518,7 +518,7 @@ public abstract class CommitListPanel extends Panel {
 				addCommitClass(item, commitIndex++);
 			commitsView.add(item);
 		}
-		getProject().cacheCommitStatus(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));
+		getProject().cacheCommitStatuses(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));
 		return commitsView;
 	}
 
