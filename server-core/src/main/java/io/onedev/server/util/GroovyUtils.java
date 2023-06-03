@@ -8,7 +8,6 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.exception.ScriptException;
 import io.onedev.server.model.support.administration.GroovyScript;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +112,7 @@ public class GroovyUtils {
 			script.setBinding(getBinding(variables));
 			return script.run();
 		} catch (RuntimeException e) {
-			throw new ScriptException(scriptContent, e);
+			throw new RuntimeException("Error evaluating groovy script:\n\n" + scriptContent, e);
 		}
     }
     
