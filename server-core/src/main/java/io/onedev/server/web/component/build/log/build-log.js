@@ -1,7 +1,11 @@
 onedev.server.buildLog = {
     appendLogEntries: function(containerId, logEntries) {
         var $buildLog = $("#" + containerId + ">.build-log");
-
+		// parent scrollbar jumps as we remove/add log entries in chrome. Let's restore it afterwards
+		$buildLog.parents().each(function() {
+			$(this).data("buildLogScrollLeft", $(this).scrollLeft());
+			$(this).data("buildLogScrollTop", $(this).scrollTop());
+		});
         for (var i=0; i<logEntries.length; i++)
 			$buildLog.append(onedev.server.jobLogEntry.render(logEntries[i], true));
         
@@ -22,6 +26,10 @@ onedev.server.buildLog = {
         }
 		$buildLog.trigger("resized");
         $buildLog.scrollTop($buildLog[0].scrollHeight);
+		$buildLog.parents().each(function() {
+			$(this).scrollLeft($(this).data("buildLogScrollLeft"));
+			$(this).scrollTop($(this).data("buildLogScrollTop"));
+		});
     }, 
 	buildUpdated: function(containerId, paused) {
 		var $buildLog = $("#" + containerId + ">.build-log");
