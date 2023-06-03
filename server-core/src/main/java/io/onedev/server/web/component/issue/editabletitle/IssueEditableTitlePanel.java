@@ -146,7 +146,8 @@ public abstract class IssueEditableTitlePanel extends Panel {
 			}
 			
 		});
-		titleViewer.add(new CopyToClipboardLink("copy", Model.of(getIssue().getTitle())));
+		titleViewer.add(new CopyToClipboardLink("copy", 
+				Model.of(getIssue().getTitle() + " (#" + getIssue().getNumber() + ")")));
 		
 		titleViewer.setOutputMarkupId(true);
 		

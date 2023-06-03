@@ -1331,7 +1331,8 @@ public abstract class IssueListPanel extends Panel {
 					
 				});
 				
-				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.getTitle())));
+				fragment.add(new CopyToClipboardLink("copy", 
+						Model.of(issue.getTitle() + " (#" + issue.getNumber() + ")")));
 				
 				AtomicReference<String> expandedLinkName = new AtomicReference<>(null);
 				
