@@ -2,12 +2,10 @@ package io.onedev.server.buildspec.step;
 
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.server.annotation.ChoiceProvider;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-import io.onedev.server.annotation.RegEx;
+import io.onedev.server.annotation.*;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -15,6 +13,8 @@ import io.onedev.server.model.Project;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Null;
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +31,9 @@ public abstract class SyncRepository extends ServerSideStep {
 	private String userName;
 	
 	private String passwordSecret;
-	
+
+	private String certificate;
+
 	private boolean force;
 	
 	private String proxy;
@@ -78,6 +80,18 @@ public abstract class SyncRepository extends ServerSideStep {
 	private static List<String> getPasswordSecretChoices() {
 		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+
+	@Editable(order=450, name="Certificate to Trust", placeholder = "Base64 encoded PEM format, starting with " +
+			"-----BEGIN CERTIFICATE----- and ending with -----END CERTIFICATE-----", 
+			description = "Specify certificate to trust if you are using self-signed certificate for above url")
+	@Multiline
+	public String getCertificate() {
+		return certificate;
+	}
+
+	public void setCertificate(String certificate) {
+		this.certificate = certificate;
 	}
 	
 	@SuppressWarnings("unused")
@@ -141,6 +155,26 @@ public abstract class SyncRepository extends ServerSideStep {
 	protected static void configureProxy(Commandline git, @Nullable String proxy) {
 		if (proxy != null)
 			git.addArgs("-c", "http.proxy=" + proxy, "-c", "https.proxy=" + proxy);
+	}
+	
+	@Nullable
+	protected static File writeCertificate(@Nullable String certificate) {
+		if (certificate != null) {
+			try {
+				var file = File.createTempFile("certificate", "pem");
+				FileUtils.writeFile(file, certificate);
+				return file;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return null;
+		}
+	}
+
+	protected static void configureCertificate(Commandline git, @Nullable File certificateFile) {
+		if (certificateFile != null)
+			git.addArgs("-c", "http.sslCAInfo=" + certificateFile.getAbsolutePath());
 	}
 	
 }

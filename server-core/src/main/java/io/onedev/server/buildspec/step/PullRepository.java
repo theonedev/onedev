@@ -7,6 +7,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
@@ -149,7 +150,7 @@ public class PullRepository extends SyncRepository {
 		String remoteUrl = getRemoteUrlWithCredential(build);
 		Long projectId = getTargetProject(build).getId();
 		
-		var task = new PullTask(projectId, remoteUrl, getRefs(), isForce(), isWithLfs(), getProxy());
+		var task = new PullTask(projectId, remoteUrl, getCertificate(), getRefs(), isForce(), isWithLfs(), getProxy());
 		getProjectManager().runOnActiveServer(projectId, task);
 		
 		return null;
@@ -178,6 +179,8 @@ public class PullRepository extends SyncRepository {
 		
 		private final String remoteUrl;
 		
+		private final String certificate;
+		
 		private final String refs;
 		
 		private final boolean force;
@@ -186,10 +189,11 @@ public class PullRepository extends SyncRepository {
 		
 		private final String proxy;
 		
-		PullTask(Long projectId, String remoteUrl, String refs, boolean force, 
-				 boolean withLfs, @Nullable String proxy) {
+		PullTask(Long projectId, String remoteUrl, @Nullable String certificate, 
+				 String refs, boolean force, boolean withLfs, @Nullable String proxy) {
 			this.projectId = projectId;
 			this.remoteUrl = remoteUrl;
+			this.certificate = certificate;
 			this.refs = refs;
 			this.force = force;
 			this.withLfs = withLfs;
@@ -214,88 +218,63 @@ public class PullRepository extends SyncRepository {
 
 		@Override
 		public Void call() throws Exception {
-			Repository repository = getProjectManager().getRepository(projectId);
+			var certificateFile = writeCertificate(certificate);
+			try {
+				Repository repository = getProjectManager().getRepository(projectId);
 
-			String defaultBranch = GitUtils.getDefaultBranch(repository);
-			Map<String, ObjectId> oldCommitIds = getRefCommits(repository);
+				String defaultBranch = GitUtils.getDefaultBranch(repository);
+				Map<String, ObjectId> oldCommitIds = getRefCommits(repository);
 
-			Commandline git = CommandUtils.newGit();
-			configureProxy(git, proxy);
-			git.workingDir(repository.getDirectory());
-			
-			git.addArgs("fetch");
-			git.addArgs(remoteUrl);
-			if (force)
-				git.addArgs("--force");
-
-			for (String each: Splitter.on(' ').omitEmptyStrings().trimResults().split(refs))
-				git.addArgs(each + ":" + each);
-
-			git.execute(new LineConsumer() {
-
-				@Override
-				public void consume(String line) {
-					logger.debug(line);
-				}
-
-			}, new LineConsumer() {
-
-				@Override
-				public void consume(String line) {
-					if (!line.startsWith("From") && !line.contains("->"))
-						logger.error(line);
-					else
-						logger.debug(line);
-				}
-
-			}).checkReturnCode();
-
-			Map<String, ObjectId> newCommitIds = getRefCommits(repository);
-
-			if (defaultBranch == null) {
-				logger.debug("Determining remote head branch...");
-
-				git.clearArgs();
+				Commandline git = CommandUtils.newGit();
 				configureProxy(git, proxy);
-				git.addArgs("remote", "show", remoteUrl);
+				configureCertificate(git, certificateFile);
+				git.workingDir(repository.getDirectory());
 
-				AtomicReference<String> headBranch = new AtomicReference<>(null);
+				git.addArgs("fetch");
+				git.addArgs(remoteUrl);
+				if (force)
+					git.addArgs("--force");
+
+				for (String each : Splitter.on(' ').omitEmptyStrings().trimResults().split(refs))
+					git.addArgs(each + ":" + each);
+
 				git.execute(new LineConsumer() {
 
 					@Override
 					public void consume(String line) {
 						logger.debug(line);
-						if (line.trim().startsWith("HEAD branch:"))
-							headBranch.set(line.trim().substring("HEAD branch:".length()).trim());
 					}
 
 				}, new LineConsumer() {
 
 					@Override
 					public void consume(String line) {
-						logger.warn(line);
+						if (!line.startsWith("From") && !line.contains("->"))
+							logger.error(line);
+						else
+							logger.debug(line);
 					}
 
 				}).checkReturnCode();
 
-				if (headBranch.get() != null) {
-					if (GitUtils.resolve(repository, Constants.R_HEADS + headBranch.get(), false) == null) {
-						logger.debug("Remote head branch not synced, using first branch as default");
-						headBranch.set(null);
-					}
-				} else {
-					logger.debug("Remote head branch not found, using first branch as default");
-				}
-				if (headBranch.get() == null) {
-					git.clearArgs();
-					git.addArgs("branch");
+				Map<String, ObjectId> newCommitIds = getRefCommits(repository);
 
+				if (defaultBranch == null) {
+					logger.debug("Determining remote head branch...");
+
+					git.clearArgs();
+					configureProxy(git, proxy);
+					configureCertificate(git, certificateFile);
+					git.addArgs("remote", "show", remoteUrl);
+
+					AtomicReference<String> headBranch = new AtomicReference<>(null);
 					git.execute(new LineConsumer() {
 
 						@Override
 						public void consume(String line) {
-							if (headBranch.get() == null)
-								headBranch.set(StringUtils.stripStart(line.trim(), "*").trim());
+							logger.debug(line);
+							if (line.trim().startsWith("HEAD branch:"))
+								headBranch.set(line.trim().substring("HEAD branch:".length()).trim());
 						}
 
 					}, new LineConsumer() {
@@ -306,62 +285,96 @@ public class PullRepository extends SyncRepository {
 						}
 
 					}).checkReturnCode();
+
+					if (headBranch.get() != null) {
+						if (GitUtils.resolve(repository, Constants.R_HEADS + headBranch.get(), false) == null) {
+							logger.debug("Remote head branch not synced, using first branch as default");
+							headBranch.set(null);
+						}
+					} else {
+						logger.debug("Remote head branch not found, using first branch as default");
+					}
+					if (headBranch.get() == null) {
+						git.clearArgs();
+						git.addArgs("branch");
+
+						git.execute(new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								if (headBranch.get() == null)
+									headBranch.set(StringUtils.stripStart(line.trim(), "*").trim());
+							}
+
+						}, new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								logger.warn(line);
+							}
+
+						}).checkReturnCode();
+					}
+					if (headBranch.get() != null)
+						GitUtils.setDefaultBranch(repository, headBranch.get());
 				}
-				if (headBranch.get() != null)
-					GitUtils.setDefaultBranch(repository, headBranch.get());
+
+				if (withLfs) {
+					git.clearArgs();
+					configureProxy(git, proxy);
+					configureCertificate(git, certificateFile);
+					var sinceCommitIds = getProjectManager().readLfsSinceCommits(projectId);
+
+					if (sinceCommitIds.isEmpty()) {
+						new LfsFetchAllCommand(git.workingDir(), remoteUrl) {
+							protected Commandline newGit() {
+								return git;
+							}
+						}.run();
+					} else {
+						var fetchCommitIds = getReachableCommits(repository, sinceCommitIds, newCommitIds.values())
+								.stream().map(AnyObjectId::copy).collect(toList());
+						new LfsFetchCommand(git.workingDir(), remoteUrl, fetchCommitIds) {
+							@Override
+							protected Commandline newGit() {
+								return git;
+							}
+						}.run();
+					}
+					getProjectManager().writeLfsSinceCommits(projectId, newCommitIds.values());
+				}
+
+				OneDev.getInstance(SessionManager.class).runAsync(() -> {
+					try {
+						// Access db connection in a separate thread to avoid possible deadlock, as
+						// the parent thread is blocking another thread holding database connections
+						var project = getProjectManager().load(projectId);
+						MapDifference<String, ObjectId> difference = difference(oldCommitIds, newCommitIds);
+						ListenerRegistry registry = OneDev.getInstance(ListenerRegistry.class);
+						for (Map.Entry<String, ObjectId> entry : difference.entriesOnlyOnLeft().entrySet()) {
+							if (RefUpdated.isValidRef(entry.getKey()))
+								registry.post(new RefUpdated(project, entry.getKey(), entry.getValue(), ObjectId.zeroId()));
+						}
+						for (Map.Entry<String, ObjectId> entry : difference.entriesOnlyOnRight().entrySet()) {
+							if (RefUpdated.isValidRef(entry.getKey()))
+								registry.post(new RefUpdated(project, entry.getKey(), ObjectId.zeroId(), entry.getValue()));
+						}
+						for (Map.Entry<String, ValueDifference<ObjectId>> entry : difference.entriesDiffering().entrySet()) {
+							if (RefUpdated.isValidRef(entry.getKey())) {
+								registry.post(new RefUpdated(project, entry.getKey(),
+										entry.getValue().leftValue(), entry.getValue().rightValue()));
+							}
+						}
+					} catch (Exception e) {
+						logger.error("Error posting ref updated event", e);
+					}
+				});
+
+				return null;
+			} finally {
+				if (certificateFile != null)
+					FileUtils.deleteFile(certificateFile);
 			}
-
-			if (withLfs) {
-				git.clearArgs();
-				configureProxy(git, proxy);
-				var sinceCommitIds = getProjectManager().readLfsSinceCommits(projectId);
-
-				if (sinceCommitIds.isEmpty()) {
-					new LfsFetchAllCommand(git.workingDir(), remoteUrl) {
-						protected Commandline newGit() {
-							return git;
-						}
-					}.run();
-				} else {
-					var fetchCommitIds = getReachableCommits(repository, sinceCommitIds, newCommitIds.values())
-							.stream().map(AnyObjectId::copy).collect(toList());
-					new LfsFetchCommand(git.workingDir(), remoteUrl, fetchCommitIds) {
-						@Override
-						protected Commandline newGit() {
-							return git;
-						}
-					}.run();
-				}
-				getProjectManager().writeLfsSinceCommits(projectId, newCommitIds.values());
-			}
-
-			OneDev.getInstance(SessionManager.class).runAsync(() -> {
-				try {
-					// Access db connection in a separate thread to avoid possible deadlock, as
-					// the parent thread is blocking another thread holding database connections
-					var project = getProjectManager().load(projectId);
-					MapDifference<String, ObjectId> difference = difference(oldCommitIds, newCommitIds);
-					ListenerRegistry registry = OneDev.getInstance(ListenerRegistry.class);
-					for (Map.Entry<String, ObjectId> entry : difference.entriesOnlyOnLeft().entrySet()) {
-						if (RefUpdated.isValidRef(entry.getKey()))
-							registry.post(new RefUpdated(project, entry.getKey(), entry.getValue(), ObjectId.zeroId()));
-					}
-					for (Map.Entry<String, ObjectId> entry : difference.entriesOnlyOnRight().entrySet()) {
-						if (RefUpdated.isValidRef(entry.getKey()))
-							registry.post(new RefUpdated(project, entry.getKey(), ObjectId.zeroId(), entry.getValue()));
-					}
-					for (Map.Entry<String, ValueDifference<ObjectId>> entry : difference.entriesDiffering().entrySet()) {
-						if (RefUpdated.isValidRef(entry.getKey())) {
-							registry.post(new RefUpdated(project, entry.getKey(),
-									entry.getValue().leftValue(), entry.getValue().rightValue()));
-						}
-					}
-				} catch (Exception e) {
-					logger.error("Error posting ref updated event", e);
-				}
-			});
-
-			return null;
 		}
 		
 	}
