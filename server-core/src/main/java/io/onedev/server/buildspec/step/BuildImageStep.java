@@ -7,6 +7,7 @@ import javax.validation.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.BuildImageFacade;
 import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
@@ -14,9 +15,11 @@ import io.onedev.server.annotation.SafePath;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
 
-@Editable(order=160, name="Build Docker Image", description="Build and optionally publish docker image. "
-		+ "<span class='text-danger'>Registry logins should be specified</span> in the job executor executing this step if registry authentication "
-		+ "is required for build or publish")
+@Editable(order=160, name="Build Docker Image", description="Build and publish docker image with docker daemon. " +
+		"This step can only be executed by server docker executor or remote docker executor, and " +
+		"<code>mount docker sock</code> option needs to be enabled on the executor. To build image with " +
+		"Kubernetes executor, please use kaniko step. <b class='text-danger'>NOTE: </b> registry logins " +
+		"should be configured in the job executor if authentication is required for build or publish")
 public class BuildImageStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -26,8 +29,6 @@ public class BuildImageStep extends Step {
 	private String dockerfile;
 	
 	private String tags;
-	
-	private boolean publish;
 
 	private String moreOptions;
 	
@@ -68,21 +69,12 @@ public class BuildImageStep extends Step {
 		this.tags = tags;
 	}
 	
-	@Editable(order=350, description="Optionally specify additional options to build image. " +
-			"Different options should be separated by spaces, and single option containing " +
-			"spaces should be quoted")
+	@Editable(order=350, description="Optionally specify additional options to build image, " +
+			"separated by spaces")
 	@Interpolative(variableSuggester="suggestVariables")
+	@ReservedOptions({"-f", "(--file)=.*", "-t", "(--tag)=.*"})
 	public String getMoreOptions() {
 		return moreOptions;
-	}
-	
-	@Editable(order=400, name="Publish After Build", description="Whether or not to publish built image to docker registry")
-	public boolean isPublish() {
-		return publish;
-	}
-
-	public void setPublish(boolean publish) {
-		this.publish = publish;
 	}
 
 	public void setMoreOptions(String moreOptions) {
@@ -96,7 +88,7 @@ public class BuildImageStep extends Step {
 	
 	@Override
 	public StepFacade getFacade(Build build, String jobToken, ParamCombination paramCombination) {
-		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), getMoreOptions(), isPublish());
+		return new BuildImageFacade(getBuildPath(), getDockerfile(), getTags(), getMoreOptions());
 	}
 
 }

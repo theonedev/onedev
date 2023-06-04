@@ -207,9 +207,12 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 											jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Command exited with code " + result.getReturnCode());
 											return false;
 										}
-									} else if (facade instanceof RunContainerFacade || facade instanceof BuildImageFacade) {
+									} else if (facade instanceof RunContainerFacade) {
 										throw new ExplicitException("This step can only be executed by server docker executor, "
 												+ "remote docker executor, or kubernetes executor");
+									} else if (facade instanceof BuildImageFacade) {
+										throw new ExplicitException("This step can only be executed by server docker executor or "
+												+ "remote docker executor");
 									} else if (facade instanceof CheckoutFacade) {
 										try {
 											CheckoutFacade checkoutFacade = (CheckoutFacade) facade;

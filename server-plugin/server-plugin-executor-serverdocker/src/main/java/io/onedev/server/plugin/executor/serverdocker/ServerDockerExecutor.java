@@ -1,6 +1,5 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.ExecutorUtils;
@@ -43,6 +42,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static io.onedev.agent.DockerExecutorUtils.*;
 import static io.onedev.k8shelper.KubernetesHelper.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
 
 @Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", 
 		description="This executor runs build jobs as docker containers on OneDev server")
@@ -128,6 +129,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	@Editable(order=530, group="More Settings", description = "Optionally specify docker options to create network. " +
 			"Multiple options should be separated by space, and single option containing spaces should be quoted")
+	@ReservedOptions({"-d", "(--driver)=.*"})
 	public String getNetworkOptions() {
 		return networkOptions;
 	}
@@ -162,6 +164,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	@Editable(order=50050, group="More Settings", description="Optionally specify docker options to run container. " +
 			"Multiple options should be separated by space, and single option containing spaces should be quoted")
+	@ReservedOptions({"-w", "(--workdir)=.*", "-d", "--detach", "-a", "--attach", "-t", "--tty", 
+			"-i", "--interactive", "--rm", "--restart", "(--name)=.*"})
 	public String getRunOptions() {
 		return runOptions;
 	}
@@ -305,7 +309,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									private int runStepContainer(String image, @Nullable String entrypoint,
 																 List<String> arguments, Map<String, String> environments,
 																 @Nullable String workingDir, Map<String, String> volumeMounts,
-																 List<Integer> position, boolean useTTY) {
+																 List<Integer> position, boolean useTTY, boolean kaniko) {
 										// Uninstall symbol links as docker can not process it well
 										cache.uninstallSymbolinks(hostWorkspace);
 										containerName = network + "-step-" + stringifyStepPosition(position);
@@ -320,7 +324,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 
 											docker.addArgs("-v", getHostPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
-
+											
+											if (kaniko) {
+												var dockerConfigFile = new File(hostBuildHome, "kaniko/.docker/config.json");
+												FileUtils.writeFile(
+														dockerConfigFile, 
+														buildDockerConfig(getRegistryLogins().stream().map(it->it.getFacade()).collect(toList())), 
+														UTF_8.name());
+												String hostPath = getHostPath(dockerConfigFile.getAbsolutePath());
+												docker.addArgs("-v", hostPath + ":/kaniko/.docker/config.json");
+											}
+											
 											for (Map.Entry<String, String> entry : volumeMounts.entrySet()) {
 												if (entry.getKey().contains(".."))
 													throw new ExplicitException("Volume mount source path should not contain '..'");
@@ -414,7 +428,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 												int exitCode = runStepContainer(execution.getImage(), entrypoint.executable(),
 														entrypoint.arguments(), new HashMap<>(), null, new HashMap<>(),
-														position, commandFacade.isUseTTY());
+														position, commandFacade.isUseTTY(), false);
 
 												if (exitCode != 0) {
 													long duration = System.currentTimeMillis() - time;
@@ -425,13 +439,14 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 												DockerExecutorUtils.buildImage(newDocker(), (BuildImageFacade) facade,
 														hostBuildHome, jobLogger);
 											} else if (facade instanceof RunContainerFacade) {
-												RunContainerFacade rubContainerFacade = (RunContainerFacade) facade;
-												OsContainer container = rubContainerFacade.getContainer(osInfo);
+												RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
+												OsContainer container = runContainerFacade.getContainer(osInfo);
 												List<String> arguments = new ArrayList<>();
 												if (container.getArgs() != null)
 													arguments.addAll(Arrays.asList(StringUtils.parseQuoteTokens(container.getArgs())));
 												int exitCode = runStepContainer(container.getImage(), null, arguments, container.getEnvMap(),
-														container.getWorkingDir(), container.getVolumeMounts(), position, rubContainerFacade.isUseTTY());
+														container.getWorkingDir(), container.getVolumeMounts(), position, runContainerFacade.isUseTTY(),
+														runContainerFacade.isKaniko());
 												if (exitCode != 0) {
 													long duration = System.currentTimeMillis() - time;
 													jobLogger.error("Step \"" + stepNames + "\" is failed (" + DateUtils.formatDuration(duration) + "): Container exited with code " + exitCode);
@@ -579,24 +594,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	private void login(TaskLogger jobLogger) {
 		for (RegistryLogin login: getRegistryLogins()) 
-			DockerExecutorUtils.login(newDocker(), login.getRegistryUrl(), login.getUserName(), login.getPassword(), jobLogger);
-	}
-	
-	private boolean hasOptions(String[] arguments, String... options) {
-		for (String argument: arguments) {
-			for (String option: options) {
-				if (option.startsWith("--")) {
-					if (argument.startsWith(option + "=") || argument.equals(option))
-						return true;
-				} else if (option.startsWith("-")) {
-					if (argument.startsWith(option))
-						return true;
-				} else {
-					throw new ExplicitException("Invalid option: " + option);
-				}
-			}
-		}
-		return false;
+			DockerExecutorUtils.login(newDocker(),login.getFacade(), jobLogger);
 	}
 	
 	@Override
@@ -614,29 +612,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				context.buildConstraintViolationWithTemplate(message)
 						.addPropertyNode("registryLogins").addConstraintViolation();
 				break;
-			}
-		}
-		if (getRunOptions() != null) {
-			String[] arguments = StringUtils.parseQuoteTokens(getRunOptions());
-			String reservedOptions[] = new String[] {"-w", "--workdir", "-d", "--detach", "-a", "--attach", "-t", "--tty", 
-					"-i", "--interactive", "--rm", "--restart", "--name"}; 
-			if (hasOptions(arguments, reservedOptions)) {
-				StringBuilder errorMessage = new StringBuilder("Can not use reserved options: "
-						+ Joiner.on(", ").join(reservedOptions));
-				context.buildConstraintViolationWithTemplate(errorMessage.toString())
-						.addPropertyNode("runOptions").addConstraintViolation();
-				isValid = false;
-			} 
-		}
-		if (getNetworkOptions() != null) {
-			String[] arguments = StringUtils.parseQuoteTokens(getNetworkOptions());
-			String reservedOptions[] = new String[] {"-d", "--driver"};
-			if (hasOptions(arguments, reservedOptions)) {
-				StringBuilder errorMessage = new StringBuilder("Can not use reserved options: "
-						+ Joiner.on(", ").join(reservedOptions));
-				context.buildConstraintViolationWithTemplate(errorMessage.toString())
-						.addPropertyNode("networkOptions").addConstraintViolation();
-				isValid = false;
 			}
 		}
 		if (!isValid)

@@ -7,6 +7,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.*;
@@ -34,7 +35,6 @@ import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
-import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.util.Testable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -60,8 +60,15 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
+import static io.onedev.agent.DockerExecutorUtils.*;
 import static io.onedev.k8shelper.KubernetesHelper.*;
+import static io.onedev.server.util.CollectionUtils.newHashMap;
+import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.*;
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 @Editable(order=KubernetesExecutor.ORDER, description="This executor runs build jobs as pods in a kubernetes cluster. "
 		+ "No any agents are required."
@@ -93,8 +100,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private String configFile;
 	
 	private String kubeCtlPath;
-	
-	private boolean mountContainerSock;
 	
 	private String cpuRequest = "250m";
 	
@@ -137,17 +142,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
 		this.registryLogins = registryLogins;
 	}
-	
-	@Editable(order=300, description="Whether or not to mount docker/containerd sock into job "
-			+ "container to support container operations in job commands, for instance to build "
-			+ "container image.<br>"
-			+ "<b class='text-danger'>WARNING</b>: Malicious jobs can take control of k8s node "
-			+ "running the job by operating the mounted container sock. You should configure "
-			+ "job authorization below to make sure the executor can only be used by trusted "
-			+ "jobs if this option is enabled")
-	public boolean isMountContainerSock() {
-		return mountContainerSock;
-	}
 
 	@Editable(order=400, description = "Specify cpu request for jobs using this executor. " +
 			"Check <a href='https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/' target='_blank'>Kubernetes resource management</a> for details")
@@ -169,10 +163,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	public void setMemoryRequest(String memoryRequest) {
 		this.memoryRequest = memoryRequest;
-	}
-
-	public void setMountContainerSock(boolean mountContainerSock) {
-		this.mountContainerSock = mountContainerSock;
 	}
 
 	@Editable(order=24990, group="More Settings", placeholder = "No limit", description = "" +
@@ -384,7 +374,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				maskedYaml = StringUtils.replace(maskedYaml, secret, SecretInput.MASK);
 			logger.trace("Creating resource:\n" + maskedYaml);
 			
-			FileUtils.writeFile(file, resourceYaml, StandardCharsets.UTF_8.name());
+			FileUtils.writeFile(file, resourceYaml, UTF_8.name());
 			kubectl.addArgs("create", "-f", file.getAbsolutePath(), "-o", "jsonpath={.metadata.name}");
 			kubectl.execute(new LineConsumer() {
 
@@ -552,23 +542,23 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String registryUrl = login.getRegistryUrl();
 				if (registryUrl == null)
 					registryUrl = "https://index.docker.io/v1/";
-				auths.put(registryUrl, CollectionUtils.newLinkedHashMap(
-						"auth", Base64.encodeBase64String(auth.getBytes(StandardCharsets.UTF_8))));
+				auths.put(registryUrl, newLinkedHashMap(
+						"auth", encodeBase64String(auth.getBytes(UTF_8))));
 			}
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			try {
-				String dockerConfig = mapper.writeValueAsString(CollectionUtils.newLinkedHashMap("auths", auths));
+				String dockerConfig = mapper.writeValueAsString(newLinkedHashMap("auths", auths));
 				
 				String secretName = "image-pull-secret";
 				Map<String, String> encodedSecrets = new LinkedHashMap<>();
-				Map<Object, Object> secretDef = CollectionUtils.newLinkedHashMap(
+				Map<Object, Object> secretDef = newLinkedHashMap(
 						"apiVersion", "v1", 
 						"kind", "Secret", 
-						"metadata", CollectionUtils.newLinkedHashMap(
+						"metadata", newLinkedHashMap(
 								"name", secretName, 
 								"namespace", namespace), 
-						"data", CollectionUtils.newLinkedHashMap(
-								".dockerconfigjson", Base64.encodeBase64String(dockerConfig.getBytes(StandardCharsets.UTF_8))));
+						"data", newLinkedHashMap(
+								".dockerconfigjson", encodeBase64String(dockerConfig.getBytes(UTF_8))));
 				secretDef.put("type", "kubernetes.io/dockerconfigjson");
 				createResource(secretDef, encodedSecrets.values(), jobLogger);
 				return secretName;
@@ -604,16 +594,16 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		if (clusterRoleBindingExists.get())
 			deleteClusterRoleBinding(namespace, jobLogger);
 		
-		Map<Object, Object> clusterRoleBindingDef = CollectionUtils.newLinkedHashMap(
+		Map<Object, Object> clusterRoleBindingDef = newLinkedHashMap(
 				"apiVersion", "rbac.authorization.k8s.io/v1", 
 				"kind", "ClusterRoleBinding", 
-				"metadata", CollectionUtils.newLinkedHashMap(
+				"metadata", newLinkedHashMap(
 						"name", namespace), 
-				"subjects", Lists.<Object>newArrayList(CollectionUtils.newLinkedHashMap(
+				"subjects", Lists.<Object>newArrayList(newLinkedHashMap(
 						"kind", "ServiceAccount", 
 						"name", "default", 
 						"namespace", namespace)), 
-				"roleRef", CollectionUtils.newLinkedHashMap(
+				"roleRef", newLinkedHashMap(
 						"apiGroup", "rbac.authorization.k8s.io",
 						"kind", "ClusterRole", 
 						"name", getClusterRole()));
@@ -630,7 +620,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (file.isFile() && !file.isHidden()) {
 					try {
 						byte[] fileContent = FileUtils.readFileToByteArray(file);
-						configMapData.put((index++) + ".pem", Base64.encodeBase64String(fileContent));
+						configMapData.put((index++) + ".pem", encodeBase64String(fileContent));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -638,10 +628,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}
 		}
 		if (!configMapData.isEmpty()) {
-			Map<Object, Object> configMapDef = CollectionUtils.newLinkedHashMap(
+			Map<Object, Object> configMapDef = newLinkedHashMap(
 					"apiVersion", "v1", 
 					"kind", "ConfigMap",
-					"metadata", CollectionUtils.newLinkedHashMap(
+					"metadata", newLinkedHashMap(
 							"name", "trust-certs", 
 							"namespace", namespace), 
 					"binaryData", configMapData);
@@ -649,6 +639,18 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		} else {
 			return null;
 		}
+	}
+
+	private String createDockerConfigSecret(String namespace, TaskLogger jobLogger) {
+		String dockerConfig = buildDockerConfig(getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList()));
+		Map<Object, Object> secretDef = newLinkedHashMap(
+				"apiVersion", "v1",
+				"kind", "Secret",
+				"metadata", newLinkedHashMap(
+						"name", "docker-config",
+						"namespace", namespace),
+				"data", newLinkedHashMap("config.json", encodeBase64String(dockerConfig.getBytes(UTF_8))));
+		return createResource(secretDef, new HashSet<>(), jobLogger);
 	}
 	
 	private void startService(String namespace, JobContext jobContext, Service jobService, 
@@ -664,11 +666,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 		
 		Map<String, Object> podSpec = new LinkedHashMap<>();
-		Map<Object, Object> containerSpec = CollectionUtils.newLinkedHashMap(
+		Map<Object, Object> containerSpec = newLinkedHashMap(
 				"name", "default", 
 				"image", jobService.getImage());
-		Map<Object, Object> resourcesSpec = CollectionUtils.newLinkedHashMap(
-				"requests", CollectionUtils.newLinkedHashMap(
+		Map<Object, Object> resourcesSpec = newLinkedHashMap(
+				"requests", newLinkedHashMap(
 						"cpu", getCpuRequest(),
 						"memory", getMemoryRequest()));
 		Map<Object, Object>	limitsSpec = new LinkedHashMap<>();
@@ -681,7 +683,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		containerSpec.put("resources", resourcesSpec);
 		List<Map<Object, Object>> envs = new ArrayList<>();
 		for (EnvVar envVar: jobService.getEnvVars()) {
-			envs.add(CollectionUtils.newLinkedHashMap(
+			envs.add(newLinkedHashMap(
 					"name", envVar.getName(), 
 					"value", envVar.getValue()));
 		}
@@ -695,7 +697,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		podSpec.put("containers", Lists.<Object>newArrayList(containerSpec));
 		if (imagePullSecretName != null)
-			podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(CollectionUtils.newLinkedHashMap("name", imagePullSecretName)));
+			podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(newLinkedHashMap("name", imagePullSecretName)));
 		podSpec.put("restartPolicy", "Never");		
 		
 		if (!nodeSelector.isEmpty())
@@ -703,26 +705,26 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		String podName = "service-" + jobService.getName();
 		
-		Map<Object, Object> podDef = CollectionUtils.newLinkedHashMap(
+		Map<Object, Object> podDef = newLinkedHashMap(
 				"apiVersion", "v1", 
 				"kind", "Pod", 
-				"metadata", CollectionUtils.newLinkedHashMap(
+				"metadata", newLinkedHashMap(
 						"name", podName, 
 						"namespace", namespace, 
-						"labels", CollectionUtils.newLinkedHashMap(
+						"labels", newLinkedHashMap(
 								"service", jobService.getName())), 
 				"spec", podSpec);
 		createResource(podDef, Sets.newHashSet(), jobLogger);		
 		
-		Map<Object, Object> serviceDef = CollectionUtils.newLinkedHashMap(
+		Map<Object, Object> serviceDef = newLinkedHashMap(
 				"apiVersion", "v1", 
 				"kind", "Service", 
-				"metadata", CollectionUtils.newLinkedHashMap(
+				"metadata", newLinkedHashMap(
 						"name", jobService.getName(),
 						"namespace", namespace), 
-				"spec", CollectionUtils.newLinkedHashMap(
+				"spec", newLinkedHashMap(
 						"clusterIP", "None", 
-						"selector", CollectionUtils.newLinkedHashMap(
+						"selector", newLinkedHashMap(
 								"service", jobService.getName())));
 		createResource(serviceDef, Sets.newHashSet(), jobLogger);
 		
@@ -862,7 +864,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					}
 				}
 				
-				String trustCertsConfigMapName = createTrustCertsConfigMap(namespace, jobLogger);
+				var trustCertsConfigMapName = createTrustCertsConfigMap(namespace, jobLogger);
+				var dockerConfigSecretName = createDockerConfigSecret(namespace, jobLogger);
 				
 				osInfo = getBaselineOsInfo(getNodeSelector(), jobLogger);
 				
@@ -898,42 +901,41 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					containerdSock = "/run/containerd/containerd.sock";
 				}
 
-				Map<String, String> buildHomeMount = CollectionUtils.newLinkedHashMap(
+				Map<String, String> buildHomeMount = newLinkedHashMap(
 						"name", "build-home", 
 						"mountPath", containerBuildHome);
-				Map<String, String> authInfoMount = CollectionUtils.newLinkedHashMap(
+				Map<String, String> authInfoMount = newLinkedHashMap(
 						"name", "auth-info", 
 						"mountPath", containerAuthInfoDir);
 				
 				// Windows nanoserver default user is ContainerUser
-				Map<String, String> authInfoMount2 = CollectionUtils.newLinkedHashMap(
+				Map<String, String> authInfoMount2 = newLinkedHashMap(
 						"name", "auth-info", 
 						"mountPath", "C:\\Users\\ContainerUser\\auth-info");
 				
-				Map<String, String> cacheHomeMount = CollectionUtils.newLinkedHashMap(
+				Map<String, String> cacheHomeMount = newLinkedHashMap(
 						"name", "cache-home", 
 						"mountPath", containerCacheHome);
-				Map<String, String> trustCertsMount = CollectionUtils.newLinkedHashMap(
+				Map<String, String> trustCertsMount = newLinkedHashMap(
 						"name", "trust-certs", 
 						"mountPath", containerTrustCertsDir);
-				Map<String, String> dockerSockMount = CollectionUtils.newLinkedHashMap(
+				Map<String, String> dockerSockMount = newLinkedHashMap(
 						"name", "docker-sock", 
 						"mountPath", dockerSock);
-				Map<String, String> containerdSockMount = CollectionUtils.newLinkedHashMap(
+				Map<String, String> containerdSockMount = newLinkedHashMap(
 						"name", "containerd-sock", 
 						"mountPath", containerdSock);
 				
-				List<Object> commonVolumeMounts = Lists.<Object>newArrayList(buildHomeMount, authInfoMount, cacheHomeMount);
+				var commonVolumeMounts = Lists.newArrayList(buildHomeMount, authInfoMount, cacheHomeMount);
 				if (osInfo.isWindows())
 					commonVolumeMounts.add(authInfoMount2);
 				if (trustCertsConfigMapName != null)
 					commonVolumeMounts.add(trustCertsMount);
+				var sidecarVolumeMounts = new ArrayList<>(commonVolumeMounts);
 				
-				if (isMountContainerSock()) {
-					commonVolumeMounts.add(dockerSockMount);
-					commonVolumeMounts.add(containerdSockMount);
-				}
-
+				sidecarVolumeMounts.add(dockerSockMount);
+				sidecarVolumeMounts.add(containerdSockMount);
+				
 				CompositeFacade entryFacade;
 				if (jobContext != null) {
 					entryFacade = new CompositeFacade(jobContext.getActions());
@@ -961,118 +963,115 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String helperImage = IMAGE_REPO_PREFIX + "-" + helperImageSuffix + ":" + KubernetesHelper.getVersion();
 				
 				List<Map<Object, Object>> commonEnvs = new ArrayList<>();
-				commonEnvs.add(CollectionUtils.newLinkedHashMap(
+				commonEnvs.add(newLinkedHashMap(
 						"name", ENV_SERVER_URL, 
 						"value", getServerUrl()));
-				commonEnvs.add(CollectionUtils.newLinkedHashMap(
+				commonEnvs.add(newLinkedHashMap(
 						"name", ENV_JOB_TOKEN, 
 						"value", jobToken));
-				commonEnvs.add(CollectionUtils.newLinkedHashMap(
+				commonEnvs.add(newLinkedHashMap(
 						"name", ENV_OS_INFO,
 						"value", Hex.encodeHexString(SerializationUtils.serialize(osInfo))
 						));
-				commonEnvs.add(CollectionUtils.newLinkedHashMap(
+				commonEnvs.add(newLinkedHashMap(
 						"name", "ONEDEV_WORKSPACE",
 						"value", containerWorkspace
 						));
 
-				entryFacade.traverse(new LeafVisitor<Void>() {
-
-					@Override
-					public Void visit(LeafFacade facade, List<Integer> position) {
-						String containerName = getContainerName(position);
-						containerNames.add(containerName);
-						Map<Object, Object> stepContainerSpec;
-						if (facade instanceof CommandFacade) {
-							CommandFacade commandFacade = (CommandFacade) facade;
-							OsExecution execution = commandFacade.getExecution(osInfo);
-							if (execution.getImage() == null) {
-								throw new ExplicitException("This step can only be executed by server shell "
-										+ "executor or remote shell executor");
-							}
-							
-							stepContainerSpec = CollectionUtils.newHashMap(
-									"name", containerName, 
-									"image", execution.getImage());
-							if (commandFacade.isUseTTY())
-								stepContainerSpec.put("tty", true);
-							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
-							stepContainerSpec.put("env", commonEnvs);
-						} else if (facade instanceof BuildImageFacade) {
-							stepContainerSpec = CollectionUtils.newHashMap(
-									"name", containerName, 
-									"image", helperImage);
-							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
-							stepContainerSpec.put("env", commonEnvs);
-						} else if (facade instanceof RunContainerFacade) {
-							RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
-							OsContainer container = runContainerFacade.getContainer(osInfo); 
-							stepContainerSpec = CollectionUtils.newHashMap(
-									"name", containerName, 
-									"image", container.getImage());
-							if (runContainerFacade.isUseTTY())
-								stepContainerSpec.put("tty", true);
-							
-							List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
-							for (Map.Entry<String, String> entry: container.getVolumeMounts().entrySet()) {
-								if (entry.getKey().contains(".."))
-									throw new ExplicitException("Volume mount source path should not container '..'");
-								String subPath = StringUtils.stripStart(entry.getKey(), "/\\");
-								if (osInfo.isWindows())
-									subPath = "workspace\\" + subPath;
-								else
-									subPath = "workspace/" + subPath;
-								volumeMounts.add(CollectionUtils.newLinkedHashMap(
-										"name", "build-home", 
-										"mountPath", entry.getValue(),
-										"subPath", subPath));
-							}
-							stepContainerSpec.put("volumeMounts", volumeMounts);
-							
-							List<Map<Object, Object>> envs = new ArrayList<>(commonEnvs);
-							for (Map.Entry<String, String> entry: container.getEnvMap().entrySet()) {
-								envs.add(CollectionUtils.newLinkedHashMap(
-										"name", entry.getKey(), 
-										"value", entry.getValue()));
-							}
-							stepContainerSpec.put("env", envs);
-						} else { 
-							stepContainerSpec = CollectionUtils.newHashMap(
-									"name", containerName, 
-									"image", helperImage);
-							stepContainerSpec.put("volumeMounts", commonVolumeMounts);
-							stepContainerSpec.put("env", commonEnvs);
+				entryFacade.traverse((LeafVisitor<Void>) (facade, position) -> {
+					String containerName = getContainerName(position);
+					containerNames.add(containerName);
+					Map<Object, Object> stepContainerSpec;
+					if (facade instanceof CommandFacade) {
+						CommandFacade commandFacade = (CommandFacade) facade;
+						OsExecution execution = commandFacade.getExecution(osInfo);
+						if (execution.getImage() == null) {
+							throw new ExplicitException("This step can only be executed by server shell "
+									+ "executor or remote shell executor");
 						}
 						
-						String positionStr = stringifyStepPosition(position);
-						if (osInfo.isLinux()) {
-							stepContainerSpec.put("command", Lists.newArrayList("sh"));
-							stepContainerSpec.put("args", Lists.newArrayList(containerCommandDir + "/" + positionStr + ".sh"));
-						} else {
-							stepContainerSpec.put("command", Lists.newArrayList("cmd"));
-							stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandDir + "\\" + positionStr + ".bat"));
-						}
-
-						Map<Object, Object> requestsSpec = CollectionUtils.newLinkedHashMap(
-										"cpu", "0", 
-										"memory", "0");
-						Map<Object, Object> limitsSpec = new LinkedHashMap<>();
-						if (getCpuLimit() != null)
-							limitsSpec.put("cpu", getCpuLimit());
-						if (getMemoryLimit() != null)
-							limitsSpec.put("memory", getMemoryLimit());
-						if (!limitsSpec.isEmpty()) {
-							stepContainerSpec.put(
-									"resources", CollectionUtils.newLinkedHashMap(
-											"limits", limitsSpec, 
-											"requests", requestsSpec));
-						}
+						stepContainerSpec = newHashMap(
+								"name", containerName, 
+								"image", execution.getImage());
+						if (commandFacade.isUseTTY())
+							stepContainerSpec.put("tty", true);
+						stepContainerSpec.put("volumeMounts", commonVolumeMounts);
+						stepContainerSpec.put("env", commonEnvs);
+					} else if (facade instanceof BuildImageFacade) {
+						throw new ExplicitException("This step can only be executed by server docker executor or " +
+								"remote docker executor. Use kaniko step instead to build image in kubernetes cluster");
+					} else if (facade instanceof RunContainerFacade) {
+						RunContainerFacade runContainerFacade = (RunContainerFacade) facade;
+						OsContainer container = runContainerFacade.getContainer(osInfo); 
+						stepContainerSpec = newHashMap(
+								"name", containerName, 
+								"image", container.getImage());
+						if (runContainerFacade.isUseTTY())
+							stepContainerSpec.put("tty", true);
 						
-						containerSpecs.add(stepContainerSpec);
+						List<Object> volumeMounts = new ArrayList<>(commonVolumeMounts);
+						for (Map.Entry<String, String> entry: container.getVolumeMounts().entrySet()) {
+							if (entry.getKey().contains(".."))
+								throw new ExplicitException("Volume mount source path should not container '..'");
+							String subPath = StringUtils.stripStart(entry.getKey(), "/\\");
+							if (osInfo.isWindows())
+								subPath = "workspace\\" + subPath;
+							else
+								subPath = "workspace/" + subPath;
+							volumeMounts.add(newLinkedHashMap(
+									"name", "build-home", 
+									"mountPath", entry.getValue(),
+									"subPath", subPath));
+						}
+//						if (runContainerFacade.isKaniko()) {
+							volumeMounts.add(newLinkedHashMap(
+									"name", "docker-config",
+									"mountPath", "/kaniko/.docker"));
+//						}
+						stepContainerSpec.put("volumeMounts", volumeMounts);
 						
-						return null;
+						List<Map<Object, Object>> envs = new ArrayList<>(commonEnvs);
+						for (Map.Entry<String, String> entry: container.getEnvMap().entrySet()) {
+							envs.add(newLinkedHashMap(
+									"name", entry.getKey(), 
+									"value", entry.getValue()));
+						}
+						stepContainerSpec.put("env", envs);
+					} else { 
+						stepContainerSpec = newHashMap(
+								"name", containerName, 
+								"image", helperImage);
+						stepContainerSpec.put("volumeMounts", commonVolumeMounts);
+						stepContainerSpec.put("env", commonEnvs);
 					}
 					
+					String positionStr = stringifyStepPosition(position);
+					if (osInfo.isLinux()) {
+						stepContainerSpec.put("command", Lists.newArrayList("sh"));
+						stepContainerSpec.put("args", Lists.newArrayList(containerCommandDir + "/" + positionStr + ".sh"));
+					} else {
+						stepContainerSpec.put("command", Lists.newArrayList("cmd"));
+						stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandDir + "\\" + positionStr + ".bat"));
+					}
+
+					Map<Object, Object> requestsSpec = newLinkedHashMap(
+									"cpu", "0", 
+									"memory", "0");
+					Map<Object, Object> limitsSpec = new LinkedHashMap<>();
+					if (getCpuLimit() != null)
+						limitsSpec.put("cpu", getCpuLimit());
+					if (getMemoryLimit() != null)
+						limitsSpec.put("memory", getMemoryLimit());
+					if (!limitsSpec.isEmpty()) {
+						stepContainerSpec.put(
+								"resources", newLinkedHashMap(
+										"limits", limitsSpec, 
+										"requests", requestsSpec));
+					}
+					
+					containerSpecs.add(stepContainerSpec);
+					
+					return null;
 				}, new ArrayList<>());
 				
 				String k8sHelperClassPath;
@@ -1093,31 +1092,23 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					initArgs.add("test");
 				}
 				
-				List<Map<Object, Object>> initEnvs = new ArrayList<>(commonEnvs);
-				List<RegistryLoginFacade> registryLogins = new ArrayList<>();
-				for (RegistryLogin login: getRegistryLogins())
-					registryLogins.add(new RegistryLoginFacade(login.getRegistryUrl(), login.getUserName(), login.getPassword()));
-				initEnvs.add(CollectionUtils.newLinkedHashMap(
-						"name", KubernetesHelper.ENV_REGISTRY_LOGINS,
-						"value", Hex.encodeHexString(SerializationUtils.serialize((Serializable) registryLogins))
-						));
-				Map<Object, Object> initContainerSpec = CollectionUtils.newHashMap(
+				Map<Object, Object> initContainerSpec = newHashMap(
 						"name", "init", 
 						"image", helperImage, 
 						"command", Lists.newArrayList("java"), 
 						"args", initArgs,
-						"env", initEnvs,
+						"env", commonEnvs,
 						"volumeMounts", commonVolumeMounts);
 				
-				Map<Object, Object> sidecarContainerSpec = CollectionUtils.newHashMap(
+				Map<Object, Object> sidecarContainerSpec = newLinkedHashMap(
 						"name", "sidecar", 
 						"image", helperImage, 
 						"command", Lists.newArrayList("java"), 
 						"args", sidecarArgs, 
 						"env", commonEnvs, 
-						"volumeMounts", commonVolumeMounts);
+						"volumeMounts", sidecarVolumeMounts);
 				
-				sidecarContainerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
+				sidecarContainerSpec.put("resources", newLinkedHashMap("requests", newLinkedHashMap(
 						"cpu", getCpuRequest(), 
 						"memory", getMemoryRequest())));
 				
@@ -1128,47 +1119,49 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				podSpec.put("initContainers", Lists.<Object>newArrayList(initContainerSpec));
 
 				if (imagePullSecretName != null)
-					podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(CollectionUtils.newLinkedHashMap("name", imagePullSecretName)));
+					podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(newLinkedHashMap("name", imagePullSecretName)));
 				podSpec.put("restartPolicy", "Never");		
 				
 				if (!getNodeSelector().isEmpty())
 					podSpec.put("nodeSelector", toMap(getNodeSelector()));
 				
-				Map<Object, Object> buildHomeVolume = CollectionUtils.newLinkedHashMap(
+				Map<Object, Object> buildHomeVolume = newLinkedHashMap(
 						"name", "build-home", 
-						"emptyDir", CollectionUtils.newLinkedHashMap());
-				Map<Object, Object> userHomeVolume = CollectionUtils.newLinkedHashMap(
+						"emptyDir", newLinkedHashMap());
+				Map<Object, Object> userHomeVolume = newLinkedHashMap(
 						"name", "auth-info", 
-						"emptyDir", CollectionUtils.newLinkedHashMap());
-				Map<Object, Object> cacheHomeVolume = CollectionUtils.newLinkedHashMap(
+						"emptyDir", newLinkedHashMap());
+				Map<Object, Object> cacheHomeVolume = newLinkedHashMap(
 						"name", "cache-home", 
-						"hostPath", CollectionUtils.newLinkedHashMap(
+						"hostPath", newLinkedHashMap(
 								"path", osInfo.getCacheHome(), 
 								"type", "DirectoryOrCreate"));
 				List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, userHomeVolume, cacheHomeVolume);
 				if (trustCertsConfigMapName != null) {
-					volumes.add(CollectionUtils.newLinkedHashMap(
+					volumes.add(newLinkedHashMap(
 							"name", "trust-certs", 
-							"configMap", CollectionUtils.newLinkedHashMap(
+							"configMap", newLinkedHashMap(
 									"name", trustCertsConfigMapName)));
 				}
+				volumes.add(newLinkedHashMap(
+						"name", "docker-config", 
+						"secret", newLinkedHashMap(
+								"secretName", dockerConfigSecretName)));
 				
-				if (isMountContainerSock()) {
-					volumes.add(CollectionUtils.newLinkedHashMap(
-							"name", "docker-sock", 
-							"hostPath", CollectionUtils.newLinkedHashMap(
-									"path", dockerSock)));
-					volumes.add(CollectionUtils.newLinkedHashMap(
-							"name", "containerd-sock", 
-							"hostPath", CollectionUtils.newLinkedHashMap(
-									"path", containerdSock)));
-				}
+				volumes.add(newLinkedHashMap(
+						"name", "docker-sock", 
+						"hostPath", newLinkedHashMap(
+								"path", dockerSock)));
+				volumes.add(newLinkedHashMap(
+						"name", "containerd-sock", 
+						"hostPath", newLinkedHashMap(
+								"path", containerdSock)));
 				podSpec.put("volumes", volumes);
 
-				Map<Object, Object> podDef = CollectionUtils.newLinkedHashMap(
+				Map<Object, Object> podDef = newLinkedHashMap(
 						"apiVersion", "v1", 
 						"kind", "Pod", 
-						"metadata", CollectionUtils.newLinkedHashMap(
+						"metadata", newLinkedHashMap(
 								"name", POD_NAME, 
 								"namespace", namespace), 
 						"spec", podSpec);

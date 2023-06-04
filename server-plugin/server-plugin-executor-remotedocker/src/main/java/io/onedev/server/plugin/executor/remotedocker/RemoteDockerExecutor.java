@@ -22,7 +22,6 @@ import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.terminal.AgentShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
-import io.onedev.server.util.CollectionUtils;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.Serializable;
@@ -33,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static io.onedev.agent.WebsocketUtils.call;
+import static java.util.stream.Collectors.toList;
 
 @Editable(order=210, description="This executor runs build jobs as docker containers on remote machines via <a href='/~administration/agents' target='_blank'>agents</a>")
 public class RemoteDockerExecutor extends ServerDockerExecutor {
@@ -106,14 +106,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					jobLogger.log(String.format("Executing job (executor: %s, agent: %s)...",
 							getName(), agentData.getName()));
 
-					List<Map<String, String>> registryLogins = new ArrayList<>();
-					for (RegistryLogin login : getRegistryLogins()) {
-						registryLogins.add(CollectionUtils.newHashMap(
-								"url", login.getRegistryUrl(),
-								"userName", login.getUserName(),
-								"password", login.getPassword()));
-					}
-
+					var registryLogins = getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList());
+					
 					List<Map<String, Serializable>> services = new ArrayList<>();
 					for (Service service : jobContext.getServices())
 						services.add(service.toMap());
@@ -185,14 +179,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 
 				currentJobLogger.log(String.format("Testing on agent '%s'...", agentData.getName()));
 
-				List<Map<String, String>> registryLogins = new ArrayList<>();
-				for (RegistryLogin login: getRegistryLogins()) {
-					registryLogins.add(CollectionUtils.newHashMap(
-							"url", login.getRegistryUrl(),
-							"userName", login.getUserName(),
-							"password", login.getPassword()));
-				}
-
+				var registryLogins = getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList());
 				TestDockerJobData jobData = new TestDockerJobData(getName(), jobToken,
 						testData.getDockerImage(), getDockerSockPath(), registryLogins, 
 						getRunOptions());

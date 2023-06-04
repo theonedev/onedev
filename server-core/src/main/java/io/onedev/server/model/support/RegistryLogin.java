@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 
+import io.onedev.k8shelper.RegistryLoginFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 
@@ -49,4 +50,10 @@ public class RegistryLogin implements Serializable {
 		this.password = password;
 	}
 	
+	public RegistryLoginFacade getFacade() {
+		var registryUrl = getRegistryUrl();
+		if (registryUrl == null)
+			registryUrl = "https://index.docker.io/v1/";
+		return new RegistryLoginFacade(registryUrl, getUserName(), getPassword());
+	}
 }

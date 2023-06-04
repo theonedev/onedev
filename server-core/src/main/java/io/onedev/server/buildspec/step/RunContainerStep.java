@@ -1,29 +1,25 @@
 package io.onedev.server.buildspec.step;
 
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.RunContainerFacade;
+import io.onedev.k8shelper.StepFacade;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.SafePath;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.EnvVar;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.model.Build;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
-import javax.validation.constraints.NotEmpty;
-
-import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.k8shelper.RunContainerFacade;
-import io.onedev.k8shelper.StepFacade;
-import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.EnvVar;
-import io.onedev.server.buildspec.param.ParamCombination;
-import io.onedev.server.model.Build;
-import io.onedev.server.annotation.SafePath;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Interpolative;
-
 @Editable(order=150, name="Run Docker Container", description="Run specified docker container. To access files in "
-		+ "job workspace, either use environment variable <tt>JOB_WORKSPACE</tt>, or specify volume mounts. "
-		+ "<b class='text-warning'>NOTE:</b> If this step runs with a Kubernetes executor, the option "
-		+ "<code>mount container sock</code> of that executor must be enabled")
+		+ "job workspace, either use environment variable <tt>JOB_WORKSPACE</tt>, or specify volume mounts")
 public class RunContainerStep extends Step {
 
 	private static final long serialVersionUID = 1L;
@@ -48,7 +44,7 @@ public class RunContainerStep extends Step {
 		Map<String, String> mountMap = new HashMap<>();
 		for (VolumeMount mount: getVolumeMounts())
 			mountMap.put(mount.getSourcePath(), mount.getTargetPath());
-		return new RunContainerFacade(getImage(), getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY());
+		return new RunContainerFacade(getImage(), getArgs(), envMap, getWorkingDir(), mountMap, isUseTTY(), false);
 	}
 
 	@Editable(order=100, description="Specify container image to run. <b class='text-warning'>NOTE:</b> A shell must "
