@@ -3,7 +3,7 @@ onedev.server.jobLogEntry = {
 	render(logEntry, withDate) {
 		var $logEntry = $("<div class='log-entry'></div>");
 		if (withDate)
-			$logEntry.append("<span class='date mr-3'>" + moment(logEntry.date).format("HH:mm:ss") + "</span>");
+			$logEntry.append("<span class='date mr-2'>" + moment(logEntry.date).format("HH:mm:ss") + "</span> ");
 		for (var i=0; i<logEntry.messages.length; i++) {	
 			var message = logEntry.messages[i];
 			var $message = $("<span class='message'></span>")
