@@ -1,3 +1,8 @@
+# 8.3.4
+
+1. **[Executor]** Kubernetes executor no longer supports to execute build image step even with docker runtime. A kaniko step is added to build image in Kubernetes cluster
+2. **[Build Spec]** The `publish` option of `build docker image` step is removed, and now the step always tries to publish the built image
+
 # 8.2.0
 
 Branch/tag protection rules are changed to apply first matching instead of apply all matching
