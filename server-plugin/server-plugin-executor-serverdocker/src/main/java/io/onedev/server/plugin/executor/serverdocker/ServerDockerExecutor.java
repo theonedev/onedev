@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.ExecutorUtils;
 import io.onedev.agent.job.FailedException;
+import io.onedev.agent.job.ImageMappingFacade;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.*;
@@ -21,6 +22,7 @@ import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.job.JobRunnable;
 import io.onedev.server.job.ResourceAllocator;
+import io.onedev.server.model.support.ImageMapping;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor.TestData;
@@ -75,13 +77,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private String concurrency;
 	
+	private List<ImageMapping> imageMappings = new ArrayList<>();
+	
 	private transient volatile File hostBuildHome;
 	
 	private transient volatile LeafFacade runningStep;
 	
 	private transient volatile String containerName;
 	
-	private static transient volatile String hostInstallPath;
+	private transient List<ImageMappingFacade> imageMappingFacades;
+	
+	private static volatile String hostInstallPath;
 	
 	@Editable(order=400, description="Specify login information for docker registries if necessary")
 	public List<RegistryLogin> getRegistryLogins() {
@@ -127,17 +133,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.mountDockerSock = mountDockerSock;
 	}
 
-	@Editable(order=530, group="More Settings", description = "Optionally specify docker options to create network. " +
-			"Multiple options should be separated by space, and single option containing spaces should be quoted")
-	@ReservedOptions({"-d", "(--driver)=.*"})
-	public String getNetworkOptions() {
-		return networkOptions;
-	}
-
-	public void setNetworkOptions(String networkOptions) {
-		this.networkOptions = networkOptions;
-	}
-
 	@Editable(order=50010, group="More Settings", placeholder = "No limit", description = "" +
 			"Optionally specify cpu limit of jobs/services using this executor. This will be " +
 			"used as option <a href='https://docs.docker.com/config/containers/resource_constraints/#cpu' target='_blank'>--cpus</a> " +
@@ -174,6 +169,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.runOptions = runOptions;
 	}
 
+	@Editable(order=50075, group="More Settings", description = "Optionally specify docker options to create network. " +
+			"Multiple options should be separated by space, and single option containing spaces should be quoted")
+	@ReservedOptions({"-d", "(--driver)=.*"})
+	public String getNetworkOptions() {
+		return networkOptions;
+	}
+
+	public void setNetworkOptions(String networkOptions) {
+		this.networkOptions = networkOptions;
+	}
+
 	@Editable(order=50100, group="More Settings", placeholder="Use default", description=""
 			+ "Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
 			+ "Leave empty to use docker executable in PATH")
@@ -185,6 +191,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.dockerExecutable = dockerExecutable;
 	}
 
+	@Editable(order=50150, group="More Settings", description = "Optionally maps a docker image to a different " +
+			"image. The first matching entry will take effect, or image will remain unchanged if no matching " +
+			"entries found")
+	public List<ImageMapping> getImageMappings() {
+		return imageMappings;
+	}
+
+	public void setImageMappings(List<ImageMapping> imageMappings) {
+		this.imageMappings = imageMappings;
+	}
+	
 	private Commandline newDocker() {
 		Commandline docker;
 		if (getDockerExecutable() != null)
@@ -275,8 +292,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							OsInfo osInfo = OneDev.getInstance(OsInfo.class);
 
 							for (Service jobService : jobContext.getServices()) {
-								jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
-								startService(newDocker(), network, jobService.toMap(), osInfo, getCpuLimit(), getMemoryLimit(), jobLogger);
+								startService(newDocker(), network, jobService.toMap(), osInfo, getImageMappingFacades(),
+										getCpuLimit(), getMemoryLimit(), jobLogger);
 							}
 
 							File hostWorkspace = new File(hostBuildHome, "workspace");
@@ -310,6 +327,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 																 List<String> arguments, Map<String, String> environments,
 																 @Nullable String workingDir, Map<String, String> volumeMounts,
 																 List<Integer> position, boolean useTTY, boolean kaniko) {
+										image = mapImage(image);
 										// Uninstall symbol links as docker can not process it well
 										cache.uninstallSymbolinks(hostWorkspace);
 										containerName = network + "-step-" + stringifyStepPosition(position);
@@ -630,6 +648,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				hostInstallPath = installPath;
 		}
 		return hostInstallPath + path.substring(installPath.length());
+	}
+
+	private List<ImageMappingFacade> getImageMappingFacades() {
+		if (imageMappingFacades == null)
+			imageMappingFacades = getImageMappings().stream().map(it->it.getFacade()).collect(toList());
+		return imageMappingFacades;
+	}
+
+	private String mapImage(String image) {
+		return ImageMappingFacade.map(getImageMappingFacades(), image);
 	}
 	
 	@Override

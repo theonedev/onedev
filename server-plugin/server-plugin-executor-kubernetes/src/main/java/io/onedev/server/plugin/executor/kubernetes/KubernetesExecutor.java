@@ -7,8 +7,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.agent.job.FailedException;
+import io.onedev.agent.job.ImageMappingFacade;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.*;
 import io.onedev.commons.utils.command.Commandline;
@@ -27,6 +27,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.job.JobContext;
 import io.onedev.server.job.JobManager;
 import io.onedev.server.job.JobRunnable;
+import io.onedev.server.model.support.ImageMapping;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
@@ -36,7 +37,6 @@ import io.onedev.server.terminal.CommandlineShell;
 import io.onedev.server.terminal.Shell;
 import io.onedev.server.terminal.Terminal;
 import io.onedev.server.web.util.Testable;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -52,7 +52,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -60,14 +59,13 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
-import static io.onedev.agent.DockerExecutorUtils.*;
+import static io.onedev.agent.DockerExecutorUtils.buildDockerConfig;
 import static io.onedev.k8shelper.KubernetesHelper.*;
 import static io.onedev.server.util.CollectionUtils.newHashMap;
 import static io.onedev.server.util.CollectionUtils.newLinkedHashMap;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 @Editable(order=KubernetesExecutor.ORDER, description="This executor runs build jobs as pods in a kubernetes cluster. "
@@ -109,9 +107,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private String memoryLimit;
 	
+	private List<ImageMapping> imageMappings = new ArrayList<>();
+	
 	private transient volatile OsInfo osInfo;
 	
 	private transient volatile String containerName;
+	
+	private transient List<ImageMappingFacade> imageMappingFacades;
 	
 	@Editable(order=20, description="Optionally specify node selector of the job pods")
 	public List<NodeSelectorEntry> getNodeSelector() {
@@ -219,6 +221,19 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	public void setKubeCtlPath(String kubeCtlPath) {
 		this.kubeCtlPath = kubeCtlPath;
+	}
+
+	@Editable(order=28000, group="More Settings", description = "Optionally maps a docker image to a different " +
+			"image. The first matching entry will take effect, or image will remain unchanged if no matching entries " +
+			"found. For instance a mapping entry with <code>From</code> specified as <code>1dev/k8s-helper-linux:(.*)</code>, " +
+			"and <code>To</code> specified as <code>my-local-registry/k8s-helper-linux:$1</code> will map the " +
+			"k8s helper image from official docker registry to local registry, with repository and tag unchanged")
+	public List<ImageMapping> getImageMappings() {
+		return imageMappings;
+	}
+
+	public void setImageMappings(List<ImageMapping> imageMappings) {
+		this.imageMappings = imageMappings;
 	}
 
 	@Override
@@ -668,7 +683,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		Map<String, Object> podSpec = new LinkedHashMap<>();
 		Map<Object, Object> containerSpec = newLinkedHashMap(
 				"name", "default", 
-				"image", jobService.getImage());
+				"image", mapImage(jobService.getImage()));
 		Map<Object, Object> resourcesSpec = newLinkedHashMap(
 				"requests", newLinkedHashMap(
 						"cpu", getCpuRequest(),
@@ -960,7 +975,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					helperImageSuffix = "linux";
 				}
 				
-				String helperImage = IMAGE_REPO_PREFIX + "-" + helperImageSuffix + ":" + KubernetesHelper.getVersion();
+				String helperImage = mapImage(IMAGE_REPO_PREFIX + "-" + helperImageSuffix + ":" + KubernetesHelper.getVersion());
 				
 				List<Map<Object, Object>> commonEnvs = new ArrayList<>();
 				commonEnvs.add(newLinkedHashMap(
@@ -992,7 +1007,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
-								"image", execution.getImage());
+								"image", mapImage(execution.getImage()));
 						if (commandFacade.isUseTTY())
 							stepContainerSpec.put("tty", true);
 						stepContainerSpec.put("volumeMounts", commonVolumeMounts);
@@ -1005,7 +1020,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						OsContainer container = runContainerFacade.getContainer(osInfo); 
 						stepContainerSpec = newHashMap(
 								"name", containerName, 
-								"image", container.getImage());
+								"image", mapImage(container.getImage()));
 						if (runContainerFacade.isUseTTY())
 							stepContainerSpec.put("tty", true);
 						
@@ -1023,11 +1038,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 									"mountPath", entry.getValue(),
 									"subPath", subPath));
 						}
-//						if (runContainerFacade.isKaniko()) {
+						if (runContainerFacade.isKaniko()) {
 							volumeMounts.add(newLinkedHashMap(
 									"name", "docker-config",
 									"mountPath", "/kaniko/.docker"));
-//						}
+						}
 						stepContainerSpec.put("volumeMounts", volumeMounts);
 						
 						List<Map<Object, Object>> envs = new ArrayList<>(commonEnvs);
@@ -1541,6 +1556,16 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				}
 			}
 		}
+	}
+	
+	private List<ImageMappingFacade> getImageMappingFacades() {
+		if (imageMappingFacades == null)
+			imageMappingFacades = getImageMappings().stream().map(it->it.getFacade()).collect(toList());
+		return imageMappingFacades;
+	}
+	
+	private String mapImage(String image) {
+		return ImageMappingFacade.map(getImageMappingFacades(), image);
 	}
 	
 	private static interface AbortChecker {

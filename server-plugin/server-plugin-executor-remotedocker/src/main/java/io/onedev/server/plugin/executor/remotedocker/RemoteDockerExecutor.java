@@ -15,6 +15,7 @@ import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.job.*;
 import io.onedev.server.job.log.LogManager;
 import io.onedev.server.job.log.ServerJobLogger;
+import io.onedev.server.model.support.ImageMapping;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
@@ -107,6 +108,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 							getName(), agentData.getName()));
 
 					var registryLogins = getRegistryLogins().stream().map(RegistryLogin::getFacade).collect(toList());
+					var imageMappings = getImageMappings().stream().map(ImageMapping::getFacade).collect(toList());
 					
 					List<Map<String, Serializable>> services = new ArrayList<>();
 					for (Service service : jobContext.getServices())
@@ -116,7 +118,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(),
 							jobContext.getProjectId(), jobContext.getRefName(), jobContext.getCommitId().name(),
 							jobContext.getBuildNumber(), jobContext.getActions(), jobContext.getRetried(),
-							services, registryLogins, isMountDockerSock(), getDockerSockPath(),
+							services, registryLogins, imageMappings, isMountDockerSock(), getDockerSockPath(),
 							getCpuLimit(), getMemoryLimit(), getRunOptions(), getNetworkOptions());
 
 					try {

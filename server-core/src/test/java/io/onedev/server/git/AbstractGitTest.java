@@ -1,28 +1,27 @@
 package io.onedev.server.git;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.AppLoaderMocker;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.git.location.GitLocation;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
-import org.eclipse.jgit.lib.ConfigConstants;
+import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.storage.file.FileBasedConfig;
+import org.eclipse.jgit.util.FS;
 import org.junit.Assert;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.loader.AppLoaderMocker;
-import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.git.location.GitLocation;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
 
 public abstract class AbstractGitTest extends AppLoaderMocker {
 
@@ -38,23 +37,24 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 	protected void setup() {
 		gitDir = FileUtils.createTempDir();
 		
-		try {
-			git = Git.init().setInitialBranch("main").setBare(false).setDirectory(gitDir).call();
+		try (var ignored = Git.init().setInitialBranch("main").setBare(false).setDirectory(gitDir).call()) {
 		} catch (IllegalStateException | GitAPIException e) {
 			throw new RuntimeException(e);
 		}
 		
-		var config = git.getRepository().getConfig();
-		config.setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, 
-				ConfigConstants.CONFIG_KEY_ALGORITHM, SupportedAlgorithm.HISTOGRAM);
-		config.setBoolean(ConfigConstants.CONFIG_COMMIT_SECTION, null, 
-				ConfigConstants.CONFIG_KEY_GPGSIGN, false);
 		try {
-			config.save();
+			git = Git.wrap(new FileRepository(new File(gitDir, ".git")) {
+				@Override
+				public FileBasedConfig getConfig() {
+					// avoid loading user config
+					return new FileBasedConfig(new File(getDirectory(), "config"), FS.DETECTED);
+				}
+				
+			});
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
+		
 		Mockito.when(AppLoader.getInstance(GitLocation.class)).thenReturn(new GitLocation() {
 
 			private static final long serialVersionUID = 1L;
@@ -92,7 +92,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 	
 	@Override
 	protected void teardown() {
-		git.close();
+		git.getRepository().close();
 		FileUtils.deleteDir(gitDir, 3);
 	}
 

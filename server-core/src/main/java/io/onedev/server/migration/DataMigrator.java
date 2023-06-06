@@ -5433,5 +5433,28 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	private void migrate126(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement: valueElement.elements()) {
+								if (executorElement.getName().contains("KubernetesExecutor")
+										|| executorElement.getName().contains("DockerExecutor")) {
+									executorElement.addElement("imageMappings");
+								}
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

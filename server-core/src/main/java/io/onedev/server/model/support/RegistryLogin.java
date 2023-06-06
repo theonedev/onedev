@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 
-import io.onedev.k8shelper.RegistryLoginFacade;
+import io.onedev.agent.job.RegistryLoginFacade;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Password;
 
