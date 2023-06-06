@@ -88,7 +88,7 @@ public class BuildImageWithKanikoStep extends Step {
 		if (getMoreOptions() != null)
 			args.append(getMoreOptions());
 		
-		return new RunContainerFacade("1dev/kaniko:latest", 
+		return new RunContainerFacade("1dev/kaniko:1.0.0", 
 				args.toString(), new HashMap<>(), null, volumeMounts, true, true);
 	}
 

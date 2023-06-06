@@ -74,7 +74,7 @@ public class SCPCommandStep extends CommandStep {
 	@Editable
 	@Override
 	public String getImage() {
-		return "1dev/ssh-client";
+		return "1dev/ssh-client:1.0.0";
 	}
 
 	@Override
