@@ -386,7 +386,7 @@ public class UserResource {
 		sshKey.setContent(content);
 		sshKey.setCreatedAt(new Date());
 		sshKey.setOwner(user);
-		sshKey.digest();
+		sshKey.fingerprint();
         
 		sshKeyManager.create(sshKey);
 		return sshKey.getId();

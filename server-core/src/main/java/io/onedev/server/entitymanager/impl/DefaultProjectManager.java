@@ -752,6 +752,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 			var projectId = Long.valueOf(projectDir.getName());
 			var project = projects.get(projectId);
 			if (project != null) {
+				logger.debug("Checking project (path: {}, id: {})...", project.getPath(), projectId);
 				checkGitDir(projectId);
 				HookUtils.checkHooks(getGitDir(projectId));
 				checkGitConfig(projectId, project.getGitPackConfig());

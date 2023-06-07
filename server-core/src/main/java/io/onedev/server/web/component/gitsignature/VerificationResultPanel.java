@@ -1,5 +1,12 @@
 package io.onedev.server.web.component.gitsignature;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.git.signatureverification.SignatureVerificationManager;
+import io.onedev.server.git.signatureverification.VerificationResult;
+import io.onedev.server.git.signatureverification.VerificationSuccessful;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -7,30 +14,19 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.revwalk.RevObject;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.signature.SignatureVerification;
-import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
-import io.onedev.server.git.signature.SignatureVerified;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.svg.SpriteImage;
-
 @SuppressWarnings("serial")
-public abstract class GitSignaturePanel extends DropdownLink {
+public abstract class VerificationResultPanel extends DropdownLink {
 
-	private IModel<SignatureVerification> model = 
-			new LoadableDetachableModel<SignatureVerification>() {
+	private IModel<VerificationResult> model = new LoadableDetachableModel<>() {
 
 		@Override
-		protected SignatureVerification load() {
-			return GitUtils.verifySignature(getRevObject(), 
-					OneDev.getInstance(SignatureVerificationKeyLoader.class));
+		protected VerificationResult load() {
+			return OneDev.getInstance(SignatureVerificationManager.class).verifySignature(getRevObject());
 		}
-		
+
 	};
 	
-	public GitSignaturePanel(String id) {
+	public VerificationResultPanel(String id) {
 		super(id);
 	}
 
@@ -43,7 +39,7 @@ public abstract class GitSignaturePanel extends DropdownLink {
 
 			@Override
 			public String getObject() {
-				if (model.getObject() instanceof SignatureVerified)
+				if (model.getObject() instanceof VerificationSuccessful)
 					return "link-success";
 				else
 					return "link-danger";
@@ -58,10 +54,10 @@ public abstract class GitSignaturePanel extends DropdownLink {
 
 			@Override
 			protected String load() {
-				SignatureVerification verification = model.getObject();
+				var verification = model.getObject();
 				
 				String icon;
-				if (verification instanceof SignatureVerified)
+				if (verification instanceof VerificationSuccessful)
 					icon = "locked";
 				else
 					icon = "unlocked";
@@ -86,19 +82,7 @@ public abstract class GitSignaturePanel extends DropdownLink {
 
 	@Override
 	protected Component newContent(String id, FloatingPanel dropdown) {
-		return new GitSignatureDetailPanel(id) {
-
-			@Override
-			protected SignatureVerification getVerification() {
-				return model.getObject();
-			}
-
-			@Override
-			protected RevObject getRevObject() {
-				return GitSignaturePanel.this.getRevObject();
-			}
-			
-		};
+		return model.getObject().renderDetail(id, getRevObject());
 	}
 	
 	protected abstract RevObject getRevObject();

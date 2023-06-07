@@ -32,7 +32,7 @@ import io.onedev.server.web.component.branch.create.CreateBranchLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
-import io.onedev.server.web.component.gitsignature.GitSignaturePanel;
+import io.onedev.server.web.component.gitsignature.VerificationResultPanel;
 import io.onedev.server.web.component.job.jobinfo.JobInfoButton;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
@@ -277,7 +277,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		
-		add(new GitSignaturePanel("signature") {
+		add(new VerificationResultPanel("signature") {
 			
 			@Override
 			protected RevObject getRevObject() {

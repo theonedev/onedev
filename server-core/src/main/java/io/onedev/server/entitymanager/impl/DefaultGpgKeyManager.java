@@ -8,7 +8,7 @@ import io.onedev.server.event.Listen;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.git.signature.SignatureVerificationKey;
+import io.onedev.server.git.signatureverification.gpg.GpgSigningKey;
 import io.onedev.server.model.EmailAddress;
 import io.onedev.server.model.GpgKey;
 import io.onedev.server.model.User;
@@ -22,10 +22,7 @@ import org.bouncycastle.openpgp.PGPPublicKey;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Singleton
 public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements GpgKeyManager {
@@ -99,17 +96,12 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 
     @Sessional
 	@Override
-	public SignatureVerificationKey findSignatureVerificationKey(long keyId) {
+	public GpgSigningKey findSignatureVerificationKey(long keyId) {
     	Long entityId = entityIds.get(keyId);
     	if (entityId != null) {
-    		return new SignatureVerificationKey() {
+    		return new GpgSigningKey() {
 				
-    			private transient List<String> emailAddresses;
-    			
-				@Override
-				public boolean shouldVerifyDataWriter() {
-					return true;
-				}
+    			private transient Collection<String> emailAddresses;
 				
 				@Override
 				public PGPPublicKey getPublicKey() {
@@ -121,9 +113,9 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 				}
 
 				@Override
-				public List<String> getEmailAddresses() {
+				public Collection<String> getEmailAddresses() {
 					if (emailAddresses == null) {
-						emailAddresses = new ArrayList<>();
+						emailAddresses = new LinkedHashSet<>();
 						GpgKey gpgKey = load(entityId);
 						for (String value: GpgUtils.getEmailAddresses(gpgKey.getPublicKeys().get(0))) {
 							EmailAddress emailAddress = emailAddressManager.findByValue(value);

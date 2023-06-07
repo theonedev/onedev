@@ -10,11 +10,14 @@ import io.onedev.server.OneDev;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.*;
+import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.patternset.PatternSet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.common.digest.BuiltinDigests;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.slf4j.Logger;
@@ -32,6 +35,8 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -5456,5 +5461,25 @@ public class DataMigrator {
 			}
 		}
 	}
-	
+
+	private void migrate127(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("SshKeys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					PublicKey publicKey = null;
+					try {
+						publicKey = SshKeyUtils.decodeSshPublicKey(element.elementText("content"));
+					} catch (IOException | GeneralSecurityException e) {
+						throw new RuntimeException(e);
+					}
+					var digest = KeyUtils.getFingerPrint(BuiltinDigests.sha256, publicKey);
+					var digestElement = element.element("digest");
+					digestElement.setName("fingerprint");
+					digestElement.setText(digest);
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

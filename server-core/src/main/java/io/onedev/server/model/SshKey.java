@@ -1,39 +1,30 @@
 package io.onedev.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.annotation.ClassValidating;
+import io.onedev.server.annotation.Editable;
+import io.onedev.server.annotation.Multiline;
+import io.onedev.server.annotation.OmitName;
+import io.onedev.server.ssh.SshKeyUtils;
+import io.onedev.server.validation.Validatable;
+import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.common.digest.BuiltinDigests;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.annotation.Nullable;
+import javax.persistence.*;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Date;
 
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.ConstraintValidatorContext;
-
-import org.apache.sshd.common.config.keys.KeyUtils;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import javax.validation.constraints.NotEmpty;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.ssh.SshKeyUtils;
-import io.onedev.server.util.CryptoUtils;
-import io.onedev.server.validation.Validatable;
-import io.onedev.server.annotation.ClassValidating;
-import io.onedev.server.annotation.Editable;
-import io.onedev.server.annotation.Multiline;
-import io.onedev.server.annotation.OmitName;
-
 @Editable
 @Entity
-@Table(indexes={@Index(columnList="o_owner_id"), @Index(columnList="digest")})
+@Table(indexes={@Index(columnList="o_owner_id"), @Index(columnList="fingerprint")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @ClassValidating
 public class SshKey extends AbstractEntity implements Validatable {
@@ -45,7 +36,7 @@ public class SshKey extends AbstractEntity implements Validatable {
     
     @JsonIgnore
     @Column(nullable=false, unique=true)
-    private String digest;
+    private String fingerprint;
 
     @JsonIgnore
     @Column(nullable=false)
@@ -69,12 +60,12 @@ public class SshKey extends AbstractEntity implements Validatable {
         this.content = content;
     }
 
-    public String getDigest() {
-        return digest;
+    public String getFingerprint() {
+        return fingerprint;
     }
 
-    public void setDigest(String digest) {
-        this.digest = digest;
+    public void setFingerprint(String fingerprint) {
+        this.fingerprint = fingerprint;
     }
 
     public User getOwner() {
@@ -102,10 +93,10 @@ public class SshKey extends AbstractEntity implements Validatable {
     		return null;
     }
     
-    public void digest() {
+    public void fingerprint() {
         try {
             PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
-            digest = KeyUtils.getFingerPrint(CryptoUtils.DIGEST_FORMAT, pubEntry);
+            fingerprint = KeyUtils.getFingerPrint(BuiltinDigests.sha256, pubEntry);
         } catch (IOException | GeneralSecurityException e) {
             throw new RuntimeException(e);
         }
