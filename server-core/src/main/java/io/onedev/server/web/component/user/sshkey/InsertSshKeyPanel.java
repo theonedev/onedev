@@ -52,9 +52,9 @@ public abstract class InsertSshKeyPanel extends Panel {
                 
                 SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
                 SshKey sshKey = (SshKey) editor.getModelObject();
-                sshKey.digest();
+                sshKey.fingerprint();
                 
-                if (sshKeyManager.findByDigest(sshKey.getDigest()) != null) {
+                if (sshKeyManager.findByDigest(sshKey.getFingerprint()) != null) {
 					editor.error(new Path(new PathNode.Named("content")), "This key is already in use");
 					target.add(form);
                 } else {

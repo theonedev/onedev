@@ -47,8 +47,9 @@ import io.onedev.server.git.hook.GitPreReceiveCallback;
 import io.onedev.server.git.location.GitLocation;
 import io.onedev.server.git.service.DefaultGitService;
 import io.onedev.server.git.service.GitService;
-import io.onedev.server.git.signature.DefaultSignatureVerificationKeyLoader;
-import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
+import io.onedev.server.git.signatureverification.DefaultSignatureVerificationManager;
+import io.onedev.server.git.signatureverification.SignatureVerificationManager;
+import io.onedev.server.git.signatureverification.SignatureVerifier;
 import io.onedev.server.infomanager.*;
 import io.onedev.server.jetty.DefaultJettyLauncher;
 import io.onedev.server.jetty.DefaultSessionDataStoreFactory;
@@ -369,8 +370,9 @@ public class CoreModule extends AbstractPluginModule {
 		bind(GitLfsFilter.class);
 		bind(GitPreReceiveCallback.class);
 		bind(GitPostReceiveCallback.class);
-		bind(SignatureVerificationKeyLoader.class).to(DefaultSignatureVerificationKeyLoader.class);
+		bind(SignatureVerificationManager.class).to(DefaultSignatureVerificationManager.class);
 		contribute(CommandCreator.class, SshCommandCreator.class);
+		contributeFromPackage(SignatureVerifier.class, SignatureVerifier.class);
 	}
 	
 	private void configureRestful() {

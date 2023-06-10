@@ -13,6 +13,8 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.CommandUtils;
 
+import javax.annotation.Nullable;
+
 public class GetRawTagCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(GetRawTagCommand.class);
@@ -33,6 +35,7 @@ public class GetRawTagCommand {
 		return CommandUtils.newGit();
 	}
 	
+	@Nullable
 	public byte[] run() {
 		Commandline git = newGit().workingDir(workingDir);
 		git.environments().putAll(envs);

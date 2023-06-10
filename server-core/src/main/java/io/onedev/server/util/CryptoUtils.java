@@ -5,8 +5,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.crypto.AesCipherService;
-import org.apache.sshd.common.digest.BaseDigest;
-import org.apache.sshd.common.digest.Digest;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -18,8 +16,6 @@ import java.security.spec.KeySpec;
 public class CryptoUtils {
 	
 	private static final int DEFAULT_SECRET_LEN = 40;
-	
-    public static final Digest DIGEST_FORMAT = new BaseDigest("MD5", 512);
 	
 	private static volatile KeyPair keyPair;
 	

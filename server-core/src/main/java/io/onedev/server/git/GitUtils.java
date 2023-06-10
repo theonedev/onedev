@@ -11,16 +11,13 @@ import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.git.exception.RefUpdateException;
 import io.onedev.server.git.service.DiffEntryFacade;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.git.signature.*;
 import io.onedev.server.util.GpgUtils;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.*;
-import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -39,14 +36,16 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
-import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -589,192 +588,6 @@ public class GitUtils {
 		} catch (IOException | PGPException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Nullable
-	public static SignatureVerification verifyTagSignature(byte[] raw,
-														   SignatureVerificationKeyLoader keyLoader) {
-		byte[] signatureData = TagParser.getRawGpgSignature(raw);
-		if (signatureData == null) {
-			return null;
-		}
-
-		// The signature is just tacked onto the end of the message, which
-		// is last in the buffer.
-		byte[] data = Arrays.copyOfRange(raw, 0, raw.length - signatureData.length);
-
-		PersonIdent taggerIdent = TagParser.getTaggerIdent(raw);
-		if (taggerIdent == null)
-			return null;
-
-		return verify(data, signatureData, taggerIdent.getEmailAddress(), keyLoader);
-	}
-
-	/*
-	 * Most logic here is copied from JGit
-	 */
-	@Nullable
-	public static SignatureVerification verifyCommitSignature(byte[] raw,
-															  SignatureVerificationKeyLoader keyLoader) {
-		byte[] header = {'g', 'p', 'g', 's', 'i', 'g'};
-		int start = RawParseUtils.headerStart(header, raw, 0);
-		if (start < 0)
-			return null;
-		int end = RawParseUtils.headerEnd(raw, start);
-		byte[] signatureData = Arrays.copyOfRange(raw, start, end);
-
-		// start is at the beginning of the header's content
-		start -= header.length + 1;
-		// end is on the terminating LF; we need to skip that, too
-		if (end < raw.length) {
-			end++;
-		}
-		byte[] data = new byte[raw.length - (end - start)];
-		System.arraycopy(raw, 0, data, 0, start);
-		System.arraycopy(raw, end, data, start, raw.length - end);
-
-		int nameB = RawParseUtils.committer(raw, 0);
-		if (nameB < 0)
-			return null;
-		PersonIdent committerIdent = RawParseUtils.parsePersonIdent(raw, nameB);
-		String emailAddress = committerIdent.getEmailAddress();
-		return verify(data, signatureData, emailAddress, keyLoader);
-	}
-
-	@Nullable
-	public static SignatureVerification verifySignature(RevObject object, SignatureVerificationKeyLoader keyLoader) {
-		if (object instanceof RevCommit) {
-			RevCommit commit = (RevCommit) object;
-			return verifyCommitSignature(commit.getRawBuffer(), keyLoader);
-		} else if (object instanceof RevTag) {
-			RevTag tag = (RevTag) object;
-			return verifyTagSignature(tag.getRawBuffer(), keyLoader);
-		} else {
-			return null;
-		}
-	}
-
-	private static PGPSignature parseSignature(InputStream in) throws IOException, PGPException {
-		try (InputStream sigIn = PGPUtil.getDecoderStream(in)) {
-			JcaPGPObjectFactory pgpFactory = new JcaPGPObjectFactory(sigIn);
-			Object obj = pgpFactory.nextObject();
-			if (obj instanceof PGPCompressedData) {
-				obj = new JcaPGPObjectFactory(((PGPCompressedData) obj).getDataStream()).nextObject();
-			}
-			if (obj instanceof PGPSignatureList) {
-				return ((PGPSignatureList) obj).get(0);
-			}
-			return null;
-		}
-	}
-
-	@Nullable
-	private static SignatureVerification verify(byte[] data, byte[] signatureData, String dataWriter,
-												SignatureVerificationKeyLoader keyLoader) {
-		try (InputStream sigIn = new ByteArrayInputStream(signatureData)) {
-			PGPSignature signature = parseSignature(sigIn);
-			if (signature != null) {
-				SignatureVerificationKey key = keyLoader.getSignatureVerificationKey(signature.getKeyID());
-				if (key != null) {
-					try {
-						signature.init(
-								new JcaPGPContentVerifierBuilderProvider().setProvider(BouncyCastleProvider.PROVIDER_NAME),
-								key.getPublicKey());
-						signature.update(data);
-						if (signature.verify()) {
-							if (!key.shouldVerifyDataWriter() || key.getEmailAddresses().contains(dataWriter))
-								return new SignatureVerified(key);
-							else
-								return new SignatureUnverified(key, "Can not verify committer email using signing key");
-						} else {
-							return new SignatureUnverified(key, "Invalid commit signature");
-						}
-					} catch (PGPException e) {
-						logger.error("Commit signature verification failed", e);
-						return new SignatureUnverified(key, "Signature verification failed");
-					}
-				} else {
-					return new SignatureUnverified(null, "Signature is signed with an unknown key "
-							+ "(key ID: " + GpgUtils.getKeyIDString(signature.getKeyID()) + ")");
-				}
-			} else {
-				return new SignatureUnverified(null, "Signature does not decode into a signature object");
-			}
-		} catch (Exception e) {
-			logger.error("Error parsing commit signature", e);
-			return new SignatureUnverified(null, "Signature cannot be parsed");		
-		}
-	}
-
-	/*
-	 * Copied from JGit
-	 */
-	private static class TagParser {
-
-		private static final byte[] hSignature = Constants.encodeASCII("-----BEGIN PGP SIGNATURE-----");
-
-		private static int nextStart(byte[] prefix, byte[] buffer, int from) {
-			int stop = buffer.length - prefix.length + 1;
-			int ptr = from;
-			if (ptr > 0) {
-				ptr = RawParseUtils.nextLF(buffer, ptr - 1);
-			}
-			while (ptr < stop) {
-				int lineStart = ptr;
-				boolean found = true;
-				for (byte element : prefix) {
-					if (element != buffer[ptr++]) {
-						found = false;
-						break;
-					}
-				}
-				if (found) {
-					return lineStart;
-				}
-				do {
-					ptr = RawParseUtils.nextLF(buffer, ptr);
-				} while (ptr < stop && buffer[ptr] == '\n');
-			}
-			return -1;
-		}
-
-		private static int getSignatureStart(byte[] raw) {
-			int msgB = RawParseUtils.tagMessage(raw, 0);
-			if (msgB < 0) {
-				return msgB;
-			}
-			// Find the last signature start and return the rest
-			int start = nextStart(hSignature, raw, msgB);
-			if (start < 0) {
-				return start;
-			}
-			int next = RawParseUtils.nextLF(raw, start);
-			while (next < raw.length) {
-				int newStart = nextStart(hSignature, raw, next);
-				if (newStart < 0) {
-					break;
-				}
-				start = newStart;
-				next = RawParseUtils.nextLF(raw, start);
-			}
-			return start;
-		}
-
-		private static byte[] getRawGpgSignature(byte[] raw) {
-			int start = getSignatureStart(raw);
-			if (start < 0) {
-				return null;
-			}
-			return Arrays.copyOfRange(raw, start, raw.length);
-		}
-
-		private static PersonIdent getTaggerIdent(byte[] raw) {
-			int nameB = RawParseUtils.tagger(raw, 0);
-			if (nameB < 0)
-				return null;
-			return RawParseUtils.parsePersonIdent(raw, nameB);
-		}
-
 	}
 
 }

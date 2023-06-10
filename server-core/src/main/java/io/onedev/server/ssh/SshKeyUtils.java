@@ -30,16 +30,6 @@ public class SshKeyUtils {
         return entry.resolvePublicKey(null, PublicKeyEntryResolver.FAILING);
     }
     
-    public static PublicKey decodePEMPublicKey(String publicKey) throws IOException, GeneralSecurityException {
-        try (PemReader pemReaderPublic = new PemReader(new StringReader(publicKey))) {
-            KeyFactory kf = SecurityUtils.getKeyFactory(KeyUtils.RSA_ALGORITHM);
-            
-            PemObject pemObjectPublic = pemReaderPublic.readPemObject();
-            X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(pemObjectPublic.getContent());
-            return kf.generatePublic(x509EncodedKeySpec);
-        }
-    }
-    
     public static PrivateKey decodePEMPrivateKey(String privateKey) throws IOException, GeneralSecurityException {
         try (PemReader pemReaderPrivate = new PemReader(new StringReader(privateKey))) {
             KeyFactory kf = SecurityUtils.getKeyFactory(KeyUtils.RSA_ALGORITHM);

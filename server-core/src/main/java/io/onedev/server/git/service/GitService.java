@@ -134,6 +134,7 @@ public interface GitService {
 							   ObjectId oldId, ObjectId newId, 
 							   @Nullable Map<String, String> envs);
 	
+	@Nullable
 	byte[] getRawTag(Project project, ObjectId tagId, Map<String, String> envs);
 	
 }

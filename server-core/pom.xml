@@ -333,6 +333,11 @@
 			<artifactId>objenesis</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.connectbot</groupId>
+			<artifactId>sshlib</artifactId>
+			<version>2.2.21</version>
+		</dependency>
+		<dependency>
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast</artifactId>
 		</dependency>

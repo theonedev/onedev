@@ -52,7 +52,7 @@ public class SshKeyResource {
 			throw new UnauthorizedException();
 		
 		sshKey.setCreatedAt(new Date());
-    	sshKey.digest();
+    	sshKey.fingerprint();
     	
     	sshKeyManager.create(sshKey);
     	return sshKey.getId();

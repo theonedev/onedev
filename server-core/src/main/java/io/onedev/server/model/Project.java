@@ -20,8 +20,8 @@ import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.CommitMessageError;
 import io.onedev.server.git.service.GitService;
 import io.onedev.server.git.service.RefFacade;
-import io.onedev.server.git.signature.SignatureVerificationKeyLoader;
-import io.onedev.server.git.signature.SignatureVerified;
+import io.onedev.server.git.signatureverification.SignatureVerificationManager;
+import io.onedev.server.git.signatureverification.VerificationSuccessful;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.*;
@@ -1499,25 +1499,26 @@ public class Project extends AbstractEntity implements LabelSupport<ProjectLabel
 	}
 	
 	public boolean hasValidCommitSignature(RevCommit commit) {
-		SignatureVerificationKeyLoader keyLoader = 
-				OneDev.getInstance(SignatureVerificationKeyLoader.class);
-		return GitUtils.verifySignature(commit, keyLoader) instanceof SignatureVerified;
+		return getSignatureVerificationManager().verifySignature(commit) instanceof VerificationSuccessful;
 	}
 	
 	public boolean hasValidCommitSignature(ObjectId commitId, Map<String, String> gitEnvs) {
-		byte[] commitRawData = getGitService().getRawCommit(this, commitId, gitEnvs);
-		SignatureVerificationKeyLoader keyLoader = OneDev.getInstance(SignatureVerificationKeyLoader.class);
-		return GitUtils.verifyCommitSignature(commitRawData, keyLoader) instanceof SignatureVerified;
+		byte[] rawCommit = getGitService().getRawCommit(this, commitId, gitEnvs);
+		return getSignatureVerificationManager().verifyCommitSignature(rawCommit) 
+				instanceof VerificationSuccessful;
 	}
 	
 	public boolean hasValidTagSignature(ObjectId tagId, Map<String, String> gitEnvs) {
-		byte[] tagRawData = getGitService().getRawTag(this, tagId, gitEnvs);
-		SignatureVerificationKeyLoader keyLoader = OneDev.getInstance(SignatureVerificationKeyLoader.class);
-		return tagRawData != null && GitUtils.verifyTagSignature(tagRawData, keyLoader) instanceof SignatureVerified;
+		byte[] rawTag = getGitService().getRawTag(this, tagId, gitEnvs);
+		return rawTag != null && getSignatureVerificationManager().verifyTagSignature(rawTag) instanceof VerificationSuccessful;
 	}
 	
 	public boolean isCommitSignatureRequirementSatisfied(User user, String branch, RevCommit commit) {
 		return !isCommitSignatureRequired(user, branch) || hasValidCommitSignature(commit);
+	}
+	
+	private SignatureVerificationManager getSignatureVerificationManager() {
+		return OneDev.getInstance(SignatureVerificationManager.class);
 	}
 	
 	public static boolean containsPath(@Nullable String patterns, String path) {

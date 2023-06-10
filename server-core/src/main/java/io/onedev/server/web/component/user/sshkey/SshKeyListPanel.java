@@ -49,12 +49,12 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
         
 		List<IColumn<SshKey, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<>(Model.of("Digest")) {
+		columns.add(new AbstractColumn<>(Model.of("Fingerprint")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
 									 IModel<SshKey> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getDigest()));
+				cellItem.add(new Label(componentId, rowModel.getObject().getFingerprint()));
 			}
 
 		});
