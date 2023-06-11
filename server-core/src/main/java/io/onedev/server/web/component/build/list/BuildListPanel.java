@@ -54,8 +54,10 @@ import io.onedev.server.web.component.revision.RevisionSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
@@ -924,6 +926,12 @@ public abstract class BuildListPanel extends Panel {
 					}.add(AttributeAppender.append("class", "no-current"));
 				}
 
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(SecurityUtils.getUser() != null && getPage() instanceof BuildListPage);
+				}
+				
 			});
 		} else {
 			add(runJobLink = new AjaxLink<Void>("runJob") {
@@ -931,6 +939,12 @@ public abstract class BuildListPanel extends Panel {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					newRevisionSelector(target, getProject());
+				}
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(SecurityUtils.getUser() != null && getPage() instanceof ProjectBuildsPage);
 				}
 				
 			});
