@@ -4,6 +4,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.annotation.ChoiceProvider;
 import io.onedev.server.annotation.Editable;
 import io.onedev.server.annotation.Interpolative;
+import io.onedev.server.annotation.ReservedOptions;
 import io.onedev.server.buildspec.step.commandinterpreter.DefaultInterpreter;
 import io.onedev.server.buildspec.step.commandinterpreter.Interpreter;
 import io.onedev.server.model.Build;
@@ -26,6 +27,8 @@ public class SCPCommandStep extends CommandStep {
 	private String source;
 	
 	private String target;
+	
+	private String options;
 
 	@Editable(order=200, description="Specify a secret to be used as private key for SSH authentication")
 	@ChoiceProvider("getPrivateKeySecretChoices")
@@ -65,6 +68,16 @@ public class SCPCommandStep extends CommandStep {
 		this.target = target;
 	}
 
+	@Editable(order=500, description = "Optionally specify options for scp command. Multiple options need to be " +
+			"separated with space")
+	public String getOptions() {
+		return options;
+	}
+
+	public void setOptions(String options) {
+		this.options = options;
+	}
+
 	@Editable
 	@Override
 	public boolean isRunInContainer() {
@@ -74,7 +87,7 @@ public class SCPCommandStep extends CommandStep {
 	@Editable
 	@Override
 	public String getImage() {
-		return "1dev/ssh-client:1.0.0";
+		return "1dev/ssh-client:1.0.1";
 	}
 
 	@Override
@@ -92,10 +105,14 @@ public class SCPCommandStep extends CommandStep {
 						"cat <<EOF>> /root/.ssh/id_rsa");
 				var privateKey = Build.get().getJobSecretAuthorizationContext().getSecretValue(getPrivateKeySecret());
 				commands.addAll(StringUtils.splitToLines(privateKey));
+				var scpBuilder = new StringBuilder("scp -o StrictHostKeyChecking=no ");
+				if (getOptions() != null)
+					scpBuilder.append(getOptions()).append(" ");
+				scpBuilder.append(getSource()).append(" ").append(getTarget());
 				commands.addAll(newArrayList(
 						"EOF",
 						"chmod 600 /root/.ssh/id_rsa",
-						"scp -o StrictHostKeyChecking=no " + getSource() + " " + getTarget()));
+						scpBuilder.toString()));
 				return commands;
 			}
 		};
