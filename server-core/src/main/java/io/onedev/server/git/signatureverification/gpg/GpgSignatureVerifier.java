@@ -10,25 +10,19 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
-import org.eclipse.jgit.util.RawParseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 @Singleton
 public class GpgSignatureVerifier implements SignatureVerifier {
 	
 	private static final Logger logger = LoggerFactory.getLogger(GpgSignatureVerifier.class);
-	
-	private static final byte[] SIGNATURE_START = "-----BEGIN PGP SIGNATURE-----\n".getBytes(UTF_8);
 	
 	private final GpgKeyManager gpgKeyManager;
 
@@ -56,49 +50,49 @@ public class GpgSignatureVerifier implements SignatureVerifier {
 	
 	private GpgSigningKey loadKey(long keyId) {
 		GpgSetting gpgSetting = settingManager.getGpgSetting();
-		GpgSigningKey verificationKey = gpgSetting.findSignatureVerificationKey(keyId);
+		GpgSigningKey verificationKey = gpgSetting.findSigningKey(keyId);
 		if (verificationKey == null)
-			verificationKey = gpgKeyManager.findSignatureVerificationKey(keyId);
+			verificationKey = gpgKeyManager.findSigningKey(keyId);
 		return verificationKey;
 	}	
 
-	@Nullable
 	@Override
 	public VerificationResult verify(byte[] data, byte[] signatureData, String emailAddress) {
-		if (RawParseUtils.match(signatureData, 0, SIGNATURE_START) != -1) {
-			try (InputStream is = new ByteArrayInputStream(signatureData)) {
-				PGPSignature signature = parseSignature(is);
-				if (signature != null) {
-					GpgSigningKey verificationKey = loadKey(signature.getKeyID());
-					if (verificationKey != null) {
-						if (verificationKey.getEmailAddresses() != null 
-								&& !verificationKey.getEmailAddresses().contains(emailAddress)) {
-							return new GpgVerificationFailed(verificationKey, "Not a verified email of signing GPG key");
-						}
-						signature.init(
-								new JcaPGPContentVerifierBuilderProvider().setProvider(BouncyCastleProvider.PROVIDER_NAME),
-								verificationKey.getPublicKey());
-						signature.update(data);
-						if (signature.verify()) 
-							return new GpgVerificationSuccessful(verificationKey);
-						else 
-							return new GpgVerificationFailed(verificationKey, "Invalid GPG signature");
-					} else {
-						return new GpgVerificationFailed(null, "Signed with an unknown GPG key "
-								+ "(key ID: " + GpgUtils.getKeyIDString(signature.getKeyID()) + ")");
+		try (InputStream is = new ByteArrayInputStream(signatureData)) {
+			PGPSignature signature = parseSignature(is);
+			if (signature != null) {
+				GpgSigningKey signingKey = loadKey(signature.getKeyID());
+				if (signingKey != null) {
+					if (signingKey.getEmailAddresses() != null 
+							&& !signingKey.getEmailAddresses().contains(emailAddress)) {
+						return new GpgVerificationFailed(signingKey, "Not a verified email of signing GPG key");
 					}
+					signature.init(
+							new JcaPGPContentVerifierBuilderProvider().setProvider(BouncyCastleProvider.PROVIDER_NAME),
+							signingKey.getPublicKey());
+					signature.update(data);
+					if (signature.verify()) 
+						return new GpgVerificationSuccessful(signingKey);
+					else 
+						return new GpgVerificationFailed(signingKey, "Invalid GPG signature");
 				} else {
-					return new GpgVerificationFailed(null, "Looks like a GPG signature but without necessary data");
+					return new GpgVerificationFailed(null, "Signed with an unknown GPG key "
+							+ "(key ID: " + GpgUtils.getKeyIDString(signature.getKeyID()) + ")");
 				}
-			} catch (PGPException e) {
-				logger.error("Error verifying GPG signature", e);
-				return new GpgVerificationFailed(null, "Error verifying GPG signature");
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			} else {
+				return new GpgVerificationFailed(null, "Looks like a GPG signature but without necessary data");
 			}
-		} else {
-			return null;
+		} catch (PGPException e) {
+			logger.error("Error verifying GPG signature", e);
+			return new GpgVerificationFailed(null, "Error verifying GPG signature");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
-	
+
+	@Override
+	public String getPrefix() {
+		return "-----BEGIN PGP SIGNATURE-----";
+	}
+
 }

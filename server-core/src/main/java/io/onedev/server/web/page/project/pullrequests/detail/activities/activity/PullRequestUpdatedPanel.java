@@ -10,7 +10,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
-import io.onedev.server.web.component.gitsignature.VerificationResultPanel;
+import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -90,7 +90,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					
 				});
 
-				item.add(new VerificationResultPanel("signature") {
+				item.add(new SignatureStatusPanel("signature") {
 
 					@Override
 					protected RevObject getRevObject() {

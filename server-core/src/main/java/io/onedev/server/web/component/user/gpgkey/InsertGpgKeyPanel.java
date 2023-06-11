@@ -59,7 +59,7 @@ public abstract class InsertGpgKeyPanel extends Panel {
                 gpgKey.setOwner(getUser());
                 gpgKey.setKeyId(gpgKey.getKeyIds().get(0));
                 
-                if (gpgKey.getKeyIds().stream().anyMatch(it->gpgKeyManager.findSignatureVerificationKey(it)!=null)) { 
+                if (gpgKey.getKeyIds().stream().anyMatch(it->gpgKeyManager.findSigningKey(it)!=null)) { 
 					editor.error(new Path(new PathNode.Named("content")), "This key or one of its subkey is already in use");
 					target.add(form);
                 } else {

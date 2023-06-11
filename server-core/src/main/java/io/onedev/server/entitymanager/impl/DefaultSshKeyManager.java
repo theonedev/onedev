@@ -38,8 +38,8 @@ public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements S
     
     @Sessional
     @Override
-    public SshKey findByDigest(String digest) {
-        SimpleExpression eq = Restrictions.eq("fingerprint", digest);
+    public SshKey findByFingerprint(String fingerprint) {
+        SimpleExpression eq = Restrictions.eq("fingerprint", fingerprint);
         EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
         entityCriteria.setCacheable(true);
         return find(entityCriteria);
@@ -66,7 +66,7 @@ public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements S
 		diff.entriesOnlyOnLeft().values().forEach(sshKey -> delete(sshKey));
 		
 		diff.entriesOnlyOnRight().values().forEach(sshKey -> {
-			if (findByDigest(sshKey.getFingerprint()) == null) 
+			if (findByFingerprint(sshKey.getFingerprint()) == null) 
 				create(sshKey);	
 			else 
 				logger.warn("SSH key is already in use (fingerprint: {})", sshKey.getFingerprint());

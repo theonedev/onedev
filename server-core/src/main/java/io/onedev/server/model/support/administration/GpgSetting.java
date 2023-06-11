@@ -117,7 +117,7 @@ public class GpgSetting implements Serializable {
 	}
 	
 	@Nullable
-	public GpgSigningKey findSignatureVerificationKey(long keyId) {
+	public GpgSigningKey findSigningKey(long keyId) {
 		if (getSigningKey() != null && getSigningKey().getPublicKey().getKeyID() == keyId) {
 			return new GpgSigningKey() {
 				

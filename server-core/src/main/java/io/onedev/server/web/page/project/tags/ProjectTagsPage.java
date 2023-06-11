@@ -69,7 +69,7 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.gitsignature.VerificationResultPanel;
+import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -338,7 +338,7 @@ public class ProjectTagsPage extends ProjectPage {
 				});
 
 				if (ref.getObj() instanceof RevTag) {
-					fragment.add(new VerificationResultPanel("signature") {
+					fragment.add(new SignatureStatusPanel("signature") {
 
 						@Override
 						protected RevObject getRevObject() {

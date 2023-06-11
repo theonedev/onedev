@@ -11,7 +11,7 @@ import io.onedev.server.persistence.dao.EntityManager;
 public interface SshKeyManager extends EntityManager<SshKey> {
 
     @Nullable
-    SshKey findByDigest(String digest);
+    SshKey findByFingerprint(String fingerprint);
     
     void syncSshKeys(User user, Collection<String> sshKeys);
 

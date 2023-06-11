@@ -553,7 +553,7 @@ public class GitUtils {
 			blobName = StringUtils.substringAfterLast(blobPath, "/");
 		return blobName;
 	}
-
+	
 	public static void sign(ObjectBuilder object, PGPSecretKeyRing signingKey) {
 		JcePBESecretKeyDecryptorBuilder decryptorBuilder = new JcePBESecretKeyDecryptorBuilder()
 				.setProvider(BouncyCastleProvider.PROVIDER_NAME);

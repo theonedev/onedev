@@ -61,9 +61,9 @@ public class DefaultSignatureVerificationManager implements SignatureVerificatio
 		String emailAddress = committerIdent.getEmailAddress();
 		
 		for (var signatureVerifier: signatureVerifiers) {
-			var result = signatureVerifier.verify(data, signatureData, emailAddress);
-			if (result != null)
-				return result;
+			var signatureStartBytes = Constants.encodeASCII(signatureVerifier.getPrefix());
+			if (RawParseUtils.match(signatureData, 0, signatureStartBytes) != -1) 
+				return signatureVerifier.verify(data, signatureData, emailAddress);
 		}
 		return null;
 	}
@@ -71,24 +71,20 @@ public class DefaultSignatureVerificationManager implements SignatureVerificatio
 	@Nullable
 	@Override
 	public VerificationResult verifyTagSignature(byte[] rawTag) {
-		byte[] signatureData = TagParser.getRawGpgSignature(rawTag);
-		if (signatureData == null) {
-			return null;
-		}
-
-		// The signature is just tacked onto the end of the message, which
-		// is last in the buffer.
-		byte[] data = Arrays.copyOfRange(rawTag, 0, rawTag.length - signatureData.length);
-
 		PersonIdent taggerIdent = TagParser.getTaggerIdent(rawTag);
 		if (taggerIdent == null)
 			return null;
 
 		for (var signatureVerifier: signatureVerifiers) {
-			var result = signatureVerifier.verify(data, signatureData, taggerIdent.getEmailAddress());
-			if (result != null)
-				return result;
-		}
+			byte[] signatureStart = Constants.encodeASCII(signatureVerifier.getPrefix());
+			byte[] signatureData = TagParser.getRawSignature(rawTag, signatureStart);
+			if (signatureData != null) {
+				// The signature is just tacked onto the end of the message, which
+				// is last in the buffer.
+				byte[] data = Arrays.copyOfRange(rawTag, 0, rawTag.length - signatureData.length);
+				return signatureVerifier.verify(data, signatureData, taggerIdent.getEmailAddress());
+			}
+		}		
 		return null;
 	}
 
@@ -96,10 +92,8 @@ public class DefaultSignatureVerificationManager implements SignatureVerificatio
 	 * Copied from JGit
 	 */
 	private static class TagParser {
-
-		private static final byte[] hSignature = Constants.encodeASCII("-----BEGIN PGP SIGNATURE-----");
-
-		private static int nextStart(byte[] prefix, byte[] buffer, int from) {
+	
+		public static int nextStart(byte[] prefix, byte[] buffer, int from) {
 			int stop = buffer.length - prefix.length + 1;
 			int ptr = from;
 			if (ptr > 0) {
@@ -123,20 +117,21 @@ public class DefaultSignatureVerificationManager implements SignatureVerificatio
 			}
 			return -1;
 		}
-
-		private static int getSignatureStart(byte[] raw) {
+	
+		public static int getSignatureStart(byte[] raw, byte[] signatureStart) {
 			int msgB = RawParseUtils.tagMessage(raw, 0);
 			if (msgB < 0) {
 				return msgB;
 			}
+	
 			// Find the last signature start and return the rest
-			int start = nextStart(hSignature, raw, msgB);
+			int start = nextStart(signatureStart, raw, msgB);
 			if (start < 0) {
 				return start;
 			}
 			int next = RawParseUtils.nextLF(raw, start);
 			while (next < raw.length) {
-				int newStart = nextStart(hSignature, raw, next);
+				int newStart = nextStart(signatureStart, raw, next);
 				if (newStart < 0) {
 					break;
 				}
@@ -145,22 +140,21 @@ public class DefaultSignatureVerificationManager implements SignatureVerificatio
 			}
 			return start;
 		}
-
-		private static byte[] getRawGpgSignature(byte[] raw) {
-			int start = getSignatureStart(raw);
+	
+		public static byte[] getRawSignature(byte[] raw, byte[] signatureStart) {
+			int start = getSignatureStart(raw, signatureStart);
 			if (start < 0) {
 				return null;
 			}
 			return Arrays.copyOfRange(raw, start, raw.length);
 		}
-
-		private static PersonIdent getTaggerIdent(byte[] raw) {
+	
+		public static PersonIdent getTaggerIdent(byte[] raw) {
 			int nameB = RawParseUtils.tagger(raw, 0);
 			if (nameB < 0)
 				return null;
 			return RawParseUtils.parsePersonIdent(raw, nameB);
 		}
-
+	
 	}
-
 }

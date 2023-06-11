@@ -8,7 +8,7 @@ import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.commit.status.CommitStatusLink;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.gitsignature.VerificationResultPanel;
+import io.onedev.server.web.component.gitsignature.SignatureStatusPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
@@ -80,7 +80,7 @@ public abstract class CommitInfoPanel extends GenericPanel<ProjectScopedCommit> 
 
 		});
 
-		add(new VerificationResultPanel("signature") {
+		add(new SignatureStatusPanel("signature") {
 
 			@Override
 			protected RevObject getRevObject() {

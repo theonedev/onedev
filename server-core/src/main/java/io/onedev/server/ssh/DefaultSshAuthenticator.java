@@ -47,7 +47,7 @@ public class DefaultSshAuthenticator implements SshAuthenticator {
 		}
 		
         String digest = KeyUtils.getFingerPrint(BuiltinDigests.sha256, key);  
-        SshKey sshKey = sshKeyManager.findByDigest(digest);
+        SshKey sshKey = sshKeyManager.findByFingerprint(digest);
         if (sshKey != null) {
             session.setAttribute(ATTR_PUBLIC_KEY_OWNER_ID, sshKey.getOwner().getId());
             return true;

@@ -96,7 +96,7 @@ public class DefaultGpgKeyManager extends BaseEntityManager<GpgKey> implements G
 
     @Sessional
 	@Override
-	public GpgSigningKey findSignatureVerificationKey(long keyId) {
+	public GpgSigningKey findSigningKey(long keyId) {
     	Long entityId = entityIds.get(keyId);
     	if (entityId != null) {
     		return new GpgSigningKey() {
