@@ -1,14 +1,13 @@
 package io.onedev.server.web.component.issue;
 
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.model.IModel;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.util.ColorUtils;
+import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.IModel;
 
 @SuppressWarnings("serial")
 public class IssueStateBadge extends Label {

@@ -302,6 +302,8 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	
 	private transient Collection<User> authorizedUsers;
 	
+	private transient List<IssueLink> links;
+	
 	public String getState() {
 		return state;
 	}
@@ -543,9 +545,11 @@ public class Issue extends ProjectBelonging implements Referenceable, Attachment
 	}
 	
 	public Collection<IssueLink> getLinks() {
-		List<IssueLink> links = new ArrayList<>();
-		links.addAll(sourceLinks);
-		links.addAll(targetLinks);
+		if (links == null) {
+			links = new ArrayList<>();
+			links.addAll(sourceLinks);
+			links.addAll(targetLinks);
+		}
 		return links;
 	}
 	

@@ -1,7 +1,9 @@
-package io.onedev.server.web.page.project.issues.boards;
+package io.onedev.server.web.component.issue.create;
 
-import javax.annotation.Nullable;
-
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -9,18 +11,12 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.component.issue.create.NewIssueEditor;
+import javax.annotation.Nullable;
 
 @SuppressWarnings("serial")
-abstract class NewCardPanel extends Panel {
+public abstract class CreateIssuePanel extends Panel {
 
-	public NewCardPanel(String id) {
+	public CreateIssuePanel(String id) {
 		super(id);
 	}
 
@@ -35,12 +31,12 @@ abstract class NewCardPanel extends Panel {
 
 			@Override
 			protected Project getProject() {
-				return NewCardPanel.this.getProject();
+				return CreateIssuePanel.this.getProject();
 			}
 
 			@Override
 			protected Criteria<Issue> getTemplate() {
-				return NewCardPanel.this.getTemplate();
+				return CreateIssuePanel.this.getTemplate();
 			}
 			
 		};
@@ -53,8 +49,7 @@ abstract class NewCardPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				Issue issue = editor.getConvertedInput();
-				OneDev.getInstance(IssueManager.class).open(issue);
-				onClose(target);
+				onSave(target, issue);
 			}
 
 			@Override
@@ -68,7 +63,7 @@ abstract class NewCardPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onClose(target);
+				onCancel(target);
 			}
 			
 		});
@@ -82,7 +77,7 @@ abstract class NewCardPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onClose(target);
+				onCancel(target);
 			}
 			
 		});
@@ -91,8 +86,10 @@ abstract class NewCardPanel extends Panel {
 
 	@Nullable
 	protected abstract Criteria<Issue> getTemplate();
+
+	protected abstract void onSave(AjaxRequestTarget target, Issue issue);
 	
-	protected abstract void onClose(AjaxRequestTarget target);
+	protected abstract void onCancel(AjaxRequestTarget target);
 
 	protected abstract Project getProject();
 }

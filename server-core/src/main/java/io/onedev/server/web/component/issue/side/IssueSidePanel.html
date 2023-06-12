@@ -26,7 +26,7 @@
 				<li wicket:id="milestones" class="bg-light rounded p-3">
 					<div class="d-flex">
 						<a wicket:id="link" class="mr-2"><span wicket:id="label"></span></a>
-						<a wicket:id="delete" class="mr-2 flex-shrink-0" title="Remove from this milestone"><wicket:svg href="trash" class="icon icon-sm"></wicket:svg></a>
+						<a wicket:id="delete" class="mr-2 flex-shrink-0" title="Remove issue from this milestone"><wicket:svg href="trash" class="icon icon-sm"></wicket:svg></a>
 						<span wicket:id="status" class="status ml-auto"></span> 
 					</div>
 					<div wicket:id="progress" class="mt-3"></div>
@@ -79,7 +79,7 @@
 		<div class="bg-light rounded p-3">
 			<div class="d-flex align-items-center number-and-state mb-2">
 				<a wicket:id="number" class="mr-2"><span wicket:id="label"></span></a>
-				<a wicket:id="delete" class="mr-2 mb-1" title="Remove"><wicket:svg href="trash" class="icon icon-sm"/></a>
+				<a wicket:id="delete" class="mr-2 mb-1" title="Unlink this issue"><wicket:svg href="trash" class="icon icon-sm"/></a>
 				<span wicket:id="state" class="ml-auto"></span>
 			</div>
 			<div class="title d-flex text-nowrap">
@@ -96,9 +96,10 @@
 		<div wicket:id="name" class="head d-flex align-items-center"></div>
 		<ul class="body linked-issues list-unstyled mb-0">
 			<li wicket:id="linkedIssues"></li>
-			<wicket:enclosure>
-			<li class="add">
-				<input wicket:id="add" type="hidden" class="form-control">
+			<wicket:enclosure child="linkNew">
+			<li class="new-link d-flex">
+				<input wicket:id="linkNew" type="hidden" placeholder="Add existing" class="form-control">
+				<a wicket:id="createNew" title="Create new" class="btn btn-icon btn-light ml-2"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			</li>
 			</wicket:enclosure>
 		</ul>

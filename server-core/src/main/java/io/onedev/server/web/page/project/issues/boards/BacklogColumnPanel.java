@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.web.component.issue.create.CreateIssuePanel;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -67,7 +68,7 @@ abstract class BacklogColumnPanel extends Panel {
 		protected Integer load() {
 			if (getQuery() != null) {
 				try {
-					return OneDev.getInstance(IssueManager.class).count(getProjectScope(), getQuery().getCriteria());
+					return getIssueManager().count(getProjectScope(), getQuery().getCriteria());
 				} catch (ExplicitException e) {
 					return 0;
 				}
@@ -92,10 +93,16 @@ abstract class BacklogColumnPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new NewCardPanel(id) {
+				return new CreateIssuePanel(id) {
 
 					@Override
-					protected void onClose(AjaxRequestTarget target) {
+					protected void onSave(AjaxRequestTarget target, Issue issue) {
+						getIssueManager().open(issue);
+						modal.close();
+					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
 						modal.close();
 					}
 
@@ -146,7 +153,7 @@ abstract class BacklogColumnPanel extends Panel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				Issue issue = OneDev.getInstance(IssueManager.class).load(params.getParameterValue("issue").toLong());
+				Issue issue = getIssueManager().load(params.getParameterValue("issue").toLong());
 				if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 					throw new UnauthorizedException("Permission denied");
 				OneDev.getInstance(IssueChangeManager.class).removeSchedule(issue, getMilestone());
@@ -219,6 +226,10 @@ abstract class BacklogColumnPanel extends Panel {
 		queryModel.detach();
 		countModel.detach();
 		super.onDetach();
+	}
+	
+	private IssueManager getIssueManager() {
+		return OneDev.getInstance(IssueManager.class);
 	}
 	
 	private Project getProject() {

@@ -1,15 +1,40 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.annotation.Nullable;
-
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.buildspecmodel.inputspec.InputContext;
+import io.onedev.server.buildspecmodel.inputspec.InputSpec;
+import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.StateSpec;
+import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.field.FieldUtils;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
+import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.search.entity.issue.*;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.ProjectScope;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.util.ProjectAware;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -31,50 +56,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.commons.utils.ExplicitException;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueSchedule;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.buildspecmodel.inputspec.InputContext;
-import io.onedev.server.buildspecmodel.inputspec.InputSpec;
-import io.onedev.server.buildspecmodel.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.issue.field.FieldUtils;
-import io.onedev.server.model.support.issue.field.spec.choicefield.ChoiceField;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.userchoicefield.UserChoiceField;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
-import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
-import io.onedev.server.search.entity.issue.MilestoneCriteria;
-import io.onedev.server.search.entity.issue.MilestoneIsEmptyCriteria;
-import io.onedev.server.search.entity.issue.StateCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.EditContext;
-import io.onedev.server.util.ProjectScope;
-import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.util.ProjectAware;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("serial")
 abstract class BoardColumnPanel extends Panel implements EditContext {
@@ -288,10 +273,16 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new NewCardPanel(id) {
+				return new CreateIssuePanel(id) {
+					
+					@Override
+					protected void onSave(AjaxRequestTarget target, Issue issue) {
+						getIssueManager().open(issue);
+						modal.close();
+					}
 
 					@Override
-					protected void onClose(AjaxRequestTarget target) {
+					protected void onCancel(AjaxRequestTarget target) {
 						modal.close();
 					}
 

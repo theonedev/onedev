@@ -1,17 +1,50 @@
 package io.onedev.server.web.component.issue.side;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Lists;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.entityreference.Referenceable;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.IssueQueryParseOption;
+import io.onedev.server.search.entity.issue.StateCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Input;
+import io.onedev.server.util.LinkSide;
+import io.onedev.server.util.Similarities;
+import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.entity.reference.ReferencePanel;
+import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.issue.IssueStateBadge;
+import io.onedev.server.web.component.issue.choice.IssueAddChoice;
+import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
+import io.onedev.server.web.component.issue.create.CreateIssuePanel;
+import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.statestats.StateStatsBar;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
+import io.onedev.server.web.component.milestone.choice.AbstractMilestoneChoiceProvider;
+import io.onedev.server.web.component.milestone.choice.MilestoneChoiceResourceReference;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.select2.Response;
+import io.onedev.server.web.component.select2.ResponseFiller;
+import io.onedev.server.web.component.select2.SelectToAddChoice;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.list.SimpleUserListLink;
+import io.onedev.server.web.editable.InplacePropertyEditLink;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -19,6 +52,7 @@ import org.apache.wicket.ajax.attributes.AjaxCallListener;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -39,59 +73,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.collect.Lists;
+import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueVoteManager;
-import io.onedev.server.entitymanager.IssueWatchManager;
-import io.onedev.server.entitymanager.LinkSpecManager;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entityreference.Referenceable;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueVote;
-import io.onedev.server.model.IssueWatch;
-import io.onedev.server.model.LinkSpec;
-import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
-import io.onedev.server.search.entity.issue.StateCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.LinkSide;
-import io.onedev.server.util.Similarities;
-import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.AttachAjaxIndicatorListener;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.entity.reference.ReferencePanel;
-import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
-import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.issue.IssueStateBadge;
-import io.onedev.server.web.component.issue.choice.IssueAddChoice;
-import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
-import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.issue.statestats.StateStatsBar;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
-import io.onedev.server.web.component.milestone.choice.AbstractMilestoneChoiceProvider;
-import io.onedev.server.web.component.milestone.choice.MilestoneChoiceResourceReference;
-import io.onedev.server.web.component.select2.Response;
-import io.onedev.server.web.component.select2.ResponseFiller;
-import io.onedev.server.web.component.select2.SelectToAddChoice;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.list.SimpleUserListLink;
-import io.onedev.server.web.editable.InplacePropertyEditLink;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneIssuesPage;
-import io.onedev.server.web.page.simple.security.LoginPage;
+import static io.onedev.server.search.entity.issue.IssueQuery.parse;
 
 @SuppressWarnings("serial")
 public abstract class IssueSidePanel extends Panel {
@@ -333,7 +320,7 @@ public abstract class IssueSidePanel extends Panel {
 				}
 				fragment.add(linkedIssuesView);
 
-				fragment.add(new IssueAddChoice("add", new IssueChoiceProvider() {
+				fragment.add(new IssueAddChoice("linkNew", new IssueChoiceProvider() {
 
 					@Override
 					protected Project getProject() {
@@ -365,10 +352,46 @@ public abstract class IssueSidePanel extends Panel {
 							getIssueChangeManager().addLink(spec, getIssue(), selection, opposite);
 						}
 					}
+					
+				}.setVisible(canEditIssueLink));
+
+				fragment.add(new ModalLink("createNew") {
 
 					@Override
-					protected String getPlaceholder() {
-						return "Add " + name.toLowerCase();
+					protected Component newContent(String id, ModalPanel modal) {
+						return new CreateIssuePanel(id) {
+
+							@Nullable
+							@Override
+							protected Criteria<Issue> getTemplate() {
+								String query;
+								var spec = model.getObject().getSpec();
+								if (opposite)
+									query = spec.getOpposite().getIssueQuery();
+								else
+									query = spec.getIssueQuery();
+								return parse(getProject(), query, new IssueQueryParseOption(), false).getCriteria();
+							}
+
+							@Override
+							protected void onSave(AjaxRequestTarget target, Issue issue) {
+								getIssueManager().open(issue);
+								getIssueChangeManager().addLink(model.getObject().getSpec(), 
+										getIssue(), issue, opposite);
+								modal.close();
+							}
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								modal.close();
+							}
+
+							@Override
+							protected Project getProject() {
+								return getIssue().getProject();
+							}
+
+						};
 					}
 					
 				}.setVisible(canEditIssueLink));
@@ -446,7 +469,7 @@ public abstract class IssueSidePanel extends Panel {
 				if (prevLinkedIssue != null) 
 					fragment.add(newLinkedIssueContainer("body", prevLinkedIssue, null));
 				else 
-					fragment.add(new Label("body", "<i>Not specified</i>").setEscapeModelStrings(false));
+					fragment.add(new WebMarkupContainer("body").setVisible(false));
 				
 				return fragment;
 			}
@@ -473,7 +496,7 @@ public abstract class IssueSidePanel extends Panel {
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
 					attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-							"Do you really want to remove this?"));
+							"Do you really want to unlink this issue?"));
 				}
 
 				@Override
@@ -491,7 +514,7 @@ public abstract class IssueSidePanel extends Panel {
 					return getIssueManager().load(linkedIssueId);
 				}
 				
-			}));
+			}).add(AttributeAppender.append("class", "badge-sm")));
 			
 			link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
 					IssueActivitiesPage.paramsOf(linkedIssue));
@@ -565,7 +588,7 @@ public abstract class IssueSidePanel extends Panel {
 						return item.getModelObject();
 					}
 					
-				}));
+				}).add(AttributeAppender.append("class", "badge-sm")));
 				
 				item.add(new AjaxLink<Void>("delete") {
 
