@@ -55,3 +55,11 @@
 .issue-side>.milestones li+li, .issue-side>.links li+li {
 	margin-top: 1.2rem; 
 }
+
+.issue-side>.links .state {
+	border-bottom: 2px dotted transparent;
+	cursor: pointer;
+}
+.issue-side>.links .state:hover {
+	border-color: var(--gray);
+}

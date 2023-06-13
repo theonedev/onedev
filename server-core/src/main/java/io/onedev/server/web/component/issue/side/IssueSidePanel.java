@@ -28,6 +28,7 @@ import io.onedev.server.web.component.issue.choice.IssueAddChoice;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
 import io.onedev.server.web.component.issue.create.CreateIssuePanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.operation.TransitionMenuLink;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
@@ -506,8 +507,21 @@ public abstract class IssueSidePanel extends Panel {
 				}
 				
 			}.setVisible(deleteListener != null));
-			
-			fragment.add(new IssueStateBadge("state", new LoadableDetachableModel<Issue>() {
+
+			AjaxLink<Void> stateLink = new TransitionMenuLink("state") {
+
+				@Override
+				protected Issue getIssue() {
+					return getIssueManager().load(linkedIssueId);
+				}
+
+				@Override
+				protected void onTransited(AjaxRequestTarget target) {
+				}
+
+			};
+
+			stateLink.add(new IssueStateBadge("badge", new LoadableDetachableModel<Issue>() {
 
 				@Override
 				protected Issue load() {
@@ -516,6 +530,8 @@ public abstract class IssueSidePanel extends Panel {
 				
 			}).add(AttributeAppender.append("class", "badge-sm")));
 			
+			fragment.add(stateLink);
+
 			link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
 					IssueActivitiesPage.paramsOf(linkedIssue));
 			link.add(new Label("label", linkedIssue.getTitle()));
