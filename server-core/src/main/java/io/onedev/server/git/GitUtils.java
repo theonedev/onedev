@@ -3,6 +3,7 @@ package io.onedev.server.git;
 import com.google.common.base.Objects;
 import com.google.common.base.*;
 import com.google.common.collect.Iterables;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.command.IsAncestorCommand;
@@ -89,8 +90,17 @@ public class GitUtils {
 	}
 
 	public static void setDefaultBranch(Repository repository, String defaultBranch) {
-		RefUpdate refUpdate = getRefUpdate(repository, "HEAD");
-		linkRef(refUpdate, branch2ref(defaultBranch));
+		var defaultBranchRef = branch2ref(defaultBranch);
+		try {
+			if (repository.findRef(defaultBranchRef) != null) {
+				RefUpdate refUpdate = getRefUpdate(repository, "HEAD");
+				linkRef(refUpdate, branch2ref(defaultBranch));
+			} else {
+				throw new ExplicitException("Branch not exist: " + defaultBranch);	
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static List<DiffEntry> diff(Repository repository, AnyObjectId oldRevId, AnyObjectId newRevId) {

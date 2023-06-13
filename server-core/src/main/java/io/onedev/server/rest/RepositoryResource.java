@@ -1,48 +1,12 @@
 package io.onedev.server.rest;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.shiro.authz.UnauthorizedException;
-import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.revwalk.RevCommit;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobContent;
-import io.onedev.server.git.BlobEdits;
-import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.BlobIdentFilter;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.*;
 import io.onedev.server.git.command.RevListOptions;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.git.service.GitService;
@@ -56,6 +20,25 @@ import io.onedev.server.rest.support.FileEditRequest;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.RevisionAndPath;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.revwalk.RevCommit;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Api(order=1100)
 @Path("/repositories")
@@ -70,10 +53,13 @@ public class RepositoryResource {
 
 	private final GitService gitService;
 	
+	private final ObjectMapper mapper;
+	
 	@Inject
-	public RepositoryResource(ProjectManager projectManager, GitService gitService) {
+	public RepositoryResource(ProjectManager projectManager, GitService gitService, ObjectMapper mapper) {
 		this.projectManager = projectManager;
 		this.gitService = gitService;
+		this.mapper = mapper;
 	}
 
 	@Api(order=10, description="List all branches")
@@ -102,7 +88,24 @@ public class RepositoryResource {
 
 		return project.getDefaultBranch();
 	}
-	
+
+	@Api(order=17, description="Set default branch")
+	@Path("/{projectId}/default-branch")
+	@POST
+	public Response setDefaultBranch(@PathParam("projectId") Long projectId, @NotNull String defaultBranch) {
+		Project project = projectManager.load(projectId);
+		if (!SecurityUtils.canWriteCode(project))
+			throw new UnauthorizedException();
+
+		try {
+			project.setDefaultBranch(mapper.readValue(defaultBranch, String.class));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+
+		return Response.ok().build();
+	}
+
 	@Api(order=20, description="Get specified branch")
 	@Path("/{projectId}/branches/{branch:.*}")
 	@GET
